@@ -1,5 +1,5 @@
 #pragma once
-class None {};
+//class None {};
 class DpIn
 {
 public:

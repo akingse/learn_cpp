@@ -70,7 +70,6 @@ struct Tree
 	void insert(T* data) { if (root)root->insert(data); }
 };
 
-class Vec3 {};
 
 int main_ser()
 {

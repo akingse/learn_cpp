@@ -44,7 +44,7 @@
 /* Warning, change the file to script automatically.
 Please modify the source file under source. 
 Source file: "my_geometry.h".*/
-class None {};
+//class None {};
 class DpIn
 {
 public:
