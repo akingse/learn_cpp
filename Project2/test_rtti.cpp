@@ -109,7 +109,7 @@ public:
 };
 
 
-int main08098(int argc, char* argv[])
+int main_riit(int argc, char* argv[])
 {
     D d;
     A* a_ptr = &d;

@@ -1,7 +1,7 @@
-#include "pch.h"
+//#include "pch.h"
 using namespace std;
-
-//void func();
+#include <map>
+#include <string>
 
 int main_ex()
 {

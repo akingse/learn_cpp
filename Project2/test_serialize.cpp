@@ -1,8 +1,6 @@
 using namespace std;
 #include "pch.h"
 
-
-
 std::vector<unsigned char> serialize(const BPGeometricPrimitiveSer& primitive)
 {
 	//序列化 infor
@@ -72,6 +70,7 @@ struct Tree
 	void insert(T* data) { if (root)root->insert(data); }
 };
 
+class Vec3 {};
 
 int main_ser()
 {
@@ -100,7 +99,7 @@ int main_ser()
 	size_t sz7 = sizeof(map<size_t, size_t>); //24
 
 	//类强转二进制
-	Vec3 vec(1, 2, 3);
+	Vec3 vec;
 	const unsigned char* ptr = reinterpret_cast<const unsigned char*>(&vec);
 	std::vector<unsigned char> res = std::vector<unsigned char>(ptr, ptr + sizeof(Vec3));
 	Vec3 vecDe;

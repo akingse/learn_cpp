@@ -1,12 +1,6 @@
 #include "pch.h"
 
-static void f_enrol()
-{
-	enrol("CUBE", "¸ß", cube_setHigh);
-
-}
-
-static int _enrol=[]()->int {
+static int _enrol2=[]()->int {
 	Cube cube(100, 100, 200);
 
 	auto type = &Cube::setHigh; //(0x00007ff6c3826a64)(0x000000c87852ebb8,100)-		&cube	0x000000c87852ebb8 {m_l=100 m_w=100 m_h=200 }	Cube *

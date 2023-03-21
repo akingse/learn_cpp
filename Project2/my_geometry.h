@@ -1,14 +1,10 @@
 #pragma once
-
-class ParaNone {};
-class BPPropertyID;
-class Gnrc;
-class BCModCube;
+class None {};
 class DpIn
 {
 public:
 	DpIn() :
-		m_funType(typeid(ParaNone)),
+		m_funType(typeid(None)),
 		m_fun(nullptr)
 	{
 	}
@@ -21,8 +17,8 @@ public:
 	{
 		type_index tmp0 = typeid(T);
 		string tmp1 = typeid(T).name();
-		type_index tmp2 = typeid(ParaNone);
-		string tmp3 = typeid(ParaNone).name();
+		type_index tmp2 = typeid(None);
+		string tmp3 = typeid(None).name();
 
 		return m_funType == typeid(T);
 	}

@@ -1,4 +1,4 @@
-int main1()
+int main_ptwo()
 {
 
 	//const –ﬁ Œ÷∏’Î 

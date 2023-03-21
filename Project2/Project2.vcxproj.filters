@@ -13,6 +13,9 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{d060f9c4-d494-4a28-9a28-6f5192f3bcde}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test_main_p2.cpp">
@@ -49,14 +52,14 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>head</Filter>
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test_singleton2.h">
-      <Filter>head</Filter>
-    </ClInclude>
-    <ClInclude Include="pch.h">
       <Filter>head</Filter>
     </ClInclude>
     <ClInclude Include="test_function.h">
@@ -67,6 +70,9 @@
     </ClInclude>
     <ClInclude Include="my_geometry.h">
       <Filter>head</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

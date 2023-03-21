@@ -161,14 +161,14 @@
     <ClInclude Include="test_singleton.h">
       <Filter>head</Filter>
     </ClInclude>
-    <ClInclude Include="Project1API.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="my_handle.h">
       <Filter>head</Filter>
+    </ClInclude>
+    <ClInclude Include="..\auto_include\Project1_API.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

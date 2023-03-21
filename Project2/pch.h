@@ -5,7 +5,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-
 #include <algorithm> 
 #include <chrono>   
 #include <iostream>
@@ -56,10 +55,8 @@
 #include <functional>
 #include <memory_resource>
 
+// my custom
+//#include "Project1_API.h"
 #include "test_serialize.h"
 #include "test_singleton2.h"
-
-
-
-// my custom
 #include "my_geometry.h"			//export
