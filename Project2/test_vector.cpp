@@ -1,0 +1,113 @@
+#include "pch.h"
+using namespace std;
+
+// 重载一下+号运算符
+template <typename T>
+std::vector<T>& operator+(std::vector<T>& vct1, const std::vector<T>& vct2)
+{
+	vct1.insert(vct1.end(), vct2.begin(), vct2.end());
+	return vct1;
+}
+
+//指针偏移
+//指针偏移获取类的私有成员
+//但违反了类的封装原则，在使用指针的类中也极不安全，所以不建议使用。
+#pragma pack(1) // memory alignment
+
+class Base
+{
+public:
+	virtual void inheriFun1() {}
+	virtual void inheriFun2() {}
+	virtual void inheriFun3() {}
+};
+class A :public Base
+{
+public:
+	virtual void inheriFun1() override {}
+	virtual void inheriFun2() override {}
+	virtual void inheriFun3() override {}
+
+	void setter(int a, Vec3 vec, char b, double c) {
+		this->a = a;
+		this->vec = vec;
+		this->b = b;
+		this->c = c;
+	}
+private:
+	int a;
+	Vec3 vec;
+	char b;
+	double c;
+	//单独设置char b，会导致字符串中的字符无效，必须将下一位字符设置为'\0'
+	//字符串没有找到'\0'，这个是字符串的结束标记
+};
+#pragma pack() //end memory alignment
+
+
+int main_vector()
+{
+	auto ss1 = sizeof(void*); //8
+	auto ss2 = sizeof(size_t);//8
+
+	A insa;
+	insa.setter(1112, Vec3(1,2,3), 'a', 3.14159);
+	char* pI;
+	pI = (char*)&insa + sizeof(void*); //only one pointor
+
+	int* pInt = (int*)(pI);		pI += sizeof(int); //len(char*)=1byte, as a unit length
+	//int* p1 = (int*)&insa + 1;
+	Vec3* pVec = (Vec3*)(pI);	pI += sizeof(Vec3);
+	char* pChar = (char*)(pI);	pI += sizeof(char); //&insa + sizeof(Vec3);
+	double* pDouble = (double*)(pI); //&insa + sizeof(char);
+	// (Vec3*)0x00000032f42fed98
+
+	int a1[] = { 1,2,3 }, a2[] = { 4,5,6 };
+	vector<int> v1(a1, a1 + 3);
+	vector<int> v2(a2, a2 + 3);
+	vector<int> v3 = { 7,8,9 };
+	// 方法一：insert() 函数
+	//v1.insert(v1.end(), v2.begin(), v2.end());
+	//v1.insert(v1.end(), v3.begin(), v3.end());
+
+	// 方法二：重载一下+号运算符
+	v1 = v1 + v2 + v3;
+
+	// 方法三：copy()函数
+	int s=(int)v1.size();
+	v1.resize(s+v2.size());
+	std::copy(v2.begin(),v2.end(),v1.begin()+s);
+	int s2=(int)v1.size();
+	v1.resize(s2+v3.size());
+	std::copy(v3.begin(),v3.end(),v1.begin()+s2);
+
+		// 显示
+	for (int i = 0; i < v1.size(); i++)
+	{
+		cout << "v1=" << v1[i] << endl;
+	}
+
+	std::multimap<int,int> umap;
+	//umap.insert(pair<int, int>(1, 1));
+	//umap.insert(pair<int, int>(1, 2));
+	umap.insert({ 1, 1 });
+	umap.insert({ 1, 2 });
+	//umap.insert(1, 2); //不能这样插入
+	for (auto& iter : umap)
+	{
+		cout << iter.first << ":" << iter.second << endl;
+	}
+
+	/*
+	在向std::map/unordered_map中插入元素时，我们往往使用emplace，emplace的操作是如果元素key不存在，则插入该元素，否则不插入。
+	但是在元素已存在时，emplace仍会构造一次待插入的元素，在判断不需要插入后，立即将该元素析构，因此进行了一次多余构造和析构操作。
+	c++17加入了try_emplace，避免了这个问题。同时try_emplace在参数列表中将key和value分开，因此进行原地构造的语法比emplace更加简洁
+	*/
+	return 0;
+}
+
+
+static int _enrol = []()->int {
+
+	return 0;
+}();

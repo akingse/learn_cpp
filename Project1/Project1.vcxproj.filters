@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="head">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{efdc9d3b-8f52-4156-aa69-0e960479f637}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test_eg">
+      <UniqueIdentifier>{21088a41-a15b-492e-8094-7fceb7d09a25}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="my_vec.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="object_pool.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="half_edge.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="my_gnrc.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="my_md5.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="my_ref_count.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test_alg.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_atomic.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_cache.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_class.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_class_cast.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_construct.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_dsa01.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_factory.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_file.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_geo.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_hash.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_lambda.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_math.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_matrix.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_memory_leak.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_object_pool.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_ope.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_overload.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_recursion.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_refer.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_regular .cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_set.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_sgt.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_singleton.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_stl.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_template.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_template1.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_thread.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_tmp.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_type.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="my_handle.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test_guid.cpp">
+      <Filter>head</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="my_template.h">
+      <Filter>head</Filter>
+    </ClInclude>
+    <ClInclude Include="my_gnrc.h">
+      <Filter>head</Filter>
+    </ClInclude>
+    <ClInclude Include="my_vec.h">
+      <Filter>head</Filter>
+    </ClInclude>
+    <ClInclude Include="my_md5.h">
+      <Filter>head</Filter>
+    </ClInclude>
+    <ClInclude Include="my_ref_count.h">
+      <Filter>head</Filter>
+    </ClInclude>
+    <ClInclude Include="test_singleton.h">
+      <Filter>head</Filter>
+    </ClInclude>
+    <ClInclude Include="Project1API.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="my_handle.h">
+      <Filter>head</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

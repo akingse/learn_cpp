@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="head">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="test_main_p2.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test_singleton2.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test_serialize.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test_vector.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test_function.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test_tree.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test_eigen.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test_extern.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test_template.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test_rtti.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="my_geometry.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>head</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="test_singleton2.h">
+      <Filter>head</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>head</Filter>
+    </ClInclude>
+    <ClInclude Include="test_function.h">
+      <Filter>head</Filter>
+    </ClInclude>
+    <ClInclude Include="test_serialize.h">
+      <Filter>head</Filter>
+    </ClInclude>
+    <ClInclude Include="my_geometry.h">
+      <Filter>head</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
