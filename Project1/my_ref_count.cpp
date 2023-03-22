@@ -103,3 +103,4 @@ double Cone::get_h() const
 {
 	return ToGeCone::get_h(m_imp);
 }
+

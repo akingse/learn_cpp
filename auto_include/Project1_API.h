@@ -222,53 +222,6 @@ public:
 };
 
 
-////¡Ÿ ±Gnrc£¨÷∏’ÎøΩ±¥
-//class Gnrc
-//{
-//	type_index m_id;
-//	void* m_imp;
-//	bool m_ref;
-//
-//public:
-//
-//	Gnrc(std::type_index id, void* src = nullptr, bool isRef = false) :
-//		m_id(id),//(id = typeid(None)),
-//		m_imp(src),
-//		m_ref(isRef)
-//	{
-//	}
-//
-//	template<typename T>
-//	inline bool is() const
-//	{
-//		return m_id == typeid(T) && (m_imp);
-//	}
-//
-//	template<typename T>
-//	inline T& as()
-//	{
-//		assert(is<T>());
-//		return static_cast<T>(m_imp);
-//	}
-//	template<typename T>
-//	inline const T& as() const 
-//	{
-//		assert(is<T>());
-//		return static_cast<T>(m_imp);
-//	}
-//
-//	~Gnrc()
-//	{
-//		if (m_ref)
-//			return;
-//		else
-//		{
-//			delete m_imp;
-//			m_imp = nullptr;
-//		}
-//	}
-//};
-
 
 class GeneFactoryClassBase
 {
@@ -760,6 +713,9 @@ public:
 
 };
 
+
+
+
 class BPTransfrom
 {
 	double x = 0;
@@ -791,6 +747,10 @@ Source file: "my_md5.h".*//**
  *
  */
 
+#include <string>
+#include <cstring>
+
+using std::string;
 
 /* Define of btye.*/
 typedef unsigned char Byte;
@@ -800,13 +760,13 @@ typedef unsigned int bit32;
 class MD5 {
 public:
 	/* Construct a MD5 object with a string. */
-	MD5(const std::string& message);
+	MD5(const string& message);
 
 	/* Generate md5 digest. */
 	const Byte* getDigest();
 
 	/* Convert digest to string value */
-	std::string toStr();
+	string toStr();
 
 private:
 	/* Initialization the md5 object, processing another message block,
@@ -848,7 +808,9 @@ private:
 
 namespace para
 {
-	std::string getMD5(const std::string& source);
+	string getMD5(const string& source);
+
+
 }
 
 
