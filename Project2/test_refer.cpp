@@ -1,5 +1,4 @@
 #include "pch.h"
-
 using namespace std;
 //string make_plural(size_t, const string&, const string&);
 //const string& shorterString(const string&, const string&);

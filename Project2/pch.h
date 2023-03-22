@@ -32,16 +32,7 @@
 #include <stack>
 #include <unordered_set>
 #include <regex>
-#include<iostream>
-#include<fstream>
-#include<string>
-#include<vector>
-#include<set>
-#include<map>
-#include<regex>
-#include<functional>
 
-#define PL_A 1e-10 
 #include <process.h>
 #include <cassert>
 #include <typeinfo>
@@ -49,14 +40,31 @@
 #include <type_traits>
 #include <utility> 
 #include <any> 
-
-#include <iostream>
+#include <mutex> 
 #include <string_view>
 #include <functional>
 #include <memory_resource>
+#include <Eigen/Dense>
 
 // my custom
 #include "Project1_API.h"
 #include "test_serialize.h"
-#include "test_singleton2.h"
 #include "my_geometry.h"			//export
+
+
+
+
+//eigen
+using namespace Eigen;
+using Eigen::MatrixXd;
+using Eigen::Matrix4d;
+
+using Eigen::VectorXd;
+using Eigen::Vector2d;
+using Eigen::Vector3d;
+
+//typedef Vector3d Vec3;
+//typedef Matrix4d BPTransfrom;
+//typedef Matrix4d GeTransfrom;
+//class None {};
+//using Vec3 = Vector3d;

@@ -1,13 +1,10 @@
-//#include "pch.h"
+#include "pch.h"
 using namespace std;
-#include <map>
-#include <string>
-
 int main_ex()
 {
     //func(); //1
-    extern int num;
-    printf("%d", num); //2
+    //extern int num;
+    //printf("%d", num); //2
 
     map<int, string> amap;
     amap[0] = "0";

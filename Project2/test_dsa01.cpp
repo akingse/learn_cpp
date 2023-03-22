@@ -1,6 +1,7 @@
 #include "pch.h"
 using namespace std;
-
+// 数据结构和算法
+// data structure and algorithm
 
 /*
 归并排序的原理 将待排序的数组分成前后两个部分，再递归的将前半部分数据和后半部分的数据各自归并排序，得到的两部分数据，

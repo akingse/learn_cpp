@@ -1,8 +1,4 @@
-#include <iostream>
-#include <thread>
-#include <atomic>
-#include <functional>
-#include <Windows.h>
+
 #include "pch.h"
 /*
 std::atomic为C++11封装的原子数据类型。

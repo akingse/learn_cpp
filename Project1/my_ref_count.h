@@ -73,12 +73,11 @@ namespace std
 class Cone
 {
 public:
-	Cone();
-	Cone(double r, double h);
-	~Cone();
-
-	void set_h(double h);
-	double get_h() const;
+	__declspec(dllexport) Cone();
+	__declspec(dllexport) Cone(double r, double h);
+	__declspec(dllexport) ~Cone();
+	__declspec(dllexport) void set_h(double h);
+	__declspec(dllexport) double get_h() const;
 
 	const Primitive* m_imp;
 };

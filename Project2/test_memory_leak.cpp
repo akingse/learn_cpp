@@ -1,5 +1,4 @@
 #include "pch.h"
-
 using namespace std;
 /*
 ### 内存泄漏的情况
@@ -97,11 +96,6 @@ struct C_struct
 
 int main_me()
 {
-	/*while (true)
-	{
-		C c;
-		
-	}*/
 	int& ra = func(); //出函数栈，野指针
 	ra = 2;
 

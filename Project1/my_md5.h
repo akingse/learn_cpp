@@ -17,13 +17,11 @@ typedef unsigned int bit32;
 class MD5 {
 public:
 	/* Construct a MD5 object with a string. */
-	MD5(const std::string& message);
-
+	__declspec(dllexport) MD5(const std::string& message);
 	/* Generate md5 digest. */
-	const Byte* getDigest();
-
+	__declspec(dllexport) const Byte* getDigest();
 	/* Convert digest to string value */
-	std::string toStr();
+	__declspec(dllexport) std::string toStr();
 
 private:
 	/* Initialization the md5 object, processing another message block,
@@ -65,6 +63,6 @@ private:
 
 namespace para
 {
-	std::string getMD5(const std::string& source);
+	__declspec(dllexport) std::string getMD5(const std::string& source);
 }
 

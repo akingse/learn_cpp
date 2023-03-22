@@ -1,6 +1,5 @@
 #include "pch.h"
 using namespace std;
-#include <regex>
 //#include <boost/regex.hpp>
 //正则表达式(regular expression)描述了一种字符串匹配的模式（pattern），可以用来检查一个串是否含有某种子串、将匹配的子串替换或者从某个串中取出符合某个条件的子串等。
 
@@ -28,7 +27,8 @@ using namespace std;
 
 
 std::map<std::string, double> parMap;
-std::map<std::string, Vec3> pointMap;
+std::map<std::string, Vector3d> pointMap;
+
 
 bool analysisExpressionNumber(string& expre/*,bool isRev=false*/)
 {
@@ -151,9 +151,16 @@ bool analysisExpressionVector(string& expre)
 		finderAdd = regex_replace(finderAdd, regex("\\}"), "\\}");
 		if (pointMap.find(finderSub) == pointMap.end())
 			return false;//not in map, something wrong
-		expX = regex_replace(expX, regex(finderAdd), to_string(pointMap[finderSub].x));
-		expY = regex_replace(expY, regex(finderAdd), to_string(pointMap[finderSub].y));
-		expZ = regex_replace(expZ, regex(finderAdd), to_string(pointMap[finderSub].z));
+
+		//using eigen
+		expX = regex_replace(expX, regex(finderAdd), to_string(pointMap[finderSub][0]));
+		expY = regex_replace(expY, regex(finderAdd), to_string(pointMap[finderSub][1]));
+		expZ = regex_replace(expZ, regex(finderAdd), to_string(pointMap[finderSub][2]));
+
+		// custom vec
+		//expX = regex_replace(expX, regex(finderAdd), to_string(pointMap[finderSub].x));
+		//expY = regex_replace(expY, regex(finderAdd), to_string(pointMap[finderSub].y));
+		//expZ = regex_replace(expZ, regex(finderAdd), to_string(pointMap[finderSub].z));
 	}
 	for (sregex_iterator iter(expre.begin(), expre.end(), reVec); iter != sregex_iterator(); iter++)
 	{
@@ -229,12 +236,12 @@ bool isFloatZero(double num, double eps=0.0)
 int main_regular()
 {
 	//CLA* Aptr = Amap.begin()->second;
-	vector<Vec3> vecList;
+	vector<Vector3d> vecList;
 	{
-		Vec3 vec;
+		Vector3d vec;
 		/*Vec3 vec1 = Vec3(1, 1);
 		vecList.push_back(vec1);*/
-		vecList.push_back(Vec3(1, 1));
+		vecList.push_back(Vector3d(1, 1));
 		//vecList.push_back(move(vec1)); //强制使用移动构造
 	}
 
@@ -288,11 +295,11 @@ int main_regular()
 	//expre = "{长方体3.高}+100";
 	//expre = "{长方体3.高}+100+{a}-{b}";
 	//expre = "{桌子高}-{长方体3.高}";
-	pointMap["长方体1.V1"] = Vec3(1, 2, 3);
+	pointMap["长方体1.V1"] = Vector3d(1, 2, 3);
 
 
-	pointMap["长方体1.V1"] = move(Vec3(1, 2, 3));
-	pointMap["长方体2.V2"] = Vec3(2, 2, 2);
+	pointMap["长方体1.V1"] = move(Vector3d(1, 2, 3));
+	pointMap["长方体2.V2"] = Vector3d(2, 2, 2);
 	//expre = "{长方体1.V1}+{长方体2.V2}+vec(4, 5, 7)";
 	expre = "{长方体1.V1}+vec(4, 5, 7)";
 	//analysisExpression(reExp);

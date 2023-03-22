@@ -1,8 +1,3 @@
-//#include <iostream>
-//#include <algorithm> 
-//#include <vector>
-//#include <string>
-//#include <cassert>
 #include"pch.h"
 using namespace std;
 
@@ -74,9 +69,11 @@ int main_stl1()
 	auto name1 = _cmp_less;
 	auto name2 = typeid(name1).name();
 	auto bl = (*cmp_less)(3, 2); //º¯ÊýµØÖ·
-	Segment segm(Vec3(1, 1), Vec3(2, 2));
-	Vec3 vec = segm[0];
-	Vec3 vec2 = segm[1];
+
+	//custom segment
+	//Segment segm(Vec3(1, 1), Vec3(2, 2));
+	//Vec3 vec = segm[0];
+	//Vec3 vec2 = segm[1];
 	puts("0");
 
 	bool bl2 = fun(1);

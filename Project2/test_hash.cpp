@@ -1,6 +1,6 @@
 #include "pch.h"
 using namespace std;
-using namespace std::literals;
+//using namespace std::literals;
 
 #include <iostream>
 #include <string>
@@ -97,11 +97,11 @@ void display(unordered_map<string, double> myrecipe, string str)
 int main_hash()
 {
 
-	unordered_map<Vec3, int> vmap;
-	Vec3* vec = new Vec3(1,2);
-	//vmap.insert({ move(*vec),1 });
-	vmap.insert({ *vec,1 });
-	delete vec;
+	//unordered_map<Vector3d, int> vmap;
+	//Vector3d* vec = new Vector3d(1,2);
+	////vmap.insert({ move(*vec),1 });
+	//vmap.insert({ *vec,1 });
+	//delete vec;
 	
 	size_t a = 0b1010;
 	size_t b = 0b1100;
@@ -131,7 +131,7 @@ int main_hash()
 	//v1 = nullptr;
 	//vecList.push_back(move(vp2));
 
-	std::unordered_map<Vec3::Vec3Wrap, size_t> vwmap;
+	//std::unordered_map<Vec3::Vec3Wrap, size_t> vwmap;
 
 	std::unordered_map < MyClass, int> umap;
 	MyClass* mc = new MyClass();
@@ -151,25 +151,13 @@ int main_hash()
 //	std::cout << std::hash<std::string_view>{}(sv) << '\n';
 //	std::cout << std::hash<std::string>{}(str) << '\n';
 //	std::cout << std::hash<std::pmr::string>{}(pmrs) << '\n';
-//
-//
 //	size_t hn = std::hash<std::string_view>{}("hello");
 //	size_t hn1 = std::hash<std::string_view>{}("hash");
 //	//size_t hn2 = std::hash<Vec1>{}(Vec1());
 //	//std::unordered_map<Vec1, int> umap;
 ////	size_t hn2 = std::hash<Vec3>{}(Vec3());
 
-	size_t hn3 = 0;
-
-	//test MD5
-	string message = "hello";
-	cout << "md5(\"" << message << "\") = "
-		<< MD5(message).toStr();
-	//------------------------------------------------------
-
-	unordered_map < string, double>
-		myrecipe,
-		mypantry = { {"milk",2.0},{"flour",1.5} };
+	unordered_map<string, double> myrecipe, mypantry = { {"milk",2.0},{"flour",1.5} };
 
 	/****************≤Â»Î*****************/
 	pair<string, double> myshopping("baking powder", 0.3);

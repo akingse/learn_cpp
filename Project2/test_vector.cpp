@@ -37,12 +37,15 @@ public:
 private:
 	int a;
 	Vec3 vec;
+	
 	char b;
 	double c;
 	//单独设置char b，会导致字符串中的字符无效，必须将下一位字符设置为'\0'
 	//字符串没有找到'\0'，这个是字符串的结束标记
 };
 #pragma pack() //end memory alignment
+
+
 
 
 int main_vector()

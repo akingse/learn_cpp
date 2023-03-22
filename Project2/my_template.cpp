@@ -173,9 +173,6 @@ void ShowList(Args... args)
 }
 
 
-#include <iostream>
-using namespace std;
-
 void doF1(int t1)
 {
 	cout << "arg1 type:" << typeid(t1).name() << " value:" << t1 << endl;
@@ -262,9 +259,9 @@ int main_template () {
 	mf6.getNumber(cube,1,1,1);
 
 	// const_mem_fun_t<int, Cube> mf8
-	auto mf8 = mem_fun(&Cube::getLength);
+	//auto mf8 = mem_fun(&Cube::getLength); //cant found in C++17
 	// mem_fun1_t<void, Cube, int> mf10
-	auto mf10 = mem_fun(&Cube::setLength);
+	//auto mf10 = mem_fun(&Cube::setLength);
 	//auto mf12 = mem_fun(&Cube::setArea); //不支持多于1个参数
 
 	// _Mem_fn<int (Cube::*)() const> mf7

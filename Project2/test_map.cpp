@@ -31,7 +31,7 @@ int main_geo()
 
 
 	static constexpr double pla = 1;
-		
+
 	//string rule = "[[:graph:]]+@163[.]com";
 //string rule = ".*@163[.]com";
 //regex re(rule);
@@ -40,7 +40,7 @@ int main_geo()
 //cout << regex_replace(expre, re, "ok") << endl;    //ok
 //bool bb = isFloatZero(0.00001,0.001);
 
-	for (int i =0;i<3;i++)
+	for (int i = 0; i < 3; i++)
 	{
 		if (mymap.find(2) != mymap.end())
 		{

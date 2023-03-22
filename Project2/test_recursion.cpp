@@ -1,8 +1,5 @@
 #include "pch.h"
-
 using namespace std;
-
-
 int counter = 1;
 
 int fac(int n)

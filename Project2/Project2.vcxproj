@@ -71,16 +71,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\eigen-3.4.0;$(SolutionDir)auto_include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\third_party_library\eigen-3.4.0;$(SolutionDir)auto_include;$(SolutionDir)Project1\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\link</OutDir>
     <IntDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\compile</IntDir>
-    <LibraryPath>$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)build\Project1\;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\eigen-3.4.0;$(SolutionDir)auto_include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\third_party_library\eigen-3.4.0;$(SolutionDir)auto_include;$(SolutionDir)Project1\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\link</OutDir>
     <IntDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\compile</IntDir>
-    <LibraryPath>$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)build\Project1\;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -116,11 +116,15 @@
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\eigen-3.4.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)auto_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)build\Project1\$(PlatformTarget)\link</AdditionalLibraryDirectories>
     </Link>
     <PreLinkEvent>
       <Command>$(SolutionDir)tools\python3-embed\python.exe $(SolutionDir)tools\export_header.py  $(ProjectName)</Command>
@@ -135,13 +139,15 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\eigen-3.4.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)auto_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)build\Project1\$(PlatformTarget)\link</AdditionalLibraryDirectories>
     </Link>
     <PreLinkEvent>
       <Command>$(SolutionDir)tools\python3-embed\python.exe $(SolutionDir)tools\export_header.py  $(ProjectName)</Command>
@@ -150,28 +156,61 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="my_geometry.cpp" />
-    <ClCompile Include="pch.cpp" />
-    <ClCompile Include="test_template.cpp">
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="my_template.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="test_alg.cpp" />
+    <ClCompile Include="test_atomic.cpp" />
+    <ClCompile Include="test_cache.cpp" />
+    <ClCompile Include="test_class.cpp" />
+    <ClCompile Include="test_class_cast.cpp" />
+    <ClCompile Include="test_construct.cpp" />
+    <ClCompile Include="test_dsa01.cpp" />
     <ClCompile Include="test_eigen.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="test_extern.cpp" />
+    <ClCompile Include="test_factory.cpp" />
+    <ClCompile Include="test_file.cpp" />
     <ClCompile Include="test_function.cpp" />
-    <ClCompile Include="test_main_p2.cpp" />
+    <ClCompile Include="test_hash.cpp" />
+    <ClCompile Include="test_lambda.cpp" />
+    <ClCompile Include="test_map.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="test_pointer.cpp" />
+    <ClCompile Include="test_math.cpp" />
+    <ClCompile Include="test_matrix.cpp" />
+    <ClCompile Include="test_memory_leak.cpp" />
+    <ClCompile Include="test_object_pool.cpp" />
+    <ClCompile Include="test_ope.cpp" />
+    <ClCompile Include="test_overload.cpp" />
+    <ClCompile Include="test_recursion.cpp" />
+    <ClCompile Include="test_refer.cpp" />
+    <ClCompile Include="test_regular .cpp" />
     <ClCompile Include="test_rtti.cpp" />
     <ClCompile Include="test_serialize.cpp" />
-    <ClCompile Include="test_singleton2.cpp" />
+    <ClCompile Include="test_set.cpp" />
+    <ClCompile Include="test_sgt.cpp" />
+    <ClCompile Include="test_stl.cpp" />
+    <ClCompile Include="test_template1.cpp" />
+    <ClCompile Include="test_template2.cpp" />
+    <ClCompile Include="test_thread.cpp" />
+    <ClCompile Include="test_tmp.cpp" />
     <ClCompile Include="test_tree.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="test_type.cpp" />
     <ClCompile Include="test_vector.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -179,7 +218,9 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="test_function.h" />
     <ClInclude Include="test_serialize.h" />
-    <ClInclude Include="test_singleton2.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\readme.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

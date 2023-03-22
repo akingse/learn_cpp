@@ -1,5 +1,4 @@
 #include "pch.h"
-
 using namespace std;
 
 class Box

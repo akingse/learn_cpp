@@ -47,6 +47,9 @@
 //template<typename T>
 //
 
+//#define PL_A 1e-10 
+static const double PL_A = 1e-10;
+
 class Vec1
 {
 public:

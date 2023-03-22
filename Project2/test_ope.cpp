@@ -1,7 +1,6 @@
 // is_copy_constructible example
 #include "pch.h"
-#include <iostream>
-#include <type_traits>
+
 using namespace std;
 
 namespace CHECK

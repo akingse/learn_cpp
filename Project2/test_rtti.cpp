@@ -1,7 +1,4 @@
-#include <iostream>
-#include <string>
-#include <vector>
-#include <typeinfo>
+#include "pch.h"
 using namespace std;
 
 
@@ -108,8 +105,8 @@ public:
 
 };
 
-
-int main_riit(int argc, char* argv[])
+// RTTI(Runtime Type Identification) 运行时类型识别
+int main_rtti(int argc, char* argv[])
 {
     D d;
     A* a_ptr = &d;

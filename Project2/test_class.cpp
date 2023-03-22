@@ -1,4 +1,7 @@
 #include "pch.h"
+namespace para
+{
+}
 using namespace para;
 using namespace std;
 class CClass
@@ -226,16 +229,15 @@ int main_class()
 	//string anum = "1234567890000000";
 	string Handle = "1";
 	std::map<std::string, int>::iterator resE;
+	auto name = std::hash<std::string>()(typeid(_Sphere).name());
 
 
 	//==========================================================================
 
-	GeTransform matG(1, 1, 1); //first
-	BPTransfrom matB(2, 2, 2); //second
-
-	auto name = std::hash<std::string>()(typeid(_Sphere).name());
-	matB = matG; //类型双向互转  
-	matG = matB;
+	//GeTransform matG(1, 1, 1); //first
+	//BPTransfrom matB(2, 2, 2); //second
+	//matB = matG; //类型双向互转  
+	//matG = matB;
 
 	//testMap.clear();
 	//auto iterM = testMap.begin();
@@ -291,9 +293,6 @@ int main_class()
 	//+ ：匹配一次或多次；
 	cout << regex_match("123", regex("\\d")) << endl;		//结果为0
 	cout << regex_match("123", regex("\\d+")) << endl;		//结果为1
-
-
-	
 	{
 		static std::set<wchar_t> s_set = { L'（', L'）', L'！', L'，', L'。', L'？', L'【', L'】', L'—',L'《', L'》' };
 		wchar_t it = *s_set.begin();
@@ -410,9 +409,9 @@ int main_class()
 	比较两个结构体不能使用memcmp(void*, void*)
 	*/
 
-	std::any g1 = std::any(int(1));
-	std::any g2 = std::any(double(1)); //any仅支持debug查看double变量
-	std::any g3 = std::any(string("1"));
+	//std::any g1 = std::any(int(1));
+	//std::any g2 = std::any(double(1)); //any仅支持debug查看double变量
+	//std::any g3 = std::any(string("1"));
 
 	auto l1 = sizeof(int);
 	auto l2 = sizeof(long);
@@ -442,17 +441,22 @@ int main_class()
  
 
 	//test MD5
-	string md0 = para::getMD5("helloworld");
-	//MD5_32B md3 = para::getMD5_ULL("helloworld");
-	MD5 md("helloworld");
-	string mm2 = md.toStr(); //"fc5e038d 38a57032 085441e7 fe7010b0"// 32 byte
+	//string md0 = para::getMD5("helloworld");
+	////MD5_32B md3 = para::getMD5_ULL("helloworld");
+	//MD5 md("helloworld");
+	//string mm2 = md.toStr(); //"fc5e038d 38a57032 085441e7 fe7010b0"// 32 byte
 	//hex16 to dec	//unsigned long  hexA = 0xfe7010b0;
 	//fc5e038d = 4234019725
 	//38a57032 = 950366258
 	//085441e7 = 139739623
 	//fe7010b0 = 4268757168
-	string md2 = para::getMD5("ohmygod"); //md2 = "5802ae89 9e406453 f3ad93e3 7f9d26a8"
+	//string md2 = para::getMD5("ohmygod"); //md2 = "5802ae89 9e406453 f3ad93e3 7f9d26a8"
 	//md2 = "1476570761 2655020115 4088239075 2141005480"
+	//auto sz = sizeof(mm2);
+	////MD5_32B it4 = MD5_32B();
+	//string md1 = getMD5("你好啊");
+	//string message = "hello";
+	//cout << "md5(\"" << message << "\") = "<< MD5(message).toStr();
 
 	//测试性能
 	//Debug差10倍，release差5倍
@@ -484,13 +488,6 @@ int main_class()
 
 
 	unsigned long long a0 = 0xfc5e038d;
-	//char= 1 byte
-	// longlong=8byte
-	auto sz = sizeof(mm2);
-	//MD5_32B it4 = MD5_32B();
-	string md1 = getMD5("你好啊");
-
-
 	auto ui = unsigned int(-1); //4294967295
 	MyStruct sa1(1,2.0);// { 1, 2.0 };
 	MyStruct sa2= MyStruct{ 1, 2.0 };

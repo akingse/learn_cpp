@@ -16,33 +16,39 @@
     <Filter Include="common">
       <UniqueIdentifier>{d060f9c4-d494-4a28-9a28-6f5192f3bcde}</UniqueIdentifier>
     </Filter>
+    <Filter Include="test_stl">
+      <UniqueIdentifier>{1c9dd19e-f6c5-4909-8c0b-95ca45e90d5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test_eg">
+      <UniqueIdentifier>{da15fabd-93e3-4c44-bdc1-4661484ac778}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thread">
+      <UniqueIdentifier>{36f8d27e-e62a-4a23-9ae7-7eae5efe27d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test_gram">
+      <UniqueIdentifier>{adb269f5-b6df-4283-841b-f171aab79122}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test_dsa">
+      <UniqueIdentifier>{faf8e5ff-0ef8-49ee-9cc3-d3a2a2c78262}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test_template">
+      <UniqueIdentifier>{69181f03-4b47-4a30-9afc-feb3fb814b3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="design_pattern">
+      <UniqueIdentifier>{fad63b5c-db31-4022-a047-ded44ba1a370}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test_math">
+      <UniqueIdentifier>{ab0f9f34-e60c-4037-b9de-ff1246a48bea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="test_main_p2.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="test_singleton2.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="test_serialize.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="test_vector.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="test_function.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="test_tree.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="test_eigen.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="test_extern.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="test_template.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="test_rtti.cpp">
@@ -57,11 +63,110 @@
     <ClCompile Include="pch.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="test_tree.cpp">
+      <Filter>test_stl</Filter>
+    </ClCompile>
+    <ClCompile Include="test_vector.cpp">
+      <Filter>test_stl</Filter>
+    </ClCompile>
+    <ClCompile Include="test_file.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_hash.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_lambda.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_memory_leak.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_recursion.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_regular .cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_type.cpp">
+      <Filter>test_eg</Filter>
+    </ClCompile>
+    <ClCompile Include="test_stl.cpp">
+      <Filter>test_stl</Filter>
+    </ClCompile>
+    <ClCompile Include="test_pointer.cpp">
+      <Filter>thread</Filter>
+    </ClCompile>
+    <ClCompile Include="test_atomic.cpp">
+      <Filter>thread</Filter>
+    </ClCompile>
+    <ClCompile Include="test_thread.cpp">
+      <Filter>thread</Filter>
+    </ClCompile>
+    <ClCompile Include="test_set.cpp">
+      <Filter>test_stl</Filter>
+    </ClCompile>
+    <ClCompile Include="test_object_pool.cpp">
+      <Filter>design_pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="test_factory.cpp">
+      <Filter>design_pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="test_cache.cpp">
+      <Filter>design_pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="test_construct.cpp">
+      <Filter>test_gram</Filter>
+    </ClCompile>
+    <ClCompile Include="test_class.cpp">
+      <Filter>test_gram</Filter>
+    </ClCompile>
+    <ClCompile Include="test_class_cast.cpp">
+      <Filter>test_gram</Filter>
+    </ClCompile>
+    <ClCompile Include="test_dsa01.cpp">
+      <Filter>test_dsa</Filter>
+    </ClCompile>
+    <ClCompile Include="test_alg.cpp">
+      <Filter>test_dsa</Filter>
+    </ClCompile>
+    <ClCompile Include="test_ope.cpp">
+      <Filter>test_template</Filter>
+    </ClCompile>
+    <ClCompile Include="test_overload.cpp">
+      <Filter>test_gram</Filter>
+    </ClCompile>
+    <ClCompile Include="test_template1.cpp">
+      <Filter>test_template</Filter>
+    </ClCompile>
+    <ClCompile Include="test_tmp.cpp">
+      <Filter>test_template</Filter>
+    </ClCompile>
+    <ClCompile Include="test_sgt.cpp">
+      <Filter>design_pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="test_math.cpp">
+      <Filter>test_math</Filter>
+    </ClCompile>
+    <ClCompile Include="test_matrix.cpp">
+      <Filter>test_math</Filter>
+    </ClCompile>
+    <ClCompile Include="test_refer.cpp">
+      <Filter>test_gram</Filter>
+    </ClCompile>
+    <ClCompile Include="test_eigen.cpp">
+      <Filter>test_math</Filter>
+    </ClCompile>
+    <ClCompile Include="test_map.cpp">
+      <Filter>test_stl</Filter>
+    </ClCompile>
+    <ClCompile Include="my_template.cpp">
+      <Filter>test_template</Filter>
+    </ClCompile>
+    <ClCompile Include="test_template2.cpp">
+      <Filter>test_template</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="test_singleton2.h">
-      <Filter>head</Filter>
-    </ClInclude>
     <ClInclude Include="test_function.h">
       <Filter>head</Filter>
     </ClInclude>
@@ -74,5 +179,10 @@
     <ClInclude Include="pch.h">
       <Filter>common</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\readme.md">
+      <Filter>common</Filter>
+    </None>
   </ItemGroup>
 </Project>

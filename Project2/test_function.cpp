@@ -1,3 +1,4 @@
+#include"pch.h"
 #include "test_function.h"
 
 void testfun()

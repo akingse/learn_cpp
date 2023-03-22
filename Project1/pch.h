@@ -5,7 +5,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-
 #include <algorithm> 
 #include <chrono>   
 #include <iostream>
@@ -34,7 +33,6 @@
 #include <unordered_set>
 #include <regex>
 
-#define PL_A 1e-10 
 #include <process.h>
 #include <cassert>
 #include <typeinfo>
@@ -42,18 +40,15 @@
 #include <type_traits>
 #include <utility> 
 #include <any> 
-
-#include <iostream>
+#include <mutex> 
 #include <string_view>
 #include <functional>
 #include <memory_resource>
 
 
 // my custom
-
 #include "my_gnrc.h"				//export
 #include "my_vec.h"					//export
 #include "my_md5.h"					//export
 #include "my_ref_count.h"			//export
 
-//using namespace std;

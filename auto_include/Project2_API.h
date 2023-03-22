@@ -22,21 +22,13 @@
 #include <stack>
 #include <unordered_set>
 #include <regex>
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <set>
-#include <map>
-#include <regex>
-#include <functional>
 #include <cassert>
 #include <typeinfo>
 #include <typeindex>
 #include <type_traits>
 #include <utility>
 #include <any>
-#include <iostream>
+#include <mutex>
 #include <string_view>
 #include <functional>
 #include <memory_resource>
@@ -44,7 +36,6 @@
 /* Warning, change the file to script automatically.
 Please modify the source file under source. 
 Source file: "my_geometry.h".*/
-//class None {};
 class DpIn
 {
 public:

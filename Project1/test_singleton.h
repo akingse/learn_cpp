@@ -1,8 +1,4 @@
 #pragma once
-class test_singleton
-{
-};
-
 //使用纯虚基类-单例类静态
 //static std::map<std::type_index, void*> m_id2ptr;
 void* __getImplementation(std::type_index id);

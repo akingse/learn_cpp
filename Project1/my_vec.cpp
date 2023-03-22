@@ -2,16 +2,6 @@
 using namespace std;
 
 
-/*
-单元测试
-int double longlong
-class struct vector map
-构造和析构
-继承类
-
-*/
-
-
 void test1()
 {
 	const int& a = 0; //非常量引用的初始值必须为左值
@@ -31,23 +21,23 @@ Gene getAg(bool)
 
 int maingnrc()
 {
-	std::any anya(1);
-	std::any anyd(1.0);
-	Vec3 vec=Vec3();
-	std::any anyv(&vec);
-	std::any anyb("abc");
-	type_index mytype=anyb.type();
-	if (anya.type() == typeid(int))
-	{
-		int a = std::any_cast<int>(anya);
-		cout << a << endl;
-	}
+	//std::any anya(1);
+	//std::any anyd(1.0);
+	//Vec3 vec=Vec3();
+	//std::any anyv(&vec);
+	//std::any anyb("abc");
+	//type_index mytype=anyb.type();
+	//if (anya.type() == typeid(int))
+	//{
+	//	int a = std::any_cast<int>(anya);
+	//	cout << a << endl;
+	//}
 
-	if (anyv.type() == typeid(Vec3*))
-	{
-		Vec3* a = std::any_cast<Vec3*>(anyv);
-		cout << a << endl;
-	}
+	//if (anyv.type() == typeid(Vec3*))
+	//{
+	//	Vec3* a = std::any_cast<Vec3*>(anyv);
+	//	cout << a << endl;
+	//}
 
 
 	Gene::enrol<bool>();

@@ -28,7 +28,7 @@
 #include <type_traits>
 #include <utility>
 #include <any>
-#include <iostream>
+#include <mutex>
 #include <string_view>
 #include <functional>
 #include <memory_resource>
@@ -222,6 +222,53 @@ public:
 };
 
 
+////¡Ÿ ±Gnrc£¨÷∏’ÎøΩ±¥
+//class Gnrc
+//{
+//	type_index m_id;
+//	void* m_imp;
+//	bool m_ref;
+//
+//public:
+//
+//	Gnrc(std::type_index id, void* src = nullptr, bool isRef = false) :
+//		m_id(id),//(id = typeid(None)),
+//		m_imp(src),
+//		m_ref(isRef)
+//	{
+//	}
+//
+//	template<typename T>
+//	inline bool is() const
+//	{
+//		return m_id == typeid(T) && (m_imp);
+//	}
+//
+//	template<typename T>
+//	inline T& as()
+//	{
+//		assert(is<T>());
+//		return static_cast<T>(m_imp);
+//	}
+//	template<typename T>
+//	inline const T& as() const 
+//	{
+//		assert(is<T>());
+//		return static_cast<T>(m_imp);
+//	}
+//
+//	~Gnrc()
+//	{
+//		if (m_ref)
+//			return;
+//		else
+//		{
+//			delete m_imp;
+//			m_imp = nullptr;
+//		}
+//	}
+//};
+
 
 class GeneFactoryClassBase
 {
@@ -394,6 +441,9 @@ Source file: "my_vec.h".*/
 //
 //template<typename T>
 //
+
+//#define PL_A 1e-10 
+static const double PL_A = 1e-10;
 
 class Vec1
 {
@@ -713,9 +763,6 @@ public:
 
 };
 
-
-
-
 class BPTransfrom
 {
 	double x = 0;
@@ -747,10 +794,6 @@ Source file: "my_md5.h".*//**
  *
  */
 
-#include <string>
-#include <cstring>
-
-using std::string;
 
 /* Define of btye.*/
 typedef unsigned char Byte;
@@ -760,13 +803,11 @@ typedef unsigned int bit32;
 class MD5 {
 public:
 	/* Construct a MD5 object with a string. */
-	MD5(const string& message);
-
+	__declspec(dllimport) MD5(const std::string& message);
 	/* Generate md5 digest. */
-	const Byte* getDigest();
-
+	__declspec(dllimport) const Byte* getDigest();
 	/* Convert digest to string value */
-	string toStr();
+	__declspec(dllimport) std::string toStr();
 
 private:
 	/* Initialization the md5 object, processing another message block,
@@ -808,9 +849,7 @@ private:
 
 namespace para
 {
-	string getMD5(const string& source);
-
-
+	__declspec(dllimport) std::string getMD5(const std::string& source);
 }
 
 
@@ -892,14 +931,16 @@ namespace std
 class Cone
 {
 public:
-	Cone();
-	Cone(double r, double h);
-	~Cone();
-
-	void set_h(double h);
-	double get_h() const;
+	__declspec(dllimport) Cone();
+	__declspec(dllimport) Cone(double r, double h);
+	__declspec(dllimport) ~Cone();
+	__declspec(dllimport) void set_h(double h);
+	__declspec(dllimport) double get_h() const;
 
 	const Primitive* m_imp;
 };
+
+
+
 
 
