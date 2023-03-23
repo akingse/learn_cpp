@@ -71,13 +71,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)..\third_party_library\eigen-3.4.0;$(SolutionDir)auto_include;$(SolutionDir)Project1\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\third_party_library\CGAL-5.5.2;$(SolutionDir)..\third_party_library\eigen-3.4.0;$(SolutionDir)auto_include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\link</OutDir>
     <IntDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\compile</IntDir>
     <LibraryPath>$(SolutionDir)build\Project1\;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)..\third_party_library\eigen-3.4.0;$(SolutionDir)auto_include;$(SolutionDir)Project1\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\third_party_library\CGAL-5.5.2;$(SolutionDir)..\third_party_library\eigen-3.4.0;$(SolutionDir)auto_include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\link</OutDir>
     <IntDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\compile</IntDir>
     <LibraryPath>$(SolutionDir)build\Project1\;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(LibraryPath)</LibraryPath>
@@ -166,6 +166,7 @@
     <ClCompile Include="test_alg.cpp" />
     <ClCompile Include="test_atomic.cpp" />
     <ClCompile Include="test_cache.cpp" />
+    <ClCompile Include="test_cgal.cpp" />
     <ClCompile Include="test_class.cpp" />
     <ClCompile Include="test_class_cast.cpp" />
     <ClCompile Include="test_construct.cpp" />
@@ -181,8 +182,8 @@
     <ClCompile Include="test_hash.cpp" />
     <ClCompile Include="test_lambda.cpp" />
     <ClCompile Include="test_map.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="test_pointer.cpp" />
     <ClCompile Include="test_math.cpp" />

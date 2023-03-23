@@ -55,14 +55,29 @@ public:
         //memcpy(&copy, nullptr, sizeof(void*));
 
         //当一个类拥有两个以上的成员时，需要写统一的比较函数
-		int res = memcmp((char*)(this) + sizeof(void*), (char*)(&_r) + sizeof(void*), sizeof(size_t) + sizeof(size_t) + sizeof(unsigned char));
-		int res1 = memcmp((size_t*)(this) + 1, (size_t*)(&_r) + 1, sizeof(size_t) + sizeof(size_t) + sizeof(unsigned char));
-        //return res1;
-        //return m_handle1 < _r.m_handle1 || m_handle2 < _r.m_handle2 || m_type < _r.m_type;
+		int res0 = memcmp((char*)(this) + sizeof(void*), (char*)(&_r) + sizeof(void*), sizeof(size_t) + sizeof(size_t) + sizeof(unsigned char)); //v
+		int res1 = memcmp((size_t*)(this) + 1, (size_t*)(&_r) + 1, sizeof(size_t) + sizeof(size_t) + sizeof(unsigned char)); 
+		int res2 = memcmp(this, &_r , sizeof(void*)+ sizeof(size_t) + sizeof(size_t) + sizeof(unsigned char)); //x
+        return res2==-1;
+        //this 是此时父类虚表指针，_r的首地址是子类的虚表指针
 
+        if (!(m_handle1 < _r.m_handle1)) 
+            return false;
+        if (!(m_handle2 < _r.m_handle2))
+            return false;
+        return m_type < _r.m_type;
+
+
+        //if (!m_handle1 < _r.m_handle1) //try_emplace将无法判断
+        //    return false;
+        //if (!m_handle2 < _r.m_handle2)
+        //    return false;
+        //return m_type < _r.m_type;
+
+        //return m_handle1 < _r.m_handle1 || m_handle2 < _r.m_handle2 || m_type < _r.m_type;
         size_t mhash = (std::hash<size_t>()(m_handle1)) ^ (std::hash<size_t>()(m_handle2) << 1) ^ (std::hash<unsigned char>()(m_type) << 2);
         size_t rhash = (std::hash<size_t>()(_r.m_handle1)) ^ (std::hash<size_t>()(_r.m_handle2) << 1) ^ (std::hash<unsigned char>()(_r.m_type) << 2);
-        return mhash < rhash;
+        //return mhash < rhash;
     }
     inline bool operator==(const BPParaHandle& _r) const
     {

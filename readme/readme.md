@@ -20,7 +20,7 @@
 
   使用由工写的export_header.py脚本自动导出，项目中在project1中的链接前事件
 
-  ```
+  ```shell
   $(SolutionDir)tools\python3-embed\python.exe $(SolutionDir)tools\export_header.py  $(ProjectName)
   使用内置python写法，确保安装了python3
   python $(SolutionDir)tools\export_header.py  $(ProjectName)
@@ -36,6 +36,44 @@
 
   
 
+```
+头文件和附加库配置
+
+$(SolutionDir)auto_include
+$(SolutionDir)build\Project1\$(PlatformTarget)\link
+
+第三方库
+
+
+```
 
   插图
-  ![dsa](tools/pic/file.png)
+  ![dsa](https://raw.githubusercontent.com/akingse/my-picbed/main/file.png)
+
+[git配置ssh](https://blog.csdn.net/ly1358152944/article/details/127549295)
+
+
+
+typora配置图床
+
+1. GitHub创建pic-bed项目，并获取GitHub账号token
+
+   ```
+   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
+   ```
+
+   
+
+1. 安装picgo，输入配置参数（注意仓库名没有前缀）
+
+   ```
+   设定仓库名 akingse/my-picbed
+   设定分支名 main
+   设定token 
+   ```
+
+
+![image-20230323212025683.png](https://github.com/akingse/my-picbed/blob/main/image-20230323212025683.png?raw=true)
+
+
+
