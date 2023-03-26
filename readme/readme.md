@@ -47,8 +47,7 @@ $(SolutionDir)build\Project1\$(PlatformTarget)\link
 
 ```
 
-  插图
-  ![dsa](https://raw.githubusercontent.com/akingse/my-picbed/main/file.png)
+
 
 [git配置ssh](https://blog.csdn.net/ly1358152944/article/details/127549295)
 
@@ -64,7 +63,7 @@ typora配置图床
 
    
 
-1. 安装picgo，输入配置参数（注意仓库名没有前缀）
+1. 安装[picgo](https://github.com/Molunerfinn/PicGo/releases/)，输入配置参数（注意仓库名没有前缀）
 
    ```
    设定仓库名 akingse/my-picbed
@@ -77,3 +76,10 @@ typora配置图床
 
 
 
+
+
+
+
+推荐使用软件 [typora](https://typoraio.cn/)
+
+![image-20230326010014578](https://raw.githubusercontent.com/akingse/my-picbed/main/img/image-20230326010014578.png)
