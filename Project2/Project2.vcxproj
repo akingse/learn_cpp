@@ -71,16 +71,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)..\third_party_library\CGAL-5.5.2;$(SolutionDir)..\third_party_library\eigen-3.4.0;$(SolutionDir)auto_include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\third_party_library\CGAL-5.5.2;$(SolutionDir)..\third_party_library\eigen-3.4.0;$(SolutionDir)auto_include;$(SolutionDir)..\third_party_library\boost-1.81.0\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\link</OutDir>
     <IntDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\compile</IntDir>
-    <LibraryPath>$(SolutionDir)build\Project1\;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)build\Project1\;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)..\third_party_library\boost-1.81.0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)..\third_party_library\CGAL-5.5.2;$(SolutionDir)..\third_party_library\eigen-3.4.0;$(SolutionDir)auto_include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\third_party_library\CGAL-5.5.2;$(SolutionDir)..\third_party_library\eigen-3.4.0;$(SolutionDir)auto_include;$(SolutionDir)..\third_party_library\boost-1.81.0\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\link</OutDir>
     <IntDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\compile</IntDir>
-    <LibraryPath>$(SolutionDir)build\Project1\;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)build\Project1\;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)..\third_party_library\boost-1.81.0\stage\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -124,7 +124,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)build\Project1\$(PlatformTarget)\link</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)..\third_party_library\boost-1.81.0\stage\lib</AdditionalLibraryDirectories>
     </Link>
     <PreLinkEvent>
       <Command>$(SolutionDir)tools\python3-embed\python.exe $(SolutionDir)tools\export_header.py  $(ProjectName)</Command>
@@ -147,7 +147,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)build\Project1\$(PlatformTarget)\link</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)..\third_party_library\boost-1.81.0\stage\lib</AdditionalLibraryDirectories>
     </Link>
     <PreLinkEvent>
       <Command>$(SolutionDir)tools\python3-embed\python.exe $(SolutionDir)tools\export_header.py  $(ProjectName)</Command>
@@ -165,6 +165,7 @@
     </ClCompile>
     <ClCompile Include="test_alg.cpp" />
     <ClCompile Include="test_atomic.cpp" />
+    <ClCompile Include="test_boost.cpp" />
     <ClCompile Include="test_cache.cpp" />
     <ClCompile Include="test_cgal.cpp" />
     <ClCompile Include="test_class.cpp" />

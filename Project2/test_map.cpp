@@ -60,3 +60,34 @@ int main_geo()
 
 	return 0;
 }
+
+void test_map()
+{
+	map<double, int> amap;
+	amap[1] = 1;
+	amap[2] = 1;
+	amap[3] = 1;
+
+	for (auto & iter : amap)
+	{
+		int i = iter.second;
+		type_index na = typeid(iter); //key is const decorate
+		string ns = typeid(iter).name();
+	}
+
+
+	
+}
+
+
+
+static int enrol = []()->int
+{
+	//static void(*trigger)() = nullptr;
+	void (*trigger)() = nullptr;
+	//º¯ÊıÖ¸Õë
+	trigger = test_map;
+
+	test_map();
+	return 0;
+}();

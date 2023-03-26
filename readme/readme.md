@@ -43,20 +43,15 @@ $(SolutionDir)auto_include
 $(SolutionDir)build\Project1\$(PlatformTarget)\link
 
 第三方库
-
+$(SolutionDir)..\third_party_library\name
 
 ```
 
-  插图
-  ![dsa](https://raw.githubusercontent.com/akingse/my-picbed/main/file.png)
-
-[git配置ssh](https://blog.csdn.net/ly1358152944/article/details/127549295)
 
 
+## Typora配置图床
 
-typora配置图床
-
-1. GitHub创建pic-bed项目，并获取GitHub账号token
+1. GitHub创建pic-bed项目，并获取GitHub账号token(class)
 
    ```
    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

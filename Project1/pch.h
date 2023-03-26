@@ -51,4 +51,5 @@
 #include "my_vec.h"					//export
 #include "my_md5.h"					//export
 #include "my_ref_count.h"			//export
+#include "my_handle.h"				//export
 
