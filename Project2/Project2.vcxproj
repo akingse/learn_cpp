@@ -71,10 +71,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)..\third_party_library\CGAL-5.5.2;$(SolutionDir)..\third_party_library\eigen-3.4.0;$(SolutionDir)auto_include;$(SolutionDir)..\third_party_library\boost-1.81.0\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\TPL\CGAL-5.5.2;$(SolutionDir)..\TPL\CGAL-5.5.2\include;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include;$(SolutionDir)..\TPL\eigen-3.4.0;$(SolutionDir)auto_include;$(SolutionDir)..\TPL\boost-1.81.0\;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\link</OutDir>
     <IntDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\compile</IntDir>
-    <LibraryPath>$(SolutionDir)build\Project1\;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)..\third_party_library\boost-1.81.0\stage\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)build\Project1\;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)..\TPL\boost-1.81.0\stage\lib;$(SolutionDir)..\TPL\boost-1.81.0\libs;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir)..\third_party_library\CGAL-5.5.2;$(SolutionDir)..\third_party_library\eigen-3.4.0;$(SolutionDir)auto_include;$(SolutionDir)..\third_party_library\boost-1.81.0\;$(IncludePath)</IncludePath>
@@ -120,11 +120,13 @@
       <LanguageStandard>stdcpp14</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)..\third_party_library\boost-1.81.0\stage\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)..\TPL\boost-1.81.0\stage\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libgmp-10.lib;libmpfr-4.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreLinkEvent>
       <Command>$(SolutionDir)tools\python3-embed\python.exe $(SolutionDir)tools\export_header.py  $(ProjectName)</Command>
@@ -167,7 +169,8 @@
     <ClCompile Include="test_atomic.cpp" />
     <ClCompile Include="test_boost.cpp" />
     <ClCompile Include="test_cache.cpp" />
-    <ClCompile Include="test_cgal.cpp" />
+    <ClCompile Include="test_cgal_1.cpp" />
+    <ClCompile Include="test_cgal_2.cpp" />
     <ClCompile Include="test_class.cpp" />
     <ClCompile Include="test_class_cast.cpp" />
     <ClCompile Include="test_construct.cpp" />

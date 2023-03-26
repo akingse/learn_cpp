@@ -44,7 +44,8 @@ $(SolutionDir)build\Project1\$(PlatformTarget)\link
 
 第三方库
 $(SolutionDir)..\third_party_library\name
-
+加载dll
+PATH=$(SolutionDir)build\Project1\$(PlatformTarget)\link
 ```
 
 
@@ -53,22 +54,25 @@ $(SolutionDir)..\third_party_library\name
 
 1. GitHub创建pic-bed项目，并获取GitHub账号token(class)
 
-   ```
-   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
-   ```
 
-   
+```
+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
+```
 
-1. 安装picgo，输入配置参数（注意仓库名没有前缀）
 
-   ```
-   设定仓库名 akingse/my-picbed
-   设定分支名 main
-   设定token 
-   ```
+
+2. 安装picgo，输入配置参数（注意仓库名没有前缀）
+
+
+```
+设定仓库名 akingse/my-picbed
+设定分支名 main
+设定token 
+```
 
 
 ![image-20230323212025683.png](https://github.com/akingse/my-picbed/blob/main/image-20230323212025683.png?raw=true)
 
+3. typora设置
 
-
+![image-20230326204547772](https://raw.githubusercontent.com/akingse/my-picbed/main/x1e4/image-20230326204547772.png)
