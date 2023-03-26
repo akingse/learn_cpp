@@ -33,7 +33,7 @@ public:
 
 static std::map <std::string, std::map<std::string, DpIn*> > g_funMap;
 template<typename T>
-inline bool enrol(std::string object, std::string propertyID, T t)
+inline bool interface_enrol(std::string object, std::string propertyID, T t)
 {
 	if (t == nullptr)
 		return false;
@@ -52,7 +52,7 @@ inline bool enrol(std::string object, std::string propertyID, T t)
 	return true;
 }
 template<typename T>
-inline void enrol(std::string object, std::string propertyID, T* t)
+inline void interface_enrol(std::string object, std::string propertyID, T* t)
 {
 	if (t == nullptr)
 		return;

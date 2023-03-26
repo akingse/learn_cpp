@@ -94,13 +94,13 @@ public:
     {
         return BPParaHandle::enPropertyHandle;
     }
-    BPPropertyHandle() {}
-    BPPropertyHandle(size_t handle1, size_t handle2) //:m_handle(handle), m_type(type)
+    __declspec(dllexport) BPPropertyHandle() {}
+    __declspec(dllexport) BPPropertyHandle(size_t handle1, size_t handle2) //:m_handle(handle), m_type(type)
     {
         m_handle1 = handle1;
         m_handle2 = handle2;
 		m_type = BPParaHandle::enPropertyHandle;
     }
-    ~BPPropertyHandle() {}
+    __declspec(dllexport) ~BPPropertyHandle() {}
 };
 

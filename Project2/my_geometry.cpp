@@ -12,9 +12,9 @@ static int _enrol2=[]()->int {
 
 	const std::map<std::string, std::map<std::string, DpIn*>>* pMap = &g_funMap;
 	//注册函数，统一改参
-	enrol("CUBE", "长", cube_setLength);
-	enrol("CUBE", "宽", cube_setWidth);
-	enrol("CUBE", "mf高", &Cube::setHigh);
+	interface_enrol("CUBE", "长", cube_setLength);
+	interface_enrol("CUBE", "宽", cube_setWidth);
+	interface_enrol("CUBE", "mf高", &Cube::setHigh);
 	//enrol("CUBE", "高", cube_setHigh);
 
 	BPGeometricPrimitive primitive(new Cube(100, 100, 200), false);

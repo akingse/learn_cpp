@@ -168,6 +168,9 @@
     <ClCompile Include="test_cgal.cpp">
       <Filter>test_math</Filter>
     </ClCompile>
+    <ClCompile Include="test_boost.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test_function.h">

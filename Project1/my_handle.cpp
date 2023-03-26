@@ -1,5 +1,4 @@
 #include "pch.h"
-#include "my_handle.h"
 
 
 void test_handle()
