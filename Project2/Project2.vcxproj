@@ -71,7 +71,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)..\TPL\CGAL-5.5.2;$(SolutionDir)..\TPL\CGAL-5.5.2\include;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include;$(SolutionDir)..\TPL\eigen-3.4.0;$(SolutionDir)auto_include;$(SolutionDir)..\TPL\boost-1.81.0\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\TPL\CGAL-5.5.2;$(SolutionDir)..\TPL\CGAL-5.5.2\include;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include;$(SolutionDir)..\TPL\eigen-3.4.0;$(SolutionDir)auto_include;$(SolutionDir)..\TPL\boost-1.81.0\;C:\Qt\6.4.3\msvc2019_64\include\;C:\Qt\6.4.3\msvc2019_64\include\QtWidgets\QApplication;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\link</OutDir>
     <IntDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\compile</IntDir>
     <LibraryPath>$(SolutionDir)build\Project1\;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)..\TPL\boost-1.81.0\stage\lib;$(SolutionDir)..\TPL\boost-1.81.0\libs;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib;$(LibraryPath)</LibraryPath>

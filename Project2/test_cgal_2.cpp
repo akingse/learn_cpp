@@ -1,4 +1,6 @@
 #include "pch.h"
+#define  CGAL_USE_BASIC_VIEWER
+
 //在C/C++命令行中加  /bigobj
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Polygon_2.h>
