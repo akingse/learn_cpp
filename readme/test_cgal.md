@@ -53,9 +53,19 @@ Boost.Geometry是极为强大的地理空间库之一。Boost.Polygon能做的�
 配置
 
 ```
-VC++\包含目录 $(SolutionDir)..\third_party_library\boost-1.81.0
-VC++\库目录 $(SolutionDir)..\third_party_library\\boost-1.81.0\stage\lib
-链接器\附加库目录 $(SolutionDir)..\third_party_library\\boost-1.81.0\stage\lib
+VC++\包含目录 $(SolutionDir)..\TPL\boost-1.81.0
+VC++\库目录 $(SolutionDir)..\TPL\boost-1.81.0\stage\lib
+链接器\附加库目录 $(SolutionDir)..\TPL\boost-1.81.0\stage\lib
+```
+
+添加环境变量
+
+```
+使用命令行
+setx 
+BOOST_LIBRARYDIR = C:\Users\Aking\source\repos\TPL\boost-1.81.0\libs
+Boost_INCLUDEDIR = C:\Users\Aking\source\repos\TPL\boost-1.81.0
+PATH = C:\Users\Aking\source\repos\TPL\boost-1.81.0\libs
 ```
 
 
@@ -71,7 +81,50 @@ VC++\库目录 $(SolutionDir)..\third_party_library\\boost-1.81.0\stage\lib
 
 ![image-20230324215459927](https://raw.githubusercontent.com/akingse/my-picbed/main/image-20230324215459927.png)
 
+环境变量
+
+```
+QTDIR = C:\Qt ，帮助cmake找到Qt
+PATH = C:\Qt\6.4.3\msvc2019_64\bin
+为了避免与另一个文件夹中具有相同名称的另一个dll发生任何冲突，请将此路径添加为列表中的第一个。
+```
+
+安装CGAL
+
+[github](https://github.com/CGAL/cgal/releases)
+
+![image-20230326212456526](https://raw.githubusercontent.com/akingse/my-picbed/main/x1e4/image-20230326212456526.png)
+
+**配置环境变量**
+
+```
+CGAL_DIR = C:\Users\Aking\source\repos\TPL\CGAL-5.5.2
+```
 
 
 
+### vs项目配置
+
+```shell
+1 添加包含目录（通用属性->VC++ 目录->包含目录）
+$(SolutionDir)..\TPL\boost-1.81.0
+$(SolutionDir)..\TPL\CGAL-5.5.2\include
+$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include
+
+2 添加库目录（通用属性->VC++ 目录->库目录）
+$(SolutionDir)..\TPL\boost-1.81.0\libs
+$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib
+
+3 添加依赖项（通用属性->链接器->输入>附加依赖项）
+libgmp-10.lib
+libmpfr-4.lib
+
+加载dll
+PATH=$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib
+
+工程中不需要非要添加到环境变量内，环境变量过多的情况下容易引起冲突,我们可以通过在
+调试-> 环境中
+PATH=;%PATH%
+这样就能大大减少我们工程中配置环境的烦恼。
+```
 

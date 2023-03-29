@@ -165,11 +165,14 @@
     <ClCompile Include="test_template2.cpp">
       <Filter>test_template</Filter>
     </ClCompile>
-    <ClCompile Include="test_cgal.cpp">
+    <ClCompile Include="test_cgal_1.cpp">
       <Filter>test_math</Filter>
     </ClCompile>
     <ClCompile Include="test_boost.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test_cgal_2.cpp">
+      <Filter>test_math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
