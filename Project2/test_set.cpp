@@ -25,7 +25,9 @@ bool pnpoly(int nvert, float* vertx, float* verty, float testx, float testy)
     return c;
 }
 
-int mainset()
+//inline 是加在头文件内的，用于声明「这个函数虽然定义在头文件内，但多个编译实体中只保留一份」。
+//static 是加在源文件里边的，用于声明「这个函数仅用于当前源文件，其它编译实体不可用」。
+static int mainstl()
 {
     std::cout << "Hello World! test_set\n";
     float xList[5] = { 0, 10, 10, 0 };
@@ -42,11 +44,18 @@ int mainset()
     myset.insert("point");
     myset.insert("line");
     myset.insert("arc");
+    myset.insert("arc");
     auto a=myset.find("arc");
     auto b=myset.count("arc");
+    auto c = myset.erase("line");
     std::cout << myset.count("arc") << endl;
-
     return 0;
-
 }
+
+static int enrol = []()->int
+{
+    mainstl();
+    return 0;
+}();
+
 

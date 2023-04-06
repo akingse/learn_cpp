@@ -109,8 +109,46 @@ int main_vector()
 	return 0;
 }
 
+static void test_list()
+{
+
+	bool sign = true;
+	double a = (2 * sign - 1) * 1.0;
+	double b = (2 * (!sign)-1) * 1.0;
+
+	//双向环形链表
+
+	//std::list<double> alist;
+	std::queue<double> alist;
+	for (int i = 0; i < 5; i++)
+		alist.push(i);
+
+	double num = 0;
+	double temp = 0;
+	double i = alist.front();
+	
+	//for (auto iter = alist.begin(); iter != alist.end(); iter++)
+	//{
+	//	//temp = *iter + *(++iter) + *(++(++iter));
+	//	temp = *iter + *(iter++) + *((iter++)++);
+	//	num += *iter;
+
+	//}
+
+	for (int j = 2; j < 7; j++)
+	{
+		//num += alist
+	}
+
+	std::map<string, int> amap;
+	auto res1 = amap.try_emplace("类型1", 1);
+	auto res2 = amap.try_emplace("默认类型1", 2);
+
+	cout << 1;
+}
+
 
 static int _enrol = []()->int {
-
+	test_list();
 	return 0;
 }();

@@ -170,7 +170,12 @@
     <ClCompile Include="test_boost.cpp" />
     <ClCompile Include="test_cache.cpp" />
     <ClCompile Include="test_cgal_1.cpp" />
-    <ClCompile Include="test_cgal_2.cpp" />
+    <ClCompile Include="test_cgal_2.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="test_cgal_3.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="test_class.cpp" />
     <ClCompile Include="test_class_cast.cpp" />
     <ClCompile Include="test_construct.cpp" />
@@ -223,9 +228,6 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="test_function.h" />
     <ClInclude Include="test_serialize.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\readme.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

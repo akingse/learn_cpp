@@ -47,3 +47,12 @@ auto的作用就是自动推导对象的类型。从这个意义上讲，auto并
 
 
 ---
+
+
+
+bad_cast		: 通过dynamic_cast 抛出；
+runtime_error	: 运行时异常，包括 3个自子类：
+	overflow_error / underflow_error / range_error
+logic_error		: 逻辑错误，包括 4个子类：
+	domain_error / invalid_argument / out_of_range / length_error
+bad_alloc		: new失败时，会抛出bad_alloc；

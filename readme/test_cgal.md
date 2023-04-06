@@ -38,7 +38,7 @@
 
 [csdn](https://blog.csdn.net/summer_dew/article/details/107811371)
 
-安装依赖 
+[安装依赖](https://blog.csdn.net/qq_39784672/article/details/125839069) 
 
 ### boost
 
@@ -126,5 +126,20 @@ PATH=$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib
 调试-> 环境中
 PATH=;%PATH%
 这样就能大大减少我们工程中配置环境的烦恼。
+
+绝对目录
+//head
+C:\Users\Aking\source\repos\TPL\boost-1.81.0
+C:\Users\Aking\source\repos\TPL\CGAL-5.5.2\include
+C:\Users\Aking\source\repos\TPL\CGAL-5.5.2\auxiliary\gmp\include
+//lib
+C:\Users\Aking\source\repos\TPL\boost-1.81.0\libs
+C:\Users\Aking\source\repos\TPL\\CGAL-5.5.2\auxiliary\gmp\lib
+//dll
+PATH=C:\Users\Aking\source\repos\TPL\CGAL-5.5.2\auxiliary\gmp\lib
 ```
+
+
+
+Qt项目配置
 
