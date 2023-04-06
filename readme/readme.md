@@ -50,6 +50,8 @@ PATH=$(SolutionDir)build\Project1\$(PlatformTarget)\link
 
 
 
+[git配置ssh](https://blog.csdn.net/ly1358152944/article/details/127549295)
+
 ## Typora配置图床
 
 1. GitHub创建pic-bed项目，并获取GitHub账号token(class)
@@ -63,6 +65,7 @@ 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
 
 2. 安装picgo，输入配置参数（注意仓库名没有前缀）
 
+1. 安装[picgo](https://github.com/Molunerfinn/PicGo/releases/)，输入配置参数（注意仓库名没有前缀）
 
 ```
 设定仓库名 akingse/my-picbed
@@ -75,4 +78,10 @@ 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
 
 3. typora设置
 
-![image-20230326204547772](https://raw.githubusercontent.com/akingse/my-picbed/main/x1e4/image-20230326204547772.png)
+
+
+
+
+推荐使用软件 [typora](https://typoraio.cn/)
+
+![image-20230326010014578](https://raw.githubusercontent.com/akingse/my-picbed/main/img/image-20230326010014578.png)
