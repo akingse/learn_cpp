@@ -148,6 +148,30 @@ static void test_list()
 }
 
 
+void test_vec_compare()
+{
+	std::map<BPParaVec, int> amap;
+	amap.insert({ BPParaVec(3, 6), 1 });
+	amap.insert({ BPParaVec(3, 7), 1 });
+	amap.insert({ BPParaVec(4, 6), 1 });
+	amap.insert({ BPParaVec(5, 6), 1 });
+	amap.insert({ BPParaVec(6, 4), 1 });
+	amap.insert({ BPParaVec(-6, 4), 1 });
+	amap.insert({ BPParaVec(-6, -4), 1 });
+	amap.insert({ BPParaVec(10, 11), 1 });
+
+	//amap.try_emplace(BPParaVec(3, 6), 1);
+	//amap.try_emplace(BPParaVec(3, 7), 1);
+	//amap.try_emplace(BPParaVec(4, 6), 1);
+	//amap.try_emplace(BPParaVec(5, 6), 1);
+	//amap.try_emplace(BPParaVec(6, 4), 1);
+	//amap.try_emplace(BPParaVec(-6, 4), 1);
+	//amap.try_emplace(BPParaVec(-6, -4), 1);
+	//amap.try_emplace(BPParaVec(10, 11), 1);
+
+	auto it = amap.find(BPParaVec(4, 6));
+
+}
 static int _enrol = []()->int {
 	test_list();
 	return 0;

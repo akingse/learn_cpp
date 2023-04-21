@@ -37,3 +37,9 @@ test.try_emplace(3, str);									// (4)
 
 
 ### C++ STL [十六大容器](https://zhuanlan.zhihu.com/p/542115773)
+
+
+
+
+
+[list约瑟夫环](https://blog.csdn.net/weixin_65155181/article/details/126675169)

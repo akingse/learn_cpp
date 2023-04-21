@@ -61,10 +61,6 @@ PATH=$(SolutionDir)build\Project1\$(PlatformTarget)\link
 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
 ```
 
-
-
-2. 安装picgo，输入配置参数（注意仓库名没有前缀）
-
 1. 安装[picgo](https://github.com/Molunerfinn/PicGo/releases/)，输入配置参数（注意仓库名没有前缀）
 
 ```
@@ -78,10 +74,22 @@ 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
 
 3. typora设置
 
-
-
-
-
 推荐使用软件 [typora](https://typoraio.cn/)
 
 ![image-20230326010014578](https://raw.githubusercontent.com/akingse/my-picbed/main/img/image-20230326010014578.png)
+
+
+
+git同步问题
+
+```
+使用代理
+git config --global http.proxy http://127.0.0.1:49986
+git config --global https.proxy http://127.0.0.1:49986
+
+//取消http代理
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+
+```
+

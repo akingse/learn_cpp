@@ -199,7 +199,9 @@
     <ClCompile Include="test_matrix.cpp" />
     <ClCompile Include="test_memory_leak.cpp" />
     <ClCompile Include="test_object_pool.cpp" />
-    <ClCompile Include="test_ope.cpp" />
+    <ClCompile Include="test_ope.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="test_overload.cpp" />
     <ClCompile Include="test_recursion.cpp" />
     <ClCompile Include="test_refer.cpp" />
