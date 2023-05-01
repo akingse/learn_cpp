@@ -6,7 +6,7 @@
 //--------------------------------------------------------------------------------------------------------------
 bool BPParaTransform::isValid() const
 {
-	if (isZeroMatrix(*this))
+	if (isZeroMatrix(*this, false))
 		return false;
 	for (int i = 0; i < 3; i++)
 	{
@@ -758,14 +758,25 @@ bool isIdentifyMatrix(const BPParaTransform& M)
 	}
 	return true;
 }
-bool isZeroMatrix(const BPParaTransform& M)
+bool isZeroMatrix(const BPParaTransform& M, bool isAll /*= true*/)
 {
 	for (int i = 0; i < 3; i++)
 	{
-		for (int j = 0; j < 4; j++)
+		if (isAll)
 		{
-			if (abs(M.m_matrix[i][j]) > PL_Length)
-				return false;
+			for (int j = 0; j < 4; j++)
+			{
+				if (abs(M.m_matrix[i][j]) > PL_Length)
+					return false;
+			}
+		}
+		else
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				if (abs(M.m_matrix[i][j]) > PL_Length)
+					return false;
+			}
 		}
 	}
 	return true;

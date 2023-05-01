@@ -42,9 +42,10 @@
 
 ### boost
 
-Boost.Polygon是一个非常好的求多边形运算的库。
-
-Boost.Geometry是极为强大的地理空间库之一。Boost.Polygon能做的图元运算Boost.Geometry都能做，尤其是带孔的多边形这一方面Boost.Geometry的API比Boost.Polygon人性化多了。
+> Boost.Polygon是一个非常好的求多边形运算的库。
+>
+> Boost.Geometry是极为强大的地理空间库之一。Boost.Polygon能做的图元运算Boost.Geometry都能做，尤其是带孔的多边形这一方面Boost.Geometry的API比Boost.Polygon人性化多了。
+>
 
 [GitHub](https://github.com/boostorg/boost/releases/tag/boost-1.81.0)
 
@@ -70,26 +71,7 @@ PATH = C:\Users\Aking\source\repos\TPL\boost-1.81.0\libs
 
 
 
----
-
-### Qt
-
-安装qt开源个人版 [download](https://www.qt.io/download-thank-you)，需要注册个人账户，注意关闭翻墙软件；
-
-> Qt作为一个支持GUI的大型C++库，计算几何也是有相关支持的。QRegion、QPoint、QLine、QRect、QPolygon……还有一个从渲染到到碰撞检测全包的常用2D图元库QGraphicsScene。
->
-
-![image-20230324215459927](https://raw.githubusercontent.com/akingse/my-picbed/main/image-20230324215459927.png)
-
-环境变量
-
-```
-QTDIR = C:\Qt ，帮助cmake找到Qt
-PATH = C:\Qt\6.4.3\msvc2019_64\bin
-为了避免与另一个文件夹中具有相同名称的另一个dll发生任何冲突，请将此路径添加为列表中的第一个。
-```
-
-安装CGAL
+### 安装CGAL
 
 [github](https://github.com/CGAL/cgal/releases)
 
@@ -119,7 +101,7 @@ $(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib
 libgmp-10.lib
 libmpfr-4.lib
 
-加载dll
+加载dll（添加到环境变量，调试->环境）
 PATH=$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib
 
 工程中不需要非要添加到环境变量内，环境变量过多的情况下容易引起冲突,我们可以通过在
@@ -141,5 +123,82 @@ PATH=C:\Users\Aking\source\repos\TPL\CGAL-5.5.2\auxiliary\gmp\lib
 
 
 
-Qt项目配置
+---
+
+### 安装Qt5
+
+安装qt开源个人版 [download](https://www.qt.io/download-thank-you)，需要注册个人账户，注意关闭翻墙软件；
+
+> Qt作为一个支持GUI的大型C++库，计算几何也是有相关支持的。QRegion、QPoint、QLine、QRect、QPolygon……还有一个从渲染到到碰撞检测全包的常用2D图元库QGraphicsScene。
+
+![image-20230324215459927](https://raw.githubusercontent.com/akingse/my-picbed/main/image-20230324215459927.png)
+
+环境变量
+
+```
+QTDIR = C:\Qt ，帮助cmake找到Qt
+PATH = C:\Qt\6.4.3\msvc2019_64\bin
+为了避免与另一个文件夹中具有相同名称的另一个dll发生任何冲突，请将此路径添加为列表中的第一个。
+```
+
+
+
+### Qt项目配置
+
+```shell
+添加环境变量
+Windows
+QTDIR=C:\Qt\5.15.2
+vs-Path
+C:\Qt\5.15.2\msvc2019_64\bin
+
+缺少宏定义
+Impossible to draw, CGAL_USE_BASIC_VIEWER is not defined.
+#define  CGAL_USE_BASIC_VIEWER
+
+无法打开包括文件: "QApplication":
+cmake找不到Qt5，打开CMakeLists.txt，添加
+set(Qt5_DIR "C:/Qt/5.15.2/msvc2019_64/lib/cmake/Qt5")
+
+加载dll，绝对路径，可以添加到系统环境变量
+PATH=$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib
+PATH=C:\Qt\5.15.2\msvc2019_64\bin;C:\Users\Aking\source\repos\TPL\CGAL-5.5.2\auxiliary\gmp\lib;
+
+```
+
+
+
+简单配置cgal.cpp和文件
+
+![image-20230426101017089](https://raw.githubusercontent.com/akingse/my-picbed/main/x1e4/image-20230426101017089.png)
+
+
+
+
+
+
+
+### 使用vcpkg源码安装第三方库
+
+```shell
+编译vcpkg
+bootstrap-vcpkg.bat
+集成到全局
+vcpkg integrate install
+安装各种库
+.\vcpkg.exe install sophus:x64-windows
+.\vcpkg.exe install g2o:x64-windows --x-use-aria2
+.\vcpkg.exe install opencv4:x64-windows
+（注意exe打开路径）
+PS C:\Users\Aking\source\repos\TPL\vcpkg> .\vcpkg.exe install opencv4:x64-windows
+
+```
+
+
+
+```
+win安装GiNaC
+https://www.ginac.de/CLN/
+https://www.ginac.de/tutorial/
+```
 

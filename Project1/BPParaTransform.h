@@ -95,7 +95,7 @@ inline BPParaTransform scalez(double z) { return scale(1, 1, z); }
 inline BPParaTransform scaleXoY(double s) { return scale(s, s, 1); }
 // __declspec(dllexport) inline BPParaTransform scalePoint(double z);
 //translate
-__declspec(dllexport) BPParaTransform trans(double x, double y = 0.0, double z = 0.0);
+__declspec(dllexport) BPParaTransform trans(double x, double y, double z = 0.0); //no implicit convert
 __declspec(dllexport) BPParaTransform trans(const BPParaVec& point);
 __declspec(dllexport) BPParaTransform transx(double x);
 __declspec(dllexport) BPParaTransform transy(double y);
@@ -148,7 +148,7 @@ __declspec(dllexport) BPParaVec getMatrixsScale(const BPParaTransform& T); // ge
 __declspec(dllexport) BPParaTransform getMatrixsScalePart(const BPParaTransform& T); // get scale matrix
 //operate-judge
 __declspec(dllexport) bool isIdentifyMatrix(const BPParaTransform& M); 
-__declspec(dllexport) bool isZeroMatrix(const BPParaTransform& M); // all zero
+__declspec(dllexport) bool isZeroMatrix(const BPParaTransform& M, bool isAll = true); // all zero
 __declspec(dllexport) bool isOrthogonalMatrix(const BPParaTransform& T, bool onlyRot = true); // 
 __declspec(dllexport) BPParaTransform getOrthogonalMatrix(const BPParaTransform& T, bool withPosition = true);
 // __declspec(dllexport) bool isAttitudeMatrix(const BPParaTransform& T); // 
