@@ -14,8 +14,6 @@
 
   
 
-
-
 - 自动dll导出
 
   使用由工写的export_header.py脚本自动导出，项目中在project1中的链接前事件
@@ -78,10 +76,16 @@ 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
 
 3. typora设置
 
-
-
-
-
 推荐使用软件 [typora](https://typoraio.cn/)
 
 ![image-20230326010014578](https://raw.githubusercontent.com/akingse/my-picbed/main/img/image-20230326010014578.png)
+
+
+
+使用代理后git拉取失败
+
+```shell
+git config --global http.proxy http://127.0.0.1:7890 
+git config --global https.proxy http://127.0.0.1:7890 
+```
+

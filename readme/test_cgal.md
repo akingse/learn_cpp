@@ -66,6 +66,11 @@ setx
 BOOST_LIBRARYDIR = C:\Users\Aking\source\repos\TPL\boost-1.81.0\libs
 Boost_INCLUDEDIR = C:\Users\Aking\source\repos\TPL\boost-1.81.0
 PATH = C:\Users\Aking\source\repos\TPL\boost-1.81.0\libs
+
+环境变量
+%HOMEPATH%  =   C:\Users\用户名(wangk)
+
+
 ```
 
 
@@ -99,6 +104,7 @@ PATH = C:\Qt\6.4.3\msvc2019_64\bin
 
 ```
 CGAL_DIR = C:\Users\Aking\source\repos\TPL\CGAL-5.5.2
+CGAL_DIR = C:\Users\wangk\source\repos\TPL\CGAL-5.5.2
 ```
 
 

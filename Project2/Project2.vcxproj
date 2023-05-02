@@ -156,6 +156,7 @@
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GYDevillersTriangle.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="my_geometry.cpp" />
     <ClCompile Include="pch.cpp">
@@ -217,8 +218,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="triangle_intersec.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GYDevillersTriangle.h" />
     <ClInclude Include="my_geometry.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="test_function.h" />

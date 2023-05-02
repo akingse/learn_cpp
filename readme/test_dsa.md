@@ -1,6 +1,6 @@
-数据结构
+## 数据结构
 
-
+赫夫曼（*Huffman*）树又称最优二叉树或最优搜索树，是一种带权路径长度最短的二叉树。在许多应用中，常常赋给树中结点一个有某种意义的实数，称此实数为该结点的权。
 
   ![dsa](https://raw.githubusercontent.com/akingse/my-picbed/main/file.png)
 
