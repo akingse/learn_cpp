@@ -225,12 +225,12 @@ bool analysisExpressionVectorInverse(string& expre)
 	return true;
 }
 
-bool isFloatZero(double num, double eps=0.0)
-{
-	if (!eps)
-		return !bool(num);
-	return abs(num) < eps;
-}
+//bool isFloatZero(double num, double eps=0.0)
+//{
+//	if (!eps)
+//		return !bool(num);
+//	return abs(num) < eps;
+//}
 
 
 int main_regular()

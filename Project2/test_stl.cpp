@@ -60,7 +60,7 @@ bool fun(int a)
 	return A = a;
 }
 
-int main_stl1()
+static int mainstl()
 {
 	test_fun(10);
 	vector<int> mlist = alist();

@@ -170,8 +170,7 @@
     <ClCompile Include="test_atomic.cpp" />
     <ClCompile Include="test_boost.cpp" />
     <ClCompile Include="test_cache.cpp" />
-    <ClCompile Include="test_cgal_1.cpp" />
-    <ClCompile Include="test_cgal_2.cpp" />
+    <ClCompile Include="test_cast.cpp" />
     <ClCompile Include="test_class.cpp" />
     <ClCompile Include="test_class_cast.cpp" />
     <ClCompile Include="test_construct.cpp" />
@@ -195,7 +194,9 @@
     <ClCompile Include="test_matrix.cpp" />
     <ClCompile Include="test_memory_leak.cpp" />
     <ClCompile Include="test_object_pool.cpp" />
-    <ClCompile Include="test_ope.cpp" />
+    <ClCompile Include="test_ope.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="test_overload.cpp" />
     <ClCompile Include="test_recursion.cpp" />
     <ClCompile Include="test_refer.cpp" />
@@ -226,9 +227,6 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="test_function.h" />
     <ClInclude Include="test_serialize.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\readme.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

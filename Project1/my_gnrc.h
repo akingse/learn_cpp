@@ -74,7 +74,8 @@ protected:
 		const Templator<T>* ptr = dynamic_cast<const Templator<T>*>(&other);
 		if (!ptr) //(ptr == nullptr)
 			return false;
-		return ptr->m_imp == this->m_imp;
+		//return ptr->m_imp == this->m_imp;
+		return false;
 	}
 	bool _is_less(const IClass& other) const override
 	{
@@ -89,7 +90,9 @@ protected:
 				int a = 1;*/
 			return typeid(*this).name() < typeid(other).name(); //compare string
 		}
-		return this->m_imp < ptr->m_imp;
+		//return this->m_imp < ptr->m_imp;
+		//
+		return false;
 	}
 
 	inline std::type_index _get_id() const
@@ -169,20 +172,20 @@ protected:
 	}
 };
 
-class None
-{
-public:
-	//std::nullptr_t m_null; //空参类
-	None() {}; // : m_null(nullptr) {}
-	bool operator<(const None& other) const
-	{
-		return false;
-	}
-	bool operator==(const None& other) const
-	{
-		return true;
-	}
-};
+//class None
+//{
+//public:
+//	//std::nullptr_t m_null; //空参类
+//	None() {}; // : m_null(nullptr) {}
+//	bool operator<(const None& other) const
+//	{
+//		return false;
+//	}
+//	bool operator==(const None& other) const
+//	{
+//		return true;
+//	}
+//};
 
 
 ////临时Gnrc，指针拷贝

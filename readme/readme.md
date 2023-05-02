@@ -42,7 +42,7 @@ $(SolutionDir)build\Project1\$(PlatformTarget)\link
 
 第三方库
 $(SolutionDir)..\third_party_library\name
-加载dll
+加载dll（调试->环境）
 PATH=$(SolutionDir)build\Project1\$(PlatformTarget)\link
 ```
 
@@ -57,11 +57,9 @@ PATH=$(SolutionDir)build\Project1\$(PlatformTarget)\link
 
 ```
 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
+更新永久
+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
 ```
-
-
-
-2. 安装picgo，输入配置参数（注意仓库名没有前缀）
 
 1. 安装[picgo](https://github.com/Molunerfinn/PicGo/releases/)，输入配置参数（注意仓库名没有前缀）
 
@@ -82,10 +80,34 @@ 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
 
 
 
-使用代理后git拉取失败
+### github代理问题
 
-```shell
-git config --global http.proxy http://127.0.0.1:7890 
-git config --global https.proxy http://127.0.0.1:7890 
+```
+使用代理
+git config --global http.proxy http://127.0.0.1:49986
+git config --global https.proxy http://127.0.0.1:49986
+
+//取消http代理
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+
+![image-20230326010014578](https://raw.githubusercontent.com/akingse/my-picbed/main/img/image-20230326010014578.png)
+
+### typora设置
+
+```
+高级设置
+conf.user.json
+中文搜索
+    [
+      "使用百度搜索",
+      "https://www.baidu.com/s?ie=UTF-8&wd=%s"
+    ]
+设置代理
+    [
+      "proxy-server",
+      "http://127.0.0.1:49724"
+    ]
+
 ```
 

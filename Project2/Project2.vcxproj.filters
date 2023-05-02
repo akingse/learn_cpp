@@ -165,14 +165,11 @@
     <ClCompile Include="test_template2.cpp">
       <Filter>test_template</Filter>
     </ClCompile>
-    <ClCompile Include="test_cgal_1.cpp">
-      <Filter>test_math</Filter>
-    </ClCompile>
     <ClCompile Include="test_boost.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="test_cgal_2.cpp">
-      <Filter>test_math</Filter>
+    <ClCompile Include="test_cast.cpp">
+      <Filter>test_gram</Filter>
     </ClCompile>
     <ClCompile Include="triangle_intersec.cpp">
       <Filter>test_math</Filter>
@@ -197,10 +194,5 @@
     <ClInclude Include="GYDevillersTriangle.h">
       <Filter>head</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\readme.md">
-      <Filter>common</Filter>
-    </None>
   </ItemGroup>
 </Project>

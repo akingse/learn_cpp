@@ -19,6 +19,12 @@
     <Filter Include="test_eg">
       <UniqueIdentifier>{21088a41-a15b-492e-8094-7fceb7d09a25}</UniqueIdentifier>
     </Filter>
+    <Filter Include="component">
+      <UniqueIdentifier>{82bbbae9-70d1-4416-ad70-6c695ba9afaf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="geometry">
+      <UniqueIdentifier>{b77325ff-4b59-41c0-b1ab-f42203b78bcb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="my_vec.cpp">
@@ -54,6 +60,27 @@
     <ClCompile Include="test_singleton.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="BPParaTransform.cpp">
+      <Filter>component</Filter>
+    </ClCompile>
+    <ClCompile Include="BPParaVec.cpp">
+      <Filter>component</Filter>
+    </ClCompile>
+    <ClCompile Include="Gnrc.cpp">
+      <Filter>component</Filter>
+    </ClCompile>
+    <ClCompile Include="geometry\ParaGeometryCalculate.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="geometry\ParaGeometryClass.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="geometry\ParaGeometryRelation.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="geometry\ParaNearestCatchIndex.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="my_template.h">
@@ -82,6 +109,27 @@
     </ClInclude>
     <ClInclude Include="..\auto_include\Project1_API.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="BPParaTransform.h">
+      <Filter>component</Filter>
+    </ClInclude>
+    <ClInclude Include="BPParaVec.h">
+      <Filter>component</Filter>
+    </ClInclude>
+    <ClInclude Include="Gnrc.h">
+      <Filter>component</Filter>
+    </ClInclude>
+    <ClInclude Include="geometry\ParaGeometryCalculate.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="geometry\ParaGeometryClass.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="geometry\ParaGeometryRelation.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="geometry\ParaNearestCatchIndex.h">
+      <Filter>geometry</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
