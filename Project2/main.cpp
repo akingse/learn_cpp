@@ -6,7 +6,7 @@
 /// <returns></returns>
 int main()
 {
-
+	
 	return 0;
 }
 

@@ -170,6 +170,7 @@
     <ClCompile Include="test_atomic.cpp" />
     <ClCompile Include="test_boost.cpp" />
     <ClCompile Include="test_cache.cpp" />
+    <ClCompile Include="test_calculate0.cpp" />
     <ClCompile Include="test_cast.cpp" />
     <ClCompile Include="test_class.cpp" />
     <ClCompile Include="test_class_cast.cpp" />
@@ -225,6 +226,7 @@
     <ClInclude Include="GYDevillersTriangle.h" />
     <ClInclude Include="my_geometry.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="test_calculate0.h" />
     <ClInclude Include="test_function.h" />
     <ClInclude Include="test_serialize.h" />
   </ItemGroup>
