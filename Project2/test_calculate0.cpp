@@ -1,5 +1,4 @@
 #include "pch.h"
-#include "test_calculate0.h"
 
 Vec2 _get_circumcircle_center(const std::array<Vec2, 3>& trigon)
 {

@@ -52,6 +52,7 @@
 #include "Project1_API.h"
 #include "test_serialize.h"
 #include "my_geometry.h"			//export
+#include "test_calculate0.h"
 
 
 
