@@ -40,6 +40,9 @@
     <Filter Include="test_math">
       <UniqueIdentifier>{ab0f9f34-e60c-4037-b9de-ff1246a48bea}</UniqueIdentifier>
     </Filter>
+    <Filter Include="test_paste">
+      <UniqueIdentifier>{7db03efe-7c52-4f06-b2b9-61647caf6103}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test_serialize.cpp">
@@ -138,7 +141,7 @@
     <ClCompile Include="test_template1.cpp">
       <Filter>test_template</Filter>
     </ClCompile>
-    <ClCompile Include="test_tmp.cpp">
+    <ClCompile Include="test_template0.cpp">
       <Filter>test_template</Filter>
     </ClCompile>
     <ClCompile Include="test_sgt.cpp">
@@ -159,7 +162,7 @@
     <ClCompile Include="test_map.cpp">
       <Filter>test_stl</Filter>
     </ClCompile>
-    <ClCompile Include="my_template.cpp">
+    <ClCompile Include="test_memfn.cpp">
       <Filter>test_template</Filter>
     </ClCompile>
     <ClCompile Include="test_template2.cpp">
@@ -177,6 +180,9 @@
     <ClCompile Include="GYDevillersTriangle.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="test_paste1.cpp">
+      <Filter>test_paste</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test_function.h">
@@ -193,6 +199,9 @@
     </ClInclude>
     <ClInclude Include="GYDevillersTriangle.h">
       <Filter>head</Filter>
+    </ClInclude>
+    <ClInclude Include="test_template0.h">
+      <Filter>test_template</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

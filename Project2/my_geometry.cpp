@@ -1,5 +1,52 @@
 #include "pch.h"
 
+
+
+//int    polySides;//=  how many cornersthe polygon has
+//float  polyX[];//=  horizontalcoordinates of corners
+//float  polyY[];//=  verticalcoordinates of corners
+//float  x, y;//=  point to be tested
+
+
+bool pointInPolygon(int    polySides, float  polyX[], float  polyY[],float x, float y)
+{
+    int   i, j = polySides - 1;
+    bool  oddNodes = false;
+    for (i = 0; i < polySides; i++)
+    {
+        //if ((polyY[i] < y && polyY[j] >= y || polyY[j] < y && polyY[i] >= y) && (polyX[i] <= x || polyX[j] <= x))
+        if (polyY[i] < y && polyY[j] >= y || polyY[j] < y && polyY[i] >= y)
+        {
+            if (polyX[i] + (y - polyY[i]) / (polyY[j] - polyY[i]) * (polyX[j] - polyX[i]) < x)
+            {
+                oddNodes = !oddNodes;
+            }
+        }
+        j = i;
+    }
+    return oddNodes;
+}
+
+
+
+// Randolph Franklin的算法
+int pnpoly(int npol, float* xp, float* yp, float x, float y)
+{
+    int i, j, c = 0;
+    for (i = 0, j = npol - 1; i < npol; j = i++)
+    {//<== 和< 奥妙蕴含其中
+        if ((((yp[i] <= y) && (y < yp[j])) || ((yp[j] <= y) && (y < yp[i]))) && (x < (xp[j] - xp[i]) * (y - yp[i]) / (yp[j] - yp[i]) + xp[i]))
+            c = !c;
+    }
+    return c;
+}
+
+
+
+
+
+
+
 static int _enrol2=[]()->int {
 	Cube cube(100, 100, 200);
 

@@ -52,7 +52,7 @@ PATH=$(SolutionDir)build\Project1\$(PlatformTarget)\link
 
 ## Typora配置图床
 
-1. GitHub创建pic-bed项目，并获取GitHub账号token(class)
+GitHub创建pic-bed项目，并获取GitHub账号token(class)
 
 
 ```
@@ -61,7 +61,7 @@ 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
 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
 ```
 
-1. 安装[picgo](https://github.com/Molunerfinn/PicGo/releases/)，输入配置参数（注意仓库名没有前缀）
+安装[picgo](https://github.com/Molunerfinn/PicGo/releases/)，输入配置参数（注意仓库名没有前缀）
 
 ```
 设定仓库名 akingse/my-picbed
@@ -72,31 +72,16 @@ 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
 
 ![image-20230323212025683.png](https://github.com/akingse/my-picbed/blob/main/image-20230323212025683.png?raw=true)
 
-3. typora设置
+
+
+### typora设置
 
 推荐使用软件 [typora](https://typoraio.cn/)
 
 ![image-20230326010014578](https://raw.githubusercontent.com/akingse/my-picbed/main/img/image-20230326010014578.png)
 
-
-
-### github代理问题
-
 ```
-使用代理
-git config --global http.proxy http://127.0.0.1:49986
-git config --global https.proxy http://127.0.0.1:49986
-
-//取消http代理
-git config --global --unset http.proxy
-git config --global --unset https.proxy
-
-![image-20230326010014578](https://raw.githubusercontent.com/akingse/my-picbed/main/img/image-20230326010014578.png)
-
-### typora设置
-
-```
-高级设置
+高级设置（配置文件）
 conf.user.json
 中文搜索
     [
@@ -110,4 +95,26 @@ conf.user.json
     ]
 
 ```
+
+### github代理问题
+
+```shell
+#使用代理
+git config --global http.proxy http://127.0.0.1:49825
+git config --global https.proxy http://127.0.0.1:49825
+
+#取消http代理
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+```
+
+同步设备
+
+|        |                     |                |
+| ------ | ------------------- | -------------- |
+| device | LAPTOP-X1E4         | LAPTOP-STRIX7  |
+| user   | Aking               | akingse        |
+| email  | Akingse@outlook.com | akingse@qq.com |
+
+
 
