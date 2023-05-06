@@ -800,9 +800,11 @@ public:
 class Vec2
 {
 public:
-	//double x;
-	//double y;
-	double transform[16];
+	double x;
+	double y;
+	//double transform[16];
+	__declspec(dllimport) Vec2() = default;
+	__declspec(dllimport) Vec2(double x, double y) : x(x), y(y) {}
 };
 
 class Vec3 : public Vec2

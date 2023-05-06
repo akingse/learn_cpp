@@ -113,6 +113,8 @@ C:\Users\Aking\source\repos\TPL\boost-1.81.0\libs
 C:\Users\Aking\source\repos\TPL\\CGAL-5.5.2\auxiliary\gmp\lib
 # dll
 PATH=C:\Users\Aking\source\repos\TPL\CGAL-5.5.2\auxiliary\gmp\lib
+
+CGAL编不过，注释掉version文件的//5.5.2信息
 ```
 
 

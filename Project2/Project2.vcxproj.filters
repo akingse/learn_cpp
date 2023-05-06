@@ -183,6 +183,9 @@
     <ClCompile Include="test_paste1.cpp">
       <Filter>test_paste</Filter>
     </ClCompile>
+    <ClCompile Include="test_calculate0.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test_function.h">
@@ -198,6 +201,9 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="GYDevillersTriangle.h">
+      <Filter>head</Filter>
+    </ClInclude>
+    <ClInclude Include="test_calculate0.h">
       <Filter>head</Filter>
     </ClInclude>
     <ClInclude Include="test_template0.h">
