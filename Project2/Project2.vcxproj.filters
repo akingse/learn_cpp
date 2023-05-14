@@ -180,6 +180,9 @@
     <ClCompile Include="test_calculate0.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="test_omp.cpp">
+      <Filter>thread</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test_function.h">

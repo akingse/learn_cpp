@@ -10,7 +10,7 @@ extern "C"
 		double x;
 		double y;
 		double z;
-	} vec = { 0,0,0 };
+	};// vec = { 0,0,0 };
 
 	//member
 	__declspec(dllexport) CVec3 CVec3add(CVec3 a, CVec3 b); //+

@@ -75,7 +75,7 @@ int test_boost1()
 
 static int enrol = []()->int
 {
-	test_boost();
-	test_boost1();
+	//test_boost();
+	//test_boost1();
 	return 0;
 }();

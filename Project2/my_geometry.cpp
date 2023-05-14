@@ -1,13 +1,13 @@
 #include "pch.h"
-
-static int _enrol2=[]()->int {
+static void test_geometry()
+{
 	Cube cube(100, 100, 200);
 
 	auto type = &Cube::setHigh; //(0x00007ff6c3826a64)(0x000000c87852ebb8,100)-		&cube	0x000000c87852ebb8 {m_l=100 m_w=100 m_h=200 }	Cube *
 	//constexpr  long long size = long long(&Cube::setHigh);
 	std::function<int(Cube*)> fp = &Cube::getHigh;
 	//显示指定类型
-	std::function<void(Cube*,int)> fp1 = &Cube::setHigh;
+	std::function<void(Cube*, int)> fp1 = &Cube::setHigh;
 	fp1(&cube, 300);
 
 	const std::map<std::string, std::map<std::string, DpIn*>>* pMap = &g_funMap;
@@ -34,6 +34,9 @@ static int _enrol2=[]()->int {
 	primitive.setPropertyValue("长", 5000);
 	//primitive.setPropertyValue("mf高", 6000);
 	bool res = cube_setLength(nullptr, 300);
+
+}
+static int _enrol2=[]()->int {
 
 	return 0;
 }();
