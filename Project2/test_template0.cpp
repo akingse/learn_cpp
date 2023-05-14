@@ -133,6 +133,6 @@ static int test_chatgpt()
 
 static int enrol = []()->int
 {
-    test_chatgpt();
+    //test_chatgpt();
     return 0;
 }();

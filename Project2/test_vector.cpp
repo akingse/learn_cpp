@@ -143,6 +143,7 @@ static void test_list()
 	std::map<string, int> amap;
 	auto res1 = amap.try_emplace("类型1", 1);
 	auto res2 = amap.try_emplace("默认类型1", 2);
+	auto res3 = amap.insert({ "类型2", 2 });
 
 	cout << 1;
 }

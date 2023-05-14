@@ -253,6 +253,6 @@ static int main1()
 
 static int enrol = []()->int
 {
-	main1();
+	//main1(); //deque crash
 	return 0;
 }();
