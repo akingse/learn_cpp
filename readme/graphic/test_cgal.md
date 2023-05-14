@@ -29,54 +29,11 @@
 >
 
 
-
-
-
 ---
 
-### CGAL的编译与使用
+## CGAL的编译与使用
 
-[csdn](https://blog.csdn.net/summer_dew/article/details/107811371)
-
-[安装依赖](https://blog.csdn.net/qq_39784672/article/details/125839069) 
-
-### boost
-
-> Boost.Polygon是一个非常好的求多边形运算的库。
->
-> Boost.Geometry是极为强大的地理空间库之一。Boost.Polygon能做的图元运算Boost.Geometry都能做，尤其是带孔的多边形这一方面Boost.Geometry的API比Boost.Polygon人性化多了。
->
-
-[GitHub](https://github.com/boostorg/boost/releases/tag/boost-1.81.0)
-
-双击bootstrap.bat启动，生成b2.exe后继续安装；
-
-配置
-
-```
-VC++\包含目录 $(SolutionDir)..\TPL\boost-1.81.0
-VC++\库目录 $(SolutionDir)..\TPL\boost-1.81.0\stage\lib
-链接器\附加库目录 $(SolutionDir)..\TPL\boost-1.81.0\stage\lib
-```
-
-添加环境变量
-
-```
-使用命令行
-setx 
-BOOST_LIBRARYDIR = C:\Users\Aking\source\repos\TPL\boost-1.81.0\libs
-Boost_INCLUDEDIR = C:\Users\Aking\source\repos\TPL\boost-1.81.0
-PATH = C:\Users\Aking\source\repos\TPL\boost-1.81.0\libs
-
-环境变量
-%HOMEPATH%  =   C:\Users\用户名(wangk)
-
-
-```
-
-
-
-### 安装CGAL
+### 安装CGAL [csdn](https://blog.csdn.net/summer_dew/article/details/107811371)
 
 [github](https://github.com/CGAL/cgal/releases)
 
@@ -88,6 +45,39 @@ PATH = C:\Users\Aking\source\repos\TPL\boost-1.81.0\libs
 CGAL_DIR = C:\Users\Aking\source\repos\TPL\CGAL-5.5.2
 CGAL_DIR = C:\Users\wangk\source\repos\TPL\CGAL-5.5.2
 ```
+
+### 安装boost
+
+[安装依赖](https://blog.csdn.net/qq_39784672/article/details/125839069) 
+
+> Boost.Polygon是一个非常好的求多边形运算的库。
+>
+> Boost.Geometry是极为强大的地理空间库之一。Boost.Polygon能做的图元运算Boost.Geometry都能做，尤其是带孔的多边形这一方面Boost.Geometry的API比Boost.Polygon人性化多了。
+>
+
+[GitHub](https://github.com/boostorg/boost/releases/tag/boost-1.81.0)
+
+双击bootstrap.bat启动，生成b2.exe后继续安装；
+
+vs配置
+
+```
+VC++\包含目录 $(SolutionDir)..\TPL\boost-1.81.0
+VC++\库目录 $(SolutionDir)..\TPL\boost-1.81.0\stage\lib
+链接器\附加库目录 $(SolutionDir)..\TPL\boost-1.81.0\stage\lib
+```
+
+添加环境变量
+
+```shell
+#使用命令行
+setx 
+BOOST_LIBRARYDIR = C:\Users\Aking\source\repos\TPL\boost-1.81.0\libs
+Boost_INCLUDEDIR = C:\Users\Aking\source\repos\TPL\boost-1.81.0
+PATH = C:\Users\Aking\source\repos\TPL\boost-1.81.0\libs
+
+```
+
 
 
 
@@ -107,23 +97,21 @@ $(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib
 libgmp-10.lib
 libmpfr-4.lib
 
-加载dll（添加到环境变量，调试->环境）
-PATH=$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib
+4 加载dll（添加到环境变量，调试->环境）
+PATH=$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib;C:\Qt\5.15.2\msvc2019_64\bin;
+也可以添加到系统环境变量中（全局），这样就能大大减少我们工程中配置环境的烦恼。
+加载dll，绝对路径，可以添加到系统环境变量
+环境变量
+%HOMEPATH%  =   C:\Users\用户名(wangk)
 
-工程中不需要非要添加到环境变量内，环境变量过多的情况下容易引起冲突,我们可以通过在
-调试-> 环境中
-PATH=;%PATH%
-这样就能大大减少我们工程中配置环境的烦恼。
-
-绝对目录
-//head
+# head
 C:\Users\Aking\source\repos\TPL\boost-1.81.0
 C:\Users\Aking\source\repos\TPL\CGAL-5.5.2\include
 C:\Users\Aking\source\repos\TPL\CGAL-5.5.2\auxiliary\gmp\include
-//lib
+# lib
 C:\Users\Aking\source\repos\TPL\boost-1.81.0\libs
 C:\Users\Aking\source\repos\TPL\\CGAL-5.5.2\auxiliary\gmp\lib
-//dll
+# dll
 PATH=C:\Users\Aking\source\repos\TPL\CGAL-5.5.2\auxiliary\gmp\lib
 
 CGAL编不过，注释掉version文件的//5.5.2信息
@@ -168,9 +156,7 @@ Impossible to draw, CGAL_USE_BASIC_VIEWER is not defined.
 cmake找不到Qt5，打开CMakeLists.txt，添加
 set(Qt5_DIR "C:/Qt/5.15.2/msvc2019_64/lib/cmake/Qt5")
 
-加载dll，绝对路径，可以添加到系统环境变量
-PATH=$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib
-PATH=C:\Qt\5.15.2\msvc2019_64\bin;C:\Users\Aking\source\repos\TPL\CGAL-5.5.2\auxiliary\gmp\lib;
+
 
 ```
 
@@ -182,7 +168,7 @@ PATH=C:\Qt\5.15.2\msvc2019_64\bin;C:\Users\Aking\source\repos\TPL\CGAL-5.5.2\aux
 
 
 
-
+---
 
 
 

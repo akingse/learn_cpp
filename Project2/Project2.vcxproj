@@ -163,7 +163,7 @@
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="my_template.cpp">
+    <ClCompile Include="test_memfn.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
@@ -191,6 +191,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="test_paste1.cpp" />
     <ClCompile Include="test_omp.cpp" />
     <ClCompile Include="test_pointer.cpp" />
     <ClCompile Include="test_math.cpp" />
@@ -213,7 +214,7 @@
     <ClCompile Include="test_template1.cpp" />
     <ClCompile Include="test_template2.cpp" />
     <ClCompile Include="test_thread.cpp" />
-    <ClCompile Include="test_tmp.cpp" />
+    <ClCompile Include="test_template0.cpp" />
     <ClCompile Include="test_tree.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -232,6 +233,7 @@
     <ClInclude Include="test_calculate0.h" />
     <ClInclude Include="test_function.h" />
     <ClInclude Include="test_serialize.h" />
+    <ClInclude Include="test_template0.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
