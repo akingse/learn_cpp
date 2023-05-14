@@ -245,7 +245,7 @@ static int main1()
 	}
 	std::cout << "\n";
 
-	std::cout << "result:" << calculate(backOrder);
+	std::cout << "result:" << calculate(backOrder); //ÓĞbug
 	return 0;
 }
 

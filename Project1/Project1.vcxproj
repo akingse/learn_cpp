@@ -162,11 +162,21 @@
   <ItemGroup>
     <ClCompile Include="BPParaTransform.cpp" />
     <ClCompile Include="BPParaVec.cpp" />
-    <ClCompile Include="geometry\ParaGeometryCalculate.cpp" />
-    <ClCompile Include="geometry\ParaGeometryClass.cpp" />
-    <ClCompile Include="geometry\ParaGeometryRelation.cpp" />
+    <ClCompile Include="geometry\ParaGeometryCalculate.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="geometry\ParaGeometryClass.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="geometry\ParaGeometryRelation.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="geometry\ParaNearestCatchIndex.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Gnrc.cpp" />
     <ClCompile Include="half_edge.cpp">
@@ -200,11 +210,21 @@
     <ClInclude Include="..\auto_include\Project1_API.h" />
     <ClInclude Include="BPParaTransform.h" />
     <ClInclude Include="BPParaVec.h" />
-    <ClInclude Include="geometry\ParaGeometryCalculate.h" />
-    <ClInclude Include="geometry\ParaGeometryClass.h" />
-    <ClInclude Include="geometry\ParaGeometryRelation.h" />
+    <ClInclude Include="geometry\ParaGeometryCalculate.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="geometry\ParaGeometryClass.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="geometry\ParaGeometryRelation.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="geometry\ParaNearestCatchIndex.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Gnrc.h" />
     <ClInclude Include="my_handle.h" />

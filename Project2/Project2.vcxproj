@@ -77,7 +77,7 @@
     <LibraryPath>$(SolutionDir)build\Project1\;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)..\TPL\boost-1.81.0\stage\lib;$(SolutionDir)..\TPL\boost-1.81.0\libs;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)..\third_party_library\CGAL-5.5.2;$(SolutionDir)..\third_party_library\eigen-3.4.0;$(SolutionDir)auto_include;$(SolutionDir)..\third_party_library\boost-1.81.0\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\TPL\CGAL-5.5.2;$(SolutionDir)..\TPL\CGAL-5.5.2\include;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include;$(SolutionDir)..\TPL\eigen-3.4.0;$(SolutionDir)auto_include;$(SolutionDir)..\TPL\boost-1.81.0\;C:\Qt\6.4.3\msvc2019_64\include\;C:\Qt\6.4.3\msvc2019_64\include\QtWidgets\QApplication;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\link</OutDir>
     <IntDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\compile</IntDir>
     <LibraryPath>$(SolutionDir)build\Project1\;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)..\third_party_library\boost-1.81.0\stage\lib;$(LibraryPath)</LibraryPath>
@@ -192,6 +192,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="test_paste1.cpp" />
+    <ClCompile Include="test_omp.cpp" />
     <ClCompile Include="test_pointer.cpp" />
     <ClCompile Include="test_math.cpp" />
     <ClCompile Include="test_matrix.cpp" />
@@ -199,6 +200,7 @@
     <ClCompile Include="test_object_pool.cpp" />
     <ClCompile Include="test_ope.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="test_overload.cpp" />
     <ClCompile Include="test_recursion.cpp" />
