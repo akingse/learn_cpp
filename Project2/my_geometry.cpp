@@ -43,11 +43,8 @@ int pnpoly(int npol, float* xp, float* yp, float x, float y)
 
 
 
-
-
-
-
-static int _enrol2=[]()->int {
+static void _test_geometry()
+{
 	Cube cube(100, 100, 200);
 
 	auto type = &Cube::setHigh; //(0x00007ff6c3826a64)(0x000000c87852ebb8,100)-		&cube	0x000000c87852ebb8 {m_l=100 m_w=100 m_h=200 }	Cube *
@@ -81,8 +78,8 @@ static int _enrol2=[]()->int {
 	primitive.setPropertyValue("³¤", 5000);
 	//primitive.setPropertyValue("mf¸ß", 6000);
 	bool res = cube_setLength(nullptr, 300);
-
 }
+
 static int _enrol2=[]()->int {
 
 	return 0;

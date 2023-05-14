@@ -245,7 +245,7 @@ static int main1()
 	}
 	std::cout << "\n";
 
-	std::cout << "result:" << calculate(backOrder);
+	std::cout << "result:" << calculate(backOrder); //ÓĞbug
 	return 0;
 }
 
@@ -253,6 +253,6 @@ static int main1()
 
 static int enrol = []()->int
 {
-	main1();
+	//main1();
 	return 0;
 }();
