@@ -51,7 +51,7 @@ bool _isTwoTriangularIntersection(const std::array<BPParaVec, 3>& tBase, const s
     BPParaVec pL1 = tLine[1];
     BPParaVec pL2 = tLine[2];
     //through the triangular plane
-    double dotA = (normal * (pL0 - pOri)) * (normal * (pL0 - pOri));
+    double dotA = (normal * (pL0 - pOri)) * (normal * (pL1 - pOri));
     double dotB = (normal * (pL1 - pOri)) * (normal * (pL2 - pOri));
     double dotC = (normal * (pL2 - pOri)) * (normal * (pL0 - pOri));
 
