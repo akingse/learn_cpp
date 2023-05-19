@@ -553,9 +553,15 @@ BPParaTransform inverse(const BPParaTransform& T)
 
 BPParaTransform inverseOrth(const BPParaTransform& T)
 {
-	BPParaTransform rotM = getMatrixsRotationPart(T);
-	BPParaVec transP = getMatrixsPosition(T);
-	return transpose(rotM) * translate((-1.0) * transP);
+	BPParaTransform M = setMatrixByValueList(
+		T.m_matrix[0][0], T.m_matrix[0][1], T.m_matrix[0][2], -T.m_matrix[3][0],
+		T.m_matrix[1][0], T.m_matrix[1][1], T.m_matrix[1][2], -T.m_matrix[3][0],
+		T.m_matrix[2][0], T.m_matrix[2][1], T.m_matrix[2][2], -T.m_matrix[3][0]);
+	return M;
+
+	//BPParaTransform rotM = getMatrixsRotationPart(T);
+	//BPParaVec transP = getMatrixsPosition(T);
+	//return transpose(rotM) * translate((-1.0) * transP);
 }
 
 BPParaTransform operator*(double a, const BPParaTransform& b) //Êý×Ö×ó³Ë

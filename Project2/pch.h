@@ -53,7 +53,7 @@
 #include "test_serialize.h"
 #include "my_geometry.h"			//export
 #include "test_calculate0.h"
-
+#include "test_speed.h"
 
 
 

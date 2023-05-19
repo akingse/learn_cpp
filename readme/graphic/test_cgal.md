@@ -123,7 +123,7 @@ CGAL编不过，注释掉version文件的//5.5.2信息
 
 ### 安装Qt5
 
-安装qt开源个人版 [download](https://www.qt.io/download-thank-you)，需要注册个人账户，注意关闭翻墙软件；
+安装qt开源个人版，下载器下载 [download](https://www.qt.io/download-thank-you)，需要注册个人账户，注意关闭翻墙软件；
 
 > Qt作为一个支持GUI的大型C++库，计算几何也是有相关支持的。QRegion、QPoint、QLine、QRect、QPolygon……还有一个从渲染到到碰撞检测全包的常用2D图元库QGraphicsScene。
 

@@ -189,6 +189,9 @@
     <ClCompile Include="test_omp.cpp">
       <Filter>thread</Filter>
     </ClCompile>
+    <ClCompile Include="test_speed.cpp">
+      <Filter>test_math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test_function.h">
@@ -211,6 +214,9 @@
     </ClInclude>
     <ClInclude Include="test_template0.h">
       <Filter>test_template</Filter>
+    </ClInclude>
+    <ClInclude Include="test_speed.h">
+      <Filter>test_math</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

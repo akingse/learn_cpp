@@ -35,6 +35,26 @@ extern "C"
 	__declspec(dllexport) double getAngleOfTwoVectors3d(CVec3 vecA, CVec3 vecB, bool isAbs = false);
 }
 
+class BPParaVec2
+{
+public:
+	double x;
+	double y;
+	__declspec(dllexport) BPParaVec2() :x(0.0), y(0.0) {}
+	__declspec(dllexport) BPParaVec2(double _x, double _y) : x(_x), y(_y) {}
+	__declspec(dllexport) ~BPParaVec2() {}
+	__declspec(dllexport) BPParaVec2(const BPParaVec2& rhs) : x(rhs.x), y(rhs.y) {}
+	//__declspec(dllexport) BPParaVec2 operator^(const BPParaVec2& rhs) const;
+	__declspec(dllexport) double operator*(const BPParaVec2& rhs) const { return x * rhs.x, y * rhs.y; }
+	__declspec(dllexport) BPParaVec2 operator+(const BPParaVec2& rhs) const { return BPParaVec2(x + rhs.x, y + rhs.y); }
+	__declspec(dllexport) BPParaVec2 operator-(const BPParaVec2& rhs) const { return BPParaVec2(x - rhs.x, y - rhs.y); }
+	__declspec(dllexport) bool operator<(const BPParaVec2& rhs) const;
+	__declspec(dllexport) bool operator==(const BPParaVec2& rhs) const;
+	__declspec(dllexport) double operator[](int i) const;
+	inline BPParaVec2 operator+() { return *this; }
+	inline BPParaVec2 operator-() { return BPParaVec2(-x, -y); }
+};
+
 class BPParaTransform;
 class BPParaVec
 {
@@ -125,11 +145,12 @@ inline bool isFloatEqualOrMore(double numA, double numB) { return _isFloatEqual(
 inline bool isFloatEqual(double numA, double numB, double eps) { return _isFloatEqual(numA, numB, eps); }
 inline double norm(const BPParaVec& other) { return other.norm(); }
 inline BPParaVec unitize(const BPParaVec& other) { return BPParaVec(other).unitize(); }
-inline BPParaVec toVec2(const BPParaVec& vec3) { return BPParaVec(vec3.m_imp.x, vec3.m_imp.y, 0); }
+//inline BPParaVec toVec2(const BPParaVec& vec3) { return BPParaVec(vec3.m_imp.x, vec3.m_imp.y, 0); }
 inline BPParaVec toVec2XoY(const BPParaVec& vec3) { return BPParaVec(vec3.m_imp.x, vec3.m_imp.y, 0); }
 inline BPParaVec toVec2XoZ(const BPParaVec& vec3) { return BPParaVec(vec3.m_imp.x, 0, vec3.m_imp.z); }
 inline BPParaVec toVec2YoZ(const BPParaVec& vec3) { return BPParaVec(0, vec3.m_imp.y, vec3.m_imp.y); }
 inline BPParaVec operator*(double n, const BPParaVec& other) { return BPParaVec(n * other.m_imp.x, n * other.m_imp.y, n * other.m_imp.z); }
+inline BPParaVec2 _toVec2(const BPParaVec& vec) { return BPParaVec2(vec.x(), vec.y()); }
 
 //geometry relation
 __declspec(dllexport) bool isParallel(const BPParaVec& vecA, const BPParaVec& vecB);

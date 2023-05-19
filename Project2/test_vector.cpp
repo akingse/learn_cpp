@@ -173,7 +173,49 @@ void test_vec_compare()
 	auto it = amap.find(BPParaVec(4, 6));
 
 }
+
+static int _test_chatgpt_1()
+{
+	//							 |         |		
+	std::vector<double> vec{ 1.2, 3.4, 3.5, 5.6 };
+
+	double target0 = 0;
+	double target1 = 2;
+	double target2 = 4;
+	double target3 = 7;
+	auto it0 = std::lower_bound(vec.begin(), vec.end(), target0);
+	auto it1 = std::lower_bound(vec.begin(), vec.end(), target1);
+	auto it2 = std::lower_bound(vec.begin(), vec.end(), target2);
+	auto it3 = std::lower_bound(vec.begin(), vec.end(), target3);
+	int dist0 = std::distance(vec.begin(), it0); //0
+	int dist1 = std::distance(vec.begin(), it1); //1
+	int dist2 = std::distance(vec.begin(), it2); //3
+	int dist3 = std::distance(vec.begin(), it3); //4
+
+	if (it0 == vec.end())
+		cout << "out";
+	if (it3 == vec.end())
+		cout << "out";
+	if (it1 != vec.end()) 
+	{
+		// 找到了大于等于target的元素
+		int dist1 = std::distance(vec.begin(), it1);
+		std::cout << "找到了目标值" << target1 << "，位置为：" << dist1 << std::endl;
+	}
+	else 
+	{
+		// 没有找到大于等于target的元素
+		std::cout << "没有找到目标值" << target1 << std::endl;
+	}
+
+	return 0;
+
+}
+
+
 static int _enrol = []()->int {
-	test_list();
+
+	_test_chatgpt_1();
+	//test_list();
 	return 0;
 }();
