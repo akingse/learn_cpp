@@ -36,726 +36,738 @@
 /* Warning, change the file to script automatically.
 Please modify the source file under source. 
 Source file: "Gnrc.h".*/
-
-//custom template meta 
-class None {};
-template<typename T>
-struct _GeneHasLessOperator
+namespace para
 {
-    template<typename U> static void test(...) {};
-    template<typename U> static auto test(int)->decltype(std::declval<const U>() < std::declval<const U>()) {};
-    enum { value = std::is_same<decltype(test<T>(0)), bool > ::value };
-};
 
-template<typename T>
-struct _GeneHasEqualOperator
-{
-    template<typename U> static void test(...) {};
-    template<typename U> static auto test(int)->decltype(std::declval<const U>() == std::declval<const T>()) {};
-    enum { value = std::is_same<decltype(test<T>(0)), bool > ::value };
-};
-
-class _GeneBaseClass
-{
-public:
-    //allow copy
-    template<typename T, bool>
-    class AbleCopy
-    {
-    public:
-        //std::is_copy_assignable
-        static void copy_assignable(T& lhs, const T& rhs);
-    };
+    //custom template meta 
+    class None {};
     template<typename T>
-    class AbleCopy<T, true>
+    struct _GeneHasLessOperator
     {
-    public:
-        static void copy_assignable(T& lhs, const T& rhs)
-        {
-            lhs = rhs;
-        }
+        template<typename U> static void test(...) {};
+        template<typename U> static auto test(int) -> decltype(std::declval<const U>() < std::declval<const U>()) {};
+        enum { value = std::is_same<decltype(test<T>(0)), bool > ::value };
     };
+
     template<typename T>
-    class AbleCopy<T, false>
+    struct _GeneHasEqualOperator
     {
-    public:
-        static void copy_assignable(T& lhs, const T& rhs)
-        {
-#ifdef _DEBUG
-            throw std::logic_error("T nonsupport opetaror=");
-#endif // DEBUG
-        }
+        template<typename U> static void test(...) {};
+        template<typename U> static auto test(int) -> decltype(std::declval<const U>() == std::declval<const T>()) {};
+        enum { value = std::is_same<decltype(test<T>(0)), bool > ::value };
     };
 
-    //allow compare less
-    template<typename T, bool>
-    class AbleLess
+    class _GeneBaseClass
     {
     public:
-        static bool operator_less(const T& lhs, const T& rhs);
-    };
-    template<typename T>
-    class AbleLess<T, true>
-    {
-    public:
-        static bool operator_less(const T& lhs, const T& rhs)
+        //allow copy
+        template<typename T, bool>
+        class AbleCopy
         {
-            return lhs < rhs;
-        }
-    };
-    template<typename T>
-    class AbleLess<T, false>
-    {
-    public:
-        static bool operator_less(const T& lhs, const T& rhs)
+        public:
+            //std::is_copy_assignable
+            static void copy_assignable(T& lhs, const T& rhs);
+        };
+        template<typename T>
+        class AbleCopy<T, true>
         {
-#ifdef _DEBUG
-            throw std::logic_error("T nonsupport opetaror<");
-#else
-            return false;
-#endif // DEBUG
-        }
-    };
-
-    //allow compare equal
-    template<typename T, bool>
-    class AbleEqual
-    {
-    public:
-        static bool operator_equal(const T& lhs, const T& rhs);
-    };
-    template<typename T>
-    class AbleEqual<T, true>
-    {
-    public:
-        static bool operator_equal(const T& lhs, const T& rhs)
-        {
-            return lhs == rhs;
-        }
-    };
-    template<typename T>
-    class AbleEqual<T, false>
-    {
-    public:
-        static bool operator_equal(const T& lhs, const T& rhs)
-        {
-#ifdef _DEBUG
-            throw std::logic_error("T nonsupport opetaror==");
-#else
-            return false;
-#endif // DEBUG
-        }
-    };
-
-public:
-    virtual ~_GeneBaseClass()
-    {
-    }
-    virtual _GeneBaseClass* _constructor() const = 0; //make_constructor
-    virtual bool _is(const std::type_index& type) const = 0;
-    virtual bool _is_equal(const _GeneBaseClass& other) const = 0;
-    virtual bool _is_less(const _GeneBaseClass& other) const = 0;
-    virtual std::type_index _get_id() const = 0;
-    virtual void* _get_imp() const = 0;
-protected:
-    virtual bool _copy_constructor(const _GeneBaseClass* src) = 0;
-};
-
-// case 1: value
-template <typename T>
-class _GeneTemplateClass :public _GeneBaseClass
-{
-public:
-    T m_imp;
-    _GeneTemplateClass(T src) : m_imp(src)
-    {
-    }
-    ~_GeneTemplateClass()
-    {
-    }
-    inline _GeneBaseClass* _constructor() const override
-    {
-        return new _GeneTemplateClass<T>(m_imp);
-    }
-
-protected:
-    bool _copy_constructor(const _GeneBaseClass* src) override
-    {
-        if (!src->_is(typeid(T)))
-            return false;
-        const _GeneTemplateClass<T>* ptr = dynamic_cast<const _GeneTemplateClass<T>*>(src);
-        if (nullptr == ptr)
-            return false;
-        //m_imp = ptr->m_imp;
-        AbleCopy<T, std::is_copy_assignable<T>::value>::copy_assignable(m_imp, ptr->m_imp);
-        return true;
-    }
-    inline bool _is(const std::type_index& type) const override
-    {
-        return type == typeid(T);
-    }
-
-    bool _is_equal(const _GeneBaseClass& other) const override
-    {
-        const _GeneTemplateClass<T>* ptr = dynamic_cast<const _GeneTemplateClass<T>*>(&other);
-        if (!ptr) //(ptr == nullptr)
-            return false;
-        //return ptr->m_imp == this->m_imp;
-        return AbleEqual<T, _GeneHasEqualOperator<T>::value>::operator_equal(ptr->m_imp, this->m_imp);
-    }
-    bool _is_less(const _GeneBaseClass& other) const override
-    {
-        if (!(&other))
-            return false;
-        const _GeneTemplateClass<T>* ptr = dynamic_cast<const _GeneTemplateClass<T>*>(&other);
-        if (!ptr)
-        {
-            return typeid(*this).name() < typeid(other).name(); //compare string
-            //return typeid(*this) < typeid(other); //compare hashcode
-        }
-        //return this->m_imp < ptr->m_imp;
-        return AbleLess<T, _GeneHasLessOperator<T>::value>::operator_less(this->m_imp, ptr->m_imp);
-    }
-
-    std::type_index _get_id() const
-    {
-        return typeid(T);
-    }
-
-    virtual void* _get_imp() const override
-    {
-        return (void*)(&m_imp);
-    }
-
-
-};
-
-// case 2: ref true, ref false
-template <typename T>
-class _GeneTemplateClassRef :public _GeneBaseClass
-{
-public:
-    T* m_imp;
-    bool m_ref;
-    _GeneTemplateClassRef() :
-        m_imp(nullptr),
-        m_ref(false)
-    {
-    }
-    _GeneTemplateClassRef(T* src, bool isRef = false) //: m_imp(src), m_ref(isRef)
-    {
-        m_ref = isRef;
-        m_imp = new T(*src);
-    }
-    ~_GeneTemplateClassRef()
-    {
-        if (m_ref)
-            return;
-        else
-        {
-            delete m_imp;
-            m_imp = nullptr;
-        }
-    }
-    inline _GeneBaseClass* _constructor() const override
-    {
-        return new _GeneTemplateClassRef<T>(m_imp);
-    }
-
-protected:
-    bool _copy_constructor(const _GeneBaseClass* src) override
-    {
-        if (!src->_is(typeid(T)))
-            return false;
-        const _GeneTemplateClassRef<T>* ptr = dynamic_cast<const _GeneTemplateClassRef<T>*>(src);
-        if (nullptr == ptr)
-            return false;
-        //m_imp = ptr->m_imp;
-        AbleCopy<T, std::is_copy_assignable<T>::value>::copy_assignable(*m_imp, *ptr->m_imp);
-        return true;
-    }
-    inline bool _is(const std::type_index& type) const override
-    {
-        return type == typeid(T);
-    }
-
-    bool _is_equal(const _GeneBaseClass& other) const override
-    {
-        const _GeneTemplateClassRef<T>* ptr = dynamic_cast<const _GeneTemplateClassRef<T>*>(&other);
-        if (!ptr) //(ptr == nullptr)
-            return false;
-        //return ptr->m_imp == this->m_imp;
-        return AbleEqual<T, _GeneHasEqualOperator<T>::value>::operator_equal(*ptr->m_imp, *this->m_imp);
-    }
-    bool _is_less(const _GeneBaseClass& other) const override
-    {
-        if (!(&other))
-            return false;
-        const _GeneTemplateClassRef<T>* ptr = dynamic_cast<const _GeneTemplateClassRef<T>*>(&other);
-        if (!ptr)
-        {
-            return typeid(*this).name() < typeid(other).name(); //compare string
-            //return typeid(*this) < typeid(other); //compare hashcode
-        }
-        //return this->m_imp < ptr->m_imp;
-        return AbleLess<T, _GeneHasLessOperator<T>::value>::operator_less(*this->m_imp, *ptr->m_imp);
-    }
-
-    std::type_index _get_id() const
-    {
-        return typeid(T);
-    }
-    virtual void* _get_imp() const override
-    {
-        return (void*)m_imp;
-    }
-
-};
-
-class _GeneFactoryClassBase
-{
-public:
-    virtual ~_GeneFactoryClassBase() {};
-    virtual _GeneBaseClass* create(void* ptr, bool isRef) = 0;
-};
-
-template<typename T>
-class _GeneFactoryClass :public _GeneFactoryClassBase
-{
-public:
-    ~_GeneFactoryClass() {};
-    virtual _GeneBaseClass* create(void* ptr, bool isRef)
-    {
-        _GeneTemplateClassRef<T>* tempRef = new _GeneTemplateClassRef<T>();
-        if (ptr == nullptr)
-        {
-            tempRef->m_imp = new T;
-        }
-        else
-        {
-            tempRef->m_imp = static_cast<T*>(ptr);
-            if (!(tempRef->m_imp))
+        public:
+            static void copy_assignable(T& lhs, const T& rhs)
             {
-                throw std::runtime_error("static_cast T* fail");
+                lhs = rhs;
+            }
+        };
+        template<typename T>
+        class AbleCopy<T, false>
+        {
+        public:
+            static void copy_assignable(T& lhs, const T& rhs)
+            {
+#ifdef _DEBUG
+                throw std::logic_error("T nonsupport opetaror=");
+#endif // DEBUG
+            }
+        };
+
+        //allow compare less
+        template<typename T, bool>
+        class AbleLess
+        {
+        public:
+            static bool operator_less(const T& lhs, const T& rhs);
+        };
+        template<typename T>
+        class AbleLess<T, true>
+        {
+        public:
+            static bool operator_less(const T& lhs, const T& rhs)
+            {
+                return lhs < rhs;
+            }
+        };
+        template<typename T>
+        class AbleLess<T, false>
+        {
+        public:
+            static bool operator_less(const T& lhs, const T& rhs)
+            {
+#ifdef _DEBUG
+                throw std::logic_error("T nonsupport opetaror<");
+#else
+                return false;
+#endif // DEBUG
+            }
+        };
+
+        //allow compare equal
+        template<typename T, bool>
+        class AbleEqual
+        {
+        public:
+            static bool operator_equal(const T& lhs, const T& rhs);
+        };
+        template<typename T>
+        class AbleEqual<T, true>
+        {
+        public:
+            static bool operator_equal(const T& lhs, const T& rhs)
+            {
+                return lhs == rhs;
+            }
+        };
+        template<typename T>
+        class AbleEqual<T, false>
+        {
+        public:
+            static bool operator_equal(const T& lhs, const T& rhs)
+            {
+#ifdef _DEBUG
+                throw std::logic_error("T nonsupport opetaror==");
+#else
+                return false;
+#endif // DEBUG
+            }
+        };
+
+    public:
+        virtual ~_GeneBaseClass()
+        {
+        }
+        virtual _GeneBaseClass* _constructor() const = 0; //make_constructor
+        virtual bool _is(const std::type_index& type) const = 0;
+        virtual bool _is_equal(const _GeneBaseClass& other) const = 0;
+        virtual bool _is_less(const _GeneBaseClass& other) const = 0;
+        virtual std::type_index _get_id() const = 0;
+        virtual void* _get_imp() const = 0;
+    protected:
+        virtual bool _copy_constructor(const _GeneBaseClass* src) = 0;
+    };
+
+    // case 1: value
+    template <typename T>
+    class _GeneTemplateClass :public _GeneBaseClass
+    {
+    public:
+        T m_imp;
+        _GeneTemplateClass(T src) : m_imp(src)
+        {
+        }
+        ~_GeneTemplateClass()
+        {
+        }
+        inline _GeneBaseClass* _constructor() const override
+        {
+            return new _GeneTemplateClass<T>(m_imp);
+        }
+
+    protected:
+        bool _copy_constructor(const _GeneBaseClass* src) override
+        {
+            if (!src->_is(typeid(T)))
+                return false;
+            const _GeneTemplateClass<T>* ptr = dynamic_cast<const _GeneTemplateClass<T>*>(src);
+            if (nullptr == ptr)
+                return false;
+            //m_imp = ptr->m_imp;
+            AbleCopy<T, std::is_copy_assignable<T>::value>::copy_assignable(m_imp, ptr->m_imp);
+            return true;
+        }
+        inline bool _is(const std::type_index& type) const override
+        {
+            return type == typeid(T);
+        }
+
+        bool _is_equal(const _GeneBaseClass& other) const override
+        {
+            const _GeneTemplateClass<T>* ptr = dynamic_cast<const _GeneTemplateClass<T>*>(&other);
+            if (!ptr) //(ptr == nullptr)
+                return false;
+            //return ptr->m_imp == this->m_imp;
+            return AbleEqual<T, _GeneHasEqualOperator<T>::value>::operator_equal(ptr->m_imp, this->m_imp);
+        }
+        bool _is_less(const _GeneBaseClass& other) const override
+        {
+            if (!(&other))
+                return false;
+            const _GeneTemplateClass<T>* ptr = dynamic_cast<const _GeneTemplateClass<T>*>(&other);
+            if (!ptr)
+            {
+                return typeid(*this).name() < typeid(other).name(); //compare string
+                //return typeid(*this) < typeid(other); //compare hashcode
+            }
+            //return this->m_imp < ptr->m_imp;
+            return AbleLess<T, _GeneHasLessOperator<T>::value>::operator_less(this->m_imp, ptr->m_imp);
+        }
+
+        std::type_index _get_id() const
+        {
+            return typeid(T);
+        }
+
+        virtual void* _get_imp() const override
+        {
+            return (void*)(&m_imp);
+        }
+
+
+    };
+
+    // case 2: ref true, ref false
+    template <typename T>
+    class _GeneTemplateClassRef :public _GeneBaseClass
+    {
+    public:
+        T* m_imp;
+        bool m_ref;
+        _GeneTemplateClassRef() :
+            m_imp(nullptr),
+            m_ref(false)
+        {
+        }
+        _GeneTemplateClassRef(T* src, bool isRef = false) //: m_imp(src), m_ref(isRef)
+        {
+            m_ref = isRef;
+            m_imp = new T(*src);
+        }
+        ~_GeneTemplateClassRef()
+        {
+            if (m_ref)
+                return;
+            else
+            {
+                delete m_imp;
+                m_imp = nullptr;
             }
         }
-        tempRef->m_ref = isRef;
-        return tempRef;
-    }
-};
-
-class Gnrc
-{
-    _GeneBaseClass* m_imp;
-    static std::map<std::type_index, _GeneFactoryClassBase*> s_map;
-    __declspec(dllimport) static std::map<std::type_index, _GeneFactoryClassBase*>& _getFactoryMap();
-public:
-    template<typename T>
-    static void enrol()
-    {
-        if (_getFactoryMap().find(typeid(T)) == _getFactoryMap().end())//avoid mem-leak
+        inline _GeneBaseClass* _constructor() const override
         {
-            _getFactoryMap()[typeid(T)] = new _GeneFactoryClass<T>;
+            return new _GeneTemplateClassRef<T>(m_imp);
         }
-    }
-    __declspec(dllimport) Gnrc();
-    __declspec(dllimport) Gnrc(std::type_index id, void* src = nullptr, bool isRef = false);
-    template <typename T> //
-    Gnrc(const T& src) : m_imp(new _GeneTemplateClass<T>(src))
-    {
-        static bool _once = false;
-        if (_once)
-            return;
-        _once = true;
-        enrol<T>();
-    }
-    template <typename T> //
-    Gnrc(T*) = delete;
-    template <typename T> //
-    Gnrc(const T*) = delete;
-    __declspec(dllimport) Gnrc(const Gnrc& lhs); //
-    __declspec(dllimport) Gnrc& operator=(const Gnrc& lhs) noexcept; //
-    __declspec(dllimport) Gnrc(Gnrc&& rhs) noexcept;  //
-    __declspec(dllimport) Gnrc& operator=(Gnrc&& src) noexcept; //
-    __declspec(dllimport) Gnrc* operator&(); //
-    __declspec(dllimport) const Gnrc* operator&() const; //
-    //using namespace rel_ops;
-    __declspec(dllimport) bool operator==(const Gnrc& other) const;
-    __declspec(dllimport) bool operator<(const Gnrc& other) const;
-    __declspec(dllimport) const std::type_index _id() const; //compat
-    __declspec(dllimport) void* _imp() const;
-    __declspec(dllimport) ~Gnrc();
-    template <typename T>
-    inline bool is() const
-    {
-        return m_imp->_is(typeid(T));
-    }
-    template <typename T>
-    inline T& as()
-    {
-        return *(T*)(m_imp->_get_imp());
-    }
-    template <typename T>
-    inline const T& as() const
-    {
-        return *(T*)(m_imp->_get_imp());
-    }
-    inline bool isValid() const
-    {
-        return _id() != typeid(None);
-    }
-};
 
-using GnrcList = std::vector<Gnrc>;
-using GnrcDict = std::map<Gnrc, Gnrc>;
+    protected:
+        bool _copy_constructor(const _GeneBaseClass* src) override
+        {
+            if (!src->_is(typeid(T)))
+                return false;
+            const _GeneTemplateClassRef<T>* ptr = dynamic_cast<const _GeneTemplateClassRef<T>*>(src);
+            if (nullptr == ptr)
+                return false;
+            //m_imp = ptr->m_imp;
+            AbleCopy<T, std::is_copy_assignable<T>::value>::copy_assignable(*m_imp, *ptr->m_imp);
+            return true;
+        }
+        inline bool _is(const std::type_index& type) const override
+        {
+            return type == typeid(T);
+        }
+
+        bool _is_equal(const _GeneBaseClass& other) const override
+        {
+            const _GeneTemplateClassRef<T>* ptr = dynamic_cast<const _GeneTemplateClassRef<T>*>(&other);
+            if (!ptr) //(ptr == nullptr)
+                return false;
+            //return ptr->m_imp == this->m_imp;
+            return AbleEqual<T, _GeneHasEqualOperator<T>::value>::operator_equal(*ptr->m_imp, *this->m_imp);
+        }
+        bool _is_less(const _GeneBaseClass& other) const override
+        {
+            if (!(&other))
+                return false;
+            const _GeneTemplateClassRef<T>* ptr = dynamic_cast<const _GeneTemplateClassRef<T>*>(&other);
+            if (!ptr)
+            {
+                return typeid(*this).name() < typeid(other).name(); //compare string
+                //return typeid(*this) < typeid(other); //compare hashcode
+            }
+            //return this->m_imp < ptr->m_imp;
+            return AbleLess<T, _GeneHasLessOperator<T>::value>::operator_less(*this->m_imp, *ptr->m_imp);
+        }
+
+        std::type_index _get_id() const
+        {
+            return typeid(T);
+        }
+        virtual void* _get_imp() const override
+        {
+            return (void*)m_imp;
+        }
+
+    };
+
+    class _GeneFactoryClassBase
+    {
+    public:
+        virtual ~_GeneFactoryClassBase() {};
+        virtual _GeneBaseClass* create(void* ptr, bool isRef) = 0;
+    };
+
+    template<typename T>
+    class _GeneFactoryClass :public _GeneFactoryClassBase
+    {
+    public:
+        ~_GeneFactoryClass() {};
+        virtual _GeneBaseClass* create(void* ptr, bool isRef)
+        {
+            _GeneTemplateClassRef<T>* tempRef = new _GeneTemplateClassRef<T>();
+            if (ptr == nullptr)
+            {
+                tempRef->m_imp = new T;
+            }
+            else
+            {
+                tempRef->m_imp = static_cast<T*>(ptr);
+                if (!(tempRef->m_imp))
+                {
+                    throw std::runtime_error("static_cast T* fail");
+                }
+            }
+            tempRef->m_ref = isRef;
+            return tempRef;
+        }
+    };
+
+    class Gnrc
+    {
+        _GeneBaseClass* m_imp;
+        static std::map<std::type_index, _GeneFactoryClassBase*> s_map;
+        __declspec(dllimport) static std::map<std::type_index, _GeneFactoryClassBase*>& _getFactoryMap();
+    public:
+        template<typename T>
+        static void enrol()
+        {
+            if (_getFactoryMap().find(typeid(T)) == _getFactoryMap().end())//avoid mem-leak
+            {
+                _getFactoryMap()[typeid(T)] = new _GeneFactoryClass<T>;
+            }
+        }
+        __declspec(dllimport) Gnrc();
+        __declspec(dllimport) Gnrc(std::type_index id, void* src = nullptr, bool isRef = false);
+        template <typename T> //
+        Gnrc(const T& src) : m_imp(new _GeneTemplateClass<T>(src))
+        {
+            static bool _once = false;
+            if (_once)
+                return;
+            _once = true;
+            enrol<T>();
+        }
+        template <typename T> //
+        Gnrc(T*) = delete;
+        template <typename T> //
+        Gnrc(const T*) = delete;
+        __declspec(dllimport) Gnrc(const Gnrc& lhs); //
+        __declspec(dllimport) Gnrc& operator=(const Gnrc& lhs) noexcept; //
+        __declspec(dllimport) Gnrc(Gnrc&& rhs) noexcept;  //
+        __declspec(dllimport) Gnrc& operator=(Gnrc&& src) noexcept; //
+        __declspec(dllimport) Gnrc* operator&(); //
+        __declspec(dllimport) const Gnrc* operator&() const; //
+        //using namespace rel_ops;
+        __declspec(dllimport) bool operator==(const Gnrc& other) const;
+        __declspec(dllimport) bool operator<(const Gnrc& other) const;
+        __declspec(dllimport) const std::type_index _id() const; //compat
+        __declspec(dllimport) void* _imp() const;
+        __declspec(dllimport) ~Gnrc();
+        template <typename T>
+        inline bool is() const
+        {
+            return m_imp->_is(typeid(T));
+        }
+        template <typename T>
+        inline T& as()
+        {
+            return *(T*)(m_imp->_get_imp());
+        }
+        template <typename T>
+        inline const T& as() const
+        {
+            return *(T*)(m_imp->_get_imp());
+        }
+        inline bool isValid() const
+        {
+            return _id() != typeid(None);
+        }
+    };
+
+    using GnrcList = std::vector<Gnrc>;
+    using GnrcDict = std::map<Gnrc, Gnrc>;
+
+}
 
 
 /* Warning, change the file to script automatically.
 Please modify the source file under source. 
 Source file: "BPParaVec.h".*/
-// using GB
-static const double PL_Length = 1e-10;// AccuracyLinearDimensions::value();
-static const double PL_Surface = 1e-6; //AccuracyLinearDimensions::square();
-static const double PL_Angle = 1e-10; //AccuracyAngularDimensions::value();
-extern "C"
+namespace para
 {
-	struct CVec3 /*__declspec(dllimport) */
+
+	// using GB
+	static const double PL_Length = 1e-10;// AccuracyLinearDimensions::value();
+	static const double PL_Surface = 1e-6; //AccuracyLinearDimensions::square();
+	static const double PL_Angle = 1e-10; //AccuracyAngularDimensions::value();
+	extern "C"
 	{
+		struct CVec3 /*__declspec(dllimport) */
+		{
+			double x;
+			double y;
+			double z;
+		};// vec = { 0,0,0 };
+
+		//member
+		__declspec(dllimport) CVec3 CVec3add(CVec3 a, CVec3 b); //+
+		__declspec(dllimport) CVec3 CVec3sub(CVec3 a, CVec3 b); //-
+		__declspec(dllimport) double CVec3dot(CVec3 a, CVec3 b); //*
+		__declspec(dllimport) CVec3 CVec3cross(CVec3 a, CVec3 b); //^
+		__declspec(dllimport) bool CVec3equal(CVec3 a, CVec3 b); //=
+		__declspec(dllimport) bool CVec3less(CVec3 a, CVec3 b); //< (compare norm)
+		__declspec(dllimport) double CVec3norm(CVec3 a); //||
+		__declspec(dllimport) CVec3 CVec3unitize(CVec3 a); //v||
+
+		// float deviation
+		__declspec(dllimport) bool _isFloatZero(double num, double eps = 1e-10);//default 0.0, using abs percision
+		__declspec(dllimport) bool _isFloatEqual(double numA, double numB, double eps = 0.0); //default 0.0, using auto percision
+		//__declspec(dllimport) bool isParallel2d(CVec2 vecA, CVec2 vecB);
+		__declspec(dllimport) bool isParallel3d(CVec3 vecA, CVec3 vecB);
+		//__declspec(dllimport) bool isPerpendi2d(CVec2 vecA, CVec2 vecB);
+		__declspec(dllimport) bool isPerpendi3d(CVec3 vecA, CVec3 vecB);
+		//__declspec(dllimport) bool isCoincident2d(CVec2 vecA, CVec2 vecB);
+		__declspec(dllimport) bool isCoincident3d(CVec3 vecA, CVec3 vecB);
+		//__declspec(dllimport) double getAngleOfTwoVectors2d(CVec2 vecA, CVec2 vecB, bool isAbs = false);
+		__declspec(dllimport) double getAngleOfTwoVectors3d(CVec3 vecA, CVec3 vecB, bool isAbs = false);
+	}
+
+	class BPParaVec2
+	{
+	public:
 		double x;
 		double y;
-		double z;
-	};// vec = { 0,0,0 };
+		__declspec(dllimport) BPParaVec2() :x(0.0), y(0.0) {}
+		__declspec(dllimport) BPParaVec2(double _x, double _y) : x(_x), y(_y) {}
+		__declspec(dllimport) ~BPParaVec2() {}
+		__declspec(dllimport) BPParaVec2(const BPParaVec2& rhs) : x(rhs.x), y(rhs.y) {}
+		//__declspec(dllimport) BPParaVec2 operator^(const BPParaVec2& rhs) const;
+		__declspec(dllimport) double operator*(const BPParaVec2& rhs) const { return x * rhs.x, y* rhs.y; }
+		__declspec(dllimport) BPParaVec2 operator+(const BPParaVec2& rhs) const { return BPParaVec2(x + rhs.x, y + rhs.y); }
+		__declspec(dllimport) BPParaVec2 operator-(const BPParaVec2& rhs) const { return BPParaVec2(x - rhs.x, y - rhs.y); }
+		__declspec(dllimport) bool operator<(const BPParaVec2& rhs) const;
+		__declspec(dllimport) bool operator==(const BPParaVec2& rhs) const;
+		__declspec(dllimport) double operator[](int i) const;
+		inline BPParaVec2 operator+() { return *this; }
+		inline BPParaVec2 operator-() { return BPParaVec2(-x, -y); }
+	};
 
-	//member
-	__declspec(dllimport) CVec3 CVec3add(CVec3 a, CVec3 b); //+
-	__declspec(dllimport) CVec3 CVec3sub(CVec3 a, CVec3 b); //-
-	__declspec(dllimport) double CVec3dot(CVec3 a, CVec3 b); //*
-	__declspec(dllimport) CVec3 CVec3cross(CVec3 a, CVec3 b); //^
-	__declspec(dllimport) bool CVec3equal(CVec3 a, CVec3 b); //=
-	__declspec(dllimport) bool CVec3less(CVec3 a, CVec3 b); //< (compare norm)
-	__declspec(dllimport) double CVec3norm(CVec3 a); //||
-	__declspec(dllimport) CVec3 CVec3unitize(CVec3 a); //v||
-
-	// float deviation
-	__declspec(dllimport) bool _isFloatZero(double num, double eps = 1e-10);//default 0.0, using abs percision
-	__declspec(dllimport) bool _isFloatEqual(double numA, double numB, double eps = 0.0); //default 0.0, using auto percision
-	//__declspec(dllimport) bool isParallel2d(CVec2 vecA, CVec2 vecB);
-	__declspec(dllimport) bool isParallel3d(CVec3 vecA, CVec3 vecB);
-	//__declspec(dllimport) bool isPerpendi2d(CVec2 vecA, CVec2 vecB);
-	__declspec(dllimport) bool isPerpendi3d(CVec3 vecA, CVec3 vecB);
-	//__declspec(dllimport) bool isCoincident2d(CVec2 vecA, CVec2 vecB);
-	__declspec(dllimport) bool isCoincident3d(CVec3 vecA, CVec3 vecB);
-	//__declspec(dllimport) double getAngleOfTwoVectors2d(CVec2 vecA, CVec2 vecB, bool isAbs = false);
-	__declspec(dllimport) double getAngleOfTwoVectors3d(CVec3 vecA, CVec3 vecB, bool isAbs = false);
-}
-
-class BPParaVec2
-{
-public:
-	double x;
-	double y;
-	__declspec(dllimport) BPParaVec2() :x(0.0), y(0.0) {}
-	__declspec(dllimport) BPParaVec2(double _x, double _y) : x(_x), y(_y) {}
-	__declspec(dllimport) ~BPParaVec2() {}
-	__declspec(dllimport) BPParaVec2(const BPParaVec2& rhs) : x(rhs.x), y(rhs.y) {}
-	//__declspec(dllimport) BPParaVec2 operator^(const BPParaVec2& rhs) const;
-	__declspec(dllimport) double operator*(const BPParaVec2& rhs) const { return x * rhs.x, y * rhs.y; }
-	__declspec(dllimport) BPParaVec2 operator+(const BPParaVec2& rhs) const { return BPParaVec2(x + rhs.x, y + rhs.y); }
-	__declspec(dllimport) BPParaVec2 operator-(const BPParaVec2& rhs) const { return BPParaVec2(x - rhs.x, y - rhs.y); }
-	__declspec(dllimport) bool operator<(const BPParaVec2& rhs) const;
-	__declspec(dllimport) bool operator==(const BPParaVec2& rhs) const;
-	__declspec(dllimport) double operator[](int i) const;
-	inline BPParaVec2 operator+() { return *this; }
-	inline BPParaVec2 operator-() { return BPParaVec2(-x, -y); }
-};
-
-class BPParaTransform;
-class BPParaVec
-{
-public:
-	CVec3 m_imp;
-	__declspec(dllimport) BPParaVec();
-	__declspec(dllimport) BPParaVec(double x, double y /*= 0*/, double z = 0);
-	__declspec(dllimport) ~BPParaVec();
+	class BPParaTransform;
+	class BPParaVec
+	{
+	public:
+		CVec3 m_imp;
+		__declspec(dllimport) BPParaVec();
+		__declspec(dllimport) BPParaVec(double x, double y /*= 0*/, double z = 0);
+		__declspec(dllimport) ~BPParaVec();
 		__declspec(dllimport) BPParaVec(const CVec3& src);
-	__declspec(dllimport) BPParaVec(const BPParaVec& other);
-	__declspec(dllimport) BPParaVec(BPParaVec&& other) = default;
-	__declspec(dllimport) BPParaVec& operator=(const BPParaVec& other);
-	__declspec(dllimport) BPParaVec operator^(const BPParaVec& other) const;
-	__declspec(dllimport) BPParaVec operator^=(const BPParaVec& other);
-	__declspec(dllimport) double operator*(const BPParaVec& other) const;
-	__declspec(dllimport) BPParaVec operator+(const BPParaVec& other) const;
-	__declspec(dllimport) BPParaVec operator+=(const BPParaVec& other);
-	__declspec(dllimport) BPParaVec operator-(const BPParaVec& other) const;
-	__declspec(dllimport) BPParaVec operator-=(const BPParaVec& other);
-	__declspec(dllimport) bool operator<(const BPParaVec& other) const;
-	__declspec(dllimport) bool operator==(const BPParaVec& other) const;
-	__declspec(dllimport) double operator[](int i) const;
-	inline BPParaVec operator+() { return *this; }
-	inline BPParaVec operator-() { return BPParaVec(-m_imp.x, -m_imp.y, -m_imp.z); }
-	inline double x() const { return m_imp.x; };
-	inline double y() const { return m_imp.y; };
-	inline double z() const { return m_imp.z; };
-	__declspec(dllimport) double norm() const;
-	__declspec(dllimport) BPParaVec& unitize();
-	__declspec(dllimport) BPParaVec unitize() const { return BPParaVec(CVec3unitize(m_imp)); };
-	__declspec(dllimport) bool isValid() const;
-	__declspec(dllimport) bool isOrigin() const;
-	__declspec(dllimport) bool isUnitize() const;
-	__declspec(dllimport) bool isAcuteAngle(const BPParaVec& other) const; //exclusive right-angle
-	__declspec(dllimport) bool isSameDireciton(const BPParaVec& other) const; //angle 0 rad
-	__declspec(dllimport) bool isParallel(const BPParaVec& other) const; //angle 0 or pi
-	__declspec(dllimport) bool isPerpendi(const BPParaVec& other) const; //angle pi/2 
+		__declspec(dllimport) BPParaVec(const BPParaVec& other);
+		__declspec(dllimport) BPParaVec(BPParaVec&& other) = default;
+		__declspec(dllimport) BPParaVec& operator=(const BPParaVec& other);
+		__declspec(dllimport) BPParaVec operator^(const BPParaVec& other) const;
+		__declspec(dllimport) BPParaVec operator^=(const BPParaVec& other);
+		__declspec(dllimport) double operator*(const BPParaVec& other) const;
+		__declspec(dllimport) BPParaVec operator+(const BPParaVec& other) const;
+		__declspec(dllimport) BPParaVec operator+=(const BPParaVec& other);
+		__declspec(dllimport) BPParaVec operator-(const BPParaVec& other) const;
+		__declspec(dllimport) BPParaVec operator-=(const BPParaVec& other);
+		__declspec(dllimport) bool operator<(const BPParaVec& other) const;
+		__declspec(dllimport) bool operator==(const BPParaVec& other) const;
+		__declspec(dllimport) double operator[](int i) const;
+		inline BPParaVec operator+() { return *this; }
+		inline BPParaVec operator-() { return BPParaVec(-m_imp.x, -m_imp.y, -m_imp.z); }
+		inline double x() const { return m_imp.x; };
+		inline double y() const { return m_imp.y; };
+		inline double z() const { return m_imp.z; };
+		__declspec(dllimport) double norm() const;
+		__declspec(dllimport) BPParaVec& unitize();
+		__declspec(dllimport) BPParaVec unitize() const { return BPParaVec(CVec3unitize(m_imp)); };
+		__declspec(dllimport) bool isValid() const;
+		__declspec(dllimport) bool isOrigin() const;
+		__declspec(dllimport) bool isUnitize() const;
+		__declspec(dllimport) bool isAcuteAngle(const BPParaVec& other) const; //exclusive right-angle
+		__declspec(dllimport) bool isSameDireciton(const BPParaVec& other) const; //angle 0 rad
+		__declspec(dllimport) bool isParallel(const BPParaVec& other) const; //angle 0 or pi
+		__declspec(dllimport) bool isPerpendi(const BPParaVec& other) const; //angle pi/2 
 
 #ifdef PARA2P3D
-public:
-	inline BPParaVec(const p3d::GeVec3d& rhs) :m_imp({ rhs.x, rhs.y, rhs.z })
-	{
-	}
-	inline operator p3d::GeVec3d() const
-	{
-		return p3d::GeVec3d::create(m_imp.x, m_imp.y, m_imp.z);
-	}
-	inline BPParaVec(const p3d::GePoint3d& rhs) :m_imp({ rhs.x, rhs.y, rhs.z })
-	{
-	}
-	inline operator p3d::GePoint3d() const
-	{
-		return p3d::GePoint3d::create(m_imp.x, m_imp.y, m_imp.z);
-	}
-	inline BPParaVec(const p3d::GeVec2d& rhs) :m_imp({ rhs.x, rhs.y, 0.0 })
-	{
-	}
-	inline operator p3d::GeVec2d() const
-	{
-		return p3d::GeVec2d::create(m_imp.x, m_imp.y);
-	}
-	inline BPParaVec(const p3d::GePoint2d& rhs) :m_imp({ rhs.x, rhs.y, 0.0 })
-	{
-	}
-	inline operator p3d::GePoint2d() const
-	{
-		return p3d::GePoint2d::create(m_imp.x, m_imp.y);
-	}
-	//__declspec(dllimport) operator GeoPoint() const;
+	public:
+		inline BPParaVec(const p3d::GeVec3d& rhs) :m_imp({ rhs.x, rhs.y, rhs.z })
+		{
+		}
+		inline operator p3d::GeVec3d() const
+		{
+			return p3d::GeVec3d::create(m_imp.x, m_imp.y, m_imp.z);
+		}
+		inline BPParaVec(const p3d::GePoint3d& rhs) :m_imp({ rhs.x, rhs.y, rhs.z })
+		{
+		}
+		inline operator p3d::GePoint3d() const
+		{
+			return p3d::GePoint3d::create(m_imp.x, m_imp.y, m_imp.z);
+		}
+		inline BPParaVec(const p3d::GeVec2d& rhs) :m_imp({ rhs.x, rhs.y, 0.0 })
+		{
+		}
+		inline operator p3d::GeVec2d() const
+		{
+			return p3d::GeVec2d::create(m_imp.x, m_imp.y);
+		}
+		inline BPParaVec(const p3d::GePoint2d& rhs) :m_imp({ rhs.x, rhs.y, 0.0 })
+		{
+		}
+		inline operator p3d::GePoint2d() const
+		{
+			return p3d::GePoint2d::create(m_imp.x, m_imp.y);
+		}
+		//__declspec(dllimport) operator GeoPoint() const;
 
 #endif // PARA2P3D
 
-};
+	};
 
-//global static variable
-static const BPParaVec g_axisO = BPParaVec(0.0, 0.0, 0.0);
-static const BPParaVec g_axisX = BPParaVec(1.0, 0.0, 0.0);
-static const BPParaVec g_axisY = BPParaVec(0.0, 1.0, 0.0);
-static const BPParaVec g_axisZ = BPParaVec(0.0, 0.0, 1.0);
-static const BPParaVec g_axisNaN = BPParaVec(std::nan("0"), std::nan("0"), std::nan("0")); //in <cmath>
+	//global static variable
+	static const BPParaVec g_axisO = BPParaVec(0.0, 0.0, 0.0);
+	static const BPParaVec g_axisX = BPParaVec(1.0, 0.0, 0.0);
+	static const BPParaVec g_axisY = BPParaVec(0.0, 1.0, 0.0);
+	static const BPParaVec g_axisZ = BPParaVec(0.0, 0.0, 1.0);
+	static const BPParaVec g_axisNaN = BPParaVec(std::nan("0"), std::nan("0"), std::nan("0")); //in <cmath>
 
-//inline
-inline bool isFloatZero(double num) { return _isFloatZero(num, PL_Length); }
-inline bool isFloatZero(double num, double eps) { return _isFloatZero(num, eps); }
-inline bool isFloatEqual(double numA, double numB) { return _isFloatEqual(numA, numB, 0.0); }
-inline bool isFloatEqualOrLess(double numA, double numB) { return _isFloatEqual(numA, numB, 0.0) || numA < numB; }
-inline bool isFloatEqualOrMore(double numA, double numB) { return _isFloatEqual(numA, numB, 0.0) || numA > numB; }
-inline bool isFloatEqual(double numA, double numB, double eps) { return _isFloatEqual(numA, numB, eps); }
-inline double norm(const BPParaVec& other) { return other.norm(); }
-inline BPParaVec unitize(const BPParaVec& other) { return BPParaVec(other).unitize(); }
-//inline BPParaVec toVec2(const BPParaVec& vec3) { return BPParaVec(vec3.m_imp.x, vec3.m_imp.y, 0); }
-inline BPParaVec toVec2XoY(const BPParaVec& vec3) { return BPParaVec(vec3.m_imp.x, vec3.m_imp.y, 0); }
-inline BPParaVec toVec2XoZ(const BPParaVec& vec3) { return BPParaVec(vec3.m_imp.x, 0, vec3.m_imp.z); }
-inline BPParaVec toVec2YoZ(const BPParaVec& vec3) { return BPParaVec(0, vec3.m_imp.y, vec3.m_imp.y); }
-inline BPParaVec operator*(double n, const BPParaVec& other) { return BPParaVec(n * other.m_imp.x, n * other.m_imp.y, n * other.m_imp.z); }
-inline BPParaVec2 _toVec2(const BPParaVec& vec) { return BPParaVec2(vec.x(), vec.y()); }
+	//inline
+	inline bool isFloatZero(double num) { return _isFloatZero(num, PL_Length); }
+	inline bool isFloatZero(double num, double eps) { return _isFloatZero(num, eps); }
+	inline bool isFloatEqual(double numA, double numB) { return _isFloatEqual(numA, numB, 0.0); }
+	inline bool isFloatEqualOrLess(double numA, double numB) { return _isFloatEqual(numA, numB, 0.0) || numA < numB; }
+	inline bool isFloatEqualOrMore(double numA, double numB) { return _isFloatEqual(numA, numB, 0.0) || numA > numB; }
+	inline bool isFloatEqual(double numA, double numB, double eps) { return _isFloatEqual(numA, numB, eps); }
+	inline double norm(const BPParaVec& other) { return other.norm(); }
+	inline BPParaVec unitize(const BPParaVec& other) { return BPParaVec(other).unitize(); }
+	//inline BPParaVec toVec2(const BPParaVec& vec3) { return BPParaVec(vec3.m_imp.x, vec3.m_imp.y, 0); }
+	inline BPParaVec toVec2XoY(const BPParaVec& vec3) { return BPParaVec(vec3.m_imp.x, vec3.m_imp.y, 0); }
+	inline BPParaVec toVec2XoZ(const BPParaVec& vec3) { return BPParaVec(vec3.m_imp.x, 0, vec3.m_imp.z); }
+	inline BPParaVec toVec2YoZ(const BPParaVec& vec3) { return BPParaVec(0, vec3.m_imp.y, vec3.m_imp.y); }
+	inline BPParaVec operator*(double n, const BPParaVec& other) { return BPParaVec(n * other.m_imp.x, n * other.m_imp.y, n * other.m_imp.z); }
+	inline BPParaVec2 _toVec2(const BPParaVec& vec) { return BPParaVec2(vec.x(), vec.y()); }
 
-//geometry relation
-__declspec(dllimport) bool isParallel(const BPParaVec& vecA, const BPParaVec& vecB);
-__declspec(dllimport) bool isPerpendi(const BPParaVec& vecA, const BPParaVec& vecB);
-__declspec(dllimport) bool isCoincident(const BPParaVec& vecA, const BPParaVec& vecB);
-__declspec(dllimport) std::vector<BPParaVec> operator*(const BPParaTransform& mat, const std::vector<BPParaVec>& vecs);
-__declspec(dllimport) double getAngleOfTwoVectors(const BPParaVec& vecA, const BPParaVec& vecB, bool isAbs = false);
-__declspec(dllimport) bool _getGnrcDouble(const Gnrc& gnrc, double& outNum);
-__declspec(dllimport) int mathSign(double x);
+	//geometry relation
+	__declspec(dllimport) bool isParallel(const BPParaVec& vecA, const BPParaVec& vecB);
+	__declspec(dllimport) bool isPerpendi(const BPParaVec& vecA, const BPParaVec& vecB);
+	__declspec(dllimport) bool isCoincident(const BPParaVec& vecA, const BPParaVec& vecB);
+	__declspec(dllimport) std::vector<BPParaVec> operator*(const BPParaTransform& mat, const std::vector<BPParaVec>& vecs);
+	__declspec(dllimport) double getAngleOfTwoVectors(const BPParaVec& vecA, const BPParaVec& vecB, bool isAbs = false);
+	__declspec(dllimport) bool _getGnrcDouble(const Gnrc& gnrc, double& outNum);
+	__declspec(dllimport) int mathSign(double x);
 
+}
 
 /* Warning, change the file to script automatically.
 Please modify the source file under source. 
 Source file: "BPParaTransform.h".*/
+namespace para
+{
 
-enum class COORD_SYS :int
-{
-	AXIS_O = 0,
-	AXIS_X = 1,
-	AXIS_Y = 2,
-	AXIS_Z = 3,
-	PLANE_XOY = 4,
-	PLANE_XOZ = 5,
-	PLANE_YOZ = 6,
-};
-enum class MAT_TRANS_BAN :int
-{
-	Translate = 1,
-	Rotate = 2,
-	Scale = 3,
-	ScaleNotEqual = 4,
-	Mirror = 5,
-	Shear = 6
-};
-enum class MAT_INVARIANCE :int
-{
-	None = 0,			//any matrix
-	Position = 1,		// local  invariance: no T R S M H
-	Orientation = 2,	// direct invariance: no R M H
-	Scale = 3,			// length invariance: no S H
-	Chiral = 4,			// hand   invariance: no M
-	Orthogonal = 5,		// orthog invariance: no H
-};
+	enum class COORD_SYS :int
+	{
+		AXIS_O = 0,
+		AXIS_X = 1,
+		AXIS_Y = 2,
+		AXIS_Z = 3,
+		PLANE_XOY = 4,
+		PLANE_XOZ = 5,
+		PLANE_YOZ = 6,
+	};
+	enum class MAT_TRANS_BAN :int
+	{
+		Translate = 1,
+		Rotate = 2,
+		Scale = 3,
+		ScaleNotEqual = 4,
+		Mirror = 5,
+		Shear = 6
+	};
+	enum class MAT_INVARIANCE :int
+	{
+		None = 0,			//any matrix
+		Position = 1,		// local  invariance: no T R S M H
+		Orientation = 2,	// direct invariance: no R M H
+		Scale = 3,			// length invariance: no S H
+		Chiral = 4,			// hand   invariance: no M
+		Orthogonal = 5,		// orthog invariance: no H
+	};
 
 
-class BPParaTransform
-{
-public:
-	double m_matrix[3][4];
-	__declspec(dllimport) BPParaTransform();
-	__declspec(dllimport) ~BPParaTransform();
-	__declspec(dllimport) BPParaTransform inverse() const;
-	__declspec(dllimport) BPParaTransform operator*(const BPParaTransform& other) const;
-	__declspec(dllimport) bool isValid() const; //isValidMatrix, except allZero NaN Inf
-	__declspec(dllimport) explicit BPParaTransform(double a);
-	__declspec(dllimport) BPParaTransform inverseOrth() const;
-	__declspec(dllimport) BPParaTransform operator+(const BPParaTransform& other) const;
-	__declspec(dllimport) BPParaTransform operator-(const BPParaTransform& other) const;
-	__declspec(dllimport) BPParaVec operator*(const BPParaVec& other) const;
-	__declspec(dllimport) BPParaTransform operator*(const double& other) const;
-	__declspec(dllimport) bool operator<(const BPParaTransform& other) const; //std::less<void>
-	__declspec(dllimport) bool operator==(const BPParaTransform& other) const;//std::equal_to<void>
+	class BPParaTransform
+	{
+	public:
+		double m_matrix[3][4];
+		__declspec(dllimport) BPParaTransform();
+		__declspec(dllimport) ~BPParaTransform();
+		__declspec(dllimport) BPParaTransform inverse() const;
+		__declspec(dllimport) BPParaTransform operator*(const BPParaTransform& other) const;
+		__declspec(dllimport) bool isValid() const; //isValidMatrix, except allZero NaN Inf
+		__declspec(dllimport) explicit BPParaTransform(double a);
+		__declspec(dllimport) BPParaTransform inverseOrth() const;
+		__declspec(dllimport) BPParaTransform operator+(const BPParaTransform& other) const;
+		__declspec(dllimport) BPParaTransform operator-(const BPParaTransform& other) const;
+		__declspec(dllimport) BPParaVec operator*(const BPParaVec& other) const;
+		__declspec(dllimport) BPParaTransform operator*(const double& other) const;
+		__declspec(dllimport) bool operator<(const BPParaTransform& other) const; //std::less<void>
+		__declspec(dllimport) bool operator==(const BPParaTransform& other) const;//std::equal_to<void>
 
 #ifdef PARA2P3D
 
-	inline BPParaTransform(p3d::GeTransform _right)
-	{
-		memcpy(m_matrix, _right.array3d, sizeof(m_matrix));
-	}
-	inline BPParaTransform(p3d::GeRotMatrix _right)
-	{
-		for (int i = 0; i < 3; i++)
+		inline BPParaTransform(p3d::GeTransform _right)
 		{
-			for (int ii = 0; ii < 3; ii++)
-				m_matrix[i][ii] = _right.array3d[i][ii];
+			memcpy(m_matrix, _right.array3d, sizeof(m_matrix));
 		}
-		m_matrix[0][3] = 0.0;
-		m_matrix[1][3] = 0.0;
-		m_matrix[2][3] = 0.0;
-	}
-	inline operator p3d::GeTransform() const
-	{
-		p3d::GeTransform temp;
-		memcpy(temp.array3d, m_matrix, sizeof(m_matrix));
-		return temp;
-	}
-	inline operator p3d::GeRotMatrix() const
-	{
-		p3d::GeRotMatrix temp;
-		temp.createByTransform(*this);
-		return temp;
-	}
+		inline BPParaTransform(p3d::GeRotMatrix _right)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				for (int ii = 0; ii < 3; ii++)
+					m_matrix[i][ii] = _right.array3d[i][ii];
+			}
+			m_matrix[0][3] = 0.0;
+			m_matrix[1][3] = 0.0;
+			m_matrix[2][3] = 0.0;
+		}
+		inline operator p3d::GeTransform() const
+		{
+			p3d::GeTransform temp;
+			memcpy(temp.array3d, m_matrix, sizeof(m_matrix));
+			return temp;
+		}
+		inline operator p3d::GeRotMatrix() const
+		{
+			p3d::GeRotMatrix temp;
+			temp.createByTransform(*this);
+			return temp;
+		}
 #endif // PARA2P3D
 
-};
+	};
 
-// build-in matrix
-static const BPParaTransform g_MatrixE = BPParaTransform();
-static const BPParaTransform g_MatrixI = BPParaTransform();
-static const BPParaTransform g_MatrixO = BPParaTransform(0.0);
-//scale
-__declspec(dllimport) BPParaTransform scale(double n);
-__declspec(dllimport) BPParaTransform scale(double x, double y, double z = 1.0);
-__declspec(dllimport) BPParaTransform scale(const BPParaVec& n);
-inline BPParaTransform scalex(double x) { return scale(x, 1, 1); }
-inline BPParaTransform scaley(double y) { return scale(1, y, 1); }
-inline BPParaTransform scalez(double z) { return scale(1, 1, z); }
-inline BPParaTransform scaleXoY(double s) { return scale(s, s, 1); }
-// __declspec(dllimport) inline BPParaTransform scalePoint(double z);
-//translate
-__declspec(dllimport) BPParaTransform trans(double x, double y, double z = 0.0); //no implicit convert
-__declspec(dllimport) BPParaTransform trans(const BPParaVec& point);
-__declspec(dllimport) BPParaTransform transx(double x);
-__declspec(dllimport) BPParaTransform transy(double y);
-__declspec(dllimport) BPParaTransform transz(double z);
-__declspec(dllimport) BPParaTransform translate(double x, double y, double z = 0.0);
-__declspec(dllimport) BPParaTransform translate(const BPParaVec& point);
-//rotate
-__declspec(dllimport) BPParaTransform rotate(double angle, const BPParaVec& axis = BPParaVec(0, 0, 1));
-__declspec(dllimport) BPParaTransform rotate(const BPParaVec& axis = BPParaVec(0, 0, 1), double angle = 0.0);
-__declspec(dllimport) BPParaTransform rotateArbitrary(const BPParaVec& point = BPParaVec(0, 0, 0), const BPParaVec& vector = BPParaVec(0, 0, 1), double theta = 0.0);
-__declspec(dllimport) BPParaTransform rotx(double theta);
-__declspec(dllimport) BPParaTransform roty(double theta);
-__declspec(dllimport) BPParaTransform rotz(double theta);
-__declspec(dllimport) BPParaTransform getMatrixByEulerRPY(const BPParaVec& rpy);
-__declspec(dllimport) BPParaVec getRPYByMatrix(const BPParaTransform& mat);
-//liner matrix
-// __declspec(dllimport) BPParaTransform mirror(const BPParaVec& axis);
-// __declspec(dllimport) BPParaTransform mirror(const BPParaVec& axisA, const BPParaVec& axisB);
-__declspec(dllimport) BPParaTransform mirror(const BPParaTransform& mat, const COORD_SYS& sys = COORD_SYS::PLANE_XOY/*const std::string& plane = "YOZ"*/); //关于面的镜像
-inline BPParaTransform mirrorXoY(const BPParaTransform& mat = g_MatrixE) { return mirror(mat, COORD_SYS::PLANE_XOY); }
-inline BPParaTransform mirrorXoZ(const BPParaTransform& mat = g_MatrixE) { return mirror(mat, COORD_SYS::PLANE_XOZ); }
-inline BPParaTransform mirrorYoZ(const BPParaTransform& mat = g_MatrixE) { return mirror(mat, COORD_SYS::PLANE_YOZ); }
-__declspec(dllimport) BPParaTransform shear(const COORD_SYS& axis, double a, double b);
-inline BPParaTransform shearx(double y, double z) { return shear(COORD_SYS::AXIS_X, y, z); }
-inline BPParaTransform sheary(double x, double z) { return shear(COORD_SYS::AXIS_Y, x, z); }
-inline BPParaTransform shearz(double x, double y) { return shear(COORD_SYS::AXIS_Z, x, y); }
-//matrix property
-__declspec(dllimport) BPParaTransform transpose(const BPParaTransform& T);
-__declspec(dllimport) BPParaTransform inverse(const BPParaTransform& T);
-__declspec(dllimport) BPParaTransform inverseOrth(const BPParaTransform& T);
-__declspec(dllimport) BPParaTransform operator*(double a, const BPParaTransform& b); //number*matrix
-//operate-set
-__declspec(dllimport) BPParaTransform setMatrixByColumnVectors(const BPParaVec& n, const BPParaVec& o, const BPParaVec& a, const BPParaVec& p = BPParaVec());
-// __declspec(dllimport) BPParaTransform setMatrixByRowVectors(double row0[4], double row1[4], double row2[4]);
-// __declspec(dllimport) BPParaTransform setMatrixByArray(double* mat[3][4]);
-__declspec(dllimport) BPParaTransform setMatrixByRotAndPosition(const BPParaTransform& rot, const BPParaVec& position);
-__declspec(dllimport) BPParaTransform setMatrixByRotAndPosition(const BPParaTransform& rot, const BPParaTransform& position);
-__declspec(dllimport) BPParaTransform setMatrixByTwoVectors(const BPParaVec& vecX, const BPParaVec& vecY, bool isOrth = true); //
-__declspec(dllimport) BPParaTransform setMatrixByValueList(double vars[12], bool isRow = true); //
-__declspec(dllimport) BPParaTransform setMatrixByValueList(double nx, double ox, double ax, double px, double ny, double oy, double ay, double py, double nz, double oz, double az, double pz);
-// __declspec(dllimport) double* getListFromMatrix(const BPParaTransform& mat, bool isRow = true); //
-//operate-get
-__declspec(dllimport) BPParaVec getMatrixsAxisX(const BPParaTransform& T);
-__declspec(dllimport) BPParaVec getMatrixsAxisY(const BPParaTransform& T);
-__declspec(dllimport) BPParaVec getMatrixsAxisZ(const BPParaTransform& T);
-__declspec(dllimport) BPParaVec getMatrixsPosition(const BPParaTransform& T); // get position vector
-__declspec(dllimport) BPParaTransform getMatrixsRotationPart(const BPParaTransform& T); // only rot, position is zero获
-__declspec(dllimport) BPParaTransform getMatrixsPositionPart(const BPParaTransform& T); // only position matrix
-__declspec(dllimport) BPParaVec getMatrixsScale(const BPParaTransform& T); // get scale vector
-__declspec(dllimport) BPParaTransform getMatrixsScalePart(const BPParaTransform& T); // get scale matrix
-//operate-judge
-__declspec(dllimport) bool isIdentifyMatrix(const BPParaTransform& M); 
-__declspec(dllimport) bool isZeroMatrix(const BPParaTransform& M, bool isAll = true); // all zero
-__declspec(dllimport) bool isOrthogonalMatrix(const BPParaTransform& T, bool onlyRot = true); // 
-__declspec(dllimport) BPParaTransform getOrthogonalMatrix(const BPParaTransform& T, bool withPosition = true);
-// __declspec(dllimport) bool isAttitudeMatrix(const BPParaTransform& T); // 
-__declspec(dllimport) bool isTwoDimensionalMatrix(const BPParaTransform& M);// only rotz&trans(x,y)
-//matrix shadow
-__declspec(dllimport) BPParaTransform shadowVectorMatrix2D(const BPParaVec& n); //arbitrary_shadow vector front shadow
-// __declspec(dllimport) BPParaTransform shadowVectorMatrix3D(const BPParaVec& vec); // 3 dimensional shadow
-__declspec(dllimport) BPParaTransform shadowScaleMatrix(double intAngle = 0); // enlarge shadow about axiaZ
-//matrix genetate
-__declspec(dllimport) BPParaTransform getMatrixFromTwoPoints(const BPParaVec& pointStart, const BPParaVec& pointEnd, bool isAxisZ = true);
-__declspec(dllimport) BPParaTransform getMatrixFromTwoPoints(const BPParaVec& pointStart, const BPParaVec& pointEnd, bool withScale, bool isAxisZ);//overload
-__declspec(dllimport) BPParaTransform getMatrixFromOneVector(const BPParaVec& vector, bool isAxisZ = true);
-__declspec(dllimport) BPParaTransform getMatrixFromTwoVector(const BPParaVec& vecA, const BPParaVec& vecB);
-__declspec(dllimport) BPParaTransform getMatrixFromThreePoints(const std::vector<BPParaVec>& points, bool is2D = false);
-__declspec(dllimport) BPParaTransform getMatrixFromThreePoints(const BPParaVec& point1, const BPParaVec& point2, const BPParaVec& point3);
-__declspec(dllimport) BPParaTransform getMatrixFromPoints(const std::vector<BPParaVec>& points, bool is2D = true);
-//matrix invariance
-__declspec(dllimport) bool hasMatrixTranslate(const BPParaTransform& M);		//T
-__declspec(dllimport) bool hasMatrixRotate(const BPParaTransform& M);			//R
-__declspec(dllimport) bool hasMatrixScale(const BPParaTransform& M);			//S
-__declspec(dllimport) bool hasMatrixScaleNotEqual(const BPParaTransform& M);	//Sne
-__declspec(dllimport) bool hasMatrixMirror(const BPParaTransform& M);			//M
-__declspec(dllimport) bool hasMatrixShear(const BPParaTransform& M);			//H
-__declspec(dllimport) bool hasMatrixTransform(const BPParaTransform& M, const MAT_TRANS_BAN& type);
-__declspec(dllimport) std::vector<bool> hasMatrixTransform(const BPParaTransform& M); //combine transform
-//__declspec(dllimport) bool getMatrixInvariance(const BPParaTransform& M, const BPParaInvariance& type);
+	// build-in matrix
+	static const BPParaTransform g_MatrixE = BPParaTransform();
+	static const BPParaTransform g_MatrixI = BPParaTransform();
+	static const BPParaTransform g_MatrixO = BPParaTransform(0.0);
+	//scale
+	__declspec(dllimport) BPParaTransform scale(double n);
+	__declspec(dllimport) BPParaTransform scale(double x, double y, double z = 1.0);
+	__declspec(dllimport) BPParaTransform scale(const BPParaVec& n);
+	inline BPParaTransform scalex(double x) { return scale(x, 1, 1); }
+	inline BPParaTransform scaley(double y) { return scale(1, y, 1); }
+	inline BPParaTransform scalez(double z) { return scale(1, 1, z); }
+	inline BPParaTransform scaleXoY(double s) { return scale(s, s, 1); }
+	// __declspec(dllimport) inline BPParaTransform scalePoint(double z);
+	//translate
+	__declspec(dllimport) BPParaTransform trans(double x, double y, double z = 0.0); //no implicit convert
+	__declspec(dllimport) BPParaTransform trans(const BPParaVec& point);
+	__declspec(dllimport) BPParaTransform transx(double x);
+	__declspec(dllimport) BPParaTransform transy(double y);
+	__declspec(dllimport) BPParaTransform transz(double z);
+	__declspec(dllimport) BPParaTransform translate(double x, double y, double z = 0.0);
+	__declspec(dllimport) BPParaTransform translate(const BPParaVec& point);
+	//rotate
+	__declspec(dllimport) BPParaTransform rotate(double angle, const BPParaVec& axis = BPParaVec(0, 0, 1));
+	__declspec(dllimport) BPParaTransform rotate(const BPParaVec& axis = BPParaVec(0, 0, 1), double angle = 0.0);
+	__declspec(dllimport) BPParaTransform rotateArbitrary(const BPParaVec& point = BPParaVec(0, 0, 0), const BPParaVec& vector = BPParaVec(0, 0, 1), double theta = 0.0);
+	__declspec(dllimport) BPParaTransform rotx(double theta);
+	__declspec(dllimport) BPParaTransform roty(double theta);
+	__declspec(dllimport) BPParaTransform rotz(double theta);
+	__declspec(dllimport) BPParaTransform getMatrixByEulerRPY(const BPParaVec& rpy);
+	__declspec(dllimport) BPParaVec getRPYByMatrix(const BPParaTransform& mat);
+	//liner matrix
+	// __declspec(dllimport) BPParaTransform mirror(const BPParaVec& axis);
+	// __declspec(dllimport) BPParaTransform mirror(const BPParaVec& axisA, const BPParaVec& axisB);
+	__declspec(dllimport) BPParaTransform mirror(const BPParaTransform& mat, const COORD_SYS& sys = COORD_SYS::PLANE_XOY/*const std::string& plane = "YOZ"*/); //关于面的镜像
+	inline BPParaTransform mirrorXoY(const BPParaTransform& mat = g_MatrixE) { return mirror(mat, COORD_SYS::PLANE_XOY); }
+	inline BPParaTransform mirrorXoZ(const BPParaTransform& mat = g_MatrixE) { return mirror(mat, COORD_SYS::PLANE_XOZ); }
+	inline BPParaTransform mirrorYoZ(const BPParaTransform& mat = g_MatrixE) { return mirror(mat, COORD_SYS::PLANE_YOZ); }
+	__declspec(dllimport) BPParaTransform shear(const COORD_SYS& axis, double a, double b);
+	inline BPParaTransform shearx(double y, double z) { return shear(COORD_SYS::AXIS_X, y, z); }
+	inline BPParaTransform sheary(double x, double z) { return shear(COORD_SYS::AXIS_Y, x, z); }
+	inline BPParaTransform shearz(double x, double y) { return shear(COORD_SYS::AXIS_Z, x, y); }
+	//matrix property
+	__declspec(dllimport) BPParaTransform transpose(const BPParaTransform& T);
+	__declspec(dllimport) BPParaTransform inverse(const BPParaTransform& T);
+	__declspec(dllimport) BPParaTransform inverseOrth(const BPParaTransform& T);
+	__declspec(dllimport) BPParaTransform operator*(double a, const BPParaTransform& b); //number*matrix
+	//operate-set
+	__declspec(dllimport) BPParaTransform setMatrixByColumnVectors(const BPParaVec& n, const BPParaVec& o, const BPParaVec& a, const BPParaVec& p = BPParaVec());
+	// __declspec(dllimport) BPParaTransform setMatrixByRowVectors(double row0[4], double row1[4], double row2[4]);
+	// __declspec(dllimport) BPParaTransform setMatrixByArray(double* mat[3][4]);
+	__declspec(dllimport) BPParaTransform setMatrixByRotAndPosition(const BPParaTransform& rot, const BPParaVec& position);
+	__declspec(dllimport) BPParaTransform setMatrixByRotAndPosition(const BPParaTransform& rot, const BPParaTransform& position);
+	__declspec(dllimport) BPParaTransform setMatrixByTwoVectors(const BPParaVec& vecX, const BPParaVec& vecY, bool isOrth = true); //
+	__declspec(dllimport) BPParaTransform setMatrixByValueList(double vars[12], bool isRow = true); //
+	__declspec(dllimport) BPParaTransform setMatrixByValueList(double nx, double ox, double ax, double px, double ny, double oy, double ay, double py, double nz, double oz, double az, double pz);
+	// __declspec(dllimport) double* getListFromMatrix(const BPParaTransform& mat, bool isRow = true); //
+	//operate-get
+	__declspec(dllimport) BPParaVec getMatrixsAxisX(const BPParaTransform& T);
+	__declspec(dllimport) BPParaVec getMatrixsAxisY(const BPParaTransform& T);
+	__declspec(dllimport) BPParaVec getMatrixsAxisZ(const BPParaTransform& T);
+	__declspec(dllimport) BPParaVec getMatrixsPosition(const BPParaTransform& T); // get position vector
+	__declspec(dllimport) BPParaTransform getMatrixsRotationPart(const BPParaTransform& T); // only rot, position is zero获
+	__declspec(dllimport) BPParaTransform getMatrixsPositionPart(const BPParaTransform& T); // only position matrix
+	__declspec(dllimport) BPParaVec getMatrixsScale(const BPParaTransform& T); // get scale vector
+	__declspec(dllimport) BPParaTransform getMatrixsScalePart(const BPParaTransform& T); // get scale matrix
+	//operate-judge
+	__declspec(dllimport) bool isIdentifyMatrix(const BPParaTransform& M);
+	__declspec(dllimport) bool isZeroMatrix(const BPParaTransform& M, bool isAll = true); // all zero
+	__declspec(dllimport) bool isOrthogonalMatrix(const BPParaTransform& T, bool onlyRot = true); // 
+	__declspec(dllimport) BPParaTransform getOrthogonalMatrix(const BPParaTransform& T, bool withPosition = true);
+	// __declspec(dllimport) bool isAttitudeMatrix(const BPParaTransform& T); // 
+	__declspec(dllimport) bool isTwoDimensionalMatrix(const BPParaTransform& M);// only rotz&trans(x,y)
+	//matrix shadow
+	__declspec(dllimport) BPParaTransform shadowVectorMatrix2D(const BPParaVec& n); //arbitrary_shadow vector front shadow
+	// __declspec(dllimport) BPParaTransform shadowVectorMatrix3D(const BPParaVec& vec); // 3 dimensional shadow
+	__declspec(dllimport) BPParaTransform shadowScaleMatrix(double intAngle = 0); // enlarge shadow about axiaZ
+	//matrix genetate
+	__declspec(dllimport) BPParaTransform getMatrixFromTwoPoints(const BPParaVec& pointStart, const BPParaVec& pointEnd, bool isAxisZ = true);
+	__declspec(dllimport) BPParaTransform getMatrixFromTwoPoints(const BPParaVec& pointStart, const BPParaVec& pointEnd, bool withScale, bool isAxisZ);//overload
+	__declspec(dllimport) BPParaTransform getMatrixFromOneVector(const BPParaVec& vector, bool isAxisZ = true);
+	__declspec(dllimport) BPParaTransform getMatrixFromTwoVector(const BPParaVec& vecA, const BPParaVec& vecB);
+	__declspec(dllimport) BPParaTransform getMatrixFromThreePoints(const std::vector<BPParaVec>& points, bool is2D = false);
+	__declspec(dllimport) BPParaTransform getMatrixFromThreePoints(const BPParaVec& point1, const BPParaVec& point2, const BPParaVec& point3);
+	__declspec(dllimport) BPParaTransform getMatrixFromPoints(const std::vector<BPParaVec>& points, bool is2D = true);
+	//matrix invariance
+	__declspec(dllimport) bool hasMatrixTranslate(const BPParaTransform& M);		//T
+	__declspec(dllimport) bool hasMatrixRotate(const BPParaTransform& M);			//R
+	__declspec(dllimport) bool hasMatrixScale(const BPParaTransform& M);			//S
+	__declspec(dllimport) bool hasMatrixScaleNotEqual(const BPParaTransform& M);	//Sne
+	__declspec(dllimport) bool hasMatrixMirror(const BPParaTransform& M);			//M
+	__declspec(dllimport) bool hasMatrixShear(const BPParaTransform& M);			//H
+	__declspec(dllimport) bool hasMatrixTransform(const BPParaTransform& M, const MAT_TRANS_BAN& type);
+	__declspec(dllimport) std::vector<bool> hasMatrixTransform(const BPParaTransform& M); //combine transform
+	//__declspec(dllimport) bool getMatrixInvariance(const BPParaTransform& M, const BPParaInvariance& type);
 
+
+}
 
 /* Warning, change the file to script automatically.
 Please modify the source file under source. 
@@ -1263,9 +1275,9 @@ public:
 	static void countDecrease(const Primitive* imp); //while count==0 delete
 	static const Primitive* set_h(const Primitive* ptr, double h);
 	static const double get_h(const Primitive* ptr);
-	static size_t sm_totalCount;
+	__declspec(dllimport) static size_t sm_totalCount;
 	//static std::map<WrapCone, size_t> sm_coneMap;
-	static std::unordered_map<ToGeCone::WrapCone, size_t> sm_coneMap;
+	__declspec(dllimport) static std::unordered_map<ToGeCone::WrapCone, size_t> sm_coneMap;
 };
 
 

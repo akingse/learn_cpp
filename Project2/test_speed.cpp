@@ -1,112 +1,97 @@
 #include "pch.h"
-using namespace psykronix;
-
-bool _isPointInTriangular(const BPParaVec& point, const std::array<BPParaVec, 3>& trigon)
-{
-	BPParaVec pA = trigon[0];
-	BPParaVec pB = trigon[1];
-	BPParaVec pC = trigon[2];
-	BPParaVec sdA = (point - pA) ^ (pB - pA);
-	BPParaVec sdB = (point - pB) ^ (pC - pB);
-	BPParaVec sdC = (point - pC) ^ (pA - pC);
-	return abs(norm(sdA) * norm(sdB) - (sdA * sdB)) < PL_Length && abs(norm(sdA) * norm(sdC) - (sdA * sdC)) < PL_Length;
-}
-
-BPParaTransform _getMatrixFromThreePoints(const std::array<BPParaVec, 3>& points)
-{
-    BPParaVec vecX = unitize(points[1]- points[0]);
-    BPParaVec vecY = points[2]- points[0];
-    BPParaVec vecZ = unitize(vecX ^ vecY); // been collinear judge
-    vecY = (vecZ ^ vecX);
-    return setMatrixByColumnVectors(vecX, vecY, vecZ, points[0]);
-}
-
-BPParaVec _getIntersectPointOfSegmentPlane(const BPParaVec& pA, const BPParaVec& pB, const BPParaVec& pOri, const BPParaVec& normal)
-{
-    double div = (normal * (pB - pA)); //
-    if (abs(div) < PL_Length)
-    {
-        return pA;
-    }
-    double k = (normal * (pA - pOri)) / div;
-    return pA + k * (pA - pB);
-}
-
-bool _isTwoTriangularIntersection(const std::array<BPParaVec, 3>& tBase, const std::array<BPParaVec, 3>& tLine)
-{
-    //include coplanar, zero distance
-    //std::array<BPParaVec, 2> edgeA = { tLine[0], tLine[1] };
-    //std::array<BPParaVec, 2> edgeB = { tLine[1], tLine[2] };
-    //std::array<BPParaVec, 2> edgeC = { tLine[2], tLine[0] };
-	//BPParaVec vecA = tLine[0] - tLine[1];
-	//BPParaVec vecB = tLine[1] - tLine[2];
-	//BPParaVec vecC = tLine[2] - tLine[0];
-	//if (abs((normal * (tLine[0] - tBase[0])) * (normal * (tLine[1] - tBase[0]))) < PL_Length) 
- //   {
- //       // special handling
- //   }
-	BPParaVec normal = (tBase[1] - tBase[0]) ^ (tBase[2] - tBase[0]);
-    BPParaVec pOri = tBase[0];
-    BPParaVec pL0 = tLine[0];
-    BPParaVec pL1 = tLine[1];
-    BPParaVec pL2 = tLine[2];
-    //through the triangular plane
-    double dotA = (normal * (pL0 - pOri)) * (normal * (pL1 - pOri));
-    double dotB = (normal * (pL1 - pOri)) * (normal * (pL2 - pOri));
-    double dotC = (normal * (pL2 - pOri)) * (normal * (pL0 - pOri));
-
-
-    if (abs(dotA) < PL_Length || dotA < 0.0) // first filter
-    {
-        //calculate shadow
-        //BPParaTransform mat = _getMatrixFromThreePoints(tBase);
-        //BPParaTransform inv = inverseOrth(mat);
-        //std::array<BPParaVec, 3> trigon = { BPParaVec(), inv * tBase[1], inv * tBase[2] };
-        //get_intersect_point_of_line_plane
-        double div = (normal * (pL0 - pL1));
-        if (abs(div) < PL_Length)
-        {
-            if (_isPointInTriangular(pL0, tBase) || _isPointInTriangular(pL1, tBase))
-                return true;
-        }
-        double k = (normal * (pL0 - pOri)) / div;
-        BPParaVec locate = pL0 + k * (pL1 - pL0);  // paramater formula vector
-        if (_isPointInTriangular(locate, tBase))
-            return true;
-    }
-    if (abs(dotB) < PL_Length || dotB < 0.0) // first filter
-    {
-        double div = (normal * (pL1 - pL2));
-        if (abs(div) < PL_Length)
-        {
-            if (_isPointInTriangular(pL1, tBase) || _isPointInTriangular(pL2, tBase))
-                return true;
-        }
-        double k = (normal * (pL1 - pOri)) / div;
-        BPParaVec locate = pL1 + k * (pL2 - pL1);  // paramater formula vector
-        if (_isPointInTriangular(locate, tBase))
-            return true;
-    }
-    if (abs(dotC) < PL_Length || dotB < 0.0) // first filter
-    {
-        double div = (normal * (pL2 - pL0));
-        if (abs(div) < PL_Length)
-        {
-            if (_isPointInTriangular(pL2, tBase) || _isPointInTriangular(pL0, tBase))
-                return true;
-        }
-        double k = (normal * (pL2 - pOri)) / div;
-        BPParaVec locate = pL2 + k * (pL0 - pL2);  // paramater formula vector
-        if (_isPointInTriangular(locate, tBase))
-            return true;
-    }
-    return false;
-}
 
 
 static void _test1()
 {
+	//测试性能
+//Debug差10倍，release差5倍
+// 计时
+	auto start = std::chrono::system_clock::now();
 
+	//for (int i = 0; i < 1e6; i++)
+	//{
+	//	//随机数
+	//	srand((unsigned)time(NULL));
+	//	string rd = to_string(rand());
+	//	string md0 = para::getMD5(rd);
+	//	//MD5_32B md0 = para::getMD5_ULL(rd);
+	//}
+
+
+	//rand函数
+
+	/*
+	int num = rand() % 100; //产生0~99这100个整数中的一个随机整数
+	rand() % (b-a+1)+ a ;    //表示  a~b 之间的一个随机整数。
+	通常rand()产生的随机数在每次运行的时候都是与上一次相同的，这样是为了便于程序的调试。若要产生每次不同的随机数，则可以使用srand( seed )函数进行产生随机化种子，随着seed的不同，就能够产生不同的随机数。
+
+	rand() 会返回一随机数值，范围在 0 至 RAND_MAX 间。
+	rand()产生的是假随机数字，每次执行时是相同的。若要不同,以不同的值来初始化它.初始化的函数就是 srand()。
+	*/
+	int a = RAND_MAX; //32767 =2^(16-1)
+	int rd0 = rand() - RAND_MAX / 2;
+	int rd = rand() - 0x3fff;
+
+
+	srand((int)time(0));
+
+	for (int i = 0; i < 1e1; i++) //1e8
+	{
+		srand((unsigned)time(NULL));
+		long long a = rand();//0x12345678;
+		long long b = a * 1024; //效率提升20%？
+		//long long c = a <<10; //使用随机数后差异很小
+	}
+	auto end = std::chrono::system_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+	std::cout << "花费了"
+		<< double(duration.count()) * std::chrono::microseconds::period::num / std::chrono::microseconds::period::den
+		<< "秒" << std::endl;
+
+}
+
+static void _test2()
+{
+	size_t I = 5;
+	size_t J = 5;
+	for (int i = 0; i < I; i++)
+	{
+		for (int j = 0; j < J; j++)
+		{
+			if (j >= i)
+			{
+				//cout << "[" << i << "," << j << "]" << endl;
+			}
+		}
+	}
+	cout << "==================" << endl;
+
+	//双层for循环，改单层for循环
+	//int n = 6;
+	//for (int k = 0; k < n * (n + 1) / 2; k++)
+	//{
+	//	int x = ceil(sqrt(n * (n + 1) - 2 * k + 0.25) + 0.5);
+	//	int i = n - x + 1;
+	//	int j = k - (n + x) * (n + 1 - x) / 2 + i;
+	//	cout << "[" << i << "," << j << "]" << endl;
+	//}
+
+	int n = 5;
+	int N = n * (n + 1) / 2;
+	int i = 0;
+	for (int k = 0; k < N; k++)
+	{
+		if (k>(2*n-1)*(i+1)/2-1)
+			i++;
+		int j = k - (n + i) * (n + 1 - i) / 2 + i;
+		cout << "[" << i << "," << j << "]" << endl;
+	}
 
 
 }
+
+static int enrol = []()->int
+{
+	_test2();
+	return 0;
+}();

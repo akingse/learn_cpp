@@ -68,7 +68,7 @@ static int mainstl()
 
 	auto name1 = _cmp_less;
 	auto name2 = typeid(name1).name();
-	auto bl = (*cmp_less)(3, 2); //函数地址
+	//auto bl = (*cmp_less)((int)3, (int)2); //函数地址
 
 	//custom segment
 	//Segment segm(Vec3(1, 1), Vec3(2, 2));

@@ -60,7 +60,15 @@ static void _test_set()
     auto iter1 = ++iter;
     auto iter2 = ++iter;
 
-
+    set<int> myset;
+    myset.insert(1);
+    myset.insert(3);
+    myset.insert(2);
+    bool suc;
+    auto it = myset.insert(4);
+    suc = it.second;
+    auto it2 = myset.erase(5);
+    auto it3 = myset.find(2);
 
     set<int> mset1{ 1,2,3,4 };
     set<int> mset2{ 4,5,6 };

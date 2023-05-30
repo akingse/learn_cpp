@@ -1,14 +1,7 @@
 #include "pch.h"
 using namespace std;
+using namespace para;
 using namespace rel_ops;//relational operators
-
-
-//shortcut key
-
-// ctrl X = ctrl L
-//х╚фа SHIFT + ALT + ENTER 
-// alt+o = ctrl KO
-
 
 
 Gene::Gene() //:m_imp(nullptr)

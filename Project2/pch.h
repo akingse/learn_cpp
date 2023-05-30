@@ -1,5 +1,4 @@
 #pragma once
-#define _USE_MATH_DEFINES //using M_PI
 
 //stream
 #include <iostream>
@@ -18,6 +17,7 @@
 #include <functional> //º¯ÊýÊ½±à³Ì
 
 //math
+#define _USE_MATH_DEFINES //using M_PI
 #include <cmath>
 #include <math.h>
 #include <complex>
@@ -53,7 +53,7 @@
 #include "test_serialize.h"
 #include "my_geometry.h"			//export
 #include "test_calculate0.h"
-#include "test_speed.h"
+#include "test_triangular.h"		//export
 
 
 

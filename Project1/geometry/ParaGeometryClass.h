@@ -119,7 +119,7 @@ namespace para
 		//geometry attribute
 		bool isCoincident() const
 		{
-			return ::isCoincident(end(), start());
+			return para::isCoincident(end(), start());
 		}
 		virtual BPParaVec start() const override
 		{

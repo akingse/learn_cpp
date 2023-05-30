@@ -3,7 +3,7 @@ class DpIn
 {
 public:
 	DpIn() :
-		m_funType(typeid(None)),
+		m_funType(typeid(para::None)),
 		m_fun(nullptr)
 	{
 	}
@@ -14,11 +14,10 @@ public:
 	template<typename T>
 	bool is()
 	{
-		type_index tmp0 = typeid(T);
-		string tmp1 = typeid(T).name();
-		type_index tmp2 = typeid(None);
-		string tmp3 = typeid(None).name();
-
+		std::type_index tmp0 = typeid(T);
+		std::string tmp1 = typeid(T).name();
+		std::type_index tmp2 = typeid(para::None);
+		std::string tmp3 = typeid(para::None).name();
 		return m_funType == typeid(T);
 	}
 
@@ -89,7 +88,7 @@ public:
 	{
 
 	}
-	virtual std::string getClassName() { return string(); };
+	virtual std::string getClassName() { return {}; };
 
 	//bool operator<(const BPObject& rhs)
 	//{
@@ -261,16 +260,16 @@ public:
 	{
 		if (!m_imp)
 			return;
-		type_index a1 = typeid(m_imp); //typeid识别动态类型：指针的解引用
-		type_index b1 = typeid(*m_imp);
+		std::type_index a1 = typeid(m_imp); //typeid识别动态类型：指针的解引用
+		std::type_index b1 = typeid(*m_imp);
 
-		string a2 = typeid(m_imp).name();
-		string b2 = typeid(*m_imp).name();
+		std::string a2 = typeid(m_imp).name();
+		std::string b2 = typeid(*m_imp).name();
 
 
 		Cube* cube = dynamic_cast<Cube*>(m_imp);
-		string a3 = typeid(cube).name();
-		string a4 = typeid(cube).raw_name();
+		std::string a3 = typeid(cube).name();
+		std::string a4 = typeid(cube).raw_name();
 		size_t a5 = typeid(cube).hash_code();
 
 

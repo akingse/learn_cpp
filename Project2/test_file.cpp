@@ -1,25 +1,22 @@
 #include "pch.h"
-
-
 using namespace std;
 
-std::ifstream t("file.txt");
-std::stringstream buffer;
-//buffer << t.rdbuf();
-std::string contents(buffer.str());
-const int MAX_NUM = 1000;
-int a[MAX_NUM]; //存放文件中读入的整数
 int MyCompare(const void* e1, const void* e2)
 { //用于qsort的比较函数
     return *((int*)e1) - *((int*)e2);
 }
 
 
-
-
-
 int main_file()
 {
+
+    std::ifstream t("file.txt");
+    std::stringstream buffer;
+    //buffer << t.rdbuf();
+    std::string contents(buffer.str());
+    const int MAX_NUM = 1000;
+    int a[MAX_NUM]; //存放文件中读入的整数
+
     const char cmd[] = "C:/Users/Aking/AppData/Local/Programs/Python/Python38/python.exe \"c:/Users/Aking/Documents/WXWork/1688856575247594/Cache/File/2022-06/Release (1)/PythonScript/python-3.7.9-embed-amd64/Lib/site-packages/test_script0/Cube参数化.py\"";
     string cmds = "C:/Users/Aking/AppData/Local/Programs/Python/Python38/python.exe \"c:/Users/Aking/Documents/WXWork/1688856575247594/Cache/File/2022-06/Release (1)/PythonScript/python-3.7.9-embed-amd64/Lib/site-packages/test_script0/Cube参数化.py\"";
 //    string cmds = "python";

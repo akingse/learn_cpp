@@ -134,7 +134,7 @@ string stringToUTF8(const string& str)
 string UTF8Tostring(const string &strTemp)
 {
 	char buf[1024 * 60];
-	snprintf(buf, sizeof(buf), u8"%s", strTemp.c_str());
+	snprintf(buf, sizeof(buf), "%s", strTemp.c_str());
 	TCHAR wscBuffer[1024 * 10] = { 0 };
 	MultiByteToWideChar(CP_UTF8, 0, buf, (int)strlen(buf) + 1, wscBuffer, sizeof(wscBuffer) / sizeof(wchar_t));
 	memset(buf, 0, 1024 * 9);
@@ -272,7 +272,7 @@ int main_class()
 		cout << "a" << endl;
 	if (a == b)
 		cout << "operate==" << endl;
-	double pi=M_PI;
+	double pi = M_PI;
 
 	int a1 = 1 << 1;
 	int a2 = 1 << 2;
@@ -305,7 +305,7 @@ int main_class()
 				flag = 1;
 
 			bool flag1 = regex_match(it, it + 1, regex("[0x4e00-0x9fa5]+"));
-			cout << *it << " "<< flag << flag1 << endl;
+			//cout << *it << " "<< flag << flag1 << endl;
 		}
 	}
 
@@ -458,51 +458,11 @@ int main_class()
 	//string message = "hello";
 	//cout << "md5(\"" << message << "\") = "<< MD5(message).toStr();
 
-	//测试性能
-	//Debug差10倍，release差5倍
-	// 计时
-	auto start = std::chrono::system_clock::now();
-
-	//for (int i = 0; i < 1e6; i++)
-	//{
-	//	//随机数
-	//	srand((unsigned)time(NULL));
-	//	string rd = to_string(rand());
-	//	string md0 = para::getMD5(rd);
-	//	//MD5_32B md0 = para::getMD5_ULL(rd);
-	//}
-
-
-	for (int i = 0; i < 1e1; i++) //1e8
-	{
-		srand((unsigned)time(NULL));
-		long long a = rand();//0x12345678;
-		long long b = a * 1024; //效率提升20%？
-		//long long c = a <<10; //使用随机数后差异很小
-	}
-	auto end = std::chrono::system_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-	std::cout << "花费了"
-		<< double(duration.count()) * std::chrono::microseconds::period::num / std::chrono::microseconds::period::den
-		<< "秒" << std::endl;
-
-
 	unsigned long long a0 = 0xfc5e038d;
 	auto ui = unsigned int(-1); //4294967295
 	MyStruct sa1(1,2.0);// { 1, 2.0 };
 	MyStruct sa2= MyStruct{ 1, 2.0 };
 	vector<Test> myvec;
-
- 	set<int> myset;
-	myset.insert(1);
-	myset.insert(3);
-	myset.insert(2);
-	bool suc;
-	auto it= myset.insert(4);
-	suc = it.second;
-	auto it2 = myset.erase(5);
-	auto it3 = myset.find(2);
-
 	int t = (int)Test::A5;
 
 	for (int i=3;i<64;i++)

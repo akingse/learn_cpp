@@ -3,19 +3,8 @@
 #include <time.h>
 #include <omp.h>
 
-/// <summary>
-/// Project2
-/// </summary>
-/// <returns></returns>
-
-int _get_rand_if(int i)
-{
-	if (i == 1)
-		return 1;
-	else if (i == 2)
-		return 1;
-
-}
+using namespace para;
+using Eigen::Vector3d;
 
 
 Vec2 _get_rand()
@@ -24,28 +13,54 @@ Vec2 _get_rand()
 	return Vec2(rand(), rand());
 }
 
+std::array<BPParaVec, 3> _get_rand3v()
+{
+	// rand -16384 -> 16384 
+	//srand((int)time(0));
+	//Sleep(100);
+	return std::array<BPParaVec, 3> {
+			BPParaVec(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
+			BPParaVec(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
+			BPParaVec(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff) };
+}
+std::array<Vector3d, 3> _get_rand3()
+{
+	// rand -16384 -> 16384 
+	//srand((int)time(0));
+	//Sleep(100);
+	return std::array<Vector3d, 3> {
+		Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
+			Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
+			Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff) };
+}
+
 int main()
 {
-	_get_rand_if(3);
+
 	clock_t start, end;
-	start = clock();
 	//Sleep(1000);
 	double nums[10] = { rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand() };
-	for (int i = 0; i < sizeof(nums)/sizeof(double); i++)
-		cout << nums[i] << " | ";
+	//for (int i = 0; i < sizeof(nums)/sizeof(double); i++)
+	//	cout << nums[i] << " | ";
+	psykronix::Vertex vec(1, 1, 1);
+	psykronix::Vertex vec2 = vec;
 
-	std::array<BPParaVec, 3> tA = { BPParaVec(rand(), rand(), rand()), BPParaVec(rand(), rand(), rand()), BPParaVec(rand(), rand(), rand()) };
-	std::array<BPParaVec, 3> tB = { BPParaVec(rand(), rand(), rand()), BPParaVec(rand(), rand(), rand()), BPParaVec(rand(), rand(), rand()) };
 //#pragma omp parallel for //开启omp优化
-	for (int i = 0; i < int(1e6); i++) //1time = 1.429s, python spent 30s
+	for (int i = 0; i < 3; i++)
 	{
-		//auto res = _get_circumcircle_center({ _get_rand() ,_get_rand() ,_get_rand() });
-		//double res = _test_custom_calculate(nums);
-		bool res = _isTwoTriangularIntersection(tA, tB);
+		start = clock();
+		for (int i = 0; i < int(1e4); i++) //1time = 1.429s, python spent 30s
+		{
+			//auto res = _get_circumcircle_center({ _get_rand() ,_get_rand() ,_get_rand() });
+			//double res = _test_custom_calculate(nums);
+			//bool res = isTwoTrianglesIntersection(tA, tB); //without rand//debug=1e7=9.6s,release=1e7=1.8s,
+			bool res = isTwoTrianglesIntersection(_get_rand3(), _get_rand3()); //debug=1e7=16.5s,release=1e7=5.1s,omp=0.85
+			//bool res = TriangularIntersectionTest(_get_rand3(), _get_rand3());
+		}
+		end = clock();   //结束时间
+		cout << "time = " << double(end - start) / CLOCKS_PER_SEC << "s" << endl;
+		Sleep(1000);
 	}
-
-	end = clock();   //结束时间
-	cout << "time = " << double(end - start) / CLOCKS_PER_SEC << "s" << endl;
 
 
 	return 0;

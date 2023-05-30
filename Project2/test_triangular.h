@@ -1,5 +1,4 @@
 #pragma once
-bool _isTwoTriangularIntersection(const std::array<BPParaVec, 3>& tBase, const std::array<BPParaVec, 3>& tLine);
 
 namespace psykronix
 {
@@ -10,11 +9,12 @@ namespace psykronix
         double y = 0.0;
         double z = 0.0;
         Vertex() {}
-        Vertex(double x_, double y_, double z_) :
+		Vertex(double x_, double y_, double z_ = 0.0) :
             x(x_),
             y(y_),
             z(z_)
         {
+            //x = 2 * x_;
         }
         inline bool operator==(const Vertex& other) const
         {
@@ -36,3 +36,8 @@ namespace psykronix
 #endif
     };
 }
+
+//__declspec(dllexport) bool _isTwoTriangularIntersection(const std::array<BPParaVec, 3>& tBase, const std::array<BPParaVec, 3>& tLine);
+__declspec(dllexport) bool isTwoTrianglesIntersection(const std::array<Eigen::Vector3d, 3>& triL, const std::array<Eigen::Vector3d, 3>& triR);
+__declspec(dllexport) bool TriangularIntersectionTest(const std::array<Eigen::Vector3d, 3>& T1, const std::array<Eigen::Vector3d, 3>& T2);
+

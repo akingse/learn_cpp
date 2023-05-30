@@ -4,7 +4,7 @@
 #define _USE_MATH_DEFINES
 #include<math.h>
 using namespace std;
-static int main1()
+static int _test1()
 {
     std::cout << "Hello World!\n";
     //for (int i = 0; i <= 5; i++)

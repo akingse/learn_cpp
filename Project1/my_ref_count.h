@@ -37,9 +37,9 @@ public:
 	static void countDecrease(const Primitive* imp); //while count==0 delete
 	static const Primitive* set_h(const Primitive* ptr, double h);
 	static const double get_h(const Primitive* ptr);
-	static size_t sm_totalCount;
+	__declspec(dllexport) static size_t sm_totalCount;
 	//static std::map<WrapCone, size_t> sm_coneMap;
-	static std::unordered_map<ToGeCone::WrapCone, size_t> sm_coneMap;
+	__declspec(dllexport) static std::unordered_map<ToGeCone::WrapCone, size_t> sm_coneMap;
 };
 
 

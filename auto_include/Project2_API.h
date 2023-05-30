@@ -40,7 +40,7 @@ class DpIn
 {
 public:
 	DpIn() :
-		m_funType(typeid(None)),
+		m_funType(typeid(para::None)),
 		m_fun(nullptr)
 	{
 	}
@@ -51,11 +51,10 @@ public:
 	template<typename T>
 	bool is()
 	{
-		type_index tmp0 = typeid(T);
-		string tmp1 = typeid(T).name();
-		type_index tmp2 = typeid(None);
-		string tmp3 = typeid(None).name();
-
+		std::type_index tmp0 = typeid(T);
+		std::string tmp1 = typeid(T).name();
+		std::type_index tmp2 = typeid(para::None);
+		std::string tmp3 = typeid(para::None).name();
 		return m_funType == typeid(T);
 	}
 
@@ -126,7 +125,7 @@ public:
 	{
 
 	}
-	virtual std::string getClassName() { return string(); };
+	virtual std::string getClassName() { return {}; };
 
 	//bool operator<(const BPObject& rhs)
 	//{
@@ -298,16 +297,16 @@ public:
 	{
 		if (!m_imp)
 			return;
-		type_index a1 = typeid(m_imp); //typeid识别动态类型：指针的解引用
-		type_index b1 = typeid(*m_imp);
+		std::type_index a1 = typeid(m_imp); //typeid识别动态类型：指针的解引用
+		std::type_index b1 = typeid(*m_imp);
 
-		string a2 = typeid(m_imp).name();
-		string b2 = typeid(*m_imp).name();
+		std::string a2 = typeid(m_imp).name();
+		std::string b2 = typeid(*m_imp).name();
 
 
 		Cube* cube = dynamic_cast<Cube*>(m_imp);
-		string a3 = typeid(cube).name();
-		string a4 = typeid(cube).raw_name();
+		std::string a3 = typeid(cube).name();
+		std::string a4 = typeid(cube).raw_name();
 		size_t a5 = typeid(cube).hash_code();
 
 
@@ -322,5 +321,52 @@ public:
 		}
 	}
 };
+
+
+/* Warning, change the file to script automatically.
+Please modify the source file under source. 
+Source file: "test_triangular.h".*/
+
+namespace psykronix
+{
+    class Vertex
+    {
+    public:
+        double x = 0.0;
+        double y = 0.0;
+        double z = 0.0;
+        Vertex() {}
+		Vertex(double x_, double y_, double z_ = 0.0) :
+            x(x_),
+            y(y_),
+            z(z_)
+        {
+            //x = 2 * x_;
+        }
+        inline bool operator==(const Vertex& other) const
+        {
+            return x == other.x &&
+                y == other.y &&
+                z == other.z;
+        }
+#ifdef EIGEN_WORLD_VERSION
+        Vertex(const Eigen::Vector3d& vec) :
+            x(vec.x()),
+            y(vec.y()),
+            z(vec.z())
+        {
+        }
+        operator Eigen::Vector3d() const
+        {
+            return Eigen::Vector3d(x, y, z);
+        }
+#endif
+    };
+}
+
+//__declspec(dllimport) bool _isTwoTriangularIntersection(const std::array<BPParaVec, 3>& tBase, const std::array<BPParaVec, 3>& tLine);
+__declspec(dllimport) bool isTwoTrianglesIntersection(const std::array<Eigen::Vector3d, 3>& triL, const std::array<Eigen::Vector3d, 3>& triR);
+__declspec(dllimport) bool TriangularIntersectionTest(const std::array<Eigen::Vector3d, 3>& T1, const std::array<Eigen::Vector3d, 3>& T2);
+
 
 

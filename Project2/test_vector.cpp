@@ -1,5 +1,6 @@
 #include "pch.h"
 using namespace std;
+using namespace para;
 
 // 重载一下+号运算符
 template <typename T>
@@ -179,6 +180,12 @@ static int _test_chatgpt_1()
 	//							 |         |		
 	std::vector<double> vec{ 1.2, 3.4, 3.5, 5.6 };
 
+	//double a1 = vec[-1]; //not support
+	double a2 = vec.front();
+	double a3 = vec.back();
+	double a4 = vec[vec.size() - 1];
+	double a5 = vec[vec.size() - 2];
+
 	double target0 = 0;
 	double target1 = 2;
 	double target2 = 4;
@@ -215,7 +222,7 @@ static int _test_chatgpt_1()
 
 static int _enrol = []()->int {
 
-	_test_chatgpt_1();
+	//_test_chatgpt_1();
 	//test_list();
 	return 0;
 }();

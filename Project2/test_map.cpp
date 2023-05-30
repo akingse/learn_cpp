@@ -88,6 +88,6 @@ static int enrol = []()->int
 	//º¯ÊıÖ¸Õë
 	trigger = test_map;
 
-	test_map();
+	//test_map();
 	return 0;
 }();

@@ -1,12 +1,9 @@
 #include "pch.h"
 
-
-
 //int    polySides;//=  how many cornersthe polygon has
 //float  polyX[];//=  horizontalcoordinates of corners
 //float  polyY[];//=  verticalcoordinates of corners
 //float  x, y;//=  point to be tested
-
 
 bool pointInPolygon(int    polySides, float  polyX[], float  polyY[],float x, float y)
 {
