@@ -4,6 +4,91 @@ using namespace psykronix;
 using Eigen::Matrix3d;
 using Eigen::Vector3d;
 
+Matrix4d psykronix::rotx(double theta)
+{
+    Matrix4d R;
+    R << 1, 0, 0, 0,
+        0, cos(theta), -sin(theta), 0,
+        0, sin(theta), cos(theta), 0,
+		0, 0, 0, 1;
+    return R;
+}
+
+Matrix4d psykronix::roty(double theta)
+{
+    Matrix4d R;
+    R << cos(theta), 0, sin(theta), 0,
+        0, 1, 0, 0,
+        -sin(theta), 0, cos(theta), 0,
+        0, 0, 0, 1;
+    return R;
+}
+
+Matrix4d psykronix::rotz(double theta)
+{
+    Matrix4d R;
+    R << cos(theta), -sin(theta), 0, 0,
+        sin(theta), cos(theta), 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1;
+    return R;
+}
+
+Matrix4d psykronix::translate(double x, double y, double z /*= 0.0*/)
+{
+    Matrix4d T;
+    T << 1, 0, 0, x,
+        0, 1, 0, y,
+        0, 0, 1, z,
+        0, 0, 0, 1;
+    return T;
+}
+
+Matrix4d psykronix::translate(const Eigen::Vector3d& vec)
+{
+    return psykronix::translate(vec.x(), vec.y(), vec.z());
+}
+
+Matrix4d psykronix::scale(double x, double y, double z /*= 0.0*/)
+{
+    Matrix4d T;
+    T << x, 0, 0, 0,
+        0, y, 0, 0,
+        0, 0, z, 0,
+        0, 0, 0, 1;
+    return T;
+}
+
+std::array<Eigen::Vector3d, 3> psykronix::operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 3>& tri)
+{
+    std::array<Eigen::Vector3d, 3> res;
+	for (int i = 0; i < 3; i++)
+    {
+        Vector4d vec4 = mat * (tri[i].homogeneous()); //Vector4d(tri[i].x(), tri[i].y(), tri[i].z(), 1);
+        res[i] = vec4.hnormalized(); // Vector3d(vec4.x(), vec4.y(), vec4.z());
+    }
+    return res;
+}
+
+
+Matrix4d psykronix::rotate(const Eigen::Vector3d& axis /*= { 0, 0, 1 }*/, double theta /*= 0.0*/)
+{
+    Quaterniond q = Quaterniond(AngleAxisd(theta, axis));
+    Matrix3d R = q.toRotationMatrix();
+    Matrix4d mat4d = Matrix4d::Identity();
+    mat4d.block<3, 3>(0, 0) = R; //block<rows,cols>(row_index,col_index) <>is child size, () is begin index
+    //mat4d.block<1, 3>(3, 0) << 0, 0, 0; 
+    //mat4d(3, 3) = 1; 
+    return mat4d;
+}
+
+//--------------------------------------------------------------------------------------------------
+//  triangle
+//--------------------------------------------------------------------------------------------------
+
+
+
+
 //static int a = 1; //test global var
 //bool _isPointInTriangular(const BPParaVec& point, const std::array<BPParaVec, 3>& trigon)
 //{
@@ -566,3 +651,4 @@ bool TriangularIntersectionTest(const std::array<Eigen::Vector3d, 3>& T1, const 
         return false; // +*/<  101,98,0,30
     return true;
 }
+
