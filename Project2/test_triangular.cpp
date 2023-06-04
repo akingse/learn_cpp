@@ -1,8 +1,10 @@
 #include "pch.h"
+#include <limits>
 using namespace para;
+using namespace Eigen;
 using namespace psykronix;
-using Eigen::Matrix3d;
-using Eigen::Vector3d;
+static const float eps = 1e-6;
+
 
 Matrix4d psykronix::rotx(double theta)
 {
@@ -70,6 +72,29 @@ std::array<Eigen::Vector3d, 3> psykronix::operator*(const Eigen::Matrix4d& mat, 
     return res;
 }
 
+std::array<Eigen::Vector3f, 3> psykronix::operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3f, 3>& tri)
+{
+    std::array<Eigen::Vector3f, 3> res;
+    Matrix4f mat_float = mat.cast<float>();
+    for (int i = 0; i < 3; i++)
+    {
+        Vector4f vec4 = mat_float * (tri[i].homogeneous()); //Vector4d(tri[i].x(), tri[i].y(), tri[i].z(), 1);
+		res[i] = vec4.hnormalized(); //Vector3f(vec4.x(), vec4.y(), vec4.z()); //
+    }
+    return res;
+}
+
+//std::array<Eigen::Vector3f, 3> psykronix::operator*(const Eigen::Matrix4f& mat, const std::array<Eigen::Vector3f, 3>& tri)
+//{
+//    std::array<Eigen::Vector3f, 3> res;
+//    for (int i = 0; i < 3; i++)
+//    {
+//        Vector4f vec4 = mat * (tri[i].homogeneous()); //Vector4d(tri[i].x(), tri[i].y(), tri[i].z(), 1);
+//		res[i] = vec4.hnormalized(); //Vector3f(vec4.x(), vec4.y(), vec4.z()); //
+//    }
+//    return res;
+//}
+
 
 Matrix4d psykronix::rotate(const Eigen::Vector3d& axis /*= { 0, 0, 1 }*/, double theta /*= 0.0*/)
 {
@@ -87,170 +112,20 @@ Matrix4d psykronix::rotate(const Eigen::Vector3d& axis /*= { 0, 0, 1 }*/, double
 //--------------------------------------------------------------------------------------------------
 
 
-
-
-//static int a = 1; //test global var
-//bool _isPointInTriangular(const BPParaVec& point, const std::array<BPParaVec, 3>& trigon)
-//{
-//	BPParaVec pA = trigon[0];
-//	BPParaVec pB = trigon[1];
-//	BPParaVec pC = trigon[2];
-//	BPParaVec sdA = (point - pA) ^ (pB - pA);
-//	BPParaVec sdB = (point - pB) ^ (pC - pB);
-//	BPParaVec sdC = (point - pC) ^ (pA - pC);
-//	return abs(norm(sdA) * norm(sdB) - (sdA * sdB)) < PL_Surface && abs(norm(sdA) * norm(sdC) - (sdA * sdC)) < PL_Surface;
-//}
-
-
-/*
-快速互斥
-即线段的外接矩形相交，线段才可能会相交
-if(min(a.x,b.x)<=max(c.x,d.x) && min(c.y,d.y)<=max(a.y,b.y)&&min(c.x,d.x)<=max(a.x,b.x) && min(a.y,b.y)<=max(c.y,d.y))
-　　return true;
-
-*/
-
-//bool _isPointInTriangular(const BPParaVec& point, const std::array<BPParaVec, 3>& trigon)
-//{
-//    BPParaVec sdA = (point - trigon[0]) ^ (trigon[1] - trigon[0]);
-//    BPParaVec sdB = (point - trigon[1]) ^ (trigon[2] - trigon[1]);
-//    BPParaVec sdC = (point - trigon[2]) ^ (trigon[0] - trigon[2]);
-//    //isParallel(sdA , sdB); //double 
-//    return abs(norm(sdA) * norm(sdB) - (sdA * sdB)) < PL_Surface && abs(norm(sdA) * norm(sdC) - (sdA * sdC)) < PL_Surface;
-//}
-
-//bool _isPointInTriangular(const BPParaVec& point, const std::array<BPParaVec, 3>& trigon)
-//{
-//	//if (abs(((trigon[1] - trigon[0]) ^ (trigon[2] - trigon[0])) * (point - trigon[0])) > PL_Surface) //not coplanar
-// //       return false;
-//	return ((trigon[1] - trigon[0]) ^ (point - trigon[0])) * ((trigon[2] - trigon[0]) ^ (point - trigon[0])) < PL_Surface &&
-//        ((trigon[0] - trigon[1]) ^ (point - trigon[1])) * ((trigon[2] - trigon[1]) ^ (point - trigon[1])) < PL_Surface; // (x)*(x)<0 || abs()<PLA
-//}
-
-
-bool _isPointInTriangular(const Vector3d& point, const std::array<Vector3d, 3>& trigon)
+bool _isPointInTriangle(const Vector3f& point, const std::array<Vector3f, 3>& trigon) //must coplanar
 {
 	//if (abs(((trigon[1] - trigon[0]) ^ (trigon[2] - trigon[0])) * (point - trigon[0])) > PL_Surface) //not coplanar
- //       return false;
-	return ((trigon[1] - trigon[0]).cross(point - trigon[0])).dot((trigon[2] - trigon[0]).cross(point - trigon[0])) < PL_Surface &&
-		((trigon[0] - trigon[1]).cross(point - trigon[1])).dot((trigon[2] - trigon[1]).cross(point - trigon[1])) < PL_Surface; // (x)*(x)<0 || abs()<PLA
+    //    return false;
+	return ((trigon[1] - trigon[0]).cross(point - trigon[0])).dot((trigon[2] - trigon[0]).cross(point - trigon[0])) < eps &&
+		((trigon[0] - trigon[1]).cross(point - trigon[1])).dot((trigon[2] - trigon[1]).cross(point - trigon[1])) < eps; // (x)*(x)<0 || abs()<PLA
 }
-
-BPParaTransform _getMatrixFromThreePoints(const std::array<BPParaVec, 3>& points)
+bool _isPointInTriangle(const Vector3d& point, const std::array<Vector3d, 3>& trigon) //must coplanar
 {
-    BPParaVec vecX = unitize(points[1]- points[0]);
-    BPParaVec vecY = points[2]- points[0];
-    BPParaVec vecZ = unitize(vecX ^ vecY); // been collinear judge
-    vecY = (vecZ ^ vecX);
-    return setMatrixByColumnVectors(vecX, vecY, vecZ, points[0]);
+    return ((trigon[1] - trigon[0]).cross(point - trigon[0])).dot((trigon[2] - trigon[0]).cross(point - trigon[0])) < eps &&
+        ((trigon[0] - trigon[1]).cross(point - trigon[1])).dot((trigon[2] - trigon[1]).cross(point - trigon[1])) < eps; // (x)*(x)<0 || abs()<PLA
 }
 
-BPParaVec _getIntersectPointOfSegmentPlane(const BPParaVec& pA, const BPParaVec& pB, const BPParaVec& pOri, const BPParaVec& normal)
-{
-    double div = (normal * (pB - pA)); //
-    if (abs(div) < PL_Surface)
-    {
-        return pA;
-    }
-    double k = (normal * (pA - pOri)) / div;
-    return pA + k * (pA - pB);
-}
-
-//
-//bool _isTwoTriangularIntersection1(const std::array<BPParaVec, 3>& triL, const std::array<BPParaVec, 3>& triR)
-//{
-//	BPParaVec pL0 = triL[0];
-//	BPParaVec pL1 = triL[1];
-//	BPParaVec pL2 = triL[2];
-//	BPParaVec pR0 = triR[0];
-//	BPParaVec pR1 = triR[1];
-//	BPParaVec pR2 = triR[2];
-//
-//	//cout << "pL0: " << pL0.x() << "," << pL0.y() << "," << pL0.z() << endl;
-//	//cout << "pR0: " << pR0.x() << "," << pR0.y() << "," << pR0.z() << endl;
-//
-//	// 1, check legal triangular
-//
-//
-//	//BPParaVec veczL = (triL[1] - triL[0]) ^ (triL[2] - triL[0]);
-//	BPParaVec veczL = (pL1 - pL0) ^ (pL2 - pL0);
-//	BPParaVec veczR = (pR1 - pR0) ^ (pR2 - pR0);
-//
-//	// plane parallel
-//	//if (isParallel(veczL, veczR))
-//	//{
-//
-//	//}
-//	// 
-//	// 
-//	//through the triangular plane
-//	// edge of triR cross plane triL
-//	double dotR2L_A = (veczL * (pL0 - pR0)) * (veczL * (pL1 - pR0));
-//	double dotR2L_B = (veczL * (pL1 - pR0)) * (veczL * (pL2 - pR0));
-//	double dotR2L_C = (veczL * (pL2 - pR0)) * (veczL * (pL0 - pR0));
-//	bool acrossR2L_A = (dotR2L_A < 0.0 || abs(dotR2L_A) < PL_Surface);
-//	bool acrossR2L_B = (dotR2L_B < 0.0 || abs(dotR2L_B) < PL_Surface);
-//	bool acrossR2L_C = (dotR2L_C < 0.0 || abs(dotR2L_C) < PL_Surface);
-//	if (!acrossR2L_A && !acrossR2L_B && !acrossR2L_C)
-//		return false;
-//
-//	double dotL2R_A = (veczR * (pR0 - pL0)) * (veczR * (pR1 - pL0));
-//	double dotL2R_B = (veczR * (pR1 - pL0)) * (veczR * (pR2 - pL0));
-//	double dotL2R_C = (veczR * (pR2 - pL0)) * (veczR * (pR0 - pL0));
-//	bool acrossL2R_A = (dotL2R_A < 0.0 || abs(dotL2R_A) < PL_Surface);
-//	bool acrossL2R_B = (dotL2R_B < 0.0 || abs(dotL2R_B) < PL_Surface);
-//	bool acrossL2R_C = (dotL2R_C < 0.0 || abs(dotL2R_C) < PL_Surface);
-//	if (!acrossL2R_A && !acrossL2R_B && !acrossL2R_C)
-//		return false;
-//
-//	// special coplanar
-//
-//
-//	if (acrossR2L_A) // first filter
-//	{
-//		double div = (veczL * (pL0 - pL1));
-//		if (abs(div) < PL_Surface)
-//		{
-//			if (_isPointInTriangular(pL0, triL) || _isPointInTriangular(pL1, triL))
-//				return true;
-//		}
-//		double k = (veczL * (pL0 - pR0)) / div;
-//		BPParaVec locate = pL0 + k * (pL1 - pL0);  // paramater formula vector
-//		if (_isPointInTriangular(locate, triL))
-//			return true;
-//	}
-//	if (acrossR2L_B) // first filter
-//	{
-//		double div = (veczL * (pL1 - pL2));
-//		if (abs(div) < PL_Surface)
-//		{
-//			if (_isPointInTriangular(pL1, triL) || _isPointInTriangular(pL2, triL))
-//				return true;
-//		}
-//		double k = (veczL * (pL1 - pR0)) / div;
-//		BPParaVec locate = pL1 + k * (pL2 - pL1);  // paramater formula vector
-//		if (_isPointInTriangular(locate, triL))
-//			return true;
-//	}
-//	if (acrossR2L_C) // first filter
-//	{
-//		double div = (veczL * (pL2 - pL0));
-//		if (abs(div) < PL_Surface)
-//		{
-//			if (_isPointInTriangular(pL2, triL) || _isPointInTriangular(pL0, triL))
-//				return true;
-//		}
-//		double k = (veczL * (pL2 - pR0)) / div;
-//		BPParaVec locate = pL2 + k * (pL0 - pL2);  // paramater formula vector
-//		if (_isPointInTriangular(locate, triL))
-//			return true;
-//	}
-//	return false;
-//}
-//
-
-
-bool isTwoTrianglesIntersection(const std::array<Vector3d, 3>& triL, const std::array<Vector3d, 3>& triR)
+bool isTwoTrianglesIntersection(const std::array<Vector3f, 3>& triL, const std::array<Vector3f, 3>& triR)
 {
     // using for many coplanar
     //if (abs(veczL.dot(triR[0] - triL[0])) < PL_Surface) //is point on triangular plane
@@ -270,74 +145,124 @@ bool isTwoTrianglesIntersection(const std::array<Vector3d, 3>& triL, const std::
     //}
 
     // right through left plane
-    Vector3d veczL = (triL[1] - triL[0]).cross(triL[2] - triL[0]);
-    bool acrossR2L_A = (veczL.dot(triR[0] - triL[0])) * (veczL.dot(triR[1] - triL[0])) < PL_Surface; //include point-on-plane
-	bool acrossR2L_B = (veczL.dot(triR[1] - triL[0])) * (veczL.dot(triR[2] - triL[0])) < PL_Surface;
-	bool acrossR2L_C = (veczL.dot(triR[2] - triL[0])) * (veczL.dot(triR[0] - triL[0])) < PL_Surface;
-	if (!acrossR2L_A && !acrossR2L_B && !acrossR2L_C)
-		return false;
+    Vector3f veczL = (triL[1] - triL[0]).cross(triL[2] - triL[0]);
+    bool acrossR2L_A = (veczL.dot(triR[0] - triL[0])) * (veczL.dot(triR[1] - triL[0])) < eps; //include point-on-plane
+    bool acrossR2L_B = (veczL.dot(triR[1] - triL[0])) * (veczL.dot(triR[2] - triL[0])) < eps;
+    bool acrossR2L_C = (veczL.dot(triR[2] - triL[0])) * (veczL.dot(triR[0] - triL[0])) < eps;
+    if (!acrossR2L_A && !acrossR2L_B && !acrossR2L_C)
+        return false;
 
     // left through right plane
- //   double dotL2R_A = (veczR.dot(triR[0] - triL[0])) * (veczR.dot(triR[1] - triL[0]));
-	//double dotL2R_B = (veczR.dot(triR[1] - triL[0])) * (veczR.dot(triR[2] - triL[0]));
-	//double dotL2R_C = (veczR.dot(triR[2] - triL[0])) * (veczR.dot(triR[0] - triL[0]));
-    Vector3d veczR = (triR[1] - triR[0]).cross(triR[2] - triR[0]);
-    bool acrossL2R_A = (veczR.dot(triR[0] - triL[0])) * (veczR.dot(triR[1] - triL[0])) < PL_Surface;
-	bool acrossL2R_B = (veczR.dot(triR[1] - triL[0])) * (veczR.dot(triR[2] - triL[0])) < PL_Surface;
-	bool acrossL2R_C = (veczR.dot(triR[2] - triL[0])) * (veczR.dot(triR[0] - triL[0])) < PL_Surface;
-	if (!acrossL2R_A && !acrossL2R_B && !acrossL2R_C)
-		return false;
+    //double dotL2R_A = (veczR.dot(triR[0] - triL[0])) * (veczR.dot(triR[1] - triL[0]));
+    //double dotL2R_B = (veczR.dot(triR[1] - triL[0])) * (veczR.dot(triR[2] - triL[0]));
+    //double dotL2R_C = (veczR.dot(triR[2] - triL[0])) * (veczR.dot(triR[0] - triL[0]));
+    Vector3f veczR = (triR[1] - triR[0]).cross(triR[2] - triR[0]);
+    bool acrossL2R_A = (veczR.dot(triR[0] - triL[0])) * (veczR.dot(triR[1] - triL[0])) < eps;
+    bool acrossL2R_B = (veczR.dot(triR[1] - triL[0])) * (veczR.dot(triR[2] - triL[0])) < eps;
+    bool acrossL2R_C = (veczR.dot(triR[2] - triL[0])) * (veczR.dot(triR[0] - triL[0])) < eps;
+    if (!acrossL2R_A && !acrossL2R_B && !acrossL2R_C)
+        return false;
 
-	if (acrossR2L_A) // first filter
-	{
-        // k = dot(vecZ, p0-pO)/dot(vecZ, p0-p1); p = p0 + k * (p1 - p0);
-		//double deno = (veczL.dot(triR[0] - triR[1]));
-		//if (abs(deno) < PL_Surface)
-		//{
-		//	if (_isPointInTriangular(triR[0], triL) || _isPointInTriangular(triR[1], triL))
-		//		return true;
-		//}
-		//else
-		//{
-			Vector3d locate = triR[0] + ((veczL.dot(triR[0] - triL[0])) / (veczL.dot(triR[0] - triR[1]))) * (triR[1] - triR[0]); 
-			if (_isPointInTriangular(locate, triL))
-				return true;
-		//}
-	}
-	if (acrossR2L_B) // first filter
-	{
-		//double deno = (veczL.dot(triR[1] - triR[2]));
-		//if (abs(deno) < PL_Surface)
-		//{
-		//	if (_isPointInTriangular(triR[1], triL) || _isPointInTriangular(triR[2], triL))
-		//		return true;
-		//}
-		//else
-		//{
-            Vector3d locate = triR[1] + ((veczL.dot(triR[1] - triL[0])) / (veczL.dot(triR[1] - triR[2]))) * (triR[2] - triR[1]); 
-			if (_isPointInTriangular(locate, triL))
-				return true;
-		//}
-	}
-	if (acrossR2L_C) // first filter
-	{
-		//double deno = (veczL.dot(triL[2] - triL[0]));
-		//if (abs(deno) < PL_Surface)
-		//{
-		//	if (_isPointInTriangular(triL[2], triL) || _isPointInTriangular(triL[0], triL))
-		//		return true;
-		//}
-		//else
-		//{
-            Vector3d locate = triR[2] + ((veczL.dot(triR[2] - triL[0])) / (veczL.dot(triR[2] - triR[0]))) * (triR[0] - triR[2]);
-			if (_isPointInTriangular(locate, triL))
-				return true;
-		//}
-	}
-	return false;
+    if (acrossR2L_A) // first filter
+    {
+        float deno = veczL.dot(triR[0] - triR[1]);
+        if (fabs(deno) < eps) // perpendi
+        {
+            if (_isPointInTriangle(triR[0], triL) || _isPointInTriangle(triR[1], triL))
+                return true;
+        }
+        else
+        {
+            Vector3f point = triR[0] + (veczL.dot(triR[0] - triL[0]) / deno) * (triR[1] - triR[0]);
+            if (_isPointInTriangle(point, triL))
+                return true;
+        }
+    }
+    if (acrossR2L_B) // first filter
+    {
+        float deno = (veczL.dot(triR[1] - triR[2]));
+        if (fabs(deno) < eps) // perpendi
+        {
+            if (_isPointInTriangle(triR[1], triL) || _isPointInTriangle(triR[2], triL))
+                return true;
+        }
+        else
+        {
+            Vector3f point = triR[1] + (veczL.dot(triR[1] - triL[0]) / deno) * (triR[2] - triR[1]);
+            if (_isPointInTriangle(point, triL))
+                return true;
+        }
+    }
+    if (acrossR2L_C) // first filter
+    {
+        float deno = (veczL.dot(triR[2] - triR[0]));
+        if (fabs(deno) < eps) // perpendi
+        {
+            if (_isPointInTriangle(triR[2], triL) || _isPointInTriangle(triR[0], triL))
+                return true;
+        }
+        else
+        {
+            Vector3f point = triR[2] + (veczL.dot(triR[2] - triL[0]) / deno) * (triR[0] - triR[2]);
+            if (_isPointInTriangle(point, triL))
+                return true;
+        }
+    }
+    // reversal
+    if (acrossL2R_A) // first filter
+    {
+        float deno = veczR.dot(triL[0] - triL[1]);
+        if (fabs(deno) < eps) // perpendi
+        {
+            if (_isPointInTriangle(triL[0], triR) || _isPointInTriangle(triL[1], triR))
+                return true;
+        }
+        else
+        {
+            Vector3f point = triL[0] + (veczL.dot(triL[0] - triR[0]) / deno) * (triL[1] - triL[0]);
+            if (_isPointInTriangle(point, triR))
+                return true;
+        }
+    }
+    if (acrossL2R_B) // first filter
+    {
+        float deno = veczR.dot(triL[1] - triL[2]);
+        if (fabs(deno) < eps) // perpendi
+        {
+            if (_isPointInTriangle(triL[1], triR) || _isPointInTriangle(triL[2], triR))
+                return true;
+        }
+        else
+        {
+            Vector3f point = triL[0] + (veczL.dot(triL[0] - triR[0]) / deno) * (triL[1] - triL[0]);
+            if (_isPointInTriangle(point, triR))
+                return true;
+        }
+    }
+    if (acrossL2R_B) // first filter
+    {
+        float deno = veczR.dot(triL[2] - triL[0]);
+        if (fabs(deno) < eps) // perpendi
+        {
+            if (_isPointInTriangle(triL[2], triR) || _isPointInTriangle(triL[0], triR))
+                return true;
+        }
+        else
+        {
+            Vector3f point = triL[2] + (veczL.dot(triL[2] - triR[0]) / deno) * (triL[0] - triL[2]);
+            if (_isPointInTriangle(point, triR))
+                return true;
+        }
+    }
+    return false;
 }
 
-
+bool isTwoTrianglesIntersection(const std::array<Eigen::Vector3d, 3>& triL, const std::array<Eigen::Vector3d, 3>& triR)
+{
+    std::array<Vector3f, 3>  triA = { triL[0].cast<float>(), triL[1].cast<float>(), triL[2].cast<float>() };
+    std::array<Vector3f, 3>  triB = { triR[0].cast<float>(), triR[1].cast<float>(), triR[2].cast<float>() };
+    return isTwoTrianglesIntersection(triA, triB);
+}
 
 bool TriangularIntersectionTest(const std::array<Eigen::Vector3d, 3>& T1, const std::array<Eigen::Vector3d, 3>& T2)
 {
@@ -652,3 +577,311 @@ bool TriangularIntersectionTest(const std::array<Eigen::Vector3d, 3>& T1, const 
     return true;
 }
 
+bool TriangularIntersectionTest(const std::array<Eigen::Vector3f, 3>& T1, const std::array<Eigen::Vector3f, 3>& T2)
+{
+    std::array<Vector3d, 3>  triA = { T1[0].cast<double>(), T1[1].cast<double>(), T1[2].cast<double>()};
+    std::array<Vector3d, 3>  triB = { T2[0].cast<double>(), T2[1].cast<double>(), T2[2].cast<double>()};
+    return TriangularIntersectionTest(triA, triB);
+}
+
+
+bool _isEdgeCrossTriangle(const std::array<Vector3d, 2>& segment, const std::array<Vector3d, 3>& trigon) // must coplanar
+{
+    // double straddle experiment x3
+    bool edgea2segm = ((segment[0] - trigon[0]).cross(trigon[1] - trigon[0])).dot((segment[1] - trigon[0]).cross(trigon[1] - trigon[0])) < eps;
+    bool segm2edgea = ((trigon[1] - segment[0]).cross(segment[1] - segment[0])).dot((trigon[0] - segment[0]).cross(segment[1] - segment[0])) < eps;
+    if (edgea2segm && segm2edgea)
+        return true;
+    bool edgeb2segm = ((segment[0] - trigon[1]).cross(trigon[2] - trigon[1])).dot((segment[1] - trigon[1]).cross(trigon[2] - trigon[1])) < eps;
+    bool segm2edgeb = ((trigon[2] - segment[0]).cross(segment[1] - segment[0])).dot((trigon[1] - segment[0]).cross(segment[1] - segment[0])) < eps;
+    if (edgeb2segm && segm2edgeb)
+        return true;
+    bool edgec2segm = ((segment[0] - trigon[2]).cross(trigon[0] - trigon[2])).dot((segment[1] - trigon[2]).cross(trigon[0] - trigon[2])) < eps;
+    bool segm2edgec = ((trigon[0] - segment[0]).cross(segment[1] - segment[0])).dot((trigon[2] - segment[0]).cross(segment[1] - segment[0])) < eps;
+    if (edgec2segm && segm2edgec)
+        return true;
+    return false;
+}
+
+// must cross plane
+bool _isSegmentCrossTriangleSurface(const std::array<Vector3d, 2>& segment, const std::array<Vector3d, 3>& trigon) //start point outof plane
+{
+    // compare angle of normal-vector
+    bool isLeftSa = (segment[1] - segment[0]).dot((trigon[0] - segment[0]).cross(trigon[1] - segment[0])) < eps;
+    bool isLeftSb = (segment[1] - segment[0]).dot((trigon[1] - segment[0]).cross(trigon[2] - segment[0])) < eps;
+    bool isLeftSc = (segment[1] - segment[0]).dot((trigon[2] - segment[0]).cross(trigon[0] - segment[0])) < eps;
+    if ((isLeftSa && isLeftSb && isLeftSc) || (!isLeftSa && !isLeftSb && !isLeftSc))
+        return true;
+    //bool isLeftEa = (segment[0] - segment[1]).dot((trigon[0] - segment[1]).cross(trigon[1] - segment[1])) < eps;
+    //bool isLeftEb = (segment[0] - segment[1]).dot((trigon[1] - segment[1]).cross(trigon[2] - segment[1])) < eps;
+    //bool isLeftEc = (segment[0] - segment[1]).dot((trigon[2] - segment[1]).cross(trigon[0] - segment[1])) < eps;
+    //if ((isLeftEa && isLeftEb && isLeftEc) || (!isLeftEa && !isLeftEb && !isLeftEc))
+    //    return true;
+    return false;
+}
+
+
+bool isTwoTrianglesIntersection1(const std::array<Vector3d, 3>& triL, const std::array<Vector3d, 3>& triR)
+{
+    // right edge through left plane
+    Vector3d veczL = (triL[1] - triL[0]).cross(triL[2] - triL[0]);
+    bool acrossR2L_A = (veczL.dot(triR[0] - triL[0])) * (veczL.dot(triR[1] - triL[0])) < eps; //include point-on-plane
+    bool acrossR2L_B = (veczL.dot(triR[1] - triL[0])) * (veczL.dot(triR[2] - triL[0])) < eps;
+    bool acrossR2L_C = (veczL.dot(triR[2] - triL[0])) * (veczL.dot(triR[0] - triL[0])) < eps;
+    if (!acrossR2L_A && !acrossR2L_B && !acrossR2L_C)
+        return false;
+
+    // left edge through right plane
+    Vector3d veczR = (triR[1] - triR[0]).cross(triR[2] - triR[0]);
+    bool acrossL2R_A = (veczR.dot(triR[0] - triL[0])) * (veczR.dot(triR[1] - triL[0])) < eps;
+    bool acrossL2R_B = (veczR.dot(triR[1] - triL[0])) * (veczR.dot(triR[2] - triL[0])) < eps;
+    bool acrossL2R_C = (veczR.dot(triR[2] - triL[0])) * (veczR.dot(triR[0] - triL[0])) < eps;
+    if (!acrossL2R_A && !acrossL2R_B && !acrossL2R_C)
+        return false;
+
+    if (acrossR2L_A) // first filter
+    {
+        double deno = veczL.dot(triR[0] - triR[1]);
+        if (fabs(deno) < eps) // perpendi to veczL
+        {
+            if (_isEdgeCrossTriangle({ triR[0], triR[1] }, triL)) //segment on plane
+                return true;
+        }
+        else
+        {
+            Vector3d point = triR[0] + (veczL.dot(triR[0] - triL[0]) / deno) * (triR[1] - triR[0]);
+            if (_isPointInTriangle(point, triL))
+                return true;
+        }
+    }
+    if (acrossR2L_B) // first filter
+    {
+        double deno = (veczL.dot(triR[1] - triR[2]));
+        if (fabs(deno) < eps) // perpendi to veczL
+        {
+            if (_isEdgeCrossTriangle({ triR[1], triR[2] }, triL)) //segment on plane
+                return true;
+        }
+        else
+        {
+            Vector3d point = triR[1] + (veczL.dot(triR[1] - triL[0]) / deno) * (triR[2] - triR[1]);
+            if (_isPointInTriangle(point, triL))
+                return true;
+        }
+    }
+    if (acrossR2L_C) // first filter
+    {
+        double deno = (veczL.dot(triR[2] - triR[0]));
+        if (fabs(deno) < eps) // perpendi to veczL
+        {
+            if (_isEdgeCrossTriangle({ triR[2], triR[0] }, triL)) //segment on plane
+                return true;
+        }
+        else
+        {
+            Vector3d point = triR[2] + (veczL.dot(triR[2] - triL[0]) / deno) * (triR[0] - triR[2]);
+            if (_isPointInTriangle(point, triL))
+                return true;
+        }
+    }
+    // reversal
+    if (acrossL2R_A) // first filter
+    {
+        double deno = veczR.dot(triL[0] - triL[1]);
+        if (fabs(deno) < eps) // perpendi to veczR
+        {
+            if (_isEdgeCrossTriangle({ triL[0], triL[1] }, triR)) //segment on plane
+                return true;
+        }
+        else
+        {
+            Vector3d point = triL[0] + (veczL.dot(triL[0] - triR[0]) / deno) * (triL[1] - triL[0]);
+            if (_isPointInTriangle(point, triR))
+                return true;
+        }
+    }
+    if (acrossL2R_B) // first filter
+    {
+        double deno = veczR.dot(triL[1] - triL[2]);
+        if (fabs(deno) < eps) // perpendi to veczR
+        {
+            if (_isEdgeCrossTriangle({ triL[1], triL[2] }, triR)) //segment on plane
+                return true;
+        }
+        else
+        {
+            Vector3d point = triL[0] + (veczL.dot(triL[0] - triR[0]) / deno) * (triL[1] - triL[0]);
+            if (_isPointInTriangle(point, triR))
+                return true;
+        }
+    }
+    if (acrossL2R_B) // first filter
+    {
+        double deno = veczR.dot(triL[2] - triL[0]);
+        if (fabs(deno) < eps) // perpendi to veczR
+        {
+            if (_isEdgeCrossTriangle({ triL[2], triL[0] }, triR)) //segment on plane
+                return true;
+        }
+        else
+        {
+            Vector3d point = triL[2] + (veczL.dot(triL[2] - triR[0]) / deno) * (triL[0] - triL[2]);
+            if (_isPointInTriangle(point, triR))
+                return true;
+        }
+    }
+    return false;
+}
+
+
+bool isTwoTrianglesIntersection2(const std::array<Vector3d, 3>& triL, const std::array<Vector3d, 3>& triR)
+{
+
+    // right edge through left plane
+    Vector3d veczL = (triL[1] - triL[0]).cross(triL[2] - triL[0]);
+    bool acrossR2L_A = (veczL.dot(triR[0] - triL[0])) * (veczL.dot(triR[1] - triL[0])) < eps; //include point-on-plane
+    bool acrossR2L_B = (veczL.dot(triR[1] - triL[0])) * (veczL.dot(triR[2] - triL[0])) < eps;
+    bool acrossR2L_C = (veczL.dot(triR[2] - triL[0])) * (veczL.dot(triR[0] - triL[0])) < eps;
+    if (!acrossR2L_A && !acrossR2L_B && !acrossR2L_C)
+        return false;
+
+    // left edge through right plane
+    Vector3d veczR = (triR[1] - triR[0]).cross(triR[2] - triR[0]);
+    bool acrossL2R_A = (veczR.dot(triR[0] - triL[0])) * (veczR.dot(triR[1] - triL[0])) < eps;
+    bool acrossL2R_B = (veczR.dot(triR[1] - triL[0])) * (veczR.dot(triR[2] - triL[0])) < eps;
+    bool acrossL2R_C = (veczR.dot(triR[2] - triL[0])) * (veczR.dot(triR[0] - triL[0])) < eps;
+    if (!acrossL2R_A && !acrossL2R_B && !acrossL2R_C)
+        return false;
+
+    // using face to-left test
+    //Vector3d veczL = (triL[1] - triL[0]).cross(triL[2] - triL[0]); // triL close face triangle
+    //bool acrossR2L_A = (veczL.dot(triR[0] - triL[0])) * (veczL.dot(triR[1] - triL[0])) < eps; //include point-on-plane
+    if (acrossR2L_A) // first filter
+    {
+        bool pointOnface_s = fabs(veczL.dot(triR[0] - triL[0])) < eps; //start point
+        bool pointOnface_e = fabs(veczL.dot(triR[1] - triL[0])) < eps; //end point
+        if (!pointOnface_s)
+        {
+            if (_isSegmentCrossTriangleSurface({ triR[0], triR[1] }, triL))
+                return true;
+        }
+        else if (!pointOnface_e)
+        {
+            if (_isSegmentCrossTriangleSurface({ triR[1], triR[0] }, triL))
+                return true;
+        }
+        else if (pointOnface_s && pointOnface_e)
+        {
+            if (_isEdgeCrossTriangle({ triR[0], triR[1] }, triL)) //segment on plane
+                return true;
+        }
+    }
+    //bool acrossR2L_B = (veczL.dot(triR[1] - triL[0])) * (veczL.dot(triR[2] - triL[0])) < eps;
+    if (acrossR2L_B) // first filter
+    {
+        bool pointOnface_s = fabs(veczL.dot(triR[1] - triL[0])) < eps; //start point
+        bool pointOnface_e = fabs(veczL.dot(triR[2] - triL[0])) < eps; //end point
+        if (!pointOnface_s)
+        {
+            if (_isSegmentCrossTriangleSurface({ triR[1], triR[2] }, triL))
+                return true;
+        }
+        else if (!pointOnface_e)
+        {
+            if (_isSegmentCrossTriangleSurface({ triR[2], triR[1] }, triL))
+                return true;
+        }
+        else if (pointOnface_s && pointOnface_e)
+        {
+            if (_isEdgeCrossTriangle({ triR[1], triR[2] }, triL)) //segment on plane
+                return true;
+        }
+    }
+    //bool acrossR2L_C = (veczL.dot(triR[2] - triL[0])) * (veczL.dot(triR[0] - triL[0])) < eps;
+    if (acrossR2L_C) // first filter
+    {
+        bool pointOnface_s = fabs(veczL.dot(triR[2] - triL[0])) < eps; //start point
+        bool pointOnface_e = fabs(veczL.dot(triR[0] - triL[0])) < eps; //end point
+        if (!pointOnface_s)
+        {
+            if (_isSegmentCrossTriangleSurface({ triR[2], triR[1] }, triL))
+                return true;
+        }
+        else if (!pointOnface_e)
+        {
+            if (_isSegmentCrossTriangleSurface({ triR[0], triR[0] }, triL))
+                return true;
+        }
+        else if (pointOnface_s && pointOnface_e)
+        {
+            if (_isEdgeCrossTriangle({ triR[2], triR[0] }, triL)) //segment on plane
+                return true;
+        }
+    }
+    //// exchange two triangles
+    //Vector3d veczR = (triR[1] - triR[0]).cross(triR[2] - triR[0]); // triR close face triangle
+    //bool acrossL2R_A = (veczR.dot(triL[0] - triR[0])) * (veczR.dot(triL[1] - triR[0])) < eps; //include point-on-plane
+    if (acrossL2R_A) // first filter
+    {
+        bool pointOnface_s = fabs(veczR.dot(triL[0] - triR[0])) < eps; //start point
+        bool pointOnface_e = fabs(veczR.dot(triL[1] - triR[0])) < eps; //end point
+        if (!pointOnface_s)
+        {
+            if (_isSegmentCrossTriangleSurface({ triL[0], triL[1] }, triR))
+                return true;
+        }
+        else if (!pointOnface_e)
+        {
+            if (_isSegmentCrossTriangleSurface({ triL[1], triL[0] }, triR))
+                return true;
+        }
+        else if (pointOnface_s && pointOnface_e)
+        {
+            if (_isEdgeCrossTriangle({ triL[0], triL[1] }, triR)) //segment on plane
+                return true;
+        }
+    }
+    //bool acrossL2R_B = (veczR.dot(triL[1] - triR[0])) * (veczR.dot(triL[2] - triR[0])) < eps;
+    if (acrossL2R_B) // first filter
+    {
+        bool pointOnface_s = fabs(veczR.dot(triL[1] - triR[0])) < eps; //start point
+        bool pointOnface_e = fabs(veczR.dot(triL[2] - triR[0])) < eps; //end point
+        if (!pointOnface_s)
+        {
+            if (_isSegmentCrossTriangleSurface({ triL[1], triL[2] }, triR))
+                return true;
+        }
+        else if (!pointOnface_e)
+        {
+            if (_isSegmentCrossTriangleSurface({ triL[2], triL[1] }, triR))
+                return true;
+        }
+        else if (pointOnface_s && pointOnface_e)
+        {
+            if (_isEdgeCrossTriangle({ triL[1], triL[2] }, triR)) //segment on plane
+                return true;
+        }
+    }
+    //bool acrossL2R_C = (veczR.dot(triL[2] - triL[0])) * (veczR.dot(triL[0] - triL[0])) < eps;
+    if (acrossL2R_C) // first filter
+    {
+        bool pointOnface_s = fabs(veczR.dot(triL[2] - triL[0])) < eps; //start point
+        bool pointOnface_e = fabs(veczR.dot(triL[0] - triL[0])) < eps; //end point
+        if (!pointOnface_s)
+        {
+            if (_isSegmentCrossTriangleSurface({ triL[2], triL[1] }, triL))
+                return true;
+        }
+        else if (!pointOnface_e)
+        {
+            if (_isSegmentCrossTriangleSurface({ triL[0], triL[0] }, triL))
+                return true;
+        }
+        else if (pointOnface_s && pointOnface_e)
+        {
+            if (_isEdgeCrossTriangle({ triL[2], triL[0] }, triL)) //segment on plane
+                return true;
+        }
+    }
+    return false;
+}

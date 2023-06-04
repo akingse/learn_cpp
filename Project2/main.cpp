@@ -6,6 +6,14 @@
 using namespace para;
 using Eigen::Vector3d;
 
+//精度
+static const float eps = 1e-6;
+static const float epsF = FLT_EPSILON;
+static const double epsD = DBL_EPSILON;
+
+auto eps1 = numeric_limits<float>::epsilon();
+auto eps2 = numeric_limits<double>::epsilon();
+
 
 Vec2 _get_rand()
 {
@@ -29,13 +37,16 @@ std::array<Vector3d, 3> _get_rand3()
 	//srand((int)time(0));
 	//Sleep(100);
 	return std::array<Vector3d, 3> {
-		Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
+			Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
 			Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
 			Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff) };
 }
 
 int main()
 {
+	double a = 3;
+	float b = 3;
+	double c = a - b;
 
 	clock_t start, end;
 	//Sleep(1000);
@@ -49,12 +60,12 @@ int main()
 	for (int i = 0; i < 3; i++)
 	{
 		start = clock();
-		for (int i = 0; i < int(1e4); i++) //1time = 1.429s, python spent 30s
+		for (int i = 0; i < int(1e7); i++) //1time = 1.429s, python spent 30s
 		{
 			//auto res = _get_circumcircle_center({ _get_rand() ,_get_rand() ,_get_rand() });
 			//double res = _test_custom_calculate(nums);
 			//bool res = isTwoTrianglesIntersection(tA, tB); //without rand//debug=1e7=9.6s,release=1e7=1.8s,
-			bool res = isTwoTrianglesIntersection(_get_rand3(), _get_rand3()); //debug=1e7=16.5s,release=1e7=5.1s,omp=0.85
+			bool res = isTwoTrianglesIntersection1(_get_rand3(), _get_rand3()); //debug=1e7=16.5s,release=1e7=5.1s,omp=0.85
 			//bool res = TriangularIntersectionTest(_get_rand3(), _get_rand3());
 		}
 		end = clock();   //结束时间

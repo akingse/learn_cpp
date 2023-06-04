@@ -40,7 +40,7 @@ inline bool interface_enrol(std::string object, std::string propertyID, T t)
 	dp->m_fun = &t;
 	dp->m_funType = typeid(T);//Cube:setHigh(int)
 	dp->m_name = typeid(T).name();
- 	string name = typeid(T).name();//"void (__cdecl Cube::*)(int) __ptr64"
+ 	std::string name = typeid(T).name();//"void (__cdecl Cube::*)(int) __ptr64"
 	if (g_funMap.find(object) == g_funMap.end())
 		g_funMap[object] = { {propertyID, dp} };
 	else
@@ -59,7 +59,7 @@ inline void interface_enrol(std::string object, std::string propertyID, T* t)
 	dp->m_fun = t;
 	dp->m_funType = typeid(T); //cube_setlength(class BPObject *,int)
 	dp->m_name = typeid(T).name();
-	string name = typeid(T).name();//"bool __cdecl(class BPObject * __ptr64,int)"
+	std::string name = typeid(T).name();//"bool __cdecl(class BPObject * __ptr64,int)"
 	if (g_funMap.find(object) == g_funMap.end())
 		g_funMap[object] = { {propertyID, dp} };
 	else

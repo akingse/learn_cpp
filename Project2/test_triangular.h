@@ -14,7 +14,6 @@ namespace psykronix
             y(y_),
             z(z_)
         {
-            //x = 2 * x_;
         }
         inline bool operator==(const Vertex& other) const
         {
@@ -33,6 +32,10 @@ namespace psykronix
         {
             return Eigen::Vector3d(x, y, z);
         }
+        operator Eigen::Vector3f() const
+        {
+            return Eigen::Vector3f(x, y, z);
+        }
 #endif
     };
 
@@ -46,10 +49,16 @@ namespace psykronix
 	__declspec(dllexport) Eigen::Matrix4d translate(double x, double y, double z = 0.0);
     __declspec(dllexport) Eigen::Matrix4d scale(double x, double y, double z = 1.0);
     __declspec(dllexport) std::array<Eigen::Vector3d, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 3>& tri);
+    __declspec(dllexport) std::array<Eigen::Vector3f, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3f, 3>& tri);
+    //__declspec(dllexport) std::array<Eigen::Vector3f, 3> operator*(const Eigen::Matrix4f& mat, const std::array<Eigen::Vector3f, 3>& tri);
 
 }
 
 //__declspec(dllexport) bool _isTwoTriangularIntersection(const std::array<BPParaVec, 3>& tBase, const std::array<BPParaVec, 3>& tLine);
+__declspec(dllexport) bool isTwoTrianglesIntersection(const std::array<Eigen::Vector3f, 3>& triL, const std::array<Eigen::Vector3f, 3>& triR);
+__declspec(dllexport) bool isTwoTrianglesIntersection1(const std::array<Eigen::Vector3d, 3>& triL, const std::array<Eigen::Vector3d, 3>& triR);
+__declspec(dllexport) bool isTwoTrianglesIntersection2(const std::array<Eigen::Vector3d, 3>& triL, const std::array<Eigen::Vector3d, 3>& triR);
 __declspec(dllexport) bool isTwoTrianglesIntersection(const std::array<Eigen::Vector3d, 3>& triL, const std::array<Eigen::Vector3d, 3>& triR);
 __declspec(dllexport) bool TriangularIntersectionTest(const std::array<Eigen::Vector3d, 3>& T1, const std::array<Eigen::Vector3d, 3>& T2);
+__declspec(dllexport) bool TriangularIntersectionTest(const std::array<Eigen::Vector3f, 3>& T1, const std::array<Eigen::Vector3f, 3>& T2);
 
