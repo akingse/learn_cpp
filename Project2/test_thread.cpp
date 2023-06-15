@@ -10,7 +10,7 @@ void myprint(/*int i*/)
 	cout << "\a" << endl;
 	cout << "child thread begin." << endl;
 	cout << "child thread end." << endl;
-	Sleep(1000);
+	//Sleep(1000);
 	cout << "\a" << endl;
 
 

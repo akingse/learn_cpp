@@ -1,14 +1,8 @@
-
-
-
-
-
-
-
-
 ### gtest项目崩溃
 
 可能是项目配置不一致导致的
+
+破案，被测项目不是lib，是可执行exe
 
 ```cpp
 #include "gtest/gtest.h"
@@ -264,6 +258,43 @@ bool isTwoTrianglesIntersection(const std::array<Eigen::Vector3d, 3>& triL, cons
     std::array<Vector3f, 3>  triB = { triR[0].cast<float>(), triR[1].cast<float>(), triR[2].cast<float>() };
     return isTwoTrianglesIntersection(triA, triB);
 }
+
+```
+
+
+
+
+
+### 距离计算 Tri
+
+```
+double TriDist(double p[3], double q[3], const double s[3][3], const double t[3][3]);
+
+计算两个三角形上最近的点，并返回它们之间的距离。
+如果三角形重叠，则p和q是三角形中的一对随机点，而不是三角形交点上的重合点
+
+For each edge pair, the vector connecting the closest points of the edges defines a slab (parallel planes at head and tail enclose the slab). If we can show that the off-edge vertex of each triangle is outside of the slab, then the closest points of the edges are the closest points for the triangles.Even if these tests fail, it may be helpful to know the closest points found, and whether the triangles were shown disjoint.
+
+对于每个边对，连接边的最近点的向量定义了一个板（头部和尾部的平行平面包围了板）。如果我们可以证明每个三角形的离边顶点都在板外，那么边的最近点就是三角形的最接近点。即使这些测试失败，了解找到的最接近的点以及三角形是否显示为不相交也可能很有帮助。
+
+
+No edge pairs contained the closest points.  
+either:
+1. one of the closest points is a vertex, and the   other point is interior to a face.
+2. the triangles are overlapping.
+3. an edge of one triangle is parallel to the other's face. If cases 1 and 2 are not true, then the closest points from the 9 edge pairs checks above can be taken as closest points for the triangles.
+4. possibly, the triangles were degenerate.  When the triangle points are nearly colinear or coincident, one 
+   of above tests might fail even though the edges tested contain the closest point
+   
+没有包含最近点的边对。
+或者：
+1.最近的点之一是顶点，而另一个点是面的内部。
+2.三角形是重叠的。
+3.一个三角形的边与另一个的面平行。如果情况1和2不成立，则可以将上述9个边对检查中的最近点作为三角形的最近点。
+4.三角形可能是退化的。当三角形点几乎共线或重合时
+即使测试的边包含最接近的点，上述测试中的一个也可能失败
+
+
 
 ```
 

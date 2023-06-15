@@ -1,5 +1,4 @@
 #include "pch.h"
-
 using namespace std;
 
 class Triangle
@@ -31,8 +30,5 @@ enum class COLLISION :int
 
 COLLISION is_two_triangle_intersec(const Triangle& triA, const Triangle& triB)
 {
-
-
-
 	return {};
 }

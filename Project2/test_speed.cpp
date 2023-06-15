@@ -1,5 +1,5 @@
 #include "pch.h"
-
+using namespace std;
 
 static void _test1()
 {
@@ -92,6 +92,6 @@ static void _test2()
 
 static int enrol = []()->int
 {
-	_test2();
+	//_test2();
 	return 0;
 }();

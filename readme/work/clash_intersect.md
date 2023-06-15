@@ -107,15 +107,20 @@ intersects()方法的返回值基于以下定理：如果两个AABB相交，则�
 
 1e7，未启用omp
 
-| time                        | debug                                                        | release                                                      |
-| --------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| 临时变量                    | 10.366s <br />10.338s <br />10.294s                          | 4.357s <br />4.432s <br />4.345s                             |
-| 索引                        | 10.425s <br />10.496s <br />10.423s                          | 4.331s <br />4.322s <br />4.354s                             |
-| 整体索引                    | time = 9.224s<br/>time = 9.212s<br/>time = 9.216s            | time = 4.564s<br/>time = 4.521s<br/>time = 4.555s            |
-| 换_isPointInTriangular      | time = 9.23s<br/>time = 9.081s<br/>time = 9.117s             | time = 4.538s<br/>time = 4.613s<br/>time = 4.674s            |
-| 换eigen                     | debug下的eigen（1/10）<br />time = 7.032s<br/>time = 7.709s<br/>time = 8.263s | time = 3.667s<br/>time = 3.651s<br/>time = 3.752s            |
-| TriangularIntersectionTest  |                                                              | time = 5.743s<br/>time = 5.713s<br/>time = 5.753s            |
-| 对比 TIT                    |                                                              |                                                              |
-| isTwoTrianglesIntersection2 |                                                              | time = 4.865s<br/>time = 4.865s<br/>time = 4.75s<br />先判出<br />time = 3.723s<br/>time = 3.578s<br/>time = 3.984s<br /> |
-|                             |                                                              |                                                              |
+| time                                       | debug                                                        | 1e8<br />array数组                                           | release<br />1e7                                             |
+| ------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 临时变量                                   | 10.366s <br />10.338s <br />10.294s                          | 开辟空间时间 <br />*2 time = 14.042s<br />装填随机数总时间<br /> time = 37.972s | 4.357s <br />4.432s <br />4.345s                             |
+| 索引                                       | 10.425s <br />10.496s <br />10.423s                          |                                                              | 4.331s <br />4.322s <br />4.354s                             |
+| 整体索引                                   | time = 9.224s<br/>time = 9.212s<br/>time = 9.216s            |                                                              | time = 4.564s<br/>time = 4.521s<br/>time = 4.555s            |
+| 换_isPointInTriangular                     | time = 9.23s<br/>time = 9.081s<br/>time = 9.117s             |                                                              | time = 4.538s<br/>time = 4.613s<br/>time = 4.674s            |
+| 换eigen                                    | debug下的eigen（1/10）<br />time = 7.032s<br/>time = 7.709s<br/>time = 8.263s |                                                              | time = 3.667s<br/>time = 3.651s<br/>time = 3.752s            |
+| TriangularIntersectionTest                 |                                                              | time = 21.059s<br/>time = 20.971s<br/>time = 20.953s         | time = 5.743s<br/>time = 5.713s<br/>time = 5.753s            |
+| isTwoTrianglesIntersection1                |                                                              | time = 4.588s<br/>time = 4.574s<br/>time = 4.575s            | time = 3.771s<br/>time = 3.758s<br/>time = 3.856s            |
+| isTwoTrianglesIntersection2                | 调用 fun 18041503*3=54140554<br />time = 3.031s<br/>time = 2.983s<br/>time = 2.903s | time = 10.846s<br/>time = 10.909s<br/>time = 10.802s         | time = 3.723s<br/>time = 3.578s<br/>time = 3.984s<br />latest<br />time = 4.498s<br/>time = 4.484s<br/>time = 4.358s<br /> |
+| _isPointInTriangle                         | 随机数 1e7<br />3*24197379=72587976                          |                                                              | time = 1.686s<br/>time = 1.671s<br/>time = 1.675s            |
+| double<br />_isSegmentCrossTriangleSurface |                                                              |                                                              | time = 5.654s<br/>time = 5.792s<br/>time = 5.812s            |
+| double<br />getTriangleBoundingCircle      |                                                              | time = 16.98s<br/>time = 16.891s<br/>time = 16.79s           | time = 4.972s<br/>time = 4.945s<br/>time = 5.088s            |
+| 软碰撞<br />_getTriDist                    |                                                              | time = 56.686s<br/>time = 57.677s<br/>time = 57.643s         | time = 9.058s<br/>time = 9.336s<br/>time = 9.22s<br />分开三角形<br />time = 6.302s<br/>time = 6.497s<br/>time = 6.521s |
+| 包围盒求交<br />AlignedBox3d::intersection | 1e8                                                          | time = 0.658s<br/>time = 0.616s<br/>time = 0.626s            |                                                              |
+|                                            |                                                              |                                                              |                                                              |
 

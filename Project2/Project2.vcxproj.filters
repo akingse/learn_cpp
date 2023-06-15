@@ -22,9 +22,6 @@
     <Filter Include="test_eg">
       <UniqueIdentifier>{da15fabd-93e3-4c44-bdc1-4661484ac778}</UniqueIdentifier>
     </Filter>
-    <Filter Include="thread">
-      <UniqueIdentifier>{36f8d27e-e62a-4a23-9ae7-7eae5efe27d4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="test_gram">
       <UniqueIdentifier>{adb269f5-b6df-4283-841b-f171aab79122}</UniqueIdentifier>
     </Filter>
@@ -45,6 +42,12 @@
     </Filter>
     <Filter Include="test_case">
       <UniqueIdentifier>{137ff279-6265-431b-93cf-095b8a1c9b50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test_thread">
+      <UniqueIdentifier>{36f8d27e-e62a-4a23-9ae7-7eae5efe27d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test_triangle">
+      <UniqueIdentifier>{d75b882f-e37a-4826-a646-5b6d0ef51577}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -100,13 +103,13 @@
       <Filter>test_stl</Filter>
     </ClCompile>
     <ClCompile Include="test_pointer.cpp">
-      <Filter>thread</Filter>
+      <Filter>test_thread</Filter>
     </ClCompile>
     <ClCompile Include="test_atomic.cpp">
-      <Filter>thread</Filter>
+      <Filter>test_thread</Filter>
     </ClCompile>
     <ClCompile Include="test_thread.cpp">
-      <Filter>thread</Filter>
+      <Filter>test_thread</Filter>
     </ClCompile>
     <ClCompile Include="test_set.cpp">
       <Filter>test_stl</Filter>
@@ -177,7 +180,7 @@
     <ClCompile Include="test_cast.cpp">
       <Filter>test_gram</Filter>
     </ClCompile>
-    <ClCompile Include="triangle_intersec.cpp">
+    <ClCompile Include="triangle_intersect.cpp">
       <Filter>test_math</Filter>
     </ClCompile>
     <ClCompile Include="GYDevillersTriangle.cpp">
@@ -190,16 +193,19 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="test_omp.cpp">
-      <Filter>thread</Filter>
-    </ClCompile>
-    <ClCompile Include="test_triangular.cpp">
-      <Filter>test_math</Filter>
+      <Filter>test_thread</Filter>
     </ClCompile>
     <ClCompile Include="test_speed.cpp">
       <Filter>test_math</Filter>
     </ClCompile>
     <ClCompile Include="test_case_triangle.cpp">
       <Filter>test_case</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\google_test\Project_target\my_class_fun.cpp">
+      <Filter>test_triangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\google_test\Project_target\triangleCalculate.cpp">
+      <Filter>test_triangle</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -218,13 +224,19 @@
     <ClInclude Include="GYDevillersTriangle.h">
       <Filter>head</Filter>
     </ClInclude>
-    <ClInclude Include="test_calculate0.h">
+    <ClInclude Include="test_calculate.h">
       <Filter>head</Filter>
     </ClInclude>
     <ClInclude Include="test_template0.h">
       <Filter>test_template</Filter>
     </ClInclude>
-    <ClInclude Include="test_triangular.h">
+    <ClInclude Include="..\..\google_test\Project_target\triangleCalculate.h">
+      <Filter>test_triangle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\google_test\Project_target\my_class_fun.h">
+      <Filter>test_triangle</Filter>
+    </ClInclude>
+    <ClInclude Include="triangle_intersect.h">
       <Filter>test_math</Filter>
     </ClInclude>
   </ItemGroup>

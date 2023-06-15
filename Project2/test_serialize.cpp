@@ -1,5 +1,5 @@
-using namespace std;
 #include "pch.h"
+using namespace std;
 
 std::vector<unsigned char> serialize(const BPGeometricPrimitiveSer& primitive)
 {

@@ -40,7 +40,7 @@ static void _type_cast()
 
 static int enrol = []()->int
 {
-	_type_cast();
+	//_type_cast();
 	return 0;
 }();
 

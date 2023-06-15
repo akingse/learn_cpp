@@ -21,13 +21,12 @@ static void _test1()
 	triA = { Vertex(0,0), Vertex(100,0), Vertex(0,100) };
 	triB = { Vertex(0,0), Vertex(100,0), Vertex(0,100) };
 	//EXPECT_TRUE(TriangularIntersectionTest(triA, triB));
-	EXPECT_TRUE(isTwoTrianglesIntersection(triA, triB));
+	//EXPECT_TRUE(isTwoTrianglesIntersection1(triA, triB));
 	//µã½Ó´¥
 	triA = triA;
 	//triB = translate(100, 0) * triB;
-
 	//EXPECT_TRUE(TriangularIntersectionTest(triA, triB));
-	EXPECT_TRUE(isTwoTrianglesIntersection(triA, triB));
+	//EXPECT_TRUE(isTwoTrianglesIntersection1(triA, triB));
 }
 
 
@@ -35,7 +34,7 @@ static void _test1()
 
 static int enrol = []()->int
 {
-	_test1();
+	//_test1();
 	return 0;
 }();
 

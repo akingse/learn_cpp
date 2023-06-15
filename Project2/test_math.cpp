@@ -1,8 +1,4 @@
 #include "pch.h"
-
-
-#define _USE_MATH_DEFINES
-#include<math.h>
 using namespace std;
 static int _test1()
 {
@@ -51,11 +47,9 @@ static int _test1()
 }
 
 
-using namespace std;
 //https://www.cnblogs.com/xiaoxi666/p/6421228.html
 
 #define N 5
-
 //æÿ’Û≥À∑®
 double* multiply(double A[N * N], double B[N * N])
 {

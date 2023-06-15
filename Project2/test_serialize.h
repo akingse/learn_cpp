@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 //class Vec3
 //{
 //public:
@@ -64,9 +63,9 @@ class BPGeometricPrimitiveSer
 public:
 	bool m_hollow = false;
 	size_t m_identification;
-	string m_remark;
+	std::string m_remark;
 	BPGeometricPrimitiveSer() = default;
-	BPGeometricPrimitiveSer(bool hollow, size_t identification, const string& remark)
+	BPGeometricPrimitiveSer(bool hollow, size_t identification, const std::string& remark)
 	{
 		m_hollow = hollow;
 		m_identification = identification;

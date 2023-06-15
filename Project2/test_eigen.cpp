@@ -4,9 +4,23 @@
 #include <Eigen/QR>
 #include <Eigen/SVD>
 using namespace Eigen;
+#undef max
+#undef min
+static void test0()
+{
+	Eigen::AlignedBox3d box1(Eigen::Vector3d(1, 2, 3), Eigen::Vector3d(4, 5, 6));
+	Eigen::AlignedBox3d box2(Eigen::Vector3d(7, 8, 9), Eigen::Vector3d(10, 11, 12));
+	//ºÏ²¢°üÎ§ºÐ
+	Eigen::AlignedBox3d sum_box = box1.merged(box2);
+
+	std::cout << "Combined Box: " << std::endl;
+	std::cout << "Min: " << sum_box.min() << std::endl;
+	std::cout << "Max: " << sum_box.max() << std::endl;
+	return;
+}
 
 
-int main_eg()
+static int main_eg()
 {
 	MatrixXd m(2, 2);
 	m(0, 0) = 3;
@@ -73,8 +87,14 @@ void eigen_matlab0()
 
 }
 
-/*
 
+static int _enrol = []()->int {
+	//test0();
+	return 0;
+}();
+
+
+/*
 void eigen_matlab1()
 {
 	Matrix<double, 3, 3> A;               // Fixed rows and cols. Same as Matrix3d.
@@ -278,8 +298,3 @@ void eigen_matlab2()
 
 */
 
-
-static int _enrol = []()->int {
-
-	return 0;
-}();

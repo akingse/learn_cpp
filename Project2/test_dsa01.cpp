@@ -1,4 +1,5 @@
 #include "pch.h"
+//#include <windows.h>
 using namespace std;
 // 数据结构和算法
 // data structure and algorithm
@@ -68,12 +69,12 @@ int sum(int A[], int n)
 		0 : sum(A, n - 1) + A[n - 1];
 }
 
-UINT64 fib(int n)
+long long fib(int n)
 {
 	return (n < 2) ? n : fib(n - 1) + fib(n - 2); //CPU拉满
 }
 
-UINT64 fib2(int n, UINT64 first = 0, UINT64 second = 1)
+long long fib2(int n, long long first = 0, long long second = 1)
 {
 	if (n <= 2)
 		return first + second;
@@ -81,10 +82,10 @@ UINT64 fib2(int n, UINT64 first = 0, UINT64 second = 1)
 		return fib2(n - 1, second, first + second);
 }
 
-UINT64 fib3(int n)
+long long fib3(int n)
 {
 	int totol = 0;
-	UINT64 a = 0, b = 1;
+	long long a = 0, b = 1;
 	for (int i = 1; i < n; i++)
 	{
 		b = a + b;

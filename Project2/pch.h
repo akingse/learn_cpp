@@ -1,5 +1,4 @@
 #pragma once
-
 //stream
 #include <iostream>
 #include <fstream>
@@ -9,13 +8,15 @@
 #include <iostream>
 #include <memory>
 #include <type_traits>
-#include <time.h> //clock()函数
-#include <ctime>    //用于产生随机数据的种子
+#include <time.h> //clock()
+#include <ctime>  // random seed
 #include <cassert>
 #include <thread>
-#include <windows.h>
-#include <functional> //函数式编程
-
+//#include <windows.h> //min max
+#define _AFXDLL
+#include <afx.h> // <cstring>
+#include <functional>  
+#include <omp.h>
 //math
 #define _USE_MATH_DEFINES //using M_PI
 #include <cmath>
@@ -52,22 +53,23 @@
 #include "Project1_API.h"
 #include "test_serialize.h"
 #include "my_geometry.h"			//export
-#include "test_calculate0.h"
-#include "test_triangular.h"		//export
-
-
+#include "test_calculate.h"
+#include "triangle_intersect.h"
+#ifdef IS_EXPORT
+#define DLLEXPORT __declspec(dllimport)
+#else
+#define DLLEXPORT __declspec(dllexport)
+#endif
+#include "C:/Users/Aking/source/repos/google_test/Project_target/my_class_fun.h"		
+#include "C:/Users/Aking/source/repos/google_test/Project_target/triangleCalculate.h"		
 
 //eigen
-using namespace Eigen;
-using Eigen::MatrixXd;
-using Eigen::Matrix4d;
-
-using Eigen::VectorXd;
-using Eigen::Vector2d;
-using Eigen::Vector3d;
-
 //typedef Vector3d Vec3;
 //typedef Matrix4d BPTransfrom;
 //typedef Matrix4d GeTransfrom;
-//class None {};
 //using Vec3 = Vector3d;
+//using Eigen::MatrixXd;
+//using Eigen::Matrix4d;
+//using Eigen::VectorXd;
+//using Eigen::Vector2d;
+//using Eigen::Vector3d;

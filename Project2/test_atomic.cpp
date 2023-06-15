@@ -1,5 +1,7 @@
 
 #include "pch.h"
+#include <windows.h>
+
 /*
 std::atomic为C++11封装的原子数据类型。
 

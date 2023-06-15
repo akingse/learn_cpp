@@ -1,4 +1,5 @@
 #include "pch.h"
+using namespace std;
 
 //https://blog.csdn.net/weixin_51618380/article/details/115297385
 class Tree
@@ -441,7 +442,8 @@ std::vector<BPGeometricPrimitive> getNestedGeometryDeserialize(const std::vector
 }
 */
 
-static int _enrol = []()->int {
+static int _enrol = []()->int 
+{
 
 	return 0;
 }();

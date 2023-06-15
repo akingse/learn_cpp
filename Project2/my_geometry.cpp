@@ -1,4 +1,5 @@
 #include "pch.h"
+using namespace std;
 
 //int    polySides;//=  how many cornersthe polygon has
 //float  polyX[];//=  horizontalcoordinates of corners
@@ -77,7 +78,8 @@ static void _test_geometry()
 	bool res = cube_setLength(nullptr, 300);
 }
 
-static int _enrol2=[]()->int {
+static int _enrol2=[]()->int 
+{
 
 	return 0;
 }();
