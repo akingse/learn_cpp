@@ -179,7 +179,10 @@ static int _test_chatgpt_1()
 {
 	//							 |         |		
 	std::vector<double> vec{ 1.2, 3.4, 3.5, 5.6 };
-
+	if (std::find(vec.begin(), vec.end(), 1.2) != vec.end())
+	{
+		cout << "" << endl;
+	}
 	//double a1 = vec[-1]; //not support
 	double a2 = vec.front();
 	double a3 = vec.back();

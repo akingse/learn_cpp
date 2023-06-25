@@ -60,8 +60,8 @@
 #else
 #define DLLEXPORT __declspec(dllexport)
 #endif
-#include "C:/Users/Aking/source/repos/google_test/Project_target/my_class_fun.h"		
-#include "C:/Users/Aking/source/repos/google_test/Project_target/triangleCalculate.h"		
+#include "my_class_fun.h"		
+#include "calculateTriangle.h"		//DLL-API
 
 //eigen
 //typedef Vector3d Vec3;

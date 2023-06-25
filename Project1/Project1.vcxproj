@@ -81,7 +81,8 @@
     <LinkIncremental>true</LinkIncremental>
     <IntDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\compile</IntDir>
     <TargetName>$(ProjectName)</TargetName>
-    <IncludePath>C:\Users\Aking\source\repos\test01;C:\Users\Aking\source\repos\test01\test01</IncludePath>
+    <IncludePath>
+    </IncludePath>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\link</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

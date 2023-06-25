@@ -298,3 +298,38 @@ either:
 
 ```
 
+
+
+
+
+### Project2 项目配置
+
+包含
+
+```
+
+```
+
+库LibraryPath
+
+```
+
+
+//origin
+$(SolutionDir)..\TPL\boost-1.81.0\stage\lib;
+$(SolutionDir)..\TPL\boost-1.81.0\libs;
+$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib;
+
+$(SolutionDir)build\Project1\;
+$(SolutionDir)build\Project1\$(PlatformTarget)\link;
+$(SolutionDir)$(Platform)\$(Configuration)\
+
+```
+
+```
+Project2.exe - System Error
+
+The code execution cannot proceed because Project_cal.dlI was not found. Reinstalling the program may fix this problem.
+
+```
+
