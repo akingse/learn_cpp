@@ -3,9 +3,72 @@
 #include <Eigen/LU>
 #include <Eigen/QR>
 #include <Eigen/SVD>
+using namespace std;
+using namespace para;
 using namespace Eigen;
+using namespace psykronix;
 #undef max
 #undef min
+
+//测试包围盒 Eigen::AlignedBox3d
+static void test1()
+{
+	//std::array<Vector3d, 3> trigon = { Vertex(-87, 21), Vertex(-27, -20), Vertex(-90, 95) };
+	std::array<Vector3d, 3> trigon = { Vertex(-10, 0), Vertex(70, 0), Vertex(50, 50) };
+	auto res = getTriangleBoundingCircle(trigon);
+	Eigen::AlignedBox3d box(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(1, 1, 1));
+	Eigen::AlignedBox3d box_(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(1, 1, -1));
+	bool isC = box.contains(Eigen::Vector3d(0.5, 0.5, 0.5));
+
+	std::array<Vector3d, 3> trigonA = { Vertex(-10, -10), Vertex(10, -10), Vertex(0, 10) };
+	std::array<Vector3d, 3> trigonB = psykronix::scale(2, 2, 2) * trigonA;
+	isTwoTrianglesIntersection(trigonA, trigonA);
+
+	Eigen::AlignedBox3d box1(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(1, 1, 1));
+	Eigen::AlignedBox3d box2(Eigen::Vector3d(0.5, 0.5, 0.5), Eigen::Vector3d(2, 2, 2));
+	Eigen::AlignedBox3d box3(Eigen::Vector3d(1, 1, 1), Eigen::Vector3d(2, 2, 2));
+	Eigen::AlignedBox3d box4(Eigen::Vector3d(1.5, 1.5, 1.5), Eigen::Vector3d(2, 2, 2));
+
+	bool ill0 = (box.diagonal().array() < 0).any();
+	bool ill1 = (box_.diagonal().array() < 0).any();
+	bool ill2 = ((box1.intersection(box4)).diagonal().array() < 0).any();
+
+	// 判断两个包围盒是否相交
+	bool isInter = box1.intersects(box4);
+	Eigen::AlignedBox3d box11(Eigen::Vector3d(-0.5, -0.5, -0.5), Eigen::Vector3d(0.5, 0.5, 0.5));
+	Eigen::AlignedBox3d box21(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0.3, 0.3, 0.3));
+	Eigen::AlignedBox3d box31(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0.5, 0.5, 0.5));
+	// 判断 box2 是否被包含在 box1 内
+	bool is_contain0 = box11.contains(box21.min()) && box11.contains(box21.max());
+	bool is_contain1 = box11.contains(box11.min()) && box11.contains(box11.max());
+	bool is_contain3 = box11.contains(box31.min()) && box11.contains(box31.max());
+
+	Eigen::AlignedBox3d box12(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(1, 1, 1));
+	Eigen::AlignedBox3d box22(Eigen::Vector3d(2, 2, 2), Eigen::Vector3d(3, 3, 3));
+	// test compare
+	double tolerance = 2;
+	Eigen::Vector3d tolerance_double = Eigen::Vector3d(tolerance, tolerance, tolerance);
+	AlignedBox3d bounding = box12.intersection(box22);
+	AlignedBox3d boundingc = box22.intersection(box12);
+	bool isSepa = ((bounding.min() - bounding.max() - tolerance_double).array() > 0).any();
+	box12.min() = box12.min() - tolerance_double;
+	box12.max() = box12.max() + tolerance_double;
+	bool isSepa0 = !box12.intersects(box22);
+
+
+	//Eigen::AlignedBox3d box22(Eigen::Vector3d(.2, .2, .2), Eigen::Vector3d(3, 3, 3));
+	Eigen::AlignedBox3d boxInter = box12.intersection(box22);
+	bool isSepa2 = ((boxInter.min() - boxInter.max()).array() > 0).any();
+	bool isIter2 = box12.intersects(box22);
+}
+
+
+static int _enrol0 = []()->int {
+	//test0();
+	return 0;
+}();
+
+
 static void test0()
 {
 	Eigen::AlignedBox3d box1(Eigen::Vector3d(1, 2, 3), Eigen::Vector3d(4, 5, 6));

@@ -18,22 +18,10 @@
     <ClCompile Include="pch.cpp">
       <Filter>com</Filter>
     </ClCompile>
-    <ClCompile Include="calculateTriangle.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="my_class_fun.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
       <Filter>com</Filter>
-    </ClInclude>
-    <ClInclude Include="calculateTriangle.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="my_class_fun.h">
-      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

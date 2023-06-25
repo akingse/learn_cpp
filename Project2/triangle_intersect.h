@@ -13,6 +13,7 @@ namespace std
 	//	}
 	//};
 }
+static std::string randNumName = "random_1e8.bin";
 
 inline std::string getExePath() // include<afx.h>
 {
@@ -23,10 +24,58 @@ inline std::string getExePath() // include<afx.h>
 	return (CStringA)path;
 }
 
+namespace std
+{
+	//wirte randnum file
+	inline int _wirteNumberFile(size_t n)
+	{
+		n = 2 * 3 * 3 * n;
+		double* arr = new double[n];
+		for (int i = 0; i < n; ++i)
+		{
+			arr[i] = static_cast<double>(rand() - 0x3fff);// rand()) / RAND_MAX;
+		}
+		// 写入文件
+		ofstream out(randNumName, ios::out | ios::binary);
+		if (!out.is_open()) {
+			cerr << "Error opening file" << endl;
+			return -1;
+		}
+		out.write(reinterpret_cast<char*>(&n), sizeof(int)); // 先写入整个数组大小 
+		out.write(reinterpret_cast<char*>(arr), n * sizeof(double));
+		out.close();
+		return 0;
+	}
+
+	inline double* _readNumberFile(size_t n)
+	{
+		n = 2 * 3 * 3 * n;
+		ifstream in(randNumName, ios::in | ios::binary);
+		if (!in.is_open()) {
+			cerr << "Error opening file" << endl;
+			return nullptr;
+		}
+		int read_n;
+		in.read(reinterpret_cast<char*>(&read_n), sizeof(int));
+		if (read_n != n) {
+			cerr << "Incorrect data size read from the input file" << endl;
+			return nullptr;
+		}
+		double* read_arr = new double[read_n];
+		in.read(reinterpret_cast<char*>(read_arr), read_n * sizeof(double));
+		return read_arr;
+	}
+}
+
 inline Vec2 _get_rand()
 {
 	double r = 100;
 	return Vec2(rand(), rand());
+}
+
+inline Eigen::Vector3d _to2D(const Eigen::Vector3d& vec3)
+{
+	return Eigen::Vector3d(vec3.x(), vec3.y(), 0.0);
 }
 
 inline std::array<para::BPParaVec, 3> _get_rand3v()

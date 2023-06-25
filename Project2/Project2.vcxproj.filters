@@ -201,6 +201,12 @@
     <ClCompile Include="test_case_triangle.cpp">
       <Filter>test_case</Filter>
     </ClCompile>
+    <ClCompile Include="..\Project_cal\calculateTriangle.cpp">
+      <Filter>test_triangle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Project_cal\my_class_fun.cpp">
+      <Filter>test_triangle</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test_function.h">
@@ -226,6 +232,12 @@
     </ClInclude>
     <ClInclude Include="triangle_intersect.h">
       <Filter>test_math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Project_cal\calculateTriangle.h">
+      <Filter>test_triangle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Project_cal\my_class_fun.h">
+      <Filter>test_triangle</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

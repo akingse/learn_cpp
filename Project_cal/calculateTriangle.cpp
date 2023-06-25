@@ -1,10 +1,10 @@
 #include "pch.h"
+//#include "stdafx.h"
 using namespace std;
 using namespace Eigen;
 using namespace psykronix;
 #undef max //AlignedBox3d mem-fun
 #undef min
-#define STATISTIC_DATA_COUNT
 
 //--------------------------------------------------------------------------------------------------
 //  triangle
@@ -12,6 +12,7 @@ using namespace psykronix;
 static constexpr double eps = 1e-6;
 static constexpr double _eps = -1e-6;
 std::atomic<size_t> getTriangleBoundC = 0, TriangularIntersectC = 0, getTriDistC = 0, isTriangleBoundC = 0,
+	count_pointInTri = 0, count_edgeCrossTri = 0,
 	isTwoTrianglesC = 0,
 	count_err_inputbox = 0;
 
@@ -31,6 +32,9 @@ bool psykronix::isPointInTriangle(const Vector2d& point, const std::array<Vector
 //_isPointInTriangle3D
 bool psykronix::isPointInTriangle(const Vector3d& point, const std::array<Vector3d, 3>& trigon) //must coplanar
 {
+#ifdef STATISTIC_DATA_COUNT
+	count_pointInTri++;
+#endif
 	// 3D triangle, input point must coplanar
 	Vector3d vecZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);// using isLeft test
 	return !((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(vecZ) < _eps || //bool isNotLeftA
@@ -65,18 +69,21 @@ bool psykronix::isTwoSegmentsIntersect(const std::array<Vector3d, 2>& segmA, con
 
 bool psykronix::isEdgeCrossTriangle(const std::array<Vector3d, 2>& segment, const std::array<Vector3d, 3>& trigon) // must coplanar
 {
+#ifdef STATISTIC_DATA_COUNT
+	count_edgeCrossTri++;
+#endif
 	//judge box
-	Eigen::AlignedBox3d boxSeg(segment[0], segment[1]);
-	Eigen::AlignedBox3d boxTri(Vector3d(
-			std::min(std::min(trigon[0].x(), trigon[1].x()), trigon[2].x()),
-			std::min(std::min(trigon[0].y(), trigon[1].y()), trigon[2].y()),
-			std::min(std::min(trigon[0].z(), trigon[1].z()), trigon[2].z())),
-		Vector3d(
-			std::max(std::max(trigon[0].x(), trigon[1].x()), trigon[2].x()),
-			std::max(std::max(trigon[0].y(), trigon[1].y()), trigon[2].y()),
-			std::max(std::max(trigon[0].z(), trigon[1].z()), trigon[2].z()))); //box of trigon
-	if (!boxSeg.intersects(boxTri))
-		return false;
+	//Eigen::AlignedBox3d boxSeg(segment[0], segment[1]);
+	//Eigen::AlignedBox3d boxTri(Vector3d(
+	//		std::min(std::min(trigon[0].x(), trigon[1].x()), trigon[2].x()),
+	//		std::min(std::min(trigon[0].y(), trigon[1].y()), trigon[2].y()),
+	//		std::min(std::min(trigon[0].z(), trigon[1].z()), trigon[2].z())),
+	//	Vector3d(
+	//		std::max(std::max(trigon[0].x(), trigon[1].x()), trigon[2].x()),
+	//		std::max(std::max(trigon[0].y(), trigon[1].y()), trigon[2].y()),
+	//		std::max(std::max(trigon[0].z(), trigon[1].z()), trigon[2].z()))); //box of trigon
+	//if (!boxSeg.intersects(boxTri))
+	//	return false;
 	//judge trigon point
 	Vector3d vecX = (segment[1] - segment[0]).cross((trigon[1] - trigon[0]).cross(trigon[2] - trigon[0])); // axisY corss axisZ
 	double dot0 = vecX.dot(trigon[0] - segment[0]);
@@ -162,7 +169,7 @@ bool psykronix::isSegmentCrossTriangleSurface(const std::array<Vector3d, 2>& seg
 bool psykronix::isTwoTrianglesIntersection(const std::array<Vector3d, 3>& triL, const std::array<Vector3d, 3>& triR)
 {
 #ifdef STATISTIC_DATA_COUNT
-	//TriangularIntersectC++;
+	TriangularIntersectC++;
 #endif
 	// right edge through left plane
 	Vector3d veczL = (triL[1] - triL[0]).cross(triL[2] - triL[0]);
@@ -786,7 +793,7 @@ double psykronix::getTrianglesDistance(Eigen::Vector3d& P, Eigen::Vector3d& Q, c
 // 
 //------------------------------------------------------------------------------------
 
-bool TriangularIntersectionTest0(const std::array<Eigen::Vector3d, 3>& T1, const std::array<Eigen::Vector3d, 3>& T2)
+bool psykronix::TriangularIntersectionTest(const std::array<Eigen::Vector3d, 3>& T1, const std::array<Eigen::Vector3d, 3>& T2)
 {
 #ifdef STATISTIC_DATA_COUNT
 	TriangularIntersectC++;
@@ -1498,22 +1505,29 @@ static void test()
 
 bool psykronix::TriangleIntersectionTest(const std::array<Eigen::Vector3d, 3>& triangle1, const std::array<Eigen::Vector3d, 3>& triangle2) 
 {
-#ifdef STATISTIC_DATA_COUNT
-	TriangularIntersectC++;
-#endif
-	std::vector<Eigen::Vector3d> edges1 = { triangle1[1] - triangle1[0],
+//#ifdef STATISTIC_DATA_COUNT
+//	TriangularIntersectC++;
+//#endif
+	std::array<Eigen::Vector3d, 3> edges1 = { triangle1[1] - triangle1[0],
 										   triangle1[2] - triangle1[1],
 										   triangle1[0] - triangle1[2] };
-	std::vector<Eigen::Vector3d> edges2 = { triangle2[1] - triangle2[0],
+	std::array<Eigen::Vector3d, 3> edges2 = { triangle2[1] - triangle2[0],
 										   triangle2[2] - triangle2[1],
 										   triangle2[0] - triangle2[2] };
 	// Compute cross products of edges (9 possible axes)
-	std::vector<Eigen::Vector3d> axes;
-	for (const auto& edge1 : edges1) 
+	std::array<Eigen::Vector3d,9> axes;
+	//for (const auto& edge1 : edges1) 
+	//{
+	//	for (const auto& edge2 : edges2) 
+	//	{
+	//		axes.push_back(edge1.cross(edge2).normalized());
+	//	}
+	//}
+	for (int i = 0; i < 3; ++i)
 	{
-		for (const auto& edge2 : edges2) 
+		for (int j = 0; j < 3; ++j)
 		{
-			axes.push_back(edge1.cross(edge2).normalized());
+			axes[i * 3 + j] = edges1[i].cross(edges2[j]).normalized();
 		}
 	}
 	// Check for overlap along each axis
@@ -1541,4 +1555,75 @@ bool psykronix::TriangleIntersectionTest(const std::array<Eigen::Vector3d, 3>& t
 			return false;
 	}
 	return true;
+}
+
+//离轴定理，包围盒与三角形求交
+
+/*
+找到与三角形平面平行的两个AABB顶点
+测试三角形的三条边与AABB的三条轴的九种组合
+测试三角形的顶点是否在AABB内
+这个算法速度快且准确。使用分离轴定理，我们只需要测试13个潜在的分离轴是否存在。
+如果有任何一个分离轴存在，那么三角形和AABB不相交。如果所有潜在的分离轴都不存在，则三角形和AABB相交。
+*/
+
+bool test_axis(const Vector3d& axis, const const std::array<Eigen::Vector3d, 3>& tri, const Eigen::AlignedBox3d& aabb) 
+{
+	double p0 = axis.x() * tri[0].x() + axis.y() * tri[0].y() + axis.z() * tri[0].z();
+	double p1 = axis.x() * tri[1].x() + axis.y() * tri[1].y() + axis.z() * tri[1].z();
+	double p2 = axis.x() * tri[2].x() + axis.y() * tri[2].y() + axis.z() * tri[2].z();
+	double t_min = std::min({ p0, p1, p2 });
+	double t_max = std::max({ p0, p1, p2 });
+	double aabb_min = axis.x() * aabb.min().x() + axis.y() * aabb.min().y() + axis.z() * aabb.min().z();
+	double aabb_max = axis.x() * aabb.max().x() + axis.y() * aabb.max().y() + axis.z() * aabb.max().z();
+
+	return !(t_max < aabb_min || t_min > aabb_max);
+}
+
+bool intersect(const const std::array<Eigen::Vector3d, 3>& tri, const Eigen::AlignedBox3d& aabb)
+{
+	// Triangle edges
+	Vector3d e0 = tri[1] - tri[0];
+	Vector3d e1 = tri[2] - tri[1];
+	Vector3d e2 = tri[0] - tri[2];
+	// AABB axes
+	Vector3d aabb_axis_x(1, 0, 0);
+	Vector3d aabb_axis_y(0, 1, 0);
+	Vector3d aabb_axis_z(0, 0, 1);
+
+	// Test triangle edges against AABB axes
+	if (!test_axis(Vector3d(e0.y() * aabb_axis_x.z() - e0.z() * aabb_axis_x.y(), e0.z() * aabb_axis_x.x() - e0.x() * aabb_axis_x.z(), e0.x() * aabb_axis_x.y() - e0.y() * aabb_axis_x.x()), tri, aabb)) return false;
+	if (!test_axis(Vector3d(e0.y() * aabb_axis_y.z() - e0.z() * aabb_axis_y.y(), e0.z() * aabb_axis_y.x() - e0.x() * aabb_axis_y.z(), e0.x() * aabb_axis_y.y() - e0.y() * aabb_axis_y.x()), tri, aabb)) return false;
+	if (!test_axis(Vector3d(e0.y() * aabb_axis_z.z() - e0.z() * aabb_axis_z.y(), e0.z() * aabb_axis_z.x() - e0.x() * aabb_axis_z.z(), e0.x() * aabb_axis_z.y() - e0.y() * aabb_axis_z.x()), tri, aabb)) return false;
+	if (!test_axis(Vector3d(e1.y() * aabb_axis_x.z() - e1.z() * aabb_axis_x.y(), e1.z() * aabb_axis_x.x() - e1.x() * aabb_axis_x.z(), e1.x() * aabb_axis_x.y() - e1.y() * aabb_axis_x.x()), tri, aabb)) return false;
+	if (!test_axis(Vector3d(e1.y() * aabb_axis_y.z() - e1.z() * aabb_axis_y.y(), e1.z() * aabb_axis_y.x() - e1.x() * aabb_axis_y.z(), e1.x() * aabb_axis_y.y() - e1.y() * aabb_axis_y.x()), tri, aabb)) return false;
+	if (!test_axis(Vector3d(e1.y() * aabb_axis_z.z() - e1.z() * aabb_axis_z.y(), e1.z() * aabb_axis_z.x() - e1.x() * aabb_axis_z.z(), e1.x() * aabb_axis_z.y() - e1.y() * aabb_axis_z.x()), tri, aabb)) return false;
+	if (!test_axis(Vector3d(e2.y() * aabb_axis_x.z() - e2.z() * aabb_axis_x.y(), e2.z() * aabb_axis_x.x() - e2.x() * aabb_axis_x.z(), e2.x() * aabb_axis_x.y() - e2.y() * aabb_axis_x.x()), tri, aabb)) return false;
+	if (!test_axis(Vector3d(e2.y() * aabb_axis_y.z() - e2.z() * aabb_axis_y.y(), e2.z() * aabb_axis_y.x() - e2.x() * aabb_axis_y.z(), e2.x() * aabb_axis_y.y() - e2.y() * aabb_axis_y.x()), tri, aabb)) return false;
+	if (!test_axis(Vector3d(e2.y() * aabb_axis_z.z() - e2.z() * aabb_axis_z.y(), e2.z() * aabb_axis_z.x() - e2.x() * aabb_axis_z.z(), e2.x() * aabb_axis_z.y() - e2.y() * aabb_axis_z.x()), tri, aabb)) return false;
+
+	// Test triangle plane
+	Vector3d normal = Vector3d(
+		e0.y() * e1.z() - e0.z() * e1.y(),
+		e0.z() * e1.x() - e0.x() * e1.z(),
+		e0.x() * e1.y() - e0.y() * e1.x()
+	);
+
+	if (!test_axis(normal, tri, aabb)) 
+		return false;
+	return true;
+}
+
+static int main0() {
+	Triangle tri = { Vector3d(0, 0, 0), Vector3d(1, 0, 0), Vector3d(0, 1, 0) };
+	AlignedBox3d aabb(Vector3d(-1, -1, -1), Vector3d(1, 1, 1));
+
+	if (intersect(tri, aabb)) {
+		std::cout << "Triangle and AABB intersect" << std::endl;
+	}
+	else {
+		std::cout << "Triangle and AABB do not intersect" << std::endl;
+	}
+
+	return 0;
 }

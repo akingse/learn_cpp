@@ -13,6 +13,6 @@
 #else
 #define DLLEXPORT __declspec(dllexport)
 #endif
-//#include "my_class_fun.h"
-//#include "calculateTriangle.h"
+#include "my_class_fun.h"
+#include "calculateTriangle.h"
 

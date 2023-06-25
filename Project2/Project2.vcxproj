@@ -150,6 +150,9 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <OpenMPSupport>true</OpenMPSupport>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -164,11 +167,14 @@
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Project_cal\calculateTriangle.cpp" />
+    <ClCompile Include="..\Project_cal\my_class_fun.cpp" />
     <ClCompile Include="GYDevillersTriangle.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="my_geometry.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="test_case_triangle.cpp" />
     <ClCompile Include="test_memfn.cpp">
@@ -236,6 +242,8 @@
     <ClCompile Include="triangle_intersect.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Project_cal\calculateTriangle.h" />
+    <ClInclude Include="..\Project_cal\my_class_fun.h" />
     <ClInclude Include="GYDevillersTriangle.h" />
     <ClInclude Include="my_geometry.h" />
     <ClInclude Include="pch.h" />

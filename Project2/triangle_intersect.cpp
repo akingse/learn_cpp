@@ -1,7 +1,7 @@
 #include "pch.h"
 using namespace std;
 
-class Triangle
+class TriangleVec
 {
 public:
 	Vec3 m_p0;
@@ -28,7 +28,7 @@ enum class COLLISION :int
 
 };
 
-COLLISION is_two_triangle_intersec(const Triangle& triA, const Triangle& triB)
+COLLISION is_two_triangle_intersec(const TriangleVec& triA, const TriangleVec& triB)
 {
 	return {};
 }
