@@ -1,4 +1,5 @@
 #pragma once
+#include <afx.h>
 
 typedef std::tuple<char, int, double> TC;
 namespace std

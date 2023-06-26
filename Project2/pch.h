@@ -14,7 +14,7 @@
 #include <thread>
 //#include <windows.h> //min max
 #define _AFXDLL
-#include <afx.h> // <cstring>
+//#include <afx.h> // MFC <cstring>
 #include <functional>  
 #include <omp.h>
 //math
