@@ -101,7 +101,7 @@ intersects()方法的返回值基于以下定理：如果两个AABB相交，则�
 4. 重复步骤3,逐层扫过每个平面。
 5. 所有平面扫过后结束,得到最终的碰撞和相交结果。
 
-![image-20230521215805496](C:/Users/Aking/AppData/Roaming/Typora/typora-user-images/image-20230521215805496.png)
+
 
 ### 效率测试 
 
@@ -118,7 +118,7 @@ intersects()方法的返回值基于以下定理：如果两个AABB相交，则�
 | isTwoTrianglesIntersection1                                  |                                                              | time = 4.588s<br/>time = 4.574s<br/>time = 4.575s<br />time = 15.401s<br/>time = 15.658s<br/>time = 15.485s | time = 3.771s<br/>time = 3.758s<br/>time = 3.856s            |
 | isTwoTrianglesIntersection2                                  | 调用 fun 18041503*3=54140554<br />time = 3.031s<br/>time = 2.983s<br/>time = 2.903s | time = 10.846s<br/>time = 10.909s<br/>time = 10.802s         | time = 3.723s<br/>time = 3.578s<br/>time = 3.984s<br />latest<br />time = 4.498s<br/>time = 4.484s<br/>time = 4.358s<br /> |
 | _isPointInTriangle<br />(randData3[i][0], randData3_[i])     | 随机数 1e7<br />3*24197379=72587976                          | time = 1.252s<br/>time = 1.266s<br/>time = 1.279s            | time = 1.686s<br/>time = 1.671s<br/>time = 1.675s            |
-| double<br />_isSegmentCrossTriangleSurface                   |                                                              |                                                              | time = 5.654s<br/>time = 5.792s<br/>time = 5.812s            |
+| double<br />_isSegmentCrossTriangleSurface                   |                                                              | time = 1.732s<br/>time = 1.703s<br/>time = 1.805s            | time = 5.654s<br/>time = 5.792s<br/>time = 5.812s            |
 | double<br />getTriangleBoundingCircle                        |                                                              | 先判钝角<br />time = 4.735s<br/>time = 4.797s<br/>time = 4.817s |                                                              |
 | _isTwoTriangles<br />BoundingBoxIntersect<br />三角面的包围盒求交 |                                                              | time = 1.617s<br/>time = 1.568s<br/>time = 1.495s<br />手写<br />time = 1.228s<br/>time = 1.242s<br/>time = 1.22s |                                                              |
 | 软碰撞<br />_getTriDist                                      |                                                              | time = 56.686s<br/>time = 57.677s<br/>time = 57.643s<br />   | time = 9.058s<br/>time = 9.336s<br/>time = 9.22s<br />分开三角形<br />time = 6.302s<br/>time = 6.497s<br/>time = 6.521s |
@@ -137,8 +137,8 @@ intersects()方法的返回值基于以下定理：如果两个AABB相交，则�
 
 ​	2.1 边与三角形共面，判断判线段是否与三角形相交 return true
 
-（共面，3点在线段左侧 isLeftTest* 3）
-（共面点在三角形内部）
+（共面，预判，3点在线段左侧 isLeftTest* 3）
+（预判，共面点在三角形内部）
 （共面，两线段相交，isLeftTest2* 3）
 
 ​	2.2 算出交点，判断交点是否在三角形内部 return true
@@ -160,6 +160,8 @@ cross 6*,3-
 //alg
 Vector3d veczL = (triL[1] - triL[0]).cross(triL[2] - triL[0]); //面法向量
 bool acrossR2L_A = (veczL.dot(triR[0] - triL[0])) * (veczL.dot(triR[1] - triL[0])) < eps;
+bool acrossR2L_B = (veczL.dot(triR[1] - triL[0])) * (veczL.dot(triR[2] - triL[0])) < eps;
+bool acrossR2L_C = (veczL.dot(triR[2] - triL[0])) * (veczL.dot(triR[0] - triL[0])) < eps;
 //critical include
 (veczL.dot(triR[0] - triL[0]))==0
 (veczL.dot(triR[1] - triL[0]))==0
@@ -173,7 +175,22 @@ if (veczL.norm()==0)
 
 ### 点在线段左侧
 
-### 两点在线段两侧
+```c
+//alg
+Vector3d vecX = (segment[1] - segment[0]).cross((trigon[1] - trigon[0]).cross(trigon[2] - trigon[0])); // axisY cross axisZ
+double dot0 = vecX.dot(trigon[0] - segment[0]);
+double dot1 = vecX.dot(trigon[1] - segment[0]);
+double dot2 = vecX.dot(trigon[2] - segment[0]);
+
+//critical include
+
+
+
+```
+
+
+
+### 两点在线段两侧（跨立实验）
 
 ```c
 //double straddling test
@@ -181,9 +198,54 @@ Vector3d vecSeg = segment[1] - segment[0];
 if (!((trigon[0] - segment[0]).cross(vecSeg).dot(vecSeg.cross(trigon[1] - segment[0])) > _eps ||
       (segment[0] - trigon[0]).cross(trigon[1] - trigon[0]).dot((trigon[1] - trigon[0]).cross(segment[1] - trigon[0])) < _eps))
     return true;
+
 ```
 
 
 
+### 分离轴定理 [SAT(Separating Axis Theorem)](https://dyn4j.org/2010/01/sat/#sat-axes)
 
+凸多边形
+
+如果某个形状与任何穿过该形状的直线只交叉两次，则该形状被称为凸多边形。如果某个形状与穿过该形状的直线交叉两次以上，则该形状为非凸（或凹）。
+
+SAT只能处理凸多边形，不过，非凸形状可以由凸形状的组合来表示（凸分解）
+
+SAT指出：“**如果两个凸面物体没有穿透，则存在一根轴，使得这两个物体在该轴上的投影不重叠。**”
+
+
+
+测试多个轴判断是否重叠。只要投影不重叠，算法可以立即确定形状不相交，从而退出循环。
+
+```c
+Axis[] axes = // get the axes to test;
+// loop over the axes
+for (int i = 0; i < axes.length; i++) 
+{
+  Axis axis = axes[i];
+  // project both shapes onto the axis
+  Projection p1 = shape1.project(axis);
+  Projection p2 = shape2.project(axis);
+  // do the projections overlap?
+  if (!p1.overlap(p2)) {
+    // then we can guarantee that the shapes do not overlap
+    return false;
+  }
+}
+// if we get here then we know that every axis had overlap on it
+// so we can guarantee an intersection
+return true;
+
+分离轴定理，三维空间中两个三角形是否相交
+1共面，计算法向量和顶点之间的距离
+2不共面，15个分离轴，6个边各自法向量和对边叉积
+    每个分离轴，计算三角形在轴上的投影，有分离则返回false，最后返回true
+    
+    
+```
+
+
+
+获取分离轴
+  **只要测试每个多边形的边的法线即可**
 

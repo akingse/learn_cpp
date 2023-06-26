@@ -60,7 +60,7 @@
 #else
 #define DLLEXPORT __declspec(dllexport)
 #endif
-#define STATISTIC_DATA_COUNT
+//#define STATISTIC_DATA_COUNT
 typedef std::array<Eigen::Vector3d, 3> Triangle;
 #include "my_class_fun.h"		
 #include "calculateTriangle.h"		//DLL-API

@@ -49,12 +49,16 @@ namespace std
 
 	inline double* _readNumberFile(size_t n)
 	{
-		n = 2 * 3 * 3 * n;
 		ifstream in(randNumName, ios::in | ios::binary);
 		if (!in.is_open()) {
-			cerr << "Error opening file" << endl;
-			return nullptr;
+			//cerr << "Error opening file" << endl;
+			//return nullptr;
+			_wirteNumberFile(n);
+			in = ifstream(randNumName, ios::in | ios::binary);
+			if (!in.is_open())
+				return nullptr;
 		}
+		n = 2 * 3 * 3 * n;
 		int read_n;
 		in.read(reinterpret_cast<char*>(&read_n), sizeof(int));
 		if (read_n != n) {
@@ -112,4 +116,28 @@ inline std::array<Eigen::Vector3d, 2> _get_rand2()
 	return std::array<Eigen::Vector3d, 2> {
 		Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
 			Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff) };
+}
+
+
+static void _test()
+{
+	std::array<std::array<double, 3>, 3> triangle = { { {0,0,0},{1,1,1}, {2,2,2}} };
+	//int PQP_BV_TYPE = RSS_TYPE | OBB_TYPE;
+	//int macro1 = PQP_BV_TYPE & RSS_TYPE;
+	//int macro2 = PQP_BV_TYPE & OBB_TYPE;
+	std::tuple<char, int, double> mytp;
+	mytp = { 'a',1,2.0 };
+
+	double nums[10] = { rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand(), rand() };
+	//for (int i = 0; i < sizeof(nums)/sizeof(double); i++)
+	//	cout << nums[i] << " | ";
+
+		//bool isTI = TriangleIntersectionTest({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+	//double td = getTrianglesDistance(P, Q, { triA0,triA1,triA2 }, { triB0,triB1,triB2 }); //43.905043670162655
+	double a = 3;
+	float b = 3;
+	double c = a - b;
+	double d = max(a, c);
+	//psykronix::Vertex vec(1, 1, 1);
+	//psykronix::Vertex vec2 = vec;
 }
