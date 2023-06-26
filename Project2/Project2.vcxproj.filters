@@ -183,9 +183,6 @@
     <ClCompile Include="triangle_intersect.cpp">
       <Filter>test_math</Filter>
     </ClCompile>
-    <ClCompile Include="GYDevillersTriangle.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="test_paste1.cpp">
       <Filter>test_paste</Filter>
     </ClCompile>
@@ -220,9 +217,6 @@
     </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="GYDevillersTriangle.h">
-      <Filter>head</Filter>
     </ClInclude>
     <ClInclude Include="test_calculate.h">
       <Filter>head</Filter>

@@ -1,20 +1,14 @@
 #pragma once
 #include <afx.h>
 
-typedef std::tuple<char, int, double> TC;
-namespace std
-{
-	//template <class T,class U,class V>
-	//class tuple<T, U, V>
-	//{
-	//public:
-	//	T operator[](int i)
-	//	{
-
-	//	}
-	//};
-}
 static std::string randNumName = "random_1e8.bin";
+
+namespace psykronix 
+{
+	bool isTrianglesIntersectSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB);
+
+}
+
 
 inline std::string getExePath() // include<afx.h>
 {
@@ -50,12 +44,16 @@ namespace std
 
 	inline double* _readNumberFile(size_t n)
 	{
-		n = 2 * 3 * 3 * n;
 		ifstream in(randNumName, ios::in | ios::binary);
 		if (!in.is_open()) {
-			cerr << "Error opening file" << endl;
-			return nullptr;
+			//cerr << "Error opening file" << endl;
+			//return nullptr;
+			_wirteNumberFile(n);
+			in = ifstream(randNumName, ios::in | ios::binary);
+			if (!in.is_open())
+				return nullptr;
 		}
+		n = 2 * 3 * 3 * n;
 		int read_n;
 		in.read(reinterpret_cast<char*>(&read_n), sizeof(int));
 		if (read_n != n) {
@@ -114,3 +112,4 @@ inline std::array<Eigen::Vector3d, 2> _get_rand2()
 		Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
 			Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff) };
 }
+
