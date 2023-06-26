@@ -204,10 +204,10 @@ bool psykronix::isTrianglesIntersectSAT(const std::array<Eigen::Vector2d, 3>& tr
 	//	return false;
 	for (const auto& axis : axes)
 	{
-		double maxA = std::max({ axis.dot(triA[0]), axisA1.dot(triA[1]), axisA1.dot(triA[2]) });
-		double minA = std::min({ axis.dot(triA[0]), axisA1.dot(triA[1]), axisA1.dot(triA[2]) });
-		double maxB = std::max({ axis.dot(triB[0]), axisA1.dot(triB[1]), axisA1.dot(triB[2]) });
-		double minB = std::min({ axis.dot(triB[0]), axisA1.dot(triB[1]), axisA1.dot(triB[2]) });
+		double maxA = std::max(std::max(axis.dot(triA[0]), axisA1.dot(triA[1])), axisA1.dot(triA[2]));
+		double minA = std::min(std::max(axis.dot(triA[0]), axisA1.dot(triA[1])), axisA1.dot(triA[2]));
+		double maxB = std::max(std::max(axis.dot(triB[0]), axisA1.dot(triB[1])), axisA1.dot(triB[2]));
+		double minB = std::min(std::max(axis.dot(triB[0]), axisA1.dot(triB[1])), axisA1.dot(triB[2]));
 		if (maxA - minB < _eps || maxB - minA < _eps)//(maxA0 < minB0 || maxB0 < minA0)
 			return false;
 	}

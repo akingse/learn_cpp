@@ -123,7 +123,7 @@ intersects()方法的返回值基于以下定理：如果两个AABB相交，则�
 | _isTwoTriangles<br />BoundingBoxIntersect<br />三角面的包围盒求交 |                                                              | time = 1.617s<br/>time = 1.568s<br/>time = 1.495s<br />手写<br />time = 1.228s<br/>time = 1.242s<br/>time = 1.22s |                                                              |
 | 软碰撞<br />_getTriDist                                      |                                                              | time = 56.686s<br/>time = 57.677s<br/>time = 57.643s<br />   | time = 9.058s<br/>time = 9.336s<br/>time = 9.22s<br />分开三角形<br />time = 6.302s<br/>time = 6.497s<br/>time = 6.521s |
 | 包围盒求交<br />AlignedBox3d::intersection                   | 1e8                                                          | time = 0.658s<br/>time = 0.616s<br/>time = 0.626s            |                                                              |
-| 分离轴定理                                                   |                                                              | time = 6.034s<br/>time = 6.144s<br/>time = 6.192s            |                                                              |
+| 分离轴定理                                                   | computer strix<br />time = 4.271s<br/>time = 4.36s<br/>time = 4.311s | time = 6.034s<br/>time = 6.144s<br/>time = 6.192s            |                                                              |
 
 
 

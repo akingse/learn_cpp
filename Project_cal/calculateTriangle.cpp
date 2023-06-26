@@ -466,7 +466,7 @@ bool psykronix::isTriangleAndBoundingBoxIntersect(const std::array<Eigen::Vector
 #ifdef STATISTIC_DATA_COUNT
 	isTriangleBoundC++;
 #endif
-	if ((box.diagonal().array() < 0).any()) // input box illegal
+	if ((box.sizes().array() < 0).any()) // input box illegal
 	{
 #ifdef STATISTIC_DATA_COUNT
 		count_err_inputbox++;
@@ -1555,12 +1555,66 @@ static void test()
 
 }
 
-bool psykronix::isTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
+bool psykronix::isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box)
 {
+	std::array<Eigen::Vector3d, 3> edges = { trigon[1] - trigon[0],
+										   trigon[2] - trigon[1],
+										   trigon[0] - trigon[2] };
+	std::array<Eigen::Vector3d, 3> coords = { Vector3d(1,0,0),
+											   Vector3d(0,1,0),
+											   Vector3d(0,0,1) };
+	std::array<Eigen::Vector3d, 15> axes = { {
+			coords[0],
+			coords[1],
+			coords[2],
+			edges[0],
+			edges[1],
+			edges[2],
+			coords[0].cross(edges[0]),
+			coords[0].cross(edges[1]),
+			coords[0].cross(edges[2]),
+			coords[1].cross(edges[0]),
+			coords[1].cross(edges[1]),
+			coords[1].cross(edges[2]),
+			coords[2].cross(edges[0]),
+			coords[2].cross(edges[1]),
+			coords[2].cross(edges[2]) } };
 
+	const Vector3d& origin = box.min();
+	Vector3d vertex = box.sizes();
+	std::array<Vector3d, 8> vertexes = { {
+			Vector3d(0, 0, 0),
+			Vector3d(vertex.x(), 0, 0),
+			Vector3d(vertex.x(), vertex.y(), 0),
+			Vector3d(0, vertex.y(), 0),
+			Vector3d(0, 0, vertex.z()),
+			Vector3d(vertex.x(), 0, vertex.z()),
+			Vector3d(vertex.x(), vertex.y(), vertex.z()),
+			Vector3d(0, vertex.y(), vertex.z())} };
+	// iterate
+	for (const auto& axis : axes) //fast than index
+	{
+		double minA = DBL_MAX;// std::numeric_limits<double>::max();
+		double maxA = -DBL_MAX;//std::numeric_limits<double>::lowest();
+		double minB = DBL_MAX;//std::numeric_limits<double>::max();
+		double maxB = -DBL_MAX;//std::numeric_limits<double>::lowest();
+		for (const auto& vertex : trigon)
+		{
+			double projection = (vertex-origin).dot(axis);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
+		}
+		for (const auto& vertex : vertexes)
+		{
+			double projection = vertex.dot(axis);
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		if (maxA - minB < _eps || maxB - minA < _eps)//(maxA < minB || maxB < minA) 
+			return false;
+	}
 	return true;
 }
-
 
 // base on Separating Axis Theorem
 bool psykronix::TriangleIntersectionTest(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB) 
