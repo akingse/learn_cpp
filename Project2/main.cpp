@@ -30,6 +30,7 @@ const size_t totalNum = (size_t)1e8;
 //std::array<Vector3d, 3>* randData3 = new std::array<Vector3d, 3>;
 //std::array<Vector3d, 3>* randData3_ = new std::array<Vector3d, 3>;
 
+#define TEST_SPEED_OF_FUNCTION
 int main()
 {
 	auto dir = getExePath();
@@ -55,6 +56,9 @@ int main()
 	//	randData3_[i] = _get_rand3();
 	//}
 
+
+
+#ifdef TEST_SPEED_OF_FUNCTION
 	size_t length = size_t(sqrt(totalNum));// (1e4);
 	for (int i = 0; i < length; ++i)
 	{
@@ -93,9 +97,9 @@ int main()
 			//auto res = _get_circumcircle_center({ _get_rand() ,_get_rand() ,_get_rand() });
 			//double res = _test_custom_calculate(nums);
 			// 三角形相交测试
-			bool res = isTwoTrianglesIntersection(randData3[i], randData3_[i]);
+			//bool res = isTwoTrianglesIntersection(randData3[i], randData3_[i]);
 			//bool res = isTwoTrianglesIntersection2(randData3[i], randData3_[i]);
-			//bool res = TriangleIntersectionTest(randData3[i], randData3_[i]);
+			bool res = TriangleIntersectionTest(randData3[i], randData3_[i]);
 			//bool res = isTwoTrianglesIntersection2(randData3[i], randData3_[i]);
 			//bool r1 = isSegmentCrossTriangleSurface(_get_rand2(), _get_rand3());
 			//bool r2 = isSegmentCrossTriangleSurface(_get_rand2(), _get_rand3());
@@ -138,6 +142,8 @@ int main()
 	count_across = 0;
 	TriangularIntersectC_in = 0;
 	TriangularIntersectC_all = 0;
+#endif
+
 	return 0;
 }
 

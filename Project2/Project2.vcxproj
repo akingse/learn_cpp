@@ -169,7 +169,6 @@
   <ItemGroup>
     <ClCompile Include="..\Project_cal\calculateTriangle.cpp" />
     <ClCompile Include="..\Project_cal\my_class_fun.cpp" />
-    <ClCompile Include="GYDevillersTriangle.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="my_geometry.cpp" />
     <ClCompile Include="pch.cpp">
@@ -244,7 +243,6 @@
   <ItemGroup>
     <ClInclude Include="..\Project_cal\calculateTriangle.h" />
     <ClInclude Include="..\Project_cal\my_class_fun.h" />
-    <ClInclude Include="GYDevillersTriangle.h" />
     <ClInclude Include="my_geometry.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="test_calculate.h" />
