@@ -1,4 +1,5 @@
 #include "pch.h"
+using namespace psykronix;
 using namespace std;
 using namespace para;
 using namespace Eigen;
@@ -147,6 +148,7 @@ static void _test1()
 	Vector3d triB_2 = Vector3d(4924589.8109916430, -385975.18553675216, 5750.0000000000000);
 	bool isTI = isTwoTrianglesIntersection({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
 	bool isTIT = TriangularIntersectionTest({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+
 	cout << "return 0" << endl;
 }
 
@@ -174,15 +176,27 @@ bool psykronix::isTrianglesIntersectSAT(const std::array<Eigen::Vector2d, 3>& tr
 	Vector2d axisA0 = triA[1] - triA[0];
 	Vector2d axisA1 = triA[2] - triA[1];
 	Vector2d axisA2 = triA[0] - triA[2];
-	std::swap(axisA0.x(), axisA0.y()); //get the normal vector
-	std::swap(axisA1.x(), axisA1.y());
-	std::swap(axisA2.x(), axisA2.y());
+	axisA0 = Vector2d(axisA0.x(), -axisA0.y());
+	axisA1 = Vector2d(axisA1.x(), -axisA1.y());
+	axisA2 = Vector2d(axisA2.x(), -axisA2.y());
+	//axisA0.x() = -1.0*axisA0.x();
+	//axisA0.y() = -1.0*axisA0.y();
+	//axisA0.z() = -1.0*axisA0.z();
+	//std::swap(axisA0.x(), axisA0.y()); //get the normal vector
+	//std::swap(axisA1.x(), axisA1.y());
+	//std::swap(axisA2.x(), axisA2.y());
 	Vector2d axisB0 = triB[1] - triB[0];
 	Vector2d axisB1 = triB[2] - triB[1];
 	Vector2d axisB2 = triB[0] - triB[2];
-	std::swap(axisB0.x(), axisB0.y()); //get the normal vector
-	std::swap(axisB1.x(), axisB1.y());
-	std::swap(axisB2.x(), axisB2.y());
+	axisB0 = Vector2d(axisB0.x(), -axisB0.y());
+	axisB1 = Vector2d(axisB1.x(), -axisB1.y());
+	axisB2 = Vector2d(axisB2.x(), -axisB2.y());
+	//axisB0.x() = -1.0*axisB0.x();
+	//axisB0.y() = -1.0*axisB0.y();
+	//axisB0.z() = -1.0*axisB0.z();
+	//std::swap(axisB0.x(), axisB0.y()); //get the normal vector
+	//std::swap(axisB1.x(), axisB1.y());
+	//std::swap(axisB2.x(), axisB2.y());
 	axes[0] = axisA0;
 	axes[1] = axisA1;
 	axes[2] = axisA2;

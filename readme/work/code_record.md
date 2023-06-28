@@ -322,7 +322,7 @@ either:
 
 ### Project2 项目配置
 
-包含
+包含 IncludePath
 
 ```
 
@@ -349,5 +349,157 @@ Project2.exe - System Error
 
 The code execution cannot proceed because Project_cal.dlI was not found. Reinstalling the program may fix this problem.
 
+依赖路径不正确
 ```
+
+
+
+### 循环缩小包围盒里的三角面
+
+// return index-vector of two mesh
+
+```c
+std::array<std::vector<size_t>, 2> _getPotentialIntersectTrianglesOfMesh(ModelMesh& mesh_a, ModelMesh& mesh_b, const Eigen::AlignedBox3d& box, double tolerance)
+{
+    //Eigen::Affine3d relative_matrix = mesh_b.pose_.inverse() * mesh_a.pose_; // model_a * a / b
+    //// machine error process
+    //for (size_t i = 0; i < 3; i++)
+    //{
+    //    for (size_t j = 0; j < 3; j++)
+    //    {
+    //        relative_matrix(i, j) = abs(relative_matrix(i, j)) < 1e-14 ? 0.0 : relative_matrix(i, j);
+    //        relative_matrix(i, j) = abs(relative_matrix(i, j) - 1.0) < 1e-14 ? 1.0 : relative_matrix(i, j);
+    //    }
+    //    relative_matrix(i, 3) = std::round(relative_matrix(i, 3) * 1e9) / 1e9;
+    //}
+    //Eigen::AlignedBox3d boxMag(box.min() - 0.5 * Vector3d(tolerance, tolerance, tolerance), box.max() + 0.5 * Vector3d(tolerance, tolerance, tolerance));
+    Eigen::AlignedBox3d boxMag(box.min() - Vector3d(tolerance, tolerance, tolerance), box.max() + Vector3d(tolerance, tolerance, tolerance));
+    std::vector<size_t> triA_Index; // using index of mesh IBO
+    Eigen::AlignedBox3d boxA_Min; // iterate to lessen box
+    for (size_t i = 0; i < mesh_a.ibo_.size(); ++i)
+    {
+        std::array<Eigen::Vector3d, 3> triIter = {
+                mesh_a.vbo_[mesh_a.ibo_[i][0]],
+                mesh_a.vbo_[mesh_a.ibo_[i][1]],
+                mesh_a.vbo_[mesh_a.ibo_[i][2]] };
+        //enlarge box while has tolerance
+        if (isTriangleAndBoundingBoxIntersect(triIter, boxMag))
+        {
+            triA_Index.push_back(i);
+            boxA_Min.extend(triIter[0]);
+            boxA_Min.extend(triIter[1]);
+            boxA_Min.extend(triIter[2]);
+        }
+    }
+    if (triA_Index.empty())
+        return {};
+    std::vector<size_t> triB_Index;
+    Eigen::AlignedBox3d boxB_Min;
+    for (size_t j = 0; j < mesh_b.ibo_.size(); ++j)
+    {
+        std::array<Eigen::Vector3d, 3> triIter = {
+                mesh_b.vbo_[mesh_b.ibo_[j][0]],
+                mesh_b.vbo_[mesh_b.ibo_[j][1]],
+                mesh_b.vbo_[mesh_b.ibo_[j][2]] };
+        if (isTriangleAndBoundingBoxIntersect(triIter, boxMag))
+        {
+            triB_Index.push_back(j);
+            boxB_Min.extend(triIter[0]);
+            boxB_Min.extend(triIter[1]);
+            boxB_Min.extend(triIter[2]);
+        }
+    }
+    if (triB_Index.empty())
+        return {};
+    // second bounding-box intersect
+    if (!boxA_Min.intersects(boxB_Min))
+        return {};
+#ifdef STATISTIC_DATA_COUNT
+    count_triA_inter += triA_Index.size();
+    count_triB_inter += triB_Index.size();
+#endif
+    bool isMinA = false;
+    bool isMinB = false;
+    while (!isMinA && !isMinB)
+    {
+        Eigen::AlignedBox3d box_Inter = boxA_Min.intersection(boxB_Min);
+        box_Inter.min() = box_Inter.min() - Vector3d(tolerance, tolerance, tolerance);
+        box_Inter.max() = box_Inter.max() + Vector3d(tolerance, tolerance, tolerance);
+        Eigen::AlignedBox3d boxA_Temp;
+        std::vector<size_t> triA_IndexTemp;
+        if (!isMinA)
+        {
+            for (auto& iA : triA_Index)
+            {
+                std::array<Eigen::Vector3d, 3> triA_Temp = {
+                        mesh_a.vbo_[mesh_a.ibo_[iA][0]],
+                        mesh_a.vbo_[mesh_a.ibo_[iA][1]],
+                        mesh_a.vbo_[mesh_a.ibo_[iA][2]] };
+                if (isTriangleAndBoundingBoxIntersect(triA_Temp, box_Inter))
+                {
+                    triA_IndexTemp.push_back(iA);
+                    boxA_Temp.extend(triA_Temp[0]);
+                    boxA_Temp.extend(triA_Temp[1]);
+                    boxA_Temp.extend(triA_Temp[2]);
+                }
+            }
+            if (triA_IndexTemp.empty())
+                return {};
+            if (boxA_Temp.contains(boxA_Min.min()) && boxA_Temp.contains(boxA_Min.max())) // boxA_Temp==boxA_Min
+            {
+                isMinA = true;//end iterate
+            }
+            else //iterate min box
+            {
+                boxA_Min = boxA_Temp;
+                triA_Index = triA_IndexTemp;
+            }
+        }
+        if (!isMinB)
+        {
+            Eigen::AlignedBox3d boxB_Temp;
+            std::vector<size_t> triB_IndexTemp;
+            for (auto& iB : triB_Index)
+            {
+                std::array<Eigen::Vector3d, 3> triB_Temp = {
+                    mesh_b.vbo_[mesh_b.ibo_[iB][0]],
+                    mesh_b.vbo_[mesh_b.ibo_[iB][1]],
+                    mesh_b.vbo_[mesh_b.ibo_[iB][2]] };
+                if (isTriangleAndBoundingBoxIntersect(triB_Temp, box_Inter))
+                {
+                    triB_IndexTemp.push_back(iB);
+                    boxB_Temp.extend(triB_Temp[0]);
+                    boxB_Temp.extend(triB_Temp[1]);
+                    boxB_Temp.extend(triB_Temp[2]);
+                }
+            }
+            if (triB_IndexTemp.empty())
+                return {};
+            if (boxB_Temp.contains(boxB_Min.min()) && boxB_Temp.contains(boxB_Min.max())) // boxB_Temp==boxB_Min
+            {
+                isMinB = true; //end iterate
+            }
+            else //iterate min box
+            {
+                boxB_Min = boxB_Temp;
+                triB_Index = triB_IndexTemp;
+            }
+        }
+        if (!boxA_Min.intersects(boxB_Min))
+            return {};
+    }
+	return { triA_Index, triB_Index };
+}
+
+```
+
+
+
+
+
+
+
+
+
+
 

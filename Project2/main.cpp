@@ -3,6 +3,7 @@ using namespace psykronix;
 using namespace std;
 using namespace para;
 using namespace Eigen;
+using namespace psykronix;
 #undef max //AlignedBox3d mem-fun
 #undef min
 //精度
@@ -39,14 +40,15 @@ int main()
 
 	Eigen::Vector3d P(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN());
 	Eigen::Vector3d Q(std::nan("0"), std::nan("0"), std::nan("0"));
+	double pi = M_PI;
 
 	start = clock();
 	cout << "data number:"<< totalNum <<", load start..." << endl;
 	double* readNum = _readNumberFile(size_t(sqrt(totalNum)));
 	// the data
-	//static std::array<Vector3d, 2>* randData2 = new std::array<Vector3d, 2>[totalNum];
+	static std::array<Vector3d, 2>* randData2 = new std::array<Vector3d, 2>[totalNum];
 	//static std::array<Vector3d, 2>* randData2_ = new std::array<Vector3d, 2>[totalNum];
-	std::array<Vector3d, 3>* randData3 = new std::array<Vector3d, 3>[totalNum];
+	//std::array<Vector3d, 3>* randData3 = new std::array<Vector3d, 3>[totalNum];
 	std::array<Vector3d, 3>* randData3_ = new std::array<Vector3d, 3>[totalNum];
 	//static std::array<Vector3d, 3>* randData30 = new std::array<Vector3d, 3>[totalNum];
 	//static std::array<Vector3d, 3>* randData30_ = new std::array<Vector3d, 3>[totalNum];
@@ -64,17 +66,17 @@ int main()
 	{
 		for (int j = 0; j < length; ++j)
 		{
-			randData3[i * length + j] = { { {readNum[j + 0],readNum[j + 2],readNum[j + 4]} ,
-											{readNum[j + 6],readNum[j + 8],readNum[j + 10]} ,
-											{readNum[j + 12],readNum[j + 14],readNum[j + 16]} } };
+			//randData3[i * length + j] = { { {readNum[j + 0],readNum[j + 2],readNum[j + 4]} ,
+			//								{readNum[j + 6],readNum[j + 8],readNum[j + 10]} ,
+			//								{readNum[j + 12],readNum[j + 14],readNum[j + 16]} } };
 			randData3_[i * length + j] = { { {readNum[j + 1],readNum[j + 3],readNum[j + 5]} ,
 											{readNum[j + 7],readNum[j + 9],readNum[j + 11]} ,
 											{readNum[j + 13],readNum[j + 15],readNum[j + 17]} } };
 
-			//randData2[i * length + j] = { { {readNum[j + 0],readNum[j + 2],readNum[j + 4]} ,
-			//					{readNum[j + 6],readNum[j + 8],readNum[j + 10]} } };
+			randData2[i * length + j] = { { {readNum[j + 0],readNum[j + 2],readNum[j + 4]} ,
+											{readNum[j + 6],readNum[j + 8],readNum[j + 10]} } };
 			//randData2_[i * length + j] = { { {readNum[j + 1],readNum[j + 3],readNum[j + 5]} ,
-			//					{readNum[j + 7],readNum[j + 9],readNum[j + 11]} } };
+			//								{readNum[j + 7],readNum[j + 9],readNum[j + 11]} } };
 			
 			//randData30[i * length + j] = { { {readNum[j + 0],readNum[j + 2],0.0} ,
 			//								{readNum[j + 6],readNum[j + 8],0.0} ,
@@ -99,13 +101,17 @@ int main()
 			// 三角形相交测试
 			//bool res = isTwoTrianglesIntersection(randData3[i], randData3_[i]);
 			//bool res = isTwoTrianglesIntersection2(randData3[i], randData3_[i]);
-			bool res = TriangleIntersectionTest(randData3[i], randData3_[i]);
+			//bool res = isTwoTrianglesIntersectionSAT(randData3[i], randData3_[i]);
 			//bool res = isTwoTrianglesIntersection2(randData3[i], randData3_[i]);
 			//bool r1 = isSegmentCrossTriangleSurface(_get_rand2(), _get_rand3());
 			//bool r2 = isSegmentCrossTriangleSurface(_get_rand2(), _get_rand3());
 			//bool res = isPointInTriangle(randData3[i][0], randData3_[i]);
 			//bool res = isSegmentCrossTriangleSurface(randData2[i], randData3_[i]);
 			//bool res = TriangularIntersectionTest(randData3[i], randData3_[i]);
+			//包围盒
+			//bool res = isTriangleAndBoundingBoxIntersect(randData3_[i], { randData2[i][0] ,randData2[i][1]});
+			bool res = isTriangleAndBoundingBoxIntersectSAT(randData3_[i], { randData2[i][0] ,randData2[i][1]});
+
 			//包围圆
 			//auto crA = getTriangleBoundingCircle(randData3[i]);
 			//auto crB = getTriangleBoundingCircle(randData3_[i]);
