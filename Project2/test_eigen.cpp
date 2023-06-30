@@ -60,13 +60,9 @@ static void test1()
 	Eigen::AlignedBox3d boxInter = box12.intersection(box22);
 	bool isSepa2 = ((boxInter.min() - boxInter.max()).array() > 0).any();
 	bool isIter2 = box12.intersects(box22);
+
+	cout << "return 0" << endl;
 }
-
-
-static int _enrol0 = []()->int {
-	//test0();
-	return 0;
-}();
 
 
 static void test0()
@@ -79,9 +75,21 @@ static void test0()
 	std::cout << "Combined Box: " << std::endl;
 	std::cout << "Min: " << sum_box.min() << std::endl;
 	std::cout << "Max: " << sum_box.max() << std::endl;
-	return;
+	
+
+	Vector3d vec(1, 2, 3);
+	bool is0 = vec.isZero();
+	bool is1 = (vec - vec).isZero();
+
+	cout << "return 0" << endl;
+
 }
 
+
+static int _enrol0 = []()->int {
+	test0();
+	return 0;
+}();
 
 static int main_eg()
 {

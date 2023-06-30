@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "my_class_fun.h"
 using namespace Eigen;
 
 Matrix4d psykronix::rotx(double theta)
@@ -82,6 +83,12 @@ Eigen::Matrix4d psykronix::mirrorz()
         0, 0, -1, 0,
         0, 0, 0, 1;
     return T;
+}
+
+Eigen::Vector3d psykronix::operator*=(const Eigen::Matrix4d& mat, const Eigen::Vector3d& vec)
+{
+    Eigen::Vector4d res = mat * vec.homogeneous();
+    return res.hnormalized();
 }
 
 std::array<Eigen::Vector3d, 3> psykronix::operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 3>& tri)

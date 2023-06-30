@@ -3,12 +3,6 @@
 
 static std::string randNumName = "random_1e8.bin";
 
-namespace psykronix 
-{
-	bool isTrianglesIntersectSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB);
-
-}
-
 
 inline std::string getExePath() // include<afx.h>
 {
@@ -36,7 +30,7 @@ namespace std
 			cerr << "Error opening file" << endl;
 			return -1;
 		}
-		out.write(reinterpret_cast<char*>(&n), sizeof(int)); // 先写入整个数组大小 
+		out.write(reinterpret_cast<char*>(&n), sizeof(int)); //
 		out.write(reinterpret_cast<char*>(arr), n * sizeof(double));
 		out.close();
 		return 0;
@@ -64,6 +58,8 @@ namespace std
 		in.read(reinterpret_cast<char*>(read_arr), read_n * sizeof(double));
 		return read_arr;
 	}
+
+
 }
 
 inline Vec2 _get_rand()

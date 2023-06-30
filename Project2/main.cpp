@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <synchapi.h>
 using namespace psykronix;
 using namespace std;
 using namespace para;
@@ -32,6 +33,12 @@ const size_t totalNum = (size_t)1e8;
 //std::array<Vector3d, 3>* randData3_ = new std::array<Vector3d, 3>;
 
 #define TEST_SPEED_OF_FUNCTION
+//#define TEST_TRIGON3
+//#define TEST_TRIGON2_TRIGON2
+//#define TEST_TRIGON2_TRIGON3
+#define TEST_TRIGON3_TRIGON3
+//#define TEST_TRIGON3XY_TRIGON3XY //on XOY plane
+
 int main()
 {
 	auto dir = getExePath();
@@ -44,50 +51,83 @@ int main()
 
 	start = clock();
 	cout << "data number:"<< totalNum <<", load start..." << endl;
-	double* readNum = _readNumberFile(size_t(sqrt(totalNum)));
 	// the data
-	static std::array<Vector3d, 2>* randData2 = new std::array<Vector3d, 2>[totalNum];
-	//static std::array<Vector3d, 2>* randData2_ = new std::array<Vector3d, 2>[totalNum];
-	//std::array<Vector3d, 3>* randData3 = new std::array<Vector3d, 3>[totalNum];
+	double* readNum = _readNumberFile(size_t(sqrt(totalNum)));
+
+#ifdef TEST_TRIGON3
+	std::array<Vector3d, 3>* randData3 = new std::array<Vector3d, 3>[totalNum];
+#endif
+
+#ifdef TEST_TRIGON2_TRIGON2
+	std::array<Vector3d, 2>* randData2 = new std::array<Vector3d, 2>[totalNum];
+	std::array<Vector3d, 2>* randData2_ = new std::array<Vector3d, 2>[totalNum];
+#endif
+
+#ifdef TEST_TRIGON3_TRIGON3
+	std::array<Vector3d, 3>* randData3 = new std::array<Vector3d, 3>[totalNum];
 	std::array<Vector3d, 3>* randData3_ = new std::array<Vector3d, 3>[totalNum];
-	//static std::array<Vector3d, 3>* randData30 = new std::array<Vector3d, 3>[totalNum];
-	//static std::array<Vector3d, 3>* randData30_ = new std::array<Vector3d, 3>[totalNum];
+#endif
+
+#ifdef TEST_TRIGON2_TRIGON3
+	std::array<Vector3d, 3>* randData2 = new std::array<Vector3d, 2>[totalNum];
+	std::array<Vector3d, 3>* randData3 = new std::array<Vector3d, 3>[totalNum];
+#endif
+
+#ifdef TEST_TRIGON3XY_TRIGON3XY
+	std::array<Vector3d, 3>* randData3xy = new std::array<Vector3d, 2>[totalNum];
+	std::array<Vector3d, 3>* randData3_xy = new std::array<Vector3d, 3>[totalNum];
+#endif
 	//for (size_t i = 0; i < totalNum; ++i)
 	//{
 	//	randData3[i] = _get_rand3();
 	//	randData3_[i] = _get_rand3();
 	//}
-
-
-
 #ifdef TEST_SPEED_OF_FUNCTION
 	size_t length = size_t(sqrt(totalNum));// (1e4);
 	for (int i = 0; i < length; ++i)
 	{
 		for (int j = 0; j < length; ++j)
 		{
-			//randData3[i * length + j] = { { {readNum[j + 0],readNum[j + 2],readNum[j + 4]} ,
-			//								{readNum[j + 6],readNum[j + 8],readNum[j + 10]} ,
-			//								{readNum[j + 12],readNum[j + 14],readNum[j + 16]} } };
+#ifdef TEST_TRIGON3
+			randData3[i * length + j] = { { {readNum[j + 0],readNum[j + 2],readNum[j + 4]} ,
+											{readNum[j + 6], readNum[j + 8], readNum[j + 10]},
+											{ readNum[j + 12],readNum[j + 14],readNum[j + 16] } } };
+#endif
+
+#ifdef TEST_TRIGON3_TRIGON3
+			randData3[i * length + j] = { { {readNum[j + 0],readNum[j + 2],readNum[j + 4]} ,
+											{readNum[j + 6],readNum[j + 8],readNum[j + 10]} ,
+											{readNum[j + 12],readNum[j + 14],readNum[j + 16]} } };
 			randData3_[i * length + j] = { { {readNum[j + 1],readNum[j + 3],readNum[j + 5]} ,
 											{readNum[j + 7],readNum[j + 9],readNum[j + 11]} ,
 											{readNum[j + 13],readNum[j + 15],readNum[j + 17]} } };
+#endif
+#ifdef TEST_TRIGON2_TRIGON3
+			randData2[i * length + j] = { { {readNum[j + 0],readNum[j + 2],readNum[j + 4]} ,
+											{readNum[j + 6],readNum[j + 8],readNum[j + 10]} } };
+			randData3[i * length + j] = { { {readNum[j + 1],readNum[j + 3],readNum[j + 5]} ,
+											{readNum[j + 7],readNum[j + 9],readNum[j + 11]} ,
+											{readNum[j + 13],readNum[j + 15],readNum[j + 17]} } };
+#endif
+#ifdef TEST_TRIGON2_TRIGON2
 
 			randData2[i * length + j] = { { {readNum[j + 0],readNum[j + 2],readNum[j + 4]} ,
 											{readNum[j + 6],readNum[j + 8],readNum[j + 10]} } };
-			//randData2_[i * length + j] = { { {readNum[j + 1],readNum[j + 3],readNum[j + 5]} ,
-			//								{readNum[j + 7],readNum[j + 9],readNum[j + 11]} } };
-			
-			//randData30[i * length + j] = { { {readNum[j + 0],readNum[j + 2],0.0} ,
-			//								{readNum[j + 6],readNum[j + 8],0.0} ,
-			//								{readNum[j + 12],readNum[j + 14],0.0} } };
-			//randData30_[i * length + j] = { { {readNum[j + 1],readNum[j + 3],0.0} ,
-			//								{readNum[j + 7],readNum[j + 9],0.0} ,
-			//								{readNum[j + 13],readNum[j + 15],0.0} } };
+			randData2_[i * length + j] = { { {readNum[j + 1],readNum[j + 3],readNum[j + 5]} ,
+											{readNum[j + 7],readNum[j + 9],readNum[j + 11]} } };
+#endif
+#ifdef TEST_TRIGON3XY_TRIGON3XY
+			randData3xy[i * length + j] = { { {readNum[j + 0],readNum[j + 2],0.0} ,
+											{readNum[j + 6],readNum[j + 8],0.0} ,
+											{readNum[j + 12],readNum[j + 14],0.0} } };
+			randData3_xy[i * length + j] = { { {readNum[j + 1],readNum[j + 3],0.0} ,
+											{readNum[j + 7],readNum[j + 9],0.0} ,
+											{readNum[j + 13],readNum[j + 15],0.0} } };
+#endif
 		}
 	}
-	end = clock();
-	cout << "data load finish, cost time = " << double(end - start) / CLOCKS_PER_SEC << "s" << endl;
+	end = clock(); //completed
+	cout << "data load finished, cost time = " << double(end - start) / CLOCKS_PER_SEC << "s" << endl;
 
 //#pragma omp parallel for //开启omp优化
 	for (int i = 0; i < 3; i++)
@@ -101,7 +141,7 @@ int main()
 			// 三角形相交测试
 			//bool res = isTwoTrianglesIntersection(randData3[i], randData3_[i]);
 			//bool res = isTwoTrianglesIntersection2(randData3[i], randData3_[i]);
-			//bool res = isTwoTrianglesIntersectionSAT(randData3[i], randData3_[i]);
+			//bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]);
 			//bool res = isTwoTrianglesIntersection2(randData3[i], randData3_[i]);
 			//bool r1 = isSegmentCrossTriangleSurface(_get_rand2(), _get_rand3());
 			//bool r2 = isSegmentCrossTriangleSurface(_get_rand2(), _get_rand3());
@@ -110,13 +150,13 @@ int main()
 			//bool res = TriangularIntersectionTest(randData3[i], randData3_[i]);
 			//包围盒
 			//bool res = isTriangleAndBoundingBoxIntersect(randData3_[i], { randData2[i][0] ,randData2[i][1]});
-			bool res = isTriangleAndBoundingBoxIntersectSAT(randData3_[i], { randData2[i][0] ,randData2[i][1]});
+			//bool res = isTriangleAndBoundingBoxIntersectSAT(randData3_[i], { randData2[i][0] ,randData2[i][1]});
 
 			//包围圆
 			//auto crA = getTriangleBoundingCircle(randData3[i]);
 			//auto crB = getTriangleBoundingCircle(randData3_[i]);
 			//bool res = (std::get<0>(crA) - std::get<0>(crB)).norm() > std::get<1>(crA) + std::get<1>(crB);
-			//bool res = isTwoTrianglesBoundingBoxIntersect(randData3[i], randData3_[i]);
+			bool res = isTwoTrianglesBoundingBoxIntersect(randData3[i], randData3_[i]);
 			//
 			// 软碰撞
 			//double d = getTrianglesDistance(P, Q, randData3[i], randData3_[i]);

@@ -495,7 +495,50 @@ std::array<std::vector<size_t>, 2> _getPotentialIntersectTrianglesOfMesh(ModelMe
 
 
 
+```c
+//对比开关优化，
 
+#ifdef DETECTION_BUG_HARD
+	for (size_t i = 0; i < mesh_a.ibo_.size(); i++)
+	{
+		for (size_t j = 0; j < mesh_b.ibo_.size(); j++)
+		{
+			std::array<Eigen::Vector3d, 3> triA = {
+				relative_matrix * mesh_a.vbo_[mesh_a.ibo_[i][0]],
+				relative_matrix * mesh_a.vbo_[mesh_a.ibo_[i][1]],
+				relative_matrix * mesh_a.vbo_[mesh_a.ibo_[i][2]] };
+			std::array<Eigen::Vector3d, 3> triB = {
+				mesh_b.vbo_[mesh_b.ibo_[j][0]],
+				mesh_b.vbo_[mesh_b.ibo_[j][1]],
+				mesh_b.vbo_[mesh_b.ibo_[j][2]] };
+			//if (isTwoTrianglesIntersection(triA, triB) != isTwoTrianglesIntersection2(triA, triB))
+			//{
+			//    triInterListExtra.push_back({ triA, triB });
+			//}
+			if (isTwoTrianglesIntersectionSAT(triA, triB))
+			{
+				bool findFlag = false;
+				for (const auto& iter : triInterList) //findTri
+				{
+					if (iter[0][0].x() == triA[0].x() && iter[0][0].y() == triA[0].y() && iter[0][0].z() == triA[0].z() &&
+						iter[0][1].x() == triA[1].x() && iter[0][1].y() == triA[1].y() && iter[0][1].z() == triA[1].z() &&
+						iter[0][2].x() == triA[2].x() && iter[0][2].y() == triA[2].y() && iter[0][2].z() == triA[2].z() &&
+						iter[1][0].x() == triB[0].x() && iter[1][0].y() == triB[0].y() && iter[1][0].z() == triB[0].z() &&
+						iter[1][1].x() == triB[1].x() && iter[1][1].y() == triB[1].y() && iter[1][1].z() == triB[1].z() &&
+						iter[1][2].x() == triB[2].x() && iter[1][2].y() == triB[2].y() && iter[1][2].z() == triB[2].z())
+					{
+						findFlag = true;
+						break;
+					}
+				}
+				if (!findFlag) //record the trigons that detect by function, but exclude by pre-box
+					triInterListExtra.push_back({ triA, triB }); //多余的相交三角形
+				return true;
+			}
+		}
+	}
+#endif
+```
 
 
 

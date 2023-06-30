@@ -121,7 +121,7 @@ intersects()方法的返回值基于以下定理：如果两个AABB相交，则�
 | double<br />_isSegmentCrossTriangleSurface                   |                                                              | time = 1.732s<br/>time = 1.703s<br/>time = 1.805s            | time = 5.654s<br/>time = 5.792s<br/>time = 5.812s            |
 | double<br />getTriangleBoundingCircle                        |                                                              | 先判钝角<br />time = 4.735s<br/>time = 4.797s<br/>time = 4.817s |                                                              |
 | _isTwoTriangles<br />BoundingBoxIntersect<br />三角面的包围盒求交 |                                                              | eigen<br />time = 1.617s<br/>time = 1.568s<br/>time = 1.495s<br />手写<br />time = 1.228s<br/>time = 1.242s<br/>time = 1.22s |                                                              |
-| 软碰撞<br />_getTriDist                                      |                                                              | time = 56.686s<br/>time = 57.677s<br/>time = 57.643s<br />   | time = 9.058s<br/>time = 9.336s<br/>time = 9.22s<br />分开三角形<br />time = 6.302s<br/>time = 6.497s<br/>time = 6.521s |
+| 软碰撞<br />_getTriDist                                      |                                                              | time = 56.686s<br/>time = 57.677s<br/>time = 57.643s<br />prejudge<br />time = 43.753s<br/>time = 44.354s<br/>time = 45.596s | time = 9.058s<br/>time = 9.336s<br/>time = 9.22s<br />分开三角形<br />time = 6.302s<br/>time = 6.497s<br/>time = 6.521s |
 | 包围盒求交<br />AlignedBox3d::intersection                   | 1e8                                                          | time = 0.658s<br/>time = 0.616s<br/>time = 0.626s            |                                                              |
 | 分离轴定理                                                   | laptop strix<br />time = 4.271s<br/>time = 4.36s<br/>time = 4.311s | time = 6.034s<br/>time = 6.144s<br/>time = 6.192s            |                                                              |
 | isTriangleAndBoundingBox<br />三角面与包围盒                 |                                                              | time = 7.706s<br/>time = 7.596s<br/>time = 8.258s            |                                                              |
@@ -284,7 +284,32 @@ bug修复
 
 使用SAT
 
-关优化 total="4031"
+关优化 total="4031" count_caltime2="7.944000s"/>，其中count_caltime1="1.273000s"
+
+开优化 total="4031" 修复完成 count_caltime2="1.485000s"/>
+
+2 软碰撞 tolerance="0.001000"
+
+关优化 total="5099" 
+
+开优化 total="4033" count_caltime2="1.485000s"/>
+
+
+
+
+
+#### 软碰撞相交
+
+eps=1e-8 count_err_dist="1341" 
+esp=0 count_err_dist="0"
+
+
+
+
+
+
+
+
 
 
 
@@ -304,13 +329,39 @@ bug修复
 
 破案了，测试程序当 if(f1()!=f2())时，装填数据，但是导出xml的时候手动粘贴数据去测试，总是f1()==f2()
 
-原因是，程序内存里的数据跟xml导出的数据不一致，std::to_string时将数字取整了 
+原因是，程序内存里的数据跟xml导出的数据不一致，std::to_string时将数字取整了，更换函数stringstream，精度也不是100%还原，中间的算法对精度太敏感了，导致测试和输出结果对不上；
+
+使用写入二进制文件来还原数据，可以精确定位到bug，两个优化策略，第一个生效，第二个暂时有bug
+
+优化1，getReduced，count_caltime1="1.184000s" count_caltime2="1.352000s"/>
+
+当三角面有拓扑错误，顶点重合时，SAT有bug
 
 
 
+### 程序流程 ClashDetection
 
+1 LoadModel 加载模型
 
+​	得到world_bounding整体包围盒，BPEntityId及对应ModelInfo（mesh，select，box）
 
+2 BoundingClashDetection 预碰撞
+
+​	得到包围盒碰撞了的BPEntityId对（包含公差）；
+
+​	is_soft=false 无公差，硬碰撞
+​	is_soft=false 有公差，但原始包围盒碰撞
+​	is_soft=true，有公差，原始box separate分离，但是在公差内（enlarge box）碰撞
+
+3 构造ClashInfo碰撞信息（BPEntityId，box，distance，position）
+
+4 处理hard-clash硬碰撞，MeshIntrusionTesting
+
+​	侵入距离计算MeshIntrusionDistance，装填ClashInfo
+
+5 处理soft-clash软碰撞，MeshStandoffDistance
+
+​	得到distance和两个mesh的position，装填ClashInfo
 
 
 

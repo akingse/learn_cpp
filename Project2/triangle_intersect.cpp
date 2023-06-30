@@ -1,4 +1,8 @@
 #include "pch.h"
+#include <iomanip>
+#include <calculateTriangle.h>
+#include <my_class_fun.h>
+using namespace std;
 using namespace psykronix;
 using namespace std;
 using namespace para;
@@ -8,6 +12,11 @@ using namespace psykronix;
 #undef min
 static constexpr double eps = 1e-14; //DBL_EPSILON
 static constexpr double _eps = -eps;
+
+static Eigen::Vector3d P(std::nan("0"), std::nan("0"), std::nan("0"));
+static Eigen::Vector3d Q(std::nan("0"), std::nan("0"), std::nan("0"));
+
+
 class TriangleVec
 {
 public:
@@ -113,8 +122,67 @@ COLLISION is_two_triangle_intersec(const TriangleVec& triA, const TriangleVec& t
 	return {};
 }
 
+double getTrigonArea2(const Triangle& triA)
+{
+	double a = (triA[1] - triA[0]).squaredNorm();
+	double b = (triA[2] - triA[1]).squaredNorm();
+	double c = (triA[0] - triA[2]).squaredNorm();
+	double p = 0.5 * (a + b + c);
+	return p * (p - a) * (p - b) * (p - c);
+}
+bool isEqualTrigon(const Triangle& triA, const Triangle& triB)
+{
+	//if (isTwoTrianglesIntersectSAT(triA, triB))
+	//{
+	//	bool findFlag = false;
+	//	for (const auto& iter : triInterList) //findTri
+	//	{
+	//		if (iter[0][0].x() == triA[0].x() && iter[0][0].y() == triA[0].y() && iter[0][0].z() == triA[0].z() &&
+	//			iter[0][1].x() == triA[1].x() && iter[0][1].y() == triA[1].y() && iter[0][1].z() == triA[1].z() &&
+	//			iter[0][2].x() == triA[2].x() && iter[0][2].y() == triA[2].y() && iter[0][2].z() == triA[2].z() &&
+	//			iter[1][0].x() == triB[0].x() && iter[1][0].y() == triB[0].y() && iter[1][0].z() == triB[0].z() &&
+	//			iter[1][1].x() == triB[1].x() && iter[1][1].y() == triB[1].y() && iter[1][1].z() == triB[1].z() &&
+	//			iter[1][2].x() == triB[2].x() && iter[1][2].y() == triB[2].y() && iter[1][2].z() == triB[2].z())
+	//		{
+	//			findFlag = true;
+	//			break;
+	//		}
+	//	}
+	//	if (!findFlag) //record the trigons that detect by function, but exclude by pre-box
+	//		triInterListExtra.push_back({ triA, triB }); //多余的相交三角形
+	//	return true;
+	//}
 
-static void _test()
+	double d = 1;
+	Vector3d point0(1.1, 0, 0);
+	Vector3d point1 = psykronix::translate(2.2, 0) * psykronix::roty(M_PI) *= point0;
+	Vector3d point2 = psykronix::rotz(2*M_PI) *= point0;
+
+	if (point0 == point1) //二进制判相等，无视精度
+		d = 0;
+	if (point0 == point2)
+		d = 0;
+	//size_t n = sizeof(Triangle); //72
+	//return memcmp(&triA, &triB, sizeof(Triangle)) == 0;// triA[0] == triB[0] && triA[1] == triB[1] && triA[2] == triB[2];
+
+	return 
+		(triA[0] == triB[0] && triA[1] == triB[1] && triA[2] == triB[2]) ||
+		(triA[0] == triB[0] && triA[1] == triB[2] && triA[2] == triB[1]) ||
+		(triA[0] == triB[1] && triA[1] == triB[0] && triA[2] == triB[2]) || 
+		(triA[0] == triB[1] && triA[1] == triB[2] && triA[2] == triB[0]) ||
+		(triA[0] == triB[2] && triA[1] == triB[0] && triA[2] == triB[1]) ||
+		(triA[0] == triB[2] && triA[1] == triB[1] && triA[2] == triB[0]) ;
+
+	//area
+	//return getTrigonArea2(triA) == getTrigonArea2(triB);
+}
+
+void printTrigon(const Triangle& trigon)
+{
+	cout << "" << endl;
+}
+
+static void _test0()
 {
 	std::array<std::array<double, 3>, 3> triangle = { { {0,0,0},{1,1,1}, {2,2,2}} };
 	//int PQP_BV_TYPE = RSS_TYPE | OBB_TYPE;
@@ -135,11 +203,32 @@ static void _test()
 	double d = max(a, c);
 	//psykronix::Vertex vec(1, 1, 1);
 	//psykronix::Vertex vec2 = vec;
-}
 
+	double num = 1.123456789012345;
+
+	std::stringstream ss;
+	ss << setprecision(15) << num;
+	string str = ss.str(); 
+	cout << "keep:" << str << endl;
+	ss.clear(15);
+	ss << setprecision(15) << num;
+	cout << "keep:" << str << endl;
+	ss.clear(15);
+	ss << setprecision(15) << M_E;
+	cout << "keep:" << str << endl;
+
+	std::stringstream ss1;
+	ss1 << setprecision(15) << M_PI;
+	cout << "keep:" << ss1.str() << endl;
+	UINT64 max = (UINT64)~((UINT64)0);
+	cout << max << endl;
+
+}
 
 static void _test1()
 {
+
+	double d=std::nan("0");
 	Vector3d triA_0 = Vector3d(4924494.8122771187, -385870.18283433426, 5749.9999999999054);
 	Vector3d triA_1 = Vector3d(4924599.8122771177, -385945.18283433421, 5749.9999999999054);
 	Vector3d triA_2 = Vector3d(4924586.8713248633, -385946.88654301979, 5749.9999999999054);
@@ -149,16 +238,171 @@ static void _test1()
 	bool isTI = isTwoTrianglesIntersection({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
 	bool isTIT = TriangularIntersectionTest({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
 
+	triA_0 = Vector3d(4948618.6464014640, -378059.39893364342, 39.982199933911403); //x
+	triA_1 = Vector3d(4948618.6464014640, -378066.89893364336, 39.982199933911403);	//x-
+	triA_2 = Vector3d(4948608.3857971635, -378068.70815501985, 39.982184091814524);
+	triB_2 = Vector3d(4948618.6464014640, -378066.89893364359, 39.982199933801859); //x-
+	triB_0 = Vector3d(4948648.6464014640, -378096.89893364365, 39.982246252978271);
+	triB_1 = Vector3d(4948627.9169112947, -378068.36723815475, 39.982214247214543);
+	d = getTrianglesDistance(P, Q, { triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+	bool int1=isTwoTrianglesIntersectSAT({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+
+	//triA_0 = Vector3d(4948618.646401, -378059.398934, 39.982200);
+	//triA_1 = Vector3d(4948618.646401, -378066.898934, 39.982200);
+	//triA_2 = Vector3d(4948608.385797, -378068.708155, 39.982184);
+	//triB_0 = Vector3d(4948648.646401, -378096.898934, 39.982246);
+	//triB_1 = Vector3d(4948618.646401, -378066.898934, 39.982200);
+	//triB_2 = Vector3d(4948609.375892, -378068.367238, 39.982186);
+	//d = getTrianglesDistance(P, Q, { triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+	//bool int2 = isTwoTrianglesIntersectSAT({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+
+	triA_0 = Vector3d(4948589.10216887,-378091.689488313,39.9821543184115);
+	triA_1 = Vector3d(4948589.10216887,-378102.108378973,39.9821543184115);
+	triA_2 = Vector3d(4948581.52809739,-378091.562127208,39.9821426242490);
+	triB_0 = Vector3d(4948648.64640146,-378096.898933644,39.9822462529783);
+	triB_1 = Vector3d(4948590.11470598,-378087.628423812,39.9821558816473);
+	triB_2 = Vector3d(4948588.64640146,-378096.898933644,39.9821536146255);
+
+	Triangle triA = { triA_0, triA_1, triA_2 };
+	Triangle triB = { triB_0, triB_1, triB_2 };
+	_wirteTrigonFile({ {triA, triB} }, "testTrisData.bin");
+	auto res = _readTrigonFile("testTrisData.bin");
+
+	double tolerance = 0.001;
+	//bool inter = isTwoTrianglesBoundingBoxIntersect(triA, triB);
+	//bool interR = isTwoTrianglesBoundingBoxIntersect(res[0][0], res[0][1]);
+	//bool inter1 = isTwoTrianglesBoundingBoxIntersect(triA, triB, tolerance);
+	bool isInt = isTwoTrianglesIntersection(triA, triB);
+	bool isInt0 = isTwoTrianglesIntersectSAT(triA, triB);
+	bool isInt1 = isTwoTrianglesIntersectSAT(res[0][0], res[0][1]);
+
+	triA_0 = Vector3d(4934991.08492488,-380736.849323458,-266.330042529162); 
+	triA_1 = Vector3d(4934984.36869635,-380736.849323732,-263.095677331456);	
+	triA_2 = Vector3d(4934986.01043158,-380736.849323665,-271.249229247876);
+	triB_0 = Vector3d(4934988.30653218,-380736.849323571,-265.705952052692);
+	triB_1 = Vector3d(4934982.79133525,-380736.849323797,-262.020815280171);
+	triB_2 = Vector3d(4935011.81215053,-380736.849322611,-250.000000000000); 
+
+	bool res1 = isTwoTrianglesIntersectSAT({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+	bool res2 = isTwoTrianglesIntersection({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+	d = getTrianglesDistance(P, Q, { triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+
+	//RW test
+	std::vector<std::array<uint64_t, 2>> entityIdList = { {1,2},{3,4} };
+	_wirteTrigonFile(entityIdList, "entityIdList.bin");
+	std::vector<std::array<uint64_t, 2>> entity = _readEntityIDFile("entityIdList.bin");
+
+	bool res3 = isEqualTrigon(triA, triA);
+	bool res4 = isEqualTrigon(triA, triB);
+
+	triA_0 = Vector3d(4935003.6138694724, -380736.84932294575, -221.24922924757556); 
+	triA_1 = Vector3d(4934991.0849248841, -380736.84932345786, -216.33004252886147);	
+	triA_2 = Vector3d(4935003.6138694724, -380736.84932294575, -221.24922924757556);
+	triB_0 = Vector3d(4934988.3065321781, -380736.84932357143, -215.70595205269194);
+	triB_1 = Vector3d(4934982.7913352484, -380736.84932379687, -212.02081528017138);
+	triB_2 = Vector3d(4935011.8121505287, -380736.84932261088, -200.00000000000006); 
+
+	bool err1= isTwoTrianglesIntersectSAT({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+	bool err2= isTwoTrianglesBoundingBoxIntersect({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+
 	cout << "return 0" << endl;
 }
 
+static void _test2()
+{
+	string path = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/";
+	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris1 = _readTrigonFile(path+"triInterList_opt1.bin"); //4031
+	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris2 = _readTrigonFile(path+"triInterList_opt2.bin"); //4031
+	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris3 = _readTrigonFile(path+"triInterList_opt3.bin"); //4030
+	//entity
+	std::vector<std::array<uint64_t, 2>> entity1 = _readEntityIDFile(path + "entityIdList_off.bin");
+	std::vector<std::array<uint64_t, 2>> entity2 = _readEntityIDFile(path + "entityIdList_on.bin");
+	std::vector<std::array<uint64_t, 2>> entity3 = _readEntityIDFile(path + "entityIdList_opt.bin");
+
+	bool isInt;
+	double d;
+	size_t count = 0;
+	//for (auto& iter : tris)
+	//{
+	//	isInt = isTwoTrianglesIntersectSAT(iter[0], iter[1]);
+	//	d = getTrianglesDistance(P,Q,iter[0], iter[1]);
+	//	cout << d << endl;
+	//}
+	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris1_extra;
+	vector<size_t> numList;
+	for (int i=0;i<tris1.size();++i)
+	{
+		if (!isTwoTrianglesIntersectSAT(tris1[i][0], tris1[i][1]))
+			cout << "not intersect1" << endl;
+		if (!isTwoTrianglesIntersectSAT(tris2[i][0], tris2[i][1]))
+			cout << "not intersect2" << endl;
+		if (!(isEqualTrigon(tris1[i][0], tris2[i][0]) && isEqualTrigon(tris1[i][1], tris2[i][1])) &&
+			!(isEqualTrigon(tris1[i][0], tris2[i][1]) && isEqualTrigon(tris1[i][1], tris2[i][0])))
+			numList.push_back(i);
+	}
+	cout << "diff-index:" << numList.size() << endl;
+	cout << "intersect finish" << endl;
+
+#ifdef DOUBLE_FOR_LOOP
+	for (auto& iterA : tris1)
+	{
+		bool findFlag = false;
+		for (auto& iterB : tris3) //findTri
+		{
+			if ((isEqualTrigon(iterA[0], iterB[0]) && isEqualTrigon(iterA[1], iterB[1])) ||
+				(isEqualTrigon(iterA[0], iterB[1]) && isEqualTrigon(iterA[1], iterB[0])))
+			{
+				findFlag = true;
+				break;
+			}
+		}
+		if (!findFlag)
+		{
+			count++;
+			tris1_extra.push_back(iterA);
+			//cout << "no findFlag" << endl;
+			//print_triangle(iter1[0], iter1[1]);
+		}
+	}
+#endif
+
+	for (auto& iterA : entity1)
+	{
+		bool findFlag = false;
+		for (auto& iterB : entity3) //findTri
+		{
+			if (iterA[0] == iterB[0] && iterA[1] == iterB[1])
+			{
+				findFlag = true;
+				break;
+			}
+		}
+		if (!findFlag)
+		{
+			cout << "no findFlag" << endl;
+			cout << iterA[0]<< "-"<< iterA[1] << endl; // 6509 - 6134
+			//print_triangle(iter1[0], iter1[1]);
+		}
+	}
+
+	cout << count << endl; //420
+
+	cout << "return 0" << endl;
+}
 
 static int enrol = []()->int
 {
+	//_test0();
 	_test1();
+	_test2();
 	return 0;
 }();
 
+
+//------------------------------------------------------------------------------------------------------------------------------
+// 
+//------------------------------------------------------------------------------------------------------------------------------
+// 
 //离轴定理，包围盒与三角形求交
 
 /*
@@ -168,202 +412,4 @@ static int enrol = []()->int
 这个算法速度快且准确。使用分离轴定理，我们只需要测试13个潜在的分离轴是否存在。
 如果有任何一个分离轴存在，那么三角形和AABB不相交。如果所有潜在的分离轴都不存在，则三角形和AABB相交。
 */
-
-//2D triangles
-bool psykronix::isTrianglesIntersectSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB)
-{
-	std::array< Vector2d, 6> axes;
-	Vector2d axisA0 = triA[1] - triA[0];
-	Vector2d axisA1 = triA[2] - triA[1];
-	Vector2d axisA2 = triA[0] - triA[2];
-	axisA0 = Vector2d(axisA0.x(), -axisA0.y());
-	axisA1 = Vector2d(axisA1.x(), -axisA1.y());
-	axisA2 = Vector2d(axisA2.x(), -axisA2.y());
-	//axisA0.x() = -1.0*axisA0.x();
-	//axisA0.y() = -1.0*axisA0.y();
-	//axisA0.z() = -1.0*axisA0.z();
-	//std::swap(axisA0.x(), axisA0.y()); //get the normal vector
-	//std::swap(axisA1.x(), axisA1.y());
-	//std::swap(axisA2.x(), axisA2.y());
-	Vector2d axisB0 = triB[1] - triB[0];
-	Vector2d axisB1 = triB[2] - triB[1];
-	Vector2d axisB2 = triB[0] - triB[2];
-	axisB0 = Vector2d(axisB0.x(), -axisB0.y());
-	axisB1 = Vector2d(axisB1.x(), -axisB1.y());
-	axisB2 = Vector2d(axisB2.x(), -axisB2.y());
-	//axisB0.x() = -1.0*axisB0.x();
-	//axisB0.y() = -1.0*axisB0.y();
-	//axisB0.z() = -1.0*axisB0.z();
-	//std::swap(axisB0.x(), axisB0.y()); //get the normal vector
-	//std::swap(axisB1.x(), axisB1.y());
-	//std::swap(axisB2.x(), axisB2.y());
-	axes[0] = axisA0;
-	axes[1] = axisA1;
-	axes[2] = axisA2;
-	axes[3] = axisB0;
-	axes[4] = axisB1;
-	axes[5] = axisB2;
-	//projection
-	//double maxA0 = std::max({ axisA0.dot(triA[0]), axisA0.dot(triA[1]), axisA0.dot(triA[2]) });
-	//double minA0 = std::min({ axisA0.dot(triA[0]), axisA0.dot(triA[1]), axisA0.dot(triA[2]) });
-	//double maxB0 = std::max({ axisA0.dot(triB[0]), axisA0.dot(triB[1]), axisA0.dot(triB[2]) });
-	//double minB0 = std::min({ axisA0.dot(triB[0]), axisA0.dot(triB[1]), axisA0.dot(triB[2]) });
-	//if (maxA0 - minB0 < _eps || maxB0 - minA0 < _eps)//(maxA0 < minB0 || maxB0 < minA0)
-	//	return false;
-	//double maxA1 = std::max({ axisA1.dot(triA[0]), axisA1.dot(triA[1]), axisA1.dot(triA[2]) });
-	//double minA1 = std::min({ axisA1.dot(triA[0]), axisA1.dot(triA[1]), axisA1.dot(triA[2]) });
-	//double maxB1 = std::max({ axisA1.dot(triB[0]), axisA1.dot(triB[1]), axisA1.dot(triB[2]) });
-	//double minB1 = std::min({ axisA1.dot(triB[0]), axisA1.dot(triB[1]), axisA1.dot(triB[2]) });
-	//if (maxA1 - minB1 < _eps || maxB1 - minA1 < _eps)//(maxA0 < minB0 || maxB0 < minA0)
-	//	return false;
-	for (const auto& axis : axes)
-	{
-		double maxA = std::max(std::max(axis.dot(triA[0]), axisA1.dot(triA[1])), axisA1.dot(triA[2]));
-		double minA = std::min(std::max(axis.dot(triA[0]), axisA1.dot(triA[1])), axisA1.dot(triA[2]));
-		double maxB = std::max(std::max(axis.dot(triB[0]), axisA1.dot(triB[1])), axisA1.dot(triB[2]));
-		double minB = std::min(std::max(axis.dot(triB[0]), axisA1.dot(triB[1])), axisA1.dot(triB[2]));
-		if (maxA - minB < _eps || maxB - minA < _eps)//(maxA0 < minB0 || maxB0 < minA0)
-			return false;
-	}
-	return true;
-}
-
-bool test_axis(const Vector3d& axis, const const std::array<Eigen::Vector3d, 3>& tri, const Eigen::AlignedBox3d& aabb)
-{
-	double p0 = axis.x() * tri[0].x() + axis.y() * tri[0].y() + axis.z() * tri[0].z();
-	double p1 = axis.x() * tri[1].x() + axis.y() * tri[1].y() + axis.z() * tri[1].z();
-	double p2 = axis.x() * tri[2].x() + axis.y() * tri[2].y() + axis.z() * tri[2].z();
-	double t_min = std::min({ p0, p1, p2 });
-	double t_max = std::max({ p0, p1, p2 });
-	double aabb_min = axis.x() * aabb.min().x() + axis.y() * aabb.min().y() + axis.z() * aabb.min().z();
-	double aabb_max = axis.x() * aabb.max().x() + axis.y() * aabb.max().y() + axis.z() * aabb.max().z();
-
-	return !(t_max < aabb_min || t_min > aabb_max);
-}
-
-
-//wrote by chatgpt4
-bool intersect(const const std::array<Eigen::Vector3d, 3>& tri, const Eigen::AlignedBox3d& aabb)
-{
-	// Triangle edges
-	Vector3d e0 = tri[1] - tri[0];
-	Vector3d e1 = tri[2] - tri[1];
-	Vector3d e2 = tri[0] - tri[2];
-	// AABB axes
-	Vector3d aabb_axis_x(1, 0, 0);
-	Vector3d aabb_axis_y(0, 1, 0);
-	Vector3d aabb_axis_z(0, 0, 1);
-
-	// Test triangle edges against AABB axes
-	if (!test_axis(Vector3d(e0.y() * aabb_axis_x.z() - e0.z() * aabb_axis_x.y(), e0.z() * aabb_axis_x.x() - e0.x() * aabb_axis_x.z(), e0.x() * aabb_axis_x.y() - e0.y() * aabb_axis_x.x()), tri, aabb)) return false;
-	if (!test_axis(Vector3d(e0.y() * aabb_axis_y.z() - e0.z() * aabb_axis_y.y(), e0.z() * aabb_axis_y.x() - e0.x() * aabb_axis_y.z(), e0.x() * aabb_axis_y.y() - e0.y() * aabb_axis_y.x()), tri, aabb)) return false;
-	if (!test_axis(Vector3d(e0.y() * aabb_axis_z.z() - e0.z() * aabb_axis_z.y(), e0.z() * aabb_axis_z.x() - e0.x() * aabb_axis_z.z(), e0.x() * aabb_axis_z.y() - e0.y() * aabb_axis_z.x()), tri, aabb)) return false;
-	if (!test_axis(Vector3d(e1.y() * aabb_axis_x.z() - e1.z() * aabb_axis_x.y(), e1.z() * aabb_axis_x.x() - e1.x() * aabb_axis_x.z(), e1.x() * aabb_axis_x.y() - e1.y() * aabb_axis_x.x()), tri, aabb)) return false;
-	if (!test_axis(Vector3d(e1.y() * aabb_axis_y.z() - e1.z() * aabb_axis_y.y(), e1.z() * aabb_axis_y.x() - e1.x() * aabb_axis_y.z(), e1.x() * aabb_axis_y.y() - e1.y() * aabb_axis_y.x()), tri, aabb)) return false;
-	if (!test_axis(Vector3d(e1.y() * aabb_axis_z.z() - e1.z() * aabb_axis_z.y(), e1.z() * aabb_axis_z.x() - e1.x() * aabb_axis_z.z(), e1.x() * aabb_axis_z.y() - e1.y() * aabb_axis_z.x()), tri, aabb)) return false;
-	if (!test_axis(Vector3d(e2.y() * aabb_axis_x.z() - e2.z() * aabb_axis_x.y(), e2.z() * aabb_axis_x.x() - e2.x() * aabb_axis_x.z(), e2.x() * aabb_axis_x.y() - e2.y() * aabb_axis_x.x()), tri, aabb)) return false;
-	if (!test_axis(Vector3d(e2.y() * aabb_axis_y.z() - e2.z() * aabb_axis_y.y(), e2.z() * aabb_axis_y.x() - e2.x() * aabb_axis_y.z(), e2.x() * aabb_axis_y.y() - e2.y() * aabb_axis_y.x()), tri, aabb)) return false;
-	if (!test_axis(Vector3d(e2.y() * aabb_axis_z.z() - e2.z() * aabb_axis_z.y(), e2.z() * aabb_axis_z.x() - e2.x() * aabb_axis_z.z(), e2.x() * aabb_axis_z.y() - e2.y() * aabb_axis_z.x()), tri, aabb)) return false;
-
-	// Test triangle plane
-	Vector3d normal = Vector3d(
-		e0.y() * e1.z() - e0.z() * e1.y(),
-		e0.z() * e1.x() - e0.x() * e1.z(),
-		e0.x() * e1.y() - e0.y() * e1.x()
-	);
-
-	if (!test_axis(normal, tri, aabb))
-		return false;
-	return true;
-}
-
-//static int main0() {
-//	Triangle tri = { Vector3d(0, 0, 0), Vector3d(1, 0, 0), Vector3d(0, 1, 0) };
-//	AlignedBox3d aabb(Vector3d(-1, -1, -1), Vector3d(1, 1, 1));
-//
-//	if (intersect(tri, aabb)) {
-//		std::cout << "Triangle and AABB intersect" << std::endl;
-//	}
-//	else {
-//		std::cout << "Triangle and AABB do not intersect" << std::endl;
-//	}
-//
-//	return 0;
-//}
-
-bool TriangleAABB(Triangle triangle, const Vector3d& center, const Vector3d& extents)
-{
-	// Get the triangle points as vectors
-	Vector3d v0 = triangle[0] - center;
-	Vector3d v1 = triangle[1] - center;
-	Vector3d v2 = triangle[2] - center;
-
-	// Compute the edge vectors of the triangle  (ABC)
-	// That is, get the lines between the points as vectors
-	Vector3d f0 = v1 - v0; // B - A
-	Vector3d f1 = v2 - v1; // C - B
-	Vector3d f2 = v0 - v2; // A - C
-
-	// Compute the face normals of the AABB, because the AABB
-	// is at center, and of course axis aligned, we know that 
-	// it's normals are the X, Y and Z axis.
-	Vector3d u0(1.0f, 0.0f, 0.0f);
-	Vector3d u1(0.0f, 1.0f, 0.0f);
-	Vector3d u2(0.0f, 0.0f, 1.0f);
-
-
-	// There are a total of 13 axis to test!
-
-	// We first test against 9 axis, these axis are given by
-	// cross product combinations of the edges of the triangle
-	// and the edges of the AABB. You need to get an axis testing
-	// each of the 3 sides of the AABB against each of the 3 sides
-	// of the triangle. The result is 9 axis of seperation
-	// https://awwapp.com/b/umzoc8tiv/
-
-	// Compute the 9 axis
-	Vector3d axis[13];
-	axis[0]=u0.cross(f0);	axis[0].normalize();
-	axis[1]=u0.cross(f1);	axis[1].normalize();
-	axis[2]=u0.cross(f2);	axis[2].normalize();
-	axis[3]=u1.cross(f0);	axis[3].normalize();
-	axis[4]=u1.cross(f1);	axis[4].normalize();
-	axis[5]=u1.cross(f2);	axis[5].normalize();
-	axis[6]=u2.cross(f0);	axis[6].normalize();
-	axis[7]=u2.cross(f1);	axis[7].normalize();
-	axis[8]=u2.cross(f2);	axis[8].normalize();
-
-	// Testing axis: axis_u0_f0
-	// Project all 3 vertices of the triangle onto the Seperating axis
-	axis[9] = Vector3d(1, 0, 0);
-	axis[10] = Vector3d(0, 1, 0);
-	axis[11] = Vector3d(0, 0, 1);
-
-	// Finally, we have one last axis to test, the face normal of the triangle
-	// We can get the normal of the triangle by crossing the first two line segments
-	axis[12]= f0.cross(f1); axis[12].normalize();
-
-	for (int i = 0; i < 13; i++)
-	{
-		// Testing axis: axis_u0_f0
-		// Project all 3 vertices of the triangle onto the Seperating axis
-		double p0 = v0.dot(axis[i]);
-		double p1 = v1.dot(axis[i]);
-		double p2 = v2.dot(axis[i]);
-		double r = extents.x() * fabs(u0.dot(axis[i])) +
-					extents.y() * fabs(u1.dot(axis[i])) +
-					extents.z() * fabs(u2.dot(axis[i]));
-		// Now do the actual test, basically see if either of
-		// the most extreme of the triangle points intersects r
-		// You might need to write Min & Max functions that take 3 arguments
-		if (std::max(-max(max(p0, p1), p2), min(min(p0, p1), p2)) > r) 
-		{
-			// This means BOTH of the points of the projected triangle
-			// are outside the projected half-length of the AABB
-			// Therefore the axis is seperating and we can exit
-			return false;
-		}
-	}
-	return true;
-}
 
