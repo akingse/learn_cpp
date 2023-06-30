@@ -1,6 +1,5 @@
 #include "pch.h"
 #include <synchapi.h>
-using namespace psykronix;
 using namespace std;
 using namespace para;
 using namespace Eigen;
@@ -141,7 +140,7 @@ int main()
 			// 三角形相交测试
 			//bool res = isTwoTrianglesIntersection(randData3[i], randData3_[i]);
 			//bool res = isTwoTrianglesIntersection2(randData3[i], randData3_[i]);
-			//bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]);
+			bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]);
 			//bool res = isTwoTrianglesIntersection2(randData3[i], randData3_[i]);
 			//bool r1 = isSegmentCrossTriangleSurface(_get_rand2(), _get_rand3());
 			//bool r2 = isSegmentCrossTriangleSurface(_get_rand2(), _get_rand3());
@@ -156,7 +155,7 @@ int main()
 			//auto crA = getTriangleBoundingCircle(randData3[i]);
 			//auto crB = getTriangleBoundingCircle(randData3_[i]);
 			//bool res = (std::get<0>(crA) - std::get<0>(crB)).norm() > std::get<1>(crA) + std::get<1>(crB);
-			bool res = isTwoTrianglesBoundingBoxIntersect(randData3[i], randData3_[i]);
+			//bool res = isTwoTrianglesBoundingBoxIntersect(randData3[i], randData3_[i]);
 			//
 			// 软碰撞
 			//double d = getTrianglesDistance(P, Q, randData3[i], randData3_[i]);

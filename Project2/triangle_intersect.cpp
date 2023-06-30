@@ -283,9 +283,9 @@ static void _test1()
 	triB_1 = Vector3d(4934982.79133525,-380736.849323797,-262.020815280171);
 	triB_2 = Vector3d(4935011.81215053,-380736.849322611,-250.000000000000); 
 
-	bool res1 = isTwoTrianglesIntersectSAT({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
-	bool res2 = isTwoTrianglesIntersection({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
-	d = getTrianglesDistance(P, Q, { triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+	//bool res1 = isTwoTrianglesIntersectSAT({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+	//bool res2 = isTwoTrianglesIntersection({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+	//d = getTrianglesDistance(P, Q, { triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
 
 	//RW test
 	std::vector<std::array<uint64_t, 2>> entityIdList = { {1,2},{3,4} };
@@ -295,9 +295,9 @@ static void _test1()
 	bool res3 = isEqualTrigon(triA, triA);
 	bool res4 = isEqualTrigon(triA, triB);
 
-	triA_0 = Vector3d(4935003.6138694724, -380736.84932294575, -221.24922924757556); 
+	triA_0 = Vector3d(4935003.6138694724, -380736.84932294575, -221.24922924757556); // ==
+	triA_2 = Vector3d(4935003.6138694724, -380736.84932294575, -221.24922924757556); // ==
 	triA_1 = Vector3d(4934991.0849248841, -380736.84932345786, -216.33004252886147);	
-	triA_2 = Vector3d(4935003.6138694724, -380736.84932294575, -221.24922924757556);
 	triB_0 = Vector3d(4934988.3065321781, -380736.84932357143, -215.70595205269194);
 	triB_1 = Vector3d(4934982.7913352484, -380736.84932379687, -212.02081528017138);
 	triB_2 = Vector3d(4935011.8121505287, -380736.84932261088, -200.00000000000006); 
@@ -393,8 +393,8 @@ static void _test2()
 static int enrol = []()->int
 {
 	//_test0();
-	_test1();
-	_test2();
+	//_test1();
+	//_test2();
 	return 0;
 }();
 
