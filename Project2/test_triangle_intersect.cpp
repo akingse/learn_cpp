@@ -1,9 +1,6 @@
 #include "pch.h"
 #include <iomanip>
-#include <calculateTriangle.h>
-#include <my_class_fun.h>
-using namespace std;
-using namespace psykronix;
+#include "C:/Users/Aking/source/repos/bimbase/Include/fbs/inter_triangels_info_generated.h"
 using namespace std;
 using namespace para;
 using namespace Eigen;
@@ -16,111 +13,6 @@ static constexpr double _eps = -eps;
 static Eigen::Vector3d P(std::nan("0"), std::nan("0"), std::nan("0"));
 static Eigen::Vector3d Q(std::nan("0"), std::nan("0"), std::nan("0"));
 
-
-class TriangleVec
-{
-public:
-	Vec3 m_p0;
-	Vec3 m_p1;
-	Vec3 m_p2;
-};
-#pragma once
-//GYDevillersTriangle.h
-/*      快速检测空间三角形相交算法的代码实现(Devillers & Guigue算法)
-博客原地址:http://blog.csdn.net/fourierfeng/article/details/11969915#
-
-Devillers & Guigue算法(简称Devillers 算法) 通过三角形各顶点构成的行列式正负的几何意义来判断三角形中点、线、面之间的相对位置关系,
-从而判断两三角形是否相交。其基本原理如下:给定空间四个点：a(ax, ay, az), b = (bx, by, bz), c = (cx, cy, cz), d = (dx, dy, dz), 定义行列式如下：
-
-[a, b, c, d] 采用右手螺旋法则定义了四个空间点的位置关系。
-[a, b, c, d] > 0 表示 d 在 a、b、c 按逆时针顺序所组成的三角形的正法线方向(即上方);
-[a, b, c, d] < 0 表示 d 在 △abc的下方; [a, b, c, d] = 0 表示四点共面。
-
-		设两个三角形T1和T2，顶点分别为：V10，V11，V12和V20，V21，V22，
-	三角形所在的平面分别为π1和π2，其法向量分别为N1和N2.算法先判别三角形和另一个三角形所在的平面的相互位置关系, 提前排除不相交的情况。
-	通过计算[V20, V21, V22, V1i].(i = 0, 1, 2)来判断T1和π2的关系：如果所有的行列式的值都不为零且同号，则T1和T2不相交；否则T1和π2相交。
-	相交又分为如下几种情况：
-		a)如果所有的行列式的值为零，则T1和T2共面，转化为共面的线段相交问题。
-		b)如果其中一个行列式的值为零，而其他两个行列式同号，则只有一个点在平面内，测试顶点是否则T2内部，是则相交，否则不相交；
-		c)否则T1的顶点位于平面π2两侧(包含T1的一条边在平面π2中的情况)。
-
-		再按照类似的方法对 T 2 和 π 1 作进一步的测试。如果通过测试, 则每个三角形必有确定的一点位于另一个三角形所在平面的一侧,
-	而另外两点位于其另一侧。算法分别循环置换每个三角形的顶点, 以使V10(V20)位于π2(π1)的一侧，另两个点位于其另一侧；
-	同时对顶点V21，V22(V11, V12)进行交换操作，以确保V10(V20)位于π2(π1)的上方，即正法线方向。
-	经过以上的预排除和置换操作，V10的邻边V10V11，V10V12和V20的邻边V20V21和V20V22与两平面的交线L相交于固定形式的点上，
-	分别记为i，j，k，l(i<j, k<l), 如图：(参看原博客)
-	这些点在L上形成的封闭区间为i1 = [i, j], i2 = [k, l].至此，两个三角形的相交测试问题转换为封闭区间i1，i2的重叠问题。
-	若重叠则相交，否则不相交。由于交点形式固定，只需满足条件k <= j且i <= l即表明区间重叠，条件还可进一步缩减为判别式
-	(1)是否成立：
-				[V10, V11, V20, V21] <= 0 && [V10, V12, V22, V20] <= 0        判别式(1)
-*/
-
-typedef float float3[];
-
-enum TopologicalStructure
-{
-	INTERSECT, NONINTERSECT
-};
-
-//struct Triangle
-//{
-//	//float3 Normal_0;
-//	//float3 Vertex_1, Vertex_2, Vertex_3;
-//};
-
-/*******************************************************************************************************/
-//Devillers算法主函数
-TopologicalStructure judge_triangle_topologicalStructure(Triangle* tri1, Triangle* tri2)
-{
-	return {};
-}
-
-//返回bool值
-bool isTriangleTntersect(Triangle* tri1, Triangle* tri2)
-{
-	TopologicalStructure  intersectSt = judge_triangle_topologicalStructure(tri1, tri2);
-	if (intersectSt == INTERSECT)
-		return true;
-	return false;
-}
-
-typedef std::tuple<char, int, double> TC;
-namespace std
-{
-	//template <class T,class U,class V>
-	//class tuple<T, U, V>
-	//{
-	//public:
-	//	T operator[](int i)
-	//	{
-
-	//	}
-	//};
-}
-
-/*
-一般来说，可以用两个方法来检测三角形是否相交:
-投影算法:
-利用投影理论，可以将三维空间中的三角形，投影到任意一个平
-面上，观察其投影之后，是否出现重叠，从而推断是否有相交;
-三角剖分算法:
-将两个三角形进行三角剖分，比较两个三角形的边、顶点是否有
-交点，如有交点，则两个三角形可以认定为相交;
-
-*/
-
-enum class COLLISION :int
-{
-	T_SEPA,
-	T_INTER,
-	T_TANG,
-
-};
-
-COLLISION is_two_triangle_intersec(const TriangleVec& triA, const TriangleVec& triB)
-{
-	return {};
-}
 
 double getTrigonArea2(const Triangle& triA)
 {
@@ -163,15 +55,15 @@ bool isEqualTrigon(const Triangle& triA, const Triangle& triB)
 	if (point0 == point2)
 		d = 0;
 	//size_t n = sizeof(Triangle); //72
-	//return memcmp(&triA, &triB, sizeof(Triangle)) == 0;// triA[0] == triB[0] && triA[1] == triB[1] && triA[2] == triB[2];
+	return memcmp(&triA, &triB, sizeof(Triangle)) == 0;// triA[0] == triB[0] && triA[1] == triB[1] && triA[2] == triB[2];
 
-	return 
-		(triA[0] == triB[0] && triA[1] == triB[1] && triA[2] == triB[2]) ||
-		(triA[0] == triB[0] && triA[1] == triB[2] && triA[2] == triB[1]) ||
-		(triA[0] == triB[1] && triA[1] == triB[0] && triA[2] == triB[2]) || 
-		(triA[0] == triB[1] && triA[1] == triB[2] && triA[2] == triB[0]) ||
-		(triA[0] == triB[2] && triA[1] == triB[0] && triA[2] == triB[1]) ||
-		(triA[0] == triB[2] && triA[1] == triB[1] && triA[2] == triB[0]) ;
+	//return // include exchange
+	//	(triA[0] == triB[0] && triA[1] == triB[1] && triA[2] == triB[2]) ||
+	//	(triA[0] == triB[0] && triA[1] == triB[2] && triA[2] == triB[1]) ||
+	//	(triA[0] == triB[1] && triA[1] == triB[0] && triA[2] == triB[2]) || 
+	//	(triA[0] == triB[1] && triA[1] == triB[2] && triA[2] == triB[0]) ||
+	//	(triA[0] == triB[2] && triA[1] == triB[0] && triA[2] == triB[1]) ||
+	//	(triA[0] == triB[2] && triA[1] == triB[1] && triA[2] == triB[0]) ;
 
 	//area
 	//return getTrigonArea2(triA) == getTrigonArea2(triB);
@@ -223,6 +115,20 @@ static void _test0()
 	UINT64 max = (UINT64)~((UINT64)0);
 	cout << max << endl;
 
+	//测试旋转对平行的影响
+	array<Vector3d, 3> points0 = { Vector3d(100000.1,0,0),  Vector3d(200000.2,0,0),  Vector3d(300000.3,0,0) };
+	Vector3d croPro = (points0[1] - points0[0]).cross((points0[1] - points0[0]));
+	array<Vector3d, 3> points1 = psykronix::rotz(M_PI/2) * points0;
+	Vector3d croPro1 = (points1[1] - points1[0]).cross((points1[1] - points1[0]));
+
+	points1 = psykronix::rotz(M_PI ) * points0;
+	croPro1 = (points1[1] - points1[0]).cross((points1[1] - points1[0]));
+	points1 = psykronix::rotz(M_PI / 3) * points0;
+	croPro1 = (points1[1] - points1[0]).cross((points1[1] - points1[0]));
+	points1 = psykronix::rotz(M_PI / 4) * points0;
+	croPro1 = (points1[1] - points1[0]).cross((points1[1] - points1[0]));
+
+	cout << "return 0" << endl;
 }
 
 static void _test1()
@@ -310,14 +216,21 @@ static void _test1()
 
 static void _test2()
 {
-	string path = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/";
+	string path = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/";
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris1 = _readTrigonFile(path+"triInterList_opt1.bin"); //4031
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris2 = _readTrigonFile(path+"triInterList_opt2.bin"); //4031
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris3 = _readTrigonFile(path+"triInterList_opt3.bin"); //4030
+	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> trist = _readTrigonFile(path+"triInterList_opt.bin"); //4030
 	//entity
-	std::vector<std::array<uint64_t, 2>> entity1 = _readEntityIDFile(path + "entityIdList_off.bin");
-	std::vector<std::array<uint64_t, 2>> entity2 = _readEntityIDFile(path + "entityIdList_on.bin");
-	std::vector<std::array<uint64_t, 2>> entity3 = _readEntityIDFile(path + "entityIdList_opt.bin");
+	std::vector<std::array<uint64_t, 2>> entity1 = _readEntityIDFile(path + "entityIdList_off.bin"); //4031
+	std::vector<std::array<uint64_t, 2>> entity2 = _readEntityIDFile(path + "entityIdList_on.bin"); //4031
+	std::vector<std::array<uint64_t, 2>> entity3 = _readEntityIDFile(path + "entityIdList_soft_off.bin"); //1069
+	std::vector<std::array<uint64_t, 2>> entity4 = _readEntityIDFile(path + "entityIdList_hard.bin"); //
+	//(6405-5779)(6510-6123)(6509-6134)
+	//std::vector<std::array<uint64_t, 2>> entity5 = _readEntityIDFile(path + "entityIdList_soft_opt_off.bin");
+	//std::vector<std::array<uint64_t, 2>> entity6 = _readEntityIDFile(path + "entityIdList_soft_off.bin");
+	//(1340-1339)(1347-1345)(1347-1346)
+
 
 	bool isInt;
 	double d;
@@ -369,7 +282,7 @@ static void _test2()
 	for (auto& iterA : entity1)
 	{
 		bool findFlag = false;
-		for (auto& iterB : entity3) //findTri
+		for (auto& iterB : entity2) //findTri
 		{
 			if (iterA[0] == iterB[0] && iterA[1] == iterB[1])
 			{
@@ -384,8 +297,64 @@ static void _test2()
 			//print_triangle(iter1[0], iter1[1]);
 		}
 	}
-
+	
+	for (int i = 0; i < entity1.size(); ++i)
+	{
+		bool findFlag = false;
+		for (int j = 0; j < entity2.size(); ++j) //big vector, findTri
+		{
+			if (entity1[i][0] == entity2[j][0] && entity1[i][1] == entity2[j][1])
+			{
+				findFlag = true;
+				//cout << "index=" << j << endl; //823,950,954
+				break;
+			}
+		}
+		if (!findFlag)
+		{
+			cout << "no findFlag" << endl;
+			cout << entity1[i][0] << "-" << entity1[i][1] << endl; // 6509 - 6134
+		}
+	}
 	cout << count << endl; //420
+	cout << "return 0" << endl;
+}
+
+static void _test3()
+{
+	string path = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/";
+	ifstream inFile(path + "interTriInfo_4030.bin", ios::in | ios::binary);
+	//void _wirteTrigonFile(const std::string & fileName, const std::vector<std::tuple<
+	//	std::array<Eigen::Vector3d, 3>, std::array<Eigen::Vector3d, 3>, unsigned long long, unsigned long long, double>>& triinfos)
+	if (inFile.is_open())
+	{
+		inFile.seekg(0, std::ios::end);
+		std::streampos fileSize = inFile.tellg();
+		inFile.seekg(0, std::ios::beg);
+		vector<uint8_t> bufferPointer(fileSize);
+		if (!inFile.read(reinterpret_cast<char*>(bufferPointer.data()), fileSize))
+			return;
+		const TriList* triList = GetTriList(bufferPointer.data());// 反序列化 TriList 对象
+		size_t n = triList->tri_infoes()->size();
+		for (size_t i = 0; i < n; ++i)
+		{
+			const TriInfo* triinfo = triList->tri_infoes()->Get(i);
+			auto tria = triinfo->tri_a();
+			auto trib = triinfo->tri_b();
+			Triangle triA = { Vector3d(tria->p0()->x(),tria->p0()->y(),tria->p0()->z()),
+				Vector3d(tria->p1()->x(),tria->p1()->y(),tria->p1()->z()),
+				Vector3d(tria->p2()->x(),tria->p2()->y(),tria->p2()->z()) };
+			Triangle triB = { Vector3d(trib->p0()->x(),trib->p0()->y(),trib->p0()->z()),
+				Vector3d(trib->p1()->x(),trib->p1()->y(),trib->p1()->z()),
+				Vector3d(trib->p2()->x(),trib->p2()->y(),trib->p2()->z()) };
+			uint64_t entityA = triinfo->entity_a();
+			uint64_t entityB = triinfo->entity_b();
+			double distance = triinfo->distance();
+
+		}
+		inFile.close();
+	}
+
 
 	cout << "return 0" << endl;
 }
@@ -394,7 +363,8 @@ static int enrol = []()->int
 {
 	//_test0();
 	//_test1();
-	//_test2();
+	_test2();
+	_test3();
 	return 0;
 }();
 
@@ -411,5 +381,35 @@ static int enrol = []()->int
 测试三角形的顶点是否在AABB内
 这个算法速度快且准确。使用分离轴定理，我们只需要测试13个潜在的分离轴是否存在。
 如果有任何一个分离轴存在，那么三角形和AABB不相交。如果所有潜在的分离轴都不存在，则三角形和AABB相交。
+*/
+
+//GYDevillersTriangle.h
+/*      快速检测空间三角形相交算法的代码实现(Devillers & Guigue算法)
+博客原地址:http://blog.csdn.net/fourierfeng/article/details/11969915#
+
+Devillers & Guigue算法(简称Devillers 算法) 通过三角形各顶点构成的行列式正负的几何意义来判断三角形中点、线、面之间的相对位置关系,
+从而判断两三角形是否相交。其基本原理如下:给定空间四个点：a(ax, ay, az), b = (bx, by, bz), c = (cx, cy, cz), d = (dx, dy, dz), 定义行列式如下：
+
+[a, b, c, d] 采用右手螺旋法则定义了四个空间点的位置关系。
+[a, b, c, d] > 0 表示 d 在 a、b、c 按逆时针顺序所组成的三角形的正法线方向(即上方);
+[a, b, c, d] < 0 表示 d 在 △abc的下方; [a, b, c, d] = 0 表示四点共面。
+
+		设两个三角形T1和T2，顶点分别为：V10，V11，V12和V20，V21，V22，
+	三角形所在的平面分别为π1和π2，其法向量分别为N1和N2.算法先判别三角形和另一个三角形所在的平面的相互位置关系, 提前排除不相交的情况。
+	通过计算[V20, V21, V22, V1i].(i = 0, 1, 2)来判断T1和π2的关系：如果所有的行列式的值都不为零且同号，则T1和T2不相交；否则T1和π2相交。
+	相交又分为如下几种情况：
+		a)如果所有的行列式的值为零，则T1和T2共面，转化为共面的线段相交问题。
+		b)如果其中一个行列式的值为零，而其他两个行列式同号，则只有一个点在平面内，测试顶点是否则T2内部，是则相交，否则不相交；
+		c)否则T1的顶点位于平面π2两侧(包含T1的一条边在平面π2中的情况)。
+
+		再按照类似的方法对 T 2 和 π 1 作进一步的测试。如果通过测试, 则每个三角形必有确定的一点位于另一个三角形所在平面的一侧,
+	而另外两点位于其另一侧。算法分别循环置换每个三角形的顶点, 以使V10(V20)位于π2(π1)的一侧，另两个点位于其另一侧；
+	同时对顶点V21，V22(V11, V12)进行交换操作，以确保V10(V20)位于π2(π1)的上方，即正法线方向。
+	经过以上的预排除和置换操作，V10的邻边V10V11，V10V12和V20的邻边V20V21和V20V22与两平面的交线L相交于固定形式的点上，
+	分别记为i，j，k，l(i<j, k<l), 如图：(参看原博客)
+	这些点在L上形成的封闭区间为i1 = [i, j], i2 = [k, l].至此，两个三角形的相交测试问题转换为封闭区间i1，i2的重叠问题。
+	若重叠则相交，否则不相交。由于交点形式固定，只需满足条件k <= j且i <= l即表明区间重叠，条件还可进一步缩减为判别式
+	(1)是否成立：
+				[V10, V11, V20, V21] <= 0 && [V10, V12, V22, V20] <= 0        判别式(1)
 */
 

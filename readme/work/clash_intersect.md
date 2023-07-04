@@ -263,8 +263,7 @@ return true;
 
 SAT指出：“**如果两个凸面物体没有穿透，则存在一根轴，使得这两个物体在该轴上的投影不重叠。**”
 
-二维凸包，获取分离轴
-  **只要测试每个多边形的边的法线即可**
+二维凸包，获取分离轴，**只要测试每个多边形的边的法线即可**
 
 
 
@@ -284,26 +283,41 @@ bug修复
 
 使用SAT
 
-关优化 total="4031" count_caltime2="7.944000s"/>，其中count_caltime1="1.273000s"
+关优化 total="4030" count_caltime2="7.944000s"/>，其中count_caltime1="1.273000s"
 
-开优化 total="4031" 修复完成 count_caltime2="1.485000s"/>
+开优化 total="4030" 修复完成 count_caltime2="1.485000s"/>
+
+未优化，TriangularIntersectC="132430306"，count_err_degen_tri="13442" 
+
+优化，count_soft_exclude_tris="920799"，TriangularIntersectC="124977"
+
+```
+硬碰撞bug，退化的三角形
+			if (clash_info.object_1.m_entityId== 6509 && clash_info.object_2.m_entityId == 6134)
+				startT = clock();
+				
+软碰撞bug，是否存在d=0的漏检，或者getTrianglesDist计算错误
+#ifdef DETECTION_DEBUG_SOFT // error with precision
+				if (temp == 0) //there is no contact
+					count_err_dist++; //break
+#endif 
+```
+
+
+
+
 
 2 软碰撞 tolerance="0.001000"
 
 关优化 total="5099" 
 
-开优化 total="4033" count_caltime2="1.485000s"/>
+开优化
 
+优化策略1，_getReducedIntersectTrianglesOfMesh，mesh的三角面与pre-box包围盒预碰撞（包含公差），排除不相交的三角面
 
+优化策略2，isTwoTrianglesBoundingBoxIntersect，距离计算之前先计算两三角面是否相交（包含公差），排除不相交的三角面
 
-
-
-#### 软碰撞相交
-
-eps=1e-8 count_err_dist="1341" 
-esp=0 count_err_dist="0"
-
-
+开优化 total="5099"，count_caltime2="1.626000s"/>
 
 
 
@@ -362,6 +376,18 @@ esp=0 count_err_dist="0"
 5 处理soft-clash软碰撞，MeshStandoffDistance
 
 ​	得到distance和两个mesh的position，装填ClashInfo
+
+
+
+### 使用FlatBuffers
+
+定义数据结构：创建一个`.fbs`文件（变量命名有要求，注意ulong）
+
+生成代码：使用FlatBuffers编译器（`flatc`）将`.fbs`文件编译为对应的C++或其他语言的代码
+
+```shell
+./flatc --cpp inter_triangels_info.fbs
+```
 
 
 

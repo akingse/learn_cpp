@@ -51,10 +51,10 @@
 
 // my custom
 #include "Project1_API.h"
-#include "test_serialize.h"
 #include "my_geometry.h"			//export
+#include "test_serialize.h"
 #include "test_calculate.h"
-#include "triangle_intersect.h"
+#include "test_triangle_intersect.h"
 #ifdef IS_EXPORT
 #define DLLEXPORT __declspec(dllimport)
 #else

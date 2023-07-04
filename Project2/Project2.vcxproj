@@ -72,7 +72,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)..\TPL\CGAL-5.5.2;$(SolutionDir)..\TPL\CGAL-5.5.2\include;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include;$(SolutionDir)..\TPL\eigen-3.4.0;$(SolutionDir)..\TPL\boost-1.81.0\;C:\Qt\6.4.3\msvc2019_64\include\;C:\Qt\6.4.3\msvc2019_64\include\QtWidgets\QApplication;$(SolutionDir)auto_include;$(SolutionDir)Project_cal;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\TPL\CGAL-5.5.2;$(SolutionDir)..\TPL\CGAL-5.5.2\include;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include;$(SolutionDir)..\TPL\eigen-3.4.0;$(SolutionDir)..\TPL\boost-1.81.0\;C:\Qt\6.4.3\msvc2019_64\include\;C:\Qt\6.4.3\msvc2019_64\include\QtWidgets\QApplication;$(SolutionDir)auto_include;$(SolutionDir)Project_cal;C:\Users\Aking\source\repos\bimbase\Include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\link</OutDir>
     <IntDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\compile</IntDir>
     <LibraryPath>$(SolutionDir)..\TPL\boost-1.81.0\stage\lib;$(SolutionDir)..\TPL\boost-1.81.0\libs;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)x64\$(ConfigurationName);$(LibraryPath)</LibraryPath>
@@ -168,9 +168,9 @@
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Project_cal\calculateTriangle.cpp" />
-    <ClCompile Include="..\Project_cal\my_class_fun.cpp" />
+    <ClCompile Include="calculateTriangle.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="my_class_fun.cpp" />
     <ClCompile Include="my_geometry.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -239,18 +239,18 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="triangle_intersect.cpp" />
+    <ClCompile Include="test_triangle_intersect.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Project_cal\calculateTriangle.h" />
-    <ClInclude Include="..\Project_cal\my_class_fun.h" />
+    <ClInclude Include="calculateTriangle.h" />
+    <ClInclude Include="my_class_fun.h" />
     <ClInclude Include="my_geometry.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="test_calculate.h" />
     <ClInclude Include="test_function.h" />
     <ClInclude Include="test_serialize.h" />
     <ClInclude Include="test_template0.h" />
-    <ClInclude Include="triangle_intersect.h" />
+    <ClInclude Include="test_triangle_intersect.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

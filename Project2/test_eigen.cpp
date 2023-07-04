@@ -87,7 +87,7 @@ static void test0()
 
 
 static int _enrol0 = []()->int {
-	test0();
+	//test0();
 	return 0;
 }();
 

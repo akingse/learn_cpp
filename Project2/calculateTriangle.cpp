@@ -14,7 +14,8 @@ static constexpr double _eps = -eps;
 std::atomic<size_t> getTriangleBoundC = 0, TriangularIntersectC = 0, getTriDistC = 0, isTriangleBoundC = 0,
 count_pointInTri = 0, count_edgeCrossTri = 0, count_segCrossTri = 0, count_across = 0,
 isTwoTrianglesC = 0, TriangularIntersectC_in = 0, TriangularIntersectC_all = 0,
-count_err_inputbox = 0, count_err_inter_dist = 0;
+count_err_inputbox = 0, count_err_inter_dist = 0, count_err_repeat_tri = 0; // count_err_degen_tri = 0
+
 
 //_isPointInTriangle2D
 bool psykronix::isPointInTriangle(const Vector2d& point, const std::array<Vector2d, 3>& trigon) // 2D
@@ -512,66 +513,78 @@ bool psykronix::isTriangleAndBoundingBoxIntersect(const std::array<Eigen::Vector
 bool psykronix::isTwoTrianglesBoundingBoxIntersect(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {
 	//get min and max of two trigons
-	//const double& xminA = std::min(std::min(triA[0].x(), triA[1].x()), triA[2].x());
-	//const double& xmaxA = std::max(std::max(triA[0].x(), triA[1].x()), triA[2].x());
-	//const double& yminA = std::min(std::min(triA[0].y(), triA[1].y()), triA[2].y());
-	//const double& ymaxA = std::max(std::max(triA[0].y(), triA[1].y()), triA[2].y());
-	//const double& zminA = std::min(std::min(triA[0].z(), triA[1].z()), triA[2].z());
-	//const double& zmaxA = std::max(std::max(triA[0].z(), triA[1].z()), triA[2].z());
-	//const double& xminB = std::min(std::min(triB[0].x(), triB[1].x()), triB[2].x());
-	//const double& xmaxB = std::max(std::max(triB[0].x(), triB[1].x()), triB[2].x());
-	//const double& yminB = std::min(std::min(triB[0].y(), triB[1].y()), triB[2].y());
-	//const double& ymaxB = std::max(std::max(triB[0].y(), triB[1].y()), triB[2].y());
-	//const double& zminB = std::min(std::min(triB[0].z(), triB[1].z()), triB[2].z());
-	//const double& zmaxB = std::max(std::max(triB[0].z(), triB[1].z()), triB[2].z());
-	//return !(xminA > xmaxB || yminA > ymaxB || zminA > zmaxB || xminB > xmaxA || yminB > ymaxA || zminB > zmaxA);
-
 	const double& xminA = std::min(std::min(triA[0].x(), triA[1].x()), triA[2].x()); // a little fast
 	const double& xmaxB = std::max(std::max(triB[0].x(), triB[1].x()), triB[2].x());
-	if (xminA > xmaxB)
+	if (xmaxB < xminA)
 		return false;
 	const double& xmaxA = std::max(std::max(triA[0].x(), triA[1].x()), triA[2].x());
 	const double& xminB = std::min(std::min(triB[0].x(), triB[1].x()), triB[2].x());
-	if (xminB > xmaxA)
+	if (xmaxA < xminB)
 		return false;
 	const double& yminA = std::min(std::min(triA[0].y(), triA[1].y()), triA[2].y());
 	const double& ymaxB = std::max(std::max(triB[0].y(), triB[1].y()), triB[2].y());
-	if (yminA > ymaxB)
+	if (ymaxB < yminA)
 		return false;
 	const double& ymaxA = std::max(std::max(triA[0].y(), triA[1].y()), triA[2].y());
 	const double& yminB = std::min(std::min(triB[0].y(), triB[1].y()), triB[2].y());
-	if (yminB > ymaxA)
+	if (ymaxA < yminB)
 		return false;
 	const double& zminA = std::min(std::min(triA[0].z(), triA[1].z()), triA[2].z());
 	const double& zmaxB = std::max(std::max(triB[0].z(), triB[1].z()), triB[2].z());
-	if (zminA > zmaxB)
+	if (zmaxB < zminA)
 		return false;
 	const double& zmaxA = std::max(std::max(triA[0].z(), triA[1].z()), triA[2].z());
 	const double& zminB = std::min(std::min(triB[0].z(), triB[1].z()), triB[2].z());
-	if (zminB > zmaxA)
+	if (zmaxA < zminB)
 		return false;
 	return true;
+	//return !(xminA > xmaxB || yminA > ymaxB || zminA > zmaxB || xminB > xmaxA || yminB > ymaxA || zminB > zmaxA);
 }
 
 bool psykronix::isTwoTrianglesBoundingBoxIntersect(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance)
 {
 	//get min and max of two trigons
-	double xminA = std::min(std::min(triA[0].x(), triA[1].x()), triA[2].x()) - tolerance;
-	double xmaxA = std::max(std::max(triA[0].x(), triA[1].x()), triA[2].x()) + tolerance;
-	double yminA = std::min(std::min(triA[0].y(), triA[1].y()), triA[2].y()) - tolerance;
-	double ymaxA = std::max(std::max(triA[0].y(), triA[1].y()), triA[2].y()) + tolerance;
-	double zminA = std::min(std::min(triA[0].z(), triA[1].z()), triA[2].z()) - tolerance;
-	double zmaxA = std::max(std::max(triA[0].z(), triA[1].z()), triA[2].z()) + tolerance;
-	double xminB = std::min(std::min(triB[0].x(), triB[1].x()), triB[2].x());
-	double xmaxB = std::max(std::max(triB[0].x(), triB[1].x()), triB[2].x());
-	double yminB = std::min(std::min(triB[0].y(), triB[1].y()), triB[2].y());
-	double ymaxB = std::max(std::max(triB[0].y(), triB[1].y()), triB[2].y());
-	double zminB = std::min(std::min(triB[0].z(), triB[1].z()), triB[2].z());
-	double zmaxB = std::max(std::max(triB[0].z(), triB[1].z()), triB[2].z());
+	const double& xminA = std::min(std::min(triA[0].x(), triA[1].x()), triA[2].x()) - tolerance; // a little fast
+	const double& xmaxB = std::max(std::max(triB[0].x(), triB[1].x()), triB[2].x());
+	if (xmaxB < xminA)
+		return false;
+	const double& xmaxA = std::max(std::max(triA[0].x(), triA[1].x()), triA[2].x()) + tolerance;
+	const double& xminB = std::min(std::min(triB[0].x(), triB[1].x()), triB[2].x());
+	if (xmaxA < xminB)
+		return false;
+	const double& yminA = std::min(std::min(triA[0].y(), triA[1].y()), triA[2].y()) - tolerance;
+	const double& ymaxB = std::max(std::max(triB[0].y(), triB[1].y()), triB[2].y());
+	if (ymaxB < yminA)
+		return false;
+	const double& ymaxA = std::max(std::max(triA[0].y(), triA[1].y()), triA[2].y()) + tolerance;
+	const double& yminB = std::min(std::min(triB[0].y(), triB[1].y()), triB[2].y());
+	if (ymaxA < yminB)
+		return false;
+	const double& zminA = std::min(std::min(triA[0].z(), triA[1].z()), triA[2].z()) - tolerance;
+	const double& zmaxB = std::max(std::max(triB[0].z(), triB[1].z()), triB[2].z());
+	if (zmaxB < zminA)
+		return false;
+	const double& zmaxA = std::max(std::max(triA[0].z(), triA[1].z()), triA[2].z()) + tolerance;
+	const double& zminB = std::min(std::min(triB[0].z(), triB[1].z()), triB[2].z());
+	if (zmaxA < zminB)
+		return false;
+	return true;
+	//double xminA = std::min(std::min(triA[0].x(), triA[1].x()), triA[2].x()) - tolerance;
+	//double xmaxA = std::max(std::max(triA[0].x(), triA[1].x()), triA[2].x()) + tolerance;
+	//double yminA = std::min(std::min(triA[0].y(), triA[1].y()), triA[2].y()) - tolerance;
+	//double ymaxA = std::max(std::max(triA[0].y(), triA[1].y()), triA[2].y()) + tolerance;
+	//double zminA = std::min(std::min(triA[0].z(), triA[1].z()), triA[2].z()) - tolerance;
+	//double zmaxA = std::max(std::max(triA[0].z(), triA[1].z()), triA[2].z()) + tolerance;
+	//double xminB = std::min(std::min(triB[0].x(), triB[1].x()), triB[2].x());
+	//double xmaxB = std::max(std::max(triB[0].x(), triB[1].x()), triB[2].x());
+	//double yminB = std::min(std::min(triB[0].y(), triB[1].y()), triB[2].y());
+	//double ymaxB = std::max(std::max(triB[0].y(), triB[1].y()), triB[2].y());
+	//double zminB = std::min(std::min(triB[0].z(), triB[1].z()), triB[2].z());
+	//double zmaxB = std::max(std::max(triB[0].z(), triB[1].z()), triB[2].z());
 	//return AlignedBox3d(Vector3d(xminA, yminA, zminA), Vector3d(xmaxA, ymaxA, zmaxA)).intersects(
 	//	AlignedBox3d(Vector3d(xminB, yminB, zminB), Vector3d(xmaxB, ymaxB, zmaxB)));
 	//m_min.array()<=(b.max)().array()).all() && ((b.min)().array()<=m_max.array()).all();
-	return !(xminA > xmaxB || yminA > ymaxB || zminA > zmaxB || xminB > xmaxA || yminB > ymaxA || zminB > zmaxA);
+	//return !(xmaxB < xminA || ymaxB < yminA || zmaxB < zminA || xmaxA < xminB || ymaxA < yminB || zmaxA < zminB);
 }
 
 std::tuple<Vector3d, double> psykronix::getTriangleBoundingCircle(const std::array<Vector3d, 3>& trigon) //return center and radius
@@ -1044,7 +1057,7 @@ bool psykronix::isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& s
 }
 
 // base on Separating Axis Theorem
-bool isTwoTrianglesIntersectionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
+bool psykronix::isTwoTrianglesIntersectionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {
 #ifdef STATISTIC_DATA_COUNT
 	TriangularIntersectC++;
@@ -1146,13 +1159,21 @@ bool isTwoTrianglesIntersectionSAT(const std::array<Eigen::Vector3d, 3>& triA, c
 
 bool psykronix::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {
-	// for degenerate triangle, return false
+#ifdef STATISTIC_DATA_COUNT
+	TriangularIntersectC++;
+	if (triA[0] == triB[0] && triA[1] == triB[1] && triA[2] == triB[2])
+		count_err_repeat_tri++;
+#endif	// for degenerate triangle, return false
 	std::array<Eigen::Vector3d, 3> edgesA = { triA[1] - triA[0],
 										   triA[2] - triA[1],
 										   triA[0] - triA[2] };
 	std::array<Eigen::Vector3d, 3> edgesB = { triB[1] - triB[0],
 											triB[2] - triB[1],
 											triB[0] - triB[2] };
+//#ifdef STATISTIC_DATA_COUNT
+//	if (edgesA[0].cross(edgesA[1]).isZero() || edgesB[0].cross(edgesB[1]).isZero())
+//		count_err_degen_tri++;
+//#endif
 	std::array<Eigen::Vector3d, 15> axes = { { //order matters speed
 			edgesA[0].cross(edgesB[0]),
 			edgesA[0].cross(edgesB[1]),
@@ -1199,8 +1220,8 @@ bool psykronix::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>&
 	// special handling degenerate triangle
 	//Eigen::Vector3d croA = edgesA[0].cross(edgesA[1]);
 	//Eigen::Vector3d croB = edgesB[0].cross(edgesB[1]);
-	return !(edgesA[0].cross(edgesA[1]).isZero() || edgesB[0].cross(edgesB[1]).isZero());
-	//return true;
+	//return !(edgesA[0].cross(edgesA[1]).isZero() || edgesB[0].cross(edgesB[1]).isZero());
+	return true;
 }
 
 //------------------------------------------------------------------------------------

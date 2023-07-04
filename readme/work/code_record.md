@@ -544,5 +544,51 @@ std::array<std::vector<size_t>, 2> _getPotentialIntersectTrianglesOfMesh(ModelMe
 
 
 
+#### 排除退化的三角形
+
+```c
+LoadModel流程
+edgesA[0].cross(edgesA[1]).isZero()
+
+before
+<linkage count_entity="5233" count_triangle="1982865"/>
+after
+<linkage count_entity="5233" count_triangle="1982041"/>
+
+
+
+				if (face_temp.size() == 3)
+				{
+					// exclude degenerated triangle
+					if (!(mesh.vbo_[face_temp.at(1)] - mesh.vbo_[face_temp.at(0)]).cross(
+						mesh.vbo_[face_temp.at(2)] - mesh.vbo_[face_temp.at(0)]).isZero())
+						//count_err_degen_tri++;
+						mesh.ibo_.push_back({ face_temp.at(0), face_temp.at(1), face_temp.at(2) });
+				}
+				face_temp.clear();
+				
+				
+			std::array<int, 3> face_temp;
+			int idx = 0;
+			for (size_t i_index = 0; i_index < indexes_raw.size(); i_index++)
+			{
+				int index = indexes_raw.at(i_index);
+				if (index != 0)
+				{
+					face_temp[idx] = abs(index) - 1;
+					idx++;
+				}
+				if (idx % 3 == 0)
+				{
+					if (!(mesh.vbo_[face_temp[1]] - mesh.vbo_[face_temp[0]]).cross(
+						mesh.vbo_[face_temp[2]] - mesh.vbo_[face_temp[1]]).isZero())
+						mesh.ibo_.push_back(face_temp);
+					idx = 0;
+				}
+			}
+```
+
+
+
 
 

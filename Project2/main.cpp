@@ -31,7 +31,7 @@ const size_t totalNum = (size_t)1e8;
 //std::array<Vector3d, 3>* randData3 = new std::array<Vector3d, 3>;
 //std::array<Vector3d, 3>* randData3_ = new std::array<Vector3d, 3>;
 
-#define TEST_SPEED_OF_FUNCTION
+//#define TEST_SPEED_OF_FUNCTION
 //#define TEST_TRIGON3
 //#define TEST_TRIGON2_TRIGON2
 //#define TEST_TRIGON2_TRIGON3
@@ -48,6 +48,7 @@ int main()
 	Eigen::Vector3d Q(std::nan("0"), std::nan("0"), std::nan("0"));
 	double pi = M_PI;
 
+#ifdef TEST_SPEED_OF_FUNCTION
 	start = clock();
 	cout << "data number:"<< totalNum <<", load start..." << endl;
 	// the data
@@ -81,7 +82,6 @@ int main()
 	//	randData3[i] = _get_rand3();
 	//	randData3_[i] = _get_rand3();
 	//}
-#ifdef TEST_SPEED_OF_FUNCTION
 	size_t length = size_t(sqrt(totalNum));// (1e4);
 	for (int i = 0; i < length; ++i)
 	{
@@ -189,6 +189,7 @@ int main()
 	TriangularIntersectC_all = 0;
 #endif
 
+	cout << "main over." << endl;
 	return 0;
 }
 
