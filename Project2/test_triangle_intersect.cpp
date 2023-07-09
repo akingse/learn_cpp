@@ -225,15 +225,12 @@ static void _test2()
 	std::vector<std::array<uint64_t, 2>> entity1 = _readEntityIDFile(path + "entityIdList_off.bin"); //4031
 	std::vector<std::array<uint64_t, 2>> entity2 = _readEntityIDFile(path + "entityIdList_on.bin"); //4031
 	std::vector<std::array<uint64_t, 2>> entity3 = _readEntityIDFile(path + "entityIdList_soft_off.bin"); //1069
-	std::vector<std::array<uint64_t, 2>> entity4 = _readEntityIDFile(path + "entityIdList_hard.bin"); //
+	std::vector<std::array<uint64_t, 2>> entity4 = _readEntityIDFile(path + "entityIdList_hard.bin"); //4030
 	//(6405-5779)(6510-6123)(6509-6134)
 	//std::vector<std::array<uint64_t, 2>> entity5 = _readEntityIDFile(path + "entityIdList_soft_opt_off.bin");
 	//std::vector<std::array<uint64_t, 2>> entity6 = _readEntityIDFile(path + "entityIdList_soft_off.bin");
 	//(1340-1339)(1347-1345)(1347-1346)
 
-
-	bool isInt;
-	double d;
 	size_t count = 0;
 	//for (auto& iter : tris)
 	//{
@@ -243,7 +240,7 @@ static void _test2()
 	//}
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris1_extra;
 	vector<size_t> numList;
-	for (int i=0;i<tris1.size();++i)
+	for (int i=0;i<tris1.size();++i) //entity的不同三角形
 	{
 		if (!isTwoTrianglesIntersectSAT(tris1[i][0], tris1[i][1]))
 			cout << "not intersect1" << endl;
@@ -253,8 +250,8 @@ static void _test2()
 			!(isEqualTrigon(tris1[i][0], tris2[i][1]) && isEqualTrigon(tris1[i][1], tris2[i][0])))
 			numList.push_back(i);
 	}
-	cout << "diff-index:" << numList.size() << endl;
-	cout << "intersect finish" << endl;
+	//cout << "diff-index:" << numList.size() << endl;
+	//cout << "intersect finish" << endl;
 
 #ifdef DOUBLE_FOR_LOOP
 	for (auto& iterA : tris1)
@@ -277,33 +274,13 @@ static void _test2()
 			//print_triangle(iter1[0], iter1[1]);
 		}
 	}
-#endif
-
-	for (auto& iterA : entity1)
-	{
-		bool findFlag = false;
-		for (auto& iterB : entity2) //findTri
-		{
-			if (iterA[0] == iterB[0] && iterA[1] == iterB[1])
-			{
-				findFlag = true;
-				break;
-			}
-		}
-		if (!findFlag)
-		{
-			cout << "no findFlag" << endl;
-			cout << iterA[0]<< "-"<< iterA[1] << endl; // 6509 - 6134
-			//print_triangle(iter1[0], iter1[1]);
-		}
-	}
 	
 	for (int i = 0; i < entity1.size(); ++i)
 	{
 		bool findFlag = false;
-		for (int j = 0; j < entity2.size(); ++j) //big vector, findTri
+		for (int j = 0; j < entity4.size(); ++j) //big vector, findTri
 		{
-			if (entity1[i][0] == entity2[j][0] && entity1[i][1] == entity2[j][1])
+			if (entity1[i][0] == entity4[j][0] && entity1[i][1] == entity4[j][1])
 			{
 				findFlag = true;
 				//cout << "index=" << j << endl; //823,950,954
@@ -312,20 +289,30 @@ static void _test2()
 		}
 		if (!findFlag)
 		{
+			count++;
 			cout << "no findFlag" << endl;
 			cout << entity1[i][0] << "-" << entity1[i][1] << endl; // 6509 - 6134
 		}
 	}
+#endif
+
 	cout << count << endl; //420
 	cout << "return 0" << endl;
 }
 
 static void _test3()
 {
-	string path = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/";
-	ifstream inFile(path + "interTriInfo_4030.bin", ios::in | ios::binary);
 	//void _wirteTrigonFile(const std::string & fileName, const std::vector<std::tuple<
 	//	std::array<Eigen::Vector3d, 3>, std::array<Eigen::Vector3d, 3>, unsigned long long, unsigned long long, double>>& triinfos)
+	string path = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/";
+	ifstream inFile(path + "interTriInfo_5108.bin", ios::in | ios::binary);
+	std::vector<std::array<uint64_t, 2>> entity1;
+	std::vector<double> diatanceLen;
+	//std::set<double> diatanceList;
+	//std::multiset<double> diatanceList;
+	//std::map<double,vector<std::array<uint64_t, 2>>> diatanceList;
+	std::map<double, set<std::array<uint64_t, 2>>> diatanceList;
+
 	if (inFile.is_open())
 	{
 		inFile.seekg(0, std::ios::end);
@@ -349,13 +336,53 @@ static void _test3()
 				Vector3d(trib->p2()->x(),trib->p2()->y(),trib->p2()->z()) };
 			uint64_t entityA = triinfo->entity_a();
 			uint64_t entityB = triinfo->entity_b();
-			double distance = triinfo->distance();
-
+			double distance = triinfo->distance(); //max=9.3132257461547852e-10
+			if (diatanceList.find(distance) == diatanceList.end())
+				diatanceList.insert({ distance, {{ entityA ,entityB }} });
+			else
+				diatanceList.at(distance).insert({ entityA ,entityB });
+			//cout << distance << endl;
+			entity1.push_back({ entityA ,entityB });
+			if (distance > 1e-9)
+			{
+				diatanceLen.push_back(distance);
+			}
 		}
 		inFile.close();
 	}
 
-
+	int count = 0;
+	for (auto& iter : diatanceList)
+	{
+		//count += iter.second.size(); //1069
+		if (iter.first > 1e-9)
+		{
+			count++;
+		}
+	}
+	//check
+	//std::vector<std::array<uint64_t, 2>> entity4 = _readEntityIDFile(path + "entityIdList_hard.bin"); //4030
+	std::vector<std::array<uint64_t, 2>> entity4 = _readEntityIDFile(path + "entityIdList_soft.bin"); //1069
+	for (int i = 0; i < entity1.size(); ++i)
+	{
+		bool findFlag = false;
+		for (int j = 0; j < entity1.size(); ++j) //big vector, findTri
+		{
+			if (i == j)
+				continue;
+			if (entity1[i][0] == entity1[j][0] && entity1[i][1] == entity1[j][1])
+			{
+				findFlag = true;
+				//cout << "index=" << j << endl; //823,950,954
+				break;
+			}
+		}
+		if (findFlag)
+		{
+			cout << "findFlag repeat" << endl; //no repeat
+			cout << entity1[i][0] << "-" << entity1[i][1] << endl; // 6509 - 6134
+		}
+	}
 	cout << "return 0" << endl;
 }
 

@@ -1155,6 +1155,7 @@ bool psykronix::isTwoTrianglesIntersectionSAT(const std::array<Eigen::Vector3d, 
 		// if intersect, must coplanar
 		return false;
 	}
+	return false;
 }
 
 bool psykronix::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
