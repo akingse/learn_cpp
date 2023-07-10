@@ -386,12 +386,24 @@ static void _test3()
 	cout << "return 0" << endl;
 }
 
+static void _test4()
+{
+	//射线法，测试点是否在mesh内部
+	Vector3d p(0, 0, 0);
+	//Triangle tri = { Vector3d(-1, -1, 0),Vector3d(1, 0, M_PI/3),Vector3d(0, 1, 1+ M_PI / 3) };
+	Triangle tri = { Vector3d(-1, -1, 0),Vector3d(0, 1, 1+ M_PI / 3),Vector3d(1, 0, M_PI/3) };
+	isPointRayAcrossTriangle(p, tri);
+
+
+}
+
 static int enrol = []()->int
 {
 	//_test0();
 	//_test1();
-	_test2();
-	_test3();
+	//_test2();
+	//_test3();
+	_test4();
 	return 0;
 }();
 

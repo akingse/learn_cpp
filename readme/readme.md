@@ -100,8 +100,8 @@ conf.user.json
 
 ```shell
 #使用代理
-git config --global http.proxy http://127.0.0.1:49775
-git config --global https.proxy http://127.0.0.1:49775
+git config --global http.proxy http://127.0.0.1:57212
+git config --global https.proxy http://127.0.0.1:57212
 
 #取消http代理
 git config --global --unset http.proxy

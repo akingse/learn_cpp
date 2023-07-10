@@ -1056,6 +1056,104 @@ bool psykronix::isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& s
 	}
 }
 
+// whlie ray across same edge of two triangles
+bool psykronix::isPointRayAcrossTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon)
+{
+	if (point.z() > std::max(std::max(trigon[0].z(), trigon[1].z()), trigon[2].z())||
+		point.x() > std::max(std::max(trigon[0].x(), trigon[1].x()), trigon[2].x())||
+		point.x() < std::min(std::min(trigon[0].x(), trigon[1].x()), trigon[2].x())||
+		point.y() > std::max(std::max(trigon[0].y(), trigon[1].y()), trigon[2].y())||
+		point.y() < std::min(std::min(trigon[0].y(), trigon[1].y()), trigon[2].y()))
+		return false; // range box judge
+	//using SAT
+	Vector3d ray(point.x(), point.y(), FLT_MAX);
+	//double dotPro1 = axisZ.dot(ray);
+	Vector3d axisZ(0, 0, 1);
+	std::array<Eigen::Vector3d, 3> edges = { trigon[1] - trigon[0],
+									   trigon[2] - trigon[1],
+									   trigon[0] - trigon[2] };
+	std::array<Eigen::Vector3d, 15> axes = { { //order matters speed
+		axisZ.cross(edges[0]),
+		axisZ.cross(edges[1]),
+		axisZ.cross(edges[2]),
+		axisZ,
+		edges[0],
+		edges[1],
+		edges[2]} };
+	for (const auto& axis : axes) //fast than index
+	{
+		double minTri = DBL_MAX; 
+		double maxTri = -DBL_MAX;
+		for (const auto& vertex : trigon) //fast than list
+		{
+			double projection = vertex.dot(axis);
+			minTri = std::min(minTri, projection);
+			maxTri = std::max(maxTri, projection);
+		}
+		double minRay = std::min(axis.dot(point), axis.dot(ray));
+		double maxRay = std::max(axis.dot(point), axis.dot(ray));
+#ifdef USING_MACHINE_PERCESION_THRESHOLD
+		if (minTri + eps < minRay || maxRay + eps < minTri)
+#else
+		if (minTri < minRay || maxRay < minTri) // absolute zero
+#endif
+			return false;
+	}
+	//Vector3d axisZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
+	//double dotPro0 = axisZ.dot(point);
+	//double d0= axisZ.dot(trigon[0]); // with accuracy error 
+	//double d1= axisZ.dot(trigon[1]);
+	//double d2= axisZ.dot(trigon[2]);
+}
+
+bool psykronix::isPointContainedInPolyhedron(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
+{
+	//Ray ray(pt, Vec3(1.0, 0.0, 0.0));
+	Vector3d rayX = Vector3d(1.0, 0.0, 0.0);
+	int count = 0;
+	for (const auto& iter : ibo)
+	{
+		//if (faces[i].contains(pt))
+		std::array<Eigen::Vector3d, 3> faceI = { vbo[iter[0]] ,vbo[iter[1]] ,vbo[iter[2]] };
+		Vector3d edge1 = faceI[1] - faceI[0];// vbo[iter[1]] - vbo[iter[0]];
+		Vector3d edge2 = faceI[2] - faceI[0];// vbo[iter[2]] - vbo[iter[0]];
+		Vector3d ptVec = point - vbo[iter[0]];
+		Vector3d normal = edge1.cross(edge2);// .normalized();
+		double dot1 = normal.dot(ptVec.cross(edge1));
+		double dot2 = normal.dot(edge2.cross(ptVec));
+		if (dot1 >= 0.0 && dot2 >= 0.0 && dot1 + dot2 <= normal.dot(normal))
+		{
+			++count;
+		}
+		else 
+		{
+			double dotPro = normal.dot(rayX); //ray.direction
+			if (dotPro == 0.0)
+				continue;
+			double t = normal.dot(faceI[0] - point) / dotPro; //ray.origin
+			if (t > 0.0) {
+				Vector3d intersection = point + rayX * t;
+				double dot1 = normal.dot(intersection - faceI[0]);
+				double dot2 = normal.dot(faceI[2] - faceI[0]);
+				if (dot1 >= 0.0 && dot2 >= 0.0 && dot1 + dot2 <= normal.dot(normal)) 
+					++count;
+			}
+		}
+	}
+	return (count % 2 != 0);
+}
+
+bool psykronix::isPointInPolyfaceMesh(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
+{
+	size_t countA = 0;
+	for (const auto& iter : ibo)
+	{
+		if (isPointRayAcrossTriangle(point, { vbo[iter[0]] ,vbo[iter[1]] ,vbo[iter[2]] }))
+			countA++;
+	}
+	return (countA % 2 != 0);
+}
+
 // base on Separating Axis Theorem
 bool psykronix::isTwoTrianglesIntersectionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {

@@ -160,3 +160,159 @@ float maxPenetrationDepth(Mesh& mesh1, Mesh& mesh2)
 ```
 
 希望这个概要能帮助你实现mesh之间的穿透深度检测!如果有任何其他问题 feel free to ask。
+
+
+
+
+
+以下是使用射线法判断点是否在三角形内的C++代码示例：
+
+```c++
+#include <iostream>
+#include <vector>
+#include <cmath>
+
+using namespace std;
+
+struct Vec3 {
+    double x, y, z;
+
+    Vec3(double x=0, double y=0, double z=0): x(x), y(y), z(z) {}
+
+    Vec3 operator+(const Vec3& other) const {
+        return Vec3(x + other.x, y + other.y, z + other.z);
+    }
+
+    Vec3 operator-(const Vec3& other) const {
+        return Vec3(x - other.x, y - other.y, z - other.z);
+    }
+
+    Vec3 operator*(double scale) const {
+        return Vec3(x * scale, y * scale, z * scale);
+    }
+
+    Vec3 cross(const Vec3& other) const {
+        return Vec3(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x);
+    }
+
+    double dot(const Vec3& other) const {
+        return x * other.x + y * other.y + z * other.z;
+    }
+
+    double length() const {
+        return sqrt(x * x + y * y + z * z);
+    }
+
+    void normalize() {
+        double len = length();
+        x /= len;
+        y /= len;
+        z /= len;
+    }
+};
+
+struct Triangle {
+    Vec3 v1, v2, v3;
+
+    Triangle(const Vec3& v1, const Vec3& v2, const Vec3& v3): v1(v1), v2(v2), v3(v3) {}
+
+    bool contains(const Vec3& pt) const {
+        Vec3 edge1 = v2 - v1;
+        Vec3 edge2 = v3 - v1;
+        Vec3 ptVec = pt - v1;
+
+        Vec3 normal = edge1.cross(edge2);
+        normal.normalize();
+
+        double dot1 = normal.dot(ptVec.cross(edge1));
+        double dot2 = normal.dot(edge2.cross(ptVec));
+
+        return (dot1 >= 0.0 && dot2 >= 0.0 && dot1 + dot2 <= normal.dot(normal));
+    }
+};
+
+struct Ray {
+    Vec3 origin, direction;
+
+    Ray(const Vec3& origin, const Vec3& direction): origin(origin), direction(direction) {}
+};
+
+struct Polyhedron {
+    vector<Triangle> faces;
+
+    Polyhedron(const vector<Vec3>& vertices, const vector<int>& indices) {
+        for (int i = 0; i < indices.size(); i += 3) {
+            Vec3 v1 = vertices[indices[i]];
+            Vec3 v2 = vertices[indices[i+1]];
+            Vec3 v3 = vertices[indices[i+2]];
+            faces.push_back(Triangle(v1, v2, v3));
+        }
+    }
+
+    bool contains(const Vec3& pt) const {
+        Ray ray(pt, Vec3(1.0, 0.0, 0.0));
+        int count = 0;
+        for (int i = 0; i < faces.size(); ++i) {
+            if (faces[i].contains(pt)) {
+                ++count;
+            } else {
+                Vec3 edge1 = faces[i].v2 - faces[i].v1;
+                Vec3 edge2 = faces[i].v3 - faces[i].v1;
+                Vec3 normal = edge1.cross(edge2);
+                normal.normalize();
+
+                double dot = normal.dot(ray.direction);
+                if (dot == 0.0) {
+                    continue;
+                }
+
+                double t = normal.dot(faces[i].v1 - ray.origin) / dot;
+                if (t > 0.0) {
+                    Vec3 intersection = ray.origin + ray.direction * t;
+
+                    Vec3 v1 = faces[i].v1;
+                    Vec3 v2 = faces[i].v2;
+                    Vec3 v3 = faces[i].v3;
+
+                    Vec3 edge1 = v2 - v1;
+                    Vec3 edge2 = v3 - v1;
+                    Vec3 normal = edge1.cross(edge2);
+                    normal.normalize();
+
+                    double dot1 = normal.dot(intersection - v1);
+                    double dot2 = normal.dot(v3 - v1);
+
+                    if (dot1 >= 0.0 && dot2 >= 0.0 && dot1 + dot2 <= normal.dot(normal)) {
+                        ++count;
+                    }
+                }
+            }
+        }
+
+        return (count % 2 != 0);
+    }
+};
+
+int main() {
+    vector<Vec3> vertices = {Vec3(0, 0, 0), Vec3(1, 0, 0), Vec3(0, 1, 0), Vec3(0, 0,1)};
+    vector<int> indices = {0, 1, 2, 0, 2, 3, 0, 3, 1, 1, 3, 2};
+    Polyhedron polyhedron(vertices, indices);
+
+    Vec3 pt(0.5, 0.5, 0.5);
+    bool isInside = polyhedron.contains(pt);
+
+    if (isInside) {
+        cout << "The point is inside the polyhedron." << endl;
+    } else {
+        cout << "The point is outside the polyhedron." << endl;
+    }
+
+    return 0;
+}
+```
+
+在这个示例中，我们首先定义了一个`Vec3`结构体来表示三维向量，以及一个`Triangle`结构体来表示三角形。然后，我们定义了一个`Polyhedron`结构体来表示多面体，它由一组顶点和索引组成，其中每三个索引表示一个三角形面。在`Polyhedron`结构体中，我们实现了一个`contains`方法来检查一个点是否在多面体内部。该方法使用射线法进行计算，首先射出一条从点开始的任意方向的射线，然后计算该射线与所有面的交点。如果交点的数量为奇数，则该点在多面体内部；如果交点的数量为偶数，则该点在多面体外部。
+
+要注意的是，在计算射线与面的交点时，我们还需要检查交点是否在该面内部。这可以通过计算交点到面的三个顶点的距离来实现。如果交点在这三个点构成的三角形内部，则认为交点在该面内部。
+
+总的来说，这个示例代码展示了如何使用射线法来判断一个点是否在多面体内部。但需要注意的是，该方法只适用于凸多面体，对于非凸多面体可能会产生错误的结果。
