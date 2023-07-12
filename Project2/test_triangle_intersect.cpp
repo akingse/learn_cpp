@@ -452,3 +452,392 @@ Devillers & GuigueËã·¨(¼ò³ÆDevillers Ëã·¨) Í¨¹ýÈý½ÇÐÎ¸÷¶¥µã¹¹³ÉµÄÐÐÁÐÊ½Õý¸ºµÄ¼¸º
 				[V10, V11, V20, V21] <= 0 && [V10, V12, V22, V20] <= 0        ÅÐ±ðÊ½(1)
 */
 
+
+//------------------------------------------------------------------------------------
+// Voxel 
+//------------------------------------------------------------------------------------
+
+#undef max
+#undef min
+#include <map>
+#include <set>
+#include <array>
+#include <vector>
+#include <memory>
+#include <ranges>
+#include <format>
+#include <cassert>
+#include <numeric>
+#include <fstream>
+#include <algorithm>
+#include <filesystem>
+#include <functional>
+#include <type_traits>
+#include "Eigen/Geometry"    
+#include <iostream>
+class Grid
+{
+public:
+	Grid(const Eigen::AlignedBox3d& bounding, std::array<unsigned int, 3> num_size) :
+		bounding_(bounding),
+		num_size_(num_size),
+		fill_cell_(num_size.at(0)* num_size.at(1)* num_size.at(2))
+	{
+	}
+	void push(const std::array<Eigen::Vector3d, 3>& triangle, unsigned char mark)
+	{
+		for (size_t i = 0; i < 3; i++)
+			if (std::isnan(triangle.at(i).x()) || std::isnan(triangle.at(i).y()) || std::isnan(triangle.at(i).z()))
+				return;
+		/***********************************************************************
+		* ¶ÔÈý¸öµãÑØ×ÅÈý¸ö·½Ïò½øÐÐÅÅÐò£¬ÑØ±ßÉ¨ÃèÊ±×ßÈýÌõÂ·¾¶: 0->2; 0->1; 1->2;
+		*             x_1
+		* y_2       __--_
+		*       __--     -_
+		* y_0 -------______-_ y_1
+		*   x_0             x_2
+		**********************************************************************/
+		std::array<unsigned int, 3> order_x({ 0, 1, 2 });
+		std::array<unsigned int, 3> order_y({ 0, 1, 2 });
+		std::array<unsigned int, 3> order_z({ 0, 1, 2 });
+		std::sort(order_x.begin(), order_x.end(), [&](int i, int j) {return triangle.at(i).x() < triangle.at(j).x(); });
+		std::sort(order_y.begin(), order_y.end(), [&](int i, int j) {return triangle.at(i).y() < triangle.at(j).y(); });
+		std::sort(order_z.begin(), order_z.end(), [&](int i, int j) {return triangle.at(i).z() < triangle.at(j).z(); });
+		// ÅÅ³ýÍêÈ«²»Ïà½»µÄÇé¿ö
+		if (triangle.at(order_x[0]).x() > bounding_.max().x())
+			return;
+		if (triangle.at(order_x[0]).y() > bounding_.max().y())
+			return;
+		if (triangle.at(order_x[0]).z() > bounding_.max().z())
+			return;
+		if (triangle.at(order_x[2]).x() < bounding_.min().x())
+			return;
+		if (triangle.at(order_x[2]).y() < bounding_.min().y())
+			return;
+		if (triangle.at(order_x[2]).z() < bounding_.min().z())
+			return;
+		// Èý¸ö·½Ïò¸ñ×Ó³¤¶È
+		double cell_size_x = (bounding_.max().x() - bounding_.min().x()) / num_size_.at(0);
+		double cell_size_y = (bounding_.max().y() - bounding_.min().y()) / num_size_.at(1);
+		double cell_size_z = (bounding_.max().z() - bounding_.min().z()) / num_size_.at(2);
+		double cell_size_x_fraction = 1.0 / cell_size_x;
+		double cell_size_y_fraction = 1.0 / cell_size_y;
+		double cell_size_z_fraction = 1.0 / cell_size_z;
+
+		/**********************************************************************
+		* ÀýÈçÌåËØ5¸ö¸ñ×Ó£¬±éÀúµÄ¸ô°å·¶Î§Îª1:4£»¹Ê²ÉÈ¡ceil
+		*          __--_
+		*      __--     -_
+		*    -------______-_
+		* |   |   |   |   |   |
+		* 0   1   2   3   4   5
+		**********************************************************************/
+		int partition_x_min_index = triangle.at(order_x[0]).x() > bounding_.min().x() ? ceil((triangle.at(order_x[0]).x() - bounding_.min().x()) * cell_size_x_fraction) : 1;
+		int partition_y_min_index = triangle.at(order_y[0]).y() > bounding_.min().y() ? ceil((triangle.at(order_y[0]).y() - bounding_.min().y()) * cell_size_y_fraction) : 1;
+		int partition_z_min_index = triangle.at(order_z[0]).z() > bounding_.min().z() ? ceil((triangle.at(order_z[0]).z() - bounding_.min().z()) * cell_size_z_fraction) : 1;
+		int partition_x_max_index = triangle.at(order_x[2]).x() > bounding_.max().x() ? num_size_.at(0) : ceil((triangle.at(order_x[2]).x() - bounding_.min().x()) * cell_size_x_fraction);
+		int partition_y_max_index = triangle.at(order_y[2]).y() > bounding_.max().y() ? num_size_.at(1) : ceil((triangle.at(order_y[2]).y() - bounding_.min().y()) * cell_size_y_fraction);
+		int partition_z_max_index = triangle.at(order_z[2]).z() > bounding_.max().z() ? num_size_.at(2) : ceil((triangle.at(order_z[2]).z() - bounding_.min().z()) * cell_size_z_fraction);
+		Eigen::Vector3d vec_x_01 = triangle.at(order_x[1]) - triangle.at(order_x[0]);
+		Eigen::Vector3d vec_x_12 = triangle.at(order_x[2]) - triangle.at(order_x[1]);
+		Eigen::Vector3d vec_x_20 = triangle.at(order_x[0]) - triangle.at(order_x[2]);
+		Eigen::Vector3d vec_y_01 = triangle.at(order_y[1]) - triangle.at(order_y[0]);
+		Eigen::Vector3d vec_y_12 = triangle.at(order_y[2]) - triangle.at(order_y[1]);
+		Eigen::Vector3d vec_y_20 = triangle.at(order_y[0]) - triangle.at(order_y[2]);
+		Eigen::Vector3d vec_z_01 = triangle.at(order_z[1]) - triangle.at(order_z[0]);
+		Eigen::Vector3d vec_z_12 = triangle.at(order_z[2]) - triangle.at(order_z[1]);
+		Eigen::Vector3d vec_z_20 = triangle.at(order_z[0]) - triangle.at(order_z[2]);
+		double y_partial_x_01 = vec_x_01.x() == 0.0 ? 0.0 : vec_x_01.y() / vec_x_01.x();
+		double z_partial_x_01 = vec_x_01.x() == 0.0 ? 0.0 : vec_x_01.z() / vec_x_01.x();
+		double y_partial_x_12 = vec_x_12.x() == 0.0 ? 0.0 : vec_x_12.y() / vec_x_12.x();
+		double z_partial_x_12 = vec_x_12.x() == 0.0 ? 0.0 : vec_x_12.z() / vec_x_12.x();
+		double y_partial_x_20 = vec_x_20.x() == 0.0 ? 0.0 : vec_x_20.y() / vec_x_20.x();
+		double z_partial_x_20 = vec_x_20.x() == 0.0 ? 0.0 : vec_x_20.z() / vec_x_20.x();
+		double z_partial_y_01 = vec_y_01.y() == 0.0 ? 0.0 : vec_y_01.z() / vec_y_01.y();
+		double x_partial_y_01 = vec_y_01.y() == 0.0 ? 0.0 : vec_y_01.x() / vec_y_01.y();
+		double z_partial_y_12 = vec_y_12.y() == 0.0 ? 0.0 : vec_y_12.z() / vec_y_12.y();
+		double x_partial_y_12 = vec_y_12.y() == 0.0 ? 0.0 : vec_y_12.x() / vec_y_12.y();
+		double z_partial_y_20 = vec_y_20.y() == 0.0 ? 0.0 : vec_y_20.z() / vec_y_20.y();
+		double x_partial_y_20 = vec_y_20.y() == 0.0 ? 0.0 : vec_y_20.x() / vec_y_20.y();
+		double x_partial_z_01 = vec_z_01.z() == 0.0 ? 0.0 : vec_z_01.x() / vec_z_01.z();
+		double y_partial_z_01 = vec_z_01.z() == 0.0 ? 0.0 : vec_z_01.y() / vec_z_01.z();
+		double x_partial_z_12 = vec_z_12.z() == 0.0 ? 0.0 : vec_z_12.x() / vec_z_12.z();
+		double y_partial_z_12 = vec_z_12.z() == 0.0 ? 0.0 : vec_z_12.y() / vec_z_12.z();
+		double x_partial_z_20 = vec_z_20.z() == 0.0 ? 0.0 : vec_z_20.x() / vec_z_20.z();
+		double y_partial_z_20 = vec_z_20.z() == 0.0 ? 0.0 : vec_z_20.y() / vec_z_20.z();
+		int kbc = num_size_.at(1) * num_size_.at(2);
+		// x
+		for (int i_x = partition_x_min_index; i_x < partition_x_max_index; i_x++)
+		{
+			double partition_x = bounding_.min().x() + i_x * cell_size_x; // ¸ô°åxµÄ×ø±ê
+			// ¸ô°å»áÇÐ¸îÈý½ÇÐÎ£¬²¢½»±ß½çÓÚÁ½¸ö½»µã point_twist=(partition_x, twist_y, twist_z); point_straight=(partition_x, straight_y, straight_z)
+			double twist_y, twist_z, straight_y, straight_z;
+			double dx_p0 = partition_x - triangle.at(order_x[0]).x();
+			straight_y = y_partial_x_20 * dx_p0 + triangle.at(order_x[0]).y();
+			straight_z = z_partial_x_20 * dx_p0 + triangle.at(order_x[0]).z();
+			if (partition_x < triangle.at(order_x[1]).x())
+			{
+				twist_y = y_partial_x_01 * dx_p0 + triangle.at(order_x[0]).y();
+				twist_z = z_partial_x_01 * dx_p0 + triangle.at(order_x[0]).z();
+			}
+			else
+			{
+				double dx_p1 = partition_x - triangle.at(order_x[1]).x();
+				twist_y = y_partial_x_12 * dx_p1 + triangle.at(order_x[1]).y();
+				twist_z = z_partial_x_12 * dx_p1 + triangle.at(order_x[1]).z();
+			}
+			double z_partial_y = (straight_z - twist_z) / (straight_y - twist_y);
+			double y_partial_z = (straight_y - twist_y) / (straight_z - twist_z);
+			// ¼ÆËãy,z¸ô°åµÄ·¶Î§
+			double y_min = std::min(twist_y, straight_y);
+			double y_max = std::max(twist_y, straight_y);
+			double z_min = std::min(twist_z, straight_z);
+			double z_max = std::max(twist_z, straight_z);
+			int y_min_index = y_min > bounding_.min().y() ? ceil((y_min - bounding_.min().y()) * cell_size_y_fraction) : 1;
+			int y_max_index = y_max > bounding_.max().y() ? num_size_.at(1) : y_max == bounding_.min().y() ? 1 : ceil((y_max - bounding_.min().y()) * cell_size_y_fraction);
+			int z_min_index = z_min > bounding_.min().z() ? ceil((z_min - bounding_.min().z()) * cell_size_z_fraction) : 1;
+			int z_max_index = z_max > bounding_.max().z() ? num_size_.at(2) : z_max == bounding_.min().z() ? 1 : ceil((z_max - bounding_.min().z()) * cell_size_z_fraction);
+			// ¶ÔÓÚÔÚx·½ÏòÍ¶Ó°·Ç³£Ð¡µÄÈý½ÇÐÎ£¨³ß´çÐ¡ÓÚ¸ñ×Ó£©²¢ÇÒÃ»ÓÐÓë¸ñ×ÓÏà½»
+			if (y_min_index == y_max_index && z_min_index == z_max_index)
+			{
+				int offset_base = i_x * kbc + (y_min_index - 1) * num_size_.at(2) + z_min_index - 1;
+				fill_cell_.at(offset_base) |= mark;
+				fill_cell_.at(offset_base - kbc) |= mark;
+			}
+			else
+			{
+				// point_twistÓëpoint_straightµÄÁ¬Ïß»áÇÐ¸îy¸ô°å
+				for (int i_y = y_min_index; i_y < y_max_index; i_y++)
+				{
+					// ½»µãÎ»ÖÃÎª(partition_x,partition_y,partition_z)
+					double partition_y = bounding_.min().y() + i_y * cell_size_y;
+					double partition_z = z_partial_y * (partition_y - twist_y) + twist_z;
+					if (partition_z < bounding_.min().z())
+						continue;
+					if (partition_z > bounding_.max().z())
+						continue;
+					// Ë÷ÒýÎ»ÖÃ(i_x, i_y, [i_z,i_z+1));
+					int i_z = floor((partition_z - bounding_.min().z()) * cell_size_z_fraction);
+					i_z = i_z == num_size_.at(2) ? i_z - 1 : i_z;
+					// ½»µãÎ»ÖÃµÄ¼¸ºÎÒâÒåÎª£ºÎ»ÓÚi_x,i_yµÄÒ»¸ùÖùÓëÈý½ÇÃæÏà½»£¬Ôò¸ÃÖùµÄËÄÖÜµÄËÄ¸öÇøÓò¾ùÓëÈý½ÇÃæÏà½»
+					int offset_base = i_x * kbc + i_y * num_size_.at(2) + i_z;
+					fill_cell_.at(offset_base) |= mark;
+					fill_cell_.at(offset_base - num_size_.at(2)) |= mark;
+					fill_cell_.at(offset_base - kbc) |= mark;
+					fill_cell_.at(offset_base - kbc - num_size_.at(2)) |= mark;
+				}
+				// point_twistÓëpoint_straightµÄÁ¬Ïß»áÇÐ¸îz¸ô°å
+				for (int i_z = z_min_index; i_z < z_max_index; i_z++)
+				{
+					double partition_z = bounding_.min().z() + i_z * cell_size_z;
+					double partition_y = y_partial_z * (partition_z - twist_z) + twist_y;
+					if (partition_y < bounding_.min().y())
+						continue;
+					if (partition_y > bounding_.max().y())
+						continue;
+					int i_y = floor((partition_y - bounding_.min().y()) * cell_size_y_fraction);
+					i_y = i_y == num_size_.at(1) ? i_y - 1 : i_y;
+					int offset_base = i_x * kbc + i_y * num_size_.at(2) + i_z;
+					fill_cell_.at(offset_base) |= mark;
+					fill_cell_.at(offset_base - 1) |= mark;
+					fill_cell_.at(offset_base - kbc) |= mark;
+					fill_cell_.at(offset_base - kbc - 1) |= mark;
+				}
+			}
+		}
+		// y
+		for (int i_y = partition_y_min_index; i_y < partition_y_max_index; i_y++)
+		{
+			double partition_y = bounding_.min().y() + i_y * cell_size_y;
+			double twist_z, twist_x, straight_z, straight_x;
+			double dy_p0 = partition_y - triangle.at(order_y[0]).y();
+			straight_z = z_partial_y_20 * dy_p0 + triangle.at(order_y[0]).z();
+			straight_x = x_partial_y_20 * dy_p0 + triangle.at(order_y[0]).x();
+			if (partition_y < triangle.at(order_y[1]).y())
+			{
+				twist_z = z_partial_y_01 * dy_p0 + triangle.at(order_y[0]).z();
+				twist_x = x_partial_y_01 * dy_p0 + triangle.at(order_y[0]).x();
+			}
+			else
+			{
+				double dy_p1 = partition_y - triangle.at(order_y[1]).y();
+				twist_z = z_partial_y_12 * dy_p1 + triangle.at(order_y[1]).z();
+				twist_x = x_partial_y_12 * dy_p1 + triangle.at(order_y[1]).x();
+			}
+			double x_partial_z = (straight_x - twist_x) / (straight_z - twist_z);
+			double z_partial_x = (straight_z - twist_z) / (straight_x - twist_x);
+			double z_min = std::min(twist_z, straight_z);
+			double z_max = std::max(twist_z, straight_z);
+			double x_min = std::min(twist_x, straight_x);
+			double x_max = std::max(twist_x, straight_x);
+			int z_min_index = z_min > bounding_.min().z() ? ceil((z_min - bounding_.min().z()) * cell_size_z_fraction) : 1;
+			int z_max_index = z_max > bounding_.max().z() ? num_size_.at(2) : z_max == bounding_.min().z() ? 1 : ceil((z_max - bounding_.min().z()) * cell_size_z_fraction);
+			int x_min_index = x_min > bounding_.min().x() ? ceil((x_min - bounding_.min().x()) * cell_size_x_fraction) : 1;
+			int x_max_index = x_max > bounding_.max().x() ? num_size_.at(0) : x_max == bounding_.min().x() ? 1 : ceil((x_max - bounding_.min().x()) * cell_size_x_fraction);
+			if (z_min_index == z_max_index && x_min_index == x_max_index)
+			{
+				int offset_base = (x_min_index - 1) * kbc + i_y * num_size_.at(2) + z_min_index - 1;
+				fill_cell_.at(offset_base) |= mark;
+				fill_cell_.at(offset_base - num_size_.at(2)) |= mark;
+			}
+			else
+			{
+				for (int i_z = z_min_index; i_z < z_max_index; i_z++)
+				{
+					double partition_z = bounding_.min().z() + i_z * cell_size_z;
+					double partition_x = x_partial_z * (partition_z - twist_z) + twist_x;
+					if (partition_x < bounding_.min().x())
+						continue;
+					if (partition_x > bounding_.max().x())
+						continue;
+					int i_x = floor((partition_x - bounding_.min().x()) * cell_size_x_fraction);
+					i_x = i_x == num_size_.at(1) ? i_x - 1 : i_x;
+					int offset_base = i_x * kbc + i_y * num_size_.at(2) + i_z;
+					fill_cell_.at(offset_base) |= mark;
+					fill_cell_.at(offset_base - 1) |= mark;
+					fill_cell_.at(offset_base - num_size_.at(2)) |= mark;
+					fill_cell_.at(offset_base - num_size_.at(2) - 1) |= mark;
+				}
+				for (int i_x = x_min_index; i_x < x_max_index; i_x++)
+				{
+					double partition_x = bounding_.min().x() + i_x * cell_size_x;
+					double partition_z = z_partial_x * (partition_x - twist_x) + twist_z;
+					if (partition_z < bounding_.min().z())
+						continue;
+					if (partition_z > bounding_.max().z())
+						continue;
+					int i_z = floor((partition_z - bounding_.min().z()) * cell_size_z_fraction);
+					i_z = i_z == num_size_.at(1) ? i_z - 1 : i_z;
+					int offset_base = i_x * kbc + i_y * num_size_.at(2) + i_z;
+					fill_cell_.at(offset_base) |= mark;
+					fill_cell_.at(offset_base - kbc) |= mark;
+					fill_cell_.at(offset_base - num_size_.at(2)) |= mark;
+					fill_cell_.at(offset_base - kbc - num_size_.at(2)) |= mark;
+				}
+			}
+		}
+		// z
+		for (int i_z = partition_z_min_index; i_z < partition_z_max_index; i_z++)
+		{
+			double partition_z = bounding_.min().z() + i_z * cell_size_z;
+			double twist_x, twist_y, straight_x, straight_y;
+			double dz_p0 = partition_z - triangle.at(order_z[0]).z();
+			straight_x = x_partial_z_20 * dz_p0 + triangle.at(order_z[0]).x();
+			straight_y = y_partial_z_20 * dz_p0 + triangle.at(order_z[0]).y();
+			if (partition_z < triangle.at(order_z[1]).z())
+			{
+				twist_x = x_partial_z_01 * dz_p0 + triangle.at(order_z[0]).x();
+				twist_y = y_partial_z_01 * dz_p0 + triangle.at(order_z[0]).y();
+			}
+			else
+			{
+				double dz_p1 = partition_z - triangle.at(order_z[1]).z();
+				twist_x = x_partial_z_12 * dz_p1 + triangle.at(order_z[1]).x();
+				twist_y = y_partial_z_12 * dz_p1 + triangle.at(order_z[1]).y();
+			}
+			double y_partial_x = (straight_y - twist_y) / (straight_x - twist_x);
+			double x_partial_y = (straight_x - twist_x) / (straight_y - twist_y);
+			double x_min = std::min(twist_x, straight_x);
+			double x_max = std::max(twist_x, straight_x);
+			double y_min = std::min(twist_y, straight_y);
+			double y_max = std::max(twist_y, straight_y);
+			int x_min_index = x_min > bounding_.min().x() ? ceil((x_min - bounding_.min().x()) * cell_size_x_fraction) : 1;
+			int x_max_index = x_max > bounding_.max().x() ? num_size_.at(0) : x_max == bounding_.min().x() ? 1 : ceil((x_max - bounding_.min().x()) * cell_size_x_fraction);
+			int y_min_index = y_min > bounding_.min().y() ? ceil((y_min - bounding_.min().y()) * cell_size_y_fraction) : 1;
+			int y_max_index = y_max > bounding_.max().y() ? num_size_.at(1) : y_max == bounding_.min().y() ? 1 : ceil((y_max - bounding_.min().y()) * cell_size_y_fraction);
+			if (x_min_index == x_max_index && y_min_index == y_max_index)
+			{
+				int offset_base = (x_min_index - 1) * kbc + (y_min_index - 1) * num_size_.at(2) + i_z;
+				fill_cell_.at(offset_base) |= mark;
+				fill_cell_.at(offset_base - 1) |= mark;
+			}
+			else
+			{
+				for (int i_x = x_min_index; i_x < x_max_index; i_x++)
+				{
+					double partition_x = bounding_.min().x() + i_x * cell_size_x;
+					double partition_y = y_partial_x * (partition_x - twist_x) + twist_y;
+					if (partition_y < bounding_.min().y())
+						continue;
+					if (partition_y > bounding_.max().y())
+						continue;
+					int i_y = floor((partition_y - bounding_.min().y()) * cell_size_y_fraction);
+					i_y = i_y == num_size_.at(1) ? i_y - 1 : i_y;
+					int offset_base = i_x * kbc + i_y * num_size_.at(2) + i_z;
+					fill_cell_.at(offset_base) |= mark;
+					fill_cell_.at(offset_base - kbc) |= mark;
+					fill_cell_.at(offset_base - 1) |= mark;
+					fill_cell_.at(offset_base - kbc - 1) |= mark;
+				}
+				for (int i_y = y_min_index; i_y < y_max_index; i_y++)
+				{
+					double partition_y = bounding_.min().y() + i_y * cell_size_y;
+					double partition_x = x_partial_y * (partition_y - twist_y) + twist_x;
+					if (partition_x < bounding_.min().x())
+						continue;
+					if (partition_x > bounding_.max().x())
+						continue;
+					int i_x = floor((partition_x - bounding_.min().x()) * cell_size_x_fraction);
+					i_x = i_x == num_size_.at(1) ? i_x - 1 : i_x;
+					int offset_base = i_x * kbc + i_y * num_size_.at(2) + i_z;
+					fill_cell_.at(offset_base) |= mark;
+					fill_cell_.at(offset_base - num_size_.at(2)) |= mark;
+					fill_cell_.at(offset_base - 1) |= mark;
+					fill_cell_.at(offset_base - num_size_.at(2) - 1) |= mark;
+				}
+			}
+		}
+	}
+	std::vector<std::tuple<Eigen::Vector3d, unsigned char>> list() const
+	{
+		std::vector<std::tuple<Eigen::Vector3d, unsigned char>> res;
+		double cell_size_x = (bounding_.max().x() - bounding_.min().x()) / num_size_.at(0);
+		double cell_size_y = (bounding_.max().y() - bounding_.min().y()) / num_size_.at(1);
+		double cell_size_z = (bounding_.max().z() - bounding_.min().z()) / num_size_.at(2);
+		int kbc = num_size_.at(1) * num_size_.at(2);
+		for (int i = 0; i < fill_cell_.size(); i++)
+		{
+			if (fill_cell_.at(i) == 0)
+				continue;
+			int ix = i / kbc;
+			int t = i % kbc;
+			int iy = t / num_size_.at(2);
+			int iz = t % num_size_.at(2);
+			res.push_back({ {
+				  bounding_.min().x() + (ix + 0.5) * cell_size_x,
+				  bounding_.min().y() + (iy + 0.5) * cell_size_y,
+				  bounding_.min().z() + (iz + 0.5) * cell_size_z},
+				  fill_cell_.at(i) });
+		}
+		return res;
+	}
+private:
+	std::vector<unsigned char> fill_cell_;
+	Eigen::AlignedBox3d bounding_;
+	std::array<unsigned int, 3> num_size_;
+};
+
+static void test()
+{
+	Grid grid(Eigen::AlignedBox3d(Eigen::Vector3d{ 0, 0, 0 }, Eigen::Vector3d{ 10, 10, 10 }), { 100,100,100 });
+	double k = 10.0 / RAND_MAX;
+	const int num = (int)1e5; //stack overflow
+	std::array<std::array<Eigen::Vector3d, 3>, num> coor;
+	for (size_t i = 0; i < coor.size(); i++)
+		coor.at(i) = { Eigen::Vector3d{k* rand(), k* rand(), k* rand()}, Eigen::Vector3d{k* rand(), k* rand(), k* rand()}, Eigen::Vector3d{k* rand(), k* rand(), k* rand()} };
+	auto start = std::chrono::steady_clock::now(); // ¿ªÊ¼¼ÆÊ±
+	for (size_t i = 0; i < num; i++)
+	{
+		grid.push(coor.at(i), 0xff);
+		if (i % 100 == 0)
+			std::cout << "\r" << i / double(num) * 100.0 << "%\t\t\t";
+	}
+	auto end = std::chrono::steady_clock::now();   // ½áÊø¼ÆÊ±
+	std::cout << "\r" << 100.0 << "%\t\t\t" << std::endl;
+	auto res = grid.list();
+	std::cout << res.size() << std::endl;
+	std::chrono::duration<double> elapsed = end - start;
+	std::cout << elapsed.count() * 1000 << " ms." << std::endl;
+
+}
+

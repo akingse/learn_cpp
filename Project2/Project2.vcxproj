@@ -78,7 +78,7 @@
     <LibraryPath>$(SolutionDir)..\TPL\boost-1.81.0\stage\lib;$(SolutionDir)..\TPL\boost-1.81.0\libs;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)x64\$(ConfigurationName);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)..\TPL\CGAL-5.5.2;$(SolutionDir)..\TPL\CGAL-5.5.2\include;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include;$(SolutionDir)..\TPL\eigen-3.4.0;$(SolutionDir)..\TPL\boost-1.81.0\;C:\Qt\6.4.3\msvc2019_64\include\;C:\Qt\6.4.3\msvc2019_64\include\QtWidgets\QApplication;$(SolutionDir)auto_include;$(SolutionDir)Project_cal;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\TPL\CGAL-5.5.2;$(SolutionDir)..\TPL\CGAL-5.5.2\include;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include;$(SolutionDir)..\TPL\eigen-3.4.0;$(SolutionDir)..\TPL\boost-1.81.0\;C:\Qt\6.4.3\msvc2019_64\include\;C:\Qt\6.4.3\msvc2019_64\include\QtWidgets\QApplication;$(SolutionDir)auto_include;$(SolutionDir)Project_cal;C:\Users\Aking\source\repos\bimbase\Include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\link</OutDir>
     <IntDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\compile</IntDir>
     <LibraryPath>$(SolutionDir)..\TPL\boost-1.81.0\stage\lib;$(SolutionDir)..\TPL\boost-1.81.0\libs;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib;$(SolutionDir)build\Project1\;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)x64\$(ConfigurationName);$(LibraryPath)</LibraryPath>
@@ -177,6 +177,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="test_case_triangle.cpp" />
+    <ClCompile Include="test_fun_speed.cpp" />
     <ClCompile Include="test_memfn.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>

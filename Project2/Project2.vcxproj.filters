@@ -204,6 +204,9 @@
     <ClCompile Include="test_triangle_intersect.cpp">
       <Filter>test_triangle</Filter>
     </ClCompile>
+    <ClCompile Include="test_fun_speed.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test_function.h">

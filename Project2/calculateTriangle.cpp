@@ -9,7 +9,7 @@ using namespace psykronix;
 //--------------------------------------------------------------------------------------------------
 //  triangle
 //--------------------------------------------------------------------------------------------------
-static constexpr double eps = 1e-6; //DBL_EPSILON
+static constexpr double eps = 1e-8; //DBL_EPSILON
 static constexpr double _eps = -eps;
 std::atomic<size_t> getTriangleBoundC = 0, TriangularIntersectC = 0, getTriDistC = 0, isTriangleBoundC = 0,
 count_pointInTri = 0, count_edgeCrossTri = 0, count_segCrossTri = 0, count_across = 0,
@@ -17,7 +17,7 @@ isTwoTrianglesC = 0, TriangularIntersectC_in = 0, TriangularIntersectC_all = 0,
 count_err_inputbox = 0, count_err_inter_dist = 0, count_err_repeat_tri = 0; // count_err_degen_tri = 0
 
 
-//_isPointInTriangle2D
+//isPointInTriangle2D
 bool psykronix::isPointInTriangle(const Vector2d& point, const std::array<Vector2d, 3>& trigon) // 2D
 {
 	// using isLeft test
@@ -25,22 +25,39 @@ bool psykronix::isPointInTriangle(const Vector2d& point, const std::array<Vector
 	const Vector2d& p1 = trigon[1];
 	const Vector2d& p2 = trigon[2];
 	// compare z-value
+#ifdef USING_MACHINE_PERCESION_THRESHOLD
 	return !(((p1.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p1.y() - p0.y()) < _eps) ||//bool isLeftA
 		((p2.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p2.y() - p0.y()) > eps) || //bool isLeftB
 		((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y()) < _eps)); //bool isLeftC
+#else
+	if (0.0 < (p1.x() - p0.x()) * (p2.y() - p0.y()) - (p2.x() - p0.x()) * (p1.y() - p0.y())) //ccw
+		return !(((p1.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p1.y() - p0.y()) < 0.0) ||//bool isLeftA
+				((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y()) < 0.0) || //bool isLeftB
+				((p0.x() - p2.x()) * (point.y() - p2.y()) - (point.x() - p2.x()) * (p0.y() - p2.y()) < 0.0)); //bool isLeftC
+	else
+		return !(((p1.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p1.y() - p0.y()) > 0.0) ||//bool isLeftA
+				((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y()) > 0.0) || //bool isLeftB
+				((p0.x() - p2.x()) * (point.y() - p2.y()) - (point.x() - p2.x()) * (p0.y() - p2.y()) > 0.0)); //bool isLeftC
+#endif
 }
-
-//_isPointInTriangle3D
+//isPointInTriangle3D
 bool psykronix::isPointInTriangle(const Vector3d& point, const std::array<Vector3d, 3>& trigon) //must coplanar
 {
 #ifdef STATISTIC_DATA_COUNT
 	count_pointInTri++;
 #endif
-	// 3D triangle, input point must coplanar
 	Vector3d vecZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);// using isLeft test
+#ifdef USING_MACHINE_PERCESION_THRESHOLD
+	// 3D triangle, input point must coplanar
 	return !((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(vecZ) < _eps || //bool isNotLeftA
-		(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < _eps || //bool isNotLeftB
-		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < _eps); //bool isNotLeftC
+			(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < _eps || //bool isNotLeftB
+			(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < _eps); //bool isNotLeftC
+#else
+	return !((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(vecZ) < 0.0 || //bool isNotLeftA
+			(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < 0.0 || //bool isNotLeftB
+			(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < 0.0); //bool isNotLeftC
+#endif
+
 	//+-*x< 0,5,1.5,2.5,1.5
 	//if (((trigon[1] - trigon[0]).cross(point - trigon[0])).dot(vecZ) < _eps) //bool isLeftA
 	//	return false;
@@ -49,8 +66,35 @@ bool psykronix::isPointInTriangle(const Vector3d& point, const std::array<Vector
 	//if (((trigon[2] - trigon[1]).cross(point - trigon[1])).dot(vecZ) < _eps) //bool isLeftC
 	//	return false;
 	//return true;
+	
+	// area method
+	//double dot1 = vecZ.dot((trigon[1] - trigon[0]).cross(point - trigon[0]));
+	//double dot2 = vecZ.dot((point - trigon[0]).cross(trigon[2] - trigon[0]));
+	//return 0.0 <= dot1 && 0.0 <= dot2 && dot1 + dot2 <= vecZ.dot(vecZ);
 }
 
+bool psykronix::isPointOnTriangleSurface(const Vector3d& point, const std::array<Vector3d, 3>& trigon)
+{
+	Vector3d vecZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
+#ifdef USING_MACHINE_PERCESION_THRESHOLD
+	if (eps < fabs(vecZ.dot(point - trigon[0])))
+		return false;
+	return !((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(vecZ) < _eps || 
+			(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < _eps ||
+			(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < _eps); 
+#else
+	if (fabs(vecZ.dot(point - trigon[0])) < 1.0) //avoid normalize all
+	{
+		vecZ.normalize(); //for error reduction
+		if (DBL_EPSILON < fabs(vecZ.dot(point - trigon[0])))
+			return false;
+	}
+	// using isLeft test
+	return !((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(vecZ) < 0.0 ||
+			(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < 0.0 ||
+			(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < 0.0);
+#endif
+}
 //double straddling test
 bool psykronix::isTwoSegmentsIntersect(const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB, bool preBox /*= false*/)
 {
@@ -467,7 +511,7 @@ bool psykronix::isTriangleAndBoundingBoxIntersect(const std::array<Eigen::Vector
 #ifdef STATISTIC_DATA_COUNT
 	isTriangleBoundC++;
 #endif
-	//	if ((box.sizes().array() < 0).any()) // input box illegal
+	//	if ((box.sizes().array() < 0.0).any()) // input box illegal
 	//	{
 	//#ifdef STATISTIC_DATA_COUNT
 	//		count_err_inputbox++; // no-one error
@@ -972,8 +1016,8 @@ bool psykronix::isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vec
 
 bool psykronix::isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& segment, const std::array<Vector3d, 3>& trigon)
 {
-#ifdef USING_MACHINE_PERCESION_THRESHOLD
 	Vector3d vecZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
+#ifdef USING_MACHINE_PERCESION_THRESHOLD
 	double dot0 = (vecZ.dot(segment[0] - trigon[0]));
 	double dot1 = (vecZ.dot(segment[1] - trigon[0]));
 	if (dot0 * dot1 > 0.0)//include point on plane(dot==0)
@@ -996,9 +1040,6 @@ bool psykronix::isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& s
 	}
 	return isEdgeCrossTriangle(segment, trigon);
 #endif
-	Vector3d vecZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
-	double d0 = vecZ.dot(segment[0] - trigon[0]);
-	double d1 = vecZ.dot(segment[1] - trigon[0]);
 	if (fabs(vecZ.dot(segment[0] - trigon[0])) < eps && abs(vecZ.dot(segment[1] - trigon[0])) < eps) // 2D-SAT, coplanar
 	{
 		std::array<Eigen::Vector3d, 4> axes = { {
@@ -1056,23 +1097,29 @@ bool psykronix::isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& s
 	}
 }
 
+#define USING_THEOREM_SAT
 // whlie ray across same edge of two triangles
 bool psykronix::isPointRayAcrossTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon)
 {
-	if (point.z() > std::max(std::max(trigon[0].z(), trigon[1].z()), trigon[2].z())||
+	//first pre-process, bounding box
+	double rayZ = std::max(std::max(trigon[0].z(), trigon[1].z()), trigon[2].z());
+	if (point.z() > rayZ || // ray direction to axisZ
 		point.x() > std::max(std::max(trigon[0].x(), trigon[1].x()), trigon[2].x())||
 		point.x() < std::min(std::min(trigon[0].x(), trigon[1].x()), trigon[2].x())||
 		point.y() > std::max(std::max(trigon[0].y(), trigon[1].y()), trigon[2].y())||
 		point.y() < std::min(std::min(trigon[0].y(), trigon[1].y()), trigon[2].y()))
 		return false; // range box judge
 	//using SAT
-	Vector3d ray(point.x(), point.y(), FLT_MAX);
-	//double dotPro1 = axisZ.dot(ray);
+#ifdef USING_THEOREM_SAT
+	//second pre-process (2D, point-in-triangle)
+	if (!isPointInTriangle(point, trigon))
+		return false;
+	Vector3d rayPt(point.x(), point.y(), rayZ);
 	Vector3d axisZ(0, 0, 1);
 	std::array<Eigen::Vector3d, 3> edges = { trigon[1] - trigon[0],
-									   trigon[2] - trigon[1],
-									   trigon[0] - trigon[2] };
-	std::array<Eigen::Vector3d, 15> axes = { { //order matters speed
+										   trigon[2] - trigon[1],
+										   trigon[0] - trigon[2] };
+	std::array<Eigen::Vector3d, 7> axes = { { //order matters speed
 		axisZ.cross(edges[0]),
 		axisZ.cross(edges[1]),
 		axisZ.cross(edges[2]),
@@ -1086,64 +1133,52 @@ bool psykronix::isPointRayAcrossTriangle(const Eigen::Vector3d& point, const std
 		double maxTri = -DBL_MAX;
 		for (const auto& vertex : trigon) //fast than list
 		{
-			double projection = vertex.dot(axis);
+			double projection = axis.dot(vertex);
 			minTri = std::min(minTri, projection);
 			maxTri = std::max(maxTri, projection);
 		}
+		double dotP = axis.dot(point);
+		double dotR = axis.dot(rayPt);
+#ifdef USING_MACHINE_PERCESION_THRESHOLD
 		double minRay = std::min(axis.dot(point), axis.dot(ray));
 		double maxRay = std::max(axis.dot(point), axis.dot(ray));
-#ifdef USING_MACHINE_PERCESION_THRESHOLD
 		if (minTri + eps < minRay || maxRay + eps < minTri)
 #else
-		if (minTri < minRay || maxRay < minTri) // absolute zero
+		if (maxTri < std::min(dotP, dotR) || std::max(dotP, dotR) < minTri) // absolute zero
 #endif
 			return false;
 	}
+	return true;
 	//Vector3d axisZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
 	//double dotPro0 = axisZ.dot(point);
 	//double d0= axisZ.dot(trigon[0]); // with accuracy error 
 	//double d1= axisZ.dot(trigon[1]);
 	//double d2= axisZ.dot(trigon[2]);
-}
-
-bool psykronix::isPointContainedInPolyhedron(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
-{
-	//Ray ray(pt, Vec3(1.0, 0.0, 0.0));
-	Vector3d rayX = Vector3d(1.0, 0.0, 0.0);
-	int count = 0;
-	for (const auto& iter : ibo)
+#else
+	if (isPointOnTriangleSurface(point, trigon))
 	{
-		//if (faces[i].contains(pt))
-		std::array<Eigen::Vector3d, 3> faceI = { vbo[iter[0]] ,vbo[iter[1]] ,vbo[iter[2]] };
-		Vector3d edge1 = faceI[1] - faceI[0];// vbo[iter[1]] - vbo[iter[0]];
-		Vector3d edge2 = faceI[2] - faceI[0];// vbo[iter[2]] - vbo[iter[0]];
-		Vector3d ptVec = point - vbo[iter[0]];
-		Vector3d normal = edge1.cross(edge2);// .normalized();
-		double dot1 = normal.dot(ptVec.cross(edge1));
-		double dot2 = normal.dot(edge2.cross(ptVec));
-		if (dot1 >= 0.0 && dot2 >= 0.0 && dot1 + dot2 <= normal.dot(normal))
-		{
-			++count;
-		}
-		else 
-		{
-			double dotPro = normal.dot(rayX); //ray.direction
-			if (dotPro == 0.0)
-				continue;
-			double t = normal.dot(faceI[0] - point) / dotPro; //ray.origin
-			if (t > 0.0) {
-				Vector3d intersection = point + rayX * t;
-				double dot1 = normal.dot(intersection - faceI[0]);
-				double dot2 = normal.dot(faceI[2] - faceI[0]);
-				if (dot1 >= 0.0 && dot2 >= 0.0 && dot1 + dot2 <= normal.dot(normal)) 
-					++count;
-			}
-		}
+		return true;
 	}
-	return (count % 2 != 0);
+	else
+	{
+		Vector3d rayX = Vector3d(1.0, 0.0, 0.0);
+		Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
+		double dotPro = normal.dot(rayX); //ray.direction
+		if (dotPro == 0.0) // ray direction is parallel
+			return false;
+		double t = normal.dot(trigon[0] - point) / dotPro; //ray.origin
+		if (t > 0.0)
+		{
+			Vector3d inter = point + rayX * t;
+			if (isPointInTriangle(inter, trigon))
+				return true;
+		}
+		return false;
+	}
+#endif
 }
 
-bool psykronix::isPointInPolyfaceMesh(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
+bool psykronix::isPointInConvexPolyhedron(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
 {
 	size_t countA = 0;
 	for (const auto& iter : ibo)
@@ -1152,6 +1187,36 @@ bool psykronix::isPointInPolyfaceMesh(const Eigen::Vector3d& point, const std::v
 			countA++;
 	}
 	return (countA % 2 != 0);
+}
+
+//one mesh all-in other mesh, the bounding-box must all-in other mesh
+bool psykronix::isPointContainedInPolyhedron(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
+{
+	int count = 0;
+	for (const auto& iter : ibo)
+	{
+		std::array<Eigen::Vector3d, 3> trigon = { vbo[iter[0]] ,vbo[iter[1]] ,vbo[iter[2]] };
+		if (isPointOnTriangleSurface(point,trigon))
+		{
+			count++;
+		}
+		else 
+		{
+			Vector3d rayX = Vector3d(1.0, 0.0, 0.0);
+			Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
+			double dotPro = normal.dot(rayX); //ray.direction
+			if (dotPro == 0.0) // ray direction is parallel
+				continue;
+			double t = normal.dot(trigon[0] - point) / dotPro; //ray.origin
+			if (t > 0.0) 
+			{
+				Vector3d inter = point + rayX * t;
+				if (isPointInTriangle(inter,trigon))
+					count++;
+			}
+		}
+	}
+	return (count % 2 != 0);
 }
 
 // base on Separating Axis Theorem
@@ -1322,10 +1387,6 @@ bool psykronix::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>&
 	//return !(edgesA[0].cross(edgesA[1]).isZero() || edgesB[0].cross(edgesB[1]).isZero());
 	return true;
 }
-
-//------------------------------------------------------------------------------------
-// Voxel 
-//------------------------------------------------------------------------------------
 
 bool psykronix::TriangularIntersectionTest(const std::array<Eigen::Vector3d, 3>& T1, const std::array<Eigen::Vector3d, 3>& T2)
 {
@@ -1647,389 +1708,5 @@ bool psykronix::TriangularIntersectionTest(const std::array<Eigen::Vector3d, 3>&
 	if ((kqk > 0 && kqp < 0 && kqq < 0) || (kqk < 0 && kqp > 0 && kqq > 0))
 		return false; // +*/<  101,98,0,30
 	return true;
-}
-
-#undef max
-#undef min
-#include <map>
-#include <set>
-#include <array>
-#include <vector>
-#include <memory>
-#include <ranges>
-#include <format>
-#include <cassert>
-#include <numeric>
-#include <fstream>
-#include <algorithm>
-#include <filesystem>
-#include <functional>
-#include <type_traits>
-#include "Eigen/Geometry"    
-#include <iostream>
-class Grid
-{
-public:
-	Grid(const Eigen::AlignedBox3d& bounding, std::array<unsigned int, 3> num_size) :
-		bounding_(bounding),
-		num_size_(num_size),
-		fill_cell_(num_size.at(0)* num_size.at(1)* num_size.at(2))
-	{
-	}
-	void push(const std::array<Eigen::Vector3d, 3>& triangle, unsigned char mark)
-	{
-		for (size_t i = 0; i < 3; i++)
-			if (std::isnan(triangle.at(i).x()) || std::isnan(triangle.at(i).y()) || std::isnan(triangle.at(i).z()))
-				return;
-		/***********************************************************************
-		* 对三个点沿着三个方向进行排序，沿边扫描时走三条路径: 0->2; 0->1; 1->2;
-		*             x_1
-		* y_2       __--_
-		*       __--     -_
-		* y_0 -------______-_ y_1
-		*   x_0             x_2
-		**********************************************************************/
-		std::array<unsigned int, 3> order_x({ 0, 1, 2 });
-		std::array<unsigned int, 3> order_y({ 0, 1, 2 });
-		std::array<unsigned int, 3> order_z({ 0, 1, 2 });
-		std::sort(order_x.begin(), order_x.end(), [&](int i, int j) {return triangle.at(i).x() < triangle.at(j).x(); });
-		std::sort(order_y.begin(), order_y.end(), [&](int i, int j) {return triangle.at(i).y() < triangle.at(j).y(); });
-		std::sort(order_z.begin(), order_z.end(), [&](int i, int j) {return triangle.at(i).z() < triangle.at(j).z(); });
-		// 排除完全不相交的情况
-		if (triangle.at(order_x[0]).x() > bounding_.max().x())
-			return;
-		if (triangle.at(order_x[0]).y() > bounding_.max().y())
-			return;
-		if (triangle.at(order_x[0]).z() > bounding_.max().z())
-			return;
-		if (triangle.at(order_x[2]).x() < bounding_.min().x())
-			return;
-		if (triangle.at(order_x[2]).y() < bounding_.min().y())
-			return;
-		if (triangle.at(order_x[2]).z() < bounding_.min().z())
-			return;
-		// 三个方向格子长度
-		double cell_size_x = (bounding_.max().x() - bounding_.min().x()) / num_size_.at(0);
-		double cell_size_y = (bounding_.max().y() - bounding_.min().y()) / num_size_.at(1);
-		double cell_size_z = (bounding_.max().z() - bounding_.min().z()) / num_size_.at(2);
-		double cell_size_x_fraction = 1.0 / cell_size_x;
-		double cell_size_y_fraction = 1.0 / cell_size_y;
-		double cell_size_z_fraction = 1.0 / cell_size_z;
-
-		/**********************************************************************
-		* 例如体素5个格子，遍历的隔板范围为1:4；故采取ceil
-		*          __--_
-		*      __--     -_
-		*    -------______-_
-		* |   |   |   |   |   |
-		* 0   1   2   3   4   5
-		**********************************************************************/
-		int partition_x_min_index = triangle.at(order_x[0]).x() > bounding_.min().x() ? ceil((triangle.at(order_x[0]).x() - bounding_.min().x()) * cell_size_x_fraction) : 1;
-		int partition_y_min_index = triangle.at(order_y[0]).y() > bounding_.min().y() ? ceil((triangle.at(order_y[0]).y() - bounding_.min().y()) * cell_size_y_fraction) : 1;
-		int partition_z_min_index = triangle.at(order_z[0]).z() > bounding_.min().z() ? ceil((triangle.at(order_z[0]).z() - bounding_.min().z()) * cell_size_z_fraction) : 1;
-		int partition_x_max_index = triangle.at(order_x[2]).x() > bounding_.max().x() ? num_size_.at(0) : ceil((triangle.at(order_x[2]).x() - bounding_.min().x()) * cell_size_x_fraction);
-		int partition_y_max_index = triangle.at(order_y[2]).y() > bounding_.max().y() ? num_size_.at(1) : ceil((triangle.at(order_y[2]).y() - bounding_.min().y()) * cell_size_y_fraction);
-		int partition_z_max_index = triangle.at(order_z[2]).z() > bounding_.max().z() ? num_size_.at(2) : ceil((triangle.at(order_z[2]).z() - bounding_.min().z()) * cell_size_z_fraction);
-		Eigen::Vector3d vec_x_01 = triangle.at(order_x[1]) - triangle.at(order_x[0]);
-		Eigen::Vector3d vec_x_12 = triangle.at(order_x[2]) - triangle.at(order_x[1]);
-		Eigen::Vector3d vec_x_20 = triangle.at(order_x[0]) - triangle.at(order_x[2]);
-		Eigen::Vector3d vec_y_01 = triangle.at(order_y[1]) - triangle.at(order_y[0]);
-		Eigen::Vector3d vec_y_12 = triangle.at(order_y[2]) - triangle.at(order_y[1]);
-		Eigen::Vector3d vec_y_20 = triangle.at(order_y[0]) - triangle.at(order_y[2]);
-		Eigen::Vector3d vec_z_01 = triangle.at(order_z[1]) - triangle.at(order_z[0]);
-		Eigen::Vector3d vec_z_12 = triangle.at(order_z[2]) - triangle.at(order_z[1]);
-		Eigen::Vector3d vec_z_20 = triangle.at(order_z[0]) - triangle.at(order_z[2]);
-		double y_partial_x_01 = vec_x_01.x() == 0.0 ? 0.0 : vec_x_01.y() / vec_x_01.x();
-		double z_partial_x_01 = vec_x_01.x() == 0.0 ? 0.0 : vec_x_01.z() / vec_x_01.x();
-		double y_partial_x_12 = vec_x_12.x() == 0.0 ? 0.0 : vec_x_12.y() / vec_x_12.x();
-		double z_partial_x_12 = vec_x_12.x() == 0.0 ? 0.0 : vec_x_12.z() / vec_x_12.x();
-		double y_partial_x_20 = vec_x_20.x() == 0.0 ? 0.0 : vec_x_20.y() / vec_x_20.x();
-		double z_partial_x_20 = vec_x_20.x() == 0.0 ? 0.0 : vec_x_20.z() / vec_x_20.x();
-		double z_partial_y_01 = vec_y_01.y() == 0.0 ? 0.0 : vec_y_01.z() / vec_y_01.y();
-		double x_partial_y_01 = vec_y_01.y() == 0.0 ? 0.0 : vec_y_01.x() / vec_y_01.y();
-		double z_partial_y_12 = vec_y_12.y() == 0.0 ? 0.0 : vec_y_12.z() / vec_y_12.y();
-		double x_partial_y_12 = vec_y_12.y() == 0.0 ? 0.0 : vec_y_12.x() / vec_y_12.y();
-		double z_partial_y_20 = vec_y_20.y() == 0.0 ? 0.0 : vec_y_20.z() / vec_y_20.y();
-		double x_partial_y_20 = vec_y_20.y() == 0.0 ? 0.0 : vec_y_20.x() / vec_y_20.y();
-		double x_partial_z_01 = vec_z_01.z() == 0.0 ? 0.0 : vec_z_01.x() / vec_z_01.z();
-		double y_partial_z_01 = vec_z_01.z() == 0.0 ? 0.0 : vec_z_01.y() / vec_z_01.z();
-		double x_partial_z_12 = vec_z_12.z() == 0.0 ? 0.0 : vec_z_12.x() / vec_z_12.z();
-		double y_partial_z_12 = vec_z_12.z() == 0.0 ? 0.0 : vec_z_12.y() / vec_z_12.z();
-		double x_partial_z_20 = vec_z_20.z() == 0.0 ? 0.0 : vec_z_20.x() / vec_z_20.z();
-		double y_partial_z_20 = vec_z_20.z() == 0.0 ? 0.0 : vec_z_20.y() / vec_z_20.z();
-		int kbc = num_size_.at(1) * num_size_.at(2);
-		// x
-		for (int i_x = partition_x_min_index; i_x < partition_x_max_index; i_x++)
-		{
-			double partition_x = bounding_.min().x() + i_x * cell_size_x; // 隔板x的坐标
-			// 隔板会切割三角形，并交边界于两个交点 point_twist=(partition_x, twist_y, twist_z); point_straight=(partition_x, straight_y, straight_z)
-			double twist_y, twist_z, straight_y, straight_z;
-			double dx_p0 = partition_x - triangle.at(order_x[0]).x();
-			straight_y = y_partial_x_20 * dx_p0 + triangle.at(order_x[0]).y();
-			straight_z = z_partial_x_20 * dx_p0 + triangle.at(order_x[0]).z();
-			if (partition_x < triangle.at(order_x[1]).x())
-			{
-				twist_y = y_partial_x_01 * dx_p0 + triangle.at(order_x[0]).y();
-				twist_z = z_partial_x_01 * dx_p0 + triangle.at(order_x[0]).z();
-			}
-			else
-			{
-				double dx_p1 = partition_x - triangle.at(order_x[1]).x();
-				twist_y = y_partial_x_12 * dx_p1 + triangle.at(order_x[1]).y();
-				twist_z = z_partial_x_12 * dx_p1 + triangle.at(order_x[1]).z();
-			}
-			double z_partial_y = (straight_z - twist_z) / (straight_y - twist_y);
-			double y_partial_z = (straight_y - twist_y) / (straight_z - twist_z);
-			// 计算y,z隔板的范围
-			double y_min = std::min(twist_y, straight_y);
-			double y_max = std::max(twist_y, straight_y);
-			double z_min = std::min(twist_z, straight_z);
-			double z_max = std::max(twist_z, straight_z);
-			int y_min_index = y_min > bounding_.min().y() ? ceil((y_min - bounding_.min().y()) * cell_size_y_fraction) : 1;
-			int y_max_index = y_max > bounding_.max().y() ? num_size_.at(1) : y_max == bounding_.min().y() ? 1 : ceil((y_max - bounding_.min().y()) * cell_size_y_fraction);
-			int z_min_index = z_min > bounding_.min().z() ? ceil((z_min - bounding_.min().z()) * cell_size_z_fraction) : 1;
-			int z_max_index = z_max > bounding_.max().z() ? num_size_.at(2) : z_max == bounding_.min().z() ? 1 : ceil((z_max - bounding_.min().z()) * cell_size_z_fraction);
-			// 对于在x方向投影非常小的三角形（尺寸小于格子）并且没有与格子相交
-			if (y_min_index == y_max_index && z_min_index == z_max_index)
-			{
-				int offset_base = i_x * kbc + (y_min_index - 1) * num_size_.at(2) + z_min_index - 1;
-				fill_cell_.at(offset_base) |= mark;
-				fill_cell_.at(offset_base - kbc) |= mark;
-			}
-			else
-			{
-				// point_twist与point_straight的连线会切割y隔板
-				for (int i_y = y_min_index; i_y < y_max_index; i_y++)
-				{
-					// 交点位置为(partition_x,partition_y,partition_z)
-					double partition_y = bounding_.min().y() + i_y * cell_size_y;
-					double partition_z = z_partial_y * (partition_y - twist_y) + twist_z;
-					if (partition_z < bounding_.min().z())
-						continue;
-					if (partition_z > bounding_.max().z())
-						continue;
-					// 索引位置(i_x, i_y, [i_z,i_z+1));
-					int i_z = floor((partition_z - bounding_.min().z()) * cell_size_z_fraction);
-					i_z = i_z == num_size_.at(2) ? i_z - 1 : i_z;
-					// 交点位置的几何意义为：位于i_x,i_y的一根柱与三角面相交，则该柱的四周的四个区域均与三角面相交
-					int offset_base = i_x * kbc + i_y * num_size_.at(2) + i_z;
-					fill_cell_.at(offset_base) |= mark;
-					fill_cell_.at(offset_base - num_size_.at(2)) |= mark;
-					fill_cell_.at(offset_base - kbc) |= mark;
-					fill_cell_.at(offset_base - kbc - num_size_.at(2)) |= mark;
-				}
-				// point_twist与point_straight的连线会切割z隔板
-				for (int i_z = z_min_index; i_z < z_max_index; i_z++)
-				{
-					double partition_z = bounding_.min().z() + i_z * cell_size_z;
-					double partition_y = y_partial_z * (partition_z - twist_z) + twist_y;
-					if (partition_y < bounding_.min().y())
-						continue;
-					if (partition_y > bounding_.max().y())
-						continue;
-					int i_y = floor((partition_y - bounding_.min().y()) * cell_size_y_fraction);
-					i_y = i_y == num_size_.at(1) ? i_y - 1 : i_y;
-					int offset_base = i_x * kbc + i_y * num_size_.at(2) + i_z;
-					fill_cell_.at(offset_base) |= mark;
-					fill_cell_.at(offset_base - 1) |= mark;
-					fill_cell_.at(offset_base - kbc) |= mark;
-					fill_cell_.at(offset_base - kbc - 1) |= mark;
-				}
-			}
-		}
-		// y
-		for (int i_y = partition_y_min_index; i_y < partition_y_max_index; i_y++)
-		{
-			double partition_y = bounding_.min().y() + i_y * cell_size_y;
-			double twist_z, twist_x, straight_z, straight_x;
-			double dy_p0 = partition_y - triangle.at(order_y[0]).y();
-			straight_z = z_partial_y_20 * dy_p0 + triangle.at(order_y[0]).z();
-			straight_x = x_partial_y_20 * dy_p0 + triangle.at(order_y[0]).x();
-			if (partition_y < triangle.at(order_y[1]).y())
-			{
-				twist_z = z_partial_y_01 * dy_p0 + triangle.at(order_y[0]).z();
-				twist_x = x_partial_y_01 * dy_p0 + triangle.at(order_y[0]).x();
-			}
-			else
-			{
-				double dy_p1 = partition_y - triangle.at(order_y[1]).y();
-				twist_z = z_partial_y_12 * dy_p1 + triangle.at(order_y[1]).z();
-				twist_x = x_partial_y_12 * dy_p1 + triangle.at(order_y[1]).x();
-			}
-			double x_partial_z = (straight_x - twist_x) / (straight_z - twist_z);
-			double z_partial_x = (straight_z - twist_z) / (straight_x - twist_x);
-			double z_min = std::min(twist_z, straight_z);
-			double z_max = std::max(twist_z, straight_z);
-			double x_min = std::min(twist_x, straight_x);
-			double x_max = std::max(twist_x, straight_x);
-			int z_min_index = z_min > bounding_.min().z() ? ceil((z_min - bounding_.min().z()) * cell_size_z_fraction) : 1;
-			int z_max_index = z_max > bounding_.max().z() ? num_size_.at(2) : z_max == bounding_.min().z() ? 1 : ceil((z_max - bounding_.min().z()) * cell_size_z_fraction);
-			int x_min_index = x_min > bounding_.min().x() ? ceil((x_min - bounding_.min().x()) * cell_size_x_fraction) : 1;
-			int x_max_index = x_max > bounding_.max().x() ? num_size_.at(0) : x_max == bounding_.min().x() ? 1 : ceil((x_max - bounding_.min().x()) * cell_size_x_fraction);
-			if (z_min_index == z_max_index && x_min_index == x_max_index)
-			{
-				int offset_base = (x_min_index - 1) * kbc + i_y * num_size_.at(2) + z_min_index - 1;
-				fill_cell_.at(offset_base) |= mark;
-				fill_cell_.at(offset_base - num_size_.at(2)) |= mark;
-			}
-			else
-			{
-				for (int i_z = z_min_index; i_z < z_max_index; i_z++)
-				{
-					double partition_z = bounding_.min().z() + i_z * cell_size_z;
-					double partition_x = x_partial_z * (partition_z - twist_z) + twist_x;
-					if (partition_x < bounding_.min().x())
-						continue;
-					if (partition_x > bounding_.max().x())
-						continue;
-					int i_x = floor((partition_x - bounding_.min().x()) * cell_size_x_fraction);
-					i_x = i_x == num_size_.at(1) ? i_x - 1 : i_x;
-					int offset_base = i_x * kbc + i_y * num_size_.at(2) + i_z;
-					fill_cell_.at(offset_base) |= mark;
-					fill_cell_.at(offset_base - 1) |= mark;
-					fill_cell_.at(offset_base - num_size_.at(2)) |= mark;
-					fill_cell_.at(offset_base - num_size_.at(2) - 1) |= mark;
-				}
-				for (int i_x = x_min_index; i_x < x_max_index; i_x++)
-				{
-					double partition_x = bounding_.min().x() + i_x * cell_size_x;
-					double partition_z = z_partial_x * (partition_x - twist_x) + twist_z;
-					if (partition_z < bounding_.min().z())
-						continue;
-					if (partition_z > bounding_.max().z())
-						continue;
-					int i_z = floor((partition_z - bounding_.min().z()) * cell_size_z_fraction);
-					i_z = i_z == num_size_.at(1) ? i_z - 1 : i_z;
-					int offset_base = i_x * kbc + i_y * num_size_.at(2) + i_z;
-					fill_cell_.at(offset_base) |= mark;
-					fill_cell_.at(offset_base - kbc) |= mark;
-					fill_cell_.at(offset_base - num_size_.at(2)) |= mark;
-					fill_cell_.at(offset_base - kbc - num_size_.at(2)) |= mark;
-				}
-			}
-		}
-		// z
-		for (int i_z = partition_z_min_index; i_z < partition_z_max_index; i_z++)
-		{
-			double partition_z = bounding_.min().z() + i_z * cell_size_z;
-			double twist_x, twist_y, straight_x, straight_y;
-			double dz_p0 = partition_z - triangle.at(order_z[0]).z();
-			straight_x = x_partial_z_20 * dz_p0 + triangle.at(order_z[0]).x();
-			straight_y = y_partial_z_20 * dz_p0 + triangle.at(order_z[0]).y();
-			if (partition_z < triangle.at(order_z[1]).z())
-			{
-				twist_x = x_partial_z_01 * dz_p0 + triangle.at(order_z[0]).x();
-				twist_y = y_partial_z_01 * dz_p0 + triangle.at(order_z[0]).y();
-			}
-			else
-			{
-				double dz_p1 = partition_z - triangle.at(order_z[1]).z();
-				twist_x = x_partial_z_12 * dz_p1 + triangle.at(order_z[1]).x();
-				twist_y = y_partial_z_12 * dz_p1 + triangle.at(order_z[1]).y();
-			}
-			double y_partial_x = (straight_y - twist_y) / (straight_x - twist_x);
-			double x_partial_y = (straight_x - twist_x) / (straight_y - twist_y);
-			double x_min = std::min(twist_x, straight_x);
-			double x_max = std::max(twist_x, straight_x);
-			double y_min = std::min(twist_y, straight_y);
-			double y_max = std::max(twist_y, straight_y);
-			int x_min_index = x_min > bounding_.min().x() ? ceil((x_min - bounding_.min().x()) * cell_size_x_fraction) : 1;
-			int x_max_index = x_max > bounding_.max().x() ? num_size_.at(0) : x_max == bounding_.min().x() ? 1 : ceil((x_max - bounding_.min().x()) * cell_size_x_fraction);
-			int y_min_index = y_min > bounding_.min().y() ? ceil((y_min - bounding_.min().y()) * cell_size_y_fraction) : 1;
-			int y_max_index = y_max > bounding_.max().y() ? num_size_.at(1) : y_max == bounding_.min().y() ? 1 : ceil((y_max - bounding_.min().y()) * cell_size_y_fraction);
-			if (x_min_index == x_max_index && y_min_index == y_max_index)
-			{
-				int offset_base = (x_min_index - 1) * kbc + (y_min_index - 1) * num_size_.at(2) + i_z;
-				fill_cell_.at(offset_base) |= mark;
-				fill_cell_.at(offset_base - 1) |= mark;
-			}
-			else
-			{
-				for (int i_x = x_min_index; i_x < x_max_index; i_x++)
-				{
-					double partition_x = bounding_.min().x() + i_x * cell_size_x;
-					double partition_y = y_partial_x * (partition_x - twist_x) + twist_y;
-					if (partition_y < bounding_.min().y())
-						continue;
-					if (partition_y > bounding_.max().y())
-						continue;
-					int i_y = floor((partition_y - bounding_.min().y()) * cell_size_y_fraction);
-					i_y = i_y == num_size_.at(1) ? i_y - 1 : i_y;
-					int offset_base = i_x * kbc + i_y * num_size_.at(2) + i_z;
-					fill_cell_.at(offset_base) |= mark;
-					fill_cell_.at(offset_base - kbc) |= mark;
-					fill_cell_.at(offset_base - 1) |= mark;
-					fill_cell_.at(offset_base - kbc - 1) |= mark;
-				}
-				for (int i_y = y_min_index; i_y < y_max_index; i_y++)
-				{
-					double partition_y = bounding_.min().y() + i_y * cell_size_y;
-					double partition_x = x_partial_y * (partition_y - twist_y) + twist_x;
-					if (partition_x < bounding_.min().x())
-						continue;
-					if (partition_x > bounding_.max().x())
-						continue;
-					int i_x = floor((partition_x - bounding_.min().x()) * cell_size_x_fraction);
-					i_x = i_x == num_size_.at(1) ? i_x - 1 : i_x;
-					int offset_base = i_x * kbc + i_y * num_size_.at(2) + i_z;
-					fill_cell_.at(offset_base) |= mark;
-					fill_cell_.at(offset_base - num_size_.at(2)) |= mark;
-					fill_cell_.at(offset_base - 1) |= mark;
-					fill_cell_.at(offset_base - num_size_.at(2) - 1) |= mark;
-				}
-			}
-		}
-	}
-	std::vector<std::tuple<Eigen::Vector3d, unsigned char>> list() const
-	{
-		std::vector<std::tuple<Eigen::Vector3d, unsigned char>> res;
-		double cell_size_x = (bounding_.max().x() - bounding_.min().x()) / num_size_.at(0);
-		double cell_size_y = (bounding_.max().y() - bounding_.min().y()) / num_size_.at(1);
-		double cell_size_z = (bounding_.max().z() - bounding_.min().z()) / num_size_.at(2);
-		int kbc = num_size_.at(1) * num_size_.at(2);
-		for (int i = 0; i < fill_cell_.size(); i++)
-		{
-			if (fill_cell_.at(i) == 0)
-				continue;
-			int ix = i / kbc;
-			int t = i % kbc;
-			int iy = t / num_size_.at(2);
-			int iz = t % num_size_.at(2);
-			res.push_back({ {
-				  bounding_.min().x() + (ix + 0.5) * cell_size_x,
-				  bounding_.min().y() + (iy + 0.5) * cell_size_y,
-				  bounding_.min().z() + (iz + 0.5) * cell_size_z},
-				  fill_cell_.at(i) });
-		}
-		return res;
-	}
-private:
-	std::vector<unsigned char> fill_cell_;
-	Eigen::AlignedBox3d bounding_;
-	std::array<unsigned int, 3> num_size_;
-};
-
-static void test()
-{
-	Grid grid(Eigen::AlignedBox3d(Eigen::Vector3d{ 0, 0, 0 }, Eigen::Vector3d{ 10, 10, 10 }), { 100,100,100 });
-	double k = 10.0 / RAND_MAX;
-	const int num = (int)1e5; //stack overflow
-	std::array<std::array<Eigen::Vector3d, 3>, num> coor;
-	for (size_t i = 0; i < coor.size(); i++)
-		coor.at(i) = { Eigen::Vector3d{k* rand(), k* rand(), k* rand()}, Eigen::Vector3d{k* rand(), k* rand(), k* rand()}, Eigen::Vector3d{k* rand(), k* rand(), k* rand()} };
-	auto start = std::chrono::steady_clock::now(); // 开始计时
-	for (size_t i = 0; i < num; i++)
-	{
-		grid.push(coor.at(i), 0xff);
-		if (i % 100 == 0)
-			std::cout << "\r" << i / double(num) * 100.0 << "%\t\t\t";
-	}
-	auto end = std::chrono::steady_clock::now();   // 结束计时
-	std::cout << "\r" << 100.0 << "%\t\t\t" << std::endl;
-	auto res = grid.list();
-	std::cout << res.size() << std::endl;
-	std::chrono::duration<double> elapsed = end - start;
-	std::cout << elapsed.count() * 1000 << " ms." << std::endl;
-
 }
 
