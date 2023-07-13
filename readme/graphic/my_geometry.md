@@ -205,3 +205,11 @@ if (p.x < (*iter)->boundingBox.left ||
 3)如果射线竖直，而P0的横坐标小于P1,P2的横坐标，则必然相交。
 
 4)再判断相交之前，先判断P是否在边(P1,P2)的上面，如果在，则直接得出结论：P再多边形内部。
+
+
+
+---
+
+### 计算几何
+
+[射线法](https://blog.csdn.net/lingyunxianhe/article/details/104936534)
