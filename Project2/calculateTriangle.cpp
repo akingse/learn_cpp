@@ -1192,11 +1192,6 @@ PointOnTrigon psykronix::relationOfPointAndTriangle(const Eigen::Vector3d& point
 	return PointOnTrigon::POINT_INNER;
 }
 
-bool operator<(const Eigen::Vector3d& lhs, const Eigen::Vector3d& rhs)
-{
-	return memcmp(&lhs, &rhs, sizeof(Eigen::Vector3d));
-}
-
 bool psykronix::isPointInConvexPolyhedron(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
 {
 	size_t count = 0;
@@ -1212,38 +1207,38 @@ bool psykronix::isPointInConvexPolyhedron(const Eigen::Vector3d& point, const st
 			PointOnTrigon relation = relationOfPointAndTriangle(point, trigon);
 			if (PointOnTrigon::POINT_INNER == relation)
 				count++;
-			else if (PointOnTrigon::POINT_INNER == POINT_VERTEX_0 && std::find(vertexVct.begin(), vertexVct.end(), trigon[0]) != vertexVct.end()) //vertexVct.find(trigon[0]) == vertexVct.end())
+			else if (PointOnTrigon::POINT_INNER == POINT_VERTEX_0 && std::find(vertexVct.begin(), vertexVct.end(), trigon[0]) == vertexVct.end()) //vertexVct.find(trigon[0]) == vertexVct.end())
 			{
 				count++;
 				vertexVct.push_back(trigon[0]);
 			}
-			else if (PointOnTrigon::POINT_INNER == POINT_VERTEX_1 && std::find(vertexVct.begin(), vertexVct.end(), trigon[1]) != vertexVct.end()) //vertexVct.find(trigon[1]) == vertexVct.end())
+			else if (PointOnTrigon::POINT_INNER == POINT_VERTEX_1 && std::find(vertexVct.begin(), vertexVct.end(), trigon[1]) == vertexVct.end()) //vertexVct.find(trigon[1]) == vertexVct.end())
 			{
 				count++;
 				vertexVct.push_back(trigon[1]);
 			}
-			else if (PointOnTrigon::POINT_INNER == POINT_VERTEX_2 && std::find(vertexVct.begin(), vertexVct.end(), trigon[2]) != vertexVct.end()) //vertexVct.find(trigon[2]) == vertexVct.end())
+			else if (PointOnTrigon::POINT_INNER == POINT_VERTEX_2 && std::find(vertexVct.begin(), vertexVct.end(), trigon[2]) == vertexVct.end()) //vertexVct.find(trigon[2]) == vertexVct.end())
 			{
 				count++;
 				vertexVct.push_back(trigon[2]);
 			}
 			else if (PointOnTrigon::POINT_INNER == POINT_EDGE_01 && 
-				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[0], trigon[1] }) != edgeVct.end() && 
-				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[1], trigon[0] }) != edgeVct.end())
+				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[0], trigon[1] }) == edgeVct.end() &&
+				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[1], trigon[0] }) == edgeVct.end())
 			{
 				count++;
 				edgeVct.push_back({ trigon[0], trigon[1] });
 			}
 			else if (PointOnTrigon::POINT_INNER == POINT_EDGE_12 &&
-				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[1], trigon[2] }) != edgeVct.end() &&
-				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[2], trigon[1] }) != edgeVct.end())
+				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[1], trigon[2] }) == edgeVct.end() &&
+				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[2], trigon[1] }) == edgeVct.end())
 			{
 				count++;
 				edgeVct.push_back({ trigon[1], trigon[2] });
 			}
 			else if (PointOnTrigon::POINT_INNER == POINT_EDGE_20 &&
-				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[2], trigon[0] }) != edgeVct.end() &&
-				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[0], trigon[2] }) != edgeVct.end())
+				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[2], trigon[0] }) == edgeVct.end() &&
+				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[0], trigon[2] }) == edgeVct.end())
 			{
 				count++;
 				edgeVct.push_back({ trigon[2], trigon[0] });

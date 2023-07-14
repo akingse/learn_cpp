@@ -73,7 +73,7 @@ bool operator<(const Eigen::Vector3d& lhs, const Eigen::Vector3d& rhs)
 	double p2 = *((double*)(&lhs)+1);
 	double p3 = *((double*)(&lhs)+2);
 	return lhs.norm() < rhs.norm();
-	return memcmp(&lhs, &rhs, sizeof(Eigen::Vector3d));
+	return memcmp(&lhs, &rhs, sizeof(Eigen::Vector3d)) == -1;
 }
 
 
@@ -108,6 +108,15 @@ static void test0()
 		cout << "return 0" << endl;
 	//if (vec1 > vec2)
 	//	cout << "return 0" << endl;
+
+	vector<Vector3d> vertexVct = { vec1_ ,vec1 ,vec2 };
+
+	auto iter = std::find(vertexVct.begin(), vertexVct.end(), vec1);
+	bool fd = std::find(vertexVct.begin(), vertexVct.end(), vec1) == vertexVct.end();
+	bool fd0 = std::find(vertexVct.begin(), vertexVct.end(), Vector3d(1, 2, 0)) == vertexVct.end();
+	bool fd1 = std::find(vertexVct.begin(), vertexVct.end(), Vector3d(1, 2, 3)) == vertexVct.end();
+
+	cout << "return 0" << endl;
 }
 
 

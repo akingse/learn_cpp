@@ -197,6 +197,7 @@ namespace para
 	}
 	bool BPParaVec::operator==(const BPParaVec& other) const
 	{
+		return memcmp(this, &other, sizeof(CVec3)) == 0;
 		return isFloatEqual(m_imp.x, other.m_imp.x) && isFloatEqual(m_imp.y, other.m_imp.y) && isFloatEqual(m_imp.z, other.m_imp.z);
 		//return CVec3equal(m_imp, other.m_imp);
 	}
