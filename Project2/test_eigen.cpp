@@ -64,6 +64,18 @@ static void test1()
 	cout << "return 0" << endl;
 }
 
+using namespace rel_ops;
+bool operator<(const Eigen::Vector3d& lhs, const Eigen::Vector3d& rhs) 
+{
+	auto a = lhs.array();
+	auto b = sizeof(lhs);
+	double p1 = *(double*)(&lhs);
+	double p2 = *((double*)(&lhs)+1);
+	double p3 = *((double*)(&lhs)+2);
+	return lhs.norm() < rhs.norm();
+	return memcmp(&lhs, &rhs, sizeof(Eigen::Vector3d));
+}
+
 
 static void test0()
 {
@@ -81,13 +93,26 @@ static void test0()
 	bool is0 = vec.isZero();
 	bool is1 = (vec - vec).isZero();
 
-	cout << "return 0" << endl;
-
+	Eigen::Vector3d vec1_(-1, 2, 3);
+	Eigen::Vector3d vec1(1, 2, 3);
+	Eigen::Vector3d vec2(4, 5, 6);
+	if (vec1_ < vec2)
+		cout << "return 0" << endl;
+	if (vec2 < vec1_)
+		cout << "return 0" << endl;
+	if(	vec1 < vec2)
+		cout << "return 0" << endl;
+	if (vec2 < vec1)
+		cout << "return 0" << endl;
+	if (vec1 < vec1)
+		cout << "return 0" << endl;
+	//if (vec1 > vec2)
+	//	cout << "return 0" << endl;
 }
 
 
 static int _enrol0 = []()->int {
-	//test0();
+	test0();
 	return 0;
 }();
 

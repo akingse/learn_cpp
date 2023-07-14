@@ -5,15 +5,15 @@ using namespace Eigen;
 using namespace psykronix;
 #undef max //AlignedBox3d mem-fun
 #undef min
+typedef std::array<Eigen::Vector3d, 3> Triangle;
 
 //--------------------------------------------------------------------------------------------------
 //  triangle
 //--------------------------------------------------------------------------------------------------
 static constexpr double eps = 1e-8; //DBL_EPSILON
 static constexpr double _eps = -eps;
-std::atomic<size_t> getTriangleBoundC = 0, TriangularIntersectC = 0, getTriDistC = 0, isTriangleBoundC = 0,
+std::atomic<size_t> getTriangleBoundC = 0, isTwoTrianglesInter = 0, getTriDistC = 0, isTriangleBoundC = 0,
 count_pointInTri = 0, count_edgeCrossTri = 0, count_segCrossTri = 0, count_across = 0,
-isTwoTrianglesC = 0, TriangularIntersectC_in = 0, TriangularIntersectC_all = 0,
 count_err_inputbox = 0, count_err_inter_dist = 0, count_err_repeat_tri = 0; // count_err_degen_tri = 0
 
 
@@ -26,18 +26,19 @@ bool psykronix::isPointInTriangle(const Vector2d& point, const std::array<Vector
 	const Vector2d& p2 = trigon[2];
 	// compare z-value
 #ifdef USING_MACHINE_PERCESION_THRESHOLD
-	return !(((p1.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p1.y() - p0.y()) < _eps) ||//bool isLeftA
-		((p2.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p2.y() - p0.y()) > eps) || //bool isLeftB
-		((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y()) < _eps)); //bool isLeftC
-#else
 	if (0.0 < (p1.x() - p0.x()) * (p2.y() - p0.y()) - (p2.x() - p0.x()) * (p1.y() - p0.y())) //ccw
-		return !(((p1.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p1.y() - p0.y()) < 0.0) ||//bool isLeftA
-				((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y()) < 0.0) || //bool isLeftB
-				((p0.x() - p2.x()) * (point.y() - p2.y()) - (point.x() - p2.x()) * (p0.y() - p2.y()) < 0.0)); //bool isLeftC
+		return !(((p1.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p1.y() - p0.y()) < _eps) ||//bool isLeftA
+			((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y()) < _eps) || //bool isLeftB
+			((p0.x() - p2.x()) * (point.y() - p2.y()) - (point.x() - p2.x()) * (p0.y() - p2.y()) < _eps)); //bool isLeftC
 	else
-		return !(((p1.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p1.y() - p0.y()) > 0.0) ||//bool isLeftA
-				((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y()) > 0.0) || //bool isLeftB
-				((p0.x() - p2.x()) * (point.y() - p2.y()) - (point.x() - p2.x()) * (p0.y() - p2.y()) > 0.0)); //bool isLeftC
+		return !(((p1.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p1.y() - p0.y()) > eps) ||//bool isLeftA
+			((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y()) > eps) || //bool isLeftB
+			((p0.x() - p2.x()) * (point.y() - p2.y()) - (point.x() - p2.x()) * (p0.y() - p2.y()) > eps)); //bool isLeftC
+#else
+	double axisz = (p1.x() - p0.x()) * (p2.y() - p0.y()) - (p2.x() - p0.x()) * (p1.y() - p0.y());
+	return  0.0 <= axisz * ((p1.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p1.y() - p0.y())) &&
+			0.0 <= axisz * ((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y())) &&
+			0.0 <= axisz * ((p0.x() - p2.x()) * (point.y() - p2.y()) - (point.x() - p2.x()) * (p0.y() - p2.y()));
 #endif
 }
 //isPointInTriangle3D
@@ -233,7 +234,7 @@ bool psykronix::isSegmentCrossTriangleSurface(const std::array<Vector3d, 2>& seg
 bool psykronix::isTwoTrianglesIntersection(const std::array<Vector3d, 3>& triL, const std::array<Vector3d, 3>& triR)
 {
 	//#ifdef STATISTIC_DATA_COUNT
-	//	TriangularIntersectC++;
+	//	isTwoTrianglesInter++;
 	//#endif
 		// pre box check
 		//if (!isTwoTrianglesBoundingBoxIntersect(triL, triR))
@@ -252,10 +253,6 @@ bool psykronix::isTwoTrianglesIntersection(const std::array<Vector3d, 3>& triL, 
 	bool acrossL2R_C = (veczR.dot(triL[2] - triR[0])) * (veczR.dot(triL[0] - triR[0])) < eps;
 	if (!acrossL2R_A && !acrossL2R_B && !acrossL2R_C)
 		return false;
-
-#ifdef STATISTIC_DATA_COUNT
-	TriangularIntersectC_in++;
-#endif
 	// forward
 	double dotPro;// = 0;
 	if (acrossR2L_A) // R0 
@@ -350,9 +347,6 @@ bool psykronix::isTwoTrianglesIntersection(const std::array<Vector3d, 3>& triL, 
 				return true;
 		}
 	}
-#ifdef STATISTIC_DATA_COUNT
-	TriangularIntersectC_all++;
-#endif
 	return false;
 }
 
@@ -1178,15 +1172,85 @@ bool psykronix::isPointRayAcrossTriangle(const Eigen::Vector3d& point, const std
 #endif
 }
 
+PointOnTrigon psykronix::relationOfPointAndTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon)
+{
+	//if (!isPointRayAcrossTriangle(point, trigon))
+	//	return PointOnTrigon::POINT_OUTER;
+	// must intersect
+	if (point.x() == trigon[0].x() && point.y() == trigon[0].y())
+		return PointOnTrigon::POINT_VERTEX_0;
+	else if (point.x() == trigon[1].x() && point.y() == trigon[1].y())
+		return PointOnTrigon::POINT_VERTEX_1;
+	else if (point.x() == trigon[2].x() && point.y() == trigon[2].y())
+		return PointOnTrigon::POINT_VERTEX_2;
+	else if ((point - trigon[1]).cross(point - trigon[0]).isZero())
+		return PointOnTrigon::POINT_EDGE_01;
+	else if ((point - trigon[2]).cross(point - trigon[1]).isZero())
+		return PointOnTrigon::POINT_EDGE_12;
+	else if ((point - trigon[0]).cross(point - trigon[2]).isZero())
+		return PointOnTrigon::POINT_EDGE_20;
+	return PointOnTrigon::POINT_INNER;
+}
+
+bool operator<(const Eigen::Vector3d& lhs, const Eigen::Vector3d& rhs)
+{
+	return memcmp(&lhs, &rhs, sizeof(Eigen::Vector3d));
+}
+
 bool psykronix::isPointInConvexPolyhedron(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
 {
-	size_t countA = 0;
+	size_t count = 0;
+	//set<Vector3d> vertexVct;
+	//set<array<Vector3d,2>> edgeVct;
+	vector<Vector3d> vertexVct;
+	vector<array<Vector3d, 2>> edgeVct;
 	for (const auto& iter : ibo)
 	{
-		if (isPointRayAcrossTriangle(point, { vbo[iter[0]] ,vbo[iter[1]] ,vbo[iter[2]] }))
-			countA++;
+		Triangle trigon = { { vbo[iter[0]] ,vbo[iter[1]] ,vbo[iter[2]] } };
+		if (isPointRayAcrossTriangle(point, trigon))
+		{
+			PointOnTrigon relation = relationOfPointAndTriangle(point, trigon);
+			if (PointOnTrigon::POINT_INNER == relation)
+				count++;
+			else if (PointOnTrigon::POINT_INNER == POINT_VERTEX_0 && std::find(vertexVct.begin(), vertexVct.end(), trigon[0]) != vertexVct.end()) //vertexVct.find(trigon[0]) == vertexVct.end())
+			{
+				count++;
+				vertexVct.push_back(trigon[0]);
+			}
+			else if (PointOnTrigon::POINT_INNER == POINT_VERTEX_1 && std::find(vertexVct.begin(), vertexVct.end(), trigon[1]) != vertexVct.end()) //vertexVct.find(trigon[1]) == vertexVct.end())
+			{
+				count++;
+				vertexVct.push_back(trigon[1]);
+			}
+			else if (PointOnTrigon::POINT_INNER == POINT_VERTEX_2 && std::find(vertexVct.begin(), vertexVct.end(), trigon[2]) != vertexVct.end()) //vertexVct.find(trigon[2]) == vertexVct.end())
+			{
+				count++;
+				vertexVct.push_back(trigon[2]);
+			}
+			else if (PointOnTrigon::POINT_INNER == POINT_EDGE_01 && 
+				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[0], trigon[1] }) != edgeVct.end() && 
+				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[1], trigon[0] }) != edgeVct.end())
+			{
+				count++;
+				edgeVct.push_back({ trigon[0], trigon[1] });
+			}
+			else if (PointOnTrigon::POINT_INNER == POINT_EDGE_12 &&
+				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[1], trigon[2] }) != edgeVct.end() &&
+				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[2], trigon[1] }) != edgeVct.end())
+			{
+				count++;
+				edgeVct.push_back({ trigon[1], trigon[2] });
+			}
+			else if (PointOnTrigon::POINT_INNER == POINT_EDGE_20 &&
+				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[2], trigon[0] }) != edgeVct.end() &&
+				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[0], trigon[2] }) != edgeVct.end())
+			{
+				count++;
+				edgeVct.push_back({ trigon[2], trigon[0] });
+			}
+		}
 	}
-	return (countA % 2 != 0);
+	return (count % 2 != 0);
 }
 
 //one mesh all-in other mesh, the bounding-box must all-in other mesh
@@ -1222,9 +1286,6 @@ bool psykronix::isPointContainedInPolyhedron(const Eigen::Vector3d& point, const
 // base on Separating Axis Theorem
 bool psykronix::isTwoTrianglesIntersectionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {
-#ifdef STATISTIC_DATA_COUNT
-	TriangularIntersectC++;
-#endif
 	//if (!isTwoTrianglesBoundingBoxIntersect(triA, triB))
 	//	return false;
 	std::array<Eigen::Vector3d, 3> edgesA = { triA[1] - triA[0],
@@ -1324,7 +1385,7 @@ bool psykronix::isTwoTrianglesIntersectionSAT(const std::array<Eigen::Vector3d, 
 bool psykronix::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {
 #ifdef STATISTIC_DATA_COUNT
-	TriangularIntersectC++;
+	isTwoTrianglesInter++;
 	if (triA[0] == triB[0] && triA[1] == triB[1] && triA[2] == triB[2])
 		count_err_repeat_tri++;
 #endif	// for degenerate triangle, return false
@@ -1391,7 +1452,7 @@ bool psykronix::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>&
 bool psykronix::TriangularIntersectionTest(const std::array<Eigen::Vector3d, 3>& T1, const std::array<Eigen::Vector3d, 3>& T2)
 {
 	//#ifdef STATISTIC_DATA_COUNT
-	//	TriangularIntersectC++;
+	//	isTwoTrianglesInter++;
 	//#endif
 	const Eigen::Vector3d& A1 = *(const Eigen::Vector3d*)(&T1.at(0));
 	const Eigen::Vector3d& B1 = *(const Eigen::Vector3d*)(&T1.at(1));

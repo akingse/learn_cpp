@@ -16,7 +16,7 @@
 | TriangularIntersectionTest                                   |                                                              | time = 21.059s<br/>time = 20.971s<br/>time = 20.953s         | time = 5.743s<br/>time = 5.713s<br/>time = 5.753s            |
 | isTwoTrianglesIntersection1                                  |                                                              | time = 4.588s<br/>time = 4.574s<br/>time = 4.575s<br />time = 15.401s<br/>time = 15.658s<br/>time = 15.485s | time = 3.771s<br/>time = 3.758s<br/>time = 3.856s            |
 | isTwoTrianglesIntersection2                                  | 调用 fun 18041503*3=54140554<br />time = 3.031s<br/>time = 2.983s<br/>time = 2.903s | time = 10.846s<br/>time = 10.909s<br/>time = 10.802s         | time = 3.723s<br/>time = 3.578s<br/>time = 3.984s<br />latest<br />time = 4.498s<br/>time = 4.484s<br/>time = 4.358s<br /> |
-| _isPointInTriangle<br />2D<br />3D                           |                                                              | time = 1.273s<br/>time = 1.271s<br/>time = 1.295s<br />3D<br />time = 1.337s<br/>time = 1.328s<br/>time = 1.371s |                                                              |
+| _isPointInTriangle<br />2D<br />3D                           | 2D，去if优化                                                 | time = 0.901s<br/>time = 0.903s<br/>time = 0.907s<br />3D<br />time = 1.201s<br/>time = 1.202s<br/>time = 1.175s |                                                              |
 | double<br />_isSegmentCrossTriangleSurface                   |                                                              | time = 1.732s<br/>time = 1.703s<br/>time = 1.805s            | time = 5.654s<br/>time = 5.792s<br/>time = 5.812s            |
 | double<br />getTriangleBoundingCircle                        |                                                              | 先判钝角<br />time = 4.735s<br/>time = 4.797s<br/>time = 4.817s |                                                              |
 | _isTwoTriangles<br />BoundingBoxIntersect<br />三角面的包围盒求交 |                                                              | eigen<br />time = 1.617s<br/>time = 1.568s<br/>time = 1.495s<br />手写<br />time = 1.228s<br/>time = 1.242s<br/>time = 1.22s |                                                              |
@@ -292,3 +292,4 @@ bug修复
 
 
 
+新bug，mesh为空，count_err_empty_mesh="44345"

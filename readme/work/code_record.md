@@ -631,3 +631,61 @@ tolerance > 0
     	MeshStandoffDistance
 ```
 
+
+
+
+
+```
+                        //for (size_t i = 0; i < triInterList.size(); i++)
+                        //{
+                        //    {
+                        //        tinyxml2::XMLElement* clashpoint = doc.NewElement("clashpoint");
+                        //        {
+                        //            tinyxml2::XMLElement* pos3f = doc.NewElement("pos3d");
+                        //            std::array<std::array<Eigen::Vector3d, 3>, 2> triPair = triInterList[i];
+                        //            for (int i = 0; i < 3; ++i)
+                        //            {
+                        //                std::string point; 
+                        //                std::stringstream ssX;
+                        //                std::stringstream ssY;
+                        //                std::stringstream ssZ;
+                        //                //A
+                        //                ssX << setprecision(15) << triPair[0][i].x();
+                        //                ssY << setprecision(15) << triPair[0][i].y();
+                        //                ssZ << setprecision(15) << triPair[0][i].z();
+                        //                point = ssX.str() + "," + ssY.str() + "," + ssZ.str();
+                        //                ssX.clear();
+                        //                ssY.clear();
+                        //                ssZ.clear();
+                        //                std::string name = "triA_" + to_string(i);
+                        //                pos3f->SetAttribute(name.c_str(), point.c_str());
+                        //            }
+                        //            for (int i = 0; i < 3; ++i)
+                        //            {
+                        //                std::string point;
+                        //                std::stringstream ssX;
+                        //                std::stringstream ssY;
+                        //                std::stringstream ssZ;
+                        //                //A
+                        //                ssX << setprecision(15) << triPair[1][i].x();
+                        //                ssY << setprecision(15) << triPair[1][i].y();
+                        //                ssZ << setprecision(15) << triPair[1][i].z();
+                        //                point = ssX.str() + "," + ssY.str() + "," + ssZ.str();
+                        //                ssX.clear();
+                        //                ssY.clear();
+                        //                ssZ.clear();
+                        //                std::string name = "triB_" + to_string(i);
+                        //                pos3f->SetAttribute(name.c_str(), point.c_str());
+                        //            }
+                        //            clashpoint->InsertEndChild(pos3f);
+                        //        }
+                        //        clashtest->InsertEndChild(clashpoint);
+                        //    }
+                        //}
+                        //triInterList.clear();
+```
+
+
+
+
+

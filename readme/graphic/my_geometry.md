@@ -213,3 +213,65 @@ if (p.x < (*iter)->boundingBox.left ||
 ### 计算几何
 
 [射线法](https://blog.csdn.net/lingyunxianhe/article/details/104936534)
+
+从目标点出发引一条射线，看这条射线和多边形所有边的交点数目。如果有奇数个交点，则说明在内部，如果有偶数个交点，则说明在外部。射线判别法对点在多边形边上的判断时不可靠的，这个需要附加一个点在直线上的判断来完善。
+
+[wrf](https://wrfranklin.org/nikola/pages/index.html)
+
+PNPoly算法 Point Inclusion in Polygon Test
+
+```c
+int pnpoly(int nvert, float *vertx, float *verty, float testx, float testy)
+{
+  int i, j, c = 0;
+  for (i = 0, j = nvert-1; i < nvert; j = i++) 
+  {
+    if ( ((verty[i]>testy) != (verty[j]>testy)) &&
+	 (testx < (vertx[j]-vertx[i]) * (testy-verty[i]) / (verty[j]-verty[i]) + vertx[i]) )
+       c = !c;
+  }
+  return c;
+}
+
+((verty[i]>testy) && (testy<verty[j])) || ((verty[i]<testy) && (testy<verty[j]))
+
+(verty[j]-verty[i]) / (vertx[j]-vertx[i]) < (testy-verty[i]) / (testx - vertx[i]) 
+    
+    
+```
+
+
+
+### 2D 点在多边形内部
+
+[特殊情况](https://www.cnblogs.com/anningwang/p/7581545.html)
+
+1点在多边形的边上
+
+2点和多边形的顶点重合
+
+3射线经过多边形顶点
+
+4射线刚好经过多边形的一条边
+
+穿越的条件是线段两个端点分别在射线两侧。我们只需要规定被射线穿越的点都算作其中一侧。规定射线经过的点都属于射线以上的一侧
+
+
+
+### 3D 点在多面体内部
+
+特殊情况
+
+1，射线穿过三角面的边，区分凸外轮廓合凹内轮廓 （特别地，穿过两个边，相当于穿过所在平面）
+
+当mesh-edge为凸时，两个triangles算一次穿越，当为凹时，算0次穿越
+
+2，射线穿过三角面的顶点，区分凹凸
+
+
+
+策略，获取索引组，经过边的（共边），count+0.5，
+
+The ray crosses face F iff 统计count
+
+P lies below the plane of F

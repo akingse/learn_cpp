@@ -163,7 +163,7 @@ static void _test0()
 			//double res = _test_custom_calculate(nums);
 			// 点与三角形
 			//bool res = isPointInTriangle(randData2D[i][0], randData2D_[i]); //2D
-			//bool res = isPointInTriangle(randData1[i][0], randData3[i]); //3D
+			bool res = isPointInTriangle(randData1[i][0], randData3[i]); //3D
 			// 
 			// 三角形相交测试
 			//bool res = isTwoTrianglesIntersection(randData3[i], randData3_[i]);
@@ -180,7 +180,7 @@ static void _test0()
 			//bool res = isTriangleAndBoundingBoxIntersect(randData3_[i], { randData2[i][0] ,randData2[i][1]});
 			//bool res = isTriangleAndBoundingBoxIntersectSAT(randData3_[i], { randData2[i][0] ,randData2[i][1]});
 			//射线法
-			bool res = isPointRayAcrossTriangle(randData1[i][0], randData3[i]);
+			//bool res = isPointRayAcrossTriangle(randData1[i][0], randData3[i]);
 
 			//包围圆
 			//auto crA = getTriangleBoundingCircle(randData3[i]);
@@ -204,21 +204,22 @@ static void _test0()
 		Sleep(1000);
 
 	}
-	cout << "TriangularIntersectC=" << TriangularIntersectC / 3 << endl;
 	cout << "count_edgeCrossTri=" << count_edgeCrossTri / 3 << endl;
 	cout << "count_pointInTri=" << count_pointInTri / 3 << endl;
 	cout << "count_segCrossTri=" << count_segCrossTri / 3 << endl;
 	cout << "count_across=" << count_across / 3 << endl;
-	cout << "TriangularIntersectC_in=" << TriangularIntersectC_in / 3 << endl;
-	cout << "TriangularIntersectC_all=" << TriangularIntersectC_all / 3 << endl;
-	TriangularIntersectC = 0;
 	count_edgeCrossTri = 0;
 	count_pointInTri = 0;
 	count_segCrossTri = 0;
 	count_across = 0;
-	TriangularIntersectC_in = 0;
-	TriangularIntersectC_all = 0;
 #endif
+
+	// 输出当前时间
+	time_t nowtime;
+	time(&nowtime); //获取1970年1月1日0点0分0秒到现在经过的秒数
+	tm p;
+	localtime_s(&p, &nowtime); //将秒数转换为本地时间,年从1900算起,需要+1900,月为0-11,所以要+1
+	printf("%04d/%02d/%02d-%02d:%02d:%02d\n", p.tm_year + 1900, p.tm_mon + 1, p.tm_mday, p.tm_hour, p.tm_min, p.tm_sec);
 
 	cout << "main over." << endl;
 }
@@ -226,7 +227,7 @@ static void _test0()
 
 static int enrol = []()->int
 {
-	_test0();
+	//_test0();
 	return 0;
 }();
 

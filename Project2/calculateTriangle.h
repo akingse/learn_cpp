@@ -1,6 +1,17 @@
 #pragma once
 namespace psykronix
 {
+	enum PointOnTrigon :unsigned int
+	{
+		POINT_OUTER = 0,
+		POINT_INNER,
+		POINT_VERTEX_0,
+		POINT_VERTEX_1,
+		POINT_VERTEX_2,
+		POINT_EDGE_01,
+		POINT_EDGE_12,
+		POINT_EDGE_20,
+	};
     // intersect of triangle
     DLLEXPORT bool isPointInTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon);
     DLLEXPORT bool isPointInTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon);
@@ -16,6 +27,7 @@ namespace psykronix
     DLLEXPORT bool TriangularIntersectionTest(const std::array<Eigen::Vector3d, 3>& T1, const std::array<Eigen::Vector3d, 3>& T2);
 	DLLEXPORT bool isPointRayAcrossTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon);
 	DLLEXPORT bool isPointInConvexPolyhedron(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo);
+	DLLEXPORT PointOnTrigon relationOfPointAndTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon);
 	DLLEXPORT bool isPointContainedInPolyhedron(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo);
 
     // preprocess
