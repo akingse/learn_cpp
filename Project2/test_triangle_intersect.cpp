@@ -44,15 +44,15 @@ bool isEqualTrigon(const Triangle& triA, const Triangle& triB)
 	//	return true;
 	//}
 
-	double d = 1;
-	Vector3d point0(1.1, 0, 0);
-	Vector3d point1 = psykronix::translate(2.2, 0) * psykronix::roty(M_PI) *= point0;
-	Vector3d point2 = psykronix::rotz(2*M_PI) *= point0;
+	//double d = 1;
+	//Vector3d point0(1.1, 0, 0);
+	//Vector3d point1 = psykronix::translate(2.2, 0) * psykronix::roty(M_PI) *= point0;
+	//Vector3d point2 = psykronix::rotz(2*M_PI) *= point0;
 
-	if (point0 == point1) //二进制判相等，无视精度
-		d = 0;
-	if (point0 == point2)
-		d = 0;
+	//if (point0 == point1) //二进制判相等，无视精度
+	//	d = 0;
+	//if (point0 == point2)
+	//	d = 0;
 	//size_t n = sizeof(Triangle); //72
 	return memcmp(&triA, &triB, sizeof(Triangle)) == 0;// triA[0] == triB[0] && triA[1] == triB[1] && triA[2] == triB[2];
 
@@ -283,7 +283,9 @@ static void _test2()
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris1 = _readTrigonFile(path+"triInterList_opt1.bin"); //4031
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris2 = _readTrigonFile(path+"triInterList_opt2.bin"); //4031
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris3 = _readTrigonFile(path+"triInterList_opt3.bin"); //4030
-	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> trist = _readTrigonFile(path+"triInterList_opt.bin"); //4030
+	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris4 = _readTrigonFile(path+"triInterList_opt.bin"); //4030
+	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris5 = _readTrigonFile(path + "interTriInfo_4027.bin"); //4027
+
 	//entity
 	std::vector<std::array<uint64_t, 2>> entity1 = _readEntityIDFile(path + "entityIdList_off.bin"); //4031
 	std::vector<std::array<uint64_t, 2>> entity2 = _readEntityIDFile(path + "entityIdList_on.bin"); //4031
@@ -303,20 +305,37 @@ static void _test2()
 	//}
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris1_extra;
 	vector<size_t> numList;
-	for (int i=0;i<tris1.size();++i) //entity的不同三角形
-	{
-		if (!isTwoTrianglesIntersectSAT(tris1[i][0], tris1[i][1]))
-			cout << "not intersect1" << endl;
-		if (!isTwoTrianglesIntersectSAT(tris2[i][0], tris2[i][1]))
-			cout << "not intersect2" << endl;
-		if (!(isEqualTrigon(tris1[i][0], tris2[i][0]) && isEqualTrigon(tris1[i][1], tris2[i][1])) &&
-			!(isEqualTrigon(tris1[i][0], tris2[i][1]) && isEqualTrigon(tris1[i][1], tris2[i][0])))
-			numList.push_back(i);
-	}
+	//for (int i=0;i<tris1.size();++i) //entity的不同三角形
+	//{
+	//	if (!isTwoTrianglesIntersectSAT(tris1[i][0], tris1[i][1]))
+	//		cout << "not intersect1" << endl;
+	//	if (!isTwoTrianglesIntersectSAT(tris2[i][0], tris2[i][1]))
+	//		cout << "not intersect2" << endl;
+	//	if (!(isEqualTrigon(tris1[i][0], tris2[i][0]) && isEqualTrigon(tris1[i][1], tris2[i][1])) &&
+	//		!(isEqualTrigon(tris1[i][0], tris2[i][1]) && isEqualTrigon(tris1[i][1], tris2[i][0])))
+	//		numList.push_back(i);
+	//}
 	//cout << "diff-index:" << numList.size() << endl;
 	//cout << "intersect finish" << endl;
 
+#define DOUBLE_FOR_LOOP
 #ifdef DOUBLE_FOR_LOOP
+	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> extra;
+	for (auto& iterA : tris1) //more
+	{
+		bool findFlag = false;
+		for (auto& iterB : tris5) //findTri
+		{
+			if ((isEqualTrigon(iterA[0], iterB[0]) && isEqualTrigon(iterA[1], iterB[1])) ||
+				(isEqualTrigon(iterA[0], iterB[1]) && isEqualTrigon(iterA[1], iterB[0])))
+			{
+				findFlag = true;
+				break;
+			}
+		}
+		if (!findFlag)
+			extra.push_back(iterA);
+	}
 	for (auto& iterA : tris1)
 	{
 		bool findFlag = false;
@@ -366,7 +385,6 @@ static void _test2()
 static void _test3()
 {
 
-	std::vector<std::array<uint64_t, 2>> entity1;
 	std::vector<double> diatanceLen;
 	//std::set<double> diatanceList;
 	//std::multiset<double> diatanceList;
@@ -387,8 +405,9 @@ static void _test3()
 	// 	//void _wirteTrigonFile(const std::string & fileName, const std::vector<std::tuple<
 	//	std::array<Eigen::Vector3d, 3>, std::array<Eigen::Vector3d, 3>, unsigned long long, unsigned long long, double>>& triinfos)
 	string path = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/";
-	//std::vector<std::array<uint64_t, 2>> entity4 = _readEntityIDFile(path + "entityIdList_hard.bin"); //4030
-	std::vector<std::array<uint64_t, 2>> entity4 = _readEntityIDFile(path + "entityIdList_soft.bin"); //1069
+	std::vector<std::array<uint64_t, 2>> entity1 = _readEntityIDFile(path + "entityIdList_hard.bin"); //4030
+	std::vector<std::array<uint64_t, 2>> entity2 = _readEntityIDFile(path + "entityIdList_soft.bin"); //1069
+	std::vector<std::array<uint64_t, 2>> entity3 = _readEntityIDFile(path + "entityIdList_4027.bin"); //4027
 	for (int i = 0; i < entity1.size(); ++i)
 	{
 		bool findFlag = false;
@@ -458,9 +477,9 @@ static int enrol = []()->int
 	//_test0();
 	//_test1();
 	//_test2();
-	//_test3();
+	_test3();
 	//_test4();
-	_test5();
+	//_test5();
 	return 0;
 }();
 

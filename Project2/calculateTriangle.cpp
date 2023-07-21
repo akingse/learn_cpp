@@ -508,7 +508,7 @@ bool psykronix::isTriangleAndBoundingBoxIntersect(const std::array<Eigen::Vector
 	//	if ((box.sizes().array() < 0.0).any()) // input box illegal
 	//	{
 	//#ifdef STATISTIC_DATA_COUNT
-	//		count_err_inputbox++; // no-one error
+	//		count_err_inputbox++; // nothing error
 	//#endif
 	//		return true;
 	//	}
@@ -952,13 +952,14 @@ bool psykronix::isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vec
 	std::array<Eigen::Vector3d, 3> coords = { Vector3d(1,0,0),
 											   Vector3d(0,1,0),
 											   Vector3d(0,0,1) };
-	std::array<Eigen::Vector3d, 15> axes = { {
+	std::array<Eigen::Vector3d, 16> axes = { {
 			coords[0],
 			coords[1],
 			coords[2],
 			edges[0],
 			edges[1],
 			edges[2],
+			edges[0].cross(edges[1]), //add
 			coords[0].cross(edges[0]),
 			coords[0].cross(edges[1]),
 			coords[0].cross(edges[2]),
@@ -1064,10 +1065,11 @@ bool psykronix::isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& s
 		std::array<Eigen::Vector3d, 3> edges = { trigon[1] - trigon[0],
 											   trigon[2] - trigon[1],
 											   trigon[0] - trigon[2] };
-		std::array<Eigen::Vector3d, 7> axes = { {
+		std::array<Eigen::Vector3d, 8> axes = { {
 				edges[0],
 				edges[1],
 				edges[2],
+				vecZ, //add
 				vecSeg,
 				vecSeg.cross(edges[0]),
 				vecSeg.cross(edges[1]),
@@ -1139,14 +1141,15 @@ bool psykronix::isPointRayAcrossTriangle(const Eigen::Vector3d& point, const std
 	std::array<Eigen::Vector3d, 3> edges = { trigon[1] - trigon[0],
 										   trigon[2] - trigon[1],
 										   trigon[0] - trigon[2] };
-	std::array<Eigen::Vector3d, 7> axes = { { //order matters speed
+	std::array<Eigen::Vector3d, 8> axes = { { //order matters speed
 		axisZ.cross(edges[0]),
 		axisZ.cross(edges[1]),
 		axisZ.cross(edges[2]),
 		axisZ,
 		edges[0],
 		edges[1],
-		edges[2]} };
+		edges[2],
+		edges[0].cross(edges[1]) } };//add
 	for (const auto& axis : axes) //fast than index
 	{
 		double minTri = DBL_MAX; 
@@ -1198,7 +1201,7 @@ bool psykronix::isPointRayAcrossTriangle(const Eigen::Vector3d& point, const std
 #endif
 }
 
-PointOnTrigon psykronix::relationOfPointAndTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon)
+PointOnTrigon psykronix::relationOfPointAndTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon) // axisZ direction
 {
 	//if (!isPointRayAcrossTriangle(point, trigon))
 	//	return PointOnTrigon::POINT_OUTER;
@@ -1209,11 +1212,11 @@ PointOnTrigon psykronix::relationOfPointAndTriangle(const Eigen::Vector3d& point
 		return PointOnTrigon::POINT_VERTEX_1;
 	else if (point.x() == trigon[2].x() && point.y() == trigon[2].y())
 		return PointOnTrigon::POINT_VERTEX_2;
-	else if ((point - trigon[1]).cross(point - trigon[0]).isZero())
+	else if ((point - trigon[1]).cross(point - trigon[0]).z() == 0.0) // point on edge's projection
 		return PointOnTrigon::POINT_EDGE_01;
-	else if ((point - trigon[2]).cross(point - trigon[1]).isZero())
+	else if ((point - trigon[2]).cross(point - trigon[1]).z() == 0.0)
 		return PointOnTrigon::POINT_EDGE_12;
-	else if ((point - trigon[0]).cross(point - trigon[2]).isZero())
+	else if ((point - trigon[0]).cross(point - trigon[2]).z() == 0.0)
 		return PointOnTrigon::POINT_EDGE_20;
 	return PointOnTrigon::POINT_INNER;
 }
@@ -1318,9 +1321,9 @@ bool psykronix::isTwoTrianglesIntersectionSAT(const std::array<Eigen::Vector3d, 
 	if (triA_legal && triB_legal)
 	{
 		// Compute cross products of edges (15 possible axes)
-		std::array<Eigen::Vector3d, 15> axes = { { //order matters speed
-				//edgesA[0].cross(edgesA[1]),
-				//edgesB[0].cross(edgesB[1]),
+		std::array<Eigen::Vector3d, 17> axes = { { //order matters speed
+				edgesA[0].cross(edgesA[1]), //add
+				edgesB[0].cross(edgesB[1]),
 				edgesA[0],
 				edgesA[1],
 				edgesA[2],
@@ -1418,7 +1421,7 @@ bool psykronix::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>&
 //	if (edgesA[0].cross(edgesA[1]).isZero() || edgesB[0].cross(edgesB[1]).isZero())
 //		count_err_degen_tri++;
 //#endif
-	std::array<Eigen::Vector3d, 15> axes = { { //order matters speed
+	std::array<Eigen::Vector3d, 17> axes = { { //order matters speed
 			edgesA[0].cross(edgesB[0]),
 			edgesA[0].cross(edgesB[1]),
 			edgesA[0].cross(edgesB[2]),
@@ -1431,9 +1434,11 @@ bool psykronix::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>&
 			edgesA[0],
 			edgesA[1],
 			edgesA[2],
+			edgesA[0].cross(edgesA[1]), //add
 			edgesB[0],
 			edgesB[1],
-			edgesB[2]} };
+			edgesB[2],
+			edgesB[0].cross(edgesB[1])	} }; //add
 	// Check for overlap along each axis
 	for (const auto& axis : axes) //fast than index
 	{

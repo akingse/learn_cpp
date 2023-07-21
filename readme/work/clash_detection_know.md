@@ -233,3 +233,15 @@ SAT指出：“**如果两个凸面物体没有穿透，则存在一根轴，使
 
 二维凸包，获取分离轴，**只要测试每个多边形的边的法线即可**
 
+
+
+### eigen矩阵Affine3d
+
+4*4，竖排拉成一行
+
+![image-20230721150559987](C:/Users/Aking/AppData/Roaming/Typora/typora-user-images/image-20230721150559987.png)
+
+
+
+
+
