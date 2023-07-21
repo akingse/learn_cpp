@@ -15,7 +15,7 @@ static constexpr double _eps = -eps;
 std::atomic<size_t> getTriangleBoundC = 0, isTwoTrianglesInter = 0, getTriDistC = 0, isTriangleBoundC = 0,
 count_pointInTri = 0, count_edgeCrossTri = 0, count_segCrossTri = 0, count_across = 0,
 count_err_inputbox = 0, count_err_inter_dist = 0, count_err_repeat_tri = 0; // count_err_degen_tri = 0
-
+extern std::atomic<size_t> count_hard_in_mesh;
 
 //isPointInTriangle2D
 bool psykronix::isPointInTriangle(const Vector2d& point, const std::array<Vector2d, 3>& trigon) // 2D
@@ -1091,7 +1091,33 @@ bool psykronix::isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& s
 	}
 }
 
-#define USING_THEOREM_SAT
+bool psykronix::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& points, const std::vector<std::array<int, 3>>& faces)
+{
+	for (const auto& iter : faces)
+	{
+		Vector3d normal = (points[iter[1]] - points[iter[0]]).cross(points[iter[2]] - points[iter[0]]).normalized();
+		bool isFirst = true, isLeft = false, temp = false;
+		for (size_t i = 0; i < points.size(); ++i)
+		{
+			if (i == iter[0] || i == iter[1] || i == iter[2] || fabs(normal.dot(points[i] - points[iter[0]])) < FLT_EPSILON) // self and coplanar
+				continue;
+			temp = normal.dot(points[i] - points[iter[0]]) < 0.0;
+			if (isFirst)
+			{
+				isLeft = temp;
+				isFirst = false;
+			}
+			else
+			{
+				if (temp != isLeft)
+					return false;
+			}
+		}
+	}
+	return true;
+}
+
+#define USING_METHOD_SAT
 // whlie ray across same edge of two triangles
 bool psykronix::isPointRayAcrossTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon)
 {
@@ -1104,7 +1130,7 @@ bool psykronix::isPointRayAcrossTriangle(const Eigen::Vector3d& point, const std
 		point.y() < std::min(std::min(trigon[0].y(), trigon[1].y()), trigon[2].y()))
 		return false; // range box judge
 	//using SAT
-#ifdef USING_THEOREM_SAT
+#ifdef USING_METHOD_SAT
 	//second pre-process (2D, point-in-triangle)
 	if (!isPointInTriangle(point, trigon))
 		return false;
@@ -1194,11 +1220,12 @@ PointOnTrigon psykronix::relationOfPointAndTriangle(const Eigen::Vector3d& point
 
 bool psykronix::isPointInConvexPolyhedron(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
 {
+#ifdef STATISTIC_DATA_COUNT
+	count_hard_in_mesh++;
+#endif  
 	size_t count = 0;
-	//set<Vector3d> vertexVct;
-	//set<array<Vector3d,2>> edgeVct;
-	vector<Vector3d> vertexVct;
-	vector<array<Vector3d, 2>> edgeVct;
+	set<int> vertexSet;
+	set<array<int, 2>> edgeSet;
 	for (const auto& iter : ibo)
 	{
 		Triangle trigon = { { vbo[iter[0]] ,vbo[iter[1]] ,vbo[iter[2]] } };
@@ -1207,41 +1234,38 @@ bool psykronix::isPointInConvexPolyhedron(const Eigen::Vector3d& point, const st
 			PointOnTrigon relation = relationOfPointAndTriangle(point, trigon);
 			if (PointOnTrigon::POINT_INNER == relation)
 				count++;
-			else if (PointOnTrigon::POINT_INNER == POINT_VERTEX_0 && std::find(vertexVct.begin(), vertexVct.end(), trigon[0]) == vertexVct.end()) //vertexVct.find(trigon[0]) == vertexVct.end())
+			else if (PointOnTrigon::POINT_VERTEX_0 == relation && vertexSet.find(iter[0]) == vertexSet.end())
 			{
 				count++;
-				vertexVct.push_back(trigon[0]);
+				vertexSet.insert(iter[0]);
 			}
-			else if (PointOnTrigon::POINT_INNER == POINT_VERTEX_1 && std::find(vertexVct.begin(), vertexVct.end(), trigon[1]) == vertexVct.end()) //vertexVct.find(trigon[1]) == vertexVct.end())
+			else if (PointOnTrigon::POINT_VERTEX_1 == relation && vertexSet.find(iter[1]) == vertexSet.end())
 			{
 				count++;
-				vertexVct.push_back(trigon[1]);
+				vertexSet.insert(iter[1]);
 			}
-			else if (PointOnTrigon::POINT_INNER == POINT_VERTEX_2 && std::find(vertexVct.begin(), vertexVct.end(), trigon[2]) == vertexVct.end()) //vertexVct.find(trigon[2]) == vertexVct.end())
+			else if (PointOnTrigon::POINT_VERTEX_2 == relation && vertexSet.find(iter[2]) == vertexSet.end())
 			{
 				count++;
-				vertexVct.push_back(trigon[2]);
+				vertexSet.insert(iter[2]);
 			}
-			else if (PointOnTrigon::POINT_INNER == POINT_EDGE_01 && 
-				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[0], trigon[1] }) == edgeVct.end() &&
-				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[1], trigon[0] }) == edgeVct.end())
+			else if (PointOnTrigon::POINT_EDGE_01 == relation &&
+				edgeSet.find({ iter[0], iter[1] }) == edgeSet.end() && edgeSet.find({ iter[1], iter[0] }) == edgeSet.end())
 			{
 				count++;
-				edgeVct.push_back({ trigon[0], trigon[1] });
+				edgeSet.insert({ iter[0], iter[1] });
 			}
-			else if (PointOnTrigon::POINT_INNER == POINT_EDGE_12 &&
-				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[1], trigon[2] }) == edgeVct.end() &&
-				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[2], trigon[1] }) == edgeVct.end())
+			else if (PointOnTrigon::POINT_EDGE_12 == relation &&
+				edgeSet.find({ iter[1], iter[2] }) == edgeSet.end() && edgeSet.find({ iter[2], iter[1] }) == edgeSet.end())
 			{
 				count++;
-				edgeVct.push_back({ trigon[1], trigon[2] });
+				edgeSet.insert({ iter[1], iter[2] });
 			}
-			else if (PointOnTrigon::POINT_INNER == POINT_EDGE_20 &&
-				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[2], trigon[0] }) == edgeVct.end() &&
-				std::find(edgeVct.begin(), edgeVct.end(), array<Vector3d, 2>{ trigon[0], trigon[2] }) == edgeVct.end())
+			else if (PointOnTrigon::POINT_EDGE_20 == relation &&
+				edgeSet.find({ iter[2], iter[0] }) == edgeSet.end() && edgeSet.find({ iter[0], iter[2] }) == edgeSet.end())
 			{
 				count++;
-				edgeVct.push_back({ trigon[2], trigon[0] });
+				edgeSet.insert({ iter[2], iter[0] });
 			}
 		}
 	}
@@ -1441,328 +1465,6 @@ bool psykronix::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>&
 	//Eigen::Vector3d croA = edgesA[0].cross(edgesA[1]);
 	//Eigen::Vector3d croB = edgesB[0].cross(edgesB[1]);
 	//return !(edgesA[0].cross(edgesA[1]).isZero() || edgesB[0].cross(edgesB[1]).isZero());
-	return true;
-}
-
-bool psykronix::TriangularIntersectionTest(const std::array<Eigen::Vector3d, 3>& T1, const std::array<Eigen::Vector3d, 3>& T2)
-{
-	//#ifdef STATISTIC_DATA_COUNT
-	//	isTwoTrianglesInter++;
-	//#endif
-	const Eigen::Vector3d& A1 = *(const Eigen::Vector3d*)(&T1.at(0));
-	const Eigen::Vector3d& B1 = *(const Eigen::Vector3d*)(&T1.at(1));
-	const Eigen::Vector3d& C1 = *(const Eigen::Vector3d*)(&T1.at(2));
-	const Eigen::Vector3d& A2 = *(const Eigen::Vector3d*)(&T2.at(0));
-	const Eigen::Vector3d& B2 = *(const Eigen::Vector3d*)(&T2.at(1));
-	const Eigen::Vector3d& C2 = *(const Eigen::Vector3d*)(&T2.at(2));
-	// T1
-	Eigen::Vector3d A1B1 = B1 - A1;
-	Eigen::Vector3d B1C1 = C1 - B1;
-	Eigen::Vector3d C1A1 = A1 - C1;
-	// A1 T2
-	Eigen::Vector3d A1A2 = A2 - A1;
-	Eigen::Vector3d A1B2 = B2 - A1;
-	Eigen::Vector3d A1C2 = C2 - A1;
-	// B1 T2
-	Eigen::Vector3d B1A2 = A2 - B1;
-	Eigen::Vector3d B1B2 = B2 - B1;
-	Eigen::Vector3d B1C2 = C2 - B1;
-	// C1 T2
-	Eigen::Vector3d C1A2 = A2 - C1;
-	Eigen::Vector3d C1B2 = B2 - C1;
-	Eigen::Vector3d C1C2 = C2 - C1;
-
-	// T2
-	Eigen::Vector3d A2B2 = B2 - A2;
-	Eigen::Vector3d B2C2 = C2 - A2;
-	Eigen::Vector3d C2A2 = A2 - C2;
-	// A2 T1
-	Eigen::Vector3d A2A1 = A1 - A2;
-	Eigen::Vector3d A2B1 = B1 - A2;
-	Eigen::Vector3d A2C1 = C1 - A2;
-	// B2 T1
-	Eigen::Vector3d B2A1 = A1 - B2;
-	Eigen::Vector3d B2B1 = B1 - B2;
-	Eigen::Vector3d B2C1 = C1 - B2;
-	// C2 T1
-	Eigen::Vector3d C2A1 = A1 - C2;
-	Eigen::Vector3d C2B1 = B1 - C2;
-	Eigen::Vector3d C2C1 = C1 - C2;
-
-	// n1
-	Eigen::Vector3d n1 = A1B1.cross(B1C1);
-	double n1_t1 = A1A2.dot(n1);
-	double n1_t2 = A1B2.dot(n1);
-	double n1_t3 = A1C2.dot(n1);
-
-	// n2
-	Eigen::Vector3d n2 = A2B2.cross(B2C2);
-	double n2_t1 = A2A1.dot(n2);
-	double n2_t2 = A2B1.dot(n2);
-	double n2_t3 = A2C1.dot(n2);
-	unsigned int n1_ts = (n1_t1 > 0.0 ? 18 : (n1_t1 < 0.0 ? 0 : 9)) + (n1_t2 > 0.0 ? 6 : (n1_t2 < 0.0 ? 0 : 3)) + (n1_t3 > 0.0 ? 2 : (n1_t3 < 0.0 ? 0 : 1));
-	unsigned int n2_ts = (n2_t1 > 0.0 ? 18 : (n2_t1 < 0.0 ? 0 : 9)) + (n2_t2 > 0.0 ? 6 : (n2_t2 < 0.0 ? 0 : 3)) + (n2_t3 > 0.0 ? 2 : (n2_t3 < 0.0 ? 0 : 1));
-	if (n1_ts == 0 || n2_ts == 0 || n1_ts == 26 || n2_ts == 26)
-		return false;   // +*/<  72,48,0,18
-	// ¹²Ãæ
-	if (n1_ts == 13 || n2_ts == 13)
-	{
-		Eigen::Vector3d A1B1_outboard = A1B1.cross(n1);
-		double A2_k1 = A1A2.dot(A1B1_outboard);
-		double B2_k1 = A1B2.dot(A1B1_outboard);
-		double C2_k1 = A1C2.dot(A1B1_outboard);
-		if (A2_k1 > 0 && B2_k1 > 0 && C2_k1 > 0)
-			return false; // +*/<  84,72,0,21
-		Eigen::Vector3d B1C1_outboard = B1C1.cross(n1);
-		double A2_k2 = B1A2.dot(B1C1_outboard);
-		double B2_k2 = B1B2.dot(B1C1_outboard);
-		double C2_k2 = B1C2.dot(B1C1_outboard);
-		if (A2_k2 > 0 && B2_k2 > 0 && C2_k2 > 0)
-			return false; // +*/<  96,96,0,24
-		Eigen::Vector3d C1A1_outboard = C1A1.cross(n1);
-		double A2_k3 = C1A2.dot(C1A1_outboard);
-		double B2_k3 = C1B2.dot(C1A1_outboard);
-		double C2_k3 = C1C2.dot(C1A1_outboard);
-		if (A2_k3 > 0 && B2_k3 > 0 && C2_k3 > 0)
-			return false; // +*/<  108,120,0,27 
-		Eigen::Vector3d A2B2_outboard = A2B2.cross(n2);
-		double A1_k1 = A2A1.dot(A2B2_outboard);
-		double B1_k1 = A2B1.dot(A2B2_outboard);
-		double C1_k1 = A2C1.dot(A2B2_outboard);
-		if (A1_k1 > 0 && B1_k1 > 0 && C1_k1 > 0)
-			return false; // +*/<  120,144,0,30
-		Eigen::Vector3d B2C2_outboard = B2C2.cross(n2);
-		double A1_k2 = B2A1.dot(B2C2_outboard);
-		double B1_k2 = B2B1.dot(B2C2_outboard);
-		double C1_k2 = B2C1.dot(B2C2_outboard);
-		if (A1_k1 > 0 && B1_k1 > 0 && C1_k1 > 0)
-			return false; // +*/<  132,168,0,33
-		Eigen::Vector3d C2A2_outboard = C2A2.cross(n2);
-		double A1_k3 = C2A1.dot(C2A2_outboard);
-		double B1_k3 = C2B1.dot(C2A2_outboard);
-		double C1_k3 = C2C1.dot(C2A2_outboard);
-		if (A1_k1 > 0 && B1_k1 > 0 && C1_k1 > 0)
-			return false; // +*/<  144,192,0,36
-		return true; // +*/<  144,192,0,18
-	}
-	Eigen::Vector3d O1, P1, Q1, O2, P2, Q2;
-	switch (n1_ts)
-	{
-	case 9:
-	case 17:
-	{
-		// A2;
-		Eigen::Vector3d A1B1_outboard = A1B1.cross(n1);
-		Eigen::Vector3d B1C1_outboard = B1C1.cross(n1);
-		Eigen::Vector3d C1A1_outboard = C1A1.cross(n1);
-		double k1 = A1A2.dot(A1B1_outboard);
-		double k2 = B1A2.dot(B1C1_outboard);
-		double k3 = C1A2.dot(C1A1_outboard);
-		return (k1 <= 0 && k2 <= 0 && k3 <= 0); // +*/<  90,84,0,21
-	}
-	case 3:
-	case 23:
-	{
-		// B2;
-		Eigen::Vector3d A1B1_outboard = A1B1.cross(n1);
-		Eigen::Vector3d B1C1_outboard = B1C1.cross(n1);
-		Eigen::Vector3d C1A1_outboard = C1A1.cross(n1);
-		double k1 = A1B2.dot(A1B1_outboard);
-		double k2 = B1B2.dot(B1C1_outboard);
-		double k3 = C1B2.dot(C1A1_outboard);
-		return (k1 <= 0 && k2 <= 0 && k3 <= 0); // +*/<  90,84,0,21
-	}
-	case 1:
-	case 25:
-	{
-		// C2;
-		Eigen::Vector3d A1B1_outboard = A1B1.cross(n1);
-		Eigen::Vector3d B1C1_outboard = B1C1.cross(n1);
-		Eigen::Vector3d C1A1_outboard = C1A1.cross(n1);
-		double k1 = A1C2.dot(A1B1_outboard);
-		double k2 = B1C2.dot(B1C1_outboard);
-		double k3 = C1C2.dot(C1A1_outboard);
-		return (k1 <= 0 && k2 <= 0 && k3 <= 0); // +*/<  90,84,0,21
-	}
-	case 12:
-	case 14:
-	{
-		// A2B2;
-		Eigen::Vector3d A2B2_outboard = A2B2.cross(n1);
-		double kA = A2A1.dot(A2B2_outboard);
-		double kB = A2B1.dot(A2B2_outboard);
-		double kC = A2C1.dot(A2B2_outboard);
-		if ((kA > 0 && kB > 0 && kC > 0) || (kA < 0 && kB < 0 && kC < 0)) // +*/<  84,72,0,24
-			return false;
-		break;
-	}
-	case 4:
-	case 22:
-	{
-		// B2C2;
-		Eigen::Vector3d B2C2_outboard = B2C2.cross(n1);
-		double kA = B2A1.dot(B2C2_outboard);
-		double kB = B2B1.dot(B2C2_outboard);
-		double kC = B2C1.dot(B2C2_outboard);
-		if ((kA > 0 && kB > 0 && kC > 0) || (kA < 0 && kB < 0 && kC < 0)) // +*/<  84,72,0,24
-			return false;
-		break;
-	}
-	case 10:
-	case 16:
-	{
-		// C2A2;
-		Eigen::Vector3d C2A2_outboard = C2A2.cross(n1);
-		double kA = C2A1.dot(C2A2_outboard);
-		double kB = C2B1.dot(C2A2_outboard);
-		double kC = C2C1.dot(C2A2_outboard);
-		if ((kA > 0 && kB > 0 && kC > 0) || (kA < 0 && kB < 0 && kC < 0)) // +*/<  84,72,0,24
-			return false;
-		break;
-	}
-	case 7:     // C2;      A2B2;
-	case 19:    // C2;      A2B2;
-	case 8:     // C2A2;    A2B2;
-	case 18:    // C2A2;    A2B2;
-		O2 = A2;
-		P2 = B2;
-		Q2 = C2;
-		break;
-	case 11:    // A2;      B2C2;
-	case 15:    // A2;      B2C2;
-	case 6:     // A2B2;    B2C2;
-	case 20:    // A2B2;    B2C2;
-		O2 = B2;
-		P2 = A2;
-		Q2 = C2;
-		break;
-	case 5:     // B2;      C2A2;
-	case 21:    // B2;      C2A2;
-	case 2:     // B2C2;    C2A2;
-	case 24:    // B2C2;    C2A2;
-		O2 = C2;
-		P2 = B2;
-		Q2 = A2;
-		break;
-	}
-	switch (n2_ts)
-	{
-	case 9:
-	case 17:
-	{
-		// A1;
-		Eigen::Vector3d A2B2_outboard = A2B2.cross(n2);
-		Eigen::Vector3d B2C2_outboard = B2C2.cross(n2);
-		Eigen::Vector3d C2A2_outboard = C2A2.cross(n2);
-		double k1 = A2A1.dot(A2B2_outboard);
-		double k2 = B2A1.dot(B2C2_outboard);
-		double k3 = C2A1.dot(C2A2_outboard);
-		return (k1 <= 0 && k2 <= 0 && k3 <= 0); // +*/<  90,84,0,21
-	}
-	case 3:
-	case 23:
-	{
-		// B1;
-		Eigen::Vector3d A2B2_outboard = A2B2.cross(n2);
-		Eigen::Vector3d B2C2_outboard = B2C2.cross(n2);
-		Eigen::Vector3d C2A2_outboard = C2A2.cross(n2);
-		double k1 = A2B1.dot(A2B2_outboard);
-		double k2 = B2B1.dot(B2C2_outboard);
-		double k3 = C2B1.dot(C2A2_outboard);
-		return (k1 <= 0 && k2 <= 0 && k3 <= 0); // +*/<  90,84,0,21
-	}
-	case 1:
-	case 25:
-	{
-		// C1;
-		Eigen::Vector3d A2B2_outboard = A1B2.cross(n2);
-		Eigen::Vector3d B2C2_outboard = B1C2.cross(n2);
-		Eigen::Vector3d C2A2_outboard = C1A2.cross(n2);
-		double k1 = A2C1.dot(A2B2_outboard);
-		double k2 = B2C1.dot(B2C2_outboard);
-		double k3 = C2C1.dot(C2A2_outboard);
-		return (k1 <= 0 && k2 <= 0 && k3 <= 0); // +*/<  90,84,0,21
-	}
-	case 12:
-	case 14:
-	{
-		// A1B1;
-		Eigen::Vector3d A2B2_outboard = A2B2.cross(n1);
-		double kA = A2A1.dot(A2B2_outboard);
-		double kB = A2B1.dot(A2B2_outboard);
-		double kC = A2C1.dot(A2B2_outboard);
-		if ((kA > 0 && kB > 0 && kC > 0) || (kA < 0 && kB < 0 && kC < 0)) // +*/<  84,72,0,24
-			return false;
-		break;
-	}
-	case 4:
-	case 22:
-	{
-		// B1C1;
-		Eigen::Vector3d B2C2_outboard = B2C2.cross(n1);
-		double kA = B2A1.dot(B2C2_outboard);
-		double kB = B2B1.dot(B2C2_outboard);
-		double kC = B2C1.dot(B2C2_outboard);
-		if ((kA > 0 && kB > 0 && kC > 0) || (kA < 0 && kB < 0 && kC < 0)) // +*/<  84,72,0,24
-			return false;
-		break;
-	}
-	case 10:
-	case 16:
-	{
-		// C1A1;
-		Eigen::Vector3d C2A2_outboard = C2A2.cross(n1);
-		double kA = C2A1.dot(C2A2_outboard);
-		double kB = C2B1.dot(C2A2_outboard);
-		double kC = C2C1.dot(C2A2_outboard);
-		if ((kA > 0 && kB > 0 && kC > 0) || (kA < 0 && kB < 0 && kC < 0)) // +*/<  84,72,0,24
-			return false;
-		break;
-	}
-	case 7:     // C1;      A1B1;
-	case 19:    // C1;      A1B1;
-	case 8:     // C1A1;    A1B1;
-	case 18:    // C1A1;    A1B1;
-		O1 = A1;
-		P1 = B1;
-		Q1 = C1;
-		break;
-	case 11:    // A1;      B1C1;
-	case 15:    // A1;      B1C1;
-	case 6:     // A1B1;    B1C1;
-	case 20:    // A1B1;    B1C1;
-		O1 = B1;
-		P1 = A1;
-		Q1 = C1;
-		break;
-	case 5:     // B1;      C1A1;
-	case 21:    // B1;      C1A1;
-	case 2:     // B1C1;    C1A2;
-	case 24:    // B1C1;    C1A2;
-		O1 = C1;
-		P1 = B1;
-		Q1 = A1;
-		break;
-	}
-	Eigen::Vector3d O1O2 = O2 - O1;
-	Eigen::Vector3d O1P2 = P2 - O1;
-	Eigen::Vector3d O1Q2 = Q2 - O1;
-	Eigen::Vector3d O1P1 = P1 - O1;
-	Eigen::Vector3d O1Q1 = Q1 - O1;
-
-	Eigen::Vector3d NP = O1P1.cross(O1O2);
-	double kpk = NP.dot(O1Q1);
-	double kpp = NP.dot(O1P2);
-	double kpq = NP.dot(O1Q2);
-	if ((kpk > 0 && kpp < 0 && kpq < 0) || (kpk < 0 && kpp > 0 && kpq > 0))
-		return false; // +*/<  89,74,0,24
-
-	Eigen::Vector3d NQ = O1Q1.cross(O1O2);
-	double kqk = NQ.dot(O1P1);
-	double kqp = NQ.dot(O1P2);
-	double kqq = NQ.dot(O1Q2);
-	if ((kqk > 0 && kqp < 0 && kqq < 0) || (kqk < 0 && kqp > 0 && kqq > 0))
-		return false; // +*/<  101,98,0,30
 	return true;
 }
 

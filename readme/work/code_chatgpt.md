@@ -1,6 +1,40 @@
 ## chatgpt-code
 
+符合距离场
 
+符号距离场（signed distance field）是一种用于描述二维或三维几何形状的数据结构。它使用向量表示空间中某个点到最近边界的距离，而且这个距离有正负之分，所以称为“符号”距离场。
+
+对于一个点来说，如果它在几何形状内部，则距离值为负数；如果在外部，则距离值为正数；如果在边界上，则距离值为零。通过计算距离场，可以有效地表示和处理几何形状的边界信息和碰撞检测等问题。同时，符号距离场还被广泛应用于图像渲染、字体生成、机器学习等领域。
+
+以下是几个常用的计算符号距离场的网站：
+
+1. https://www.shaderific.com/sdfgen/ - Shaderific SDFGen，支持二维和三维形状的生成。
+
+2. https://evanw.github.io/signed-distance-field-editor/ - Signed Distance Field Editor，一个在线编辑和生成符号距离场的工具。
+
+3. https://github.com/memononen/SDFGen - SDFGen，一个基于 C++ 的开源符号距离场生成器，可以在命令行中运行。
+
+4. http://cpetry.github.io/TextureGenerator-Online/ - Texture Generator Online，该网站中的 Symbolic Shapes 功能可以帮助用户生成二维和三维图形并导出为 SVG 或 PNG 文件，其中包含了符号距离场数据。
+
+需要注意的是，由于符号距离场的计算复杂度较高，在处理大型模型或纹理时可能会耗费较长时间。
+
+如果你想了解更多有关符号距离场的内容，可以访问以下官方网站：
+
+1. Syntopia Blog：https://www.syntopia.com/
+
+该博客由 Inigo Quilez 创办，是一个涵盖了计算机图形学、数学、物理等多个领域的知识平台。其中也包含了大量关于符号距离场的文章和教程。
+
+2. Shaderific SDFGen：https://www.shaderific.com/sdfgen/
+
+Shaderific SDFGen 是一个在线符号距离场生成器，提供了基本形状如球体、立方体、圆柱体等的快速生成方法，并且支持导出成为代码或纹理贴图。该网站同时也提供了很多教程和示例供用户参考。
+
+3. Libfive：https://libfive.com/
+
+Libfive 是一套开源的 CAD 建模工具，能够将复杂几何体转换为符号距离场表示。该工具被广泛应用在工业设计、仿真与模拟、虚拟现实等领域。
+
+
+
+---
 
 ### eigen
 
@@ -316,3 +350,55 @@ int main() {
 要注意的是，在计算射线与面的交点时，我们还需要检查交点是否在该面内部。这可以通过计算交点到面的三个顶点的距离来实现。如果交点在这三个点构成的三角形内部，则认为交点在该面内部。
 
 总的来说，这个示例代码展示了如何使用射线法来判断一个点是否在多面体内部。但需要注意的是，该方法只适用于凸多面体，对于非凸多面体可能会产生错误的结果。
+
+---
+
+
+
+### 判断凹多面体
+
+Convex polyhedron 凸多面体
+
+Concave polyhedron 凹多面体
+
+判断一个多面体是凸多面体还是凹多面体可以使用计算几何的知识，其中一个常用的方法是检查多面体的所有面是否都朝着多面体的内部。具体实现如下：
+
+定义一个函数来判断点p是否在面abc的内部
+
+```c
+bool in(const Point& p, const Point& a, const Point& b, const Point& c) 
+{
+  Point n = cross(b-a, c-a); // 计算面abc的法向量
+  return dot(n, p-a) < 0; // 如果点p在法向量的负方向（即面abc的内部），返回true
+}
+
+
+```
+
+
+
+```c
+bool is_convex(const vector<Point>& points, const vector<Face>& faces) {
+  int n = points.size(), m = faces.size();
+  for (int i = 0; i < m; ++i) {
+    bool ok = false;
+    for (int j = 0; j < n; ++j) {
+      if (j == faces[i].a || j == faces[i].b || j == faces[i].c) continue;
+      if (in(points[j], points[faces[i].a], points[faces[i].b], points[faces[i].c])) {
+        ok = true; // 存在一个点在当前面的内部，说明多面体不是凸多面体
+        break;
+      }
+    }
+    if (!ok) return false;
+  }
+  return true;
+}
+```
+
+其中，points表示多面体的所有顶点，faces表示多面体的所有面。该函数遍历所有面，对于每一个面，检查其它所有点是否都在该面的外部，如果存在一个点在该面的内部，则说明多面体不是凸多面体。如果遍历完所有面都没有发现这种情况，则说明多面体是凸多面体。
+
+
+
+
+
+对于凹多面体，你无法直接使用 SAT。你可以先尝试将凹多面体分解为凸多面体的集合（例如，使用有序凸分解法，例如 HACD），然后使用 SAT 在这些凸多面体之间检测碰撞。在这种情况下，你需要计算每个凸多面体之间的穿透深度，并从中选择最大的穿透深度作为整个凹多面体之间的穿透深度。

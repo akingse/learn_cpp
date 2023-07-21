@@ -50,6 +50,7 @@
 //#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 
 // my custom
+typedef std::array<Eigen::Vector3d, 3> Triangle;
 #include "Project1_API.h"
 #include "my_geometry.h"			//export
 #include "test_serialize.h"
@@ -61,7 +62,6 @@
 #define DLLEXPORT __declspec(dllexport)
 #endif
 //#define STATISTIC_DATA_COUNT
-typedef std::array<Eigen::Vector3d, 3> Triangle;
 #include "my_class_fun.h"		
 #include "calculateTriangle.h"		//DLL-API
 

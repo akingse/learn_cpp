@@ -1,6 +1,5 @@
 #include "pch.h"
 #include <iomanip>
-#include "C:/Users/Aking/source/repos/bimbase/Include/fbs/inter_triangels_info_generated.h"
 using namespace std;
 using namespace para;
 using namespace Eigen;
@@ -74,6 +73,70 @@ void printTrigon(const Triangle& trigon)
 	cout << "" << endl;
 }
 
+typedef array<int, 3> Face;
+bool is_convex(const vector<Vector3d>& points, const vector<array<int, 3>>& faces)
+{
+	for (const auto& iter : faces)
+	{
+		Vector3d normal = (points[iter[1]] - points[iter[0]]).cross(points[iter[2]] - points[iter[0]]).normalized();
+		bool isFirst = true, isLeft = false, temp = false;
+		for (size_t i = 0; i < points.size(); ++i)
+		{
+			if (i == iter[0] || i == iter[1] || i == iter[2] || fabs(normal.dot(points[i] - points[iter[0]])) < FLT_EPSILON) // self and coplanar
+				continue;
+			temp = normal.dot(points[i] - points[iter[0]]) < 0.0;
+			if (isFirst)
+			{
+				isLeft = temp;
+				isFirst = false;
+			}
+			else
+			{
+				if (temp != isLeft)
+					return false;
+			}
+		}
+	}
+	return true;
+}
+
+bool isConvex(const vector<Vector3d>& points, const vector<array<int, 3>>& faces)
+{
+	//for (int i = 0; i < m; ++i) 
+	//{
+	//	for (int j = 0; j < n; ++j) 
+	//	{
+	//		if (j == faces[i][0] || j == faces[i][1] || j == faces[i][2]) //
+	//			continue;
+	//		if ((points[faces[i][1]] - points[faces[i][0]]).cross(points[faces[i][2]] - points[faces[i][0]]).
+	//			dot(points[j] - points[faces[i][0]]) < 0.0)
+	//		{
+	//			//isIn = true; // ´æÔÚÒ»¸öµãÔÚµ±Ç°ÃæµÄÄÚ²¿£¬ËµÃ÷¶àÃæÌå²»ÊÇÍ¹¶àÃæÌå
+	//			//break;
+	//			return false;
+	//		}
+	//	}
+	//}
+	size_t numFaces = faces.size();
+	// ¼ÆËãÃ¿¸öÃæµÄ·¨ÏòÁ¿
+	vector<Vector3d> normals(numFaces);
+	for (size_t i = 0; i < numFaces; ++i) 
+	{
+		Vector3d v0 = points[faces[i][1]] - points[faces[i][0]];
+		Vector3d v1 = points[faces[i][2]] - points[faces[i][0]];
+		normals[i] = v0.cross(v1).normalized();
+	}
+	// ¼ÆËãÏàÁÚÃæµÄ·¨ÏòÁ¿µÄµã»ý
+	for (size_t i = 0; i < numFaces; ++i) {
+		for (size_t j = i + 1; j < numFaces; ++j) 
+		{
+			if (normals[i].dot(normals[j]) < 0) 
+				return false;  // °¼¶àÃæÌå
+		}
+	}
+	return true;  // Í¹¶àÃæÌå
+}
+
 static void _test0()
 {
 	std::array<std::array<double, 3>, 3> triangle = { { {0,0,0},{1,1,1}, {2,2,2}} };
@@ -142,7 +205,7 @@ static void _test1()
 	Vector3d triB_1 = Vector3d(4924595.2577039087, -385951.32193110074, 5750.0000000000000);
 	Vector3d triB_2 = Vector3d(4924589.8109916430, -385975.18553675216, 5750.0000000000000);
 	bool isTI = isTwoTrianglesIntersection({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
-	bool isTIT = TriangularIntersectionTest({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+	//bool isTIT = TriangularIntersectionTest({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
 
 	triA_0 = Vector3d(4948618.6464014640, -378059.39893364342, 39.982199933911403); //x
 	triA_1 = Vector3d(4948618.6464014640, -378066.89893364336, 39.982199933911403);	//x-
@@ -302,10 +365,7 @@ static void _test2()
 
 static void _test3()
 {
-	//void _wirteTrigonFile(const std::string & fileName, const std::vector<std::tuple<
-	//	std::array<Eigen::Vector3d, 3>, std::array<Eigen::Vector3d, 3>, unsigned long long, unsigned long long, double>>& triinfos)
-	string path = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/";
-	ifstream inFile(path + "interTriInfo_5108.bin", ios::in | ios::binary);
+
 	std::vector<std::array<uint64_t, 2>> entity1;
 	std::vector<double> diatanceLen;
 	//std::set<double> diatanceList;
@@ -313,43 +373,6 @@ static void _test3()
 	//std::map<double,vector<std::array<uint64_t, 2>>> diatanceList;
 	std::map<double, set<std::array<uint64_t, 2>>> diatanceList;
 
-	if (inFile.is_open())
-	{
-		inFile.seekg(0, std::ios::end);
-		std::streampos fileSize = inFile.tellg();
-		inFile.seekg(0, std::ios::beg);
-		vector<uint8_t> bufferPointer(fileSize);
-		if (!inFile.read(reinterpret_cast<char*>(bufferPointer.data()), fileSize))
-			return;
-		const TriList* triList = GetTriList(bufferPointer.data());// ·´ÐòÁÐ»¯ TriList ¶ÔÏó
-		size_t n = triList->tri_infoes()->size();
-		for (size_t i = 0; i < n; ++i)
-		{
-			const TriInfo* triinfo = triList->tri_infoes()->Get(i);
-			auto tria = triinfo->tri_a();
-			auto trib = triinfo->tri_b();
-			Triangle triA = { Vector3d(tria->p0()->x(),tria->p0()->y(),tria->p0()->z()),
-				Vector3d(tria->p1()->x(),tria->p1()->y(),tria->p1()->z()),
-				Vector3d(tria->p2()->x(),tria->p2()->y(),tria->p2()->z()) };
-			Triangle triB = { Vector3d(trib->p0()->x(),trib->p0()->y(),trib->p0()->z()),
-				Vector3d(trib->p1()->x(),trib->p1()->y(),trib->p1()->z()),
-				Vector3d(trib->p2()->x(),trib->p2()->y(),trib->p2()->z()) };
-			uint64_t entityA = triinfo->entity_a();
-			uint64_t entityB = triinfo->entity_b();
-			double distance = triinfo->distance(); //max=9.3132257461547852e-10
-			if (diatanceList.find(distance) == diatanceList.end())
-				diatanceList.insert({ distance, {{ entityA ,entityB }} });
-			else
-				diatanceList.at(distance).insert({ entityA ,entityB });
-			//cout << distance << endl;
-			entity1.push_back({ entityA ,entityB });
-			if (distance > 1e-9)
-			{
-				diatanceLen.push_back(distance);
-			}
-		}
-		inFile.close();
-	}
 
 	int count = 0;
 	for (auto& iter : diatanceList)
@@ -361,6 +384,9 @@ static void _test3()
 		}
 	}
 	//check
+	// 	//void _wirteTrigonFile(const std::string & fileName, const std::vector<std::tuple<
+	//	std::array<Eigen::Vector3d, 3>, std::array<Eigen::Vector3d, 3>, unsigned long long, unsigned long long, double>>& triinfos)
+	string path = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/";
 	//std::vector<std::array<uint64_t, 2>> entity4 = _readEntityIDFile(path + "entityIdList_hard.bin"); //4030
 	std::vector<std::array<uint64_t, 2>> entity4 = _readEntityIDFile(path + "entityIdList_soft.bin"); //1069
 	for (int i = 0; i < entity1.size(); ++i)
@@ -394,8 +420,38 @@ static void _test4()
 	Triangle tri = { Vector3d(-1, -1, 0),Vector3d(0, 1, 1+ M_PI / 3),Vector3d(1, 0, M_PI/3) };
 	isPointRayAcrossTriangle(p, tri);
 
-
+	cout << "return 0" << endl;
 }
+
+static void _test5()
+{
+	//¶ÁÈ¡¶þ½øÖÆmesh
+	string filename = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/cvtMeshVct_3.bin";
+	//string filename = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/cvtMeshVct_5233.bin";
+	std::vector<ModelMesh> meshs = _read_ModelMesh(filename);
+	size_t count = 0;
+	clock_t startT, endT;
+	startT = clock();
+
+
+	for (auto& iter : meshs)
+	{
+		//bool b1 = isConvex(iter.vbo_, iter.ibo_);
+		//bool b2 = is_convex(iter.vbo_, iter.ibo_);
+		//cout << b1 << b2 << endl;
+		bool isConvex = is_convex(iter.vbo_, iter.ibo_); //isMeshConvexPolyhedron
+		if (!isConvex)
+			count++;
+	}
+	endT = clock();
+	cout << "mesh count=" << meshs.size() << endl;
+	cout << "count=" << count << endl;
+	cout << "time=" << double(endT - startT) / CLOCKS_PER_SEC << "s" << endl;
+
+
+	cout << "return 0" << endl;
+}
+
 
 static int enrol = []()->int
 {
@@ -403,7 +459,8 @@ static int enrol = []()->int
 	//_test1();
 	//_test2();
 	//_test3();
-	_test4();
+	//_test4();
+	_test5();
 	return 0;
 }();
 
@@ -456,6 +513,329 @@ Devillers & GuigueËã·¨(¼ò³ÆDevillers Ëã·¨) Í¨¹ýÈý½ÇÐÎ¸÷¶¥µã¹¹³ÉµÄÐÐÁÐÊ½Õý¸ºµÄ¼¸º
 //------------------------------------------------------------------------------------
 // Voxel 
 //------------------------------------------------------------------------------------
+
+bool TriangularIntersectionTest(const std::array<Eigen::Vector3d, 3>& T1, const std::array<Eigen::Vector3d, 3>& T2)
+{
+	//#ifdef STATISTIC_DATA_COUNT
+	//	isTwoTrianglesInter++;
+	//#endif
+	const Eigen::Vector3d& A1 = *(const Eigen::Vector3d*)(&T1.at(0));
+	const Eigen::Vector3d& B1 = *(const Eigen::Vector3d*)(&T1.at(1));
+	const Eigen::Vector3d& C1 = *(const Eigen::Vector3d*)(&T1.at(2));
+	const Eigen::Vector3d& A2 = *(const Eigen::Vector3d*)(&T2.at(0));
+	const Eigen::Vector3d& B2 = *(const Eigen::Vector3d*)(&T2.at(1));
+	const Eigen::Vector3d& C2 = *(const Eigen::Vector3d*)(&T2.at(2));
+	// T1
+	Eigen::Vector3d A1B1 = B1 - A1;
+	Eigen::Vector3d B1C1 = C1 - B1;
+	Eigen::Vector3d C1A1 = A1 - C1;
+	// A1 T2
+	Eigen::Vector3d A1A2 = A2 - A1;
+	Eigen::Vector3d A1B2 = B2 - A1;
+	Eigen::Vector3d A1C2 = C2 - A1;
+	// B1 T2
+	Eigen::Vector3d B1A2 = A2 - B1;
+	Eigen::Vector3d B1B2 = B2 - B1;
+	Eigen::Vector3d B1C2 = C2 - B1;
+	// C1 T2
+	Eigen::Vector3d C1A2 = A2 - C1;
+	Eigen::Vector3d C1B2 = B2 - C1;
+	Eigen::Vector3d C1C2 = C2 - C1;
+
+	// T2
+	Eigen::Vector3d A2B2 = B2 - A2;
+	Eigen::Vector3d B2C2 = C2 - A2;
+	Eigen::Vector3d C2A2 = A2 - C2;
+	// A2 T1
+	Eigen::Vector3d A2A1 = A1 - A2;
+	Eigen::Vector3d A2B1 = B1 - A2;
+	Eigen::Vector3d A2C1 = C1 - A2;
+	// B2 T1
+	Eigen::Vector3d B2A1 = A1 - B2;
+	Eigen::Vector3d B2B1 = B1 - B2;
+	Eigen::Vector3d B2C1 = C1 - B2;
+	// C2 T1
+	Eigen::Vector3d C2A1 = A1 - C2;
+	Eigen::Vector3d C2B1 = B1 - C2;
+	Eigen::Vector3d C2C1 = C1 - C2;
+
+	// n1
+	Eigen::Vector3d n1 = A1B1.cross(B1C1);
+	double n1_t1 = A1A2.dot(n1);
+	double n1_t2 = A1B2.dot(n1);
+	double n1_t3 = A1C2.dot(n1);
+
+	// n2
+	Eigen::Vector3d n2 = A2B2.cross(B2C2);
+	double n2_t1 = A2A1.dot(n2);
+	double n2_t2 = A2B1.dot(n2);
+	double n2_t3 = A2C1.dot(n2);
+	unsigned int n1_ts = (n1_t1 > 0.0 ? 18 : (n1_t1 < 0.0 ? 0 : 9)) + (n1_t2 > 0.0 ? 6 : (n1_t2 < 0.0 ? 0 : 3)) + (n1_t3 > 0.0 ? 2 : (n1_t3 < 0.0 ? 0 : 1));
+	unsigned int n2_ts = (n2_t1 > 0.0 ? 18 : (n2_t1 < 0.0 ? 0 : 9)) + (n2_t2 > 0.0 ? 6 : (n2_t2 < 0.0 ? 0 : 3)) + (n2_t3 > 0.0 ? 2 : (n2_t3 < 0.0 ? 0 : 1));
+	if (n1_ts == 0 || n2_ts == 0 || n1_ts == 26 || n2_ts == 26)
+		return false;   // +*/<  72,48,0,18
+	// ¹²Ãæ
+	if (n1_ts == 13 || n2_ts == 13)
+	{
+		Eigen::Vector3d A1B1_outboard = A1B1.cross(n1);
+		double A2_k1 = A1A2.dot(A1B1_outboard);
+		double B2_k1 = A1B2.dot(A1B1_outboard);
+		double C2_k1 = A1C2.dot(A1B1_outboard);
+		if (A2_k1 > 0 && B2_k1 > 0 && C2_k1 > 0)
+			return false; // +*/<  84,72,0,21
+		Eigen::Vector3d B1C1_outboard = B1C1.cross(n1);
+		double A2_k2 = B1A2.dot(B1C1_outboard);
+		double B2_k2 = B1B2.dot(B1C1_outboard);
+		double C2_k2 = B1C2.dot(B1C1_outboard);
+		if (A2_k2 > 0 && B2_k2 > 0 && C2_k2 > 0)
+			return false; // +*/<  96,96,0,24
+		Eigen::Vector3d C1A1_outboard = C1A1.cross(n1);
+		double A2_k3 = C1A2.dot(C1A1_outboard);
+		double B2_k3 = C1B2.dot(C1A1_outboard);
+		double C2_k3 = C1C2.dot(C1A1_outboard);
+		if (A2_k3 > 0 && B2_k3 > 0 && C2_k3 > 0)
+			return false; // +*/<  108,120,0,27 
+		Eigen::Vector3d A2B2_outboard = A2B2.cross(n2);
+		double A1_k1 = A2A1.dot(A2B2_outboard);
+		double B1_k1 = A2B1.dot(A2B2_outboard);
+		double C1_k1 = A2C1.dot(A2B2_outboard);
+		if (A1_k1 > 0 && B1_k1 > 0 && C1_k1 > 0)
+			return false; // +*/<  120,144,0,30
+		Eigen::Vector3d B2C2_outboard = B2C2.cross(n2);
+		double A1_k2 = B2A1.dot(B2C2_outboard);
+		double B1_k2 = B2B1.dot(B2C2_outboard);
+		double C1_k2 = B2C1.dot(B2C2_outboard);
+		if (A1_k1 > 0 && B1_k1 > 0 && C1_k1 > 0)
+			return false; // +*/<  132,168,0,33
+		Eigen::Vector3d C2A2_outboard = C2A2.cross(n2);
+		double A1_k3 = C2A1.dot(C2A2_outboard);
+		double B1_k3 = C2B1.dot(C2A2_outboard);
+		double C1_k3 = C2C1.dot(C2A2_outboard);
+		if (A1_k1 > 0 && B1_k1 > 0 && C1_k1 > 0)
+			return false; // +*/<  144,192,0,36
+		return true; // +*/<  144,192,0,18
+	}
+	Eigen::Vector3d O1, P1, Q1, O2, P2, Q2;
+	switch (n1_ts)
+	{
+	case 9:
+	case 17:
+	{
+		// A2;
+		Eigen::Vector3d A1B1_outboard = A1B1.cross(n1);
+		Eigen::Vector3d B1C1_outboard = B1C1.cross(n1);
+		Eigen::Vector3d C1A1_outboard = C1A1.cross(n1);
+		double k1 = A1A2.dot(A1B1_outboard);
+		double k2 = B1A2.dot(B1C1_outboard);
+		double k3 = C1A2.dot(C1A1_outboard);
+		return (k1 <= 0 && k2 <= 0 && k3 <= 0); // +*/<  90,84,0,21
+	}
+	case 3:
+	case 23:
+	{
+		// B2;
+		Eigen::Vector3d A1B1_outboard = A1B1.cross(n1);
+		Eigen::Vector3d B1C1_outboard = B1C1.cross(n1);
+		Eigen::Vector3d C1A1_outboard = C1A1.cross(n1);
+		double k1 = A1B2.dot(A1B1_outboard);
+		double k2 = B1B2.dot(B1C1_outboard);
+		double k3 = C1B2.dot(C1A1_outboard);
+		return (k1 <= 0 && k2 <= 0 && k3 <= 0); // +*/<  90,84,0,21
+	}
+	case 1:
+	case 25:
+	{
+		// C2;
+		Eigen::Vector3d A1B1_outboard = A1B1.cross(n1);
+		Eigen::Vector3d B1C1_outboard = B1C1.cross(n1);
+		Eigen::Vector3d C1A1_outboard = C1A1.cross(n1);
+		double k1 = A1C2.dot(A1B1_outboard);
+		double k2 = B1C2.dot(B1C1_outboard);
+		double k3 = C1C2.dot(C1A1_outboard);
+		return (k1 <= 0 && k2 <= 0 && k3 <= 0); // +*/<  90,84,0,21
+	}
+	case 12:
+	case 14:
+	{
+		// A2B2;
+		Eigen::Vector3d A2B2_outboard = A2B2.cross(n1);
+		double kA = A2A1.dot(A2B2_outboard);
+		double kB = A2B1.dot(A2B2_outboard);
+		double kC = A2C1.dot(A2B2_outboard);
+		if ((kA > 0 && kB > 0 && kC > 0) || (kA < 0 && kB < 0 && kC < 0)) // +*/<  84,72,0,24
+			return false;
+		break;
+	}
+	case 4:
+	case 22:
+	{
+		// B2C2;
+		Eigen::Vector3d B2C2_outboard = B2C2.cross(n1);
+		double kA = B2A1.dot(B2C2_outboard);
+		double kB = B2B1.dot(B2C2_outboard);
+		double kC = B2C1.dot(B2C2_outboard);
+		if ((kA > 0 && kB > 0 && kC > 0) || (kA < 0 && kB < 0 && kC < 0)) // +*/<  84,72,0,24
+			return false;
+		break;
+	}
+	case 10:
+	case 16:
+	{
+		// C2A2;
+		Eigen::Vector3d C2A2_outboard = C2A2.cross(n1);
+		double kA = C2A1.dot(C2A2_outboard);
+		double kB = C2B1.dot(C2A2_outboard);
+		double kC = C2C1.dot(C2A2_outboard);
+		if ((kA > 0 && kB > 0 && kC > 0) || (kA < 0 && kB < 0 && kC < 0)) // +*/<  84,72,0,24
+			return false;
+		break;
+	}
+	case 7:     // C2;      A2B2;
+	case 19:    // C2;      A2B2;
+	case 8:     // C2A2;    A2B2;
+	case 18:    // C2A2;    A2B2;
+		O2 = A2;
+		P2 = B2;
+		Q2 = C2;
+		break;
+	case 11:    // A2;      B2C2;
+	case 15:    // A2;      B2C2;
+	case 6:     // A2B2;    B2C2;
+	case 20:    // A2B2;    B2C2;
+		O2 = B2;
+		P2 = A2;
+		Q2 = C2;
+		break;
+	case 5:     // B2;      C2A2;
+	case 21:    // B2;      C2A2;
+	case 2:     // B2C2;    C2A2;
+	case 24:    // B2C2;    C2A2;
+		O2 = C2;
+		P2 = B2;
+		Q2 = A2;
+		break;
+	}
+	switch (n2_ts)
+	{
+	case 9:
+	case 17:
+	{
+		// A1;
+		Eigen::Vector3d A2B2_outboard = A2B2.cross(n2);
+		Eigen::Vector3d B2C2_outboard = B2C2.cross(n2);
+		Eigen::Vector3d C2A2_outboard = C2A2.cross(n2);
+		double k1 = A2A1.dot(A2B2_outboard);
+		double k2 = B2A1.dot(B2C2_outboard);
+		double k3 = C2A1.dot(C2A2_outboard);
+		return (k1 <= 0 && k2 <= 0 && k3 <= 0); // +*/<  90,84,0,21
+	}
+	case 3:
+	case 23:
+	{
+		// B1;
+		Eigen::Vector3d A2B2_outboard = A2B2.cross(n2);
+		Eigen::Vector3d B2C2_outboard = B2C2.cross(n2);
+		Eigen::Vector3d C2A2_outboard = C2A2.cross(n2);
+		double k1 = A2B1.dot(A2B2_outboard);
+		double k2 = B2B1.dot(B2C2_outboard);
+		double k3 = C2B1.dot(C2A2_outboard);
+		return (k1 <= 0 && k2 <= 0 && k3 <= 0); // +*/<  90,84,0,21
+	}
+	case 1:
+	case 25:
+	{
+		// C1;
+		Eigen::Vector3d A2B2_outboard = A1B2.cross(n2);
+		Eigen::Vector3d B2C2_outboard = B1C2.cross(n2);
+		Eigen::Vector3d C2A2_outboard = C1A2.cross(n2);
+		double k1 = A2C1.dot(A2B2_outboard);
+		double k2 = B2C1.dot(B2C2_outboard);
+		double k3 = C2C1.dot(C2A2_outboard);
+		return (k1 <= 0 && k2 <= 0 && k3 <= 0); // +*/<  90,84,0,21
+	}
+	case 12:
+	case 14:
+	{
+		// A1B1;
+		Eigen::Vector3d A2B2_outboard = A2B2.cross(n1);
+		double kA = A2A1.dot(A2B2_outboard);
+		double kB = A2B1.dot(A2B2_outboard);
+		double kC = A2C1.dot(A2B2_outboard);
+		if ((kA > 0 && kB > 0 && kC > 0) || (kA < 0 && kB < 0 && kC < 0)) // +*/<  84,72,0,24
+			return false;
+		break;
+	}
+	case 4:
+	case 22:
+	{
+		// B1C1;
+		Eigen::Vector3d B2C2_outboard = B2C2.cross(n1);
+		double kA = B2A1.dot(B2C2_outboard);
+		double kB = B2B1.dot(B2C2_outboard);
+		double kC = B2C1.dot(B2C2_outboard);
+		if ((kA > 0 && kB > 0 && kC > 0) || (kA < 0 && kB < 0 && kC < 0)) // +*/<  84,72,0,24
+			return false;
+		break;
+	}
+	case 10:
+	case 16:
+	{
+		// C1A1;
+		Eigen::Vector3d C2A2_outboard = C2A2.cross(n1);
+		double kA = C2A1.dot(C2A2_outboard);
+		double kB = C2B1.dot(C2A2_outboard);
+		double kC = C2C1.dot(C2A2_outboard);
+		if ((kA > 0 && kB > 0 && kC > 0) || (kA < 0 && kB < 0 && kC < 0)) // +*/<  84,72,0,24
+			return false;
+		break;
+	}
+	case 7:     // C1;      A1B1;
+	case 19:    // C1;      A1B1;
+	case 8:     // C1A1;    A1B1;
+	case 18:    // C1A1;    A1B1;
+		O1 = A1;
+		P1 = B1;
+		Q1 = C1;
+		break;
+	case 11:    // A1;      B1C1;
+	case 15:    // A1;      B1C1;
+	case 6:     // A1B1;    B1C1;
+	case 20:    // A1B1;    B1C1;
+		O1 = B1;
+		P1 = A1;
+		Q1 = C1;
+		break;
+	case 5:     // B1;      C1A1;
+	case 21:    // B1;      C1A1;
+	case 2:     // B1C1;    C1A2;
+	case 24:    // B1C1;    C1A2;
+		O1 = C1;
+		P1 = B1;
+		Q1 = A1;
+		break;
+	}
+	Eigen::Vector3d O1O2 = O2 - O1;
+	Eigen::Vector3d O1P2 = P2 - O1;
+	Eigen::Vector3d O1Q2 = Q2 - O1;
+	Eigen::Vector3d O1P1 = P1 - O1;
+	Eigen::Vector3d O1Q1 = Q1 - O1;
+
+	Eigen::Vector3d NP = O1P1.cross(O1O2);
+	double kpk = NP.dot(O1Q1);
+	double kpp = NP.dot(O1P2);
+	double kpq = NP.dot(O1Q2);
+	if ((kpk > 0 && kpp < 0 && kpq < 0) || (kpk < 0 && kpp > 0 && kpq > 0))
+		return false; // +*/<  89,74,0,24
+
+	Eigen::Vector3d NQ = O1Q1.cross(O1O2);
+	double kqk = NQ.dot(O1P1);
+	double kqp = NQ.dot(O1P2);
+	double kqq = NQ.dot(O1Q2);
+	if ((kqk > 0 && kqp < 0 && kqq < 0) || (kqk < 0 && kqp > 0 && kqq > 0))
+		return false; // +*/<  101,98,0,30
+	return true;
+}
+
 
 #undef max
 #undef min
