@@ -120,7 +120,7 @@ bool isConvex(const vector<Vector3d>& points, const vector<array<int, 3>>& faces
 	size_t numFaces = faces.size();
 	// 计算每个面的法向量
 	vector<Vector3d> normals(numFaces);
-	for (size_t i = 0; i < numFaces; ++i) 
+	for (size_t i = 0; i < numFaces; ++i)
 	{
 		Vector3d v0 = points[faces[i][1]] - points[faces[i][0]];
 		Vector3d v1 = points[faces[i][2]] - points[faces[i][0]];
@@ -128,9 +128,9 @@ bool isConvex(const vector<Vector3d>& points, const vector<array<int, 3>>& faces
 	}
 	// 计算相邻面的法向量的点积
 	for (size_t i = 0; i < numFaces; ++i) {
-		for (size_t j = i + 1; j < numFaces; ++j) 
+		for (size_t j = i + 1; j < numFaces; ++j)
 		{
-			if (normals[i].dot(normals[j]) < 0) 
+			if (normals[i].dot(normals[j]) < 0)
 				return false;  // 凹多面体
 		}
 	}
@@ -163,7 +163,7 @@ static void _test0()
 
 	std::stringstream ss;
 	ss << setprecision(15) << num;
-	string str = ss.str(); 
+	string str = ss.str();
 	cout << "keep:" << str << endl;
 	ss.clear(15);
 	ss << setprecision(15) << num;
@@ -181,10 +181,10 @@ static void _test0()
 	//测试旋转对平行的影响
 	array<Vector3d, 3> points0 = { Vector3d(100000.1,0,0),  Vector3d(200000.2,0,0),  Vector3d(300000.3,0,0) };
 	Vector3d croPro = (points0[1] - points0[0]).cross((points0[1] - points0[0]));
-	array<Vector3d, 3> points1 = psykronix::rotz(M_PI/2) * points0;
+	array<Vector3d, 3> points1 = psykronix::rotz(M_PI / 2) * points0;
 	Vector3d croPro1 = (points1[1] - points1[0]).cross((points1[1] - points1[0]));
 
-	points1 = psykronix::rotz(M_PI ) * points0;
+	points1 = psykronix::rotz(M_PI) * points0;
 	croPro1 = (points1[1] - points1[0]).cross((points1[1] - points1[0]));
 	points1 = psykronix::rotz(M_PI / 3) * points0;
 	croPro1 = (points1[1] - points1[0]).cross((points1[1] - points1[0]));
@@ -197,7 +197,7 @@ static void _test0()
 static void _test1()
 {
 
-	double d=std::nan("0");
+	double d = std::nan("0");
 	Vector3d triA_0 = Vector3d(4924494.8122771187, -385870.18283433426, 5749.9999999999054);
 	Vector3d triA_1 = Vector3d(4924599.8122771177, -385945.18283433421, 5749.9999999999054);
 	Vector3d triA_2 = Vector3d(4924586.8713248633, -385946.88654301979, 5749.9999999999054);
@@ -214,7 +214,7 @@ static void _test1()
 	triB_0 = Vector3d(4948648.6464014640, -378096.89893364365, 39.982246252978271);
 	triB_1 = Vector3d(4948627.9169112947, -378068.36723815475, 39.982214247214543);
 	d = getTrianglesDistance(P, Q, { triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
-	bool int1=isTwoTrianglesIntersectSAT({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+	bool int1 = isTwoTrianglesIntersectSAT({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
 
 	//triA_0 = Vector3d(4948618.646401, -378059.398934, 39.982200);
 	//triA_1 = Vector3d(4948618.646401, -378066.898934, 39.982200);
@@ -225,12 +225,12 @@ static void _test1()
 	//d = getTrianglesDistance(P, Q, { triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
 	//bool int2 = isTwoTrianglesIntersectSAT({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
 
-	triA_0 = Vector3d(4948589.10216887,-378091.689488313,39.9821543184115);
-	triA_1 = Vector3d(4948589.10216887,-378102.108378973,39.9821543184115);
-	triA_2 = Vector3d(4948581.52809739,-378091.562127208,39.9821426242490);
-	triB_0 = Vector3d(4948648.64640146,-378096.898933644,39.9822462529783);
-	triB_1 = Vector3d(4948590.11470598,-378087.628423812,39.9821558816473);
-	triB_2 = Vector3d(4948588.64640146,-378096.898933644,39.9821536146255);
+	triA_0 = Vector3d(4948589.10216887, -378091.689488313, 39.9821543184115);
+	triA_1 = Vector3d(4948589.10216887, -378102.108378973, 39.9821543184115);
+	triA_2 = Vector3d(4948581.52809739, -378091.562127208, 39.9821426242490);
+	triB_0 = Vector3d(4948648.64640146, -378096.898933644, 39.9822462529783);
+	triB_1 = Vector3d(4948590.11470598, -378087.628423812, 39.9821558816473);
+	triB_2 = Vector3d(4948588.64640146, -378096.898933644, 39.9821536146255);
 
 	Triangle triA = { triA_0, triA_1, triA_2 };
 	Triangle triB = { triB_0, triB_1, triB_2 };
@@ -245,12 +245,12 @@ static void _test1()
 	bool isInt0 = isTwoTrianglesIntersectSAT(triA, triB);
 	bool isInt1 = isTwoTrianglesIntersectSAT(res[0][0], res[0][1]);
 
-	triA_0 = Vector3d(4934991.08492488,-380736.849323458,-266.330042529162); 
-	triA_1 = Vector3d(4934984.36869635,-380736.849323732,-263.095677331456);	
-	triA_2 = Vector3d(4934986.01043158,-380736.849323665,-271.249229247876);
-	triB_0 = Vector3d(4934988.30653218,-380736.849323571,-265.705952052692);
-	triB_1 = Vector3d(4934982.79133525,-380736.849323797,-262.020815280171);
-	triB_2 = Vector3d(4935011.81215053,-380736.849322611,-250.000000000000); 
+	triA_0 = Vector3d(4934991.08492488, -380736.849323458, -266.330042529162);
+	triA_1 = Vector3d(4934984.36869635, -380736.849323732, -263.095677331456);
+	triA_2 = Vector3d(4934986.01043158, -380736.849323665, -271.249229247876);
+	triB_0 = Vector3d(4934988.30653218, -380736.849323571, -265.705952052692);
+	triB_1 = Vector3d(4934982.79133525, -380736.849323797, -262.020815280171);
+	triB_2 = Vector3d(4935011.81215053, -380736.849322611, -250.000000000000);
 
 	//bool res1 = isTwoTrianglesIntersectSAT({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
 	//bool res2 = isTwoTrianglesIntersection({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
@@ -266,13 +266,13 @@ static void _test1()
 
 	triA_0 = Vector3d(4935003.6138694724, -380736.84932294575, -221.24922924757556); // ==
 	triA_2 = Vector3d(4935003.6138694724, -380736.84932294575, -221.24922924757556); // ==
-	triA_1 = Vector3d(4934991.0849248841, -380736.84932345786, -216.33004252886147);	
+	triA_1 = Vector3d(4934991.0849248841, -380736.84932345786, -216.33004252886147);
 	triB_0 = Vector3d(4934988.3065321781, -380736.84932357143, -215.70595205269194);
 	triB_1 = Vector3d(4934982.7913352484, -380736.84932379687, -212.02081528017138);
-	triB_2 = Vector3d(4935011.8121505287, -380736.84932261088, -200.00000000000006); 
+	triB_2 = Vector3d(4935011.8121505287, -380736.84932261088, -200.00000000000006);
 
-	bool err1= isTwoTrianglesIntersectSAT({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
-	bool err2= isTwoTrianglesBoundingBoxIntersect({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+	bool err1 = isTwoTrianglesIntersectSAT({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+	bool err2 = isTwoTrianglesBoundingBoxIntersect({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
 
 	cout << "return 0" << endl;
 }
@@ -280,10 +280,10 @@ static void _test1()
 static void _test2()
 {
 	string path = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/";
-	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris1 = _readTrigonFile(path+"triInterList_opt1.bin"); //4031
-	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris2 = _readTrigonFile(path+"triInterList_opt2.bin"); //4031
-	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris3 = _readTrigonFile(path+"triInterList_opt3.bin"); //4030
-	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris4 = _readTrigonFile(path+"triInterList_opt.bin"); //4030
+	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris1 = _readTrigonFile(path + "triInterList_opt1.bin"); //4031
+	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris2 = _readTrigonFile(path + "triInterList_opt2.bin"); //4031
+	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris3 = _readTrigonFile(path + "triInterList_opt3.bin"); //4030
+	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris4 = _readTrigonFile(path + "triInterList_opt.bin"); //4030
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris5 = _readTrigonFile(path + "interTriInfo_4027.bin"); //4027
 
 	//entity
@@ -356,7 +356,7 @@ static void _test2()
 			//print_triangle(iter1[0], iter1[1]);
 		}
 	}
-	
+
 	for (int i = 0; i < entity1.size(); ++i)
 	{
 		bool findFlag = false;
@@ -436,29 +436,33 @@ static void _test4()
 	//射线法，测试点是否在mesh内部
 	Vector3d p(0, 0, 0);
 	//Triangle tri = { Vector3d(-1, -1, 0),Vector3d(1, 0, M_PI/3),Vector3d(0, 1, 1+ M_PI / 3) };
-	Triangle tri = { Vector3d(-1, -1, 0),Vector3d(0, 1, 1+ M_PI / 3),Vector3d(1, 0, M_PI/3) };
+	Triangle tri = { Vector3d(-1, -1, 0),Vector3d(0, 1, 1 + M_PI / 3),Vector3d(1, 0, M_PI / 3) };
 	isPointRayAcrossTriangleSAT(p, tri);
 
 	cout << "return 0" << endl;
 }
 
+//test serialization 
+
+
 static void _test5()
 {
+#ifdef USING_FLATBUFFERS_SERIALIZATION
 	//读取二进制mesh
-	string filename = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/cvtMeshVct_3.bin";
-	//string filename = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/cvtMeshVct_5233.bin";
+	//string filename = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/cvtMeshVct_3.bin";
+	string filename = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/cvtMeshVct_5233.bin";
 	std::vector<ModelMesh> meshs = _read_ModelMesh(filename);
 	size_t count = 0;
 	clock_t startT, endT;
 	startT = clock();
-
 
 	for (auto& iter : meshs)
 	{
 		//bool b1 = isConvex(iter.vbo_, iter.ibo_);
 		//bool b2 = is_convex(iter.vbo_, iter.ibo_);
 		//cout << b1 << b2 << endl;
-		bool isConvex = is_convex(iter.vbo_, iter.ibo_); //isMeshConvexPolyhedron
+		//bool isConvex = is_convex(iter.vbo_, iter.ibo_); //
+		bool isConvex = isMeshConvexPolyhedron(iter.vbo_, iter.ibo_); //
 		if (!isConvex)
 			count++;
 	}
@@ -466,8 +470,7 @@ static void _test5()
 	cout << "mesh count=" << meshs.size() << endl;
 	cout << "count=" << count << endl;
 	cout << "time=" << double(endT - startT) / CLOCKS_PER_SEC << "s" << endl;
-
-
+#endif // USING_FLATBUFFERS_SERIALIZATION
 	cout << "return 0" << endl;
 }
 
