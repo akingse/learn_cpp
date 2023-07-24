@@ -437,7 +437,7 @@ static void _test4()
 	Vector3d p(0, 0, 0);
 	//Triangle tri = { Vector3d(-1, -1, 0),Vector3d(1, 0, M_PI/3),Vector3d(0, 1, 1+ M_PI / 3) };
 	Triangle tri = { Vector3d(-1, -1, 0),Vector3d(0, 1, 1+ M_PI / 3),Vector3d(1, 0, M_PI/3) };
-	isPointRayAcrossTriangle(p, tri);
+	isPointRayAcrossTriangleSAT(p, tri);
 
 	cout << "return 0" << endl;
 }

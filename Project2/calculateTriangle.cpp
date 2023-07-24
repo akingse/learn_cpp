@@ -1098,7 +1098,7 @@ bool psykronix::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& point
 	for (const auto& iter : faces)
 	{
 		Vector3d normal = (points[iter[1]] - points[iter[0]]).cross(points[iter[2]] - points[iter[0]]).normalized();
-		bool isFirst = true, isLeft = false, temp = false;
+		bool isFirst = true, isLeft /*= false*/, temp /*= false*/;
 		for (size_t i = 0; i < points.size(); ++i)
 		{
 			if (i == iter[0] || i == iter[1] || i == iter[2] || fabs(normal.dot(points[i] - points[iter[0]])) < FLT_EPSILON) // self and coplanar
@@ -1121,7 +1121,7 @@ bool psykronix::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& point
 
 #define USING_METHOD_SAT
 // whlie ray across same edge of two triangles
-bool psykronix::isPointRayAcrossTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon)
+bool psykronix::isPointRayAcrossTriangleSAT(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon)
 {
 	//first pre-process, bounding box
 	double rayZ = std::max(std::max(trigon[0].z(), trigon[1].z()), trigon[2].z());
@@ -1132,7 +1132,6 @@ bool psykronix::isPointRayAcrossTriangle(const Eigen::Vector3d& point, const std
 		point.y() < std::min(std::min(trigon[0].y(), trigon[1].y()), trigon[2].y()))
 		return false; // range box judge
 	//using SAT
-#ifdef USING_METHOD_SAT
 	//second pre-process (2D, point-in-triangle)
 	if (!isPointInTriangle(point, trigon))
 		return false;
@@ -1172,33 +1171,28 @@ bool psykronix::isPointRayAcrossTriangle(const Eigen::Vector3d& point, const std
 			return false;
 	}
 	return true;
-	//Vector3d axisZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
-	//double dotPro0 = axisZ.dot(point);
-	//double d0= axisZ.dot(trigon[0]); // with accuracy error 
-	//double d1= axisZ.dot(trigon[1]);
-	//double d2= axisZ.dot(trigon[2]);
-#else
-	if (isPointOnTriangleSurface(point, trigon))
-	{
-		return true;
-	}
-	else
-	{
-		Vector3d rayX = Vector3d(1.0, 0.0, 0.0);
-		Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
-		double dotPro = normal.dot(rayX); //ray.direction
-		if (dotPro == 0.0) // ray direction is parallel
-			return false;
-		double t = normal.dot(trigon[0] - point) / dotPro; //ray.origin
-		if (t > 0.0)
-		{
-			Vector3d inter = point + rayX * t;
-			if (isPointInTriangle(inter, trigon))
-				return true;
-		}
-		return false;
-	}
-#endif
+
+//#ifdef USING_METHOD_SAT
+	//if (isPointOnTriangleSurface(point, trigon))
+	//{
+	//	return true;
+	//}
+	//else
+	//{
+	//	Vector3d rayX = Vector3d(1.0, 0.0, 0.0);
+	//	Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
+	//	double dotPro = normal.dot(rayX); //ray.direction
+	//	if (dotPro == 0.0) // ray direction is parallel
+	//		return false;
+	//	double t = normal.dot(trigon[0] - point) / dotPro; //ray.origin
+	//	if (t > 0.0)
+	//	{
+	//		Vector3d inter = point + rayX * t;
+	//		if (isPointInTriangle(inter, trigon))
+	//			return true;
+	//	}
+	//	return false;
+	//}
 }
 
 PointOnTrigon psykronix::relationOfPointAndTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon) // axisZ direction
@@ -1232,7 +1226,7 @@ bool psykronix::isPointInConvexPolyhedron(const Eigen::Vector3d& point, const st
 	for (const auto& iter : ibo)
 	{
 		Triangle trigon = { { vbo[iter[0]] ,vbo[iter[1]] ,vbo[iter[2]] } };
-		if (isPointRayAcrossTriangle(point, trigon))
+		if (isPointRayAcrossTriangleSAT(point, trigon))
 		{
 			PointOnTrigon relation = relationOfPointAndTriangle(point, trigon);
 			if (PointOnTrigon::POINT_INNER == relation)
@@ -1272,7 +1266,83 @@ bool psykronix::isPointInConvexPolyhedron(const Eigen::Vector3d& point, const st
 			}
 		}
 	}
-	return (count % 2 != 0);
+	return count % 2 != 0;
+}
+
+bool psykronix::isPointInConcavePolyhedron(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
+{
+#ifdef STATISTIC_DATA_COUNT
+	count_hard_in_mesh++;
+#endif  
+	size_t count = 0;
+	set<int> vertexSet;
+	set<array<int, 2>> edgeSet;
+	auto isLeftAll = [&](const std::array<int, 3>& trigon)->bool
+	{
+		Vector3d normal = (vbo[trigon[1]] - vbo[trigon[0]]).cross(vbo[trigon[2]] - vbo[trigon[0]]).normalized();
+		bool isFirst = true, isLeft /*= false*/, temp /*= false*/;
+		for (size_t i = 0; i < vbo.size(); ++i)
+		{
+			if (i == trigon[0] || i == trigon[1] || i == trigon[2] || fabs(normal.dot(vbo[i] - vbo[trigon[0]])) < FLT_EPSILON) // self and coplanar
+				continue;
+			temp = normal.dot(vbo[i] - vbo[trigon[0]]) < 0.0;
+			if (isFirst)
+			{
+				isLeft = temp;
+				isFirst = false;
+			}
+			else
+			{
+				if (temp != isLeft)
+					return false;
+			}
+		}
+		return true;
+	};
+	for (const auto& iter : ibo)
+	{
+		Triangle trigon = { { vbo[iter[0]] ,vbo[iter[1]] ,vbo[iter[2]] } };
+		if (!isPointRayAcrossTriangleSAT(point, trigon))
+			continue;
+		PointOnTrigon relation = relationOfPointAndTriangle(point, trigon);
+		if (PointOnTrigon::POINT_INNER == relation)
+			count++;
+		// only vertex is special
+		else if (PointOnTrigon::POINT_VERTEX_0 == relation && vertexSet.find(iter[0]) == vertexSet.end() && isLeftAll(iter))
+		{
+			count++; // is out face
+			vertexSet.insert(iter[0]);
+		}
+		else if (PointOnTrigon::POINT_VERTEX_1 == relation && vertexSet.find(iter[1]) == vertexSet.end() && isLeftAll(iter))
+		{
+			count++;
+			vertexSet.insert(iter[1]);
+		}
+		else if (PointOnTrigon::POINT_VERTEX_2 == relation && vertexSet.find(iter[2]) == vertexSet.end() && isLeftAll(iter))
+		{
+			count++;
+			vertexSet.insert(iter[2]);
+		}
+		else if (PointOnTrigon::POINT_EDGE_01 == relation &&
+			edgeSet.find({ iter[0], iter[1] }) == edgeSet.end() && edgeSet.find({ iter[1], iter[0] }) == edgeSet.end())
+		{
+			count++;
+			edgeSet.insert({ iter[0], iter[1] });
+		}
+		else if (PointOnTrigon::POINT_EDGE_12 == relation &&
+			edgeSet.find({ iter[1], iter[2] }) == edgeSet.end() && edgeSet.find({ iter[2], iter[1] }) == edgeSet.end())
+		{
+			count++;
+			edgeSet.insert({ iter[1], iter[2] });
+		}
+		else if (PointOnTrigon::POINT_EDGE_20 == relation &&
+			edgeSet.find({ iter[2], iter[0] }) == edgeSet.end() && edgeSet.find({ iter[0], iter[2] }) == edgeSet.end())
+		{
+			count++;
+			edgeSet.insert({ iter[2], iter[0] });
+		}
+	}
+	return count % 2 != 0;
 }
 
 //one mesh all-in other mesh, the bounding-box must all-in other mesh
@@ -1282,9 +1352,9 @@ bool psykronix::isPointContainedInPolyhedron(const Eigen::Vector3d& point, const
 	for (const auto& iter : ibo)
 	{
 		std::array<Eigen::Vector3d, 3> trigon = { vbo[iter[0]] ,vbo[iter[1]] ,vbo[iter[2]] };
-		if (isPointOnTriangleSurface(point,trigon))
+		if (isPointOnTriangleSurface(point, trigon))
 		{
-			count++;
+			count++; // ray across is true
 		}
 		else 
 		{
@@ -1292,17 +1362,17 @@ bool psykronix::isPointContainedInPolyhedron(const Eigen::Vector3d& point, const
 			Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
 			double dotPro = normal.dot(rayX); //ray.direction
 			if (dotPro == 0.0) // ray direction is parallel
-				continue;
+				continue; 
 			double t = normal.dot(trigon[0] - point) / dotPro; //ray.origin
 			if (t > 0.0) 
 			{
 				Vector3d inter = point + rayX * t;
 				if (isPointInTriangle(inter,trigon))
-					count++;
+					count++; // ray across is true
 			}
 		}
 	}
-	return (count % 2 != 0);
+	return count % 2 != 0;
 }
 
 // base on Separating Axis Theorem

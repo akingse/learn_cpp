@@ -115,6 +115,17 @@ struct InterTriInfo
 	std::array<unsigned long long, 2> entityPair;
 	double distance;
 };
+
+struct ModelMesh
+{
+	std::vector<Eigen::Vector3d> vbo_;
+	std::vector<std::array<int, 3>> ibo_;
+	Eigen::AlignedBox3d bounding_;
+};
+
+#define USING_FLATBUFFERS_SERIALIZATION
+
+#ifdef USING_FLATBUFFERS_SERIALIZATION 
 #include "C:/Users/Aking/source/repos/bimbase/Include/fbs/inter_triangels_info_generated.h"
 inline std::vector<InterTriInfo> _read_GetTriList(const std::string& fileName)
 {
@@ -153,12 +164,7 @@ inline std::vector<InterTriInfo> _read_GetTriList(const std::string& fileName)
 	return res;
 }
 
-struct ModelMesh
-{
-	std::vector<Eigen::Vector3d> vbo_;
-	std::vector<std::array<int, 3>> ibo_;
-	Eigen::AlignedBox3d bounding_;
-};
+
 #include "C:/Users/Aking/source/repos/bimbase/Include/fbs/convert_to_mesh_generated.h"
 inline std::vector<ModelMesh> _read_ModelMesh(const std::string& fileName)
 {
@@ -200,3 +206,5 @@ inline std::vector<ModelMesh> _read_ModelMesh(const std::string& fileName)
 	}
 	return res;
 }
+
+#endif
