@@ -1,17 +1,9 @@
 #pragma once
 namespace psykronix
 {
-	enum PointOnTrigon :unsigned int
-	{
-		POINT_OUTER = 0,
-		POINT_INNER,
-		POINT_VERTEX_0,
-		POINT_VERTEX_1,
-		POINT_VERTEX_2,
-		POINT_EDGE_01,
-		POINT_EDGE_12,
-		POINT_EDGE_20,
-	};
+	typedef std::array<Eigen::Vector3d, 3> Triangle;
+	typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>> Polyhedron;
+
     // intersect of triangle
     DLLEXPORT bool isPointInTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon);
     DLLEXPORT bool isPointInTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon);
@@ -27,9 +19,8 @@ namespace psykronix
 	DLLEXPORT bool isPointRayAcrossTriangleSAT(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon);
 	// polyhedron
 	DLLEXPORT bool isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& points, const std::vector<std::array<int, 3>>& faces);
-	DLLEXPORT bool isPointInConvexPolyhedron(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo);
-	DLLEXPORT bool isPointInConcavePolyhedron(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo);
-	DLLEXPORT PointOnTrigon relationOfPointAndTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon);
+	DLLEXPORT bool isPointInsidePolyhedron(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo);
+	//DLLEXPORT PointOnTrigon relationOfPointAndTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon);
 	DLLEXPORT bool isPointContainedInPolyhedron(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo);
     // preprocess
     DLLEXPORT bool isTwoTrianglesBoundingBoxIntersect(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
@@ -40,8 +31,10 @@ namespace psykronix
     // soft-clash
     DLLEXPORT void getSegmentsPoints(Eigen::Vector3d& VEC, Eigen::Vector3d& X, Eigen::Vector3d& Y, const Eigen::Vector3d& P, const Eigen::Vector3d& A, const Eigen::Vector3d& Q, const Eigen::Vector3d& B);
     DLLEXPORT double getTrianglesDistance(Eigen::Vector3d& P, Eigen::Vector3d& Q, const std::array<Eigen::Vector3d, 3>& S, const std::array<Eigen::Vector3d, 3>& T);
+	DLLEXPORT double getInterpenetrationDistanceOfTwoMeshs(const std::vector<Eigen::Vector3d>& vboA, const std::vector<std::array<int, 3>>& iboA, const std::vector<Eigen::Vector3d>& vboB, const std::vector<std::array<int, 3>>& iboB);
 
 }
+
 namespace std
 {
 	inline void _wirteTrigonFile(const std::vector<std::array<uint64_t, 2>>& tris, const std::string& fileName)

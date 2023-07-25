@@ -1,9 +1,5 @@
 #pragma once
 #include <afx.h>
-
-static std::string randNumName = "random_1e8.bin";
-
-
 inline std::string getExePath() // include<afx.h>
 {
 	TCHAR buff[MAX_PATH];
@@ -13,6 +9,7 @@ inline std::string getExePath() // include<afx.h>
 	return (CStringA)path;
 }
 
+static std::string randNumName = "random_1e8.bin";
 namespace std
 {
 	//wirte randnum file
@@ -62,53 +59,7 @@ namespace std
 
 }
 
-inline Vec2 _get_rand()
-{
-	double r = 100;
-	return Vec2(rand(), rand());
-}
-
-inline Eigen::Vector3d _to2D(const Eigen::Vector3d& vec3)
-{
-	return Eigen::Vector3d(vec3.x(), vec3.y(), 0.0);
-}
-
-inline std::array<para::BPParaVec, 3> _get_rand3v()
-{
-	// rand -16384 -> 16384 
-	//srand((int)time(0));
-	//Sleep(100);
-	return std::array<para::BPParaVec, 3> {
-		para::BPParaVec(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
-			para::BPParaVec(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
-			para::BPParaVec(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff) };
-}
-inline std::array<Eigen::Vector3d, 3> _get_rand3(int i = 0)
-{
-	if (i == 0)
-		return std::array<Eigen::Vector3d, 3> {
-		Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
-			Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
-			Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff) };
-	if (i == 1)
-		return std::array<Eigen::Vector3d, 3> {
-		Eigen::Vector3d(rand(), rand(), rand()),
-			Eigen::Vector3d(rand(), rand(), rand()),
-			Eigen::Vector3d(rand(), rand(), rand()) };
-	if (i == -1)
-		return std::array<Eigen::Vector3d, 3> {
-		Eigen::Vector3d(rand() - 0x7fff, rand() - 0x7fff, rand() - 0x7fff),
-			Eigen::Vector3d(rand() - 0x7fff, rand() - 0x7fff, rand() - 0x7fff),
-			Eigen::Vector3d(rand() - 0x7fff, rand() - 0x7fff, rand() - 0x7fff) };
-}
-
-inline std::array<Eigen::Vector3d, 2> _get_rand2()
-{
-	return std::array<Eigen::Vector3d, 2> {
-		Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
-			Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff) };
-}
-
+#ifndef CLASH_DETECTION_SOLUTION
 struct InterTriInfo
 {
 	std::array<std::array<Eigen::Vector3d, 3>, 2> trianglePair;
@@ -121,7 +72,10 @@ struct ModelMesh
 	std::vector<Eigen::Vector3d> vbo_;
 	std::vector<std::array<int, 3>> ibo_;
 	Eigen::AlignedBox3d bounding_;
+	Eigen::Affine3d pose_; // Eigen::Affine3d::Identity()
+	std::vector<int> iboRaw_;
 };
+#endif
 
 #define USING_FLATBUFFERS_SERIALIZATION
 
@@ -147,6 +101,7 @@ inline std::vector<InterTriInfo> _read_GetTriList(const std::string& fileName)
 			const TriInfo* triinfo = triList->tri_infoes()->Get(i);
 			auto tria = triinfo->tri_a();
 			auto trib = triinfo->tri_b();
+			typedef std::array<Eigen::Vector3d, 3> Triangle;
 			Triangle triA = { Eigen::Vector3d(tria->p0()->x(),tria->p0()->y(),tria->p0()->z()),
 				Eigen::Vector3d(tria->p1()->x(),tria->p1()->y(),tria->p1()->z()),
 				Eigen::Vector3d(tria->p2()->x(),tria->p2()->y(),tria->p2()->z()) };
@@ -200,7 +155,13 @@ inline std::vector<ModelMesh> _read_ModelMesh(const std::string& fileName)
 				auto id = ibo->ibos()->Get(i);
 				ibo_.push_back(std::array<int, 3>{id->id0(), id->id1(), id->id2()});
 			}
-			res.push_back(ModelMesh{ vbo_ ,ibo_ , Eigen::AlignedBox3d(_min, _max) });
+			std::vector<int> _iboRaw;
+			auto iboRaw = mesh->ibo_raw();
+			for (int i = 0; i < iboRaw->size(); i++)
+			{
+				_iboRaw.push_back(iboRaw->Get(i));
+			}
+			res.push_back(ModelMesh{ vbo_ ,ibo_ , Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(),_iboRaw });
 		}
 		inFile.close();
 	}

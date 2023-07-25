@@ -407,27 +407,80 @@ static void _test3()
 	string path = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/";
 	std::vector<std::array<uint64_t, 2>> entity1 = _readEntityIDFile(path + "entityIdList_hard.bin"); //4030
 	std::vector<std::array<uint64_t, 2>> entity2 = _readEntityIDFile(path + "entityIdList_soft.bin"); //1069
-	std::vector<std::array<uint64_t, 2>> entity3 = _readEntityIDFile(path + "entityIdList_4027.bin"); //4027
-	for (int i = 0; i < entity1.size(); ++i)
+	std::vector<std::array<uint64_t, 2>> entity3 = _readEntityIDFile(path + "entityIdList_4031.bin"); //4031
+	std::vector<std::array<uint64_t, 2>> entity4 = _readEntityIDFile(path + "entityIdList_4027.bin"); //4027
+	std::vector<std::array<uint64_t, 2>> entity5;// = _readEntityIDFile(path + "entityIdList_48677.bin"); //48677
+	std::vector<std::array<uint64_t, 2>> entity6;// = _readEntityIDFile(path + "entityIdList_48678.bin"); //48678
+	//for (int i = 0; i < entity1.size(); ++i)
+	//{
+	//	bool findFlag = false;
+	//	for (int j = 0; j < entity1.size(); ++j) //big vector, findTri
+	//	{
+	//		if (i == j)
+	//			continue;
+	//		if (entity1[i][0] == entity1[j][0] && entity1[i][1] == entity1[j][1])
+	//		{
+	//			findFlag = true;
+	//			//cout << "index=" << j << endl; //823,950,954
+	//			break;
+	//		}
+	//	}
+	//	if (findFlag)
+	//	{
+	//		cout << "findFlag repeat" << endl; //no repeat
+	//		cout << entity1[i][0] << "-" << entity1[i][1] << endl; // 6509 - 6134
+	//	}
+	//}
+
+
+	cout << "findFlag extra entityid pair:" << endl;
+	for (int i = 0; i < entity6.size(); ++i)
 	{
 		bool findFlag = false;
-		for (int j = 0; j < entity1.size(); ++j) //big vector, findTri
+		for (int j = 0; j < entity5.size(); ++j) //big vector, findTri
 		{
-			if (i == j)
-				continue;
-			if (entity1[i][0] == entity1[j][0] && entity1[i][1] == entity1[j][1])
+			if (entity6[i][0] == entity5[j][0] && entity6[i][1] == entity5[j][1])
 			{
 				findFlag = true;
 				//cout << "index=" << j << endl; //823,950,954
 				break;
 			}
 		}
-		if (findFlag)
+		if (!findFlag)
 		{
-			cout << "findFlag repeat" << endl; //no repeat
-			cout << entity1[i][0] << "-" << entity1[i][1] << endl; // 6509 - 6134
+			cout << entity6[i][0] << ", " << entity6[i][1] << endl;
 		}
 	}
+	/*
+	find
+	5967, 2921
+	6504, 5970
+	6488, 5979
+	6509, 6134
+	// inside
+	47795, 3823
+	47798, 3844
+	47643, 3846
+	21699, 5200
+	95139, 108864
+	89358, 72193
+	72920, 72916
+	81005, 81001
+	81009, 81001
+	81161, 81157
+	81165, 81157
+	81280, 81276
+	81284, 81276
+	82501, 82327
+	99162, 99152
+	104212, 104208
+	123504, 123500
+	125718, 125710
+	127674, 127658
+	//only
+	82501, 82327
+	*/
+
 	cout << "return 0" << endl;
 }
 
@@ -447,16 +500,24 @@ static void _test4()
 
 static void _test5()
 {
+
+
 #ifdef USING_FLATBUFFERS_SERIALIZATION
 	//读取二进制mesh
 	//string filename = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/cvtMeshVct_3.bin";
-	string filename = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/cvtMeshVct_5233.bin";
-	std::vector<ModelMesh> meshs = _read_ModelMesh(filename);
-	size_t count = 0;
+	string filename = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/";
+	//std::vector<ModelMesh> meshs = _read_ModelMesh(filename + "cvtMeshVct_5233.bin");
+	//std::vector<ModelMesh> meshs = _read_ModelMesh(filename + "cvtMeshVct_6509_6134.bin");
+	std::vector<ModelMesh> meshs = _read_ModelMesh(filename + "cvtMeshVct_1.bin");
+	std::vector<ModelMesh> meshs2 = _read_ModelMesh(filename + "cvtMeshVct_2.bin");
+	std::vector<ModelMesh> meshs3 = _read_ModelMesh(filename + "cvtMeshVct_3.bin");
+	std::vector<ModelMesh> meshs4 = _read_ModelMesh(filename + "cvtMeshVct_4.bin");
+	std::vector<ModelMesh> meshs5 = _read_ModelMesh(filename + "cvtMeshVct_5.bin");
+	size_t count = 0, countInter = 0;
 	clock_t startT, endT;
 	startT = clock();
 
-	for (auto& iter : meshs)
+	for (const auto& iter : meshs)
 	{
 		//bool b1 = isConvex(iter.vbo_, iter.ibo_);
 		//bool b2 = is_convex(iter.vbo_, iter.ibo_);
@@ -466,6 +527,31 @@ static void _test5()
 		if (!isConvex)
 			count++;
 	}
+	//相交测试
+	bool isInter = false;
+	ModelMesh mesh_a = meshs[0];
+	ModelMesh mesh_b = meshs[1];
+	for (size_t i = 0; i < mesh_a.ibo_.size(); i++)
+	{
+		for (size_t j = 0; j < meshs[1].ibo_.size(); j++)
+		{
+			std::array<Eigen::Vector3d, 3> triA = {
+				mesh_a.vbo_[mesh_a.ibo_[i][0]],
+				mesh_a.vbo_[mesh_a.ibo_[i][1]],
+				mesh_a.vbo_[mesh_a.ibo_[i][2]] };
+			std::array<Eigen::Vector3d, 3> triB = {
+				mesh_b.vbo_[mesh_b.ibo_[j][0]],
+				mesh_b.vbo_[mesh_b.ibo_[j][1]],
+				mesh_b.vbo_[mesh_b.ibo_[j][2]] };
+			if (isTwoTrianglesBoundingBoxIntersect(triA, triB))
+			{
+				countInter++;
+				if (isTwoTrianglesIntersectSAT(triA, triB))
+					isInter = true;
+			}
+		}
+	}
+
 	endT = clock();
 	cout << "mesh count=" << meshs.size() << endl;
 	cout << "count=" << count << endl;
@@ -482,7 +568,7 @@ static int enrol = []()->int
 	//_test2();
 	_test3();
 	//_test4();
-	//_test5();
+	_test5();
 	return 0;
 }();
 

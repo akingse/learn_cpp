@@ -114,9 +114,13 @@ On fast computation of distance between line segments.
 
 ### 穿透深度
 
-penetration depth (PD) 穿透深度 (PD) 定义为使两个多面体的内部不相交的最小平移距离。
+penetration depth (PD) 穿透深度 (PD) 定义为使两个多面体的内部不相交的最小平移距离。interpenetration
 
-interpenetration
+侵入距离 IntrusionDistance
+
+
+
+
 
 
 
