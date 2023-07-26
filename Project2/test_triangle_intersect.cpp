@@ -6,12 +6,13 @@ using namespace Eigen;
 using namespace psykronix;
 #undef max
 #undef min
-static constexpr double eps = 1e-14; //DBL_EPSILON
+static constexpr double eps = 1e-6; //DBL_EPSILON
 static constexpr double _eps = -eps;
 
 static Eigen::Vector3d P(std::nan("0"), std::nan("0"), std::nan("0"));
 static Eigen::Vector3d Q(std::nan("0"), std::nan("0"), std::nan("0"));
 
+static std::string binFilePath = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/";
 
 double getTrigonArea2(const Triangle& triA)
 {
@@ -198,6 +199,7 @@ static void _test1()
 {
 
 	double d = std::nan("0");
+	double d1;
 	Vector3d triA_0 = Vector3d(4924494.8122771187, -385870.18283433426, 5749.9999999999054);
 	Vector3d triA_1 = Vector3d(4924599.8122771177, -385945.18283433421, 5749.9999999999054);
 	Vector3d triA_2 = Vector3d(4924586.8713248633, -385946.88654301979, 5749.9999999999054);
@@ -213,8 +215,32 @@ static void _test1()
 	triB_2 = Vector3d(4948618.6464014640, -378066.89893364359, 39.982199933801859); //x-
 	triB_0 = Vector3d(4948648.6464014640, -378096.89893364365, 39.982246252978271);
 	triB_1 = Vector3d(4948627.9169112947, -378068.36723815475, 39.982214247214543);
-	d = getTrianglesDistance(P, Q, { triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
-	bool int1 = isTwoTrianglesIntersectSAT({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+
+	//triA_0 = Vector3d(0,0,0);
+	//triA_1 = Vector3d(10,0,0);
+	//triA_2 = Vector3d(10,20,30);
+	//triB_2 = Vector3d(0, 1, 0);
+	//triB_0 = Vector3d(10, 1, 0);
+	//triB_1 = Vector3d(10, 21, 30);
+
+	//triA_0 = Vector3d(0,0,0);
+	//triA_1 = Vector3d(0,10,0);
+	//triA_2 = Vector3d(5,5,6);
+	//triB_2 = Vector3d(20, 0, 0);
+	//triB_0 = Vector3d(20, 10, 0);
+	//triB_1 = Vector3d(0, 5, 20);
+
+	//triA_0 = Vector3d(0, 0, 0);
+	//triA_1 = Vector3d(0, 10, 0);
+	//triA_2 = Vector3d(-5, 5, 0);
+	//triB_0 = Vector3d(5, 5, -5);
+	//triB_1 = Vector3d(5, 5, 5);
+	//triB_2 = Vector3d(15, 5, 0);
+
+	//psykronix::roty(M_PI / 2) * std::array<Eigen::Vector3d, 3>
+	Triangle triA = { triA_0, triA_1, triA_2 };
+	Triangle triB = { triB_0, triB_1, triB_2 };
+	bool int1 = isTwoTrianglesIntersectSAT(triA, triB);
 
 	//triA_0 = Vector3d(4948618.646401, -378059.398934, 39.982200);
 	//triA_1 = Vector3d(4948618.646401, -378066.898934, 39.982200);
@@ -232,8 +258,8 @@ static void _test1()
 	triB_1 = Vector3d(4948590.11470598, -378087.628423812, 39.9821558816473);
 	triB_2 = Vector3d(4948588.64640146, -378096.898933644, 39.9821536146255);
 
-	Triangle triA = { triA_0, triA_1, triA_2 };
-	Triangle triB = { triB_0, triB_1, triB_2 };
+	triA = { triA_0, triA_1, triA_2 };
+	triB = { triB_0, triB_1, triB_2 };
 	_wirteTrigonFile({ {triA, triB} }, "testTrisData.bin");
 	auto res = _readTrigonFile("testTrisData.bin");
 
@@ -279,18 +305,18 @@ static void _test1()
 
 static void _test2()
 {
-	string path = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/";
-	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris1 = _readTrigonFile(path + "triInterList_opt1.bin"); //4031
-	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris2 = _readTrigonFile(path + "triInterList_opt2.bin"); //4031
-	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris3 = _readTrigonFile(path + "triInterList_opt3.bin"); //4030
-	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris4 = _readTrigonFile(path + "triInterList_opt.bin"); //4030
-	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris5 = _readTrigonFile(path + "interTriInfo_4027.bin"); //4027
+	//string path = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/";
+	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris1 = _readTrigonFile(binFilePath + "triInterList_opt1.bin"); //4031
+	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris2 = _readTrigonFile(binFilePath + "triInterList_opt2.bin"); //4031
+	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris3 = _readTrigonFile(binFilePath + "triInterList_opt3.bin"); //4030
+	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris4 = _readTrigonFile(binFilePath + "triInterList_opt.bin"); //4030
+	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris5 = _readTrigonFile(binFilePath + "interTriInfo_4027.bin"); //4027
 
 	//entity
-	std::vector<std::array<uint64_t, 2>> entity1 = _readEntityIDFile(path + "entityIdList_off.bin"); //4031
-	std::vector<std::array<uint64_t, 2>> entity2 = _readEntityIDFile(path + "entityIdList_on.bin"); //4031
-	std::vector<std::array<uint64_t, 2>> entity3 = _readEntityIDFile(path + "entityIdList_soft_off.bin"); //1069
-	std::vector<std::array<uint64_t, 2>> entity4 = _readEntityIDFile(path + "entityIdList_hard.bin"); //4030
+	std::vector<std::array<uint64_t, 2>> entity1 = _readEntityIDFile(binFilePath + "entityIdList_off.bin"); //4031
+	std::vector<std::array<uint64_t, 2>> entity2 = _readEntityIDFile(binFilePath + "entityIdList_on.bin"); //4031
+	std::vector<std::array<uint64_t, 2>> entity3 = _readEntityIDFile(binFilePath + "entityIdList_soft_off.bin"); //1069
+	std::vector<std::array<uint64_t, 2>> entity4 = _readEntityIDFile(binFilePath + "entityIdList_hard.bin"); //4030
 	//(6405-5779)(6510-6123)(6509-6134)
 	//std::vector<std::array<uint64_t, 2>> entity5 = _readEntityIDFile(path + "entityIdList_soft_opt_off.bin");
 	//std::vector<std::array<uint64_t, 2>> entity6 = _readEntityIDFile(path + "entityIdList_soft_off.bin");
@@ -404,11 +430,10 @@ static void _test3()
 	//check
 	// 	//void _wirteTrigonFile(const std::string & fileName, const std::vector<std::tuple<
 	//	std::array<Eigen::Vector3d, 3>, std::array<Eigen::Vector3d, 3>, unsigned long long, unsigned long long, double>>& triinfos)
-	string path = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/";
-	std::vector<std::array<uint64_t, 2>> entity1 = _readEntityIDFile(path + "entityIdList_hard.bin"); //4030
-	std::vector<std::array<uint64_t, 2>> entity2 = _readEntityIDFile(path + "entityIdList_soft.bin"); //1069
-	std::vector<std::array<uint64_t, 2>> entity3 = _readEntityIDFile(path + "entityIdList_4031.bin"); //4031
-	std::vector<std::array<uint64_t, 2>> entity4 = _readEntityIDFile(path + "entityIdList_4027.bin"); //4027
+	std::vector<std::array<uint64_t, 2>> entity1 = _readEntityIDFile(binFilePath + "entityIdList_hard.bin"); //4030
+	std::vector<std::array<uint64_t, 2>> entity2 = _readEntityIDFile(binFilePath + "entityIdList_soft.bin"); //1069
+	std::vector<std::array<uint64_t, 2>> entity3 = _readEntityIDFile(binFilePath + "entityIdList_4031.bin"); //4031
+	std::vector<std::array<uint64_t, 2>> entity4 = _readEntityIDFile(binFilePath + "entityIdList_4027.bin"); //4027
 	std::vector<std::array<uint64_t, 2>> entity5;// = _readEntityIDFile(path + "entityIdList_48677.bin"); //48677
 	std::vector<std::array<uint64_t, 2>> entity6;// = _readEntityIDFile(path + "entityIdList_48678.bin"); //48678
 	//for (int i = 0; i < entity1.size(); ++i)
@@ -500,24 +525,20 @@ static void _test4()
 
 static void _test5()
 {
-
-
 #ifdef USING_FLATBUFFERS_SERIALIZATION
 	//读取二进制mesh
-	//string filename = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/cvtMeshVct_3.bin";
-	string filename = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/";
 	//std::vector<ModelMesh> meshs = _read_ModelMesh(filename + "cvtMeshVct_5233.bin");
 	//std::vector<ModelMesh> meshs = _read_ModelMesh(filename + "cvtMeshVct_6509_6134.bin");
-	std::vector<ModelMesh> meshs = _read_ModelMesh(filename + "cvtMeshVct_1.bin");
-	std::vector<ModelMesh> meshs2 = _read_ModelMesh(filename + "cvtMeshVct_2.bin");
-	std::vector<ModelMesh> meshs3 = _read_ModelMesh(filename + "cvtMeshVct_3.bin");
-	std::vector<ModelMesh> meshs4 = _read_ModelMesh(filename + "cvtMeshVct_4.bin");
-	std::vector<ModelMesh> meshs5 = _read_ModelMesh(filename + "cvtMeshVct_5.bin");
+	std::vector<ModelMesh> meshs0 = _read_ModelMesh(binFilePath + "cvtMeshVct_1.bin");
+	std::vector<ModelMesh> meshs2 = _read_ModelMesh(binFilePath + "cvtMeshVct_2.bin");
+	std::vector<ModelMesh> meshs3 = _read_ModelMesh(binFilePath + "cvtMeshVct_3.bin");
+	std::vector<ModelMesh> meshs4 = _read_ModelMesh(binFilePath + "cvtMeshVct_4.bin");
+	std::vector<ModelMesh> meshs5 = _read_ModelMesh(binFilePath + "cvtMeshVct_5.bin");
 	size_t count = 0, countInter = 0;
 	clock_t startT, endT;
 	startT = clock();
 
-	for (const auto& iter : meshs)
+	for (const auto& iter : meshs0)
 	{
 		//bool b1 = isConvex(iter.vbo_, iter.ibo_);
 		//bool b2 = is_convex(iter.vbo_, iter.ibo_);
@@ -529,11 +550,11 @@ static void _test5()
 	}
 	//相交测试
 	bool isInter = false;
-	ModelMesh mesh_a = meshs[0];
-	ModelMesh mesh_b = meshs[1];
+	ModelMesh mesh_a = meshs0[0];
+	ModelMesh mesh_b = meshs0[1];
 	for (size_t i = 0; i < mesh_a.ibo_.size(); i++)
 	{
-		for (size_t j = 0; j < meshs[1].ibo_.size(); j++)
+		for (size_t j = 0; j < meshs0[1].ibo_.size(); j++)
 		{
 			std::array<Eigen::Vector3d, 3> triA = {
 				mesh_a.vbo_[mesh_a.ibo_[i][0]],
@@ -553,7 +574,7 @@ static void _test5()
 	}
 
 	endT = clock();
-	cout << "mesh count=" << meshs.size() << endl;
+	cout << "mesh count=" << meshs0.size() << endl;
 	cout << "count=" << count << endl;
 	cout << "time=" << double(endT - startT) / CLOCKS_PER_SEC << "s" << endl;
 #endif // USING_FLATBUFFERS_SERIALIZATION
@@ -561,14 +582,62 @@ static void _test5()
 }
 
 
+static void _test6()
+{
+	std::vector<ModelMesh> meshs = read_ModelMesh(binFilePath + "cvtMeshVct_cube2.bin");
+	//std::vector<ModelMesh> meshs = _read_ModelMesh(binFilePath + "cvtMeshVct_intrusion2.bin");
+	ModelMesh meshA = meshs[0];
+	ModelMesh meshB = meshs[1];
+
+	Vector3d df = getInterpenetrationDistanceOfTwoMeshs(meshA.vbo_, meshA.ibo_, meshB.vbo_, meshB.ibo_);
+	Vector3d di = getInterpenetrationDistanceOfTwoMeshs(meshB.vbo_, meshB.ibo_, meshA.vbo_, meshA.ibo_);
+
+
+	cout << "d_min=" << df << endl;
+	cout << "return 0" << endl;
+}
+
+static void _test7()
+{
+	// 测试SAT计算三角形距离 37s
+	const size_t totalNum = (size_t)1e4;
+	//std::array<Vector3d, 3>* randData3 = new std::array<Vector3d, 3>[totalNum];
+	//std::array<Vector3d, 3>* randData3_ = new std::array<Vector3d, 3>[totalNum];
+	double* readNum = _readNumberFile(totalNum);
+	size_t count = 0;
+	for (int j = 0; j < totalNum; ++j)
+	{
+		Triangle triA = { { {readNum[j + 0],readNum[j + 2],readNum[j + 4]} ,
+							{readNum[j + 6],readNum[j + 8],readNum[j + 10]} ,
+							{readNum[j + 12],readNum[j + 14],readNum[j + 16]} } };
+		Triangle triB = { { {readNum[j + 1],readNum[j + 3],readNum[j + 5]} ,
+							{readNum[j + 7],readNum[j + 9],readNum[j + 11]} ,
+							{readNum[j + 13],readNum[j + 15],readNum[j + 17]} } };
+		bool isInter = isTwoTrianglesIntersectSAT(triA, triB);
+		double d0, d1;
+		if (!isInter)
+		{
+			d0 = getTrianglesDistance(P, Q, triA, triB);
+			d1 = getTrianglesDistanceSAT(triA, triB);
+			//cout << d0-d1 << endl;
+			if (fabs(d0 - d1) > eps)
+				count++;
+		}
+	}
+	cout << "count=" << count << endl;
+
+}
+
 static int enrol = []()->int
 {
 	//_test0();
 	//_test1();
 	//_test2();
-	_test3();
+	//_test3();
 	//_test4();
-	_test5();
+	//_test5();
+	_test6();
+	_test7();
 	return 0;
 }();
 
@@ -577,18 +646,18 @@ static int enrol = []()->int
 // 
 //------------------------------------------------------------------------------------------------------------------------------
 // 
-//离轴定理，包围盒与三角形求交
 
 /*
+//离轴定理，包围盒与三角形求交
 找到与三角形平面平行的两个AABB顶点
 测试三角形的三条边与AABB的三条轴的九种组合
 测试三角形的顶点是否在AABB内
 这个算法速度快且准确。使用分离轴定理，我们只需要测试13个潜在的分离轴是否存在。
 如果有任何一个分离轴存在，那么三角形和AABB不相交。如果所有潜在的分离轴都不存在，则三角形和AABB相交。
-*/
 
 //GYDevillersTriangle.h
-/*      快速检测空间三角形相交算法的代码实现(Devillers & Guigue算法)
+
+快速检测空间三角形相交算法的代码实现(Devillers & Guigue算法)
 博客原地址:http://blog.csdn.net/fourierfeng/article/details/11969915#
 
 Devillers & Guigue算法(简称Devillers 算法) 通过三角形各顶点构成的行列式正负的几何意义来判断三角形中点、线、面之间的相对位置关系,

@@ -51,10 +51,10 @@
 
 // my custom
 typedef std::array<Eigen::Vector3d, 3> Triangle;
+typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>> Polyhedron;
 #include "Project1_API.h"
 #include "my_geometry.h"			//export
 #include "test_serialize.h"
-#include "test_calculate.h"
 #include "test_triangle_intersect.h"
 #ifdef IS_EXPORT
 #define DLLEXPORT __declspec(dllimport)
@@ -64,8 +64,10 @@ typedef std::array<Eigen::Vector3d, 3> Triangle;
 //#define STATISTIC_DATA_COUNT
 #include "my_class_fun.h"		
 #include "calculateTriangle.h"		//DLL-API
+#include "calculatePolyhedron.h"
+#include "test_file_rw.h" //file read and wirte
 
-//eigen
+//Eigen
 //typedef Vector3d Vec3;
 //typedef Matrix4d BPTransfrom;
 //typedef Matrix4d GeTransfrom;

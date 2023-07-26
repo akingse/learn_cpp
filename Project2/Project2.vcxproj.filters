@@ -49,23 +49,11 @@
     <Filter Include="test_triangle">
       <UniqueIdentifier>{d75b882f-e37a-4826-a646-5b6d0ef51577}</UniqueIdentifier>
     </Filter>
+    <Filter Include="test_bin">
+      <UniqueIdentifier>{d1dda523-7d2c-4073-9e11-04735d696ee9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="test_serialize.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="test_function.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="test_extern.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="test_rtti.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="my_geometry.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>common</Filter>
     </ClCompile>
@@ -174,17 +162,11 @@
     <ClCompile Include="test_template2.cpp">
       <Filter>test_template</Filter>
     </ClCompile>
-    <ClCompile Include="test_boost.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="test_cast.cpp">
       <Filter>test_gram</Filter>
     </ClCompile>
     <ClCompile Include="test_paste1.cpp">
       <Filter>test_paste</Filter>
-    </ClCompile>
-    <ClCompile Include="test_calculate0.cpp">
-      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="test_omp.cpp">
       <Filter>test_thread</Filter>
@@ -204,25 +186,40 @@
     <ClCompile Include="test_triangle_intersect.cpp">
       <Filter>test_triangle</Filter>
     </ClCompile>
+    <ClCompile Include="test_function.cpp">
+      <Filter>test_gram</Filter>
+    </ClCompile>
+    <ClCompile Include="test_serialize.cpp">
+      <Filter>test_bin</Filter>
+    </ClCompile>
+    <ClCompile Include="test_file_rw.cpp">
+      <Filter>test_bin</Filter>
+    </ClCompile>
+    <ClCompile Include="test_calculate0.cpp">
+      <Filter>test_math</Filter>
+    </ClCompile>
     <ClCompile Include="test_fun_speed.cpp">
+      <Filter>test_case</Filter>
+    </ClCompile>
+    <ClCompile Include="my_geometry.cpp">
+      <Filter>test_math</Filter>
+    </ClCompile>
+    <ClCompile Include="test_boost.cpp">
+      <Filter>test_gram</Filter>
+    </ClCompile>
+    <ClCompile Include="test_extern.cpp">
+      <Filter>test_gram</Filter>
+    </ClCompile>
+    <ClCompile Include="test_rtti.cpp">
+      <Filter>test_gram</Filter>
+    </ClCompile>
+    <ClCompile Include="calculatePolyhedron.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="test_function.h">
-      <Filter>head</Filter>
-    </ClInclude>
-    <ClInclude Include="test_serialize.h">
-      <Filter>head</Filter>
-    </ClInclude>
-    <ClInclude Include="my_geometry.h">
-      <Filter>head</Filter>
-    </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="test_calculate.h">
-      <Filter>head</Filter>
     </ClInclude>
     <ClInclude Include="test_template0.h">
       <Filter>test_template</Filter>
@@ -235,6 +232,21 @@
     </ClInclude>
     <ClInclude Include="test_triangle_intersect.h">
       <Filter>test_triangle</Filter>
+    </ClInclude>
+    <ClInclude Include="test_function.h">
+      <Filter>test_gram</Filter>
+    </ClInclude>
+    <ClInclude Include="test_serialize.h">
+      <Filter>test_bin</Filter>
+    </ClInclude>
+    <ClInclude Include="test_file_rw.h">
+      <Filter>test_bin</Filter>
+    </ClInclude>
+    <ClInclude Include="my_geometry.h">
+      <Filter>test_math</Filter>
+    </ClInclude>
+    <ClInclude Include="calculatePolyhedron.h">
+      <Filter>head</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

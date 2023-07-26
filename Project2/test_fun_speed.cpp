@@ -35,9 +35,9 @@ const size_t totalNum = (size_t)1e8;
 //#define TEST_TRIGON3
 //#define TEST_TRIGON2_TRIGON2
 //#define TEST_TRIGON2D_TRIGON2D
-#define TEST_TRIGON1_TRIGON3
+//#define TEST_TRIGON1_TRIGON3
 //#define TEST_TRIGON2_TRIGON3
-//#define TEST_TRIGON3_TRIGON3
+#define TEST_TRIGON3_TRIGON3
 //#define TEST_TRIGON3XY_TRIGON3XY //on XOY plane
 
 static void _test0()
@@ -163,7 +163,7 @@ static void _test0()
 			//double res = _test_custom_calculate(nums);
 			// 点与三角形
 			//bool res = isPointInTriangle(randData2D[i][0], randData2D_[i]); //2D
-			bool res = isPointInTriangle(randData1[i][0], randData3[i]); //3D
+			//bool res = isPointInTriangle(randData1[i][0], randData3[i]); //3D
 			// 
 			// 三角形相交测试
 			//bool res = isTwoTrianglesIntersection(randData3[i], randData3_[i]);
@@ -189,7 +189,8 @@ static void _test0()
 			//bool res = isTwoTrianglesBoundingBoxIntersect(randData3[i], randData3_[i]);
 			//
 			// 软碰撞
-			//double d = getTrianglesDistance(P, Q, randData3[i], randData3_[i]);
+			double d = getTrianglesDistance(P, Q, randData3[i], randData3_[i]);
+			//double d = getTrianglesDistanceSAT(randData3[i], randData3_[i]);
 			//测试包围盒 
 			//Eigen::AlignedBox3d res = Eigen::AlignedBox3d(randData2[i][0], randData2[i][1]).intersection(Eigen::AlignedBox3d(randData2_[i][0], randData2_[i][1]));
 
@@ -220,14 +221,13 @@ static void _test0()
 	tm p;
 	localtime_s(&p, &nowtime); //将秒数转换为本地时间,年从1900算起,需要+1900,月为0-11,所以要+1
 	printf("%04d/%02d/%02d-%02d:%02d:%02d\n", p.tm_year + 1900, p.tm_mon + 1, p.tm_mday, p.tm_hour, p.tm_min, p.tm_sec);
-
 	cout << "main over." << endl;
 }
 
 
 static int enrol = []()->int
 {
-	//_test0();
+	_test0();
 	return 0;
 }();
 
