@@ -689,3 +689,126 @@ tolerance > 0
 
 
 
+```c
+std::tuple<Eigen::Vector3d, double> _getRelationOfTwoSegments(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB, bool isSquared = true)
+{
+	//enum RelationTwoSegment
+	//{
+	//	NearestMiddleMiddle, // edgeA.corss(edgeB)
+	//	NearestMiddleVertex, // (vertexA-vertexB).cross(edgesB).cross(edgesB)
+	//	NearestVertexVertex, // vertexA-vertexB
+	//};
+	auto getAxisFromFourPoints = [&]()->std::tuple<Vector3d, double>
+	{
+		double dmax = DBL_MAX;
+		Vector3d direction;
+		for (const auto& iterA : segmA)
+		{
+			for (const auto& iterB : segmB)
+			{
+				double dtemp = (iterB - iterA).squaredNorm();
+				if (dtemp < dmax)
+				{
+					direction = iterB - iterA;
+					dmax = dtemp;
+				}
+			}
+		}
+		return { direction, dmax };
+	};
+
+	auto getDistanceOfPointAndSegment = [&](const Vector3d& point, const std::array<Vector3d, 2>& segm)->double 
+	{
+		double dmin = DBL_MAX;
+		Eigen::Vector3d direction = (segm[1] - segm[0]);//.normalized(); //unnecessary
+		double projection = direction.dot(point);
+		if (direction.dot(segm[1]) < projection || projection < direction.dot(segm[0]))
+			return dmin; // (point - segm[1]).squaredNorm();
+		double k = direction.dot(point - segm[0]) / direction.dot(direction);
+		return (segm[0] - point + k * direction).squaredNorm();
+	};
+
+	Vector3d vectA = segmA[1] - segmA[0];
+	Vector3d vectB = segmB[1] - segmB[0];
+	double delta1 = (segmB[0] - segmA[0]).dot(vectA);
+	double delta2 = (segmB[0] - segmA[0]).dot(vectB);
+	// 2*2 inverse matrix, 1/|M|*(exchange main diagonal and -1 counter-diagonal)
+	double deno = -vectA.dot(vectA) * vectB.dot(vectB) + vectA.dot(vectB) * vectB.dot(vectA);//a*d-b*c
+	if (deno == 0.0)
+	{
+		perror("divided by zero.");// cout << "error" << endl;
+		return { Vector3d(0,0,0), DBL_MAX };
+	}
+	double kA = 1 / deno * (-vectB.dot(vectB) * delta1 + vectB.dot(vectA) * delta2);
+	double kB = 1 / deno * (-vectA.dot(vectB) * delta1 + vectA.dot(vectA) * delta2);
+	// based on position
+	double ptA0_segmB_p = std::min((segmA[0] - segmB[0]).squaredNorm(), (segmA[0] - segmB[1]).squaredNorm());
+	double ptA1_segmB_p = std::min((segmA[1] - segmB[0]).squaredNorm(), (segmA[1] - segmB[1]).squaredNorm());
+	double ptB0_segmA_p = std::min((segmB[0] - segmA[0]).squaredNorm(), (segmB[0] - segmA[1]).squaredNorm());
+	double ptB1_segmA_p = std::min((segmB[1] - segmA[0]).squaredNorm(), (segmB[1] - segmA[1]).squaredNorm());
+	double ptA0_segmB = getDistanceOfPointAndSegment(segmA[0], segmB);
+	double ptA1_segmB = getDistanceOfPointAndSegment(segmA[1], segmB);
+	double ptB0_segmA = getDistanceOfPointAndSegment(segmB[0], segmA);
+	double ptB1_segmA = getDistanceOfPointAndSegment(segmB[1], segmA);
+	Vector3d pointA = segmA[0] + kA * vectA;
+	Vector3d pointB = segmB[0] + kB * vectB;
+	if (0 <= kA && kA <= 1 && 0 <= kB && kB <= 1)
+	{
+		//Vector3d pointA = segmA[0] + kA * vectA;
+		//Vector3d pointB = segmB[0] + kB * vectB;
+		double d = isSquared ? (segmA[0] + kA * vectA - segmB[0] - kB * vectB).squaredNorm() : 
+			(segmA[0] + kA * vectA - segmB[0] - kB * vectB).norm();
+		return { vectA.cross(vectB), d };
+	}
+
+	if ((ptA0_segmB == DBL_MAX && ptA1_segmB == DBL_MAX) && (ptB0_segmA == DBL_MAX && ptB1_segmA == DBL_MAX))
+		return getAxisFromFourPoints();
+	if (std::min(ptA0_segmB, ptA1_segmB) < std::min(ptB0_segmA, ptB1_segmA))
+		return (ptA0_segmB < ptA1_segmB) ?
+		tuple<Eigen::Vector3d, double>{ (segmA[0] - segmB[0]).cross(vectB).cross(vectB), ptA0_segmB }:
+		tuple<Eigen::Vector3d, double>{ (segmA[1] - segmB[0]).cross(vectB).cross(vectB), ptA1_segmB };
+	else
+		return (ptB0_segmA < ptB1_segmA) ?
+		tuple<Eigen::Vector3d, double>{ (segmB[0] - segmA[0]).cross(vectA).cross(vectA), ptB0_segmA }:
+		tuple<Eigen::Vector3d, double>{ (segmB[1] - segmA[0]).cross(vectA).cross(vectA), ptB1_segmA };
+
+
+	//if (0 <= kA && kA <= 1 )//&& 0 > kB || kB > 1 )
+	//{
+	//	double dS = _getDistanceOfPointAndSegment(segmB[0], segmA);
+	//	double dE = _getDistanceOfPointAndSegment(segmB[1], segmA);
+	//	if (dS == DBL_MAX && dE == DBL_MAX)
+	//	{
+	//		return getAxisFromFourPoints();
+	//	}
+	//	if (dS < dE)
+	//		return { (segmB[0] - segmA[0]).cross(vectA).cross(vectA) , dS };
+	//	else
+	//		return { (segmB[1] - segmA[0]).cross(vectA).cross(vectA) , dE };
+	//}
+	//if (0 <= kB && kB <= 1 )//&& 0 > kA || kA > 1)
+	//{
+	//	double dS = _getDistanceOfPointAndSegment(segmA[0], segmB);
+	//	double dE = _getDistanceOfPointAndSegment(segmA[1], segmB);
+	//	if (dS == DBL_MAX && dE == DBL_MAX)
+	//	{
+	//		return getAxisFromFourPoints();
+	//	}
+	//	if (dS < dE)
+	//		return { (segmA[0] - segmB[0]).cross(vectB).cross(vectB) , dS };
+	//	else
+	//		return { (segmA[1] - segmB[0]).cross(vectB).cross(vectB) , dE };
+	//}
+	//return getAxisFromFourPoints();
+}
+
+//此方案行不通，移动的距离是两直线间的最小距离，点到直线的距离通常会更大
+	Vector3d vectZ = vectA.cross(vectB).normalized();
+	double d_P2L = (segmA[0] - segmB[0] + vectA.dot(segmB[0] - segmA[0]) / vectA.dot(vectA) * vectA).norm();
+	if (vectZ.dot(segmA[0]) < vectZ.dot(segmB[0])) //segmB front
+		d_P2L = -d_P2L;
+	std::array<Vector3d, 2> segmB_move = { segmB[0] + d_P2L * vectZ, segmB[1] + d_P2L * vectZ };
+	//double coplanar = vectA.cross(segmB_move[0] - segmA[0]).dot(segmB_move[1] - segmA[0]);
+	if (isTwoSegmentsIntersect(segmA, segmB_move))
+```
+
