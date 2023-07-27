@@ -591,6 +591,10 @@ static void _test6()
 	Vector3d df = getInterpenetrationDistanceOfTwoMeshs(meshA.vbo_, meshA.ibo_, meshB.vbo_, meshB.ibo_);
 	Vector3d di = getInterpenetrationDistanceOfTwoMeshs(meshB.vbo_, meshB.ibo_, meshA.vbo_, meshA.ibo_);
 
+	std::array<Vector3d, 2> segmA = { Vector3d(0,0,0), Vector3d(100,100,0) };
+	std::array<Vector3d, 2> segmB = { Vector3d(100,0,100), Vector3d(0,100,100) };
+	bool b1 = isTwoSegmentsIntersect(segmA, segmB);
+
 
 	cout << "d_min=" << df << endl;
 	cout << "return 0" << endl;
@@ -616,13 +620,23 @@ static void _test7()
 	Vector3d triB_2 = Vector3d(4924589.8109916430, -385975.18553675216, 5750.0000000000000);
 	Triangle triA = { triA_0, triA_1, triA_2 };
 	Triangle triB = { triB_0, triB_1, triB_2 };
-	double d = getTrianglesDistanceSAT(triA, triB);
+	//double d = getTrianglesDistanceSAT(triA, triB);
 	// ²âÊÔSAT¼ÆËãÈý½ÇÐÎ¾àÀë 37s
 	const size_t totalNum = (size_t)1e4;
 	//std::array<Vector3d, 3>* randData3 = new std::array<Vector3d, 3>[totalNum];
 	//std::array<Vector3d, 3>* randData3_ = new std::array<Vector3d, 3>[totalNum];
 	double* readNum = _readNumberFile(totalNum);
 	size_t count = 0;
+	int i = 63;
+	Triangle triAi = { { {readNum[i + 0],readNum[i + 2],readNum[i + 4]} ,
+						{readNum[i + 6],readNum[i + 8],readNum[i + 10]} ,
+						{readNum[i + 12],readNum[i + 14],readNum[i + 16]} } };
+	Triangle triBi = { { {readNum[i + 1],readNum[i + 3],readNum[i + 5]} ,
+						{readNum[i + 7],readNum[i + 9],readNum[i + 11]} ,
+						{readNum[i + 13],readNum[i + 15],readNum[i + 17]} } };
+	double d0 = getTrianglesDistance(P, Q, triAi, triBi);
+	double d1 = getTrianglesDistanceSAT(triAi, triBi);
+
 	for (int j = 0; j < totalNum; ++j)
 	{
 		Triangle triA = { { {readNum[j + 0],readNum[j + 2],readNum[j + 4]} ,

@@ -214,7 +214,7 @@
       <Filter>test_gram</Filter>
     </ClCompile>
     <ClCompile Include="calculatePolyhedron.cpp">
-      <Filter>src</Filter>
+      <Filter>test_triangle</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -246,7 +246,7 @@
       <Filter>test_math</Filter>
     </ClInclude>
     <ClInclude Include="calculatePolyhedron.h">
-      <Filter>head</Filter>
+      <Filter>test_triangle</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
