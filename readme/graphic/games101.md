@@ -156,19 +156,15 @@ $$
 
 ![image-20230325223352632](https://raw.githubusercontent.com/akingse/my-picbed/main/image-20230325223352632.png)
 
-
-
-
-
-\- Projection (投影) transformation 
+\- Projection (投影) transformation 三维到二维的投影
 
 \- Orthographic (正交) projection 
 
-\- Perspective (透视) projection
+camera在origin，看向-z，
 
- 
+\- Perspective (透视) projection，近大远小
 
- 
+![image-20230725232511115](../../../../../AppData/Roaming/Typora/typora-user-images/image-20230725232511115.png)
 
  
 

@@ -523,9 +523,9 @@ static void _test4()
 //test serialization 
 
 
+#ifdef USING_FLATBUFFERS_SERIALIZATION
 static void _test5()
 {
-#ifdef USING_FLATBUFFERS_SERIALIZATION
 	//读取二进制mesh
 	//std::vector<ModelMesh> meshs = _read_ModelMesh(filename + "cvtMeshVct_5233.bin");
 	//std::vector<ModelMesh> meshs = _read_ModelMesh(filename + "cvtMeshVct_6509_6134.bin");
@@ -577,7 +577,6 @@ static void _test5()
 	cout << "mesh count=" << meshs0.size() << endl;
 	cout << "count=" << count << endl;
 	cout << "time=" << double(endT - startT) / CLOCKS_PER_SEC << "s" << endl;
-#endif // USING_FLATBUFFERS_SERIALIZATION
 	cout << "return 0" << endl;
 }
 
@@ -596,6 +595,8 @@ static void _test6()
 	cout << "d_min=" << df << endl;
 	cout << "return 0" << endl;
 }
+#endif // USING_FLATBUFFERS_SERIALIZATION
+
 
 static void _test7()
 {
@@ -652,8 +653,10 @@ static int enrol = []()->int
 	//_test2();
 	//_test3();
 	//_test4();
+#ifdef USING_FLATBUFFERS_SERIALIZATION
 	//_test5();
 	_test6();
+#endif
 	_test7();
 	return 0;
 }();
