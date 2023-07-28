@@ -144,8 +144,12 @@ static bool _isPointInMesh(const Vector3d& point, const std::vector<Eigen::Vecto
 	//for (size_t i = 0; i < vbo.size(); ++i)
 	for (const auto& iter : ibo)
 	{
+		//顺时针绕行法
 		//Triangle trigon = { vbo[iter[0]], vbo[iter[1]], vbo[iter[2]] };
-		temp = (vbo[iter[1]] - vbo[iter[0]]).cross(vbo[iter[2]] - vbo[iter[1]]).dot(point - vbo[iter[0]]) < 0;
+		double croPro = (vbo[iter[1]] - vbo[iter[0]]).cross(vbo[iter[2]] - vbo[iter[1]]).dot(point - vbo[iter[0]]);
+		if (fabs(croPro) < eps)
+			return true; //point on the face
+		temp = croPro < 0;
 		if (isFirst)
 		{
 			isLeft = temp;
@@ -282,8 +286,8 @@ static void _test1()
 
 	triA = { triA_0, triA_1, triA_2 };
 	triB = { triB_0, triB_1, triB_2 };
-	_wirteTrigonFile({ {triA, triB} }, "testTrisData.bin");
-	auto res = _readTrigonFile("testTrisData.bin");
+	_wirteTrigonFile({ {triA, triB} }, "bin_file/testTrisData.bin");
+	auto res = _readTrigonFile("bin_file/testTrisData.bin");
 
 	double tolerance = 0.001;
 	//bool inter = isTwoTrianglesBoundingBoxIntersect(triA, triB);
@@ -306,8 +310,8 @@ static void _test1()
 
 	//RW test
 	std::vector<std::array<uint64_t, 2>> entityIdList = { {1,2},{3,4} };
-	_wirteTrigonFile(entityIdList, "entityIdList.bin");
-	std::vector<std::array<uint64_t, 2>> entity = _readEntityIDFile("entityIdList.bin");
+	_wirteTrigonFile(entityIdList, "bin_file/entityIdList.bin");
+	std::vector<std::array<uint64_t, 2>> entity = _readEntityIDFile("bin_file/entityIdList.bin");
 
 	bool res3 = isEqualTrigon(triA, triA);
 	bool res4 = isEqualTrigon(triA, triB);
@@ -432,14 +436,11 @@ static void _test2()
 
 static void _test3()
 {
-
 	std::vector<double> diatanceLen;
 	//std::set<double> diatanceList;
 	//std::multiset<double> diatanceList;
 	//std::map<double,vector<std::array<uint64_t, 2>>> diatanceList;
 	std::map<double, set<std::array<uint64_t, 2>>> diatanceList;
-
-
 	int count = 0;
 	for (auto& iter : diatanceList)
 	{
@@ -551,11 +552,11 @@ static void _test5()
 	//读取二进制mesh
 	//std::vector<ModelMesh> meshs = _read_ModelMesh(filename + "cvtMeshVct_5233.bin");
 	//std::vector<ModelMesh> meshs = _read_ModelMesh(filename + "cvtMeshVct_6509_6134.bin");
-	std::vector<ModelMesh> meshs0 = _read_ModelMesh(binFilePath + "cvtMeshVct_1.bin");
-	std::vector<ModelMesh> meshs2 = _read_ModelMesh(binFilePath + "cvtMeshVct_2.bin");
-	std::vector<ModelMesh> meshs3 = _read_ModelMesh(binFilePath + "cvtMeshVct_3.bin");
-	std::vector<ModelMesh> meshs4 = _read_ModelMesh(binFilePath + "cvtMeshVct_4.bin");
-	std::vector<ModelMesh> meshs5 = _read_ModelMesh(binFilePath + "cvtMeshVct_5.bin");
+	std::vector<ModelMesh> meshs0 = read_ModelMesh(binFilePath + "cvtMeshVct_1.bin");
+	std::vector<ModelMesh> meshs2 = read_ModelMesh(binFilePath + "cvtMeshVct_2.bin");
+	std::vector<ModelMesh> meshs3 = read_ModelMesh(binFilePath + "cvtMeshVct_3.bin");
+	std::vector<ModelMesh> meshs4 = read_ModelMesh(binFilePath + "cvtMeshVct_4.bin");
+	std::vector<ModelMesh> meshs5 = read_ModelMesh(binFilePath + "cvtMeshVct_5.bin");
 	size_t count = 0, countInter = 0;
 	clock_t startT, endT;
 	startT = clock();
@@ -610,6 +611,8 @@ static void _test6()
 	ModelMesh meshA = meshs[0];
 	ModelMesh meshB = meshs[1];
 
+	bool b0 = _isPointInMesh(Vector3d(150, 50, 50), meshA.vbo_, meshA.ibo_);
+
 	Vector3d df = getInterpenetrationDistanceOfTwoMeshs(meshA.vbo_, meshA.ibo_, meshB.vbo_, meshB.ibo_);
 	Vector3d di = getInterpenetrationDistanceOfTwoMeshs(meshB.vbo_, meshB.ibo_, meshA.vbo_, meshA.ibo_);
 
@@ -626,14 +629,7 @@ static void _test6()
 
 static void _test7()
 {
-
-	 //{-6551.0000000000000, -12214.000000000000, 9338.0000000000000} ;
-	 //{3593.0000000000000, -14015.000000000000, 5042.0000000000000} ;
-	 //{-12949.000000000000, -8942.0000000000000, 13762.000000000000} ;
-	 //{14549.000000000000, -14229.000000000000, 806.00000000000000} ;
-	 //{14946.000000000000, 12309.000000000000, -5828.0000000000000} ;
-	 //{166.00000000000000, -6871.0000000000000, 1677.0000000000000};
-
+	// 不相交的三角形
 	Vector3d triA_0 = Vector3d(4924494.8122771187, -385870.18283433426, 5749.9999999999054);
 	Vector3d triA_1 = Vector3d(4924599.8122771177, -385945.18283433421, 5749.9999999999054);
 	Vector3d triA_2 = Vector3d(4924586.8713248633, -385946.88654301979, 5749.9999999999054);
@@ -650,23 +646,30 @@ static void _test7()
 	double* readNum = _readNumberFile(totalNum);
 	size_t count = 0;
 	int i = 63;
-	Triangle triAi = { { {readNum[i + 0],readNum[i + 2],readNum[i + 4]} ,
-						{readNum[i + 6],readNum[i + 8],readNum[i + 10]} ,
-						{readNum[i + 12],readNum[i + 14],readNum[i + 16]} } };
-	Triangle triBi = { { {readNum[i + 1],readNum[i + 3],readNum[i + 5]} ,
-						{readNum[i + 7],readNum[i + 9],readNum[i + 11]} ,
-						{readNum[i + 13],readNum[i + 15],readNum[i + 17]} } };
-	double d0 = getTrianglesDistance(P, Q, triAi, triBi);
-	double d1 = getTrianglesDistanceSAT(triAi, triBi);
 
-	for (int j = 0; j < totalNum; ++j)
+	triA_0 = Vector3d(0,0,0);
+	triA_1 = Vector3d(0,10,0);
+	triA_2 = Vector3d(10,5,0);
+	triB_0 = Vector3d(-10,0,0);
+	triB_1 = Vector3d(-10,10,0);
+	triB_2 = Vector3d(-5,5,5);
+	triA = { triA_0, triA_1, triA_2 };
+	triB = { triB_0, triB_1, triB_2 };
+
+	double d0 = getTrianglesDistance(P, Q, triA, triB);
+	double d1 = getTrianglesDistanceSAT(triA, triB);
+
+	double d2 = getDistanceOfPointAndPlaneINF(Vector3d(0, 0, 0), triB);
+	d2 = sqrt(d2);
+
+	for (int i = 0; i < totalNum; ++i)
 	{
-		Triangle triA = { { {readNum[j + 0],readNum[j + 2],readNum[j + 4]} ,
-							{readNum[j + 6],readNum[j + 8],readNum[j + 10]} ,
-							{readNum[j + 12],readNum[j + 14],readNum[j + 16]} } };
-		Triangle triB = { { {readNum[j + 1],readNum[j + 3],readNum[j + 5]} ,
-							{readNum[j + 7],readNum[j + 9],readNum[j + 11]} ,
-							{readNum[j + 13],readNum[j + 15],readNum[j + 17]} } };
+		Triangle triA = { { {readNum[i + 0],readNum[i + 2],readNum[i + 4]} ,
+							{readNum[i + 6],readNum[i + 8],readNum[i + 10]} ,
+							{readNum[i + 12],readNum[i + 14],readNum[i + 16]} } };
+		Triangle triB = { { {readNum[i + 1],readNum[i + 3],readNum[i + 5]} ,
+							{readNum[i + 7],readNum[i + 9],readNum[i + 11]} ,
+							{readNum[i + 13],readNum[i + 15],readNum[i + 17]} } };
 		bool isInter = isTwoTrianglesIntersectSAT(triA, triB);
 		double d0, d1;
 		if (!isInter)

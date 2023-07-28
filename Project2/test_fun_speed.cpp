@@ -156,7 +156,7 @@ static void _test0()
 	{
 		start = clock();
 		//totalNum = 1;
-//#pragma omp parallel for //开启omp优化
+#pragma omp parallel for //开启omp优化
 		for (int i = 0; i < totalNum; i++)
 		{
 			//auto res = _get_circumcircle_center({ _get_rand() ,_get_rand() ,_get_rand() });
@@ -189,8 +189,8 @@ static void _test0()
 			//bool res = isTwoTrianglesBoundingBoxIntersect(randData3[i], randData3_[i]);
 			//
 			// 软碰撞
-			double d = getTrianglesDistance(P, Q, randData3[i], randData3_[i]);
-			//double d = getTrianglesDistanceSAT(randData3[i], randData3_[i]);
+			//double d = getTrianglesDistance(P, Q, randData3[i], randData3_[i]);
+			double d = getTrianglesDistanceSAT(randData3[i], randData3_[i]);
 			//测试包围盒 
 			//Eigen::AlignedBox3d res = Eigen::AlignedBox3d(randData2[i][0], randData2[i][1]).intersection(Eigen::AlignedBox3d(randData2_[i][0], randData2_[i][1]));
 
@@ -227,7 +227,7 @@ static void _test0()
 
 static int enrol = []()->int
 {
-	_test0();
+	//_test0();
 	return 0;
 }();
 

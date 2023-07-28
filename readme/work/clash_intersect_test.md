@@ -322,6 +322,8 @@ bug修复
 ```shell
 ./flatc --cpp inter_triangels_info.fbs
 ./flatc --cpp convert_to_mesh.fbs
+
+./flatc --python convert_to_mesh.fbs
 ```
 
 
