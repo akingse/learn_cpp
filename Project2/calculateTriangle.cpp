@@ -39,8 +39,8 @@ bool psykronix::isPointInTriangle(const Vector2d& point, const std::array<Vector
 #else
 	double axisz = (p1.x() - p0.x()) * (p2.y() - p0.y()) - (p2.x() - p0.x()) * (p1.y() - p0.y());
 	return  0.0 <= axisz * ((p1.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p1.y() - p0.y())) &&
-			0.0 <= axisz * ((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y())) &&
-			0.0 <= axisz * ((p0.x() - p2.x()) * (point.y() - p2.y()) - (point.x() - p2.x()) * (p0.y() - p2.y()));
+		0.0 <= axisz * ((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y())) &&
+		0.0 <= axisz * ((p0.x() - p2.x()) * (point.y() - p2.y()) - (point.x() - p2.x()) * (p0.y() - p2.y()));
 #endif
 }
 //isPointInTriangle3D
@@ -53,12 +53,12 @@ bool psykronix::isPointInTriangle(const Vector3d& point, const std::array<Vector
 #ifdef USING_MACHINE_PERCESION_THRESHOLD
 	// 3D triangle, input point must coplanar
 	return !((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(vecZ) < _eps || //bool isNotLeftA
-			(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < _eps || //bool isNotLeftB
-			(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < _eps); //bool isNotLeftC
+		(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < _eps || //bool isNotLeftB
+		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < _eps); //bool isNotLeftC
 #else
 	return !((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(vecZ) < 0.0 || //bool isNotLeftA
-			(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < 0.0 || //bool isNotLeftB
-			(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < 0.0); //bool isNotLeftC
+		(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < 0.0 || //bool isNotLeftB
+		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < 0.0); //bool isNotLeftC
 #endif
 
 	//+-*x< 0,5,1.5,2.5,1.5
@@ -69,7 +69,7 @@ bool psykronix::isPointInTriangle(const Vector3d& point, const std::array<Vector
 	//if (((trigon[2] - trigon[1]).cross(point - trigon[1])).dot(vecZ) < _eps) //bool isLeftC
 	//	return false;
 	//return true;
-	
+
 	// area method
 	//double dot1 = vecZ.dot((trigon[1] - trigon[0]).cross(point - trigon[0]));
 	//double dot2 = vecZ.dot((point - trigon[0]).cross(trigon[2] - trigon[0]));
@@ -82,9 +82,9 @@ bool psykronix::isPointOnTriangleSurface(const Vector3d& point, const std::array
 #ifdef USING_MACHINE_PERCESION_THRESHOLD
 	if (eps < fabs(vecZ.dot(point - trigon[0])))
 		return false;
-	return !((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(vecZ) < _eps || 
-			(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < _eps ||
-			(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < _eps); 
+	return !((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(vecZ) < _eps ||
+		(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < _eps ||
+		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < _eps);
 #else
 	if (fabs(vecZ.dot(point - trigon[0])) < 1.0) //avoid normalize all
 	{
@@ -94,8 +94,8 @@ bool psykronix::isPointOnTriangleSurface(const Vector3d& point, const std::array
 	}
 	// using isLeft test
 	return !((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(vecZ) < 0.0 ||
-			(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < 0.0 ||
-			(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < 0.0);
+		(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < 0.0 ||
+		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < 0.0);
 #endif
 }
 
@@ -512,7 +512,7 @@ bool psykronix::isTwoTrianglesIntersectionSAT(const std::array<Eigen::Vector3d, 
 	std::array<Eigen::Vector3d, 3> edgesB = { triB[1] - triB[0],
 											   triB[2] - triB[1],
 											   triB[0] - triB[2]
-};
+	};
 	bool triA_legal = !(edgesA[0].isZero() || edgesA[1].isZero() || edgesA[2].isZero());
 	bool triB_legal = !(edgesB[0].isZero() || edgesB[1].isZero() || edgesB[2].isZero());
 	if (triA_legal && triB_legal)
@@ -1502,9 +1502,9 @@ bool psykronix::isPointRayAcrossTriangleSAT(const Eigen::Vector3d& point, const 
 	//first pre-process, bounding box
 	double rayZ = std::max(std::max(trigon[0].z(), trigon[1].z()), trigon[2].z());
 	if (point.z() > rayZ || // ray direction to axisZ
-		point.x() > std::max(std::max(trigon[0].x(), trigon[1].x()), trigon[2].x())||
-		point.x() < std::min(std::min(trigon[0].x(), trigon[1].x()), trigon[2].x())||
-		point.y() > std::max(std::max(trigon[0].y(), trigon[1].y()), trigon[2].y())||
+		point.x() > std::max(std::max(trigon[0].x(), trigon[1].x()), trigon[2].x()) ||
+		point.x() < std::min(std::min(trigon[0].x(), trigon[1].x()), trigon[2].x()) ||
+		point.y() > std::max(std::max(trigon[0].y(), trigon[1].y()), trigon[2].y()) ||
 		point.y() < std::min(std::min(trigon[0].y(), trigon[1].y()), trigon[2].y()))
 		return false; // range box judge
 	//using SAT
@@ -1527,7 +1527,7 @@ bool psykronix::isPointRayAcrossTriangleSAT(const Eigen::Vector3d& point, const 
 		edges[0].cross(edges[1]) } };//add
 	for (const auto& axis : axes) //fast than index
 	{
-		double minTri = DBL_MAX; 
+		double minTri = DBL_MAX;
 		double maxTri = -DBL_MAX;
 		for (const auto& vertex : trigon) //fast than list
 		{
@@ -1548,26 +1548,26 @@ bool psykronix::isPointRayAcrossTriangleSAT(const Eigen::Vector3d& point, const 
 	}
 	return true;
 
-//#ifdef USING_METHOD_SAT
-	//if (isPointOnTriangleSurface(point, trigon))
-	//{
-	//	return true;
-	//}
-	//else
-	//{
-	//	Vector3d rayX = Vector3d(1.0, 0.0, 0.0);
-	//	Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
-	//	double dotPro = normal.dot(rayX); //ray.direction
-	//	if (dotPro == 0.0) // ray direction is parallel
-	//		return false;
-	//	double t = normal.dot(trigon[0] - point) / dotPro; //ray.origin
-	//	if (t > 0.0)
-	//	{
-	//		Vector3d inter = point + rayX * t;
-	//		if (isPointInTriangle(inter, trigon))
-	//			return true;
-	//	}
-	//	return false;
-	//}
+	//#ifdef USING_METHOD_SAT
+		//if (isPointOnTriangleSurface(point, trigon))
+		//{
+		//	return true;
+		//}
+		//else
+		//{
+		//	Vector3d rayX = Vector3d(1.0, 0.0, 0.0);
+		//	Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
+		//	double dotPro = normal.dot(rayX); //ray.direction
+		//	if (dotPro == 0.0) // ray direction is parallel
+		//		return false;
+		//	double t = normal.dot(trigon[0] - point) / dotPro; //ray.origin
+		//	if (t > 0.0)
+		//	{
+		//		Vector3d inter = point + rayX * t;
+		//		if (isPointInTriangle(inter, trigon))
+		//			return true;
+		//	}
+		//	return false;
+		//}
 }
 

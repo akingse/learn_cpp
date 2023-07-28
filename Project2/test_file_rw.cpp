@@ -153,7 +153,7 @@ std::vector<std::array<uint64_t, 2>> _readEntityIDFile(const std::string& fileNa
 	return tris;
 }
 
-#define USING_FLATBUFFERS_SERIALIZATION
+//#define USING_FLATBUFFERS_SERIALIZATION
 #ifdef USING_FLATBUFFERS_SERIALIZATION 
 #include "flatbuffers/flatbuffers.h"
 using namespace flatbuffers;
@@ -244,7 +244,6 @@ std::vector<ModelMesh> read_ModelMesh(const std::string& fileName)
 	}
 	return res;
 }
-#endif
 
 // using flatbuffers serialization
 void write_InterTriInfo(const std::vector<InterTriInfo>& infos, const std::string& fileName)
@@ -323,3 +322,4 @@ void write_ModelMesh(const std::vector<ModelMesh>& meshs, const std::string& fil
 	}
 }
 
+#endif //USING_FLATBUFFERS_SERIALIZATION
