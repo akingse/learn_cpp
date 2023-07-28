@@ -215,7 +215,9 @@ Eigen::Vector3d psykronix::getInterpenetrationDistanceOfTwoMeshs(const std::vect
 	Eigen::Vector3d direction;
 	if (isConvexA && isConvexB)
 	{
+		//std::tuple<std::array<int, 3>,bool> faceRecord; // bool fixed FaceA
 		// the minimum distance mush on the direction of face normal
+		bool isFixedFaceA = true;
 		for (const auto& iterA : iboA) // iterate every face
 		{
 			double minA = DBL_MAX, minB = DBL_MAX, maxA = -DBL_MAX, maxB = -DBL_MAX; //refresh min and max
@@ -237,6 +239,8 @@ Eigen::Vector3d psykronix::getInterpenetrationDistanceOfTwoMeshs(const std::vect
 			{
 				dminA = std::min(maxA - minB, maxB - minA);
 				direction = normal;
+				if (maxA - minB > maxB - minA)
+					isFixedFaceA = false;
 			}
 		}
 		for (const auto& iterB : iboB) // iterate every face
@@ -259,9 +263,12 @@ Eigen::Vector3d psykronix::getInterpenetrationDistanceOfTwoMeshs(const std::vect
 			{
 				dminB = std::min(maxA - minB, maxB - minA);
 				direction = normal;
+				if (maxA - minB < maxB - minA)
+					isFixedFaceA = false;
 			}
 		}
-		//return (dminA < dminB) ? tuple<double, Vector3d>{dminA, direction} : tuple<double, Vector3d>{dminA, direction};
+		if (!isFixedFaceA)
+			isFixedFaceA = -isFixedFaceA;
 		return std::min(dminA, dminB) * direction;
 	}
 

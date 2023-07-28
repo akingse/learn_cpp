@@ -2,13 +2,23 @@
 
 
 
-常用的侵入距离算法包括球体切剖法、点对距离法、基于凸壳的方法等。
+### 穿透深度
 
-符号距离场
+penetration depth (PD) 穿透深度 (PD) 定义为使两个多面体的内部不相交的最小平移距离。interpenetration
+
+侵入距离 IntrusionDistance
+
+常用的侵入距离算法包括球体切剖法、点对距离法、基于凸壳的方法等。
 
 ### GJK算法
 
 GJK算法是由 Gilbert,johnson和 Keerthi 3人在1988年共同开发的一类迭代算法。GJK算法的输入为两物体的顶点集，通过有限次数的迭代后，最后输出结果为两物体之间的欧氏距离。根据两物体之间 的欧氏距离，可进行碰撞检测。当两物体之间的距离等于或者小于零时，可判定两物体发生碰撞。
+
+两个凸多面体的碰撞，然后使用 GJK（Gilbert-Johnson-Keerthi）算法和 EPA（Expanding Polytope Algorithm）算法来计算穿透深度。
+
+对于凹多面体，你无法直接使用 SAT。你可以先尝试将凹多面体分解为凸多面体的集合（例如，使用有序凸分解法，例如 HACD），然后使用 SAT 在这些凸多面体之间检测碰撞。在这种情况下，你需要计算每个凸多面体之间的穿透深度，并从中选择最大的穿透深度作为整个凹多面体之间的穿透深度。
+
+
 
 ### 包围盒
 
@@ -112,11 +122,7 @@ On fast computation of distance between line segments.
 
 
 
-### 穿透深度
 
-penetration depth (PD) 穿透深度 (PD) 定义为使两个多面体的内部不相交的最小平移距离。interpenetration
-
-侵入距离 IntrusionDistance
 
 
 

@@ -138,6 +138,28 @@ bool isConvex(const vector<Vector3d>& points, const vector<array<int, 3>>& faces
 	return true;  // Õπ∂‡√ÊÃÂ
 }
 
+static bool _isPointInMesh(const Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
+{
+	bool isFirst = true, isLeft /*= false*/, temp /*= false*/;
+	//for (size_t i = 0; i < vbo.size(); ++i)
+	for (const auto& iter : ibo)
+	{
+		//Triangle trigon = { vbo[iter[0]], vbo[iter[1]], vbo[iter[2]] };
+		temp = (vbo[iter[1]] - vbo[iter[0]]).cross(vbo[iter[2]] - vbo[iter[1]]).dot(point - vbo[iter[0]]) < 0;
+		if (isFirst)
+		{
+			isLeft = temp;
+			isFirst = false;
+		}
+		else
+		{
+			if (temp != isLeft)
+				return false;
+		}
+	}
+	return true;
+}
+
 static void _test0()
 {
 	std::array<std::array<double, 3>, 3> triangle = { { {0,0,0},{1,1,1}, {2,2,2}} };

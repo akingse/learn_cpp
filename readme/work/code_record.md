@@ -810,5 +810,17 @@ std::tuple<Eigen::Vector3d, double> _getRelationOfTwoSegments(const std::array<E
 	std::array<Vector3d, 2> segmB_move = { segmB[0] + d_P2L * vectZ, segmB[1] + d_P2L * vectZ };
 	//double coplanar = vectA.cross(segmB_move[0] - segmA[0]).dot(segmB_move[1] - segmA[0]);
 	if (isTwoSegmentsIntersect(segmA, segmB_move))
+        
+        
+
+		std::get<0>(_getRelationOfTwoSegments({triA[0], triA[1]}, {triB[0], triB[1]})),
+		std::get<0>(_getRelationOfTwoSegments({triA[0], triA[1]}, {triB[1], triB[2]})),
+		std::get<0>(_getRelationOfTwoSegments({triA[0], triA[1]}, {triB[2], triB[0]})),
+		std::get<0>(_getRelationOfTwoSegments({triA[1], triA[2]}, {triB[0], triB[1]})),
+		std::get<0>(_getRelationOfTwoSegments({triA[1], triA[2]}, {triB[1], triB[2]})),
+		std::get<0>(_getRelationOfTwoSegments({triA[1], triA[2]}, {triB[2], triB[0]})),
+		std::get<0>(_getRelationOfTwoSegments({triA[2], triA[0]}, {triB[0], triB[1]})),
+		std::get<0>(_getRelationOfTwoSegments({triA[2], triA[0]}, {triB[1], triB[2]})),
+		std::get<0>(_getRelationOfTwoSegments({triA[2], triA[0]}, {triB[2], triB[0]})),
 ```
 
