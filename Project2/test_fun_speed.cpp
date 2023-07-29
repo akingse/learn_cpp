@@ -168,7 +168,7 @@ static void _test0()
 			// Èı½ÇĞÎÏà½»²âÊÔ
 			//bool res = isTwoTrianglesIntersection(randData3[i], randData3_[i]);
 			//bool res = isTwoTrianglesIntersection2(randData3[i], randData3_[i]);
-			//bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]);
+			bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]);
 			//bool res = isTwoTrianglesIntersection2(randData3[i], randData3_[i]);
 			//bool r1 = isSegmentCrossTriangleSurface(_get_rand2(), _get_rand3());
 			//bool r2 = isSegmentCrossTriangleSurface(_get_rand2(), _get_rand3());
@@ -190,7 +190,7 @@ static void _test0()
 			//
 			// ÈíÅö×²
 			//double d = getTrianglesDistance(P, Q, randData3[i], randData3_[i]);
-			double d = getTrianglesDistanceSAT(randData3[i], randData3_[i]);
+			//double d = getTrianglesDistanceSAT(randData3[i], randData3_[i]);
 			//²âÊÔ°üÎ§ºĞ 
 			//Eigen::AlignedBox3d res = Eigen::AlignedBox3d(randData2[i][0], randData2[i][1]).intersection(Eigen::AlignedBox3d(randData2_[i][0], randData2_[i][1]));
 

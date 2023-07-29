@@ -4,9 +4,7 @@
 
 ### 函数效率测试
 
-1e7，未启用omp
-
-| time                                                         | debug                                                        | 1e8<br />array数组                                           | release<br />1e7                                             |
+| time                                                         | debug                                                        | 1e8<br />array数组                                           | release<br />1e7，未启用omp                                  |
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | 临时变量                                                     | 10.366s <br />10.338s <br />10.294s                          | 开辟空间时间 <br />*2 time = 14.042s<br />装填随机数总时间<br /> time = 37.972s | 4.357s <br />4.432s <br />4.345s                             |
 | 索引                                                         | 10.425s <br />10.496s <br />10.423s                          |                                                              | 4.331s <br />4.322s <br />4.354s                             |
@@ -21,9 +19,9 @@
 | double<br />_isSegmentCrossTriangleSurface                   |                                                              | time = 1.732s<br/>time = 1.703s<br/>time = 1.805s            | time = 5.654s<br/>time = 5.792s<br/>time = 5.812s            |
 | double<br />getTriangleBoundingCircle                        |                                                              | 先判钝角<br />time = 4.735s<br/>time = 4.797s<br/>time = 4.817s |                                                              |
 | _isTwoTriangles<br />BoundingBoxIntersect<br />三角面的包围盒求交 |                                                              | eigen<br />time = 1.617s<br/>time = 1.568s<br/>time = 1.495s<br />手写<br />time = 1.228s<br/>time = 1.242s<br/>time = 1.22s |                                                              |
-| 软碰撞<br />_getTriDist                                      | using SAT<br />time = 47.853s<br/>time = 47.723s<br/>time = 47.657s<br />openMP<br />time = 7.771s<br/>time = 8.011s<br/>time = 8.128s | time = 56.686s<br/>time = 57.677s<br/>time = 57.643s<br />openMP<br />time = 33.12s<br/>time = 38.761s<br/>time = 39.656s | time = 9.058s<br/>time = 9.336s<br/>time = 9.22s<br />分开三角形<br />time = 6.302s<br/>time = 6.497s<br/>time = 6.521s |
+| 软碰撞<br />getTriDist                                       | using SAT<br />time = 47.853s<br/>time = 47.723s<br/>time = 47.657s<br />openMP<br />time = 7.771s<br/>time = 8.011s<br/>time = 8.128s | time = 56.686s<br/>time = 57.677s<br/>time = 57.643s<br />openMP<br />time = 33.12s<br/>time = 38.761s<br/>time = 39.656s | time = 9.058s<br/>time = 9.336s<br/>time = 9.22s<br />分开三角形<br />time = 6.302s<br/>time = 6.497s<br/>time = 6.521s |
 | 包围盒求交<br />AlignedBox3d::intersection                   | 1e8                                                          | time = 0.658s<br/>time = 0.616s<br/>time = 0.626s            |                                                              |
-| isTwoTrianglesIntersectSAT<br />分离轴定理                   | laptop strix<br />time = 4.271s<br/>time = 4.36s<br/>time = 4.311s | time = 6.034s<br/>time = 6.144s<br/>time = 6.192s            |                                                              |
+| isTwoTrianglesIntersectSAT<br />分离轴定理                   | laptop strix<br />time = 4.271s<br/>time = 4.36s<br/>time = 4.311s | time = 6.034s<br/>time = 6.144s<br/>time = 6.192s<br />openmp<br />time = 1.17s<br/>time = 1.281s<br/>time = 1.277s |                                                              |
 | isTriangleAndBoundingBox<br />三角面与包围盒                 |                                                              | time = 7.706s<br/>time = 7.596s<br/>time = 8.258s            |                                                              |
 | 三角面与包围盒 SAT                                           |                                                              | time = 11.168s<br/>time = 11.176s<br/>time = 11.663s<br />pre-judge<br />time = 5.512s<br/>time = 5.461s<br/>time = 5.476s |                                                              |
 | isPointRayAcrossTriangle                                     | SAT分离轴<br />求交点                                        | time = 1.576s<br/>time = 1.444s<br/>time = 1.447s<br />求交点<br />time = 1.512s<br/>time = 1.387s<br/>time = 1.436s |                                                              |
@@ -134,16 +132,12 @@ Vector3d vecX = (segment[1] - segment[0]).cross((trigon[1] - trigon[0]).cross(tr
 double dot0 = vecX.dot(trigon[0] - segment[0]);
 double dot1 = vecX.dot(trigon[1] - segment[0]);
 double dot2 = vecX.dot(trigon[2] - segment[0]);
-
-//critical include
-
-
-
+// triangle-point is all left
+if ((dot0 > eps && dot1 > eps && dot2 > eps) || (dot0 < _eps && dot1 < _eps && dot2 < _eps))
+    return false;
 ```
 
-
-
-### 两点在线段两侧（跨立实验）
+### 两线段相交（跨立实验）
 
 ```c
 //double straddling test
@@ -153,6 +147,16 @@ if (!((trigon[0] - segment[0]).cross(vecSeg).dot(vecSeg.cross(trigon[1] - segmen
     return true;
 
 ```
+
+### 点在面左侧
+
+```c
+Vector3d normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);
+bool isLeft = (point - plane[0]).dot(normal) < 0.0;
+
+```
+
+
 
 
 

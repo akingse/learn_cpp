@@ -99,9 +99,16 @@ bool psykronix::isPointOnTriangleSurface(const Vector3d& point, const std::array
 #endif
 }
 
-bool isTwoSegmentsIntersect(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB)
+bool psykronix::isTwoSegmentsIntersect(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB)
 {
-	return false;
+	// segmA's two point on both sides of segmB
+	// (segmB[0] - segmA[0])x(segmA[1] - segmA[0])*(segmA[1] - segmA[0])x(segmB[1] - segmA[0])>=0
+	// (segmA[0] - segmB[0])x(segmB[1] - segmB[0])*(segmB[1] - segmB[0])x(segmA[1] - segmB[0])>=0
+	bool isBetweenB = ((segmB[0] - segmA[0]).x() * (segmA[1] - segmA[0]).y() - (segmA[1] - segmA[0]).x() * (segmB[0] - segmA[0]).y()) * 
+					  ((segmA[1] - segmA[0]).x() * (segmB[1] - segmA[0]).y() - (segmB[1] - segmA[0]).x() * (segmA[1] - segmA[0]).y()) >= 0;
+	bool isBetweenA = ((segmA[0] - segmB[0]).x() * (segmB[1] - segmB[0]).y() - (segmB[1] - segmB[0]).x() * (segmA[0] - segmB[0]).y()) *
+					  ((segmB[1] - segmB[0]).x() * (segmA[1] - segmB[0]).y() - (segmA[1] - segmB[0]).x() * (segmB[1] - segmB[0]).y()) >= 0;
+	return isBetweenB && isBetweenA;
 }
 
 //double straddling test
@@ -190,13 +197,12 @@ bool psykronix::isEdgeCrossTriangle(const std::array<Vector3d, 2>& segment, cons
 	//return false;
 }
 
-// must through plane
+// segment must through trigon inner plane
 bool psykronix::isSegmentCrossTriangleSurface(const std::array<Vector3d, 2>& segment, const std::array<Vector3d, 3>& trigon) //start point outof plane
 {
 #ifdef STATISTIC_DATA_COUNT
 	count_segCrossTri++;
 #endif
-
 	// compare angle of normal-vector
 	Vector3d vecSeg = segment[1] - segment[0];
 	double dotA = (trigon[0] - segment[0]).cross(trigon[1] - segment[0]).dot(vecSeg);
@@ -375,8 +381,8 @@ bool psykronix::isTwoTrianglesIntersect(const std::array<Vector3d, 3>& triL, con
 		return false;
 	return true;
 	// using face to-left test
-	bool pointOnfaceS = false;
-	bool pointOnfaceE = false;
+	bool pointOnfaceS /*= false*/;
+	bool pointOnfaceE /*= false*/;
 	if (acrossR2L_A) // first filter
 	{
 		pointOnfaceS = fabs(veczL.dot(triR[0] - triL[0])) < eps; //start point
@@ -1133,7 +1139,7 @@ double psykronix::getDistanceOfPointAndPlaneINF(const Vector3d& point, const std
 	return (k * normal).squaredNorm();
 }
 
-std::tuple<Eigen::Vector3d, double> _getRelationOfTwoSegments(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB/*, bool isSquared = true*/)
+std::tuple<Eigen::Vector3d, double> _getNearestRelationOfTwoSegments(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB/*, bool isSquared = true*/)
 {
 	//enum RelationTwoSegment
 	//{
@@ -1225,7 +1231,7 @@ double psykronix::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& 
 	{
 		for (const auto& iterB : edgesB)
 		{
-			std::tuple<Eigen::Vector3d, double> vd = _getRelationOfTwoSegments(iterA, iterB);
+			std::tuple<Eigen::Vector3d, double> vd = _getNearestRelationOfTwoSegments(iterA, iterB);
 			if (std::get<1>(vd) < dmin)
 			{
 				axis = std::get<0>(vd);
@@ -1233,7 +1239,7 @@ double psykronix::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& 
 			}
 		}
 	}
-	//for (const auto& iterA : triA) // will cause become slow
+	//for (const auto& iterA : triA) // will cause speed slow
 	//{
 	//	double dtemp = getDistanceOfPointAndPlaneINF(iterA, triB);
 	//	if (dtemp < dmin)
