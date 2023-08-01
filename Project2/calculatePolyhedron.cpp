@@ -3,6 +3,8 @@
 using namespace std;
 using namespace Eigen;
 using namespace psykronix;
+static constexpr double eps = FLT_EPSILON; //1e-7
+static constexpr double _eps = -FLT_EPSILON;
 #undef max 
 #undef min
 #define USING_METHOD_SAT
@@ -10,23 +12,23 @@ using namespace psykronix;
 #ifdef STATISTIC_DATA_COUNT
 extern std::atomic<size_t> count_hard_in_mesh;
 extern std::atomic<size_t> count_reduced_exclude_pre, count_triA_inter, count_triB_inter,
-count_err_empty_mesh, count_tri_box_exclude_pre;
+	count_err_empty_mesh, count_tri_box_exclude_pre;
 extern std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> triPairList, triRecordHard;
 extern std::vector<InterTriInfo> interTriInfoList;
 
 #endif //STATISTIC_DATA_COUNT
 
-bool psykronix::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& points, const std::vector<std::array<int, 3>>& faces)
+bool psykronix::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
 {
-	for (const auto& iter : faces)
+	for (const auto& iter : ibo)
 	{
-		Vector3d normal = (points[iter[1]] - points[iter[0]]).cross(points[iter[2]] - points[iter[0]]).normalized();
+		Vector3d normal = (vbo[iter[1]] - vbo[iter[0]]).cross(vbo[iter[2]] - vbo[iter[0]]).normalized();
 		bool isFirst = true, isLeft /*= false*/, temp /*= false*/;
-		for (size_t i = 0; i < points.size(); ++i)
+		for (size_t i = 0; i < vbo.size(); ++i)
 		{
-			if (i == iter[0] || i == iter[1] || i == iter[2] || fabs(normal.dot(points[i] - points[iter[0]])) < FLT_EPSILON) // self and coplanar
+			if (i == iter[0] || i == iter[1] || i == iter[2] || fabs(normal.dot(vbo[i] - vbo[iter[0]])) < FLT_EPSILON) // self and coplanar
 				continue;
-			temp = normal.dot(points[i] - points[iter[0]]) < 0.0;
+			temp = normal.dot(vbo[i] - vbo[iter[0]]) < 0.0;
 			if (isFirst)
 			{
 				isLeft = temp;
@@ -42,37 +44,39 @@ bool psykronix::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& point
 	return true;
 }
 
-
-enum class PointOnTrigon :unsigned int
+enum class RayOnTrigon :unsigned int
 {
-	POINT_OUTER = 0,
-	POINT_INNER,
-	POINT_VERTEX_0,
-	POINT_VERTEX_1,
-	POINT_VERTEX_2,
-	POINT_EDGE_01,
-	POINT_EDGE_12,
-	POINT_EDGE_20,
+	CROSS_OUTER = 0,
+	CROSS_INNER,
+	CROSS_VERTEX_0,
+	CROSS_VERTEX_1,
+	CROSS_VERTEX_2,
+	CROSS_EDGE_01,
+	CROSS_EDGE_12,
+	CROSS_EDGE_20,
+	COIN_EDGE_01, //collinear
+	COIN_EDGE_12,
+	COIN_EDGE_20,
 };
 
-PointOnTrigon _relationOfPointAndTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon) // axisZ direction
+RayOnTrigon _relationOfPointAndTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon) // axisZ direction
 {
 	//if (!isPointRayAcrossTriangle(point, trigon))
-	//	return PointOnTrigon::POINT_OUTER;
+	//	return PointOnTrigon::CROSS_OUTER;
 	// must intersect
-	if (point.x() == trigon[0].x() && point.y() == trigon[0].y())
-		return PointOnTrigon::POINT_VERTEX_0;
+	if (point.x() == trigon[0].x() && point.y() == trigon[0].y()) // include ray and edge collinear
+		return RayOnTrigon::CROSS_VERTEX_0;
 	else if (point.x() == trigon[1].x() && point.y() == trigon[1].y())
-		return PointOnTrigon::POINT_VERTEX_1;
+		return RayOnTrigon::CROSS_VERTEX_1;
 	else if (point.x() == trigon[2].x() && point.y() == trigon[2].y())
-		return PointOnTrigon::POINT_VERTEX_2;
+		return RayOnTrigon::CROSS_VERTEX_2;
 	else if ((point - trigon[1]).cross(point - trigon[0]).z() == 0.0) // point on edge's projection
-		return PointOnTrigon::POINT_EDGE_01;
+		return RayOnTrigon::CROSS_EDGE_01;
 	else if ((point - trigon[2]).cross(point - trigon[1]).z() == 0.0)
-		return PointOnTrigon::POINT_EDGE_12;
+		return RayOnTrigon::CROSS_EDGE_12;
 	else if ((point - trigon[0]).cross(point - trigon[2]).z() == 0.0)
-		return PointOnTrigon::POINT_EDGE_20;
-	return PointOnTrigon::POINT_INNER;
+		return RayOnTrigon::CROSS_EDGE_20;
+	return RayOnTrigon::CROSS_INNER;
 }
 
 bool psykronix::isPointInsidePolyhedron(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
@@ -111,10 +115,10 @@ bool psykronix::isPointInsidePolyhedron(const Eigen::Vector3d& point, const std:
 		Triangle trigon = { { vbo[iter[0]] ,vbo[iter[1]] ,vbo[iter[2]] } };
 		if (isPointRayAcrossTriangleSAT(point, trigon))
 		{
-			PointOnTrigon relation = _relationOfPointAndTriangle(point, trigon);
-			if (PointOnTrigon::POINT_INNER == relation)
+			RayOnTrigon relation = _relationOfPointAndTriangle(point, trigon);
+			if (RayOnTrigon::CROSS_INNER == relation)
 				count++;
-			else if (PointOnTrigon::POINT_VERTEX_0 == relation && vertexSet.find(iter[0]) == vertexSet.end())
+			else if (RayOnTrigon::CROSS_VERTEX_0 == relation && vertexSet.find(iter[0]) == vertexSet.end())
 			{
 				if (isConvex || isLeftAll(iter)) // isConvex or Concave outer face
 				{
@@ -122,7 +126,7 @@ bool psykronix::isPointInsidePolyhedron(const Eigen::Vector3d& point, const std:
 					vertexSet.insert(iter[0]);
 				}
 			}
-			else if (PointOnTrigon::POINT_VERTEX_1 == relation && vertexSet.find(iter[1]) == vertexSet.end())
+			else if (RayOnTrigon::CROSS_VERTEX_1 == relation && vertexSet.find(iter[1]) == vertexSet.end())
 			{
 				if (isConvex || isLeftAll(iter)) // isConvex or Concave outer face
 				{
@@ -130,7 +134,7 @@ bool psykronix::isPointInsidePolyhedron(const Eigen::Vector3d& point, const std:
 					vertexSet.insert(iter[1]);
 				}
 			}
-			else if (PointOnTrigon::POINT_VERTEX_2 == relation && vertexSet.find(iter[2]) == vertexSet.end())
+			else if (RayOnTrigon::CROSS_VERTEX_2 == relation && vertexSet.find(iter[2]) == vertexSet.end())
 			{
 				if (isConvex || isLeftAll(iter)) // isConvex or Concave outer face
 				{
@@ -138,19 +142,19 @@ bool psykronix::isPointInsidePolyhedron(const Eigen::Vector3d& point, const std:
 					vertexSet.insert(iter[2]);
 				}
 			}
-			else if (PointOnTrigon::POINT_EDGE_01 == relation &&
+			else if (RayOnTrigon::CROSS_EDGE_01 == relation &&
 				edgeSet.find({ iter[0], iter[1] }) == edgeSet.end() && edgeSet.find({ iter[1], iter[0] }) == edgeSet.end())
 			{
 				count++;
 				edgeSet.insert({ iter[0], iter[1] });
 			}
-			else if (PointOnTrigon::POINT_EDGE_12 == relation &&
+			else if (RayOnTrigon::CROSS_EDGE_12 == relation &&
 				edgeSet.find({ iter[1], iter[2] }) == edgeSet.end() && edgeSet.find({ iter[2], iter[1] }) == edgeSet.end())
 			{
 				count++;
 				edgeSet.insert({ iter[1], iter[2] });
 			}
-			else if (PointOnTrigon::POINT_EDGE_20 == relation &&
+			else if (RayOnTrigon::CROSS_EDGE_20 == relation &&
 				edgeSet.find({ iter[2], iter[0] }) == edgeSet.end() && edgeSet.find({ iter[0], iter[2] }) == edgeSet.end())
 			{
 				count++;
@@ -204,8 +208,71 @@ bool _isNormalVectorOutwardsConvex(const std::array<int, 3>& face, const Eigen::
 	}
 }
 
+//using method SAT
+Eigen::Vector3d _getPenetrationDepthOfTwoConvex(const std::vector<Eigen::Vector3d>& vboA, const std::vector<std::array<int, 3>>& iboA,
+	const std::vector<Eigen::Vector3d>& vboB, const std::vector<std::array<int, 3>>& iboB)
+{
+	double dminA = DBL_MAX, dminB = DBL_MAX;
+	Eigen::Vector3d direction;
+	//std::tuple<std::array<int, 3>,bool> faceRecord; // bool fixed FaceA
+	// the minimum distance mush on the direction of face normal
+	bool isFixedFaceA = true;
+	for (const auto& iterA : iboA) // iterate every face
+	{
+		double minA = DBL_MAX, minB = DBL_MAX, maxA = -DBL_MAX, maxB = -DBL_MAX; //refresh min and max
+		Vector3d normal = (vboA[iterA[1]] - vboA[iterA[0]]).cross(vboA[iterA[2]] - vboA[iterA[0]]).normalized();
+		//bool isOut = _isNormalVectorOutwardsConvex(iterA, normal, vboA, iboA);
+		for (const auto& vertexA : vboA)
+		{
+			double projection = normal.dot(vertexA);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
+		}
+		for (const auto& vertexB : vboB)
+		{
+			double projection = normal.dot(vertexB);
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		if (std::min(maxA - minB, maxB - minA) < dminA)//refresh 
+		{
+			dminA = std::min(maxA - minB, maxB - minA);
+			direction = normal;
+			if (maxA - minB > maxB - minA)
+				isFixedFaceA = false;
+		}
+	}
+	for (const auto& iterB : iboB) // iterate every face
+	{
+		double minA = DBL_MAX, minB = DBL_MAX, maxA = -DBL_MAX, maxB = -DBL_MAX;
+		Vector3d normal = (vboB[iterB[1]] - vboB[iterB[0]]).cross(vboB[iterB[2]] - vboB[iterB[0]]).normalized();
+		for (const auto& vertexA : vboA)
+		{
+			double projection = normal.dot(vertexA);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
+		}
+		for (const auto& vertexB : vboB)
+		{
+			double projection = normal.dot(vertexB);
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		if (std::min(maxA - minB, maxB - minA) < dminB)//refresh 
+		{
+			dminB = std::min(maxA - minB, maxB - minA);
+			direction = normal;
+			if (maxA - minB < maxB - minA)
+				isFixedFaceA = false;
+		}
+	}
+	if (!isFixedFaceA)
+		isFixedFaceA = -isFixedFaceA;
+	return std::min(dminA, dminB) * direction;
+}
+
 // fix mehsA, move distance of meshB
-Eigen::Vector3d psykronix::getInterpenetrationDistanceOfTwoMeshs(const std::vector<Eigen::Vector3d>& vboA, const std::vector<std::array<int, 3>>& iboA,
+Eigen::Vector3d psykronix::getPenetrationDepthOfTwoMeshs(const std::vector<Eigen::Vector3d>& vboA, const std::vector<std::array<int, 3>>& iboA,
 	const std::vector<Eigen::Vector3d>& vboB, const std::vector<std::array<int, 3>>& iboB)
 {
 	//must intersect
@@ -215,61 +282,7 @@ Eigen::Vector3d psykronix::getInterpenetrationDistanceOfTwoMeshs(const std::vect
 	Eigen::Vector3d direction;
 	if (isConvexA && isConvexB)
 	{
-		//std::tuple<std::array<int, 3>,bool> faceRecord; // bool fixed FaceA
-		// the minimum distance mush on the direction of face normal
-		bool isFixedFaceA = true;
-		for (const auto& iterA : iboA) // iterate every face
-		{
-			double minA = DBL_MAX, minB = DBL_MAX, maxA = -DBL_MAX, maxB = -DBL_MAX; //refresh min and max
-			Vector3d normal = (vboA[iterA[1]] - vboA[iterA[0]]).cross(vboA[iterA[2]] - vboA[iterA[0]]).normalized();
-			//bool isOut = _isNormalVectorOutwardsConvex(iterA, normal, vboA, iboA);
-			for (const auto& vertexA : vboA)
-			{
-				double projection = normal.dot(vertexA);
-				minA = std::min(minA, projection);
-				maxA = std::max(maxA, projection);
-			}
-			for (const auto& vertexB : vboB)
-			{
-				double projection = normal.dot(vertexB);
-				minB = std::min(minB, projection);
-				maxB = std::max(maxB, projection);
-			}
-			if (std::min(maxA - minB, maxB - minA) < dminA)//refresh 
-			{
-				dminA = std::min(maxA - minB, maxB - minA);
-				direction = normal;
-				if (maxA - minB > maxB - minA)
-					isFixedFaceA = false;
-			}
-		}
-		for (const auto& iterB : iboB) // iterate every face
-		{
-			double minA = DBL_MAX, minB = DBL_MAX, maxA = -DBL_MAX, maxB = -DBL_MAX;
-			Vector3d normal = (vboB[iterB[1]] - vboB[iterB[0]]).cross(vboB[iterB[2]] - vboB[iterB[0]]).normalized();
-			for (const auto& vertexA : vboA)
-			{
-				double projection = normal.dot(vertexA);
-				minA = std::min(minA, projection);
-				maxA = std::max(maxA, projection);
-			}
-			for (const auto& vertexB : vboB)
-			{
-				double projection = normal.dot(vertexB);
-				minB = std::min(minB, projection);
-				maxB = std::max(maxB, projection);
-			}
-			if (std::min(maxA - minB, maxB - minA) < dminB)//refresh 
-			{
-				dminB = std::min(maxA - minB, maxB - minA);
-				direction = normal;
-				if (maxA - minB < maxB - minA)
-					isFixedFaceA = false;
-			}
-		}
-		if (!isFixedFaceA)
-			isFixedFaceA = -isFixedFaceA;
-		return std::min(dminA, dminB) * direction;
+
 	}
 
 
@@ -444,4 +457,99 @@ double psykronix::getTwoMeshsDistanceSoft(const ModelMesh& mesh_a, const ModelMe
 		interTriInfoList.push_back({ triDistPair ,{}, d });
 #endif   
 	return d;
+}
+
+// only for convex polytope 
+bool isTwoMeshsIntersectGJK(const ModelMesh& mesh_a, const ModelMesh& mesh_b, const Eigen::Affine3d& matrix = Eigen::Affine3d::Identity())
+{
+
+	return false;
+}
+
+// only for convex polytope
+double getTwoMeshsPenetrationDepthEPA(const ModelMesh& mesh_a, const ModelMesh& mesh_b, const Eigen::Affine3d& matrix = Eigen::Affine3d::Identity())
+{
+
+	return 0.0;
+}
+
+//---------------------------------------------------------------------------
+//  penetration depth
+//---------------------------------------------------------------------------
+
+//must intersect
+std::array<Vector3d, 2> _getIntersectPointsOfTwoTriangles(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
+{
+	int count = 0;
+	Eigen::Vector3d gVecNaN(std::nan("0"), std::nan("0"), std::nan("0"));
+	std::array<Vector3d, 2> res = { gVecNaN , gVecNaN };
+	std::array<array<Vector3d, 2>, 3> edgesA = { { {triA[0], triA[1]},
+												{triA[1], triA[2]},
+												{triA[2], triA[0] } } };
+	for (const auto& iterA : edgesA)
+	{
+		Vector3d normal = (triB[1] - triB[0]).cross(triB[2] - triB[1]);//triB plane, not isZero
+		Vector3d vecSeg = iterA[1] - iterA[0];
+		// intersect point of line and plane
+		if (fabs(vecSeg.dot(normal.normalized())) < eps) // error or line parallel to plane
+		{
+			if (fabs((iterA[0] - triB[0]).dot(normal.normalized())) < eps && isPointInTriangle(iterA[0], triB))
+			{
+				res[count] = iterA[0];
+				count++;
+			}
+			if (fabs((iterA[1] - triB[0]).dot(normal.normalized())) < eps && isPointInTriangle(iterA[1], triB))
+			{
+				res[count] = iterA[1];
+				count++;
+			}
+			if (count == 2)
+				return res;
+		}
+		double k = (triB[0] - iterA[0]).dot(normal) / vecSeg.dot(normal);
+		if (0 > k || k > 1)
+			continue;
+		Vector3d local = iterA[0] + k * vecSeg;
+		if (!isPointInTriangle(local, triB))
+			continue;
+		res[count] = local;
+		count++;
+		if (count == 2)
+			return res;
+	}
+	std::array<array<Vector3d, 2>, 3> edgesB = { { {triB[0], triB[1]},
+												{ triB[1], triB[2] },
+												{ triB[2], triB[0] } } };
+	for (const auto& iterB : edgesB)
+	{
+		Vector3d normal = (triA[1] - triA[0]).cross(triA[2] - triA[1]);//triA plane, not isZero
+		Vector3d vecSeg = iterB[1] - iterB[0];
+		// intersect point of line and plane
+		if (fabs(vecSeg.dot(normal.normalized())) < eps) // error or line parallel to plane
+		{
+			if (fabs((iterB[0] - triA[0]).dot(normal.normalized())) < eps && isPointInTriangle(iterB[0], triA))
+			{
+				res[count] = iterB[0];
+				count++;
+			}
+			if (fabs((iterB[1] - triA[0]).dot(normal.normalized())) < eps && isPointInTriangle(iterB[1], triA))
+			{
+				res[count] = iterB[1];
+				count++;
+			}
+			if (count == 2)
+				return res;
+		}
+		double k = (triA[0] - iterB[0]).dot(normal) / vecSeg.dot(normal);
+		if (0 > k || k > 1)
+			continue;
+		Vector3d local = iterB[0] + k * vecSeg;
+		if (!isPointInTriangle(local, triA))
+			continue;
+		res[count] = local;
+		count++;
+		if (count == 2)
+			return res;
+	}
+	return res;
 }

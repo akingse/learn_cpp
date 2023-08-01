@@ -1,24 +1,36 @@
 ## 碰撞检测
 
+应用：计算机游戏、计算机仿真模拟、机器人和计算物理学中；
+
+游戏开发，3D建模，动画，虚拟现实和增强现实，物理仿真，路径规划，BIM设计施工阶段
+
+分类：二维平面和三维碰撞，静态干涉和动态碰撞检测
 
 
-### 穿透深度
 
-penetration depth (PD) 穿透深度 (PD) 定义为使两个多面体的内部不相交的最小平移距离。interpenetration
+#### 基本原理：
 
-侵入距离 IntrusionDistance
+- mesh网格化（v）
+- parameterization参数化（x）
+- AABB包围盒预碰撞（v）
+- 平面扫描，其他包围盒预处理（x）
+- SAT分离轴，判断是否相交，计算相离的距离；（v）
+- 数据结构：kd-tree，octree，BVH 层次包围盒（x）
+- GJK和EPA计算凸多面体穿透深度（x）
 
-常用的侵入距离算法包括球体切剖法、点对距离法、基于凸壳的方法等。
+测试navisworks，依据使用场景（分级），两个功能，整体移出和局部深度；
 
-### GJK算法
+跟修工确认；
 
-GJK算法是由 Gilbert,johnson和 Keerthi 3人在1988年共同开发的一类迭代算法。GJK算法的输入为两物体的顶点集，通过有限次数的迭代后，最后输出结果为两物体之间的欧氏距离。根据两物体之间 的欧氏距离，可进行碰撞检测。当两物体之间的距离等于或者小于零时，可判定两物体发生碰撞。
 
-两个凸多面体的碰撞，然后使用 GJK（Gilbert-Johnson-Keerthi）算法和 EPA（Expanding Polytope Algorithm）算法来计算穿透深度。
 
-对于凹多面体，你无法直接使用 SAT。你可以先尝试将凹多面体分解为凸多面体的集合（例如，使用有序凸分解法，例如 HACD），然后使用 SAT 在这些凸多面体之间检测碰撞。在这种情况下，你需要计算每个凸多面体之间的穿透深度，并从中选择最大的穿透深度作为整个凹多面体之间的穿透深度。
+#### 核心功能实现：
 
-凹多面体凸分解 convex decomposition
+硬碰撞判断（v）碰撞点信息（x）
+
+软碰撞判断（v）最近点信息（v）
+
+穿透深度计算（-）最近方向（x）
 
 
 
@@ -26,9 +38,154 @@ GJK算法是由 Gilbert,johnson和 Keerthi 3人在1988年共同开发的一类�
 
 ---
 
-### 包围盒
+### 穿透深度
+
+penetration depth (PD) 穿透深度，定义为使两个多面体的内部不相交的最小平移距离。侵入距离 IntrusionDistance；
+
+#### 解决方案：
+
+- Minkowski Sum 复杂度太大，凹多面体 n^6
+- GJK和EPA，仅用于凸多面体
+- chatgpt：无法直接使用 SAT。你可以先尝试将凹多面体分解为凸多面体的集合；
+- 凹多面体凸分解 convex decomposition，也无法确定方向
+- 输入方向，输出方向穿透距离；
+
+
+
+
+
+
+
+### GJK算法
+
+GJK算法是由 Gilbert,johnson和 Keerthi 3人在1988年共同开发的一类迭代算法。GJK算法的输入为两物体的顶点集，通过有限次数的迭代后，最后输出结果为两物体之间的欧氏距离。根据两物体之间 的欧氏距离，可进行碰撞检测。当两物体之间的距离等于或者小于零时，可判定两物体发生碰撞。
+
+GJK是物理引擎中计算碰撞的主流方案；可以看成是MinkowskiDifference的超级优化；
+
+两个凸多面体的碰撞，然后使用 GJK（Gilbert-Johnson-Keerthi）算法和 EPA（Expanding Polytope Algorithm）算法来计算穿透深度。
+
+对于凹多面体，你无法直接使用 SAT。你可以先尝试将凹多面体分解为凸多面体的集合（例如，使用有序凸分解法，例如 HACD），然后使用 SAT 在这些凸多面体之间检测碰撞。在这种情况下，你需要计算每个凸多面体之间的穿透深度，并从中选择最大的穿透深度作为整个凹多面体之间的穿透深度。
+
+Simplex单纯形，在MinkowskiDifference内需要寻找的最小图形，用于判断是否包含原点；
+
+support函数，使用方向向量来查找Simplex；
+
+```c
+bool GJK(Shape shapeA, Shape shapeB)
+{
+	// 得到初始的方向
+    Vector2 direction = findFirstDirection();
+    // 得到首个support点
+    simplex.add(support(direction));
+    // 得到第二个方向
+    direction = -direction;
+    while(true)
+    {
+    	Vector2 p = support(direction);
+        // 沿着dir的方向，已经找不到能够跨越原点的support点了。
+        if (Vector2.Dot(p, direction) < 0)
+            return false;	
+        simplex.add(p);
+        // 单形体包含原点了
+        if (simplex.contains(Vector2(0, 0)))
+            return true;
+        direction = findNextDirection();
+    }
+}
+
+```
+
+
+
+用[QuickHull](https://link.zhihu.com/?target=https%3A//en.wikipedia.org/wiki/Quickhull)算法生成一个凸几何体,或者使用[V-HACD](https://link.zhihu.com/?target=https%3A//github.com/kmammou/v-hacd)等类似的算法将凹几何体分解成数个凸几何体
+
+
+
+### EPA算法
+
+Expanding Polytope Algorithm(EPA) 扩展多边形算法
+
+```c
+Vector2 EPA(Simplex simplex)
+{
+    // 构造一个首尾相连的多边形
+    simplexEdge.initEdges(simplex);
+    while(true)
+    {
+        // 找到距离原点最近的边
+        Edge e = simplexEdge.findClosestEdge();
+        // 沿着边的法线方向，尝试找一个新的support点
+        Vector2 point = support(e.normal);
+        // 无法找到能够跨越该边的support点了。也就是说，该边就是差集最近边
+        float distance = Vector2.Dot(point, e.normal);
+        if (distance - e.distance <= 0)
+        {
+            // 返回穿透向量
+            return e.normal * distance;
+        }
+        // 将新的support点插入到多边形中。
+        // 也就是将边e从support点位置分割成两条新的边，并替换到多边形集合中。
+        simplexEdge.insertEdgePoint(e, point);
+    }
+}
+```
+
+
+
+### Minkowski
+
+lMinkowski Sum and Minkowski Difference
+$$
+A + B = \{a + b|a∈A, b∈B\}
+$$
+
+闵可夫斯基和从几何上的直观理解是A集合沿B的边际连续运动一周扫过的区域与B集合本身的并集，也可以是B沿着A的边界连续运动扫过区域与A自身的并集。
+
+GJK算法的核心就是闵可夫斯基差，即若两个多边形相交，则它们的闵可夫斯基差必然包括原点。两个相交的多边形，必然有一点既属于shape1，也属于shape2，相减则为原点（0，0）
+
+如果两个凸多边形有重叠部分，则它们的Minkowski sums也会存在一个包含原点的重叠区域。因此，在计算Minkowski sums时，我们通常将其中一个凸多边形反转一下（即取相反数），这样它的形状就成为了原凸多边形包围盒（Axis-Aligned Bounding Box或AABB）。然后我们将该AABB和另一个凸多边形作为输入，求出它们的Minkowski sums，并判断是否包含原点。
+
+如果结果包含原点，则说明两个凸多边形之间存在重叠部分，即发生了碰撞。否则它们不重叠，即没有碰撞。
+
+
+
+设平面图的顶点数、边数 和区域数分别为 v，e 和 f，则由欧拉公式有 v-e+f=2。
+
+四面体，4-6+4
+
+六面体 8-12+6
+
+
+
+### 基于体分解的包围体层次 ISBVH
+
+论文：碰撞响应中方向穿透深度算法的研究
+
+穿透顶点集 V_Q
+
+穿透交点集 I_Q
+
+穿透点集
+
+
+
+---
+
+## 包围盒
 
 ### OBB包围盒
+
+Oriented Bounding Box
+
+用包围球做第一回合的快速测试，用OBB进行第二回合的测试。第一回合的测试可以剔除大多数不可见或不必裁剪的物体，这样不必进行第二回合测试的几率就会大得多。同时，OBB包围盒测试所得的结果更精确，最终要绘制的物体会更少。这种混合式的包围盒也适用于其他方面，如碰撞检测、物理/力学等
+
+要计算两个OBB是否碰撞，只需要计算他们在图3上的4个坐标轴上的投影是否有重叠，如果有，则两多边形有接触。
+
+判定方式：两个多边形在所有轴上的投影都发生重叠，则判定为碰撞；否则，没有发生碰撞。
+
+OBB存在多种的表达方式，（二维）最常用的一种：一个中心点、2个矩形的边长、两个旋转轴（该轴垂直于多边形自身的边，用于投影计算）
+
+OBB树
 
 
 
@@ -48,7 +205,7 @@ AABB包围盒具有以下特点:
 
 
 
-### 快速求交
+快速求交
 
 两个AABB包围盒的集合，想要快速求出它们相交的部分，你可以考虑使用空间分割数据结构，例如kd-tree或octree。这些数据结构可以将空间划分成不同的块或箱子，以有效地提高搜索和查询速度。
 
@@ -98,18 +255,15 @@ R-tree
 
 邻近查询包 Proximity Query Package
 
-   * collision detection - detect whether two models overlap, and
-                           optionally, which triangles of the models  overlap. 是否碰撞，具体到三角面片
-                          
-   * distance computation - compute the distance between two models, 
-                            i. e., the length of the shortest translation  that makes the models overlap 距离计算，最近距离
-                           
-   * tolerance verification - detect whether two models are closer or
-                              farther than a tolerance value. 公差验证，距离与公差值比较
+   * collision detection - detect whether two models overlap, and optionally, which triangles of the models  overlap. 是否碰撞，具体到三角面片
+     
+   * distance computation - compute the distance between two models,  i. e., the length of the shortest translation  that makes the models overlap 距离计算，最近距离
+     
+   * tolerance verification - detect whether two models are closer or farther than a tolerance value. 公差验证，距离与公差值比较
 
 
 
-### paper
+paper
 
 基于rssobb混合层次包围盒精确碰撞检测研究
 
@@ -134,31 +288,11 @@ On fast computation of distance between line segments.
 
 
 
-
-
-### lMinkowski Sum and Minkowski Difference
-
-如果两个凸多边形有重叠部分，则它们的Minkowski sums也会存在一个包含原点的重叠区域。因此，在计算Minkowski sums时，我们通常将其中一个凸多边形反转一下（即取相反数），这样它的形状就成为了原凸多边形包围盒（Axis-Aligned Bounding Box或AABB）。然后我们将该AABB和另一个凸多边形作为输入，求出它们的Minkowski sums，并判断是否包含原点。
-
-如果结果包含原点，则说明两个凸多边形之间存在重叠部分，即发生了碰撞。否则它们不重叠，即没有碰撞。
-
-
-
-设平面图的顶点数、边数 和区域数分别为 v，e 和 f，则由欧拉公式有 v-e+f=2。
-
-四面体，4-6+4
-
-六面体 8-12+6
-
-
-
 ### 算法的局限性
 
  Dual-space Expansion for Estimating Penetration depth between convex polytopes 估计凸多面体间穿透深度的双空间展开
 
-lMinkowski Sum 复杂度太大
-
-
+Minkowski Sum 复杂度太大
 
 当问题变得复杂时候，解决方案就会变得学术，论文很难啃，学术论文背后有很多专业的概念，比如闵可夫斯基和，还有一些作者自己定的概念，比如RSS(矩形扫掠球)，看懂论文，分析解决方案可行性，再到写实现，有很长的路要走；
 
@@ -185,22 +319,6 @@ Nv是相交测试BV的数量，Cv是每次相交测试的消耗，Np是相交测
 BVH的核心思想就是用体积略大而几何特征简单的包围盒来近似描述复杂的几何对象，并且这种包围盒是嵌套的，我们只需要对包围盒进行进一步的相交测试，就可以越来越逼近实际对象（很明显这个功能需要用到树形的层次结构）。
 
 ![img](https://pic4.zhimg.com/80/v2-5bff610798835ab95d23a5a591e47ccb_1440w.webp)
-
-
-
-### OBB包围盒
-
-Oriented Bounding Box
-
-用包围球做第一回合的快速测试，用OBB进行第二回合的测试。第一回合的测试可以剔除大多数不可见或不必裁剪的物体，这样不必进行第二回合测试的几率就会大得多。同时，OBB包围盒测试所得的结果更精确，最终要绘制的物体会更少。这种混合式的包围盒也适用于其他方面，如碰撞检测、物理/力学等
-
-要计算两个OBB是否碰撞，只需要计算他们在图3上的4个坐标轴上的投影是否有重叠，如果有，则两多边形有接触。
-
-判定方式：两个多边形在所有轴上的投影都发生重叠，则判定为碰撞；否则，没有发生碰撞。
-
-OBB存在多种的表达方式，（二维）最常用的一种：一个中心点、2个矩形的边长、两个旋转轴（该轴垂直于多边形自身的边，用于投影计算）
-
-OBB树
 
 
 
@@ -237,6 +355,8 @@ kd-tree（k-dimensional树的简称），是一种对k维空间中的实例点�
 - 分离轴定理算法十分得快
 
 - 分离轴定理算法十分得准
+
+- but
 
 - 分离轴定理算法只适用于凸多边形，除非你把它们分成一些小的凸多边形，然后依次检验这些小的多边形。
 - 分离轴定理算法无法告诉你是那条边发生的碰撞——仅仅是告诉你重叠了多少和分开它们所需的最短距离。

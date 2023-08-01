@@ -6,13 +6,12 @@ using namespace psykronix;
 #undef max //AlignedBox3d mem-fun
 #undef min
 #define USING_METHOD_SAT
+static constexpr double eps = FLT_EPSILON; //1e-7
+static constexpr double _eps = -FLT_EPSILON;
 
 //--------------------------------------------------------------------------------------------------
 //  triangle
 //--------------------------------------------------------------------------------------------------
-static constexpr double eps = 1e-8; //DBL_EPSILON
-static constexpr double _eps = -eps;
-
 //#ifdef STATISTIC_DATA_COUNT
 std::atomic<size_t> getTriangleBoundC = 0, isTwoTrianglesInter = 0, getTriDistC = 0, isTriangleBoundC = 0,
 count_pointInTri = 0, count_edgeCrossTri = 0, count_segCrossTri = 0, count_across = 0,
@@ -926,12 +925,12 @@ void psykronix::getSegmentsPoints(Eigen::Vector3d& VEC, Eigen::Vector3d& X, Eige
 	}
 }
 
-//#define USING_INNER_PRE_JUDGE
 double psykronix::getTrianglesDistance(Eigen::Vector3d& P, Eigen::Vector3d& Q, const std::array<Eigen::Vector3d, 3>& S, const std::array<Eigen::Vector3d, 3>& T)
 {
 #ifdef STATISTIC_DATA_COUNT
 	getTriDistC++;
 #endif
+//#define USING_INNER_PRE_JUDGE
 #ifdef USING_INNER_PRE_JUDGE
 	if (isTwoTrianglesIntersectSAT(S, T)) // pre-judge intersect
 	{
@@ -1130,8 +1129,8 @@ double psykronix::getDistanceOfTwoSegmentsINF(const std::array<Vector3d, 2>& seg
 double psykronix::getDistanceOfPointAndPlaneINF(const Vector3d& point, const std::array<Vector3d, 3>& plane)
 {
 	Vector3d normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);
-	if (normal.isZero(eps)) // coplanar
-		return 0.0;
+	if (normal.isZero()) // error triangle plane
+		return DBL_MAX;
 	double k = (plane[0] - point).dot(normal) / normal.dot(normal);
 	Vector3d local = point + k * normal;
 	if (!isPointInTriangle(local, plane))
@@ -1222,8 +1221,8 @@ double psykronix::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& 
 	std::array<array<Vector3d, 2>, 3> edgesB = { { {triB[0], triB[1]},
 												{ triB[1], triB[2] },
 												{ triB[2], triB[0] } } };
-#define REDUCED_AXIS_OPTMIZE
-#ifdef REDUCED_AXIS_OPTMIZE
+//#define REDUCED_AXIS_OPTMIZE
+#ifndef REDUCED_AXIS_OPTMIZE
 	double dmax = -DBL_MAX;
 	double dmin = DBL_MAX;
 	Vector3d axis;
@@ -1239,24 +1238,7 @@ double psykronix::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& 
 			}
 		}
 	}
-	//for (const auto& iterA : triA) // will cause speed slow
-	//{
-	//	double dtemp = getDistanceOfPointAndPlaneINF(iterA, triB);
-	//	if (dtemp < dmin)
-	//	{
-	//		dmin = dtemp;
-	//		axis = (triB[1] - triB[0]).cross(triB[2] - triB[1]);
-	//	}
-	//}
-	//for (const auto& iterB : triB)
-	//{
-	//	double dtemp = getDistanceOfPointAndPlaneINF(iterB, triA);
-	//	if (dtemp < dmin)
-	//	{
-	//		dmin = dtemp;
-	//		axis = (triA[1] - triA[0]).cross(triA[2] - triA[1]);
-	//	}
-	//}
+	// next reduce axis will cause speed slow
 	std::array<Eigen::Vector3d, 3> axes = { {
 		axis.normalized(),
 		(triA[1] - triA[0]).cross(triA[2] - triA[1]).normalized(),
@@ -1587,27 +1569,26 @@ bool psykronix::isPointRayAcrossTriangleSAT(const Eigen::Vector3d& point, const 
 			return false;
 	}
 	return true;
-
-	//#ifdef USING_METHOD_SAT
-		//if (isPointOnTriangleSurface(point, trigon))
-		//{
-		//	return true;
-		//}
-		//else
-		//{
-		//	Vector3d rayX = Vector3d(1.0, 0.0, 0.0);
-		//	Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
-		//	double dotPro = normal.dot(rayX); //ray.direction
-		//	if (dotPro == 0.0) // ray direction is parallel
-		//		return false;
-		//	double t = normal.dot(trigon[0] - point) / dotPro; //ray.origin
-		//	if (t > 0.0)
-		//	{
-		//		Vector3d inter = point + rayX * t;
-		//		if (isPointInTriangle(inter, trigon))
-		//			return true;
-		//	}
-		//	return false;
-		//}
+//#ifdef USING_METHOD_SAT
+	//if (isPointOnTriangleSurface(point, trigon))
+	//{
+	//	return true;
+	//}
+	//else
+	//{
+	//	Vector3d rayX = Vector3d(1.0, 0.0, 0.0);
+	//	Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
+	//	double dotPro = normal.dot(rayX); //ray.direction
+	//	if (dotPro == 0.0) // ray direction is parallel
+	//		return false;
+	//	double t = normal.dot(trigon[0] - point) / dotPro; //ray.origin
+	//	if (t > 0.0)
+	//	{
+	//		Vector3d inter = point + rayX * t;
+	//		if (isPointInTriangle(inter, trigon))
+	//			return true;
+	//	}
+	//	return false;
+	//}
 }
 

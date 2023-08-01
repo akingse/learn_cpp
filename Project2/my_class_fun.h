@@ -148,6 +148,7 @@ struct ModelMesh
     std::vector<std::array<int, 3>> ibo_;
     Eigen::AlignedBox3d bounding_;
     Eigen::Affine3d pose_; // Eigen::Affine3d::Identity()
+    bool convex; // isConvex default true
     std::vector<int> iboRaw_; //for test debug
 };
 #endif

@@ -613,8 +613,8 @@ static void _test6()
 
 	bool b0 = _isPointInMesh(Vector3d(150, 50, 50), meshA.vbo_, meshA.ibo_);
 
-	Vector3d df = getInterpenetrationDistanceOfTwoMeshs(meshA.vbo_, meshA.ibo_, meshB.vbo_, meshB.ibo_);
-	Vector3d di = getInterpenetrationDistanceOfTwoMeshs(meshB.vbo_, meshB.ibo_, meshA.vbo_, meshA.ibo_);
+	Vector3d df = getPenetrationDepthOfTwoMeshs(meshA.vbo_, meshA.ibo_, meshB.vbo_, meshB.ibo_);
+	Vector3d di = getPenetrationDepthOfTwoMeshs(meshB.vbo_, meshB.ibo_, meshA.vbo_, meshA.ibo_);
 
 	std::array<Vector3d, 2> segmA = { Vector3d(0,0,0), Vector3d(100,100,0) };
 	std::array<Vector3d, 2> segmB = { Vector3d(100,0,100), Vector3d(0,100,100) };
