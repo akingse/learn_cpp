@@ -3,9 +3,10 @@ using namespace std;
 using namespace psykronix;
 #undef min
 #undef max
-static std::string randNumName = "random_1e8.bin";
+static std::string randNumName = "bin_file/random_1e8.bin";
+static std::string randNumNameSepa = "bin_file/random_1e8_sepa.bin";
 //wirte randnum file
-int _wirteNumberFile(size_t n)
+int _wirteNumberFile(size_t n, const string& filename)
 {
 	n = 2 * 3 * 3 * n;
 	double* arr = new double[n];
@@ -14,7 +15,7 @@ int _wirteNumberFile(size_t n)
 		arr[i] = static_cast<double>(rand() - 0x3fff);// rand()) / RAND_MAX;
 	}
 	// Ð´ÈëÎÄ¼þ
-	ofstream out(randNumName, ios::out | ios::binary);
+	ofstream out(filename, ios::out | ios::binary);
 	if (!out.is_open()) {
 		cerr << "Error opening file" << endl;
 		return -1;
@@ -25,14 +26,48 @@ int _wirteNumberFile(size_t n)
 	return 0;
 }
 
-double* _readNumberFile(size_t n)
+int _wirteNumberFile(const std::vector<double>& _array, const string& filename)
 {
-	ifstream in(randNumName, ios::in | ios::binary);
+	ofstream out(filename, ios::out | ios::binary);
+	if (!out.is_open()) {
+		cerr << "Error opening file" << endl;
+		return -1;
+	}
+	int n = _array.size();
+	out.write(reinterpret_cast<char*>(&n), sizeof(int)); //
+	out.write(reinterpret_cast<const char*>(_array.data()), n * sizeof(double));
+	out.close();
+	return 0;
+}
+
+
+int _wirteNumberFile(size_t n, double* _array, const string& filename) // n = size(triA, triB)
+{
+	n = 2 * 3 * 3 * n;
+	//double* arr = new double[n];
+	//for (int i = 0; i < n; ++i)
+	//{
+	//	arr[i] = static_cast<double>(_array[i]);
+	//}
+	ofstream out(filename, ios::out | ios::binary);
+	if (!out.is_open()) {
+		cerr << "Error opening file" << endl;
+		return -1;
+	}
+	out.write(reinterpret_cast<char*>(&n), sizeof(int)); //
+	out.write(reinterpret_cast<char*>(_array), n * sizeof(double));
+	out.close();
+	return 0;
+}
+
+double* _readNumberFile(size_t n, const string& filename)
+{
+	ifstream in(filename, ios::in | ios::binary);
 	if (!in.is_open()) {
 		//cerr << "Error opening file" << endl;
 		//return nullptr;
-		_wirteNumberFile(n);
-		in = ifstream(randNumName, ios::in | ios::binary);
+		_wirteNumberFile(n, filename);
+		in = ifstream(filename, ios::in | ios::binary);
 		if (!in.is_open())
 			return nullptr;
 	}

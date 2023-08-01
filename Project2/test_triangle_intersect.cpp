@@ -620,15 +620,8 @@ static void _test6()
 	std::array<Vector3d, 2> segmB = { Vector3d(100,0,100), Vector3d(0,100,100) };
 	bool b1 = isTwoSegmentsIntersect(segmA, segmB);
 
-
 	cout << "d_min=" << df << endl;
 	cout << "return 0" << endl;
-}
-#endif // USING_FLATBUFFERS_SERIALIZATION
-
-
-static void _test7()
-{
 	// 不相交的三角形
 	Vector3d triA_0 = Vector3d(4924494.8122771187, -385870.18283433426, 5749.9999999999054);
 	Vector3d triA_1 = Vector3d(4924599.8122771177, -385945.18283433421, 5749.9999999999054);
@@ -639,20 +632,13 @@ static void _test7()
 	Triangle triA = { triA_0, triA_1, triA_2 };
 	Triangle triB = { triB_0, triB_1, triB_2 };
 	//double d = getTrianglesDistanceSAT(triA, triB);
-	// 测试SAT计算三角形距离 37s
-	const size_t totalNum = (size_t)1e4;
-	//std::array<Vector3d, 3>* randData3 = new std::array<Vector3d, 3>[totalNum];
-	//std::array<Vector3d, 3>* randData3_ = new std::array<Vector3d, 3>[totalNum];
-	double* readNum = _readNumberFile(totalNum);
-	size_t count = 0;
-	int i = 63;
 
-	triA_0 = Vector3d(0,0,0);
-	triA_1 = Vector3d(0,10,0);
-	triA_2 = Vector3d(10,5,0);
-	triB_0 = Vector3d(-10,0,0);
-	triB_1 = Vector3d(-10,10,0);
-	triB_2 = Vector3d(-5,5,5);
+	triA_0 = Vector3d(0, 0, 0);
+	triA_1 = Vector3d(0, 10, 0);
+	triA_2 = Vector3d(10, 5, 0);
+	triB_0 = Vector3d(-10, 0, 0);
+	triB_1 = Vector3d(-10, 10, 0);
+	triB_2 = Vector3d(-5, 5, 5);
 	triA = { triA_0, triA_1, triA_2 };
 	triB = { triB_0, triB_1, triB_2 };
 
@@ -662,27 +648,111 @@ static void _test7()
 	double d2 = getDistanceOfPointAndPlaneINF(Vector3d(0, 0, 0), triB);
 	d2 = sqrt(d2);
 
+}
+#endif // USING_FLATBUFFERS_SERIALIZATION
+
+//#define STATE_WRITING
+static void _test7()
+{
+	// 测试SAT计算三角形距离 37s
+	//std::array<Vector3d, 3>* randData3 = new std::array<Vector3d, 3>[totalNum];
+	//std::array<Vector3d, 3>* randData3_ = new std::array<Vector3d, 3>[totalNum];
+	size_t countDiff = 0;
+	size_t countSepa = 0;
+	size_t countInter = 0;
+	size_t countPair = 0;
+	std::string randNumName = "bin_file/random_1e8.bin";
+	std::string randNumNameSepa = "bin_file/random_1e8_sepa.bin";
+	// stack size=1M=1048576byte, 1double=8byte, 131072
+	const size_t totalNum = (size_t)1e4;
+	vector<double> testE(18 * totalNum);
+#ifdef STATE_WRITING
+	double* arr = new double[18 * totalNum]; //countSepa
+	double* readNum = _readNumberFile(totalNum, randNumName);
+#else
+	double* readNum = _readNumberFile(totalNum, randNumNameSepa);
+#endif
+
+#ifdef STATE_WRITING
+	for (int i = 0; i < 10*totalNum; ++i)
+	{
+		Triangle triA = _get_rand3();
+		Triangle triB = _get_rand3();
+#else
 	for (int i = 0; i < totalNum; ++i)
 	{
-		Triangle triA = { { {readNum[i + 0],readNum[i + 2],readNum[i + 4]} ,
-							{readNum[i + 6],readNum[i + 8],readNum[i + 10]} ,
-							{readNum[i + 12],readNum[i + 14],readNum[i + 16]} } };
-		Triangle triB = { { {readNum[i + 1],readNum[i + 3],readNum[i + 5]} ,
-							{readNum[i + 7],readNum[i + 9],readNum[i + 11]} ,
-							{readNum[i + 13],readNum[i + 15],readNum[i + 17]} } };
+		Triangle triA = { { {readNum[i*18 + 0],readNum[i *18  + 1],readNum[i*18 + 2]} ,
+							{readNum[i*18 + 3],readNum[i *18  + 4],readNum[i*18 + 5]} ,
+							{readNum[i*18 + 6],readNum[i *18  + 7],readNum[i*18 + 8]} } };
+		Triangle triB = { { {readNum[i*18 + 9],readNum[i *18 + 10],readNum[i*18 + 11]} ,
+							{readNum[i*18 + 12],readNum[i*18 + 13],readNum[i*18 + 14]} ,
+							{readNum[i*18 + 15],readNum[i*18 + 16],readNum[i*18 + 17]} } };
+		//for (int j = 0; j < 18; j++)
+		//{
+		//	testE[i * 18 + j] = readNum[i + 18 + j];
+		//}
+		//cout<< readNum[i*18 + 0]<<", "<< readNum[i*18 + 1] << ", " << readNum[i*18 + 2] << ", " <<
+		//	readNum[i*18 + 3] << ", " << readNum[i*18 + 4] << ", " << readNum[i*18 + 5] << ", " <<
+		//	readNum[i*18 + 6] << ", " << readNum[i*18 + 7] << ", " << readNum[i*18 + 8] << ", " << endl;
+		//cout << readNum[i + 9] << ", " << readNum[i + 10] << ", " << readNum[i*18 + 11] << ", " <<
+		//	readNum[i*18 + 12] << ", " << readNum[i*18 + 13] << ", " << readNum[i*18 + 14] << ", " <<
+		//	readNum[i*18 + 15] << ", " << readNum[i*18 + 16] << ", " << readNum[i*18 + 17] << ", " << endl;
+
+#endif		   
 		bool isInter = isTwoTrianglesIntersectSAT(triA, triB);
 		double d0, d1;
 		if (!isInter)
 		{
+#ifdef STATE_WRITING
+			//for (int j = 0; j < 18; j++)
+			//{
+			//	arr[countSepa * 18 + j] = readNum[i + j];
+			//}
+			for (int j = 0; j < 3; j++)
+			{
+				//cout << triA[j][0] << ", ";
+				//cout << triA[j][1] << ", ";
+				//cout << triA[j][2] << ", ";
+				//cout << triB[j][0] << ", ";
+				//cout << triB[j][1] << ", ";
+				//cout << triB[j][2] << ", " << endl;
+
+				arr[countSepa * 18 + j * 3 + 0] = triA[j][0];
+				arr[countSepa * 18 + j * 3 + 1] = triA[j][1];
+				arr[countSepa * 18 + j * 3 + 2] = triA[j][2];
+				arr[countSepa * 18 + 9 + j * 3 + 0] = triB[j][0];
+				arr[countSepa * 18 + 9 + j * 3 + 1] = triB[j][1];
+				arr[countSepa * 18 + 9 + j * 3 + 2] = triB[j][2];
+
+				testE[countSepa * 18 + j * 3 + 0] = triA[j][0];
+				testE[countSepa * 18 + j * 3 + 1] = triA[j][1];
+				testE[countSepa * 18 + j * 3 + 2] = triA[j][2];
+				testE[countSepa * 18 + 9 + j * 3 + 0] = triB[j][0];
+				testE[countSepa * 18 + 9 + j * 3 + 1] = triB[j][1];
+				testE[countSepa * 18 + 9 + j * 3 + 2] = triB[j][2];
+			}
+			countSepa++;
+			if (countSepa == 1e4)
+				break;
+
+#endif
 			d0 = getTrianglesDistance(P, Q, triA, triB);
 			d1 = getTrianglesDistanceSAT(triA, triB);
 			//cout << d0-d1 << endl;
 			if (fabs(d0 - d1) > eps)
-				count++;
+				countDiff++;
 		}
-	}
-	cout << "count=" << count << endl;
+		if (isInter)
+			countInter++;
 
+	}
+	cout << "countInter=" << countInter << endl;
+	cout << "count=" << countDiff << endl;
+
+#ifdef STATE_WRITING
+	// wirte new
+	_wirteNumberFile(totalNum, arr, randNumNameSepa);
+#endif
 }
 
 static int enrol = []()->int

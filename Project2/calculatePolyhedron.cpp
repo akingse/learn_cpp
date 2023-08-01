@@ -26,7 +26,7 @@ bool psykronix::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& vbo, 
 		bool isFirst = true, isLeft /*= false*/, temp /*= false*/;
 		for (size_t i = 0; i < vbo.size(); ++i)
 		{
-			if (i == iter[0] || i == iter[1] || i == iter[2] || fabs(normal.dot(vbo[i] - vbo[iter[0]])) < FLT_EPSILON) // self and coplanar
+			if (i == iter[0] || i == iter[1] || i == iter[2] || fabs(normal.dot(vbo[i] - vbo[iter[0]])) < FLT_EPSILON) // self or coplanar
 				continue;
 			temp = normal.dot(vbo[i] - vbo[iter[0]]) < 0.0;
 			if (isFirst)

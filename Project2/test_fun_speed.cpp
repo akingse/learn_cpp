@@ -39,6 +39,7 @@ const size_t totalNum = (size_t)1e8;
 //#define TEST_TRIGON2_TRIGON3
 #define TEST_TRIGON3_TRIGON3
 //#define TEST_TRIGON3XY_TRIGON3XY //on XOY plane
+static std::string randNumName = "bin_file/random_1e8.bin";
 
 static void _test0()
 {
@@ -54,7 +55,7 @@ static void _test0()
 	start = clock();
 	cout << "data number:" << totalNum << ", load start..." << endl;
 	// the data
-	double* readNum = _readNumberFile(size_t(sqrt(totalNum)));
+	double* readNum = _readNumberFile(size_t(sqrt(totalNum)), randNumName);
 
 #ifdef TEST_TRIGON3
 	std::array<Vector3d, 3>* randData3 = new std::array<Vector3d, 3>[totalNum];
@@ -156,7 +157,7 @@ static void _test0()
 	{
 		start = clock();
 		//totalNum = 1;
-#pragma omp parallel for //开启omp优化
+//#pragma omp parallel for //开启omp优化
 		for (int i = 0; i < totalNum; i++)
 		{
 			//auto res = _get_circumcircle_center({ _get_rand() ,_get_rand() ,_get_rand() });
@@ -168,7 +169,7 @@ static void _test0()
 			// 三角形相交测试
 			//bool res = isTwoTrianglesIntersection(randData3[i], randData3_[i]);
 			//bool res = isTwoTrianglesIntersection2(randData3[i], randData3_[i]);
-			bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]);
+			//bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]);
 			//bool res = isTwoTrianglesIntersection2(randData3[i], randData3_[i]);
 			//bool r1 = isSegmentCrossTriangleSurface(_get_rand2(), _get_rand3());
 			//bool r2 = isSegmentCrossTriangleSurface(_get_rand2(), _get_rand3());
@@ -190,7 +191,7 @@ static void _test0()
 			//
 			// 软碰撞
 			//double d = getTrianglesDistance(P, Q, randData3[i], randData3_[i]);
-			//double d = getTrianglesDistanceSAT(randData3[i], randData3_[i]);
+			double d = getTrianglesDistanceSAT(randData3[i], randData3_[i]);
 			//测试包围盒 
 			//Eigen::AlignedBox3d res = Eigen::AlignedBox3d(randData2[i][0], randData2[i][1]).intersection(Eigen::AlignedBox3d(randData2_[i][0], randData2_[i][1]));
 
@@ -205,6 +206,7 @@ static void _test0()
 		Sleep(1000);
 
 	}
+
 	cout << "count_edgeCrossTri=" << count_edgeCrossTri / 3 << endl;
 	cout << "count_pointInTri=" << count_pointInTri / 3 << endl;
 	cout << "count_segCrossTri=" << count_segCrossTri / 3 << endl;
