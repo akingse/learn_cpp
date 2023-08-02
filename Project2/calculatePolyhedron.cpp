@@ -5,18 +5,35 @@ using namespace Eigen;
 using namespace psykronix;
 static constexpr double eps = FLT_EPSILON; //1e-7
 static constexpr double _eps = -FLT_EPSILON;
+static Eigen::Vector3d gVecNaN(std::nan("0"), std::nan("0"), std::nan("0"));
 #undef max 
 #undef min
 #define USING_METHOD_SAT
+#define USING_RELATIVE_MATRIX_RECTIFY
 
 #ifdef STATISTIC_DATA_COUNT
-extern std::atomic<size_t> count_hard_in_mesh;
+extern std::atomic<size_t> count_mesh_inside_mesh;
 extern std::atomic<size_t> count_reduced_exclude_pre, count_triA_inter, count_triB_inter,
-	count_err_empty_mesh, count_tri_box_exclude_pre;
+count_err_empty_mesh, count_tri_box_exclude_pre;
 extern std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> triPairList, triRecordHard;
 extern std::vector<InterTriInfo> interTriInfoList;
 
 #endif //STATISTIC_DATA_COUNT
+
+enum class RayOnTrigon :unsigned int
+{
+	CROSS_OUTER = 0,
+	CROSS_INNER,
+	CROSS_VERTEX_0,
+	CROSS_VERTEX_1,
+	CROSS_VERTEX_2,
+	CROSS_EDGE_01,
+	CROSS_EDGE_12,
+	CROSS_EDGE_20,
+	COIN_EDGE_01, //collinear
+	COIN_EDGE_12,
+	COIN_EDGE_20,
+};
 
 bool psykronix::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
 {
@@ -44,20 +61,10 @@ bool psykronix::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& vbo, 
 	return true;
 }
 
-enum class RayOnTrigon :unsigned int
+bool psykronix::isMeshConvexPolyhedron(const ModelMesh& mesh)
 {
-	CROSS_OUTER = 0,
-	CROSS_INNER,
-	CROSS_VERTEX_0,
-	CROSS_VERTEX_1,
-	CROSS_VERTEX_2,
-	CROSS_EDGE_01,
-	CROSS_EDGE_12,
-	CROSS_EDGE_20,
-	COIN_EDGE_01, //collinear
-	COIN_EDGE_12,
-	COIN_EDGE_20,
-};
+	return isMeshConvexPolyhedron(mesh.vbo_, mesh.ibo_);
+}
 
 RayOnTrigon _relationOfPointAndTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon) // axisZ direction
 {
@@ -82,7 +89,7 @@ RayOnTrigon _relationOfPointAndTriangle(const Eigen::Vector3d& point, const std:
 bool psykronix::isPointInsidePolyhedron(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
 {
 #ifdef STATISTIC_DATA_COUNT
-	count_hard_in_mesh++;
+	count_mesh_inside_mesh++;
 #endif  
 	auto isLeftAll = [&](const std::array<int, 3>& trigon)->bool // buildin lambda function
 	{
@@ -195,6 +202,12 @@ bool psykronix::isPointContainedInPolyhedron(const Eigen::Vector3d& point, const
 	return count % 2 != 0;
 }
 
+bool psykronix::isPointInsidePolyhedron(const Eigen::Vector3d& point, const ModelMesh& mesh)
+{
+	Eigen::Vector3d pointR = mesh.pose_.inverse() * point;
+	return isPointInsidePolyhedron(pointR, mesh.vbo_, mesh.ibo_);
+}
+
 bool _isNormalVectorOutwardsConvex(const std::array<int, 3>& face, const Eigen::Vector3d& normal,
 	const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
 {
@@ -272,12 +285,11 @@ Eigen::Vector3d _getPenetrationDepthOfTwoConvex(const std::vector<Eigen::Vector3
 }
 
 // fix mehsA, move distance of meshB
-Eigen::Vector3d psykronix::getPenetrationDepthOfTwoMeshs(const std::vector<Eigen::Vector3d>& vboA, const std::vector<std::array<int, 3>>& iboA,
-	const std::vector<Eigen::Vector3d>& vboB, const std::vector<std::array<int, 3>>& iboB)
+Eigen::Vector3d psykronix::getPenetrationDepthOfTwoMeshs(const ModelMesh& meshA, const ModelMesh& meshB)
 {
 	//must intersect
-	bool isConvexA = isMeshConvexPolyhedron(vboA, iboA);
-	bool isConvexB = isMeshConvexPolyhedron(vboB, iboB);
+	bool isConvexA = isMeshConvexPolyhedron(meshA.vbo_, meshA.ibo_); // matrix not work on convex
+	bool isConvexB = isMeshConvexPolyhedron(meshB.vbo_, meshB.ibo_);
 	double dminA = DBL_MAX, dminB = DBL_MAX;
 	Eigen::Vector3d direction;
 	if (isConvexA && isConvexB)
@@ -294,8 +306,7 @@ Eigen::Vector3d psykronix::getPenetrationDepthOfTwoMeshs(const std::vector<Eigen
 //---------------------------------------------------------------------------
 
 // get the index param of mesh's ibo, return index-vector(ibo) of two mesh
-std::array<std::vector<size_t>, 2> psykronix::getReducedIntersectTrianglesOfMesh(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance,
-	const Eigen::Affine3d& matrix /*= Affine3d::Identity()*/)
+std::array<std::vector<size_t>, 2> psykronix::getReducedIntersectTrianglesOfMesh(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance, const Eigen::Affine3d& matrix)
 {
 	//Eigen::AlignedBox3d boxMag(box.min() - 0.5 * Vector3d(tolerance, tolerance, tolerance), box.max() + 0.5 * Vector3d(tolerance, tolerance, tolerance));
 	Eigen::AlignedBox3d box = mesh_a.bounding_.intersection(mesh_b.bounding_);
@@ -305,7 +316,7 @@ std::array<std::vector<size_t>, 2> psykronix::getReducedIntersectTrianglesOfMesh
 	Eigen::AlignedBox3d triA_Box; // iterate to lessen box
 	for (size_t i = 0; i < mesh_a.ibo_.size(); ++i)
 	{
-		std::array<Eigen::Vector3d, 3> triIter = {
+		std::array<Eigen::Vector3d, 3> triIter = { // input matrix to avoid repeat calculate
 				matrix * mesh_a.vbo_[mesh_a.ibo_[i][0]],
 				matrix * mesh_a.vbo_[mesh_a.ibo_[i][1]],
 				matrix * mesh_a.vbo_[mesh_a.ibo_[i][2]] };
@@ -352,18 +363,32 @@ std::array<std::vector<size_t>, 2> psykronix::getReducedIntersectTrianglesOfMesh
 	return { triA_Index, triB_Index };
 }
 
-bool psykronix::isTwoMeshsIntersectHard(const ModelMesh& mesh_a, const ModelMesh& mesh_b, const Eigen::Affine3d& matrix /*= Eigen::Affine3d::Identity()*/)
+bool psykronix::isTwoMeshsIntersectHard(const ModelMesh& mesh_a, const ModelMesh& mesh_b)
 {
+	Eigen::Affine3d relative_matrix = Eigen::Affine3d::Identity();
+#ifdef USING_RELATIVE_MATRIX_RECTIFY
+	// get relative matrix
+	relative_matrix = mesh_b.pose_.inverse() * mesh_a.pose_; // model_a * a / b
+	for (size_t i = 0; i < 3; i++)// machine error process
+	{
+		for (size_t j = 0; j < 3; j++)
+		{
+			relative_matrix(i, j) = abs(relative_matrix(i, j)) < 1e-14 ? 0.0 : relative_matrix(i, j);
+			relative_matrix(i, j) = abs(relative_matrix(i, j) - 1.0) < 1e-14 ? 1.0 : relative_matrix(i, j);
+		}
+		relative_matrix(i, 3) = std::round(relative_matrix(i, 3) * 1e9) / 1e9;
+	}
+#endif 
 	// get the index param of mesh's ibo
-	std::array<std::vector<size_t>, 2> indexAB = getReducedIntersectTrianglesOfMesh(mesh_a, mesh_b, 0.0, matrix);
+	std::array<std::vector<size_t>, 2> indexAB = getReducedIntersectTrianglesOfMesh(mesh_a, mesh_b, 0.0, relative_matrix);
 	if (!indexAB[0].empty() && !indexAB[1].empty())
 	{
 		for (const auto& iA : indexAB[0])
 		{
 			std::array<Eigen::Vector3d, 3> triA = {
-					matrix * mesh_a.vbo_[mesh_a.ibo_[iA][0]],
-					matrix * mesh_a.vbo_[mesh_a.ibo_[iA][1]],
-					matrix * mesh_a.vbo_[mesh_a.ibo_[iA][2]] };
+					relative_matrix * mesh_a.vbo_[mesh_a.ibo_[iA][0]],
+					relative_matrix * mesh_a.vbo_[mesh_a.ibo_[iA][1]],
+					relative_matrix * mesh_a.vbo_[mesh_a.ibo_[iA][2]] };
 			for (const auto& iB : indexAB[1])
 			{
 				std::array<Eigen::Vector3d, 3> triB = {
@@ -410,23 +435,36 @@ bool psykronix::isTwoMeshsIntersectHard(const ModelMesh& mesh_a, const ModelMesh
 	return false;
 }
 
-double psykronix::getTwoMeshsDistanceSoft(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance,
-	Eigen::Vector3d& P, Eigen::Vector3d& Q, const Eigen::Affine3d& matrix /*= Eigen::Affine3d::Identity()*/)
+double psykronix::getTwoMeshsDistanceSoft(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance, Eigen::Vector3d& P, Eigen::Vector3d& Q)
 {
 #ifdef STATISTIC_DATA_RECORD
 	std::array<std::array<Eigen::Vector3d, 3>, 2> triDistPair;
 #endif    
+	Eigen::Affine3d relative_matrix = Eigen::Affine3d::Identity();
+#ifdef USING_RELATIVE_MATRIX_RECTIFY
+	// get relative matrix
+	relative_matrix = mesh_b.pose_.inverse() * mesh_a.pose_; // model_a * a / b
+	for (size_t i = 0; i < 3; i++)// machine error process
+	{
+		for (size_t j = 0; j < 3; j++)
+		{
+			relative_matrix(i, j) = abs(relative_matrix(i, j)) < 1e-14 ? 0.0 : relative_matrix(i, j);
+			relative_matrix(i, j) = abs(relative_matrix(i, j) - 1.0) < 1e-14 ? 1.0 : relative_matrix(i, j);
+		}
+		relative_matrix(i, 3) = std::round(relative_matrix(i, 3) * 1e9) / 1e9;
+	}
+#endif 
 	// distance > tolerance, return double-max, to decrease calculate
 	double d = DBL_MAX; // the res
-	std::array<vector<size_t>, 2> indexAB = getReducedIntersectTrianglesOfMesh(mesh_a, mesh_b, tolerance, matrix);
+	std::array<vector<size_t>, 2> indexAB = getReducedIntersectTrianglesOfMesh(mesh_a, mesh_b, tolerance, relative_matrix);
 	if (indexAB[0].empty() || indexAB[1].empty())
 		return d;
 	for (const auto& iA : indexAB[0])
 	{
 		std::array<Eigen::Vector3d, 3> triA = {
-				matrix * mesh_a.vbo_[mesh_a.ibo_[iA][0]],
-				matrix * mesh_a.vbo_[mesh_a.ibo_[iA][1]],
-				matrix * mesh_a.vbo_[mesh_a.ibo_[iA][2]] };
+				relative_matrix * mesh_a.vbo_[mesh_a.ibo_[iA][0]],
+				relative_matrix * mesh_a.vbo_[mesh_a.ibo_[iA][1]],
+				relative_matrix * mesh_a.vbo_[mesh_a.ibo_[iA][2]] };
 		for (const auto& iB : indexAB[1])
 		{
 			std::array<Eigen::Vector3d, 3> triB = {
@@ -460,14 +498,14 @@ double psykronix::getTwoMeshsDistanceSoft(const ModelMesh& mesh_a, const ModelMe
 }
 
 // only for convex polytope 
-bool isTwoMeshsIntersectGJK(const ModelMesh& mesh_a, const ModelMesh& mesh_b, const Eigen::Affine3d& matrix = Eigen::Affine3d::Identity())
+bool isTwoMeshsIntersectGJK(const ModelMesh& meshA, const ModelMesh& meshB)
 {
 
 	return false;
 }
 
 // only for convex polytope
-double getTwoMeshsPenetrationDepthEPA(const ModelMesh& mesh_a, const ModelMesh& mesh_b, const Eigen::Affine3d& matrix = Eigen::Affine3d::Identity())
+double getTwoMeshsPenetrationDepthEPA(const ModelMesh& meshA, const ModelMesh& meshB)
 {
 
 	return 0.0;
@@ -477,79 +515,3 @@ double getTwoMeshsPenetrationDepthEPA(const ModelMesh& mesh_a, const ModelMesh& 
 //  penetration depth
 //---------------------------------------------------------------------------
 
-//must intersect
-std::array<Vector3d, 2> _getIntersectPointsOfTwoTriangles(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
-{
-	int count = 0;
-	Eigen::Vector3d gVecNaN(std::nan("0"), std::nan("0"), std::nan("0"));
-	std::array<Vector3d, 2> res = { gVecNaN , gVecNaN };
-	std::array<array<Vector3d, 2>, 3> edgesA = { { {triA[0], triA[1]},
-												{triA[1], triA[2]},
-												{triA[2], triA[0] } } };
-	for (const auto& iterA : edgesA)
-	{
-		Vector3d normal = (triB[1] - triB[0]).cross(triB[2] - triB[1]);//triB plane, not isZero
-		Vector3d vecSeg = iterA[1] - iterA[0];
-		// intersect point of line and plane
-		if (fabs(vecSeg.dot(normal.normalized())) < eps) // error or line parallel to plane
-		{
-			if (fabs((iterA[0] - triB[0]).dot(normal.normalized())) < eps && isPointInTriangle(iterA[0], triB))
-			{
-				res[count] = iterA[0];
-				count++;
-			}
-			if (fabs((iterA[1] - triB[0]).dot(normal.normalized())) < eps && isPointInTriangle(iterA[1], triB))
-			{
-				res[count] = iterA[1];
-				count++;
-			}
-			if (count == 2)
-				return res;
-		}
-		double k = (triB[0] - iterA[0]).dot(normal) / vecSeg.dot(normal);
-		if (0 > k || k > 1)
-			continue;
-		Vector3d local = iterA[0] + k * vecSeg;
-		if (!isPointInTriangle(local, triB))
-			continue;
-		res[count] = local;
-		count++;
-		if (count == 2)
-			return res;
-	}
-	std::array<array<Vector3d, 2>, 3> edgesB = { { {triB[0], triB[1]},
-												{ triB[1], triB[2] },
-												{ triB[2], triB[0] } } };
-	for (const auto& iterB : edgesB)
-	{
-		Vector3d normal = (triA[1] - triA[0]).cross(triA[2] - triA[1]);//triA plane, not isZero
-		Vector3d vecSeg = iterB[1] - iterB[0];
-		// intersect point of line and plane
-		if (fabs(vecSeg.dot(normal.normalized())) < eps) // error or line parallel to plane
-		{
-			if (fabs((iterB[0] - triA[0]).dot(normal.normalized())) < eps && isPointInTriangle(iterB[0], triA))
-			{
-				res[count] = iterB[0];
-				count++;
-			}
-			if (fabs((iterB[1] - triA[0]).dot(normal.normalized())) < eps && isPointInTriangle(iterB[1], triA))
-			{
-				res[count] = iterB[1];
-				count++;
-			}
-			if (count == 2)
-				return res;
-		}
-		double k = (triA[0] - iterB[0]).dot(normal) / vecSeg.dot(normal);
-		if (0 > k || k > 1)
-			continue;
-		Vector3d local = iterB[0] + k * vecSeg;
-		if (!isPointInTriangle(local, triA))
-			continue;
-		res[count] = local;
-		count++;
-		if (count == 2)
-			return res;
-	}
-	return res;
-}

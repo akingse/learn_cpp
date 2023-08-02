@@ -150,7 +150,7 @@
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <DebugInformationFormat>None</DebugInformationFormat>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <OpenMPSupport>true</OpenMPSupport>
+      <OpenMPSupport>false</OpenMPSupport>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>

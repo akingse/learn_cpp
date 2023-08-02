@@ -613,8 +613,8 @@ static void _test6()
 
 	bool b0 = _isPointInMesh(Vector3d(150, 50, 50), meshA.vbo_, meshA.ibo_);
 
-	Vector3d df = getPenetrationDepthOfTwoMeshs(meshA.vbo_, meshA.ibo_, meshB.vbo_, meshB.ibo_);
-	Vector3d di = getPenetrationDepthOfTwoMeshs(meshB.vbo_, meshB.ibo_, meshA.vbo_, meshA.ibo_);
+	Vector3d df = getPenetrationDepthOfTwoMeshs(meshA, meshB);
+	Vector3d di = getPenetrationDepthOfTwoMeshs(meshB, meshA);
 
 	std::array<Vector3d, 2> segmA = { Vector3d(0,0,0), Vector3d(100,100,0) };
 	std::array<Vector3d, 2> segmB = { Vector3d(100,0,100), Vector3d(0,100,100) };
@@ -747,12 +747,50 @@ static void _test7()
 
 	}
 	cout << "countInter=" << countInter << endl;
-	cout << "count=" << countDiff << endl;
+	cout << "countDiff=" << countDiff << endl;
 
 #ifdef STATE_WRITING
 	// wirte new
 	_wirteNumberFile(totalNum, arr, randNumNameSepa);
 #endif
+}
+
+static void _test8()
+{
+	size_t countDiff = 0;
+	size_t countInter = 0;
+	const size_t totalNum = (size_t)1e4;
+	std::string randNumName = "bin_file/random_1e8.bin";
+	double* readNum = _readNumberFile(totalNum, randNumName);
+	for (int i = 0; i < totalNum; ++i)
+	{
+		Triangle triA = { { {readNum[i * 18 + 0],readNum[i * 18 + 1],readNum[i * 18 + 2]} ,
+							{readNum[i * 18 + 3],readNum[i * 18 + 4],readNum[i * 18 + 5]} ,
+							{readNum[i * 18 + 6],readNum[i * 18 + 7],readNum[i * 18 + 8]} } };
+		Triangle triB = { { {readNum[i * 18 + 9],readNum[i * 18 + 10],readNum[i * 18 + 11]} ,
+							{readNum[i * 18 + 12],readNum[i * 18 + 13],readNum[i * 18 + 14]} ,
+							{readNum[i * 18 + 15],readNum[i * 18 + 16],readNum[i * 18 + 17]} } };
+		double d0, d1;
+		bool isInter = isTwoTrianglesIntersectSAT(triA, triB);
+		if (isInter)
+		{
+			countInter++;
+			array<Vector3d, 2> pn2 = getTwoTrianglesNearestPoints(triA, triB);
+			d1 = (pn2[1] - pn2[0]).norm();
+		}
+		if (!isInter)
+		{
+			d0 = getTrianglesDistance(P, Q, triA, triB);
+			//d1 = getTrianglesDistanceSAT(triA, triB);
+			array<Vector3d, 2> pn2= getTwoTrianglesNearestPoints(triA, triB);
+			d1 = (pn2[1] - pn2[0]).norm();
+			//cout << d0-d1 << endl;
+			if (fabs(d0 - d1) > eps)
+				countDiff++;
+		}
+	}
+	cout << "countInter=" << countInter << endl;
+	cout << "countDiff=" << countDiff << endl;
 }
 
 static int enrol = []()->int
@@ -764,9 +802,10 @@ static int enrol = []()->int
 	//_test4();
 #ifdef USING_FLATBUFFERS_SERIALIZATION
 	//_test5();
-	_test6();
+	//_test6();
 #endif
-	_test7();
+	//_test7();
+	_test8();
 	return 0;
 }();
 
@@ -819,6 +858,25 @@ Devillers & GuigueËã·¨(¼ò³ÆDevillers Ëã·¨) Í¨¹ýÈý½ÇÐÎ¸÷¶¥µã¹¹³ÉµÄÐÐÁÐÊ½Õý¸ºµÄ¼¸º
 //------------------------------------------------------------------------------------
 // Voxel 
 //------------------------------------------------------------------------------------
+
+#undef max
+#undef min
+#include <map>
+#include <set>
+#include <array>
+#include <vector>
+#include <memory>
+#include <ranges>
+#include <format>
+#include <cassert>
+#include <numeric>
+#include <fstream>
+#include <algorithm>
+#include <filesystem>
+#include <functional>
+#include <type_traits>
+#include "Eigen/Geometry"    
+#include <iostream>
 
 bool TriangularIntersectionTest(const std::array<Eigen::Vector3d, 3>& T1, const std::array<Eigen::Vector3d, 3>& T2)
 {
@@ -1142,25 +1200,261 @@ bool TriangularIntersectionTest(const std::array<Eigen::Vector3d, 3>& T1, const 
 	return true;
 }
 
+void getSegmentsPoints(Eigen::Vector3d& VEC, Eigen::Vector3d& X, Eigen::Vector3d& Y,
+	const Eigen::Vector3d& P, const Eigen::Vector3d& A, const Eigen::Vector3d& Q, const Eigen::Vector3d& B)
+{
+	Eigen::Vector3d TMP;
+	double A_dot_A, B_dot_B, A_dot_B, A_dot_T, B_dot_T;
+	Eigen::Vector3d T = Q - P;
+	A_dot_A = A.dot(A);
+	B_dot_B = B.dot(B);
+	A_dot_B = A.dot(B);
+	A_dot_T = A.dot(T);
+	B_dot_T = B.dot(T);
+	double denom = A_dot_A * B_dot_B - A_dot_B * A_dot_B;
+	double t = (A_dot_T * B_dot_B - B_dot_T * A_dot_B) / denom;
+	if ((t < 0) || isnan(t))
+		t = 0;
+	else if (t > 1)
+		t = 1;
+	double u = (t * A_dot_B - B_dot_T) / B_dot_B;
+	if ((u <= 0) || isnan(u))
+	{
+		Y = Q;
+		t = A_dot_T / A_dot_A;
+		if ((t <= 0) || isnan(t))
+		{
+			X = P;
+			VEC = Q - P;
+		}
+		else if (t >= 1)
+		{
+			X = P + A;
+			VEC = Q - X;
+		}
+		else
+		{
+			X = P + t * A;
+			TMP = T.cross(A);
+			VEC = A.cross(TMP);
+		}
+	}
+	else if (u >= 1)
+	{
+		Y = Q + B;
+		t = (A_dot_B + A_dot_T) / A_dot_A;
+		if ((t <= 0) || isnan(t))
+		{
+			X = P;
+			VEC = Y - P;
+		}
+		else if (t >= 1)
+		{
+			X = P + A;
+			VEC = Y - X;
+		}
+		else
+		{
+			X = P + t * A;
+			T = Y - P;
+			TMP = T.cross(A);
+			VEC = A.cross(TMP);
+		}
+	}
+	else
+	{
+		Y = Q + u * B;
+		if ((t <= 0) || isnan(t))
+		{
+			X = P;
+			TMP = T.cross(B);
+			VEC = B.cross(TMP);
+		}
+		else if (t >= 1)
+		{
+			X = P + A;
+			T = Q - X;
+			TMP = T.cross(B);
+			VEC = B.cross(TMP);
+		}
+		else
+		{
+			X = P + t * A;
+			VEC = A.cross(B);
+			if (VEC.dot(T) < 0)
+				VEC = -1.0 * VEC;
+		}
+	}
+}
 
-#undef max
-#undef min
-#include <map>
-#include <set>
-#include <array>
-#include <vector>
-#include <memory>
-#include <ranges>
-#include <format>
-#include <cassert>
-#include <numeric>
-#include <fstream>
-#include <algorithm>
-#include <filesystem>
-#include <functional>
-#include <type_traits>
-#include "Eigen/Geometry"    
-#include <iostream>
+double getTrianglesDistance(Eigen::Vector3d& P, Eigen::Vector3d& Q, const std::array<Eigen::Vector3d, 3>& S, const std::array<Eigen::Vector3d, 3>& T)
+{
+#ifdef STATISTIC_DATA_COUNT
+	getTriDistC++;
+#endif
+	//#define USING_INNER_PRE_JUDGE
+#ifdef USING_INNER_PRE_JUDGE
+	if (isTwoTrianglesIntersectSAT(S, T)) // pre-judge intersect
+	{
+#ifdef STATISTIC_DATA_COUNT
+		count_err_inter_dist++;
+#endif
+		return 0.0;
+	}
+#endif
+	// Compute vectors along the 6 sides
+	std::array<Eigen::Vector3d, 3> Sv, Tv;
+	Vector3d VEC;
+	Sv[0] = S[1] - S[0];
+	Sv[1] = S[2] - S[1];
+	Sv[2] = S[0] - S[2];
+	Tv[0] = T[1] - T[0];
+	Tv[1] = T[2] - T[1];
+	Tv[2] = T[0] - T[2];
+	Vector3d V, Z, minP, minQ;
+	bool shown_disjoint = false;
+	double mindd = (S[0] - T[0]).squaredNorm() + 1;  // Set first minimum safely high
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			// Find closest points on edges i & j, plus the vector (and distance squared) between these points
+			getSegmentsPoints(VEC, P, Q, S[i], Sv[i], T[j], Tv[j]);
+			V = Q - P;
+			double dd = V.dot(V);
+			// Verify this closest point pair only if the distance squared is less than the minimum found thus far.
+			if (dd <= mindd)
+			{
+				minP = P;
+				minQ = Q;
+				mindd = dd;
+				Z = S[(i + 2) % 3] - P;
+				double a = Z.dot(VEC);
+				Z = T[(j + 2) % 3] - Q;
+				double b = Z.dot(VEC);
+				if ((a <= 0) && (b >= 0))
+					return sqrt(dd);
+				double p = V.dot(VEC);
+				if (a < 0)
+					a = 0;
+				if (b > 0)
+					b = 0;
+				if ((p - a + b) > 0)
+					shown_disjoint = true;
+			}
+		}
+	}
+	Vector3d Sn = Sv[0].cross(Sv[1]); // Compute normal to S triangle
+	double Snl = Sn.dot(Sn);      // Compute square of length of normal
+	// If cross product is long enough,
+	if (Snl > 1e-15)
+	{
+		// Get projection lengths of T points
+		Vector3d Tp; //double Tp[3]
+		V = S[0] - T[0];
+		Tp[0] = V.dot(Sn);
+		V = S[0] - T[1];
+		Tp[1] = V.dot(Sn);
+		V = S[0] - T[2];
+		Tp[2] = V.dot(Sn);
+		int point = -1;
+		if ((Tp[0] > 0) && (Tp[1] > 0) && (Tp[2] > 0))
+		{
+			point = (Tp[0] < Tp[1]) ? 0 : 1;
+			if (Tp[2] < Tp[point])
+				point = 2;
+		}
+		else if ((Tp[0] < 0) && (Tp[1] < 0) && (Tp[2] < 0))
+		{
+			point = (Tp[0] > Tp[1]) ? 0 : 1;
+			if (Tp[2] > Tp[point])
+				point = 2;
+		}
+		// If Sn is a separating direction, 
+		if (point >= 0)
+		{
+			shown_disjoint = true;
+			// Test whether the point found, when projected onto the 
+			// other triangle, lies within the face.
+			V = T[point] - S[0];
+			Z = Sn.cross(Sv[0]);
+			if (V.dot(Z) > 0)
+			{
+				V = T[point] - S[1];
+				Z = Sn.cross(Sv[1]);
+				if (V.dot(Z) > 0)
+				{
+					V = T[point] - S[2];
+					Z = Sn.cross(Sv[2]);
+					if (V.dot(Z) > 0)
+					{
+						// T[point] passed the test - it's a closest point for 
+						// the T triangle; the other point is on the face of S
+						P = T[point] + (Tp[point] / Snl) * Sn;
+						Q = T[point];
+						return (P - Q).norm();
+					}
+				}
+			}
+		}
+	}
+	Vector3d Tn = Tv[0].cross(Tv[1]);
+	double Tnl = Tn.dot(Tn);
+	if (Tnl > 1e-15)
+	{
+		Vector3d Sp; //double Sp[3]
+		V = T[0] - S[0];
+		Sp[0] = V.dot(Tn);
+		V = T[0] - S[1];
+		Sp[1] = V.dot(Tn);
+		V = T[0] - S[2];
+		Sp[2] = V.dot(Tn);
+		int point = -1;
+		if ((Sp[0] > 0) && (Sp[1] > 0) && (Sp[2] > 0))
+		{
+			point = (Sp[0] < Sp[1]) ? 0 : 1;
+			if (Sp[2] < Sp[point])
+				point = 2;
+		}
+		else if ((Sp[0] < 0) && (Sp[1] < 0) && (Sp[2] < 0))
+		{
+			point = (Sp[0] > Sp[1]) ? 0 : 1;
+			if (Sp[2] > Sp[point])
+				point = 2;
+		}
+		if (point >= 0)
+		{
+			shown_disjoint = true;
+			V = S[point] - T[0];
+			Z = Tn.cross(Tv[0]);
+			if (V.dot(Z) > 0)
+			{
+				V = S[point] - T[1];
+				Z = Tn.cross(Tv[1]);
+				if (V.dot(Z) > 0)
+				{
+					V = S[point] - T[2];
+					Z = Tn.cross(Tv[2]);
+					if (V.dot(Z) > 0)
+					{
+						P = S[point];
+						Q = S[point] + (Sp[point] / Tnl) * Tn;
+						return (P - Q).norm();
+					}
+				}
+			}
+		}
+	}
+	if (shown_disjoint)
+	{
+		P = minP;
+		Q = minQ;
+		return sqrt(mindd);
+	}
+	else
+		return 0;
+}
+
 class Grid
 {
 public:

@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "test_file_rw.h"
 using namespace std;
 using namespace psykronix;
 #undef min
@@ -188,6 +189,7 @@ std::vector<std::array<uint64_t, 2>> _readEntityIDFile(const std::string& fileNa
 	return tris;
 }
 
+#define USING_FLATBUFFERS_SERIALIZATION
 #ifdef USING_FLATBUFFERS_SERIALIZATION 
 #include "flatbuffers/flatbuffers.h"
 using namespace flatbuffers;
@@ -272,7 +274,7 @@ std::vector<ModelMesh> read_ModelMesh(const std::string& fileName)
 			{
 				_iboRaw.push_back(iboRaw->Get(i));
 			}
-			res.push_back(ModelMesh{ vbo_, ibo_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(), _iboRaw });
+			res.push_back(ModelMesh{ vbo_, ibo_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(),false, _iboRaw });
 		}
 		inFile.close();
 	}
