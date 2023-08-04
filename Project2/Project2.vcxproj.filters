@@ -216,6 +216,9 @@
     <ClCompile Include="calculatePolyhedron.cpp">
       <Filter>test_triangle</Filter>
     </ClCompile>
+    <ClCompile Include="test_binfile_debug.cpp">
+      <Filter>test_case</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">

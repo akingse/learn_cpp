@@ -172,10 +172,7 @@ static void _test0()
 			//bool res = isTwoSegmentsIntersect(randData2[i], randData2_[i]);
 			// 
 			// 三角形相交测试
-			//bool res = isTwoTrianglesIntersection(randData3[i], randData3_[i]);
-			//bool res = isTwoTrianglesIntersection2(randData3[i], randData3_[i]);
 			bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]);
-			//bool res = isTwoTrianglesIntersection2(randData3[i], randData3_[i]);
 			//bool res = isSegmentCrossTriangleSurface(randData2[i], randData3_[i]);
 			//bool res = TriangularIntersectionTest(randData3[i], randData3_[i]);
 			//包围盒

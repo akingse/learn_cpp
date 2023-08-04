@@ -177,6 +177,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="test_binfile_debug.cpp" />
     <ClCompile Include="test_case_triangle.cpp" />
     <ClCompile Include="test_file_rw.cpp" />
     <ClCompile Include="test_fun_speed.cpp" />
