@@ -232,7 +232,7 @@ static void _test1()
 	Vector3d triB_0 = Vector3d(4924601.8102601077, -385940.89359764993, 5750.0000000000000);
 	Vector3d triB_1 = Vector3d(4924595.2577039087, -385951.32193110074, 5750.0000000000000);
 	Vector3d triB_2 = Vector3d(4924589.8109916430, -385975.18553675216, 5750.0000000000000);
-	bool isTI = isTwoTrianglesIntersection({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+	bool isTI = isTwoTrianglesIntersectPIT({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
 	//bool isTIT = TriangularIntersectionTest({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
 
 	triA_0 = Vector3d(4948618.6464014640, -378059.39893364342, 39.982199933911403); //x
@@ -293,7 +293,7 @@ static void _test1()
 	//bool inter = isTwoTrianglesBoundingBoxIntersect(triA, triB);
 	//bool interR = isTwoTrianglesBoundingBoxIntersect(res[0][0], res[0][1]);
 	//bool inter1 = isTwoTrianglesBoundingBoxIntersect(triA, triB, tolerance);
-	bool isInt = isTwoTrianglesIntersection(triA, triB);
+	bool isInt = isTwoTrianglesIntersectPIT(triA, triB);
 	bool isInt0 = isTwoTrianglesIntersectSAT(triA, triB);
 	bool isInt1 = isTwoTrianglesIntersectSAT(res[0][0], res[0][1]);
 
@@ -757,7 +757,26 @@ static void _test7()
 
 static void _test8()
 {
-	size_t countDiff = 0;
+	// error triangle
+	Vector3d triA_0 = Vector3d(0, 0, 0);
+	Vector3d triA_1 = Vector3d(10, 5, 0);
+	Vector3d triA_2 = Vector3d(0, 10, 0);
+	Vector3d triB_0 = Vector3d(3, 0, 0);
+	Vector3d triB_1 = Vector3d(3, 10, 0);
+	Vector3d triB_2 = Vector3d(-2, 5, 0);
+	Triangle triA = { triA_0, triA_1, triA_2 };
+	Triangle triB = { triB_0, triB_1, triB_2 };
+
+	array<Vector3d, 2> pointsNear = getTwoTrianglesNearestPoints(triA, triB);
+	array<Vector3d, 2> pointsInter = getTwoTrianglesIntersectPoints(triA, triB);
+
+	std::array<Vector3d, 2> res;
+	for (int i = 0; i < 2; ++i)
+		res[i] = Vector3d(i, i, 0);
+
+	//
+	size_t countDiff1 = 0;
+	size_t countDiff2 = 0;
 	size_t countInter = 0;
 	const size_t totalNum = (size_t)1e4;
 	std::string randNumName = "bin_file/random_1e8.bin";
@@ -770,27 +789,34 @@ static void _test8()
 		Triangle triB = { { {readNum[i * 18 + 9],readNum[i * 18 + 10],readNum[i * 18 + 11]} ,
 							{readNum[i * 18 + 12],readNum[i * 18 + 13],readNum[i * 18 + 14]} ,
 							{readNum[i * 18 + 15],readNum[i * 18 + 16],readNum[i * 18 + 17]} } };
-		double d0, d1;
+		double d0, d1, d2;
 		bool isInter = isTwoTrianglesIntersectSAT(triA, triB);
-		if (isInter)
+		//if (isInter)
 		{
 			countInter++;
-			array<Vector3d, 2> pn2 = getTwoTrianglesNearestPoints(triA, triB);
+			//array<Vector3d, 2> pn2 = getTwoTrianglesNearestPoints(triA, triB);
+			array<Vector3d, 2> pn2 = getTwoTrianglesIntersectPoints(triA, triB);
+			Vector3d p0 = pn2[0];
+			Vector3d p1 = pn2[1];
+			//cout << p0 << endl << p1 << endl << endl;
 			d1 = (pn2[1] - pn2[0]).norm();
 		}
 		if (!isInter)
 		{
 			d0 = getTrianglesDistance(P, Q, triA, triB);
-			//d1 = getTrianglesDistanceSAT(triA, triB);
+			d1 = getTrianglesDistanceSAT(triA, triB);
 			array<Vector3d, 2> pn2= getTwoTrianglesNearestPoints(triA, triB);
-			d1 = (pn2[1] - pn2[0]).norm();
+			d2 = (pn2[1] - pn2[0]).norm();
 			//cout << d0-d1 << endl;
 			if (fabs(d0 - d1) > eps)
-				countDiff++;
+				countDiff1++;
+			if (fabs(d0 - d2) > eps)
+				countDiff2++;
 		}
 	}
 	cout << "countInter=" << countInter << endl;
-	cout << "countDiff=" << countDiff << endl;
+	cout << "countDiff1=" << countDiff1 << endl;
+	cout << "countDiff2=" << countDiff2 << endl;
 }
 
 static int enrol = []()->int

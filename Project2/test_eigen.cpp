@@ -22,7 +22,7 @@ static void test1()
 
 	std::array<Vector3d, 3> trigonA = { Vertex(-10, -10), Vertex(10, -10), Vertex(0, 10) };
 	std::array<Vector3d, 3> trigonB = psykronix::scale(2, 2, 2) * trigonA;
-	isTwoTrianglesIntersection(trigonA, trigonA);
+	isTwoTrianglesIntersectPIT(trigonA, trigonA);
 
 	Eigen::AlignedBox3d box1(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(1, 1, 1));
 	Eigen::AlignedBox3d box2(Eigen::Vector3d(0.5, 0.5, 0.5), Eigen::Vector3d(2, 2, 2));

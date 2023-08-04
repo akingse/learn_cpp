@@ -824,3 +824,94 @@ std::tuple<Eigen::Vector3d, double> _getRelationOfTwoSegments(const std::array<E
 		std::get<0>(_getRelationOfTwoSegments({triA[2], triA[0]}, {triB[2], triB[0]})),
 ```
 
+
+
+
+
+```
+std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
+{
+	std::array<Vector3d, 2> res = { gVecNaN , gVecNaN }; // avoid separate
+	if (!isTwoTrianglesIntersectSAT(triA, triB))
+		return res;
+	Vector3d vecSeg;
+
+	std::array<array<Vector3d, 2>, 3> edgesA = { { {triA[0], triA[1]},
+												{triA[1], triA[2]},
+												{triA[2], triA[0] } } };
+	std::array<array<Vector3d, 2>, 3> edgesB = { { {triB[0], triB[1]},
+												{ triB[1], triB[2] },
+												{ triB[2], triB[0] } } };
+	int count = 0;
+	for (const auto& edgeA : edgesA)
+	{
+		double k = _getIntersectOfSegmentAndPlaneINF(edgeA, triB); // refer revise direction of edgeA
+		if (DBL_MAX == k) //coplanar
+		{
+			if (isPointInTriangle(edgeA[0], triB) && isPointInTriangle(edgeA[1], triB))
+				return edgeA;
+			for (const auto& edgeB : edgesB)
+			{
+				if (!isTwoSegmentsIntersect(edgeA, edgeB))
+					continue;
+				double k2 = _getPointOfTwoIntersectSegments(edgeA, edgeB);
+				if (DBL_MAX == k2) //collinear
+				{
+					res[0] = ((edgeA[0] - edgeB[0]).dot(edgeA[0] - edgeB[1])) <= 0.0 ? edgeA[0] : edgeA[1];
+					res[1] = ((edgeB[0] - edgeA[0]).dot(edgeB[0] - edgeA[1])) <= 0.0 ? edgeB[0] : edgeB[1];
+					return res;
+				}
+				res[count++] = edgeA[0] + k2 * (vecSeg);
+			}
+			if (count == 2)
+				return res;
+		}
+		else if (0 <= k && k <= 1)
+		{
+			Vector3d local = edgeA[0] + k * vecSeg;
+			if (!isPointInTriangle(local, triB))
+				continue;
+			res[count++] = local;
+		}
+		if (count == 2)
+			return res;
+	}
+	for (const auto& edgeB : edgesB)
+	{
+		double k = _getIntersectOfSegmentAndPlaneINF(edgeB, triA);
+		if (DBL_MAX == k) //coplanar
+		{
+			if (isPointInTriangle(edgeB[0], triA) && isPointInTriangle(edgeB[1], triA))
+				return edgeB;
+			for (const auto& edgeA : edgesA)
+			{
+				if (!isTwoSegmentsIntersect(edgeB, edgeA))
+					continue;
+				double k2 = _getPointOfTwoIntersectSegments(edgeB, edgeA);
+				if (DBL_MAX == k2) //collinear
+				{
+					res[0] = ((edgeA[0] - edgeB[0]).dot(edgeA[0] - edgeB[1])) <= 0.0 ? edgeA[0] : edgeA[1];
+					res[1] = ((edgeB[0] - edgeA[0]).dot(edgeB[0] - edgeA[1])) <= 0.0 ? edgeB[0] : edgeB[1];
+					return res;
+				}
+				res[count++] = edgeB[0] + k * (vecSeg);
+			}
+			if (count == 2)
+				return res;
+		}
+		else if (0 <= k && k <= 1)
+		{
+			Vector3d local = edgeB[0] + k * vecSeg;
+			if (!isPointInTriangle(local, triA))
+				continue;
+			res[count++] = local;
+		}
+		if (count == 2)
+			return res;
+	}
+	return res;
+}
+
+
+```
+

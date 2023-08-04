@@ -306,7 +306,7 @@ Eigen::Vector3d psykronix::getPenetrationDepthOfTwoMeshs(const ModelMesh& meshA,
 //---------------------------------------------------------------------------
 
 // get the index param of mesh's ibo, return index-vector(ibo) of two mesh
-std::array<std::vector<size_t>, 2> psykronix::getReducedIntersectTrianglesOfMesh(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance, const Eigen::Affine3d& matrix)
+std::array<std::vector<size_t>, 2> getReducedIntersectTrianglesOfMesh(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance, const Eigen::Affine3d& matrix)
 {
 	//Eigen::AlignedBox3d boxMag(box.min() - 0.5 * Vector3d(tolerance, tolerance, tolerance), box.max() + 0.5 * Vector3d(tolerance, tolerance, tolerance));
 	Eigen::AlignedBox3d box = mesh_a.bounding_.intersection(mesh_b.bounding_);
@@ -363,7 +363,7 @@ std::array<std::vector<size_t>, 2> psykronix::getReducedIntersectTrianglesOfMesh
 	return { triA_Index, triB_Index };
 }
 
-bool psykronix::isTwoMeshsIntersectHard(const ModelMesh& mesh_a, const ModelMesh& mesh_b)
+bool isTwoMeshsIntersectHard(const ModelMesh& mesh_a, const ModelMesh& mesh_b)
 {
 	Eigen::Affine3d relative_matrix = Eigen::Affine3d::Identity();
 #ifdef USING_RELATIVE_MATRIX_RECTIFY
@@ -435,7 +435,7 @@ bool psykronix::isTwoMeshsIntersectHard(const ModelMesh& mesh_a, const ModelMesh
 	return false;
 }
 
-double psykronix::getTwoMeshsDistanceSoft(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance, Eigen::Vector3d& P, Eigen::Vector3d& Q)
+double getTwoMeshsDistanceSoft(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance, Eigen::Vector3d& P, Eigen::Vector3d& Q)
 {
 #ifdef STATISTIC_DATA_RECORD
 	std::array<std::array<Eigen::Vector3d, 3>, 2> triDistPair;
@@ -478,12 +478,12 @@ double psykronix::getTwoMeshsDistanceSoft(const ModelMesh& mesh_a, const ModelMe
 #endif                    
 				continue;
 			}
-			double temp = getTrianglesDistance(P, Q, triA, triB);// two trigons distance calculate
+			double temp = getTrianglesDistanceSAT(triA, triB);// two trigons distance calculate
 			if (temp <= tolerance && temp < d) // update d
 			{
 				d = temp;
-				P = mesh_b.pose_ * P;
-				Q = mesh_b.pose_ * Q;
+				//P = mesh_b.pose_ * P;
+				//Q = mesh_b.pose_ * Q;
 #ifdef STATISTIC_DATA_RECORD
 				triDistPair = { triA, triB }; //record last tri-pair
 #endif    
@@ -515,3 +515,27 @@ double getTwoMeshsPenetrationDepthEPA(const ModelMesh& meshA, const ModelMesh& m
 //  penetration depth
 //---------------------------------------------------------------------------
 
+// return the vertex of meshB
+std::vector<Eigen::Vector3d> _getInsideVertexSet(const ModelMesh& meshA, const ModelMesh& meshB)
+{
+	Eigen::Affine3d relative_matrix = Eigen::Affine3d::Identity();
+#ifdef USING_RELATIVE_MATRIX_RECTIFY
+	// get relative matrix
+	relative_matrix = meshB.pose_.inverse() * meshA.pose_; // model_a * a / b
+	for (size_t i = 0; i < 3; i++)// machine error process
+	{
+		for (size_t j = 0; j < 3; j++)
+		{
+			relative_matrix(i, j) = abs(relative_matrix(i, j)) < 1e-14 ? 0.0 : relative_matrix(i, j);
+			relative_matrix(i, j) = abs(relative_matrix(i, j) - 1.0) < 1e-14 ? 1.0 : relative_matrix(i, j);
+		}
+		relative_matrix(i, 3) = std::round(relative_matrix(i, 3) * 1e9) / 1e9;
+	}
+#endif 
+	// the vertex of meshB inside meshA
+	std::vector<Eigen::Vector3d> res;
+
+
+
+	return res;
+}

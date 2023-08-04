@@ -86,7 +86,7 @@ static void _test0()
 #endif
 
 #ifdef TEST_TRIGON3XY_TRIGON3XY
-	std::array<Vector3d, 3>* randData3xy = new std::array<Vector3d, 2>[totalNum];
+	std::array<Vector3d, 3>* randData3xy = new std::array<Vector3d, 3>[totalNum];
 	std::array<Vector3d, 3>* randData3_xy = new std::array<Vector3d, 3>[totalNum];
 #endif
 	//for (size_t i = 0; i < totalNum; ++i)
@@ -158,7 +158,7 @@ static void _test0()
 	{
 		start = clock();
 		//totalNum = 1;
-#pragma omp parallel for //开启omp优化
+//#pragma omp parallel for //开启omp优化
 		for (int i = 0; i < totalNum; i++)
 		{
 			//auto res = _get_circumcircle_center({ _get_rand() ,_get_rand() ,_get_rand() });
@@ -166,16 +166,16 @@ static void _test0()
 			// 点与三角形
 			//bool res = isPointInTriangle(randData2D[i][0], randData2D_[i]); //2D
 			//bool res = isPointInTriangle(randData1[i][0], randData3[i]); //3D
+			//bool res = isPointOnTriangleSurface(Vector3d(1,2,3), randData3[i]);
+			// 
+			// 线段
+			//bool res = isTwoSegmentsIntersect(randData2[i], randData2_[i]);
 			// 
 			// 三角形相交测试
 			//bool res = isTwoTrianglesIntersection(randData3[i], randData3_[i]);
 			//bool res = isTwoTrianglesIntersection2(randData3[i], randData3_[i]);
-			//bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]);
+			bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]);
 			//bool res = isTwoTrianglesIntersection2(randData3[i], randData3_[i]);
-			//bool r1 = isSegmentCrossTriangleSurface(_get_rand2(), _get_rand3());
-			//bool r2 = isSegmentCrossTriangleSurface(_get_rand2(), _get_rand3());
-			//bool res = isPointInTriangle(Vector3d(1,2,3), randData3[i]);
-			//bool res = isPointOnTriangleSurface(Vector3d(1,2,3), randData3[i]);
 			//bool res = isSegmentCrossTriangleSurface(randData2[i], randData3_[i]);
 			//bool res = TriangularIntersectionTest(randData3[i], randData3_[i]);
 			//包围盒
@@ -193,8 +193,10 @@ static void _test0()
 			// 软碰撞
 			//double d = getTrianglesDistance(P, Q, randData3[i], randData3_[i]);
 			//double d = getTrianglesDistanceSAT(randData3[i], randData3_[i]);
-			array<Vector3d, 2> res = getTwoTrianglesNearestPoints(randData3[i], randData3_[i]);
-			double d = (res[1] - res[0]).norm();
+			//array<Vector3d, 2> res = getTwoTrianglesNearestPoints(randData3[i], randData3_[i]);
+			//array<Vector3d, 2> res = getTwoTrianglesIntersectPoints(randData3[i], randData3_[i]);
+			//array<Vector3d, 2> res = getTwoTrianglesIntersectPoints(randData3xy[i], randData3_xy[i]);
+			//double d = (res[1] - res[0]).norm(); << endl
 			//测试包围盒 
 			//Eigen::AlignedBox3d res = Eigen::AlignedBox3d(randData2[i][0], randData2[i][1]).intersection(Eigen::AlignedBox3d(randData2_[i][0], randData2_[i][1]));
 
