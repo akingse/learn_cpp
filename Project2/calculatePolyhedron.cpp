@@ -435,7 +435,8 @@ bool isTwoMeshsIntersectHard(const ModelMesh& mesh_a, const ModelMesh& mesh_b)
 	return false;
 }
 
-double getTwoMeshsDistanceSoft(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance, Eigen::Vector3d& P, Eigen::Vector3d& Q)
+// return index of mesh_a and mesh_b ibo
+std::tuple<double, std::array<size_t, 2>> getTwoMeshsDistanceSoft(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance)
 {
 #ifdef STATISTIC_DATA_RECORD
 	std::array<std::array<Eigen::Vector3d, 3>, 2> triDistPair;
@@ -456,9 +457,10 @@ double getTwoMeshsDistanceSoft(const ModelMesh& mesh_a, const ModelMesh& mesh_b,
 #endif 
 	// distance > tolerance, return double-max, to decrease calculate
 	double d = DBL_MAX; // the res
+	std::array<size_t, 2> index;
 	std::array<vector<size_t>, 2> indexAB = getReducedIntersectTrianglesOfMesh(mesh_a, mesh_b, tolerance, relative_matrix);
 	if (indexAB[0].empty() || indexAB[1].empty())
-		return d;
+		return { d, {} };
 	for (const auto& iA : indexAB[0])
 	{
 		std::array<Eigen::Vector3d, 3> triA = {
@@ -482,8 +484,7 @@ double getTwoMeshsDistanceSoft(const ModelMesh& mesh_a, const ModelMesh& mesh_b,
 			if (temp <= tolerance && temp < d) // update d
 			{
 				d = temp;
-				//P = mesh_b.pose_ * P;
-				//Q = mesh_b.pose_ * Q;
+				index = { iA, iB };
 #ifdef STATISTIC_DATA_RECORD
 				triDistPair = { triA, triB }; //record last tri-pair
 #endif    
@@ -494,7 +495,7 @@ double getTwoMeshsDistanceSoft(const ModelMesh& mesh_a, const ModelMesh& mesh_b,
 	if (d <= tolerance)
 		interTriInfoList.push_back({ triDistPair ,{}, d });
 #endif   
-	return d;
+	return { d, index };
 }
 
 // only for convex polytope 

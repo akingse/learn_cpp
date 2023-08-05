@@ -15,4 +15,4 @@ namespace psykronix
 // collision detection
 DLLEXPORT std::array<std::vector<size_t>, 2> getReducedIntersectTrianglesOfMesh(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance, const Eigen::Affine3d& matrix);
 DLLEXPORT bool isTwoMeshsIntersectHard(const ModelMesh& mesh_a, const ModelMesh& mesh_b);
-DLLEXPORT double getTwoMeshsDistanceSoft(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance, Eigen::Vector3d& P, Eigen::Vector3d& Q);
+DLLEXPORT std::tuple<double, std::array<size_t, 2>> getTwoMeshsDistanceSoft(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance);
