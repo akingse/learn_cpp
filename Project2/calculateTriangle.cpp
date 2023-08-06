@@ -1015,6 +1015,7 @@ bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, cons
 	Vector3d normalA = edgesA[0].cross(edgesA[1]);
 	Vector3d normalB = edgesB[0].cross(edgesB[1]);
 	if (normalA.normalized().cross(normalB.normalized()).isZero(eps)) // parallel
+	//if (normalA.normalized().cross(normalB.normalized()).squaredNorm() < DBL_EPSILON) // parallel
 	{
 		std::array<Eigen::Vector3d, 7> axes = { {
 				normalA,

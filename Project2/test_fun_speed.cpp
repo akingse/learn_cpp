@@ -56,7 +56,7 @@ static void _test0()
 	start = clock();
 	cout << "data number:" << totalNum << ", load start..." << endl;
 	// the data
-	double* readNum = _readNumberFile(size_t(sqrt(totalNum)), randNumNameSepa);
+	double* readNum = _readNumberFile(size_t(sqrt(totalNum)), randNumName);
 
 #ifdef TEST_TRIGON3
 	std::array<Vector3d, 3>* randData3 = new std::array<Vector3d, 3>[totalNum];
