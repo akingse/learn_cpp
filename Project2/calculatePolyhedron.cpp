@@ -254,18 +254,18 @@ bool psykronix::isPointContainedInPolyhedron(const Eigen::Vector3d& point, const
 	return isPointContainedInPolyhedron(pointR, mesh.vbo_, mesh.ibo_);
 }
 
-bool _isNormalVectorOutwardsConvex(const std::array<int, 3>& face, const Eigen::Vector3d& normal,
-	const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
-{
-	// must be Convex Polyhedron, default create normal
-	//Vector3d normal = (vbo[face[1]] - vbo[face[0]]).cross(vbo[face[2]] - vbo[face[0]]).normalized();
-	for (size_t i = 0; i < vbo.size(); ++i)
-	{
-		if (i == face[0] || i == face[1] || i == face[2] || fabs(normal.dot((vbo[i] - vbo[face[0]]).normalized())) < eps) // self and coplanar
-			continue;
-		return normal.dot(vbo[i] - vbo[face[0]]) < 0.0;
-	}
-}
+//bool _isNormalVectorOutwardsConvex(const std::array<int, 3>& face, const Eigen::Vector3d& normal,
+//	const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
+//{
+//	// must be Convex Polyhedron, default create normal
+//	//Vector3d normal = (vbo[face[1]] - vbo[face[0]]).cross(vbo[face[2]] - vbo[face[0]]).normalized();
+//	for (size_t i = 0; i < vbo.size(); ++i)
+//	{
+//		if (i == face[0] || i == face[1] || i == face[2] || fabs(normal.dot((vbo[i] - vbo[face[0]]).normalized())) < eps) // self and coplanar
+//			continue;
+//		return normal.dot(vbo[i] - vbo[face[0]]) < 0.0;
+//	}
+//}
 
 //using method SAT
 Eigen::Vector3d _getPenetrationDepthOfTwoConvex(const std::vector<Eigen::Vector3d>& vboA, const std::vector<std::array<int, 3>>& iboA,
@@ -280,7 +280,6 @@ Eigen::Vector3d _getPenetrationDepthOfTwoConvex(const std::vector<Eigen::Vector3
 	{
 		double minA = DBL_MAX, minB = DBL_MAX, maxA = -DBL_MAX, maxB = -DBL_MAX; //refresh min and max
 		Vector3d normal = (vboA[iterA[1]] - vboA[iterA[0]]).cross(vboA[iterA[2]] - vboA[iterA[0]]).normalized();
-		//bool isOut = _isNormalVectorOutwardsConvex(iterA, normal, vboA, iboA);
 		for (const auto& vertexA : vboA)
 		{
 			double projection = normal.dot(vertexA);
@@ -368,7 +367,7 @@ Eigen::Affine3d _getRelativeMatrixRectify(const Eigen::Affine3d& matA, const Eig
 }
 
 // get the index param of mesh's ibo, return index-vector(ibo) of two mesh
-std::array<std::vector<size_t>, 2> getReducedIntersectTrianglesOfMesh(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance, const Eigen::Affine3d& matrix)
+std::array<std::vector<size_t>, 2> _getReducedIntersectTrianglesOfMesh(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance, const Eigen::Affine3d& matrix)
 {
 	//Eigen::AlignedBox3d boxMag(box.min() - 0.5 * Vector3d(tolerance, tolerance, tolerance), box.max() + 0.5 * Vector3d(tolerance, tolerance, tolerance));
 	Eigen::AlignedBox3d box = mesh_a.bounding_.intersection(mesh_b.bounding_);
@@ -430,7 +429,7 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& mesh_a, const ModelMesh& mesh_b)
 {
 	Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(mesh_a.pose_, mesh_b.pose_);// get relative matrix
 	// get the index param of mesh's ibo
-	std::array<std::vector<size_t>, 2> indexAB = getReducedIntersectTrianglesOfMesh(mesh_a, mesh_b, 0.0, relative_matrix);
+	std::array<std::vector<size_t>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(mesh_a, mesh_b, 0.0, relative_matrix);
 	if (!indexAB[0].empty() && !indexAB[1].empty())
 	{
 		for (const auto& iA : indexAB[0])
@@ -495,7 +494,7 @@ RelationOfTwoMesh getTwoMeshsIntersectRelation(const ModelMesh& mesh_a, const Mo
 	};
 	Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(mesh_a.pose_, mesh_b.pose_);// get relative matrix
 	// get the index param of mesh's ibo
-	std::array<std::vector<size_t>, 2> indexAB = getReducedIntersectTrianglesOfMesh(mesh_a, mesh_b, 0.0, relative_matrix);
+	std::array<std::vector<size_t>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(mesh_a, mesh_b, 0.0, relative_matrix);
 	bool isContact = false; // vertex or edge or face contact
 	if (!indexAB[0].empty() && !indexAB[1].empty())
 	{
@@ -583,7 +582,7 @@ std::tuple<double, std::array<size_t, 2>> getTwoMeshsDistanceSAT(const ModelMesh
 	// distance > tolerance, return double-max, to decrease calculate
 	double d = DBL_MAX; // the res
 	std::array<size_t, 2> index;
-	std::array<vector<size_t>, 2> indexAB = getReducedIntersectTrianglesOfMesh(mesh_a, mesh_b, tolerance, relative_matrix);
+	std::array<vector<size_t>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(mesh_a, mesh_b, tolerance, relative_matrix);
 	if (indexAB[0].empty() || indexAB[1].empty())
 		return { d, {} };
 	for (const auto& iA : indexAB[0])

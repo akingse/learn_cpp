@@ -180,6 +180,31 @@ static void _test1()
 	cout << "return 0" << endl;
 }
 
+static void _test2()
+{
+	//²âÊÔ isPointInTriangle
+	Vector3d triA_0 = Vector3d(10,10,0.3);
+	Vector3d triA_1 = Vector3d(10, -10, 0);
+	Vector3d triA_2 = Vector3d(10,0,20.2);
+	Vector3d triB_0 = Vector3d(1.8943685,0.3846357,0.8737654);
+	Vector3d triB_1 = Vector3d(20.983265,2.9384856,10.2398456);
+	Vector3d triB_2 = Vector3d();
+	Triangle plane = { triA_0, triA_1, triA_2 };
+	plane = psykronix::scale(1e6, 1e6, 1e6) * plane;
+	//Triangle triB = { triB_0, triB_1, triB_2 };
+	Segment segment = { triB_0 ,triB_1 };
+	segment = psykronix::scale(1e6, 1e6, 1e6) * segment;
+
+	//calculate
+	Vector3d vecSeg = segment[1] - segment[0];
+	Vector3d normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);// normalized();
+	double k= (plane[0] - segment[0]).dot(normal) / vecSeg.dot(normal); //k
+	Vector3d local = segment[0] + k * vecSeg; // intersect point
+
+
+	cout << endl;
+}
+
 //using serialization 
 static void _test7()
 {
@@ -352,8 +377,9 @@ static void _test8()
 
 static int enrol = []()->int
 {
+	_test2();
 	//_test7();
-	_test8();
+	//_test8();
 	return 0;
 }();
 

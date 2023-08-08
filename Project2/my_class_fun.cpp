@@ -91,6 +91,18 @@ Eigen::Vector3d psykronix::operator*=(const Eigen::Matrix4d& mat, const Eigen::V
     return res.hnormalized();
 }
 
+
+std::array<Eigen::Vector3d, 2> psykronix::operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 2>& seg)
+{
+    std::array<Eigen::Vector3d, 2> res;
+    for (int i = 0; i < 2; i++)
+    {
+        Vector4d vec4 = mat * (seg[i].homogeneous());
+        res[i] = vec4.hnormalized();
+    }
+    return res;
+}
+
 std::array<Eigen::Vector3d, 3> psykronix::operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 3>& tri)
 {
     std::array<Eigen::Vector3d, 3> res;

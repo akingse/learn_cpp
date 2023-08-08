@@ -63,6 +63,7 @@ namespace psykronix
     DLLEXPORT Eigen::Matrix4d mirrory();
     DLLEXPORT Eigen::Matrix4d mirrorz();
     DLLEXPORT Eigen::Vector3d operator*=(const Eigen::Matrix4d& mat, const Eigen::Vector3d& vec); //operator* been occupied
+    DLLEXPORT std::array<Eigen::Vector3d, 2> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 2>& seg);
     DLLEXPORT std::array<Eigen::Vector3d, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 3>& tri);
     DLLEXPORT std::array<Eigen::Vector3f, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3f, 3>& tri);
 

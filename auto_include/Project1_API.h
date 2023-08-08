@@ -961,18 +961,18 @@ public:
 
 };
 
-class Segment
-{
-public:
-	Vec3 m_start;
-	Vec3 m_end;
-	__declspec(dllimport) Segment(Vec3 start, Vec3 end):m_start(start),m_end(end)
-	{}
-	__declspec(dllimport) Vec3 operator[](bool i) const
-	{
-		return i ? m_end : m_start;
-	}
-};
+//class Segment
+//{
+//public:
+//	Vec3 m_start;
+//	Vec3 m_end;
+//	__declspec(dllimport) Segment(Vec3 start, Vec3 end):m_start(start),m_end(end)
+//	{}
+//	__declspec(dllimport) Vec3 operator[](bool i) const
+//	{
+//		return i ? m_end : m_start;
+//	}
+//};
 
 namespace std
 {
