@@ -165,14 +165,14 @@ static void _test0()
 			//double res = _test_custom_calculate(nums);
 			// 点与三角形
 			//bool res = isPointInTriangle(randData2D[i][0], randData2D_[i]); //2D
-			//bool res = isPointInTriangle(randData1[i][0], randData3[i]); //3D
+			//bool res = isPointInTriangle(randData3[i][0], randData3_[i]); //3D
 			//bool res = isPointOnTriangleSurface(Vector3d(1,2,3), randData3[i]);
 			// 
 			// 线段
 			//bool res = isTwoSegmentsIntersect(randData2[i], randData2_[i]);
 			// 
 			// 三角形相交测试
-			bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]);
+			//bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]);
 			//bool res = isSegmentCrossTriangleSurface(randData2[i], randData3_[i]);
 			//bool res = TriangularIntersectionTest(randData3[i], randData3_[i]);
 			//包围盒
@@ -191,7 +191,7 @@ static void _test0()
 			//double d = getTrianglesDistance(P, Q, randData3[i], randData3_[i]);
 			//double d = getTrianglesDistanceSAT(randData3[i], randData3_[i]);
 			//array<Vector3d, 2> res = getTwoTrianglesNearestPoints(randData3[i], randData3_[i]);
-			//array<Vector3d, 2> res = getTwoTrianglesIntersectPoints(randData3[i], randData3_[i]);
+			array<Vector3d, 2> res = getTwoTrianglesIntersectPoints(randData3[i], randData3_[i]);
 			//array<Vector3d, 2> res = getTwoTrianglesIntersectPoints(randData3xy[i], randData3_xy[i]);
 			//double d = (res[1] - res[0]).norm(); << endl
 			//测试包围盒 
