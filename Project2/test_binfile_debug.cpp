@@ -269,6 +269,7 @@ static void _test2()
 	cout << "return 0" << endl;
 }
 
+//读取entityIdList
 static void _test3()
 {
 	std::vector<double> diatanceLen;
@@ -292,8 +293,9 @@ static void _test3()
 	std::vector<std::array<uint64_t, 2>> entity2 = _readEntityIDFile(binFilePath + "entityIdList_soft.bin"); //1069
 	std::vector<std::array<uint64_t, 2>> entity3 = _readEntityIDFile(binFilePath + "entityIdList_4031.bin"); //4031
 	std::vector<std::array<uint64_t, 2>> entity4 = _readEntityIDFile(binFilePath + "entityIdList_4027.bin"); //4027
-	std::vector<std::array<uint64_t, 2>> entity5;// = _readEntityIDFile(path + "entityIdList_48677.bin"); //48677
-	std::vector<std::array<uint64_t, 2>> entity6;// = _readEntityIDFile(path + "entityIdList_48678.bin"); //48678
+	std::vector<std::array<uint64_t, 2>> entity5;// = _readEntityIDFile(binFilePath + "entityIdList_4028.bin"); //4028
+	std::vector<std::array<uint64_t, 2>> entity6;// = _readEntityIDFile(binFilePath + "entityIdList_4042.bin"); //4042
+
 	//for (int i = 0; i < entity1.size(); ++i)
 	//{
 	//	bool findFlag = false;
@@ -314,7 +316,6 @@ static void _test3()
 	//		cout << entity1[i][0] << "-" << entity1[i][1] << endl; // 6509 - 6134
 	//	}
 	//}
-
 
 	cout << "findFlag extra entityid pair:" << endl;
 	for (int i = 0; i < entity6.size(); ++i)
@@ -343,8 +344,9 @@ static void _test4()
 {
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> triRec;
 
-	std::vector<InterTriInfo> triInfo1=read_InterTriInfo(binFilePath + "interTriInfo_4027.bin");
-	std::vector<InterTriInfo> triInfo2=read_InterTriInfo(binFilePath + "interTriInfo_4028.bin"); //more
+	std::vector<InterTriInfo> triInfo1 = read_InterTriInfo(binFilePath + "interTriInfo_4027.bin");
+	std::vector<InterTriInfo> triInfo2 = read_InterTriInfo(binFilePath + "interTriInfo_4042.bin"); //more
+	std::vector<InterTriInfo> triInfo3 = read_InterTriInfo(binFilePath + "interTriInfo_4042.bin");
 	//find difference
 	for (int i = 0; i < triInfo2.size(); ++i)
 	{
@@ -371,11 +373,13 @@ static void _test4()
 	1935, 1903
 	2153, 2133
 	2255, 2243
+
 	2418, 2386
 	2636, 2616
 	2901, 2869
 	3119, 3099
 	3384, 3352
+
 	3599, 3579
 	3864, 3832
 	4080, 4060
@@ -384,18 +388,36 @@ static void _test4()
 	*/
 	for (auto& iter : triRec)
 	{
-		bool isInter = isTwoTrianglesIntersectSAT(iter[0], iter[1]);
+		bool isInter0 = isTwoTrianglesIntersectSAT(iter[0], iter[1]);
 		bool isInter1 = isTwoTrianglesIntersectEIT(iter[0], iter[1]);
 		bool isInter2 = isTwoTrianglesIntersectPIT(iter[0], iter[1]);
 		cout << endl;
 	}
+	bool isInter0 = isTwoTrianglesIntersectSAT(triRec.back()[0], triRec.back()[1]);
+	Vector3d triA_0(4934991.0849248841, -380736.84932345786, -216.33004252886147);
+	Vector3d triA_1(4934991.0849241894, -380719.84932345781, -216.33004252886150);
+	Vector3d triA_2(4934984.3686963469, -380736.84932373225, -213.09567733115546);
+	Vector3d triB_0(4934994.8122385293, -382890.18308486621, -217.00000000000003);
+	Vector3d triB_1(4934994.8121505287, -380736.84932330565, -217.00000000000003);
+	Vector3d triB_2(4934988.3065321781, -380736.84932357143, -215.70595205269194);
+	double d0 = getTrianglesDistance(P, Q, { triA_0 ,triA_2 }, { triB_1 ,triB_2 });
+
+	double er = (triA_2 - triA_0).cross(triB_1 - triA_0).dot(triB_2 - triA_0);
+
+	Triangle triA = { triA_0, triA_1, triA_2 };
+	Triangle triB = { triB_0, triB_1, triB_2 };
+	double d1 = getTrianglesDistanceSAT(triA, triB);
+
+	auto pnt = getTwoTrianglesNearestPoints(triA, triB);
+	auto pnt2 = getTwoTrianglesIntersectPoints(triA, triB);
+
 
 	cout << "return 0" << endl;
 }
 
+//读取二进制mesh
 static void _test5()
 {
-	//读取二进制mesh
 	//std::vector<ModelMesh> meshs = _read_ModelMesh(filename + "cvtMeshVct_5233.bin");
 	//std::vector<ModelMesh> meshs = _read_ModelMesh(filename + "cvtMeshVct_6509_6134.bin");
 	std::vector<ModelMesh> meshs0 = read_ModelMesh(binFilePath + "cvtMeshVct_1.bin");
@@ -457,7 +479,7 @@ static void _test6()
 	ModelMesh meshA = meshs[0];
 	ModelMesh meshB = meshs[1];
 
-	bool b0 = isPointInsidePolyhedron(Vector3d(150, 50, 50), meshA.vbo_, meshA.ibo_);
+	RelationOfPointAndMesh b0 = isPointInsidePolyhedron(Vector3d(150, 50, 50), meshA.vbo_, meshA.ibo_);
 
 	Vector3d df = getPenetrationDepthOfTwoMeshs(meshA, meshB);
 	Vector3d di = getPenetrationDepthOfTwoMeshs(meshB, meshA);

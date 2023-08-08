@@ -7,6 +7,19 @@ enum class RelationOfPointAndMesh : int
 	OUTER,
 };
 
+enum class RelationOfTwoMesh : int
+{
+	SEPARATE = 0,
+	INTRUSIVE, //d>0
+	CONTACT_OUTER, //d==0
+	INSEDE_AINB, //total inside
+	INSEDE_AINB_CONT, // partly cont 
+	INSEDE_AINB_FIT, //all vertex cont
+	INSEDE_BINA,
+	INSEDE_BINA_CONT,
+	INSEDE_BINA_FIT,
+};
+
 namespace psykronix
 {
 	// polyhedron
@@ -23,5 +36,6 @@ namespace psykronix
 
 // collision detection
 DLLEXPORT std::array<std::vector<size_t>, 2> getReducedIntersectTrianglesOfMesh(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance, const Eigen::Affine3d& matrix);
-DLLEXPORT bool isTwoMeshsIntersectClashHard(const ModelMesh& mesh_a, const ModelMesh& mesh_b);
-DLLEXPORT std::tuple<double, std::array<size_t, 2>> getTwoMeshsDistanceClashSoft(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance);
+DLLEXPORT bool isTwoMeshsIntersectSAT(const ModelMesh& mesh_a, const ModelMesh& mesh_b);
+DLLEXPORT RelationOfTwoMesh getTwoMeshsIntersectRelation(const ModelMesh& mesh_a, const ModelMesh& mesh_b);
+DLLEXPORT std::tuple<double, std::array<size_t, 2>> getTwoMeshsDistanceSAT(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance);
