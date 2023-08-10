@@ -345,7 +345,7 @@ static void _test4()
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> triRec;
 
 	std::vector<InterTriInfo> triInfo1 = read_InterTriInfo(binFilePath + "interTriInfo_4027.bin");
-	std::vector<InterTriInfo> triInfo2 = read_InterTriInfo(binFilePath + "interTriInfo_4042.bin"); //more
+	std::vector<InterTriInfo> triInfo2 = read_InterTriInfo(binFilePath + "interTriInfo_4034.bin"); //more
 	std::vector<InterTriInfo> triInfo3 = read_InterTriInfo(binFilePath + "interTriInfo_4042.bin");
 	//find difference
 	for (int i = 0; i < triInfo2.size(); ++i)
@@ -384,14 +384,23 @@ static void _test4()
 	3864, 3832
 	4080, 4060
 	4478, 4446
-	6509, 6134
+	6509, 6134 //min
+
+	//inside
+	1418, 1417
+	1910, 1909
+	2393, 2392
+	2876, 2875
+	3359, 3358
+	3839, 3838
+	4453, 4452
 	*/
 	for (auto& iter : triRec)
 	{
 		bool isInter0 = isTwoTrianglesIntersectSAT(iter[0], iter[1]);
 		bool isInter1 = isTwoTrianglesIntersectEIT(iter[0], iter[1]);
 		bool isInter2 = isTwoTrianglesIntersectPIT(iter[0], iter[1]);
-		cout << endl;
+		//cout << endl;
 	}
 	bool isInter0 = isTwoTrianglesIntersectSAT(triRec.back()[0], triRec.back()[1]);
 	Vector3d triA_0(4934991.0849248841, -380736.84932345786, -216.33004252886147);

@@ -8,13 +8,11 @@ using namespace psykronix;
 #define USING_METHOD_SAT
 //#define USING_ACCURATE_NORMALIZED
 //#define USING_THRESHOLD_GEOMETRIC // to process collinar and coplanar
-static constexpr double eps = FLT_EPSILON; //1e-7
-static constexpr double _eps = -FLT_EPSILON;
-static Eigen::Vector3d gVecNaN(std::nan("0"), std::nan("0"), std::nan("0"));
 
 //--------------------------------------------------------------------------------------------------
 //  triangle
 //--------------------------------------------------------------------------------------------------
+
 //#ifdef STATISTIC_DATA_COUNT
 std::atomic<size_t> getTriangleBoundC = 0, isTwoTrianglesInter = 0, getTriDistC = 0, isTriangleBoundC = 0,
 count_pointInTri = 0, count_edgeCrossTri = 0, count_segCrossTri = 0, count_across = 0,
@@ -42,11 +40,11 @@ bool psykronix::isPointInTriangle(const Vector2d& point, const std::array<Vector
 #ifdef USING_THRESHOLD_GEOMETRIC
 	double axisz = (p1.x() - p0.x()) * (p2.y() - p0.y()) - (p2.x() - p0.x()) * (p1.y() - p0.y());
 	return !(axisz * ((p1.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p1.y() - p0.y()) < _eps) ||//bool isLeftA
-			axisz * ((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y()) < _eps) || //bool isLeftB
-			axisz * ((p0.x() - p2.x()) * (point.y() - p2.y()) - (point.x() - p2.x()) * (p0.y() - p2.y()) < _eps)); //bool isLeftC
+		axisz * ((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y()) < _eps) || //bool isLeftB
+		axisz * ((p0.x() - p2.x()) * (point.y() - p2.y()) - (point.x() - p2.x()) * (p0.y() - p2.y()) < _eps)); //bool isLeftC
 #else
 	double axisz = (p1.x() - p0.x()) * (p2.y() - p0.y()) - (p2.x() - p0.x()) * (p1.y() - p0.y());
-	return  
+	return
 		0.0 <= axisz * ((p1.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p1.y() - p0.y())) &&
 		0.0 <= axisz * ((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y())) &&
 		0.0 <= axisz * ((p0.x() - p2.x()) * (point.y() - p2.y()) - (point.x() - p2.x()) * (p0.y() - p2.y()));
@@ -59,13 +57,14 @@ bool psykronix::isPointInTriangle(const Vector3d& point, const std::array<Vector
 #ifdef STATISTIC_DATA_COUNT
 	count_pointInTri++;
 #endif
-	//if (point.x() < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
-	//	point.x() > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) || 
-	//	point.y() < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) || 
-	//	point.y() > std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
-	//	point.z() < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) || 
-	//	point.z() > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]))
-	//	return false; // random data test fast
+	// precision problem, cause misjudge without tolerance
+	//if (point.x() < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) /*+ _eps*/ ||
+	//	point.x() > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) /*+ eps */ ||
+	//	point.y() < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) /*+ _eps*/ || 
+	//	point.y() > std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) /*+ eps */ ||
+	//	point.z() < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) /*+ _eps*/ || 
+	//	point.z() > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]) /*+ eps */ )
+	//	return false; // random data test fast 10% about
 #ifdef USING_ACCURATE_NORMALIZED
 	Vector3d vecZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]).normalized();// using isLeft test
 #else
@@ -74,10 +73,10 @@ bool psykronix::isPointInTriangle(const Vector3d& point, const std::array<Vector
 #ifdef USING_THRESHOLD_GEOMETRIC
 	// 3D triangle, input point must coplanar
 	return !((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(vecZ) < _eps || //bool isNotLeftA
-			(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < _eps || //bool isNotLeftB
-			(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < _eps); //bool isNotLeftC
+		(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < _eps || //bool isNotLeftB
+		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < _eps); //bool isNotLeftC
 #else
-	return 
+	return
 		0.0 <= (trigon[1] - trigon[0]).cross(point - trigon[0]).dot(vecZ) && //bool isLeftA
 		0.0 <= (trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) && //bool isLeftB
 		0.0 <= (trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ);	 //bool isLeftC
@@ -132,10 +131,10 @@ bool psykronix::isTwoSegmentsIntersect(const std::array<Vector2d, 2>& segmA, con
 	// (segmB[0] - segmA[0])x(segmA[1] - segmA[0])*(segmA[1] - segmA[0])x(segmB[1] - segmA[0])>=0
 	// (segmA[0] - segmB[0])x(segmB[1] - segmB[0])*(segmB[1] - segmB[0])x(segmA[1] - segmB[0])>=0
 #ifdef USING_THRESHOLD_GEOMETRIC
-	bool isBetweenB = ((segmB[0] - segmA[0]).x() * (segmA[1] - segmA[0]).y() - (segmA[1] - segmA[0]).x() * (segmB[0] - segmA[0]).y()) * 
-					  ((segmA[1] - segmA[0]).x() * (segmB[1] - segmA[0]).y() - (segmB[1] - segmA[0]).x() * (segmA[1] - segmA[0]).y()) > _eps;
+	bool isBetweenB = ((segmB[0] - segmA[0]).x() * (segmA[1] - segmA[0]).y() - (segmA[1] - segmA[0]).x() * (segmB[0] - segmA[0]).y()) *
+		((segmA[1] - segmA[0]).x() * (segmB[1] - segmA[0]).y() - (segmB[1] - segmA[0]).x() * (segmA[1] - segmA[0]).y()) > _eps;
 	bool isBetweenA = ((segmA[0] - segmB[0]).x() * (segmB[1] - segmB[0]).y() - (segmB[1] - segmB[0]).x() * (segmA[0] - segmB[0]).y()) *
-					  ((segmB[1] - segmB[0]).x() * (segmA[1] - segmB[0]).y() - (segmA[1] - segmB[0]).x() * (segmB[1] - segmB[0]).y()) > _eps;
+		((segmB[1] - segmB[0]).x() * (segmA[1] - segmB[0]).y() - (segmA[1] - segmB[0]).x() * (segmB[1] - segmB[0]).y()) > _eps;
 	return isBetweenB && isBetweenA;
 #else
 	return // double point on line judge
@@ -165,10 +164,10 @@ bool psykronix::isTwoSegmentsIntersect(const std::array<Vector3d, 2>& segmA, con
 		return false;
 #ifdef USING_THRESHOLD_GEOMETRIC
 	return !((segmB[0] - segmA[0]).cross(segmA[1] - segmA[0]).dot((segmA[1] - segmA[0]).cross(segmB[1] - segmA[0])) < _eps || //double separate
-			(segmA[0] - segmB[0]).cross(segmB[1] - segmB[0]).dot((segmB[1] - segmB[0]).cross(segmA[1] - segmB[0])) < _eps);
+		(segmA[0] - segmB[0]).cross(segmB[1] - segmB[0]).dot((segmB[1] - segmB[0]).cross(segmA[1] - segmB[0])) < _eps);
 #else
 	return 0.0 <= (segmB[0] - segmA[0]).cross(segmA[1] - segmA[0]).dot((segmA[1] - segmA[0]).cross(segmB[1] - segmA[0])) &&
-			0.0 <= (segmA[0] - segmB[0]).cross(segmB[1] - segmB[0]).dot((segmB[1] - segmB[0]).cross(segmA[1] - segmB[0]));
+		0.0 <= (segmA[0] - segmB[0]).cross(segmB[1] - segmB[0]).dot((segmB[1] - segmB[0]).cross(segmA[1] - segmB[0]));
 #endif
 }
 
@@ -201,11 +200,11 @@ bool psykronix::isSegmentCrossTriangle(const std::array<Vector3d, 2>& segment, c
 	if ((dot0 > eps && dot1 > eps && dot2 > eps) || (dot0 < _eps && dot1 < _eps && dot2 < _eps))
 		return false; //+-*x< 0,6,3,2,4.5
 	// double straddling test x3
-	if (isTwoSegmentsIntersect(segment, { trigon[0], trigon[1]}))
+	if (isTwoSegmentsIntersect(segment, { trigon[0], trigon[1] }))
 		return true;
-	if (isTwoSegmentsIntersect(segment, { trigon[1], trigon[2]}))
+	if (isTwoSegmentsIntersect(segment, { trigon[1], trigon[2] }))
 		return true;
-	if (isTwoSegmentsIntersect(segment, { trigon[2], trigon[0]}))
+	if (isTwoSegmentsIntersect(segment, { trigon[2], trigon[0] }))
 		return true;
 	return false;
 	//bool edgea2segm = ((segment[0] - trigon[0]).cross(trigon[1] - trigon[0])).dot((segment[1] - trigon[0]).cross(trigon[1] - trigon[0])) < eps;
@@ -584,49 +583,37 @@ std::tuple<Vector3d, double> psykronix::getTriangleBoundingCircle(const std::arr
 
 bool psykronix::isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& segment, const std::array<Vector3d, 3>& trigon)
 {
-	Vector3d vecZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
-#ifndef USING_METHOD_SAT
-	double onPlaneS = (vecZ.dot(segment[0] - trigon[0]));
-	double onPlaneE = (vecZ.dot(segment[1] - trigon[0]));
-	if (onPlaneS * onPlaneE > 0.0)//include point on plane(dot==0)
+	//pre-box
+	if (std::max(segment[0][0], segment[1][0]) < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+		std::max(segment[0][0], segment[1][0]) > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+		std::max(segment[0][1], segment[1][1]) < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
+		std::max(segment[0][1], segment[1][1]) > std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
+		std::max(segment[0][2], segment[1][2]) < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
+		std::max(segment[0][2], segment[1][2]) > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]))
 		return false;
+	Vector3d vecZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
 	Vector3d vecSeg = segment[1] - segment[0];
-	//point on plane
-	if (onPlaneS != 0.0)
-	{
-		double dotA = (trigon[0] - segment[0]).cross(trigon[1] - segment[0]).dot(vecSeg);
-		double dotB = (trigon[1] - segment[0]).cross(trigon[2] - segment[0]).dot(vecSeg);
-		double dotC = (trigon[2] - segment[0]).cross(trigon[0] - segment[0]).dot(vecSeg);
-		return (dotA <= 0.0 && dotB <= 0.0 && dotC <= 0.0) || (dotA >= 0.0 && dotB >= 0.0 && dotC >= 0.0);
-	}
-	if (onPlaneE != 0.0)
-	{
-		double dotA = (trigon[0] - segment[1]).cross(trigon[1] - segment[1]).dot(vecSeg);
-		double dotB = (trigon[1] - segment[1]).cross(trigon[2] - segment[1]).dot(vecSeg);
-		double dotC = (trigon[2] - segment[1]).cross(trigon[0] - segment[1]).dot(vecSeg);
-		return (dotA <= 0.0 && dotB <= 0.0 && dotC <= 0.0) || (dotA >= 0.0 && dotB >= 0.0 && dotC >= 0.0);
-	}
-	return isSegmentCrossTriangle(segment, trigon);
-#endif
-	if (fabs(vecZ.dot(segment[0] - trigon[0])) < eps && abs(vecZ.dot(segment[1] - trigon[0])) < eps) // 2D-SAT, coplanar
+#ifdef USING_METHOD_SAT
+	double minA, maxA, projection, dotB0, dotB1;
+	if (fabs(vecZ.dot(segment[0] - trigon[0])) < eps && fabs(vecZ.dot(segment[1] - trigon[0])) < eps)// 2D-SAT, coplanar
 	{
 		std::array<Eigen::Vector3d, 4> axes = { {
-				vecZ.cross(segment[1] - segment[0]),
+				vecZ.cross(vecSeg),
 				vecZ.cross(trigon[1] - trigon[0]),
 				vecZ.cross(trigon[2] - trigon[1]),
 				vecZ.cross(trigon[0] - trigon[2]) } };
 		for (const auto& axis : axes)
 		{
-			double minA = DBL_MAX;
-			double maxA = -DBL_MAX;
+			minA = DBL_MAX;
+			maxA = -DBL_MAX;
 			for (const auto& vertex : trigon)
 			{
-				double projection = vertex.dot(axis);
+				projection = vertex.dot(axis);
 				minA = std::min(minA, projection);
 				maxA = std::max(maxA, projection);
 			}
-			double dotB0 = segment[0].dot(axis);
-			double dotB1 = segment[1].dot(axis);
+			dotB0 = segment[0].dot(axis);
+			dotB1 = segment[1].dot(axis);
 			if (maxA < std::min(dotB0, dotB1) || std::max(dotB0, dotB1) < minA) // absolute zero
 				return false;
 		}
@@ -634,36 +621,51 @@ bool psykronix::isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& s
 	}
 	else // 3D-SAT, not coplanar
 	{
-		Eigen::Vector3d vecSeg = segment[1] - segment[0];
-		std::array<Eigen::Vector3d, 3> edges = { trigon[1] - trigon[0],
-											   trigon[2] - trigon[1],
-											   trigon[0] - trigon[2] };
-		std::array<Eigen::Vector3d, 8> axes = { {
-				edges[0],
-				edges[1],
-				edges[2],
-				vecZ, //add
-				vecSeg,
-				vecSeg.cross(edges[0]),
-				vecSeg.cross(edges[1]),
-				vecSeg.cross(edges[2])} };
+		std::array<Eigen::Vector3d, 4> axes = { {
+				vecZ,
+				vecSeg.cross(trigon[1] - trigon[0]),
+				vecSeg.cross(trigon[2] - trigon[1]),
+				vecSeg.cross(trigon[0] - trigon[2])} };
 		for (const auto& axis : axes)
 		{
-			double minA = DBL_MAX;
-			double maxA = -DBL_MAX;
+			minA = DBL_MAX;
+			maxA = -DBL_MAX;
 			for (const auto& vertex : trigon)
 			{
-				double projection = vertex.dot(axis);
+				projection = vertex.dot(axis);
 				minA = std::min(minA, projection);
 				maxA = std::max(maxA, projection);
 			}
-			double dotB0 = segment[0].dot(axis);
-			double dotB1 = segment[1].dot(axis);
+			dotB0 = segment[0].dot(axis);
+			dotB1 = segment[1].dot(axis);
 			if (maxA < std::min(dotB0, dotB1) || std::max(dotB0, dotB1) < minA) // absolute zero
 				return false;
 		}
 		return true;
 	}
+#else
+	double onPlaneS = (vecZ.dot(segment[0] - trigon[0]));
+	double onPlaneE = (vecZ.dot(segment[1] - trigon[0]));
+	if (onPlaneS * onPlaneE > 0.0)//include point on plane(dot==0)
+		return false;
+	//point on plane
+	double dotA, dotB, dotC;
+	if (onPlaneS != 0.0)
+	{
+		dotA = (trigon[0] - segment[0]).cross(trigon[1] - segment[0]).dot(vecSeg);
+		dotB = (trigon[1] - segment[0]).cross(trigon[2] - segment[0]).dot(vecSeg);
+		dotC = (trigon[2] - segment[0]).cross(trigon[0] - segment[0]).dot(vecSeg);
+		return (dotA <= 0.0 && dotB <= 0.0 && dotC <= 0.0) || (dotA >= 0.0 && dotB >= 0.0 && dotC >= 0.0);
+	}
+	if (onPlaneE != 0.0)
+	{
+		dotA = (trigon[0] - segment[1]).cross(trigon[1] - segment[1]).dot(vecSeg);
+		dotB = (trigon[1] - segment[1]).cross(trigon[2] - segment[1]).dot(vecSeg);
+		dotC = (trigon[2] - segment[1]).cross(trigon[0] - segment[1]).dot(vecSeg);
+		return (dotA <= 0.0 && dotB <= 0.0 && dotC <= 0.0) || (dotA >= 0.0 && dotB >= 0.0 && dotC >= 0.0);
+	}
+	return isSegmentCrossTriangle(segment, trigon);
+#endif
 }
 
 // whlie ray across same edge of two triangles
@@ -678,35 +680,33 @@ bool psykronix::isPointRayAcrossTriangleSAT(const Eigen::Vector3d& point, const 
 		point.y() < std::min(std::min(trigon[0].y(), trigon[1].y()), trigon[2].y()))
 		return false; // range box judge
 	//using SAT
-	//second pre-process (2D, point-in-triangle)
-	if (!isPointInTriangle(point, trigon))
-		return false;
-	Vector3d rayPt(point.x(), point.y(), rayZ);
-	Vector3d axisZ(0, 0, 1);
+	Vector3d rayPt(point.x(), point.y(), rayZ), axisZ(0, 0, 1);
 	std::array<Eigen::Vector3d, 3> edges = { trigon[1] - trigon[0],
 										   trigon[2] - trigon[1],
 										   trigon[0] - trigon[2] };
-	std::array<Eigen::Vector3d, 8> axes = { { //order matters speed
-		axisZ.cross(edges[0]),
-		axisZ.cross(edges[1]),
-		axisZ.cross(edges[2]),
-		axisZ,
-		edges[0],
-		edges[1],
-		edges[2],
-		edges[0].cross(edges[1]) } };//add
+	Vector3d normal = edges[0].cross(edges[1]);
+	std::array<Eigen::Vector3d, 7> axes = { { //order matters speed
+			//axisZ, // using pre-box
+			axisZ.cross(edges[0]),
+			axisZ.cross(edges[1]),
+			axisZ.cross(edges[2]),
+			normal,
+			normal.cross(edges[0]),
+			normal.cross(edges[1]),
+			normal.cross(edges[2]) } };//add
+	double minTri, maxTri, projection, dotP, dotR;
 	for (const auto& axis : axes) //fast than index
 	{
-		double minTri = DBL_MAX;
-		double maxTri = -DBL_MAX;
+		minTri = DBL_MAX;
+		maxTri = -DBL_MAX;
 		for (const auto& vertex : trigon) //fast than list
 		{
-			double projection = axis.dot(vertex);
+			projection = axis.dot(vertex);
 			minTri = std::min(minTri, projection);
 			maxTri = std::max(maxTri, projection);
 		}
-		double dotP = axis.dot(point);
-		double dotR = axis.dot(rayPt);
+		dotP = axis.dot(point);
+		dotR = axis.dot(rayPt);
 #ifdef USING_THRESHOLD_CUSTOMIZE
 		double minRay = std::min(axis.dot(point), axis.dot(rayPt));
 		double maxRay = std::max(axis.dot(point), axis.dot(rayPt));
@@ -717,6 +717,7 @@ bool psykronix::isPointRayAcrossTriangleSAT(const Eigen::Vector3d& point, const 
 			return false;
 	}
 	return true;
+	// another method, judge 2D point in triangle, point under plane
 }
 
 // for soft clash
@@ -763,6 +764,27 @@ double psykronix::getDistanceOfPointAndPlaneINF(const Vector3d& point, const std
 	return (k * normal).squaredNorm();
 }
 
+//Vector3d getIntersectPointOfPointAndLineMIN(const Vector3d& point, const std::array<Vector3d, 2>& segm)
+//{
+//	return {};
+//}
+//Vector3d getIntersectPointOfPointAndPlaneMIN(const Vector3d& point, const std::array<Vector3d, 3>& plane)
+//{
+//	return {};
+//}
+//Segment getIntersectPointsOfTwoLineMIN(const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)
+//{
+//	return {};
+//}
+//Vector3d getIntersectPointOfLineAndPlaneMIN(const std::array<Vector3d, 2>& segm, const std::array<Vector3d, 3>& plane)
+//{
+//	return {};
+//}
+//Segment getIntersectPointsOfTwoPlaneMIN(const std::array<Vector3d, 3>& planeA, const std::array<Vector3d, 3>& planeB)
+//{
+//	return {};
+//}
+
 bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {
 	std::array<Eigen::Vector3d, 3> edgesA = { triA[1] - triA[0],
@@ -803,9 +825,9 @@ bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, cons
 	double minA, maxA, minB, maxB, projection;
 	for (const auto& axis : axes) //fast than index
 	{
-		minA = DBL_MAX; 
+		minA = DBL_MAX;
 		maxA = -DBL_MAX;
-		minB = DBL_MAX; 
+		minB = DBL_MAX;
 		maxB = -DBL_MAX;
 		for (const auto& vertex : triA) //fast than list
 		{
@@ -1244,7 +1266,7 @@ std::array<Eigen::Vector3d, 2> getTwoTrianglesNearestPoints(const std::array<Eig
 		if (dtemp < dmin)
 		{
 			dmin = dtemp;
-			res = { local, vertex};
+			res = { local, vertex };
 		}
 		for (const auto& edge : edgesA) // vertex to edge
 		{

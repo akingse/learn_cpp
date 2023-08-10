@@ -50,8 +50,8 @@
 //#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 
 // my custom
-typedef std::array<Eigen::Vector3d, 3> Triangle;
 typedef std::array<Eigen::Vector3d, 2> Segment;
+typedef std::array<Eigen::Vector3d, 3> Triangle;
 typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>> Polyhedron;
 #include "Project1_API.h"
 #include "my_geometry.h"			//export
@@ -63,7 +63,7 @@ typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>
 #define DLLEXPORT __declspec(dllexport)
 #endif
 //#define STATISTIC_DATA_COUNT
-//#define USING_FLATBUFFERS_SERIALIZATION
+#define USING_FLATBUFFERS_SERIALIZATION
 
 #include "my_class_fun.h"		
 #include "calculateTriangle.h"		//DLL-API

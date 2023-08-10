@@ -35,7 +35,7 @@ namespace psykronix
 }
 
 // collision detection
-//DLLEXPORT std::array<std::vector<size_t>, 2> getReducedIntersectTrianglesOfMesh(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance, const Eigen::Affine3d& matrix);
-DLLEXPORT bool isTwoMeshsIntersectSAT(const ModelMesh& mesh_a, const ModelMesh& mesh_b);
-DLLEXPORT RelationOfTwoMesh getTwoMeshsIntersectRelation(const ModelMesh& mesh_a, const ModelMesh& mesh_b);
-DLLEXPORT std::tuple<double, std::array<size_t, 2>> getTwoMeshsDistanceSAT(const ModelMesh& mesh_a, const ModelMesh& mesh_b, double tolerance);
+//DLLEXPORT std::array<std::vector<size_t>, 2> getReducedIntersectTrianglesOfMesh(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance, const Eigen::Affine3d& matrix);
+DLLEXPORT bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB);
+DLLEXPORT RelationOfTwoMesh getTwoMeshsIntersectRelation(const ModelMesh& meshA, const ModelMesh& meshB);
+DLLEXPORT std::tuple<double, std::array<size_t, 2>> getTwoMeshsDistanceSAT(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance);

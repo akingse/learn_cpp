@@ -6,8 +6,6 @@ using namespace Eigen;
 using namespace psykronix;
 #undef max
 #undef min
-static constexpr double eps = 1e-6; //DBL_EPSILON
-static constexpr double _eps = -eps;
 
 static Eigen::Vector3d P(std::nan("0"), std::nan("0"), std::nan("0"));
 static Eigen::Vector3d Q(std::nan("0"), std::nan("0"), std::nan("0"));
