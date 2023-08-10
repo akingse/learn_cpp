@@ -485,28 +485,36 @@ RelationOfTwoMesh getTwoMeshsIntersectRelation(const ModelMesh& mesh_a, const Mo
 	bool isContact = false; // vertex or edge or face contact
 	bool isIntrusive = false;
 	std::map<size_t, bool> vertexAINB, vertexBINA;
-	std::vector<size_t> faceInterA, faceInterB;
+	std::set<size_t> faceA, faceB; // intersect and inside // or using vector
 	set<size_t> vertexSetA, vertexSetB;
 	if (!indexAB[0].empty() && !indexAB[1].empty())
 	{
+		//for (const auto& iA : indexAB[0])
+		//{
+		//	vertexAINB.insert({ mesh_a.ibo_[iA][0], false });
+		//	vertexAINB.insert({ mesh_a.ibo_[iA][1], false });
+		//	vertexAINB.insert({ mesh_a.ibo_[iA][2], false });
+		//}
+		//for (const auto& iB : indexAB[1])
+		//{
+		//	vertexAINB.insert({ mesh_b.ibo_[iB][0], false });
+		//	vertexAINB.insert({ mesh_b.ibo_[iB][1], false });
+		//	vertexAINB.insert({ mesh_b.ibo_[iB][2], false });
+		//}
+
 		for (const auto& iA : indexAB[0])
 		{
-			vertexAINB.insert({ mesh_a.ibo_[iA][0], false });
-			vertexAINB.insert({ mesh_a.ibo_[iA][1], false });
-			vertexAINB.insert({ mesh_a.ibo_[iA][2], false });
-		}
+			if (isPointInsidePolyhedronCEIL(mesh_a.pose_ * mesh_a.vbo_[mesh_a.ibo_[iA][0]], mesh_b) ||
+				isPointInsidePolyhedronCEIL(mesh_a.pose_ * mesh_a.vbo_[mesh_a.ibo_[iA][1]], mesh_b) ||
+				isPointInsidePolyhedronCEIL(mesh_a.pose_ * mesh_a.vbo_[mesh_a.ibo_[iA][2]], mesh_b))
+				faceA.insert(iA);
+		}		
 		for (const auto& iB : indexAB[1])
 		{
-			vertexAINB.insert({ mesh_b.ibo_[iB][0], false });
-			vertexAINB.insert({ mesh_b.ibo_[iB][1], false });
-			vertexAINB.insert({ mesh_b.ibo_[iB][2], false });
-		}
-
-		for (const auto& iA : indexAB[0])
-		{
-
-			if (RelationOfPointAndMesh::OUTER != isPointInsidePolyhedronRZ(mesh_a.pose_ * mesh_a.vbo_[mesh_a.ibo_[iA][0]], mesh_b))
-				faceInterA.push_back(iA);
+			if (isPointInsidePolyhedronCEIL(mesh_b.pose_ * mesh_b.vbo_[mesh_b.ibo_[iB][0]], mesh_a) ||
+				isPointInsidePolyhedronCEIL(mesh_b.pose_ * mesh_b.vbo_[mesh_b.ibo_[iB][1]], mesh_a) ||
+				isPointInsidePolyhedronCEIL(mesh_b.pose_ * mesh_b.vbo_[mesh_b.ibo_[iB][2]], mesh_a))
+				faceB.insert(iB);
 		}
 
 
@@ -529,11 +537,11 @@ RelationOfTwoMesh getTwoMeshsIntersectRelation(const ModelMesh& mesh_a, const Mo
 #endif  
 					continue;
 				}
-				if (!isTwoTrianglesIntersectSAT(triA, triB))
+				if (!isTwoTrianglesIntersectSAT(triA, triB)) //separate
 					continue;
 				//intersect
 				isContact = true;
-				if ((triA[1] - triA[0]).cross(triA[2] - triA[0]).cross((triB[1] - triB[0]).cross(triB[2] - triB[0])).isZero(eps)) //coplanar
+				if ((triA[1] - triA[0]).cross(triA[2] - triA[0]).cross((triB[1] - triB[0]).cross(triB[2] - triB[0])).isZero(eps)) // intersect-coplanar
 				{
 #ifdef STATISTIC_DATA_COUNT
 					count_trigon_coplanar++;
@@ -672,33 +680,37 @@ std::tuple<double, std::array<size_t, 2>> getTwoMeshsDistanceSAT(const ModelMesh
 //---------------------------------------------------------------------------
 
 //using method SAT
-Eigen::Vector3d _getPenetrationDepthOfTwoConvex(const ModelMesh& meshA, const ModelMesh& meshB)
+//Eigen::Vector3d _getPenetrationDepthOfTwoConvex(const ModelMesh& meshA, const ModelMesh& meshB)
+Eigen::Vector3d getPenetrationDepthOfTwoConvex(const ModelMesh& meshA, const set<size_t>& faceA, const ModelMesh& meshB, const set<size_t>& faceB)
 {
 	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
 	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
 	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
 	const std::vector<std::array<int, 3>>& iboB = meshB.ibo_;
+	const Eigen::Affine3d& matA = meshA.pose_;
+	const Eigen::Affine3d& matB = meshB.pose_;
 	double dminA = DBL_MAX, dminB = DBL_MAX;
 	Eigen::Vector3d direction, normal;
 	// the minimum distance mush on the direction of face normal
 	bool isFixedFaceA = true;
 	double minA, maxA, minB, maxB, projection;//refresh min and max
-	for (const auto& iterA : iboA) // iterate every face
+	std::array<size_t, 2> indexAB;
+	for (const auto& iterA : faceA) // iterate every face
 	{
 		minA = DBL_MAX;
 		maxA = -DBL_MAX;
 		minB = DBL_MAX;
 		maxB = -DBL_MAX;
-		normal = (vboA[iterA[1]] - vboA[iterA[0]]).cross(vboA[iterA[2]] - vboA[iterA[0]]).normalized(); //pose is same
+		normal = (vboA[iboA[iterA][1]] - vboA[iboA[iterA][0]]).cross(vboA[iboA[iterA][2]] - vboA[iboA[iterA][0]]).normalized(); //pose is same
 		for (const auto& vertexA : vboA)
 		{
-			projection = normal.dot(meshA.pose_ * vertexA);
+			projection = normal.dot(matA * vertexA);
 			minA = std::min(minA, projection);
 			maxA = std::max(maxA, projection);
 		}
 		for (const auto& vertexB : vboB)
 		{
-			projection = normal.dot(meshB.pose_ * vertexB);
+			projection = normal.dot(matB * vertexB);
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
@@ -706,26 +718,27 @@ Eigen::Vector3d _getPenetrationDepthOfTwoConvex(const ModelMesh& meshA, const Mo
 		{
 			dminA = std::min(maxA - minB, maxB - minA);
 			direction = normal;
+			indexAB = { iterA ,0 };
 			if (maxA - minB > maxB - minA)
 				isFixedFaceA = false;
 		}
 	}
-	for (const auto& iterB : iboB) // iterate every face
+	for (const auto& iterB : faceB) // iterate every face
 	{
 		minA = DBL_MAX;
 		maxA = -DBL_MAX;
 		minB = DBL_MAX;
 		maxB = -DBL_MAX;
-		normal = (vboB[iterB[1]] - vboB[iterB[0]]).cross(vboB[iterB[2]] - vboB[iterB[0]]).normalized(); //pose is same
+		normal = (vboB[iboB[iterB][1]] - vboB[iboB[iterB][0]]).cross(vboB[iboB[iterB][2]] - vboB[iboB[iterB][0]]).normalized(); //pose is same
 		for (const auto& vertexA : vboA)
 		{
-			projection = normal.dot(meshA.pose_ * vertexA);
+			projection = normal.dot(matA * vertexA);
 			minA = std::min(minA, projection);
 			maxA = std::max(maxA, projection);
 		}
 		for (const auto& vertexB : vboB)
 		{
-			projection = normal.dot(meshB.pose_ * vertexB);
+			projection = normal.dot(matB * vertexB);
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
@@ -733,6 +746,7 @@ Eigen::Vector3d _getPenetrationDepthOfTwoConvex(const ModelMesh& meshA, const Mo
 		{
 			dminB = std::min(maxA - minB, maxB - minA);
 			direction = normal;
+			indexAB = { 0 , iterB };
 			if (maxA - minB < maxB - minA)
 				isFixedFaceA = false;
 		}
@@ -805,13 +819,12 @@ Eigen::Vector3d psykronix::getPenetrationDepthOfTwoMeshs(const ModelMesh& meshA,
 	//must intersect
 	if (meshA.convex_ && meshB.convex_) // already intrusive
 	{
-		return _getPenetrationDepthOfTwoConvex(meshA, meshB);
+		//return getPenetrationDepthOfTwoConvex(meshA, meshB);
 	}
 	Eigen::Vector3d direction = gVecNaN;
 	// V==null, I!=nul, 
 
 	// V!=null
-
 
 
 	return direction;
