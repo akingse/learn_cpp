@@ -475,12 +475,38 @@ static void _test5()
 
 	//测试一个点遍历所有mesh的效率
 	Vector3d point = Vector3d(rand(), rand(), rand());
+	//Vector3d point = Vector3d(0, 0, 0);
 	startT = clock();
-	for (const auto& iter: meshs_5233)
-	{
-		bool res = isPointInsidePolyhedronAZ(point, iter);
+	bool isIn;
+	int nFace = 0, nVertex = 0;
+	//for (const auto& iter: meshs_5233)
+		//bool res = isPointInsidePolyhedronCEIL(point, iter);
+		//bool res = isPointInsidePolyhedronAZ(point, iter);
 		//RelationOfPointAndMesh res = isPointInsidePolyhedronRZ(point, iter);
+	for (int i = 0; i < meshs_5233.size()/2; ++i)
+	{
+		nFace += meshs_5233[i].ibo_.size(); //1982041  //1031776
+		nVertex += meshs_5233[i].vbo_.size(); //977267  //506709
 	}
+
+//#define TEST_TIME_COST
+#ifdef TEST_TIME_COST
+#pragma omp parallel for // omp optimize
+	for (int i = 0; i < meshs_5233.size()/2; ++i)
+	{
+		for (int j = 0; j < meshs_5233.size()/2; ++j)
+		{
+			if (i <= j)
+				continue;
+			for (const auto& iter : meshs_5233[i].vbo_)
+			{
+				isIn = isPointInsidePolyhedronCEIL(iter, meshs_5233[j]);
+				//isIn = isPointInsidePolyhedronAZ(iter, meshs_5233[j]);
+				//isPointInsidePolyhedronRZ(iter, meshs_5233[j]);
+			}
+		}
+	}
+#endif
 
 	endT = clock();
 	cout << "mesh count=" << meshs0.size() << endl;

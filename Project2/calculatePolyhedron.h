@@ -30,6 +30,7 @@ namespace psykronix
 	DLLEXPORT RelationOfPointAndMesh isPointInsidePolyhedronRZ(const Eigen::Vector3d& point, const ModelMesh& mesh);
 	DLLEXPORT bool isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo);
 	DLLEXPORT bool isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const ModelMesh& mesh);
+	DLLEXPORT bool isPointInsidePolyhedronCEIL(const Eigen::Vector3d& point, const ModelMesh& mesh);
 	DLLEXPORT Eigen::Vector3d getPenetrationDepthOfTwoMeshs(const ModelMesh& meshA, const ModelMesh& meshB);
 
 }

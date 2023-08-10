@@ -259,22 +259,71 @@ bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& _point, const M
 //	return isPointInsidePolyhedronAZ(pointR, mesh.vbo_, mesh.ibo_);
 //}
 
+bool psykronix::isPointInsidePolyhedronCEIL(const Eigen::Vector3d& _point, const ModelMesh& mesh) // more judge
+{
+	Eigen::Vector3d point = mesh.pose_.inverse() * _point;
+	//auto _isPointInTriangle2D = [&](const std::array<Vector3d, 3>& trigon)->bool
+	//{
+	//	if (point.x() > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+	//		point.x() < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+	//		point.y() > std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) || 
+	//		point.y() < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]))
+	//		return false;
+	//	double az = (trigon[1][0] - trigon[0][0]) * (trigon[2][1] - trigon[0][1]) - (trigon[2][0] - trigon[0][0]) * (trigon[1][1] - trigon[0][1]);
+	//	return //when vertical, az==0, always true
+	//		0.0 <= az * ((trigon[1][0] - trigon[0][0]) * (point[1] - trigon[0][1]) - (point[0] - trigon[0][0]) * (trigon[1][1] - trigon[0][1])) &&
+	//		0.0 <= az * ((trigon[2][0] - trigon[1][0]) * (point[1] - trigon[1][1]) - (point[0] - trigon[1][0]) * (trigon[2][1] - trigon[1][1])) &&
+	//		0.0 <= az * ((trigon[0][0] - trigon[2][0]) * (point[1] - trigon[2][1]) - (point[0] - trigon[2][0]) * (trigon[0][1] - trigon[2][1]));
+	//};
+	auto _isPointInTriangle2D = [&](const Eigen::Vector3d& p0, const Eigen::Vector3d& p1, const Eigen::Vector3d& p2)->bool
+	{
+		if (point.x() > std::max(std::max(p0[0], p1[0]), p2[0]) ||
+			point.x() < std::min(std::min(p0[0], p1[0]), p2[0]) ||
+			point.y() > std::max(std::max(p0[1], p1[1]), p2[1]) ||
+			point.y() < std::min(std::min(p0[1], p1[1]), p2[1]) ||
+			point.z() > std::max(std::max(p0[2], p1[2]), p2[2])) //include z
+			return false;
+		double az = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
+		return //when vertical, az==0, always true
+			0.0 <= az * ((p1[0] - p0[0]) * (point[1] - p0[1]) - (point[0] - p0[0]) * (p1[1] - p0[1])) &&
+			0.0 <= az * ((p2[0] - p1[0]) * (point[1] - p1[1]) - (point[0] - p1[0]) * (p2[1] - p1[1])) &&
+			0.0 <= az * ((p0[0] - p2[0]) * (point[1] - p2[1]) - (point[0] - p2[0]) * (p0[1] - p2[1]));
+	};
+	if (!mesh.bounding_.contains(point))
+		return false;
+	// using axisZ
+	Eigen::Vector3d normal;
+	size_t count = 0;
+	double projection;
+	for (const auto& face : mesh.ibo_)
+	{
+		//Triangle trigon = { { mesh.vbo_[face[0]] ,mesh.vbo_[face[1]] ,mesh.vbo_[face[2]] } };
+		const Vector3d& p0 = mesh.vbo_[face[0]];
+		const Vector3d& p1 = mesh.vbo_[face[1]];
+		const Vector3d& p2 = mesh.vbo_[face[2]];
+		if (!_isPointInTriangle2D(p0, p1, p2))
+			continue;
+		normal = (p1 - p0).cross(p2 - p0);
+		if (normal.z() == 0.0) // point-ray through trigon, return true
+		{
+			// point in segment collinear judge 
+			if ((point.x() - p0.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (point.y() - p0.y()) == 0.0)
+				return true;
+			continue; //judge point under segment
+		}
+		projection = normal.dot(point - p0);
+		if (projection == 0.0) //isPointOnTriangleSurface
+			return true; 
+		if (projection * normal.z() < 0.0) // point under plane
+			count++;
+	}
+	return count % 2 == 1;
+}
+
 //--------------------------------------------------------------------------------------------------------
 // mesh
 //--------------------------------------------------------------------------------------------------------
 
-//bool _isNormalVectorOutwardsConvex(const std::array<int, 3>& face, const Eigen::Vector3d& normal,
-//	const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
-//{
-//	// must be Convex Polyhedron, default create normal
-//	//Vector3d normal = (vbo[face[1]] - vbo[face[0]]).cross(vbo[face[2]] - vbo[face[0]]).normalized();
-//	for (size_t i = 0; i < vbo.size(); ++i)
-//	{
-//		if (i == face[0] || i == face[1] || i == face[2] || fabs(normal.dot((vbo[i] - vbo[face[0]]).normalized())) < eps) // self and coplanar
-//			continue;
-//		return normal.dot(vbo[i] - vbo[face[0]]) < 0.0;
-//	}
-//}
 
 Eigen::Affine3d _getRelativeMatrixRectify(const Eigen::Affine3d& matA, const Eigen::Affine3d& matB)
 {
@@ -772,3 +821,4 @@ double getMoveDistanceOfAssignedDirection(const ModelMesh& meshA, const ModelMes
 {
 	return 0;
 }
+
