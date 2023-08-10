@@ -277,6 +277,7 @@ bool psykronix::isPointInsidePolyhedronCEIL(const Eigen::Vector3d& _point, const
 	//};
 	auto _isPointInTriangle2D = [&](const Eigen::Vector3d& p0, const Eigen::Vector3d& p1, const Eigen::Vector3d& p2)->bool
 	{
+		//pre-box
 		if (point.x() > std::max(std::max(p0[0], p1[0]), p2[0]) ||
 			point.x() < std::min(std::min(p0[0], p1[0]), p2[0]) ||
 			point.y() > std::max(std::max(p0[1], p1[1]), p2[1]) ||
@@ -471,7 +472,8 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& mesh_a, const ModelMesh& mesh_b)
 	return false;
 }
 
-RelationOfTwoMesh getTwoMeshsIntersectRelation(const ModelMesh& mesh_a, const ModelMesh& mesh_b)
+// clash judge include penetration depth
+std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(const ModelMesh& mesh_a, const ModelMesh& mesh_b)
 {
 	//auto _isTwoIntersectTrianglesCoplanar = [](const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB)->bool //must intersect
 	//{
@@ -541,6 +543,8 @@ RelationOfTwoMesh getTwoMeshsIntersectRelation(const ModelMesh& mesh_a, const Mo
 					continue;
 				//intersect
 				isContact = true;
+				faceA.insert(iA);
+				faceB.insert(iB);
 				if ((triA[1] - triA[0]).cross(triA[2] - triA[0]).cross((triB[1] - triB[0]).cross(triB[2] - triB[0])).isZero(eps)) // intersect-coplanar
 				{
 #ifdef STATISTIC_DATA_COUNT
@@ -556,62 +560,93 @@ RelationOfTwoMesh getTwoMeshsIntersectRelation(const ModelMesh& mesh_a, const Mo
 					interTriInfoList.push_back({ { triA, triB }, {}, 0.0 });
 #endif
 					//return RelationOfTwoMesh::INTRUSIVE;
-					isIntrusive = true;
+					isIntrusive = true; //for count all intersect
 				}
 			}
 		}
 	}
+	if (isIntrusive)
+	{
+		//RelationOfTwoMesh::INTRUSIVE 
+		return { RelationOfTwoMesh::INTRUSIVE , getPenetrationDepthOfTwoConvex(mesh_a,faceA, mesh_b, faceB) };
+	}
 	//judge whether mesh entirely inside mesh
-	if (mesh_a.vbo_.empty() || mesh_b.vbo_.empty())
+	if (mesh_a.vbo_.empty() || mesh_b.vbo_.empty()) //pre judge, mesh isnot empty
 	{
 #ifdef STATISTIC_DATA_COUNT
 		count_err_empty_mesh++;
 #endif  
-		return RelationOfTwoMesh::SEPARATE;
+		return { RelationOfTwoMesh::SEPARATE, gVecNaN };
 	}
 	//lefted, total inside, inner-contact or outer-contact
 	if (mesh_a.bounding_.contains(mesh_b.bounding_)) //boundingbox is world coord
 	{
 		// precondition: boundingbox inside, polyface not intersect, mesh isnot empty
 		Eigen::Affine3d mat = mesh_a.pose_.inverse() * mesh_b.pose_;
-		for (const auto& vertexB : mesh_b.vbo_)
+		RelationOfPointAndMesh relation = isPointInsidePolyhedronRZ(mat * (*mesh_b.vbo_.begin()), mesh_a.vbo_, mesh_a.ibo_);
+		if (RelationOfPointAndMesh::INNER == relation)
 		{
-			RelationOfPointAndMesh relation = isPointInsidePolyhedronRZ(mat * vertexB, mesh_a.vbo_, mesh_a.ibo_);
-			if (RelationOfPointAndMesh::INNER == relation)
-			{
-#ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
-				triRecordHard.push_back({ gTirNaN, gTirNaN });
-				interTriInfoList.push_back({ { gTirNaN, gTirNaN }, {}, 0.0 });
-#endif
-				return isContact ? RelationOfTwoMesh::INSEDE_BINA_CONT : RelationOfTwoMesh::INSEDE_BINA;
-			}
-			else if (RelationOfPointAndMesh::OUTER == relation)
-				return isContact ? RelationOfTwoMesh::CONTACT_OUTER : RelationOfTwoMesh::SEPARATE; // concave separate
-			// else SURFACE all
+			return isContact ?
+				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::INSEDE_BINA_CONT, getPenetrationDepthOfTwoConvex(mesh_a, faceA, mesh_b, faceB) } :
+				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::INSEDE_BINA , getPenetrationDepthOfTwoConvex(mesh_a,faceA, mesh_b, faceB) };
 		}
-		return RelationOfTwoMesh::INSEDE_BINA_FIT;// RelationOfPointAndMesh::SURFACE fit all vertex
+		else if (RelationOfPointAndMesh::OUTER == relation)
+		{
+			return isContact ? 
+				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::CONTACT_OUTER, gVecZero} :
+				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::SEPARATE , gVecNaN };
+		}
+//		for (const auto& vertexB : mesh_b.vbo_)
+//		{
+//			RelationOfPointAndMesh relation = isPointInsidePolyhedronRZ(mat * vertexB, mesh_a.vbo_, mesh_a.ibo_);
+//			if (RelationOfPointAndMesh::INNER == relation)
+//			{
+//#ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
+//				triRecordHard.push_back({ gTirNaN, gTirNaN });
+//				interTriInfoList.push_back({ { gTirNaN, gTirNaN }, {}, 0.0 });
+//#endif
+//				return isContact ? RelationOfTwoMesh::INSEDE_BINA_CONT : RelationOfTwoMesh::INSEDE_BINA;
+//			}
+//			else if (RelationOfPointAndMesh::OUTER == relation)
+//				return isContact ? RelationOfTwoMesh::CONTACT_OUTER : RelationOfTwoMesh::SEPARATE; // concave separate
+//			// else SURFACE all
+//		}
+//		return RelationOfTwoMesh::INSEDE_BINA_FIT;// RelationOfPointAndMesh::SURFACE fit all vertex
 	}
 	else if (mesh_b.bounding_.contains(mesh_a.bounding_))
 	{
 		Eigen::Affine3d mat = mesh_b.pose_.inverse() * mesh_a.pose_;
-		for (const auto& vertexA : mesh_a.vbo_)
+		RelationOfPointAndMesh relation = isPointInsidePolyhedronRZ(mat * (*mesh_a.vbo_.begin()), mesh_b.vbo_, mesh_b.ibo_);
+		if (RelationOfPointAndMesh::INNER == relation)
 		{
-			RelationOfPointAndMesh relation = isPointInsidePolyhedronRZ(mat * vertexA, mesh_b.vbo_, mesh_b.ibo_);
-			if (RelationOfPointAndMesh::INNER == relation)
-			{
-#ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
-				triRecordHard.push_back({ gTirNaN, gTirNaN });
-				interTriInfoList.push_back({ { gTirNaN, gTirNaN }, {}, 0.0 });
-#endif
-				return isContact ? RelationOfTwoMesh::INSEDE_AINB_CONT : RelationOfTwoMesh::INSEDE_AINB;
-			}
-			else if (RelationOfPointAndMesh::OUTER == relation)
-				return isContact ? RelationOfTwoMesh::CONTACT_OUTER : RelationOfTwoMesh::SEPARATE; // concave separate
-			// else SURFACE all
+			return isContact ?
+				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::INSEDE_BINA_CONT, getPenetrationDepthOfTwoConvex(mesh_a, faceA, mesh_b, faceB) } :
+				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::INSEDE_BINA , getPenetrationDepthOfTwoConvex(mesh_a,faceA, mesh_b, faceB) };
 		}
-		return RelationOfTwoMesh::INSEDE_BINA_FIT;// RelationOfPointAndMesh::SURFACE fit all vertex
+		else if (RelationOfPointAndMesh::OUTER == relation)
+		{
+			return isContact ?
+				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::CONTACT_OUTER, gVecZero} :
+				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::SEPARATE , gVecNaN };
+		}
+//		for (const auto& vertexA : mesh_a.vbo_)
+//		{
+//			RelationOfPointAndMesh relation = isPointInsidePolyhedronRZ(mat * vertexA, mesh_b.vbo_, mesh_b.ibo_);
+//			if (RelationOfPointAndMesh::INNER == relation)
+//			{
+//#ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
+//				triRecordHard.push_back({ gTirNaN, gTirNaN });
+//				interTriInfoList.push_back({ { gTirNaN, gTirNaN }, {}, 0.0 });
+//#endif
+//				return isContact ? RelationOfTwoMesh::INSEDE_AINB_CONT : RelationOfTwoMesh::INSEDE_AINB;
+//			}
+//			else if (RelationOfPointAndMesh::OUTER == relation)
+//				return isContact ? RelationOfTwoMesh::CONTACT_OUTER : RelationOfTwoMesh::SEPARATE; // concave separate
+//			// else SURFACE all
+//		}
+//		return RelationOfTwoMesh::INSEDE_BINA_FIT;// RelationOfPointAndMesh::SURFACE fit all vertex
 	}
-	return RelationOfTwoMesh::SEPARATE;
+	return { RelationOfTwoMesh::SEPARATE, gVecZero }; 
 }
 
 // ClashSoft // return index of mesh_a and mesh_b ibo
@@ -680,8 +715,8 @@ std::tuple<double, std::array<size_t, 2>> getTwoMeshsDistanceSAT(const ModelMesh
 //---------------------------------------------------------------------------
 
 //using method SAT
-//Eigen::Vector3d _getPenetrationDepthOfTwoConvex(const ModelMesh& meshA, const ModelMesh& meshB)
 Eigen::Vector3d getPenetrationDepthOfTwoConvex(const ModelMesh& meshA, const set<size_t>& faceA, const ModelMesh& meshB, const set<size_t>& faceB)
+//Eigen::Vector3d _getPenetrationDepthOfTwoConvex(const ModelMesh& meshA, const ModelMesh& meshB)
 {
 	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
 	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
@@ -804,7 +839,6 @@ vector<Polyhedron> _getBooleanIntersectOfTwoMesh(const ModelMesh& meshA, const M
 
 	return {};
 }
-
 
 Eigen::Vector3d _getPartialDepthtOfTwoConcave(const ModelMesh& meshA, const ModelMesh& meshB)
 {
