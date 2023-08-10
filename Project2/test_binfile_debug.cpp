@@ -427,8 +427,9 @@ static void _test4()
 //读取二进制mesh
 static void _test5()
 {
-	//std::vector<ModelMesh> meshs = _read_ModelMesh(filename + "cvtMeshVct_5233.bin");
+	//std::vector<ModelMesh> meshs0;
 	//std::vector<ModelMesh> meshs = _read_ModelMesh(filename + "cvtMeshVct_6509_6134.bin");
+	std::vector<ModelMesh> meshs_5233 = read_ModelMesh(binFilePath + "cvtMeshVct_jingujun.bin");
 	std::vector<ModelMesh> meshs0 = read_ModelMesh(binFilePath + "cvtMeshVct_1.bin");
 	std::vector<ModelMesh> meshs2 = read_ModelMesh(binFilePath + "cvtMeshVct_2.bin");
 	std::vector<ModelMesh> meshs3 = read_ModelMesh(binFilePath + "cvtMeshVct_3.bin");
@@ -436,9 +437,8 @@ static void _test5()
 	std::vector<ModelMesh> meshs5 = read_ModelMesh(binFilePath + "cvtMeshVct_5.bin");
 	size_t count = 0, countInter = 0;
 	clock_t startT, endT;
-	startT = clock();
 
-	for (const auto& iter : meshs0)
+	for (const auto& iter : meshs2)
 	{
 		//bool b1 = isConvex(iter.vbo_, iter.ibo_);
 		//bool b2 = is_convex(iter.vbo_, iter.ibo_);
@@ -450,11 +450,11 @@ static void _test5()
 	}
 	//相交测试
 	bool isInter = false;
-	ModelMesh mesh_a = meshs0[0];
-	ModelMesh mesh_b = meshs0[1];
+	ModelMesh mesh_a = meshs2[0];
+	ModelMesh mesh_b = meshs2[1];
 	for (size_t i = 0; i < mesh_a.ibo_.size(); i++)
 	{
-		for (size_t j = 0; j < meshs0[1].ibo_.size(); j++)
+		for (size_t j = 0; j < meshs2[1].ibo_.size(); j++)
 		{
 			std::array<Eigen::Vector3d, 3> triA = {
 				mesh_a.vbo_[mesh_a.ibo_[i][0]],
@@ -473,6 +473,15 @@ static void _test5()
 		}
 	}
 
+	//测试一个点遍历所有mesh的效率
+	Vector3d point = Vector3d(rand(), rand(), rand());
+	startT = clock();
+	for (const auto& iter: meshs_5233)
+	{
+		bool res = isPointInsidePolyhedronAZ(point, iter);
+		//RelationOfPointAndMesh res = isPointInsidePolyhedronRZ(point, iter);
+	}
+
 	endT = clock();
 	cout << "mesh count=" << meshs0.size() << endl;
 	cout << "count=" << count << endl;
@@ -488,7 +497,7 @@ static void _test6()
 	ModelMesh meshA = meshs[0];
 	ModelMesh meshB = meshs[1];
 
-	RelationOfPointAndMesh b0 = isPointInsidePolyhedron(Vector3d(150, 50, 50), meshA.vbo_, meshA.ibo_);
+	RelationOfPointAndMesh b0 = isPointInsidePolyhedronRZ(Vector3d(150, 50, 50), meshA.vbo_, meshA.ibo_);
 
 	Vector3d df = getPenetrationDepthOfTwoMeshs(meshA, meshB);
 	Vector3d di = getPenetrationDepthOfTwoMeshs(meshB, meshA);
@@ -531,8 +540,8 @@ static void _test6()
 static int enrol = []()->int
 {
 #ifdef USING_FLATBUFFERS_SERIALIZATION
-	_test4();
-	//_test5();
+	//_test4();
+	_test5();
 	//_test6();
 #endif
 	return 0;
