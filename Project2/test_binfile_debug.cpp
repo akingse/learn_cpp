@@ -566,8 +566,8 @@ static void _test6()
 static int enrol = []()->int
 {
 #ifdef USING_FLATBUFFERS_SERIALIZATION
-	//_test4();
-	_test5();
+	_test4();
+	//_test5();
 	//_test6();
 #endif
 	return 0;

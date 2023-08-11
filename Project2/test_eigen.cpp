@@ -11,7 +11,7 @@ using namespace psykronix;
 #undef min
 
 //²âÊÔ°üÎ§ºĞ Eigen::AlignedBox3d
-static void test1()
+static void test0()
 {
 	//std::array<Vector3d, 3> trigon = { Vertex(-87, 21), Vertex(-27, -20), Vertex(-90, 95) };
 	std::array<Vector3d, 3> trigon = { Vertex(-10, 0), Vertex(70, 0), Vertex(50, 50) };
@@ -77,7 +77,7 @@ bool operator<(const Eigen::Vector3d& lhs, const Eigen::Vector3d& rhs)
 }
 
 
-static void test0()
+static void test1()
 {
 	Eigen::AlignedBox3d box1(Eigen::Vector3d(1, 2, 3), Eigen::Vector3d(4, 5, 6));
 	Eigen::AlignedBox3d box2(Eigen::Vector3d(7, 8, 9), Eigen::Vector3d(10, 11, 12));
@@ -119,9 +119,21 @@ static void test0()
 	cout << "return 0" << endl;
 }
 
+static void test2()
+{
+	Eigen::AlignedBox3d box;
+	//Eigen::AlignedBox3d box(Eigen::Vector3d(1, 2, 3), Eigen::Vector3d(4, 5, 6));
+	//box.setEmpty();
 
-static int _enrol0 = []()->int {
-	test0();
+	bool valid = box.isEmpty();
+	cout << "cout box:" << endl;
+	cout << box.min() << box.max() << endl;
+	cout << "return 0" << endl;
+}
+
+static int _enrol = []()->int {
+	//test0();
+	test2();
 	return 0;
 }();
 
@@ -191,12 +203,6 @@ void eigen_matlab0()
 	//
 
 }
-
-
-static int _enrol = []()->int {
-	//test0();
-	return 0;
-}();
 
 
 /*
@@ -315,7 +321,6 @@ void eigen_matlab1()
 */
 
 /*
-
 void eigen_matlab2()
 {
 	Matrix<double, 3, 3> A;               // Fixed rows and cols. Same as Matrix3d.
