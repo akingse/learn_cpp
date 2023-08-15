@@ -337,6 +337,10 @@ static void _test3()
 	}
 	cout << "return 0" << endl;
 }
+bool _opLessInfo(const InterTriInfo& lhs, const InterTriInfo& rhs)
+{
+	return lhs.distance < rhs.distance;
+}
 
 #ifdef USING_FLATBUFFERS_SERIALIZATION
 //²âÊÔÐÞ¸´SATÏà¹Ø
@@ -344,17 +348,31 @@ static void _test4()
 {
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> triRec;
 
-	std::vector<InterTriInfo> triInfo1 = read_InterTriInfo(binFilePath + "interTriInfo_4027.bin");
-	std::vector<InterTriInfo> triInfo2 = read_InterTriInfo(binFilePath + "interTriInfo_4034.bin"); //more
-	std::vector<InterTriInfo> triInfo3 = read_InterTriInfo(binFilePath + "interTriInfo_4042.bin");
+	std::vector<InterTriInfo> triInfo4027 = read_InterTriInfo(binFilePath + "interTriInfo_4027.bin");
+	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034.bin"); //more
+	std::vector<InterTriInfo> triInfo4042 = read_InterTriInfo(binFilePath + "interTriInfo_4042.bin");
+	// Category
+	std::vector<InterTriInfo> triInfoSq;
+	std::vector<InterTriInfo> triInfoZero;
+	std::vector<InterTriInfo> triInfo1e_6;
+	std::vector<InterTriInfo> triInfo1e_1;
+	std::vector<InterTriInfo> triInfo1;
+	std::vector<InterTriInfo> triInfo10;
+	std::vector<InterTriInfo> triInfo100;
+	std::vector<InterTriInfo> triInfo200;
+
+	triInfoSq = triInfo4034;
+	double d_ins6, d_ins7; //-32.011189515236765
+	std::sort(triInfoSq.begin(), triInfoSq.end(), _opLessInfo); //-200
 	//find difference
-	for (int i = 0; i < triInfo2.size(); ++i)
+	for (int i = 0; i < triInfo4034.size(); ++i)
 	{
+		//
 		bool findFlag = false;
-		for (int j = 0; j < triInfo1.size(); ++j) //big vector, findTri
+		for (int j = 0; j < triInfo4027.size(); ++j) //big vector, findTri
 		{
-			if (triInfo2[i].entityPair[0] == triInfo1[j].entityPair[0] && 
-				triInfo2[i].entityPair[1] == triInfo1[j].entityPair[1])
+			if (triInfo4034[i].entityPair[0] == triInfo4027[j].entityPair[0] &&
+				triInfo4034[i].entityPair[1] == triInfo4027[j].entityPair[1])
 			{
 				findFlag = true;
 				//cout << "index=" << j << endl; //823,950,954
@@ -363,29 +381,55 @@ static void _test4()
 		}
 		if (!findFlag)
 		{
-			cout << triInfo2[i].entityPair[0] << ", " << triInfo2[i].entityPair[1] << endl;
-			triRec.push_back(triInfo2[i].trianglePair);
+			//cout << triInfo4034[i].entityPair[0] << ", " << triInfo4034[i].entityPair[1] << endl;
+			triRec.push_back(triInfo4034[i].trianglePair);
 		}
+		// the inside
+		if (triInfo4034[i].entityPair[0] == 3839 && triInfo4034[i].entityPair[1] == 3838)
+			d_ins6 = triInfo4034[i].distance;
+		if (triInfo4034[i].entityPair[0] == 1418 && triInfo4034[i].entityPair[1] == 1417)
+			d_ins7 = triInfo4034[i].distance;
 	}
+
+	for (int i = 0; i < triInfoSq.size(); ++i)
+	{
+		if (triInfoSq[i].distance <= -100)
+			triInfo200.push_back(triInfoSq[i]); // d=-196(6569,4279) d=-101(6572,4267)
+		else if (triInfoSq[i].distance <= -10)
+			triInfo100.push_back(triInfoSq[i]);
+		else if (triInfoSq[i].distance <= -1)
+			triInfo10.push_back(triInfoSq[i]);
+		else if (triInfoSq[i].distance <= -1e-1) //d=-9.5(5268,4706)
+			triInfo1.push_back(triInfoSq[i]);
+		else if (triInfoSq[i].distance <= -1e-6)
+			triInfo1e_1.push_back(triInfoSq[i]);
+		else if (triInfoSq[i].distance == 0.0) //d=0(4224,4221)
+			triInfoZero.push_back(triInfoSq[i]);
+		else 
+			triInfo1e_6.push_back(triInfoSq[i]); //d=1e-7(6125,6123)
+
+
+	}
+
+
 	/*
 	1443, 1411
 	1662, 1642
 	1935, 1903
 	2153, 2133
 	2255, 2243
-
+	//---
 	2418, 2386
 	2636, 2616
 	2901, 2869
 	3119, 3099
 	3384, 3352
-
+	//---
 	3599, 3579
 	3864, 3832
 	4080, 4060
 	4478, 4446
 	6509, 6134 //min
-
 	//inside
 	1418, 1417
 	1910, 1909
