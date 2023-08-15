@@ -151,5 +151,6 @@ struct ModelMesh
     Eigen::Affine3d pose_; // Eigen::Affine3d::Identity()
     bool convex_; // isConvex default true
     std::vector<int> iboRaw_; //for test debug
+    uint64_t entityid_;
 };
 #endif

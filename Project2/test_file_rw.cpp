@@ -194,6 +194,40 @@ std::vector<std::array<uint64_t, 2>> _readEntityIDFile(const std::string& fileNa
 using namespace flatbuffers;
 
 #include "C:/Users/Aking/source/repos/bimbase/Include/fbs/inter_triangels_info_generated.h"
+
+void write_InterTriInfo(const std::vector<InterTriInfo>& infos, const std::string& fileName)
+{
+	//flat buffer
+	flatbuffers::FlatBufferBuilder builder;
+	std::vector<flatbuffers::Offset<TriInfo>> triInfos;
+	for (const auto& iter : infos)
+	{
+		auto p0_A = CreatePoint3D(builder, iter.trianglePair[0][0].x(), iter.trianglePair[0][0].y(), iter.trianglePair[0][0].z());
+		auto p1_A = CreatePoint3D(builder, iter.trianglePair[0][1].x(), iter.trianglePair[0][1].y(), iter.trianglePair[0][1].z());
+		auto p2_A = CreatePoint3D(builder, iter.trianglePair[0][2].x(), iter.trianglePair[0][2].y(), iter.trianglePair[0][2].z());
+		auto triangleA = CreateTriangular(builder, p0_A, p1_A, p2_A);
+		auto p0_B = CreatePoint3D(builder, iter.trianglePair[1][0].x(), iter.trianglePair[1][0].y(), iter.trianglePair[1][0].z());
+		auto p1_B = CreatePoint3D(builder, iter.trianglePair[1][1].x(), iter.trianglePair[1][1].y(), iter.trianglePair[1][1].z());
+		auto p2_B = CreatePoint3D(builder, iter.trianglePair[1][2].x(), iter.trianglePair[1][2].y(), iter.trianglePair[1][2].z());
+		auto triangleB = CreateTriangular(builder, p0_B, p1_B, p2_B);
+		auto triInfo = CreateTriInfo(builder, triangleA, triangleB, iter.entityPair[0], iter.entityPair[1], iter.distance);
+		triInfos.push_back(triInfo);
+	}
+	auto triInfosVector = builder.CreateVector(triInfos); // 创建 TriInfo 向量
+	auto triList = CreateTriList(builder, triInfosVector); //创建 TriList 表对象并填充字段
+	builder.Finish(triList); //结束构建并生成 FlatBuffer
+	// 获取序列化后的数据缓冲区指针和大小
+	uint8_t* bufferPointer = builder.GetBufferPointer();
+	size_t bufferSize = builder.GetSize();
+	ofstream out(fileName, ios::out | ios::binary);
+	if (out.is_open())
+	{
+		out.write(reinterpret_cast<char*>(bufferPointer), bufferSize);
+		out.close();
+		builder.Clear();
+	}
+}
+
 std::vector<InterTriInfo> read_InterTriInfo(const std::string& fileName)
 {
 	//ifstream inFile(path + "interTriInfo_5108.bin", ios::in | ios::binary);
@@ -233,6 +267,50 @@ std::vector<InterTriInfo> read_InterTriInfo(const std::string& fileName)
 }
 
 #include "C:/Users/Aking/source/repos/bimbase/Include/fbs/convert_to_mesh_generated.h"
+
+void write_ModelMesh(const std::vector<ModelMesh>& meshs, const std::string& fileName)
+{
+	flatbuffers::FlatBufferBuilder builder;
+	std::vector<flatbuffers::Offset<ConvertToMesh>> meshVct;
+	for (const auto& iter : meshs)
+	{
+		std::vector<flatbuffers::Offset<Point3D>> vbos;
+		for (auto& iterV : iter.vbo_)
+		{
+			auto vbo = CreatePoint3D(builder, iterV.x(), iterV.y(), iterV.z());
+			vbos.push_back(vbo);
+		}
+		auto _vbosVct = builder.CreateVector(vbos); //create fbs::Offset<fbs::Vector<fbs::Offset<T>>>
+		auto _vbos = CreateVBO(builder, _vbosVct);
+		std::vector<flatbuffers::Offset<IndexVt>> ibos;
+		for (auto& iterI : iter.ibo_)
+		{
+			auto ibo = CreateIndexVt(builder, iterI[0], iterI[1], iterI[2]);
+			ibos.push_back(ibo);
+		}
+		auto _ibosVct = builder.CreateVector(ibos); //create fbs::Offset<fbs::Vector<fbs::Offset<T>>>
+		auto _ibos = CreateIBO(builder, _ibosVct);
+		auto _ibos_raw = builder.CreateVector(iter.iboRaw_); //origin type
+		auto _min = CreatePoint3D(builder, iter.bounding_.min().x(), iter.bounding_.min().y(), iter.bounding_.min().z());
+		auto _max = CreatePoint3D(builder, iter.bounding_.max().x(), iter.bounding_.max().y(), iter.bounding_.max().z());
+		auto mesh = CreateConvertToMesh(builder, _vbos, _ibos, _min, _max, _ibos_raw, iter.convex_, iter.entityid_); //order and content
+		meshVct.push_back(mesh);
+	}
+	auto _meshVct = builder.CreateVector(meshVct);
+	auto triList = CreateMeshVct(builder, _meshVct);
+	builder.Finish(triList);
+	// get the pointer and size
+	uint8_t* bufferPointer = builder.GetBufferPointer();
+	size_t bufferSize = builder.GetSize();
+	ofstream out(fileName, ios::out | ios::binary);
+	if (out.is_open())
+	{
+		out.write(reinterpret_cast<char*>(bufferPointer), bufferSize);
+		out.close();
+		builder.Clear();
+	}
+}
+
 std::vector<ModelMesh> read_ModelMesh(const std::string& fileName)
 {
 	std::ifstream inFile(fileName, std::ios::in | std::ios::binary);
@@ -273,88 +351,12 @@ std::vector<ModelMesh> read_ModelMesh(const std::string& fileName)
 			{
 				_iboRaw.push_back(iboRaw->Get(i));
 			}
-			res.push_back(ModelMesh{ vbo_, ibo_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(),false, _iboRaw });
+			res.push_back(ModelMesh{ vbo_, ibo_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(),mesh->convex(), _iboRaw, mesh->entityid() });
 		}
 		inFile.close();
 	}
 	return res;
 }
 
-// using flatbuffers serialization
-void write_InterTriInfo(const std::vector<InterTriInfo>& infos, const std::string& fileName)
-{
-	//flat buffer
-	flatbuffers::FlatBufferBuilder builder;
-	std::vector<flatbuffers::Offset<TriInfo>> triInfos;
-	for (const auto& iter : infos)
-	{
-		auto p0_A = CreatePoint3D(builder, iter.trianglePair[0][0].x(), iter.trianglePair[0][0].y(), iter.trianglePair[0][0].z());
-		auto p1_A = CreatePoint3D(builder, iter.trianglePair[0][1].x(), iter.trianglePair[0][1].y(), iter.trianglePair[0][1].z());
-		auto p2_A = CreatePoint3D(builder, iter.trianglePair[0][2].x(), iter.trianglePair[0][2].y(), iter.trianglePair[0][2].z());
-		auto triangleA = CreateTriangular(builder, p0_A, p1_A, p2_A);
-		auto p0_B = CreatePoint3D(builder, iter.trianglePair[1][0].x(), iter.trianglePair[1][0].y(), iter.trianglePair[1][0].z());
-		auto p1_B = CreatePoint3D(builder, iter.trianglePair[1][1].x(), iter.trianglePair[1][1].y(), iter.trianglePair[1][1].z());
-		auto p2_B = CreatePoint3D(builder, iter.trianglePair[1][2].x(), iter.trianglePair[1][2].y(), iter.trianglePair[1][2].z());
-		auto triangleB = CreateTriangular(builder, p0_B, p1_B, p2_B);
-		auto triInfo = CreateTriInfo(builder, triangleA, triangleB, iter.entityPair[0], iter.entityPair[1], iter.distance);
-		triInfos.push_back(triInfo);
-	}
-	auto triInfosVector = builder.CreateVector(triInfos); // 创建 TriInfo 向量
-	auto triList = CreateTriList(builder, triInfosVector); //创建 TriList 表对象并填充字段
-	builder.Finish(triList); //结束构建并生成 FlatBuffer
-	// 获取序列化后的数据缓冲区指针和大小
-	uint8_t* bufferPointer = builder.GetBufferPointer();
-	size_t bufferSize = builder.GetSize();
-	ofstream out(fileName, ios::out | ios::binary);
-	if (out.is_open())
-	{
-		out.write(reinterpret_cast<char*>(bufferPointer), bufferSize);
-		out.close();
-		builder.Clear();
-	}
-}
-
-void write_ModelMesh(const std::vector<ModelMesh>& meshs, const std::string& fileName)
-{
-	flatbuffers::FlatBufferBuilder builder;
-	std::vector<flatbuffers::Offset<ConvertToMesh>> meshVct;
-	for (const auto& iter : meshs)
-	{
-		std::vector<flatbuffers::Offset<Point3D>> vbos;
-		for (auto& iterV : iter.vbo_)
-		{
-			auto vbo = CreatePoint3D(builder, iterV.x(), iterV.y(), iterV.z());
-			vbos.push_back(vbo);
-		}
-		auto _vbosVct = builder.CreateVector(vbos); //create fbs::Offset<fbs::Vector<fbs::Offset<T>>>
-		auto _vbos = CreateVBO(builder, _vbosVct);
-		std::vector<flatbuffers::Offset<IndexVt>> ibos;
-		for (auto& iterI : iter.ibo_)
-		{
-			auto ibo = CreateIndexVt(builder, iterI[0], iterI[1], iterI[2]);
-			ibos.push_back(ibo);
-		}
-		auto _ibosVct = builder.CreateVector(ibos); //create fbs::Offset<fbs::Vector<fbs::Offset<T>>>
-		auto _ibos = CreateIBO(builder, _ibosVct);
-		auto _ibos_raw = builder.CreateVector(iter.iboRaw_); //origin type
-		auto _min = CreatePoint3D(builder, iter.bounding_.min().x(), iter.bounding_.min().y(), iter.bounding_.min().z());
-		auto _max = CreatePoint3D(builder, iter.bounding_.max().x(), iter.bounding_.max().y(), iter.bounding_.max().z());
-		auto mesh = CreateConvertToMesh(builder, _vbos, _ibos, _ibos_raw, _min, _max);
-		meshVct.push_back(mesh);
-	}
-	auto _meshVct = builder.CreateVector(meshVct);
-	auto triList = CreateMeshVct(builder, _meshVct);
-	builder.Finish(triList);
-	// get the pointer and size
-	uint8_t* bufferPointer = builder.GetBufferPointer();
-	size_t bufferSize = builder.GetSize();
-	ofstream out(fileName, ios::out | ios::binary);
-	if (out.is_open())
-	{
-		out.write(reinterpret_cast<char*>(bufferPointer), bufferSize);
-		out.close();
-		builder.Clear();
-	}
-}
 
 #endif //USING_FLATBUFFERS_SERIALIZATION
