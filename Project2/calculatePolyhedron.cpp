@@ -7,11 +7,19 @@ using namespace psykronix;
 //static constexpr double _eps = -FLT_EPSILON;
 static constexpr double eps_d = 10 * DBL_EPSILON; // double
 static constexpr unsigned long long ULL_MAX = 18446744073709551615; // 2 ^ 64 - 1
+static const Triangle gTriXOY = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(1,0,0), Eigen::Vector3d(0,1,0) };
+static const Triangle gTriXOZ = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(1,0,0), Eigen::Vector3d(0,0,1) };
+static const Triangle gTriYOZ = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(0,1,0), Eigen::Vector3d(0,0,1) };
 
 #undef max 
 #undef min
 #define USING_METHOD_SAT
 #define USING_RELATIVE_MATRIX_RECTIFY
+#define USING_MESH_VERTEX_FOR_PENETRATION //all vertex
+
+//replace .x() => [0]
+//replace .y() => [1]
+//replace .z() => [2]
 
 #ifdef STATISTIC_DATA_COUNT
 extern std::atomic<size_t> count_mesh_inside_mesh;
@@ -40,15 +48,17 @@ enum class RelationOfRayAndTrigon : int
 bool psykronix::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
 {
 	Vector3d normal;
-	double projection;
+	double projection, d_eps;
+	bool isFirst /*= true*/, isLeft /*= false*/, temp /*= false*/;
 	for (const auto& face : ibo)
 	{
 		normal = (vbo[face[1]] - vbo[face[0]]).cross(vbo[face[2]] - vbo[face[0]]);// .normalized();
-		bool isFirst = true, isLeft /*= false*/, temp /*= false*/;
+		d_eps = normal.squaredNorm() * eps; // wide threshold
+		isFirst = true;
 		for (size_t i = 0; i < vbo.size(); ++i)
 		{
 			projection = normal.dot(vbo[i] - vbo[face[0]]);
-			if (i == face[0] || i == face[1] || i == face[2] || fabs(projection) < normal.squaredNorm() * eps) // self or coplanar
+			if (i == face[0] || i == face[1] || i == face[2] || fabs(projection) < d_eps) // self or coplanar
 				continue;
 			temp = projection < 0.0;
 			if (isFirst)
@@ -148,7 +158,6 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronRZ(const Eigen::Vector3
 }
 
 // include point on face, 
-//bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
 bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& _point, const ModelMesh& mesh)
 {
 #ifdef STATISTIC_DATA_COUNT
@@ -256,12 +265,6 @@ bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& _point, const M
 	return count % 2 == 1;
 }
 
-//bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const ModelMesh& mesh)
-//{
-//	Eigen::Vector3d pointR = mesh.pose_.inverse() * point;
-//	return isPointInsidePolyhedronAZ(pointR, mesh.vbo_, mesh.ibo_);
-//}
-
 bool psykronix::isPointInsidePolyhedronCEIL(const Eigen::Vector3d& _point, const ModelMesh& mesh) // more judge
 {
 	Eigen::Vector3d point = mesh.pose_.inverse() * _point; // all vertex using self coordinate
@@ -332,7 +335,7 @@ bool psykronix::isPointInsidePolyhedronCEIL(const Eigen::Vector3d& _point, const
 }
 
 //using method SAT
-std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConvexIN(const ModelMesh& meshA, const ModelMesh& meshB)
+std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConvexALL(const ModelMesh& meshA, const ModelMesh& meshB)
 {
 	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
 	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
@@ -397,6 +400,27 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 	return { std::min(dminA, dminB) * direction, indexAB };
 }
 
+std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConvexBOX(const ModelMesh& meshA, const ModelMesh& meshB)
+{
+	Eigen::AlignedBox3d boxA = meshA.bounding_;
+	Eigen::AlignedBox3d boxB = meshB.bounding_;
+	// no contain sequence
+	double dmin = DBL_MAX, dtemp;
+	Vector3d coord;
+	size_t index;
+	Triangle unitThree = { Eigen::Vector3d(1,0,0), Eigen::Vector3d(0,1,0), Eigen::Vector3d(0,0,1) };
+	for (int i = 0; i < 3; i++)
+	{
+		dtemp = std::min(boxA.max()[i] - boxB.min()[i], boxB.max()[i] - boxA.min()[i]); //x direction
+		if (dtemp < dmin)
+		{
+			dmin = dtemp;
+			coord = unitThree[i]; //Eigen::Vector3d::UnitX();
+			index = i;
+		}
+	}
+	return { dmin * coord,{index, ULL_MAX} };
+}
 
 // for intrusive meshs
 std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConvex(const ModelMesh& meshA, const set<size_t>& faceA, const ModelMesh& meshB, const set<size_t>& faceB)
@@ -501,7 +525,6 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 // mesh
 //--------------------------------------------------------------------------------------------------------
 
-
 Eigen::Affine3d _getRelativeMatrixRectify(const Eigen::Affine3d& matA, const Eigen::Affine3d& matB)
 {
 	//Eigen::Affine3d::Identity()
@@ -584,16 +607,15 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 	std::array<std::vector<size_t>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, 0.0);
 	if (!indexAB[0].empty() && !indexAB[1].empty())
 	{
+		std::array<Eigen::Vector3d, 3> triA, triB;
 		for (const auto& iA : indexAB[0])
 		{
-			std::array<Eigen::Vector3d, 3> triA = {
-					relative_matrix * meshA.vbo_[meshA.ibo_[iA][0]],
+			triA = { relative_matrix * meshA.vbo_[meshA.ibo_[iA][0]],
 					relative_matrix * meshA.vbo_[meshA.ibo_[iA][1]],
 					relative_matrix * meshA.vbo_[meshA.ibo_[iA][2]] };
 			for (const auto& iB : indexAB[1])
 			{
-				std::array<Eigen::Vector3d, 3> triB = {
-						meshB.vbo_[meshB.ibo_[iB][0]],
+				triB = { meshB.vbo_[meshB.ibo_[iB][0]],
 						meshB.vbo_[meshB.ibo_[iB][1]],
 						meshB.vbo_[meshB.ibo_[iB][2]] };
 				if (!isTwoTrianglesBoundingBoxIntersect(triA, triB)) // second pre-judge
@@ -658,84 +680,21 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 	bool isIntrusive = false;
 	std::set<size_t> faceSetA, faceSetB; // intersect and inside, or using vector
 	//std::set<size_t> vertexSetA, vertexSetB;
-	//bool indiseP0, indiseP1, indiseP2;
-	std::array<Eigen::Vector3d, 2> pInter;
+	//std::array<Eigen::Vector3d, 2> pInter;
 #ifdef STATISTIC_DATA_RECORD
-	Triangle triA = gTirNaN, triB = gTirNaN;
+	Triangle trigon;
 #endif
 	if (!indexAB[0].empty() && !indexAB[1].empty())
 	{
-//#define USING_MESH_VERTEX_THAN_FACE
-#ifdef USING_MESH_VERTEX_RATHERTHAN_FACE
-		for (const auto& iA : indexAB[0])
+		std::array<Eigen::Vector3d, 3> triA, triB;
+		for (const auto& iA : indexAB[0]) //faces intersect
 		{
-			vertexAINB.insert({ mesh_a.ibo_[iA][0], false });
-			vertexAINB.insert({ mesh_a.ibo_[iA][1], false });
-			vertexAINB.insert({ mesh_a.ibo_[iA][2], false });
-		}
-		for (const auto& iB : indexAB[1])
-		{
-			vertexAINB.insert({ mesh_b.ibo_[iB][0], false });
-			vertexAINB.insert({ mesh_b.ibo_[iB][1], false });
-			vertexAINB.insert({ mesh_b.ibo_[iB][2], false });
-		}
-		for (const auto& iA : vertexSetA)
-		{
-			if (isPointInsidePolyhedronCEIL(mesh_a.pose_ * mesh_a.vbo_[iA], mesh_b))
-				faceSetA.insert(iA);
-		}
-		for (const auto& iB : vertexSetB)
-		{
-			if (isPointInsidePolyhedronCEIL(mesh_b.pose_ * mesh_b.vbo_[iB], mesh_a))
-				faceSetB.insert(iB);
-		}
-#endif
-		for (const auto& iA : indexAB[0])
-		{
-			if (isPointInsidePolyhedronCEIL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][0]], meshB) ||
-				isPointInsidePolyhedronCEIL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][1]], meshB) ||
-				isPointInsidePolyhedronCEIL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][2]], meshB))
-				faceSetA.insert(iA);
-			//indiseP0 = isPointInsidePolyhedronCEIL(mesh_a.pose_ * mesh_a.vbo_[mesh_a.ibo_[iA][0]], mesh_b);
-			//indiseP1 = isPointInsidePolyhedronCEIL(mesh_a.pose_ * mesh_a.vbo_[mesh_a.ibo_[iA][1]], mesh_b);
-			//indiseP2 = isPointInsidePolyhedronCEIL(mesh_a.pose_ * mesh_a.vbo_[mesh_a.ibo_[iA][2]], mesh_b);
-			//if (indiseP0)
-			//	vertexSetA.insert(mesh_a.ibo_[iA][0]);
-			//if (indiseP1)
-			//	vertexSetA.insert(mesh_a.ibo_[iA][1]);
-			//if (indiseP2)
-			//	vertexSetA.insert(mesh_a.ibo_[iA][2]);
-			//if (indiseP0 || indiseP1 || indiseP2)
-			//	faceSetA.insert(iA);
-		}		
-		for (const auto& iB : indexAB[1])
-		{
-			if (isPointInsidePolyhedronCEIL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][0]], meshA) ||
-				isPointInsidePolyhedronCEIL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][1]], meshA) ||
-				isPointInsidePolyhedronCEIL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][2]], meshA))
-				faceSetB.insert(iB);
-			//indiseP0 = isPointInsidePolyhedronCEIL(mesh_b.pose_ * mesh_b.vbo_[mesh_b.ibo_[iB][0]], mesh_a);
-			//indiseP1 = isPointInsidePolyhedronCEIL(mesh_b.pose_ * mesh_b.vbo_[mesh_b.ibo_[iB][1]], mesh_a);
-			//indiseP2 = isPointInsidePolyhedronCEIL(mesh_b.pose_ * mesh_b.vbo_[mesh_b.ibo_[iB][2]], mesh_a);
-			//if (indiseP0)
-			//	vertexSetB.insert(mesh_a.ibo_[iB][0]);
-			//if (indiseP1)
-			//	vertexSetB.insert(mesh_a.ibo_[iB][1]);
-			//if (indiseP2)
-			//	vertexSetB.insert(mesh_a.ibo_[iB][2]);
-			//if (indiseP0 || indiseP1 || indiseP2)
-			//	faceSetB.insert(iB);
-		}
-		for (const auto& iA : indexAB[0])
-		{
-			std::array<Eigen::Vector3d, 3> triA = {
-					relative_matrix * meshA.vbo_[meshA.ibo_[iA][0]],
+			triA = { relative_matrix * meshA.vbo_[meshA.ibo_[iA][0]],
 					relative_matrix * meshA.vbo_[meshA.ibo_[iA][1]],
 					relative_matrix * meshA.vbo_[meshA.ibo_[iA][2]] };
 			for (const auto& iB : indexAB[1])
 			{
-				std::array<Eigen::Vector3d, 3> triB = {
-						meshB.vbo_[meshB.ibo_[iB][0]],
+				triB = { meshB.vbo_[meshB.ibo_[iB][0]],
 						meshB.vbo_[meshB.ibo_[iB][1]],
 						meshB.vbo_[meshB.ibo_[iB][2]] };
 				if (!isTwoTrianglesBoundingBoxIntersect(triA, triB)) // second pre-judge
@@ -747,7 +706,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 				}
 				if (!isTwoTrianglesIntersectSAT(triA, triB)) //separate
 					continue;
-				isContact = true; // maybe intrusive or atleast contact
+				isContact = true; //isIntersect// maybe intrusive or atleast contact
 				//intersect
 				if ((triA[1] - triA[0]).cross(triA[2] - triA[0]).cross((triB[1] - triB[0]).cross(triB[2] - triB[0])).isZero()) // intersect-coplanar
 				{
@@ -756,36 +715,52 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 #endif  
 					continue;
 				}
-				pInter = getTwoTrianglesIntersectPoints(triA, triB);
-				if (!(pInter[1] - pInter[0]).isZero()) // also using eps
-				{
-					//return RelationOfTwoMesh::INTRUSIVE;
-					isIntrusive = true; //for count all intersect
-					faceSetA.insert(iA); // only intrusive triangle insert, exclude contact triangle
-					faceSetB.insert(iB);
-				}
+				isIntrusive = true; 
+				faceSetA.insert(iA);
+				faceSetB.insert(iB);
+				//pInter = getTwoTrianglesIntersectPoints(triA, triB);
+				//if (!(pInter[1] - pInter[0]).isZero()) // also using eps
+				//{
+				//	//return RelationOfTwoMesh::INTRUSIVE;
+				//	isIntrusive = true; //for count all intersect
+				//	faceSetA.insert(iA); // only intrusive triangle insert, exclude contact triangle
+				//	faceSetB.insert(iB);
+				//}
 			}
 		}
 	}
 	if (isIntrusive)
 	{
+		for (const auto& iA : indexAB[0]) //only insert intersect mesh
+		{
+			if (isPointInsidePolyhedronCEIL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][0]], meshB) ||
+				isPointInsidePolyhedronCEIL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][1]], meshB) ||
+				isPointInsidePolyhedronCEIL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][2]], meshB))
+				faceSetA.insert(iA);
+		}
+		for (const auto& iB : indexAB[1])
+		{
+			if (isPointInsidePolyhedronCEIL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][0]], meshA) ||
+				isPointInsidePolyhedronCEIL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][1]], meshA) ||
+				isPointInsidePolyhedronCEIL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][2]], meshA))
+				faceSetB.insert(iB);
+		}
 		std::tuple<Eigen::Vector3d, std::array<size_t, 2>> depth = getPenetrationDepthOfTwoConvex(meshA, faceSetA, meshB, faceSetB);
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
-		if (std::get<1>(depth)[0] != ULL_MAX) //
+		if (std::get<1>(depth)[0] != ULL_MAX) //bool isLeft 
 		{
-			triA = {
-			meshA.pose_ * meshA.vbo_[meshA.ibo_[std::get<1>(depth)[0]][0]],
-			meshA.pose_ * meshA.vbo_[meshA.ibo_[std::get<1>(depth)[0]][1]],
-			meshA.pose_ * meshA.vbo_[meshA.ibo_[std::get<1>(depth)[0]][2]] };
+			trigon = { meshA.pose_ * meshA.vbo_[meshA.ibo_[get<1>(depth)[0]][0]],
+					meshA.pose_ * meshA.vbo_[meshA.ibo_[get<1>(depth)[0]][1]],
+					meshA.pose_ * meshA.vbo_[meshA.ibo_[get<1>(depth)[0]][2]] };
+			interTriInfoList.push_back({ { std::move(trigon), std::move(gTirNaN) }, {}, -std::get<0>(depth).norm() });
 		}
 		else
 		{
-			triB = {
-			meshB.pose_ * meshB.vbo_[meshB.ibo_[std::get<1>(depth)[1]][0]],
-			meshB.pose_ * meshB.vbo_[meshB.ibo_[std::get<1>(depth)[1]][1]],
-			meshB.pose_ * meshB.vbo_[meshB.ibo_[std::get<1>(depth)[1]][2]] };
+			trigon = { meshB.pose_ * meshB.vbo_[meshB.ibo_[get<1>(depth)[1]][0]],
+					meshB.pose_ * meshB.vbo_[meshB.ibo_[get<1>(depth)[1]][1]],
+					meshB.pose_ * meshB.vbo_[meshB.ibo_[get<1>(depth)[1]][2]] };
+			interTriInfoList.push_back({ { std::move(gTirNaN), std::move(trigon) }, {}, -std::get<0>(depth).norm() });
 		}
-		interTriInfoList.push_back({ { std::move(triA), std::move(triB) }, {}, -std::get<0>(depth).norm() });
 #endif
 		//RelationOfTwoMesh::INTRUSIVE 
 		return { RelationOfTwoMesh::INTRUSIVE , std::get<0>(depth) };
@@ -805,23 +780,10 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 		}
 		else //if (RelationOfPointAndMesh::INNER == relation)
 		{
-			std::tuple<Eigen::Vector3d, std::array<size_t, 2>> depth = getPenetrationDepthOfTwoConvexIN(meshA, meshB);
+			std::tuple<Eigen::Vector3d, std::array<size_t, 2>> depth = getPenetrationDepthOfTwoConvexBOX(meshA, meshB);
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
-			//if (std::get<1>(depth)[0] != ULL_MAX) //
-			//{
-			//	triA = {
-			//	meshA.pose_ * meshA.vbo_[meshA.ibo_[std::get<1>(depth)[0]][0]],
-			//	meshA.pose_ * meshA.vbo_[meshA.ibo_[std::get<1>(depth)[0]][1]],
-			//	meshA.pose_ * meshA.vbo_[meshA.ibo_[std::get<1>(depth)[0]][2]] };
-			//}
-			//else
-			//{
-			//	triB = {
-			//	meshB.pose_ * meshB.vbo_[meshB.ibo_[std::get<1>(depth)[1]][0]],
-			//	meshB.pose_ * meshB.vbo_[meshB.ibo_[std::get<1>(depth)[1]][1]],
-			//	meshB.pose_ * meshB.vbo_[meshB.ibo_[std::get<1>(depth)[1]][2]] };
-			//}
-			interTriInfoList.push_back({ { std::move(triA), std::move(triB) }, {}, -std::get<0>(depth).norm() });
+			std::array<Triangle, 3> triThree = { gTriYOZ ,gTriXOZ ,gTriXOY };
+			interTriInfoList.push_back({ { std::move(triThree[std::get<1>(depth)[0]]), std::move(gTirNaN)}, {}, -std::get<0>(depth).norm()});
 #endif
 			return isContact ?
 				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::INSEDE_BINA_CONT, std::get<0>(depth) } :
@@ -840,23 +802,10 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 		}
 		else //if (RelationOfPointAndMesh::INNER == relation)
 		{
-			std::tuple<Eigen::Vector3d, std::array<size_t, 2>> depth = getPenetrationDepthOfTwoConvexIN(meshA, meshB);
+			std::tuple<Eigen::Vector3d, std::array<size_t, 2>> depth = getPenetrationDepthOfTwoConvexBOX(meshA, meshB);
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
-			//if (std::get<1>(depth)[0] != ULL_MAX) //
-			//{
-			//	triA = {
-			//	meshA.pose_ * meshA.vbo_[meshA.ibo_[std::get<1>(depth)[0]][0]],
-			//	meshA.pose_ * meshA.vbo_[meshA.ibo_[std::get<1>(depth)[0]][1]],
-			//	meshA.pose_ * meshA.vbo_[meshA.ibo_[std::get<1>(depth)[0]][2]] };
-			//}
-			//else
-			//{
-			//	triB = {
-			//	meshB.pose_ * meshB.vbo_[meshB.ibo_[std::get<1>(depth)[1]][0]],
-			//	meshB.pose_ * meshB.vbo_[meshB.ibo_[std::get<1>(depth)[1]][1]],
-			//	meshB.pose_ * meshB.vbo_[meshB.ibo_[std::get<1>(depth)[1]][2]] };
-			//}
-			interTriInfoList.push_back({ { std::move(triA), std::move(triB) }, {}, -std::get<0>(depth).norm()});
+			std::array<Triangle, 3> triThree = { gTriYOZ ,gTriXOZ ,gTriXOY };
+			interTriInfoList.push_back({ { std::move(triThree[std::get<1>(depth)[0]]), std::move(gTirNaN)}, {}, -std::get<0>(depth).norm() });
 #endif
 			return isContact ?
 				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::INSEDE_BINA_CONT, std::get<0>(depth) } :
@@ -916,20 +865,21 @@ std::tuple<double, std::array<size_t, 2>> getTwoMeshsDistanceSAT(const ModelMesh
 	return { d, index };
 }
 
-//// only for convex polytope 
-//bool isTwoMeshsIntersectGJK(const ModelMesh& meshA, const ModelMesh& meshB)
-//{
-//	return false;
-//}
-//// only for convex polytope
-//double getTwoMeshsPenetrationDepthEPA(const ModelMesh& meshA, const ModelMesh& meshB)
-//{
-//	return 0.0;
-//}
-
 //---------------------------------------------------------------------------
 //  penetration depth
 //---------------------------------------------------------------------------
+
+// only for convex polytope 
+bool isTwoMeshsIntersectGJK(const ModelMesh& meshA, const ModelMesh& meshB)
+{
+	return false;
+}
+
+// only for convex polytope
+double getTwoMeshsPenetrationDepthEPA(const ModelMesh& meshA, const ModelMesh& meshB)
+{
+	return 0.0;
+}
 
 // return the vertex of meshA
 std::vector<Eigen::Vector3d> _getInsideVertexSet(const ModelMesh& meshA, const ModelMesh& meshB)
@@ -988,7 +938,7 @@ Eigen::Vector3d _getPartialDepthtOfTwoConcave(const ModelMesh& meshA, const Mode
 }
 
 // fixed mehsB, move distance of meshA
-Eigen::Vector3d psykronix::getPenetrationDepthOfTwoMeshs(const ModelMesh& meshA, const ModelMesh& meshB)
+Eigen::Vector3d getPenetrationDepthOfTwoMeshs(const ModelMesh& meshA, const ModelMesh& meshB)
 {
 	//must intersect
 	if (meshA.convex_ && meshB.convex_) // already intrusive
