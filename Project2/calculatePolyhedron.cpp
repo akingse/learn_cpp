@@ -153,7 +153,7 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronRZ(const Eigen::Vector3
 	return isPointInsidePolyhedronRZ(pointR, mesh.vbo_, mesh.ibo_);
 }
 
-// include point on face, 
+// include point on face
 bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& _point, const ModelMesh& mesh)
 {
 #ifdef STATISTIC_DATA_COUNT
@@ -261,7 +261,7 @@ bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& _point, const M
 	return count % 2 == 1;
 }
 
-bool psykronix::isPointInsidePolyhedronCEIL(const Eigen::Vector3d& _point, const ModelMesh& mesh) // more judge
+bool isPointInsidePolyhedronCL(const Eigen::Vector3d& _point, const ModelMesh& mesh) // more judge like ceil
 {
 	Eigen::Vector3d point = mesh.pose_.inverse() * _point; // all vertex using self coordinate
 	//auto _isPointInTriangle2D = [&](const std::array<Vector3d, 3>& trigon)->bool
@@ -278,8 +278,7 @@ bool psykronix::isPointInsidePolyhedronCEIL(const Eigen::Vector3d& _point, const
 	//		0.0 <= az * ((trigon[0][0] - trigon[2][0]) * (point[1] - trigon[2][1]) - (point[0] - trigon[2][0]) * (trigon[0][1] - trigon[2][1]));
 	//};
 	auto _isPointInTriangle2D = [&](const Eigen::Vector3d& p0, const Eigen::Vector3d& p1, const Eigen::Vector3d& p2)->bool
-	{
-		//pre-box
+	{	//pre-box
 		if (point.x() > std::max(std::max(p0[0], p1[0]), p2[0]) ||
 			point.x() < std::min(std::min(p0[0], p1[0]), p2[0]) ||
 			point.y() > std::max(std::max(p0[1], p1[1]), p2[1]) ||
@@ -324,6 +323,62 @@ bool psykronix::isPointInsidePolyhedronCEIL(const Eigen::Vector3d& _point, const
 		projection = normal.dot(point - p0);
 		if (projection == 0.0) //isPointOnTriangleSurface
 			return true; 
+		if (projection * normal.z() < 0.0) // point under plane
+			count++;
+	}
+	return count % 2 == 1;
+}
+
+// exclude point on surface
+bool isPointInsidePolyhedronFL(const Eigen::Vector3d& _point, const ModelMesh& mesh) // less judge like floor
+{
+	Eigen::Vector3d point = mesh.pose_.inverse() * _point; // all vertex using self coordinate
+	auto _isPointInTriangle2D = [&](const Eigen::Vector3d& p0, const Eigen::Vector3d& p1, const Eigen::Vector3d& p2)->bool
+	{	//pre-box
+		if (point.x() > std::max(std::max(p0[0], p1[0]), p2[0]) ||
+			point.x() < std::min(std::min(p0[0], p1[0]), p2[0]) ||
+			point.y() > std::max(std::max(p0[1], p1[1]), p2[1]) ||
+			point.y() < std::min(std::min(p0[1], p1[1]), p2[1]) ||
+			point.z() > std::max(std::max(p0[2], p1[2]), p2[2]) + eps) // isPointOnSurface with threshold
+			return false;
+		double az = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
+		return //when vertical, az==0, always true
+			0.0 <= az * ((p1[0] - p0[0]) * (point[1] - p0[1]) - (point[0] - p0[0]) * (p1[1] - p0[1])) &&
+			0.0 <= az * ((p2[0] - p1[0]) * (point[1] - p1[1]) - (point[0] - p1[0]) * (p2[1] - p1[1])) &&
+			0.0 <= az * ((p0[0] - p2[0]) * (point[1] - p2[1]) - (point[0] - p2[0]) * (p0[1] - p2[1]));
+	};
+	if (!mesh.bounding_.contains(_point)) //mesh boundingbox is world coordinate
+		return false;
+	// using axisZ
+	Eigen::Vector3d normal;
+	size_t count = 0;
+	double projection;
+	for (const auto& face : mesh.ibo_)
+	{
+		//Triangle trigon = { { mesh.vbo_[face[0]] ,mesh.vbo_[face[1]] ,mesh.vbo_[face[2]] } };
+		const Vector3d& p0 = mesh.vbo_[face[0]];
+		const Vector3d& p1 = mesh.vbo_[face[1]];
+		const Vector3d& p2 = mesh.vbo_[face[2]];
+		if (!_isPointInTriangle2D(p0, p1, p2))
+			continue;
+		normal = (p1 - p0).cross(p2 - p0);
+		if (normal.z() == 0.0) // trigon is vertical
+		{
+			// point in segment collinear judge 
+			if ((point.x() - p0.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (point.y() - p0.y()) == 0.0) //cross product is zero
+			{
+				Vector3d normalA = normal.cross(p1 - p0);
+				Vector3d normalB = normal.cross(p2 - p1);
+				Vector3d normalC = normal.cross(p0 - p2);
+				// point under segment judge
+				if (normalA.dot(point - p0) * normalA.z() < 0.0 || normalB.dot(point - p1) * normalB.z() < 0.0 || normalC.dot(point - p2) * normalC.z() < 0.0)
+					count++; //
+			}
+			continue; //judge point under segment
+		}
+		projection = normal.dot(point - p0);
+		if (fabs(projection) < normal.squaredNorm() * eps) //isPointOnTriangleSurface exclude
+			return false;
 		if (projection * normal.z() < 0.0) // point under plane
 			count++;
 	}
@@ -418,8 +473,9 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 	return { dmin * coord,{index, ULL_MAX} };
 }
 
-// for intrusive meshs
-std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConvex(const ModelMesh& meshA, const set<size_t>& faceA, const ModelMesh& meshB, const set<size_t>& faceB)
+// for intrusive meshs, using major method SAT
+std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConvex(const ModelMesh& meshA, const ModelMesh& meshB, 
+	const vector<size_t>& faceVectA, const vector<size_t>& faceVectB, const vector<size_t>& vertexVectA, const vector<size_t>& vertexVectB)
 {
 	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
 	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
@@ -427,32 +483,33 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 	const std::vector<std::array<int, 3>>& iboB = meshB.ibo_;
 	const Eigen::Affine3d& matA = meshA.pose_;
 	const Eigen::Affine3d& matB = meshB.pose_;
-	double dminA = DBL_MAX, dminB = DBL_MAX;
-	double minA, maxA, minB, maxB, projection;//refresh min and max
-	Eigen::Vector3d direction, normal;
+	double dminA = DBL_MAX, dminB = DBL_MAX, dminA_V = 0, dminB_V = 0, tmpMaxA = 0, tmpMaxB = 0;
+	double minA, maxA, minB, maxB, projection, origin;//refresh min and max
+	Eigen::Vector3d directionA, directionB, directionA_V, directionB_V, normal;
 	// the minimum distance must on the direction of face normal
 	bool isFixedFaceA = true;
-	std::array<size_t, 2> indexAB = { ULL_MAX , ULL_MAX };
+	size_t indexA = ULL_MAX, indexB = ULL_MAX, indexA_V = ULL_MAX, indexB_V = ULL_MAX;
+	//std::array<size_t, 2> indexAB = { ULL_MAX , ULL_MAX };
 	std::set<int> vboSetA, vboSetB; // to remove repeat vertex
-	for (const auto& iterA : faceA)
+	for (const auto& iterA : faceVectA) //merge vertex
 	{
 		vboSetA.insert(iboA[iterA][0]);
 		vboSetA.insert(iboA[iterA][1]);
 		vboSetA.insert(iboA[iterA][2]);
 	}
-	for (const auto& iterB : faceB)
+	for (const auto& iterB : faceVectB)
 	{
 		vboSetB.insert(iboB[iterB][0]);
 		vboSetB.insert(iboB[iterB][1]);
 		vboSetB.insert(iboB[iterB][2]);
 	}
-	for (const auto& iterA : faceA) // iterate every face
+	for (const auto& iA : faceVectA) // iterate every face
 	{
 		minA = DBL_MAX;
 		maxA = -DBL_MAX;
 		minB = DBL_MAX;
 		maxB = -DBL_MAX;
-		normal = (vboA[iboA[iterA][1]] - vboA[iboA[iterA][0]]).cross(vboA[iboA[iterA][2]] - vboA[iboA[iterA][0]]).normalized(); //pose is same
+		normal = (vboA[iboA[iA][1]] - vboA[iboA[iA][0]]).cross(vboA[iboA[iA][2]] - vboA[iboA[iA][0]]).normalized();
 		for (const auto& vertexA : vboSetA)
 		{
 			projection = normal.dot(matA * vboA[vertexA]);
@@ -465,26 +522,45 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
-		if (std::min(maxA - minB, maxB - minA) < dminA)//refresh 
+		if (std::min(maxA - minB, maxB - minA) < dminA)// the intersect mesh-part prejection segment
 		{
-			dminA = std::min(maxA - minB, maxB - minA);
-			direction = normal;
+			dminA = std::min(maxA - minB, maxB - minA); //always positive
+			directionA = normal;
+			indexA = iA ;
 #ifdef STATISTIC_DATA_RECORD
 			if (dminA < 0.0)
 				count_error_tris_sepa++;
-			indexAB = { iterA ,ULL_MAX };
 			if (maxA - minB > maxB - minA)
 				isFixedFaceA = false;
 #endif
 		}
+		for (const auto& iB : vertexVectB) // the inside vertex's prejection
+		{
+			//projection = normal.dot(matB * vboB[iB] - vboA[iboA[iA][0]]);
+			projection = normal.dot(matB * vboB[iB]) - origin;
+			if (projection < dminA_V) // always negative
+			{
+				dminA_V = projection;
+				directionA_V = normal;
+				indexA_V = iA;
+			}
+			if (!meshA.convex_ && tmpMaxA < projection) // the direction not exact
+				tmpMaxA = projection;
+		}
+		if (dminA < tmpMaxA - dminA_V) // choose max, without vertex, dminV is zero
+		{
+			dminA = dminA_V;
+			directionA = directionA_V;
+			indexA = indexA_V;
+		}
 	}
-	for (const auto& iterB : faceB) // iterate every face
+	for (const auto& iB : faceVectB) // iterate every face
 	{
 		minA = DBL_MAX;
 		maxA = -DBL_MAX;
 		minB = DBL_MAX;
 		maxB = -DBL_MAX;
-		normal = (vboB[iboB[iterB][1]] - vboB[iboB[iterB][0]]).cross(vboB[iboB[iterB][2]] - vboB[iboB[iterB][0]]).normalized(); //pose is same
+		normal = (vboB[iboB[iB][1]] - vboB[iboB[iB][0]]).cross(vboB[iboB[iB][2]] - vboB[iboB[iB][0]]).normalized();
 		for (const auto& vertexA : vboSetA)
 		{
 			projection = normal.dot(matA * vboA[vertexA]);
@@ -500,19 +576,116 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		if (std::min(maxA - minB, maxB - minA) < dminB)//refresh 
 		{
 			dminB = std::min(maxA - minB, maxB - minA);
-			direction = normal;
+			directionB = normal;
+			indexB = iB;
 #ifdef STATISTIC_DATA_RECORD
 			if (dminB < 0.0)
 				count_error_tris_sepa++;
-			indexAB = { ULL_MAX , iterB };
 			if (maxA - minB < maxB - minA)
 				isFixedFaceA = false;
 #endif
 		}
+		for (const auto& iA : vertexVectA) // the inside vertex's prejection
+		{
+			projection = normal.dot(matA * vboA[iA]) - origin;
+			if (projection < dminB_V)
+			{
+				dminB_V = projection;
+				directionB_V = normal;
+				indexB_V = iB;
+			}
+			if (!meshA.convex_ && tmpMaxB < projection) // the direction not exact
+				tmpMaxB = projection;
+		}
+		if (dminB < tmpMaxB - dminB_V) // choose max
+		{
+			dminB = dminB_V;
+			directionB = directionB_V;
+			indexB = indexB_V;
+		}
 	}
 	//if (!isFixedFaceA)
 	//	direction = -direction;
-	return { std::min(dminA, dminB) * direction, indexAB };
+	return (dminA < dminB) ?
+		std::tuple<Eigen::Vector3d, std::array<size_t, 2>>{ dminA * directionA, { indexA, ULL_MAX }} :
+		std::tuple<Eigen::Vector3d, std::array<size_t, 2>>{ dminB * directionB, { ULL_MAX, indexB } };
+}
+
+std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfVertexAndFace(const ModelMesh& meshA, const ModelMesh& meshB, 
+	const vector<size_t>& faceVectA, const vector<size_t>& faceVectB, const vector<size_t>& vertexVectA, const vector<size_t>& vertexVectB)
+{
+	if ((faceVectA.empty() || vertexVectB.empty()) && (faceVectB.empty() || vertexVectA.empty())) // any empty cause zero
+		return { gVecZero, { ULL_MAX , ULL_MAX } }; // or gVecNaN separate
+	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
+	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
+	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
+	const std::vector<std::array<int, 3>>& iboB = meshB.ibo_;
+	const Eigen::Affine3d& matA = meshA.pose_;
+	const Eigen::Affine3d& matB = meshB.pose_;
+	Eigen::Vector3d directionA, directionB, normal;
+	double dminA = 0, dminB = 0, projection, origin, tmpMaxA = 0, tmpMaxB = 0;
+	size_t indexA = ULL_MAX, indexB = ULL_MAX;
+#ifdef STATISTIC_DATA_RECORD
+	set<double> projectionA, projectionB;
+#endif
+	for (const auto& iA : faceVectA) // the face normal direction always outwards
+	{
+		if (vertexVectB.empty())
+		{
+			dminA = -DBL_MAX;
+			break;
+		}
+		normal = (vboA[iboA[iA][1]] - vboA[iboA[iA][0]]).cross(vboA[iboA[iA][2]] - vboA[iboA[iA][0]]).normalized();
+		origin = normal.dot(vboA[iboA[iA][0]]); // relative projection value
+		for (const auto& iB : vertexVectB)
+		{
+			//projection = normal.dot(matB * vboB[iB] - vboA[iboA[iA][0]]);
+			projection = normal.dot(matB * vboB[iB]) - origin;
+#ifdef STATISTIC_DATA_RECORD
+			projectionA.insert(projection);
+#endif
+			if (projection < dminA) // always negative
+			{
+				dminA = projection;
+				directionA = normal;
+				indexA = iA;
+			}
+			if (!meshA.convex_ && tmpMaxA < projection) // the direction not exact
+			{
+				tmpMaxA = projection;
+			}
+		}
+	}
+	for (const auto& iB : faceVectB) // the face normal direction always outwards
+	{
+		if (vertexVectA.empty())
+		{
+			dminB = -DBL_MAX;
+			break;
+		}
+		normal = (vboB[iboB[iB][1]] - vboB[iboB[iB][0]]).cross(vboB[iboB[iB][2]] - vboB[iboB[iB][0]]).normalized();
+		origin = normal.dot(vboB[iboB[iB][0]]);
+		for (const auto& iA : vertexVectA)
+		{
+			projection = normal.dot(matA * vboA[iA]) - origin;
+#ifdef STATISTIC_DATA_RECORD
+			projectionB.insert(projection);
+#endif
+			if (dminB < fabs(projection))
+			{
+				dminB = fabs(projection);
+				directionB = normal;
+				indexB = iB;
+			}
+			if (!meshA.convex_ && tmpMaxB < projection) // the direction not exact
+			{
+				tmpMaxB = projection;
+			}
+		}
+	}
+	return (tmpMaxA - dminA < tmpMaxB - dminB) ? //return min
+		std::tuple<Eigen::Vector3d, std::array<size_t, 2>>{ (tmpMaxA - dminA) * directionA, { indexA, ULL_MAX }} :
+		std::tuple<Eigen::Vector3d, std::array<size_t, 2>>{ (tmpMaxB - dminB) * directionB, { ULL_MAX, indexB } };
 }
 
 //--------------------------------------------------------------------------------------------------------
@@ -672,8 +845,8 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 	std::array<std::vector<size_t>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, 0.0);
 	bool isContact = false; // vertex or edge or face contact
 	bool isIntrusive = false;
-	std::set<size_t> faceSetA, faceSetB; // intersect and inside, or using vector
-	//std::set<size_t> vertexSetA, vertexSetB;
+	//std::set<size_t> faceSetA, faceSetB; // intersect and inside, or using vector
+	std::vector<size_t> faceVectA, faceVectB, vertexVectA, vertexVectB;
 	//std::array<Eigen::Vector3d, 2> pInter;
 #ifdef STATISTIC_DATA_RECORD
 	Triangle trigon;
@@ -710,8 +883,8 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 					continue;
 				}
 				isIntrusive = true; 
-				faceSetA.insert(iA);
-				faceSetB.insert(iB);
+				faceVectA.push_back(iA);// faceSetA.insert(iA);
+				faceVectB.push_back(iB);// faceSetB.insert(iB);
 				//pInter = getTwoTrianglesIntersectPoints(triA, triB);
 				//if (!(pInter[1] - pInter[0]).isZero()) // also using eps
 				//{
@@ -725,23 +898,36 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 	}
 	if (isIntrusive)
 	{
-		for (const auto& iA : indexAB[0]) //only insert intersect mesh
+		//for (const auto& iA : indexAB[0]) //only insert intersect mesh
+		//{
+		//	if (isPointInsidePolyhedronCEIL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][0]], meshB) ||
+		//		isPointInsidePolyhedronCEIL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][1]], meshB) ||
+		//		isPointInsidePolyhedronCEIL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][2]], meshB))
+		//		faceSetA.insert(iA);
+		//}
+		//for (const auto& iB : indexAB[1])
+		//{
+		//	if (isPointInsidePolyhedronCEIL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][0]], meshA) ||
+		//		isPointInsidePolyhedronCEIL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][1]], meshA) ||
+		//		isPointInsidePolyhedronCEIL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][2]], meshA))
+		//		faceSetB.insert(iB);
+		//}
+		for (size_t i = 0; i < meshA.vbo_.size(); ++i)
 		{
-			if (isPointInsidePolyhedronCEIL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][0]], meshB) ||
-				isPointInsidePolyhedronCEIL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][1]], meshB) ||
-				isPointInsidePolyhedronCEIL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][2]], meshB))
-				faceSetA.insert(iA);
+			if (isPointInsidePolyhedronFL(meshA.pose_ * meshA.vbo_[i], meshB))
+				vertexVectA.push_back(i);
 		}
-		for (const auto& iB : indexAB[1])
+		for (size_t i = 0; i < meshB.vbo_.size(); ++i)
 		{
-			if (isPointInsidePolyhedronCEIL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][0]], meshA) ||
-				isPointInsidePolyhedronCEIL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][1]], meshA) ||
-				isPointInsidePolyhedronCEIL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][2]], meshA))
-				faceSetB.insert(iB);
+			if (isPointInsidePolyhedronFL(meshB.pose_ * meshB.vbo_[i], meshA))
+				vertexVectB.push_back(i);
 		}
-		std::tuple<Eigen::Vector3d, std::array<size_t, 2>> depth = getPenetrationDepthOfTwoConvex(meshA, faceSetA, meshB, faceSetB);
+		std::tuple<Eigen::Vector3d, std::array<size_t, 2>> depth = getPenetrationDepthOfTwoConvex(meshA, meshB, faceVectA, faceVectB, vertexVectA, vertexVectB);
+		//std::tuple<Eigen::Vector3d, std::array<size_t, 2>> depth = getPenetrationDepthOfVertexAndFace(meshA, meshB, faceVectA, faceVectB, vertexVectA, vertexVectB);
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
-		if (std::get<1>(depth)[0] != ULL_MAX) //bool isLeft 
+		if (std::get<1>(depth)[0] == ULL_MAX && std::get<1>(depth)[1] == ULL_MAX)
+			interTriInfoList.push_back({ { std::move(gTirNaN), std::move(gTirNaN) }, {}, -std::get<0>(depth).norm() });
+		else if (std::get<1>(depth)[0] != ULL_MAX) //bool isLeft 
 		{
 			trigon = { meshA.pose_ * meshA.vbo_[meshA.ibo_[get<1>(depth)[0]][0]],
 					meshA.pose_ * meshA.vbo_[meshA.ibo_[get<1>(depth)[0]][1]],
@@ -920,14 +1106,11 @@ vector<Polyhedron> _getBooleanIntersectOfTwoMesh(const ModelMesh& meshA, const M
 {
 	vector<Polyhedron> interBodys;
 
-
 	return {};
 }
 
 Eigen::Vector3d _getPartialDepthtOfTwoConcave(const ModelMesh& meshA, const ModelMesh& meshB)
 {
-
-
 	return {};
 }
 

@@ -423,6 +423,8 @@ static void _test4() //优化SAT的侵入距离计算，验证
 	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034.bin"); //more, latest
 	std::vector<InterTriInfo> triInfo4034_all = read_InterTriInfo(binFilePath + "interTriInfo_4034_all.bin"); // all-iter
 	std::sort(triInfo4034_all.begin(), triInfo4034_all.end(), _opLessInfo);
+	triInfoSq = triInfo4034;
+	std::sort(triInfoSq.begin(), triInfoSq.end(), _opLessInfo); //-200
 	//std::vector<InterTriInfo> triInfo10_122;
 	//for (const auto& iter : interTriInfo_4034_5)
 	//{
@@ -434,6 +436,7 @@ static void _test4() //优化SAT的侵入距离计算，验证
 	std::vector<InterTriInfo> triInfoDiff;
 	std::vector<double> triInfoDiffd;
 	std::vector<tuple<size_t, size_t>> triInfoDiffCon; // 全是convex的entityid
+	double d_ins6, d_ins7; //-32.011189515236765
 	bool findflag = false;
 	bool isCon = false;
 	for (int i = 0; i < triInfo4034.size(); ++i )
@@ -468,11 +471,6 @@ static void _test4() //优化SAT的侵入距离计算，验证
 		}
 	}
 
-
-
-	triInfoSq = triInfo4034;
-	double d_ins6, d_ins7; //-32.011189515236765
-	std::sort(triInfoSq.begin(), triInfoSq.end(), _opLessInfo); //-200
 	//find difference
 	for (int i = 0; i < triInfo4034.size(); ++i)
 	{
