@@ -382,8 +382,7 @@ static void _test0()
 
 	double d0 = getTrianglesDistance(P, Q, triA, triB);
 	double d1 = getTrianglesDistanceSAT(triA, triB);
-	double d2 = getDistanceOfPointAndPlaneINF(Vector3d(0, 0, 0), triB);
-	d2 = sqrt(d2);
+	//double d2 = getDistanceOfPointAndPlaneINF(Vector3d(0, 0, 0), triB);
 
 	size_t m2 = ULL_MAX1 + 2; //归零重新开始计数
 	double dm1 = DBL_MAX + 1;

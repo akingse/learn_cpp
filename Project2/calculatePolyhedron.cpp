@@ -3,10 +3,7 @@
 using namespace std;
 using namespace Eigen;
 using namespace psykronix;
-//static constexpr double eps = FLT_EPSILON; //1e-7
-//static constexpr double _eps = -FLT_EPSILON;
-static constexpr double eps_d = 10 * DBL_EPSILON; // double
-static constexpr unsigned long long ULL_MAX = 18446744073709551615; // 2 ^ 64 - 1
+//static constexpr double eps_d = 10 * DBL_EPSILON; // double
 static const Triangle gTriXOY = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(1,0,0), Eigen::Vector3d(0,1,0) };
 static const Triangle gTriXOZ = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(1,0,0), Eigen::Vector3d(0,0,1) };
 static const Triangle gTriYOZ = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(0,1,0), Eigen::Vector3d(0,0,1) };
@@ -15,7 +12,6 @@ static const Triangle gTriYOZ = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(0,1,0)
 #undef min
 #define USING_METHOD_SAT
 #define USING_RELATIVE_MATRIX_RECTIFY
-#define USING_MESH_VERTEX_FOR_PENETRATION //all vertex
 
 //replace .x() => [0]
 //replace .y() => [1]
@@ -514,10 +510,8 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 #endif
 		}
 	}
-#ifdef STATISTIC_DATA_RECORD
-	if (!isFixedFaceA)
-		direction = -direction;
-#endif
+	//if (!isFixedFaceA)
+	//	direction = -direction;
 	return { std::min(dminA, dminB) * direction, indexAB };
 }
 
