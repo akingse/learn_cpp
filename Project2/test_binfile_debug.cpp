@@ -383,6 +383,11 @@ static void _test0()
 	double d0 = getTrianglesDistance(P, Q, triA, triB);
 	double d1 = getTrianglesDistanceSAT(triA, triB);
 	//double d2 = getDistanceOfPointAndPlaneINF(Vector3d(0, 0, 0), triB);
+	double d = std::nan("0");
+	if (0.0 > d) // nan not greater, not less
+		d++;
+	if (0.0 < d)
+		d++;
 
 	size_t m2 = ULL_MAX1 + 2; //归零重新开始计数
 	double dm1 = DBL_MAX + 1;
@@ -420,7 +425,7 @@ static void _test4() //优化SAT的侵入距离计算，验证
 	std::vector<InterTriInfo> triInfo200;
 
 	// find diff
-	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034.bin"); //more, latest
+	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034_11.bin"); //more, latest
 	std::vector<InterTriInfo> triInfo4034_all = read_InterTriInfo(binFilePath + "interTriInfo_4034_all.bin"); // all-iter
 	std::sort(triInfo4034_all.begin(), triInfo4034_all.end(), _opLessInfo);
 	triInfoSq = triInfo4034;
@@ -471,7 +476,7 @@ static void _test4() //优化SAT的侵入距离计算，验证
 		}
 	}
 
-	//find difference
+	//find difference 查找指定entityID
 	for (int i = 0; i < triInfo4034.size(); ++i)
 	{
 		//
@@ -494,9 +499,9 @@ static void _test4() //优化SAT的侵入距离计算，验证
 		// the inside
 		size_t idA = 1418;
 		size_t idB = 1417;
-		//if (triInfo4034[i].entityPair[0] == 3839 && triInfo4034[i].entityPair[1] == 3838)
-		//	d_ins6 = triInfo4034[i].distance;
-		if (triInfo4034[i].entityPair[0] == 1418 && triInfo4034[i].entityPair[1] == 1417)
+		if (triInfo4034[i].entityPair[0] == 6564 && triInfo4034[i].entityPair[1] == 4293)
+			d_ins6 = triInfo4034[i].distance;
+		if (triInfo4034[i].entityPair[0] == 6563 && triInfo4034[i].entityPair[1] == 4296)
 			d_ins7 = triInfo4034[i].distance;
 	}
 
@@ -609,7 +614,6 @@ static void _test5()
 	size_t count = 0, countInter = 0, countPre = 0;
 	clock_t startT, endT;
 
-
 	//测试一个点遍历所有mesh的效率
 	Vector3d point = Vector3d(rand(), rand(), rand());
 	//Vector3d point = Vector3d(0, 0, 0);
@@ -680,8 +684,12 @@ static void _test7()
 	std::vector<ModelMesh> cvtMeshVct_con = read_ModelMesh(binFilePath + "cvtMeshVct_con.bin"); //all mesh
 	//size_t idA = 1521, idB = 1519; //same model
 	//size_t idA = 2978, idB = 2976;
-	size_t idA = 1480, idB = 1474; //intru diff
+	//size_t idA = 1480, idB = 1474; //intru diff
+	//size_t idA = 6563, idB = 4296; // dp不同
+	size_t idA = 6564, idB = 4293;
+
 	ModelMesh meshA, meshB;
+	double dtest;
 	for (const auto& iter : cvtMeshVct_con)
 	{
 		if (iter.entityid_ == idA)
@@ -693,12 +701,15 @@ static void _test7()
 		//cout << b1 << b2 << endl;
 		//bool isConvex = is_convex(iter.vbo_, iter.ibo_); //
 	}
+
+	//手动计算PenetrationDepth
 	std::tuple<Eigen::Vector3d, std::array<size_t, 2>> res1 = getPenetrationDepthOfTwoConvexALL(meshA, meshB);
 	double d1 = std::get<0>(res1).norm();
 
 	std::tuple<RelationOfTwoMesh, Eigen::Vector3d> res2 = getTwoMeshsIntersectRelation(meshA, meshB);
 	double d2 = std::get<1>(res2).norm();
-
+	// without d = -75.000000000040018
+	 //with vertex d = -131.80984782427549
 
 	//相交测试
 	bool isInter = false;
@@ -727,13 +738,15 @@ static void _test7()
 	}
 	bool isInter1= isTwoMeshsIntersectSAT(meshA, meshB);
 
+
 	cout << "return 0;" << endl;
 }
 
 static int enrol = []()->int
 {
 #ifdef USING_FLATBUFFERS_SERIALIZATION
-	_test4();
+	//_test0();
+	//_test4();
 	//_test5();
 	//_test6();
 	_test7();

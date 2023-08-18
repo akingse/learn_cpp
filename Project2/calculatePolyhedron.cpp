@@ -484,7 +484,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 	const Eigen::Affine3d& matA = meshA.pose_;
 	const Eigen::Affine3d& matB = meshB.pose_;
 	double dminA = DBL_MAX, dminB = DBL_MAX, dminA_V = 0, dminB_V = 0, tmpMaxA = 0, tmpMaxB = 0;
-	double minA, maxA, minB, maxB, projection, origin;//refresh min and max
+	double minA, maxA, minB, maxB, projection;//refresh min and max
 	Eigen::Vector3d directionA, directionB, directionA_V, directionB_V, normal;
 	// the minimum distance must on the direction of face normal
 	bool isFixedFaceA = true;
@@ -536,11 +536,10 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		}
 		for (const auto& iB : vertexVectB) // the inside vertex's prejection
 		{
-			//projection = normal.dot(matB * vboB[iB] - vboA[iboA[iA][0]]);
-			projection = normal.dot(matB * vboB[iB]) - origin;
-			if (projection < dminA_V) // always negative
+			projection = normal.dot(matB * vboB[iB] - vboA[iboA[iA][0]]);
+			if (projection < dminA_V)
 			{
-				dminA_V = projection;
+				dminA_V = projection; // always negative
 				directionA_V = normal;
 				indexA_V = iA;
 			}
@@ -549,7 +548,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		}
 		if (dminA < tmpMaxA - dminA_V) // choose max, without vertex, dminV is zero
 		{
-			dminA = dminA_V;
+			dminA = tmpMaxA - dminA_V;
 			directionA = directionA_V;
 			indexA = indexA_V;
 		}
@@ -587,19 +586,19 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		}
 		for (const auto& iA : vertexVectA) // the inside vertex's prejection
 		{
-			projection = normal.dot(matA * vboA[iA]) - origin;
+			projection = normal.dot(matA * vboA[iA] - vboB[iboB[iB][0]]);
 			if (projection < dminB_V)
 			{
-				dminB_V = projection;
+				dminB_V = projection;  // always negative
 				directionB_V = normal;
 				indexB_V = iB;
 			}
-			if (!meshA.convex_ && tmpMaxB < projection) // the direction not exact
+			if (!meshB.convex_ && tmpMaxB < projection) // the direction not exact
 				tmpMaxB = projection;
 		}
 		if (dminB < tmpMaxB - dminB_V) // choose max
 		{
-			dminB = dminB_V;
+			dminB = tmpMaxB - dminB_V;
 			directionB = directionB_V;
 			indexB = indexB_V;
 		}
@@ -898,20 +897,20 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 	}
 	if (isIntrusive)
 	{
-		//for (const auto& iA : indexAB[0]) //only insert intersect mesh
-		//{
-		//	if (isPointInsidePolyhedronCEIL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][0]], meshB) ||
-		//		isPointInsidePolyhedronCEIL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][1]], meshB) ||
-		//		isPointInsidePolyhedronCEIL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][2]], meshB))
-		//		faceSetA.insert(iA);
-		//}
-		//for (const auto& iB : indexAB[1])
-		//{
-		//	if (isPointInsidePolyhedronCEIL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][0]], meshA) ||
-		//		isPointInsidePolyhedronCEIL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][1]], meshA) ||
-		//		isPointInsidePolyhedronCEIL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][2]], meshA))
-		//		faceSetB.insert(iB);
-		//}
+		for (const auto& iA : indexAB[0]) //only insert intersect mesh
+		{
+			if (isPointInsidePolyhedronCL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][0]], meshB) ||
+				isPointInsidePolyhedronCL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][1]], meshB) ||
+				isPointInsidePolyhedronCL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][2]], meshB))
+				faceVectA.push_back(iA);
+		}
+		for (const auto& iB : indexAB[1])
+		{
+			if (isPointInsidePolyhedronCL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][0]], meshA) ||
+				isPointInsidePolyhedronCL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][1]], meshA) ||
+				isPointInsidePolyhedronCL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][2]], meshA))
+				faceVectB.push_back(iB);
+		}
 		for (size_t i = 0; i < meshA.vbo_.size(); ++i)
 		{
 			if (isPointInsidePolyhedronFL(meshA.pose_ * meshA.vbo_[i], meshB))
@@ -996,14 +995,14 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 }
 
 // ClashSoft // return index of mesh_a and mesh_b ibo
-std::tuple<double, std::array<size_t, 2>> getTwoMeshsDistanceSAT(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance)
+std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance)
 {
 #ifdef STATISTIC_DATA_RECORD
 	std::array<std::array<Eigen::Vector3d, 3>, 2> triDistPair;
 #endif    
 	Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
 	// distance > tolerance, return double-max, to decrease calculate
-	double d = DBL_MAX; // the res
+	double d = DBL_MAX, temp; // the res
 	std::array<size_t, 2> index = { ULL_MAX, ULL_MAX };
 	std::array<vector<size_t>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, tolerance);
 	if (indexAB[0].empty() || indexAB[1].empty())
@@ -1027,7 +1026,7 @@ std::tuple<double, std::array<size_t, 2>> getTwoMeshsDistanceSAT(const ModelMesh
 #endif                    
 				continue;
 			}
-			double temp = getTrianglesDistanceSAT(triA, triB);// two trigons distance calculate
+			temp = getTrianglesDistanceSAT(triA, triB);// two trigons distance calculate
 			if (temp <= tolerance && temp < d) // update d
 			{
 				d = temp;
