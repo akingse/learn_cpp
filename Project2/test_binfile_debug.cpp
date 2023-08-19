@@ -425,7 +425,7 @@ static void _test4() //优化SAT的侵入距离计算，验证
 	std::vector<InterTriInfo> triInfo200;
 
 	// find diff
-	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034_11.bin"); //more, latest
+	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034.bin"); //more, latest
 	std::vector<InterTriInfo> triInfo4034_all = read_InterTriInfo(binFilePath + "interTriInfo_4034_all.bin"); // all-iter
 	std::sort(triInfo4034_all.begin(), triInfo4034_all.end(), _opLessInfo);
 	triInfoSq = triInfo4034;
@@ -686,7 +686,8 @@ static void _test7()
 	//size_t idA = 2978, idB = 2976;
 	//size_t idA = 1480, idB = 1474; //intru diff
 	//size_t idA = 6563, idB = 4296; // dp不同
-	size_t idA = 6564, idB = 4293;
+	//size_t idA = 6564, idB = 4293;
+	size_t idA = 3871, idB = 3391; //双杆
 
 	ModelMesh meshA, meshB;
 	double dtest;
@@ -746,10 +747,10 @@ static int enrol = []()->int
 {
 #ifdef USING_FLATBUFFERS_SERIALIZATION
 	//_test0();
-	//_test4();
+	_test4();
 	//_test5();
 	//_test6();
-	_test7();
+	//_test7();
 #endif
 	return 0;
 }();
