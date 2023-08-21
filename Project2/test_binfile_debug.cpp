@@ -360,6 +360,9 @@ static void _test3()
 //数据测试
 static void _test0()
 {
+	double rd = double(rand());// / RAND_MAX;
+	rd = double(rand());
+	rd = double(rand());
 	// 不相交的三角形
 	Vector3d triA_0 = Vector3d(4924494.8122771187, -385870.18283433426, 5749.9999999999054);
 	Vector3d triA_1 = Vector3d(4924599.8122771177, -385945.18283433421, 5749.9999999999054);
@@ -425,8 +428,9 @@ static void _test4() //优化SAT的侵入距离计算，验证
 	std::vector<InterTriInfo> triInfo200;
 
 	// find diff
-	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034.bin"); //more, latest
-	std::vector<InterTriInfo> triInfo4034_all = read_InterTriInfo(binFilePath + "interTriInfo_4034_all.bin"); // all-iter
+	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_5103.bin"); //more, latest
+	//std::vector<InterTriInfo> triInfo4034_all = read_InterTriInfo(binFilePath + "interTriInfo_4034_all.bin"); // all-iter
+	std::vector<InterTriInfo> triInfo4034_all = read_InterTriInfo(binFilePath + "interTriInfo_5108.bin"); 
 	std::sort(triInfo4034_all.begin(), triInfo4034_all.end(), _opLessInfo);
 	triInfoSq = triInfo4034;
 	std::sort(triInfoSq.begin(), triInfoSq.end(), _opLessInfo); //-200
@@ -594,8 +598,9 @@ static void _test5()
 {
 	//std::vector<ModelMesh> meshs0;
 	//std::vector<ModelMesh> meshs = _read_ModelMesh(filename + "cvtMeshVct_6509_6134.bin");
-	std::vector<ModelMesh> meshs_5233 = read_ModelMesh(binFilePath + "cvtMeshVct_jingujun.bin");
+	//std::vector<ModelMesh> meshs_5233 = read_ModelMesh(binFilePath + "cvtMeshVct_jingujun.bin");
 	std::vector<ModelMesh> meshs_jgj = read_ModelMesh(binFilePath + "cvtMeshVct_jgj.bin");
+	std::vector<ModelMesh> meshs_5233 = read_ModelMesh(binFilePath + "cvtMeshVct_con.bin");
 	std::vector<ModelMesh> meshs_con = read_ModelMesh(binFilePath + "cvtMeshVct_con.bin");
 	//std::vector<ModelMesh> meshs0 = read_ModelMesh(binFilePath + "cvtMeshVct_1.bin"); //old fbs file
 	//std::vector<ModelMesh> meshs2 = read_ModelMesh(binFilePath + "cvtMeshVct_2.bin");
@@ -611,7 +616,7 @@ static void _test5()
 		//1308, 1317 1794, 5216
 	}
 
-	size_t count = 0, countInter = 0, countPre = 0;
+	size_t count = 0, countInter = 0, countPre = 0, countLoop = 0;
 	clock_t startT, endT;
 
 	//测试一个点遍历所有mesh的效率
@@ -630,20 +635,23 @@ static void _test5()
 		nVertex += meshs_5233[i].vbo_.size(); //977267  //506709
 	}
 
-//#define TEST_TIME_COST
+#define TEST_TIME_COST
 #ifdef TEST_TIME_COST
 #pragma omp parallel for // omp optimize
-	for (int i = 0; i < meshs_5233.size()/2; ++i)
+	for (int i = 0; i < meshs_5233.size()/20; ++i)
 	{
-		for (int j = 0; j < meshs_5233.size()/2; ++j)
+		for (int j = 0; j < meshs_5233.size()/20; ++j)
 		{
 			if (i <= j)
 				continue;
 			for (const auto& iter : meshs_5233[i].vbo_)
 			{
-				isIn = isPointInsidePolyhedronCEIL(iter, meshs_5233[j]);
+				/*isIn =*/ 
+				isPointInsidePolyhedronRZ(iter, meshs_5233[j]);
 				//isIn = isPointInsidePolyhedronAZ(iter, meshs_5233[j]);
-				//isPointInsidePolyhedronRZ(iter, meshs_5233[j]);
+				//isIn = isPointInsidePolyhedronCL(iter, meshs_5233[j]);
+				//isIn = isPointInsidePolyhedronFL(iter, meshs_5233[j]);
+				countLoop++;
 			}
 		}
 	}
@@ -651,6 +659,7 @@ static void _test5()
 	endT = clock();
 	cout << "mesh count=" << meshs_5233.size() << endl;
 	cout << "count=" << count << endl;
+	cout << "countLoop=" << countLoop << endl;
 	cout << "time=" << double(endT - startT) / CLOCKS_PER_SEC << "s" << endl;
 	cout << "return 0;" << endl;
 }
@@ -682,12 +691,14 @@ static void _test6()
 static void _test7()
 {
 	std::vector<ModelMesh> cvtMeshVct_con = read_ModelMesh(binFilePath + "cvtMeshVct_con.bin"); //all mesh
+	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034.bin");
 	//size_t idA = 1521, idB = 1519; //same model
 	//size_t idA = 2978, idB = 2976;
 	//size_t idA = 1480, idB = 1474; //intru diff
 	//size_t idA = 6563, idB = 4296; // dp不同
 	//size_t idA = 6564, idB = 4293;
-	size_t idA = 3871, idB = 3391; //双杆
+	//size_t idA = 3871, idB = 3391; //双杆
+	size_t idA = 1521, idB = 1519; //inter but d<0
 
 	ModelMesh meshA, meshB;
 	double dtest;
@@ -706,9 +717,18 @@ static void _test7()
 	//手动计算PenetrationDepth
 	std::tuple<Eigen::Vector3d, std::array<size_t, 2>> res1 = getPenetrationDepthOfTwoConvexALL(meshA, meshB);
 	double d1 = std::get<0>(res1).norm();
-
+	bool isInter2=isTwoMeshsIntersectSAT(meshA, meshB);
 	std::tuple<RelationOfTwoMesh, Eigen::Vector3d> res2 = getTwoMeshsIntersectRelation(meshA, meshB);
 	double d2 = std::get<1>(res2).norm();
+	double dinfo;
+	for (int i = 0; i < triInfo4034.size(); ++i)
+	{
+		if (triInfo4034[i].entityPair[0] == idA &&
+			triInfo4034[i].entityPair[1] == idB )
+		{
+			dinfo = triInfo4034[i].distance;
+		}
+	}
 	// without d = -75.000000000040018
 	 //with vertex d = -131.80984782427549
 
@@ -747,8 +767,8 @@ static int enrol = []()->int
 {
 #ifdef USING_FLATBUFFERS_SERIALIZATION
 	//_test0();
-	_test4();
-	//_test5();
+	//_test4();
+	_test5();
 	//_test6();
 	//_test7();
 #endif

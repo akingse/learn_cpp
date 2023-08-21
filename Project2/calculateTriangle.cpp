@@ -16,7 +16,8 @@ using namespace psykronix;
 #ifdef STATISTIC_DATA_COUNT
 std::atomic<size_t> count_isTwoTrisInter = 0, count_getTrisDistance = 0, count_isTrisBoundBoxInter = 0, count_isTrisAndBoxInter = 0,
 count_pointInTri = 0, 
-count_err_inputbox = 0, count_err_inter_dist = 0, count_err_repeat_tri = 0;
+count_err_inputbox = 0, count_err_inter_dist = 0, count_err_repeat_tri = 0, 
+count_err_tris_sepa = 0, count_err_tris_inter = 0;
 #endif //STATISTIC_DATA_COUNT
 extern std::atomic<size_t> count_err_degen_tri;
 
@@ -1195,8 +1196,11 @@ double getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const
 std::array<Eigen::Vector3d, 2> getTwoTrianglesNearestPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {
 	std::array<Vector3d, 2> res;
-	//if (isTwoTrianglesIntersectSAT(triA, triB))
+#ifdef STATISTIC_DATA_COUNT
+	if (isTwoTrianglesIntersectSAT(triA, triB))
+		count_err_tris_inter++;
 	//	return res;
+#endif
 	double dmin = DBL_MAX, dtemp;
 	Eigen::Vector3d local, local2;
 	auto _getDistanceOfPointAndPlaneINF = [&](const Vector3d& point, const std::array<Vector3d, 3>& plane)->double
@@ -1316,8 +1320,11 @@ std::array<Eigen::Vector3d, 2> getTwoTrianglesNearestPoints(const std::array<Eig
 std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {
 	std::array<Vector3d, 2> res = { gVecNaN , gVecNaN }; // avoid separate
-	//if (!isTwoTrianglesIntersectSAT(triA, triB))
+#ifdef STATISTIC_DATA_COUNT
+	if (!isTwoTrianglesIntersectSAT(triA, triB))
+		count_err_tris_sepa++;
 	//	return res;
+#endif
 	Vector3d vecSeg, normal, local;
 	auto _getIntersectOfSegmentAndPlaneINF = [&](const std::array<Vector3d, 2>& segment, const std::array<Eigen::Vector3d, 3>& plane)->double
 	{

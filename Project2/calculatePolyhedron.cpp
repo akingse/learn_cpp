@@ -85,8 +85,13 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronRZ(const Eigen::Vector3
 	//one mesh inside other mesh, the bounding-box must inside other mesh
 	Vector3d rayX = Vector3d(1.0, 0.0, 0.0);
 	Vector3d normal, local;
+	std::array<Eigen::Vector3d, 3> trigon;
 	int count = 0;
 	double angle = 0.0, deno, k;
+#ifdef STATISTIC_DATA_TESTFOR
+	clock_t startT = clock(), endT;
+	size_t countCr = 0, countPr = 0;
+#endif
 	auto _isRayAndTriangleIntersectParallel = [&](std::array<Eigen::Vector3d, 3 >& trigon)->bool
 	{
 		//if (fabs((point - trigon[0]).dot(normal)) > eps) // not coplanar
@@ -99,22 +104,23 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronRZ(const Eigen::Vector3
 	};
 	auto _correctRayX = [&]()
 	{
-		angle += 0.1; // 0.1(rad)~5.73(deg)
+		angle += 1.0; // 0.1(rad)~5.73(deg)
 		Affine3d rotation = Affine3d::Identity();
-		rotation.rotate(AngleAxisd(angle, Vector3d::UnitZ()));
+		rotation.rotate(AngleAxisd(angle, Vector3d(rand(), rand(), rand()))); //Vector3d::UnitZ() //Vector3d(1, 1, 1)
 		rayX = rotation * rayX;
+		//countCr++;
 	};
 	while (true)
 	{
 		bool isNew = false;//new rayX
 		for (const auto& iter : ibo) // iterate every trigon
 		{
-			std::array<Eigen::Vector3d, 3> trigon = { vbo[iter[0]] ,vbo[iter[1]] ,vbo[iter[2]] };
+			trigon = { vbo[iter[0]] ,vbo[iter[1]] ,vbo[iter[2]] };
 			if (isPointOnTriangleSurface(point, trigon))
 				return RelationOfPointAndMesh::SURFACE; // ray across is false
 			normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
 			deno = rayX.dot(normal); //ray.direction
-			if (deno == 0.0)//(fabs(deno) < eps) // ray direction is parallel, redo circulation
+			if (deno == 0.0)// (fabs(deno) < eps) //ray direction is parallel, redo circulation
 			{
 				if (_isRayAndTriangleIntersectParallel(trigon)) //coplanar
 				{
@@ -145,6 +151,14 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronRZ(const Eigen::Vector3
 		}
 		if (!isNew)
 			break;//end while
+#ifdef STATISTIC_DATA_TESTFOR
+		endT = clock();
+		if (1.0 < double(endT - startT) / CLOCKS_PER_SEC)
+		{
+			cout << "timeout!" << endl;
+			//return {};
+		}
+#endif
 	}
 	return (count % 2 == 1) ? RelationOfPointAndMesh::INNER : RelationOfPointAndMesh::OUTER;
 }
@@ -263,7 +277,7 @@ bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& _point, const M
 	return count % 2 == 1;
 }
 
-bool isPointInsidePolyhedronCL(const Eigen::Vector3d& _point, const ModelMesh& mesh) // more judge like ceil
+bool psykronix::isPointInsidePolyhedronCL(const Eigen::Vector3d& _point, const ModelMesh& mesh) // more judge like ceil
 {
 #ifdef STATISTIC_DATA_COUNT
 	count_point_inside_mesh++;
@@ -335,7 +349,7 @@ bool isPointInsidePolyhedronCL(const Eigen::Vector3d& _point, const ModelMesh& m
 }
 
 // exclude point on surface
-bool isPointInsidePolyhedronFL(const Eigen::Vector3d& _point, const ModelMesh& mesh) // less judge like floor
+bool psykronix::isPointInsidePolyhedronFL(const Eigen::Vector3d& _point, const ModelMesh& mesh) // less judge like floor
 {
 #ifdef STATISTIC_DATA_COUNT
 	count_point_inside_mesh++;

@@ -28,7 +28,10 @@
 | isTwoSegmentsIntersect<br />Vector3d                         | using prebox                                                 | time = 0.571s<br/>time = 0.564s<br/>time = 0.564s            |                                                              |
 | getTwoTrianglesNearestPoints                                 |                                                              |                                                              |                                                              |
 | getTwoTrianglesIntersectPoints                               | USING_ACCURATE_NORMALIZED                                    | time = 38.246s<br/>time = 38.42s<br/>time = 39.058s<br />without<br />time = 32.608s<br/>time = 32.908s<br/>time = 32.791s |                                                              |
-|                                                              |                                                              |                                                              |                                                              |
+| isPointInsidePolyhedronFL                                    | mesh 5233/2=208016546                                        | time=24.209s                                                 |                                                              |
+| isPointInsidePolyhedronCL                                    | mesh 5233/2                                                  | time=19.549s                                                 |                                                              |
+| isPointInsidePolyhedronAZ<br />包含isPointRayAcrossTriangleSAT | mesh 5233/20                                                 | time=40.587s                                                 |                                                              |
+| isPointInsidePolyhedronRZ                                    | mesh 5233/20                                                 | time=13.061s                                                 |                                                              |
 
 
 
