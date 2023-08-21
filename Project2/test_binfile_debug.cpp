@@ -392,6 +392,10 @@ static void _test0()
 	if (0.0 < d)
 		d++;
 
+	Vector3d v1(1, 0, 0);
+	Vector3d v2(1, 0, 0);
+	Vector3d v3 = v1.cross(v2).normalized(); //0的单位化还是0
+
 	size_t m2 = ULL_MAX1 + 2; //归零重新开始计数
 	double dm1 = DBL_MAX + 1;
 	double dm2 = DBL_MAX + DBL_MAX;
@@ -410,6 +414,7 @@ static void _test0()
 	cout << "return 0;" << endl;
 }
 
+//距离划分等级
 #ifdef USING_FLATBUFFERS_SERIALIZATION
 static void _test4() //优化SAT的侵入距离计算，验证
 {
@@ -428,7 +433,7 @@ static void _test4() //优化SAT的侵入距离计算，验证
 	std::vector<InterTriInfo> triInfo200;
 
 	// find diff
-	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_5103.bin"); //more, latest
+	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034.bin"); //more, latest
 	//std::vector<InterTriInfo> triInfo4034_all = read_InterTriInfo(binFilePath + "interTriInfo_4034_all.bin"); // all-iter
 	std::vector<InterTriInfo> triInfo4034_all = read_InterTriInfo(binFilePath + "interTriInfo_5108.bin"); 
 	std::sort(triInfo4034_all.begin(), triInfo4034_all.end(), _opLessInfo);
@@ -690,6 +695,19 @@ static void _test6()
 //优化测试
 static void _test7()
 {
+
+	Vector3d triA_0 = Vector3d(4936998.2332053846, -383787.17924958991, 6015.6846000000369);
+	Vector3d triA_1 = Vector3d(4937024.8494758252, -383779.28694613208, 6070.1700860465535);
+	Vector3d triA_2 = Vector3d(4937029.5225078566, -383777.90129043174, 6060.6040417688109);
+	Vector3d triB_0 = Vector3d(4937021.0285847718, -383780.41992348642, 6057.7254248593736);
+	Vector3d triB_1 = Vector3d(4937022.2016856968, -383780.07207353070, 6050.0000000000000);
+	Vector3d triB_2 = Vector3d(4936824.6681833472, -383113.90342609736, 6050.0000000000000);
+
+	Triangle triA = { triA_0, triA_1, triA_2 };
+	Triangle triB = { triB_0, triB_1, triB_2 };
+	bool issat = isTwoTrianglesIntersectSAT(triA, triB);
+
+
 	std::vector<ModelMesh> cvtMeshVct_con = read_ModelMesh(binFilePath + "cvtMeshVct_con.bin"); //all mesh
 	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034.bin");
 	//size_t idA = 1521, idB = 1519; //same model
@@ -767,10 +785,10 @@ static int enrol = []()->int
 {
 #ifdef USING_FLATBUFFERS_SERIALIZATION
 	//_test0();
-	//_test4();
-	_test5();
+	_test4();
+	//_test5();
 	//_test6();
-	//_test7();
+	_test7();
 #endif
 	return 0;
 }();

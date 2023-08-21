@@ -67,33 +67,33 @@ bool psykronix::isPointInTriangle(const Vector3d& point, const std::array<Vector
 	//	point.z() > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]) /*+ eps */ )
 	//	return false; // random data test fast 10% about
 #ifdef USING_ACCURATE_NORMALIZED
-	Vector3d vecZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]).normalized();// using isLeft test
+	Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[1]).normalized();// using isLeft test
 #else
-	Vector3d vecZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);// using isLeft test
+	Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[1]);// using isLeft test
 #endif // USING_ACCURATE_NORMALIZED
 #ifdef USING_THRESHOLD_GEOMETRIC
 	// 3D triangle, input point must coplanar
-	return !((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(vecZ) < _eps || //bool isNotLeftA
-		(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < _eps || //bool isNotLeftB
-		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < _eps); //bool isNotLeftC
+	return !((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) < _eps || //bool isNotLeftA
+		(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) < _eps || //bool isNotLeftB
+		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal) < _eps); //bool isNotLeftC
 #else
 	return
-		0.0 <= (trigon[1] - trigon[0]).cross(point - trigon[0]).dot(vecZ) && //bool isLeftA
-		0.0 <= (trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) && //bool isLeftB
-		0.0 <= (trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ);	 //bool isLeftC
+		0.0 <= (trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) && //bool isLeftA
+		0.0 <= (trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) && //bool isLeftB
+		0.0 <= (trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal);	 //bool isLeftC
 #endif //USING_THRESHOLD_GEOMETRIC
 	//+-*x< 0,5,1.5,2.5,1.5
-	//if (((trigon[1] - trigon[0]).cross(point - trigon[0])).dot(vecZ) < _eps) //bool isLeftA
+	//if (((trigon[1] - trigon[0]).cross(point - trigon[0])).dot(normal) < _eps) //bool isLeftA
 	//	return false;
-	//if (((trigon[2] - trigon[0]).cross(point - trigon[0])).dot(vecZ) > eps) //bool isLeftB
+	//if (((trigon[2] - trigon[0]).cross(point - trigon[0])).dot(normal) > eps) //bool isLeftB
 	//	return false;
-	//if (((trigon[2] - trigon[1]).cross(point - trigon[1])).dot(vecZ) < _eps) //bool isLeftC
+	//if (((trigon[2] - trigon[1]).cross(point - trigon[1])).dot(normal) < _eps) //bool isLeftC
 	//	return false;
 	//return true;
 	// area method
-	//double dot1 = vecZ.dot((trigon[1] - trigon[0]).cross(point - trigon[0]));
-	//double dot2 = vecZ.dot((point - trigon[0]).cross(trigon[2] - trigon[0]));
-	//return 0.0 <= dot1 && 0.0 <= dot2 && dot1 + dot2 <= vecZ.dot(vecZ);
+	//double dot1 = normal.dot((trigon[1] - trigon[0]).cross(point - trigon[0]));
+	//double dot2 = normal.dot((point - trigon[0]).cross(trigon[2] - trigon[0]));
+	//return 0.0 <= dot1 && 0.0 <= dot2 && dot1 + dot2 <= normal.dot(normal);
 }
 
 bool psykronix::isPointOnTriangleSurface(const Vector3d& point, const std::array<Vector3d, 3>& trigon)
@@ -106,22 +106,22 @@ bool psykronix::isPointOnTriangleSurface(const Vector3d& point, const std::array
 		point.z() > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]))
 		return false;
 #ifdef USING_ACCURATE_NORMALIZED
-	Vector3d vecZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]).normalized();// using isLeft test
+	Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[1]).normalized();// using isLeft test
 #else
-	Vector3d vecZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);// using isLeft test
+	Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[1]);// using isLeft test
 #endif // USING_ACCURATE_NORMALIZED
 #ifdef USING_THRESHOLD_GEOMETRIC
-	if ((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(vecZ) < _eps ||
-		(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < _eps ||
-		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < _eps)
+	if ((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) < _eps ||
+		(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) < _eps ||
+		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal) < _eps)
 		return false;
-	return fabs(vecZ.dot(point - trigon[0])) < eps;
+	return fabs(normal.dot(point - trigon[0])) < eps;
 #else
-	if ((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(vecZ) < 0.0 ||
-		(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < 0.0 ||
-		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < 0.0)
+	if ((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) < 0.0 ||
+		(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) < 0.0 ||
+		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal) < 0.0)
 		return false;
-	return vecZ.dot(point - trigon[0]) == 0.0;
+	return normal.dot(point - trigon[0]) == 0.0;
 #endif
 }
 
@@ -190,7 +190,7 @@ bool psykronix::isSegmentCrossTriangle(const std::array<Vector3d, 2>& segment, c
 	//judge trigon point
 	if (isPointInTriangle(segment[0], trigon) || isPointInTriangle(segment[1], trigon))
 		return true;
-	Vector3d vecX = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]).cross(segment[1] - segment[0]); // axisZ cross axisY
+	Vector3d vecX = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[1]).cross(segment[1] - segment[0]); // axisZ cross axisY
 	double dot0 = vecX.dot(trigon[0] - segment[0]);
 	double dot1 = vecX.dot(trigon[1] - segment[0]);
 	double dot2 = vecX.dot(trigon[2] - segment[0]);
@@ -241,14 +241,14 @@ bool psykronix::isTwoTrianglesIntersectPIT(const std::array<Vector3d, 3>& triL, 
 		//if (!isTwoTrianglesBoundingBoxIntersect(triL, triR))
 		//	return false;
 		// right edge through left plane
-	Vector3d veczL = (triL[1] - triL[0]).cross(triL[2] - triL[0]);
+	Vector3d veczL = (triL[1] - triL[0]).cross(triL[2] - triL[1]);
 	bool acrossR2L_A = (veczL.dot(triR[0] - triL[0])) * (veczL.dot(triR[1] - triL[0])) < eps; //include point on plane(dot==0)
 	bool acrossR2L_B = (veczL.dot(triR[1] - triL[0])) * (veczL.dot(triR[2] - triL[0])) < eps;
 	bool acrossR2L_C = (veczL.dot(triR[2] - triL[0])) * (veczL.dot(triR[0] - triL[0])) < eps;
 	if (!acrossR2L_A && !acrossR2L_B && !acrossR2L_C)
 		return false;
 	// left edge through right plane
-	Vector3d veczR = (triR[1] - triR[0]).cross(triR[2] - triR[0]);
+	Vector3d veczR = (triR[1] - triR[0]).cross(triR[2] - triR[1]);
 	bool acrossL2R_A = (veczR.dot(triL[0] - triR[0])) * (veczR.dot(triL[1] - triR[0])) < eps;
 	bool acrossL2R_B = (veczR.dot(triL[1] - triR[0])) * (veczR.dot(triL[2] - triR[0])) < eps;
 	bool acrossL2R_C = (veczR.dot(triL[2] - triR[0])) * (veczR.dot(triL[0] - triR[0])) < eps;
@@ -354,13 +354,13 @@ bool psykronix::isTwoTrianglesIntersectPIT(const std::array<Vector3d, 3>& triL, 
 // Method: edge in tetra-hedron
 bool psykronix::isTwoTrianglesIntersectEIT(const std::array<Vector3d, 3>& triL, const std::array<Vector3d, 3>& triR)
 {
-	Vector3d veczL = (triL[1] - triL[0]).cross(triL[2] - triL[0]); // triL close face triangle
+	Vector3d veczL = (triL[1] - triL[0]).cross(triL[2] - triL[1]); // triL close face triangle
 	bool acrossR2L_A = (veczL.dot(triR[0] - triL[0])) * (veczL.dot(triR[1] - triL[0])) < eps; //include point-on-plane
 	bool acrossR2L_B = (veczL.dot(triR[1] - triL[0])) * (veczL.dot(triR[2] - triL[0])) < eps;
 	bool acrossR2L_C = (veczL.dot(triR[2] - triL[0])) * (veczL.dot(triR[0] - triL[0])) < eps;
 	if (!acrossR2L_A && !acrossR2L_B && !acrossR2L_C)
 		return false;
-	Vector3d veczR = (triR[1] - triR[0]).cross(triR[2] - triR[0]); // triR close face triangle
+	Vector3d veczR = (triR[1] - triR[0]).cross(triR[2] - triR[1]); // triR close face triangle
 	bool acrossL2R_A = (veczR.dot(triL[0] - triR[0])) * (veczR.dot(triL[1] - triR[0])) < eps; //include point-on-plane
 	bool acrossL2R_B = (veczR.dot(triL[1] - triR[0])) * (veczR.dot(triL[2] - triR[0])) < eps;
 	bool acrossL2R_C = (veczR.dot(triL[2] - triL[0])) * (veczR.dot(triL[0] - triL[0])) < eps;
@@ -541,8 +541,10 @@ bool psykronix::isTriangleAndBoundingBoxIntersect(const std::array<Eigen::Vector
 std::tuple<Vector3d, double> psykronix::getTriangleBoundingCircle(const std::array<Vector3d, 3>& trigon) //return center and radius
 {
 	Vector3d vecA = trigon[1] - trigon[0];
-	Vector3d vecB = trigon[2] - trigon[0];
-	Vector3d vecC = trigon[2] - trigon[1];
+	Vector3d vecB = trigon[2] - trigon[1];
+	Vector3d vecC = trigon[0] - trigon[2];
+	Vector3d normal = vecA.cross(vecB);
+	//if (normal.squaredNorm() > eps) //trigon legal
 	// illegal and obtuse angle
 	double a2 = vecA.squaredNorm();
 	double b2 = vecB.squaredNorm();
@@ -553,20 +555,18 @@ std::tuple<Vector3d, double> psykronix::getTriangleBoundingCircle(const std::arr
 		return { 0.5 * (trigon[0] + trigon[2]), 0.5 * sqrt(b2) };
 	else if (c2 >= a2 + b2)
 		return { 0.5 * (trigon[1] + trigon[2]), 0.5 * sqrt(c2) };
-	Vector3d vecZ = vecA.cross(vecB);
-	//if (vecZ.squaredNorm() > eps) //trigon legal
-	const Vector3d& p0 = trigon[0];
-	const Vector3d& p1 = trigon[1];
-	const Vector3d& p2 = trigon[2];
-	//mat = set_matrix_by_row_vectors(vecA, vecB, vecZ)
+	//mat = set_matrix_by_row_vectors(vecA, vecB, normal)
 	Eigen::Matrix3d mat;
 	mat.row(0) = vecA;
 	mat.row(1) = vecB;
-	mat.row(2) = vecZ;
+	mat.row(2) = normal;
+	const Vector3d& p0 = trigon[0];
+	const Vector3d& p1 = trigon[1];
+	const Vector3d& p2 = trigon[2];
 	Vector3d p = mat.inverse() * Vector3d(
 		0.5 * (p1.x() * p1.x() - p0.x() * p0.x() + p1.y() * p1.y() - p0.y() * p0.y() + p1.z() * p1.z() - p0.z() * p0.z()),
 		0.5 * (p2.x() * p2.x() - p0.x() * p0.x() + p2.y() * p2.y() - p0.y() * p0.y() + p2.z() * p2.z() - p0.z() * p0.z()),
-		vecZ.dot(p0));
+		normal.dot(p0));
 	return { p, (p - p0).norm() };
 }
 
@@ -580,17 +580,17 @@ bool psykronix::isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& s
 		std::max(segment[0][2], segment[1][2]) < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
 		std::max(segment[0][2], segment[1][2]) > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]))
 		return false;
-	Vector3d vecZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
+	Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[1]);
 	Vector3d vecSeg = segment[1] - segment[0];
 #ifdef USING_METHOD_SAT
 	double minA, maxA, projection, dotB0, dotB1;
-	if (fabs(vecZ.dot(segment[0] - trigon[0])) < eps && fabs(vecZ.dot(segment[1] - trigon[0])) < eps)// 2D-SAT, coplanar
+	if (fabs(normal.dot(segment[0] - trigon[0])) < eps && fabs(normal.dot(segment[1] - trigon[0])) < eps)// 2D-SAT, coplanar
 	{
 		std::array<Eigen::Vector3d, 4> axes = { {
-				vecZ.cross(vecSeg),
-				vecZ.cross(trigon[1] - trigon[0]),
-				vecZ.cross(trigon[2] - trigon[1]),
-				vecZ.cross(trigon[0] - trigon[2]) } };
+				normal.cross(vecSeg),
+				normal.cross(trigon[1] - trigon[0]),
+				normal.cross(trigon[2] - trigon[1]),
+				normal.cross(trigon[0] - trigon[2]) } };
 		for (const auto& axis : axes)
 		{
 			minA = DBL_MAX;
@@ -611,7 +611,7 @@ bool psykronix::isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& s
 	else // 3D-SAT, not coplanar
 	{
 		std::array<Eigen::Vector3d, 4> axes = { {
-				vecZ,
+				normal,
 				vecSeg.cross(trigon[1] - trigon[0]),
 				vecSeg.cross(trigon[2] - trigon[1]),
 				vecSeg.cross(trigon[0] - trigon[2])} };
@@ -633,8 +633,8 @@ bool psykronix::isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& s
 		return true;
 	}
 #else
-	double onPlaneS = (vecZ.dot(segment[0] - trigon[0]));
-	double onPlaneE = (vecZ.dot(segment[1] - trigon[0]));
+	double onPlaneS = (normal.dot(segment[0] - trigon[0]));
+	double onPlaneE = (normal.dot(segment[1] - trigon[0]));
 	if (onPlaneS * onPlaneE > 0.0)//include point on plane(dot==0)
 		return false;
 	//point on plane
@@ -847,6 +847,7 @@ bool isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& 
 			coords[1],
 			coords[2],
 			edges[0].cross(edges[1]), //normal
+			//normal.cross(edges[]),
 			coords[0].cross(edges[0]),
 			coords[0].cross(edges[1]),
 			coords[0].cross(edges[2]),

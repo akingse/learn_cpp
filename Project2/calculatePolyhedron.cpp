@@ -50,7 +50,7 @@ bool psykronix::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& vbo, 
 	bool isFirst /*= true*/, isLeft /*= false*/, temp /*= false*/;
 	for (const auto& face : ibo)
 	{
-		normal = (vbo[face[1]] - vbo[face[0]]).cross(vbo[face[2]] - vbo[face[0]]);// .normalized();
+		normal = (vbo[face[1]] - vbo[face[0]]).cross(vbo[face[2]] - vbo[face[1]]);// .normalized();
 		d_eps = normal.squaredNorm() * eps; // wide threshold
 		isFirst = true;
 		for (size_t i = 0; i < vbo.size(); ++i)
@@ -83,7 +83,7 @@ bool psykronix::isMeshConvexPolyhedron(const ModelMesh& mesh)
 RelationOfPointAndMesh psykronix::isPointInsidePolyhedronRZ(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
 {
 	//one mesh inside other mesh, the bounding-box must inside other mesh
-	Vector3d rayX = Vector3d(1.0, 0.0, 0.0);
+	Vector3d rayLine = Vector3d(1.0, 0.0, 0.0);
 	Vector3d normal, local;
 	std::array<Eigen::Vector3d, 3> trigon;
 	int count = 0;
@@ -98,16 +98,17 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronRZ(const Eigen::Vector3
 		if ((point - trigon[0]).dot(normal) != 0.0) // not coplanar
 			return false;
 		// negetive direction ray cause cross product result opposite
-		return ((trigon[0] - point).cross(rayX).dot(rayX.cross(trigon[1] - point)) >= 0.0 && (trigon[0] - point).cross(rayX).dot((trigon[0] - point).cross(trigon[1] - point)) >= 0.0) ||
-			((trigon[1] - point).cross(rayX).dot(rayX.cross(trigon[2] - point)) >= 0.0 && (trigon[1] - point).cross(rayX).dot((trigon[1] - point).cross(trigon[2] - point)) >= 0.0) ||
-			((trigon[2] - point).cross(rayX).dot(rayX.cross(trigon[0] - point)) >= 0.0 && (trigon[2] - point).cross(rayX).dot((trigon[2] - point).cross(trigon[0] - point)) >= 0.0);
+		return 
+			((trigon[0] - point).cross(rayLine).dot(rayLine.cross(trigon[1] - point)) >= 0.0 && (trigon[0] - point).cross(rayLine).dot((trigon[0] - point).cross(trigon[1] - point)) >= 0.0) ||
+			((trigon[1] - point).cross(rayLine).dot(rayLine.cross(trigon[2] - point)) >= 0.0 && (trigon[1] - point).cross(rayLine).dot((trigon[1] - point).cross(trigon[2] - point)) >= 0.0) ||
+			((trigon[2] - point).cross(rayLine).dot(rayLine.cross(trigon[0] - point)) >= 0.0 && (trigon[2] - point).cross(rayLine).dot((trigon[2] - point).cross(trigon[0] - point)) >= 0.0);
 	};
-	auto _correctRayX = [&]()
+	auto _correctRayLine = [&]()
 	{
 		angle += 1.0; // 0.1(rad)~5.73(deg)
 		Affine3d rotation = Affine3d::Identity();
 		rotation.rotate(AngleAxisd(angle, Vector3d(rand(), rand(), rand()))); //Vector3d::UnitZ() //Vector3d(1, 1, 1)
-		rayX = rotation * rayX;
+		rayLine = rotation * rayLine;
 		//countCr++;
 	};
 	while (true)
@@ -118,13 +119,13 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronRZ(const Eigen::Vector3
 			trigon = { vbo[iter[0]] ,vbo[iter[1]] ,vbo[iter[2]] };
 			if (isPointOnTriangleSurface(point, trigon))
 				return RelationOfPointAndMesh::SURFACE; // ray across is false
-			normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]);
-			deno = rayX.dot(normal); //ray.direction
+			normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[1]);
+			deno = rayLine.dot(normal); //ray.direction
 			if (deno == 0.0)// (fabs(deno) < eps) //ray direction is parallel, redo circulation
 			{
 				if (_isRayAndTriangleIntersectParallel(trigon)) //coplanar
 				{
-					_correctRayX();
+					_correctRayLine();
 					isNew = true;
 					break;
 				}
@@ -133,7 +134,7 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronRZ(const Eigen::Vector3
 			k = (trigon[0] - point).dot(normal) / deno;
 			if (k < 0.0) // only positive direction
 				continue;
-			local = point + k * rayX;
+			local = point + k * rayLine;
 			if (!isPointInTriangle(local, trigon))
 				continue;
 			if ((local - trigon[0]).isZero() ||
@@ -143,7 +144,7 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronRZ(const Eigen::Vector3
 				(local - trigon[1]).cross(local - trigon[2]).isZero() ||
 				(local - trigon[2]).cross(local - trigon[0]).isZero()) //singularity
 			{
-				_correctRayX();
+				_correctRayLine();
 				isNew = true;
 				break;
 			}
@@ -199,7 +200,7 @@ bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& _point, const M
 	};
 	auto isLeftAll = [&](const std::array<int, 3>& trigon)->bool // buildin lambda function
 	{
-		Vector3d normal = (vbo[trigon[1]] - vbo[trigon[0]]).cross(vbo[trigon[2]] - vbo[trigon[0]]).normalized(); // for precision
+		Vector3d normal = (vbo[trigon[1]] - vbo[trigon[0]]).cross(vbo[trigon[2]] - vbo[trigon[1]]).normalized(); // for precision
 		bool isFirst = true, isLeft /*= false*/, temp /*= false*/;
 		for (size_t i = 0; i < vbo.size(); ++i)
 		{
@@ -324,7 +325,7 @@ bool psykronix::isPointInsidePolyhedronCL(const Eigen::Vector3d& _point, const M
 		const Vector3d& p2 = mesh.vbo_[face[2]];
 		if (!_isPointInTriangle2D(p0, p1, p2))
 			continue;
-		normal = (p1 - p0).cross(p2 - p0);
+		normal = (p1 - p0).cross(p2 - p1);
 		if (normal.z() == 0.0) // trigon is vertical
 		{
 			// point in segment collinear judge 
@@ -383,7 +384,7 @@ bool psykronix::isPointInsidePolyhedronFL(const Eigen::Vector3d& _point, const M
 		const Vector3d& p2 = mesh.vbo_[face[2]];
 		if (!_isPointInTriangle2D(p0, p1, p2))
 			continue;
-		normal = (p1 - p0).cross(p2 - p0);
+		normal = (p1 - p0).cross(p2 - p1);
 		if (normal.z() == 0.0) // trigon is vertical
 		{
 			// point in segment collinear judge 
@@ -426,7 +427,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		maxA = -DBL_MAX;
 		minB = DBL_MAX;
 		maxB = -DBL_MAX;
-		normal = (vboA[faceA[1]] - vboA[faceA[0]]).cross(vboA[faceA[2]] - vboA[faceA[0]]).normalized(); //pose is same
+		normal = (vboA[faceA[1]] - vboA[faceA[0]]).cross(vboA[faceA[2]] - vboA[faceA[1]]).normalized(); //pose is same
 		for (const auto& vertexA : vboA)
 		{
 			projection = normal.dot(matA * vertexA);
@@ -451,7 +452,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		maxA = -DBL_MAX;
 		minB = DBL_MAX;
 		maxB = -DBL_MAX;
-		normal = (vboB[faceB[1]] - vboB[faceB[0]]).cross(vboB[faceB[2]] - vboB[faceB[0]]).normalized(); //pose is same
+		normal = (vboB[faceB[1]] - vboB[faceB[0]]).cross(vboB[faceB[2]] - vboB[faceB[1]]).normalized(); //pose is same
 		for (const auto& vertexA : vboA)
 		{
 			projection = normal.dot(matA * vertexA);
@@ -531,7 +532,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		maxA = -DBL_MAX;
 		minB = DBL_MAX;
 		maxB = -DBL_MAX;
-		normal = (vboA[iboA[iA][1]] - vboA[iboA[iA][0]]).cross(vboA[iboA[iA][2]] - vboA[iboA[iA][0]]).normalized();
+		normal = (vboA[iboA[iA][1]] - vboA[iboA[iA][0]]).cross(vboA[iboA[iA][2]] - vboA[iboA[iA][1]]).normalized();
 		for (const auto& vertexA : vboSetA)
 		{
 			projection = normal.dot(matA * vboA[vertexA]);
@@ -546,7 +547,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		}
 		if (std::min(maxA - minB, maxB - minA) < dminA)// the intersect mesh-part prejection segment
 		{
-			dminA = std::min(maxA - minB, maxB - minA); //always positive
+			dminA = std::min(maxA - minB, maxB - minA); //always positive, but impacted by accuracy, forexample cross edges and normalized
 			directionA = normal;
 			indexA = iA ;
 #ifdef STATISTIC_DATA_RECORD
@@ -584,7 +585,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		maxA = -DBL_MAX;
 		minB = DBL_MAX;
 		maxB = -DBL_MAX;
-		normal = (vboB[iboB[iB][1]] - vboB[iboB[iB][0]]).cross(vboB[iboB[iB][2]] - vboB[iboB[iB][0]]).normalized();
+		normal = (vboB[iboB[iB][1]] - vboB[iboB[iB][0]]).cross(vboB[iboB[iB][2]] - vboB[iboB[iB][1]]).normalized();
 		for (const auto& vertexA : vboSetA)
 		{
 			projection = normal.dot(matA * vboA[vertexA]);
@@ -662,7 +663,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfVertexAn
 			dminA = -DBL_MAX;
 			break;
 		}
-		normal = (vboA[iboA[iA][1]] - vboA[iboA[iA][0]]).cross(vboA[iboA[iA][2]] - vboA[iboA[iA][0]]).normalized();
+		normal = (vboA[iboA[iA][1]] - vboA[iboA[iA][0]]).cross(vboA[iboA[iA][2]] - vboA[iboA[iA][1]]).normalized();
 		origin = normal.dot(matA * vboA[iboA[iA][0]]); // relative projection value
 		for (const auto& iB : vertexVectB)
 		{
@@ -690,7 +691,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfVertexAn
 			dminB = -DBL_MAX;
 			break;
 		}
-		normal = (vboB[iboB[iB][1]] - vboB[iboB[iB][0]]).cross(vboB[iboB[iB][2]] - vboB[iboB[iB][0]]).normalized();
+		normal = (vboB[iboB[iB][1]] - vboB[iboB[iB][0]]).cross(vboB[iboB[iB][2]] - vboB[iboB[iB][1]]).normalized();
 		origin = normal.dot(matB * vboB[iboB[iB][0]]);
 		for (const auto& iA : vertexVectA)
 		{
@@ -906,11 +907,11 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 				isContact = true; //isIntersect// maybe intrusive or atleast contact
 				//intersect
 #ifdef STATISTIC_DATA_TESTFOR
-				double cp = (triA[1] - triA[0]).cross(triA[2] - triA[0]).cross((triB[1] - triB[0]).cross(triB[2] - triB[0])).squaredNorm();
-				cpVect.push_back(cp);
-				sort(cpVect.begin(), cpVect.end());
+				//double cp = (triA[1] - triA[0]).cross(triA[2] - triA[1]).cross((triB[1] - triB[0]).cross(triB[2] - triB[1])).squaredNorm();
+				//cpVect.push_back(cp);
+				//sort(cpVect.begin(), cpVect.end());
 #endif
-				if ((triA[1] - triA[0]).cross(triA[2] - triA[0]).cross((triB[1] - triB[0]).cross(triB[2] - triB[0])).isZero(eps)) // intersect-coplanar
+				if ((triA[1] - triA[0]).cross(triA[2] - triA[1]).cross((triB[1] - triB[0]).cross(triB[2] - triB[1])).isZero(eps)) // intersect-coplanar
 				{
 #ifdef STATISTIC_DATA_COUNT
 					count_trigon_coplanar++;
