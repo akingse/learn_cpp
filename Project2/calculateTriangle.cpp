@@ -18,15 +18,15 @@ std::atomic<size_t> count_isTwoTrisInter = 0, count_getTrisDistance = 0, count_i
 count_pointInTri = 0, 
 count_err_inputbox = 0, count_err_inter_dist = 0, count_err_repeat_tri = 0, 
 count_err_tris_sepa = 0, count_err_tris_inter = 0;
-#endif //STATISTIC_DATA_COUNT
 extern std::atomic<size_t> count_err_degen_tri;
+#endif //STATISTIC_DATA_COUNT
 
 enum class RelationOfTrigon : int
 {
 	SEPARATE = 0,
 	INTERSECT, //intersect point local one or two trigon
-	COPLANAR_A_INSIDE_B,
-	COPLANAR_B_INSIDE_A,
+	COPLANAR_AINB, //A_INSIDE_B
+	COPLANAR_BINA, //B_INSIDE_A
 	COPLANAR_INTERSECT,
 };
 

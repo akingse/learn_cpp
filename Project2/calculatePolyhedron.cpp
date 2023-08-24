@@ -80,7 +80,7 @@ bool psykronix::isMeshConvexPolyhedron(const ModelMesh& mesh)
 }
 
 // exclude point on face, ray is rotz
-RelationOfPointAndMesh psykronix::isPointInsidePolyhedronRZ(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
+RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
 {
 	//one mesh inside other mesh, the bounding-box must inside other mesh
 	Vector3d rayLine = Vector3d(1.0, 0.0, 0.0);
@@ -164,10 +164,10 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronRZ(const Eigen::Vector3
 	return (count % 2 == 1) ? RelationOfPointAndMesh::INNER : RelationOfPointAndMesh::OUTER;
 }
 
-RelationOfPointAndMesh psykronix::isPointInsidePolyhedronRZ(const Eigen::Vector3d& point, const ModelMesh& mesh)
+RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector3d& point, const ModelMesh& mesh)
 {
 	Eigen::Vector3d pointR = mesh.pose_.inverse() * point;
-	return isPointInsidePolyhedronRZ(pointR, mesh.vbo_, mesh.ibo_);
+	return isPointInsidePolyhedronROT(pointR, mesh.vbo_, mesh.ibo_);
 }
 
 // include point on face
@@ -987,7 +987,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 	{
 		// precondition: boundingbox inside, polyface not intersect, mesh isnot empty
 		Eigen::Affine3d mat = meshA.pose_.inverse() * meshB.pose_;
-		RelationOfPointAndMesh relation = isPointInsidePolyhedronRZ(mat * (*meshB.vbo_.begin()), meshA.vbo_, meshA.ibo_);// already pre judge, mesh isnot empty
+		RelationOfPointAndMesh relation = isPointInsidePolyhedronROT(mat * (*meshB.vbo_.begin()), meshA.vbo_, meshA.ibo_);// already pre judge, mesh isnot empty
 		if (RelationOfPointAndMesh::OUTER == relation)
 		{
 			return isContact ?
@@ -1009,7 +1009,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 	else if (meshB.bounding_.contains(meshA.bounding_))
 	{
 		Eigen::Affine3d mat = meshB.pose_.inverse() * meshA.pose_;
-		RelationOfPointAndMesh relation = isPointInsidePolyhedronRZ(mat * (*meshA.vbo_.begin()), meshB.vbo_, meshB.ibo_);
+		RelationOfPointAndMesh relation = isPointInsidePolyhedronROT(mat * (*meshA.vbo_.begin()), meshB.vbo_, meshB.ibo_);
 		if (RelationOfPointAndMesh::OUTER == relation)
 		{
 			return isContact ?
@@ -1105,7 +1105,7 @@ std::vector<Eigen::Vector3d> _getInsideVertexSet(const ModelMesh& meshA, const M
 	std::vector<Eigen::Vector3d> res;
 	for (const auto& iter : meshA.vbo_)
 	{
-		if (RelationOfPointAndMesh::INNER == isPointInsidePolyhedronRZ(relative_matrix * iter, meshB.vbo_, meshB.ibo_))
+		if (RelationOfPointAndMesh::INNER == isPointInsidePolyhedronROT(relative_matrix * iter, meshB.vbo_, meshB.ibo_))
 			res.push_back(meshA.pose_ * iter);
 	}
 	return res;
