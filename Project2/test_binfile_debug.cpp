@@ -652,7 +652,7 @@ static void _test5()
 			for (const auto& iter : meshs_5233[i].vbo_)
 			{
 				/*isIn =*/ 
-				isPointInsidePolyhedronRZ(iter, meshs_5233[j]);
+				isPointInsidePolyhedronROT(iter, meshs_5233[j]);
 				//isIn = isPointInsidePolyhedronAZ(iter, meshs_5233[j]);
 				//isIn = isPointInsidePolyhedronCL(iter, meshs_5233[j]);
 				//isIn = isPointInsidePolyhedronFL(iter, meshs_5233[j]);
@@ -677,7 +677,7 @@ static void _test6()
 	ModelMesh meshA = meshs[0];
 	ModelMesh meshB = meshs[1];
 
-	RelationOfPointAndMesh b0 = isPointInsidePolyhedronRZ(Vector3d(150, 50, 50), meshA.vbo_, meshA.ibo_);
+	RelationOfPointAndMesh b0 = isPointInsidePolyhedronROT(Vector3d(150, 50, 50), meshA.vbo_, meshA.ibo_);
 
 	//Vector3d df = getPenetrationDepthOfTwoMeshs(meshA, meshB);
 	//Vector3d di = getPenetrationDepthOfTwoMeshs(meshB, meshA);
