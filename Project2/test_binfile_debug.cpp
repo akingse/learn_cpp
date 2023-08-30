@@ -414,7 +414,7 @@ static void _test0()
 	cout << "return 0;" << endl;
 }
 
-//距离划分等级
+//距离划分等级& 找不同
 #ifdef USING_FLATBUFFERS_SERIALIZATION
 static void _test4() //优化SAT的侵入距离计算，验证
 {
@@ -433,10 +433,10 @@ static void _test4() //优化SAT的侵入距离计算，验证
 	std::vector<InterTriInfo> triInfo200;
 
 	// find diff
-	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034.bin"); //more, latest
+	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034_4.bin"); //more, latest
 	//std::vector<InterTriInfo> triInfo4034_all = read_InterTriInfo(binFilePath + "interTriInfo_4034_all.bin"); // all-iter
-	std::vector<InterTriInfo> triInfo4034_all = read_InterTriInfo(binFilePath + "interTriInfo_5108.bin"); 
-	std::sort(triInfo4034_all.begin(), triInfo4034_all.end(), _opLessInfo);
+	std::vector<InterTriInfo> triInfo4021 = read_InterTriInfo(binFilePath + "interTriInfo_4021.bin"); 
+	std::sort(triInfo4021.begin(), triInfo4021.end(), _opLessInfo);
 	triInfoSq = triInfo4034;
 	std::sort(triInfoSq.begin(), triInfoSq.end(), _opLessInfo); //-200
 	//std::vector<InterTriInfo> triInfo10_122;
@@ -448,6 +448,7 @@ static void _test4() //优化SAT的侵入距离计算，验证
 	std::vector<ModelMesh> meshs_5233 = read_ModelMesh(binFilePath + "cvtMeshVct_con.bin");
 
 	std::vector<InterTriInfo> triInfoDiff;
+	std::vector<InterTriInfo> triInfoEntityDiff;
 	std::vector<double> triInfoDiffd;
 	std::vector<tuple<size_t, size_t>> triInfoDiffCon; // 全是convex的entityid
 	double d_ins6, d_ins7; //-32.011189515236765
@@ -455,16 +456,23 @@ static void _test4() //优化SAT的侵入距离计算，验证
 	bool isCon = false;
 	for (int i = 0; i < triInfo4034.size(); ++i )
 	{
-		for (int j = 0; j < triInfo4034_all.size(); ++j )
+		bool findFlag = false;
+		for (int j = 0; j < triInfo4021.size(); ++j )
 		{
+			//找不同
+			//auto iter=find(triInfo4021.begin(), triInfo4021.end(), triInfo4034[i])
+			if ((triInfo4034[i].entityPair[0] == triInfo4021[j].entityPair[0] && triInfo4034[i].entityPair[1] == triInfo4021[j].entityPair[1])||
+				(triInfo4034[i].entityPair[0] == triInfo4021[j].entityPair[1] && triInfo4034[i].entityPair[1] == triInfo4021[j].entityPair[0]))
+				findFlag = true;
+
 			if (i <= j)
 				continue;
-			if (triInfo4034[i].entityPair[0] == triInfo4034_all[j].entityPair[0] &&
-				triInfo4034[i].entityPair[1] == triInfo4034_all[j].entityPair[1] &&
-				fabs(triInfo4034[i].distance - triInfo4034_all[j].distance) > eps)
+			if (triInfo4034[i].entityPair[0] == triInfo4021[j].entityPair[0] &&
+				triInfo4034[i].entityPair[1] == triInfo4021[j].entityPair[1] &&
+				fabs(triInfo4034[i].distance - triInfo4021[j].distance) > eps)
 			{
 				double d1 = triInfo4034[i].distance;
-				double d2 = triInfo4034_all[j].distance;
+				double d2 = triInfo4021[j].distance;
 				bool conA = false, conB = false;// = triInfo4034[i].entityPair
 				for (auto& iter : meshs_5233)
 				{
@@ -483,6 +491,8 @@ static void _test4() //优化SAT的侵入距离计算，验证
 				triInfoDiffd.push_back(d1 - d2);
 			}
 		}
+		if (!findFlag)
+			triInfoEntityDiff.push_back(triInfo4034[i]);
 	}
 
 	//find difference 查找指定entityID
@@ -788,7 +798,7 @@ static int enrol = []()->int
 	_test4();
 	//_test5();
 	//_test6();
-	_test7();
+	//_test7();
 #endif
 	return 0;
 }();

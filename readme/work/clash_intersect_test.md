@@ -21,7 +21,7 @@
 | _isTwoTriangles<br />BoundingBoxIntersect<br />三角面的包围盒求交 |                                                              | eigen<br />time = 1.617s<br/>time = 1.568s<br/>time = 1.495s<br />手写<br />time = 1.228s<br/>time = 1.242s<br/>time = 1.22s |                                                              |
 | 软碰撞<br />getTriDist<br />getTrianglesDistanceSAT          | using SAT<br />time = 47.853s<br/>time = 47.723s<br/>time = 47.657s<br />openMP<br />time = 7.771s<br/>time = 8.011s<br/>time = 8.128s | time = 56.686s<br/>time = 57.677s<br/>time = 57.643s<br />openMP<br />time = 33.12s<br/>time = 38.761s<br/>time = 39.656s | time = 9.058s<br/>time = 9.336s<br/>time = 9.22s<br />分开三角形<br />time = 6.302s<br/>time = 6.497s<br/>time = 6.521s |
 | 包围盒求交<br />AlignedBox3d::intersection                   | 1e8                                                          | time = 0.658s<br/>time = 0.616s<br/>time = 0.626s            |                                                              |
-| isTwoTrianglesIntersectSAT<br />分离轴定理                   | laptop strix<br />time = 4.271s<br/>time = 4.36s<br/>time = 4.311s | time = 8.723s<br/>time = 8.805s<br/>time = 8.774s<br />openmp<br />time = 1.17s<br/>time = 1.281s<br/>time = 1.277s |                                                              |
+| isTwoTrianglesIntersectSAT<br />分离轴定理                   | laptop strix<br />time = 4.271s<br/>time = 4.36s<br/>time = 4.311s | time = 8.723s<br/>time = 8.805s<br/>time = 8.774s<br />openmp<br />time = 1.17s<br/>time = 1.281s<br/>time = 1.277s | bug修复<br />time = 11.668s<br/>time = 11.145s<br/>time = 11.379s |
 | isTriangleAndBoundingBox<br />三角面与包围盒                 |                                                              | time = 7.706s<br/>time = 7.596s<br/>time = 8.258s            |                                                              |
 | 三角面与包围盒 SAT                                           |                                                              | time = 11.168s<br/>time = 11.176s<br/>time = 11.663s<br />pre-judge<br />time = 5.512s<br/>time = 5.461s<br/>time = 5.476s |                                                              |
 | isPointRayAcrossTriangle                                     | SAT分离轴<br />求交点                                        | time = 1.576s<br/>time = 1.444s<br/>time = 1.447s<br />求交点<br />time = 1.512s<br/>time = 1.387s<br/>time = 1.436s |                                                              |
@@ -66,6 +66,15 @@
 |                          | 优化<br />no：3.821000/3.850000/3.963000<br />no+omp: 1.760000/1.613000/1.546000<br />head:3.853000/3.787000/3.603000<br />head+omp:1.681000/1.635000/1.646000 |                                                |
 | 模型统计                 | 地漏排水：10<br />消防：1<br />洗手池：6<br />马桶：7        |                                                |
 |                          |                                                              |                                                |
+
+
+
+### 功能边界
+
+1. 固有限制：此版本碰撞检查全部基于离散后的mesh数据，碰撞精度受限于mesh精度；当离散接口发生错误时，将无法得到相关结果；
+2. 碰撞最小单元：BPEntity；
+3. 硬碰撞精度问题，硬碰撞定义为距离为浮点数0的碰撞，此碰撞结果易受浮点数精度影响，对于临界碰撞有概率问题；
+4. 算法：此版本算法使用分离轴定理，用于判断mesh最小单元三角面的碰撞，对于临界碰撞，有侵入距离和分离距离作为参考；；
 
 
 
