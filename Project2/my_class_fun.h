@@ -150,8 +150,10 @@ struct ModelMesh
     Eigen::AlignedBox3d bounding_;
     Eigen::Affine3d pose_; // Eigen::Affine3d::Identity()
     bool convex_; // isConvex default true
-    uint64_t instanceid_;
+    //uint64_t instanceid_;
     std::vector<int> iboRaw_; //for test debug
     uint64_t entityid_;
 };
+
+
 #endif

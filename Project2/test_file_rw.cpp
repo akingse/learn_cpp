@@ -351,7 +351,7 @@ std::vector<ModelMesh> read_ModelMesh(const std::string& fileName)
 			{
 				_iboRaw.push_back(iboRaw->Get(i));
 			}
-			res.push_back(ModelMesh{ vbo_, ibo_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(),mesh->convex(),0, _iboRaw, mesh->entityid() });
+			res.push_back(ModelMesh{ vbo_, ibo_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(),mesh->convex(), _iboRaw, mesh->entityid() });
 		}
 		inFile.close();
 	}

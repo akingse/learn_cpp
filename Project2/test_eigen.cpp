@@ -129,6 +129,14 @@ static void test2()
 	cout << "cout box:" << endl;
 	cout << box.min() << box.max() << endl;
 	cout << "return 0" << endl;
+
+	Affine3d pose = Eigen::Affine3d::Identity();
+	for (size_t i = 0; i < 4; i++)
+		for (size_t j = 0; j < 4; j++)
+			pose(i, j) = i+j;
+
+
+	return;
 }
 
 static int _enrol = []()->int {

@@ -853,7 +853,7 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 	}
 	else if (meshB.bounding_.contains(meshA.bounding_))
 	{
-		if (isPointInsidePolyhedronAZ(meshB.pose_.inverse() * meshA.pose_ * meshA.vbo_[0], meshB))
+		if (isPointInsidePolyhedronAZ(meshA.pose_.inverse() * meshB.pose_ * meshA.vbo_[0], meshB))
 		{
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
 			triRecordHard.push_back({ gTirNaN, gTirNaN });
@@ -1103,11 +1103,11 @@ std::vector<Eigen::Vector3d> _getInsideVertexSet(const ModelMesh& meshA, const M
 	Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
 	// the vertex of meshA inside meshB
 	std::vector<Eigen::Vector3d> res;
-	for (const auto& iter : meshA.vbo_)
-	{
-		if (RelationOfPointAndMesh::INNER == isPointInsidePolyhedronROT(relative_matrix * iter, meshB.vbo_, meshB.ibo_))
-			res.push_back(meshA.pose_ * iter);
-	}
+	//for (const auto& iter : meshA.vbo_)
+	//{
+	//	if (RelationOfPointAndMesh::INNER == isPointInsidePolyhedronROT(relative_matrix * iter, meshB.vbo_, meshB.ibo_))
+	//		res.push_back(meshA.pose_ * iter);
+	//}
 	return res;
 }
 
@@ -1115,25 +1115,25 @@ std::vector<Eigen::Vector3d> _getIntersectVertexSet(const ModelMesh& meshA, cons
 {
 	Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
 	std::vector<Eigen::Vector3d> res;
-	for (size_t i = 0; i < meshA.ibo_.size(); i++)
-	{
-		std::array<Eigen::Vector3d, 3> triA = {
-				relative_matrix * meshA.vbo_[meshA.ibo_[i][0]],
-				relative_matrix * meshA.vbo_[meshA.ibo_[i][1]],
-				relative_matrix * meshA.vbo_[meshA.ibo_[i][2]] };
-		for (size_t j = 0; j < meshA.ibo_.size(); j++)
-		{
-			std::array<Eigen::Vector3d, 3> triB = {
-					meshB.vbo_[meshB.ibo_[j][0]],
-					meshB.vbo_[meshB.ibo_[j][1]],
-					meshB.vbo_[meshB.ibo_[j][2]] };
-			if (!isTwoTrianglesIntersectSAT(triA, triB))
-				continue;
-			std::array<Eigen::Vector3d, 2> pInter = getTwoTrianglesIntersectPoints(triA, triB);
-			res.push_back(meshB.pose_ * pInter[0]);
-			res.push_back(meshB.pose_ * pInter[1]);
-		}
-	}
+	//for (size_t i = 0; i < meshA.ibo_.size(); i++)
+	//{
+	//	std::array<Eigen::Vector3d, 3> triA = {
+	//			relative_matrix * meshA.vbo_[meshA.ibo_[i][0]],
+	//			relative_matrix * meshA.vbo_[meshA.ibo_[i][1]],
+	//			relative_matrix * meshA.vbo_[meshA.ibo_[i][2]] };
+	//	for (size_t j = 0; j < meshA.ibo_.size(); j++)
+	//	{
+	//		std::array<Eigen::Vector3d, 3> triB = {
+	//				meshB.vbo_[meshB.ibo_[j][0]],
+	//				meshB.vbo_[meshB.ibo_[j][1]],
+	//				meshB.vbo_[meshB.ibo_[j][2]] };
+	//		if (!isTwoTrianglesIntersectSAT(triA, triB))
+	//			continue;
+	//		std::array<Eigen::Vector3d, 2> pInter = getTwoTrianglesIntersectPoints(triA, triB);
+	//		res.push_back(meshB.pose_ * pInter[0]);
+	//		res.push_back(meshB.pose_ * pInter[1]);
+	//	}
+	//}
 	return res;
 }
 
@@ -1154,16 +1154,7 @@ Eigen::Vector3d _getPartialDepthtOfTwoConcave(const ModelMesh& meshA, const Mode
 Eigen::Vector3d getPenetrationDepthOfTwoMeshs(const ModelMesh& meshA, const ModelMesh& meshB)
 {
 	//must intersect
-	if (meshA.convex_ && meshB.convex_) // already intrusive
-	{
-		//return getPenetrationDepthOfTwoConvex(meshA, meshB);
-	}
 	Eigen::Vector3d direction = gVecNaN;
-	// V==null, I!=nul, 
-
-	// V!=null
-
-
 	return direction;
 }
 
