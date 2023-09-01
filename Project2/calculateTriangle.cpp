@@ -15,7 +15,7 @@ using namespace psykronix;
 
 #ifdef STATISTIC_DATA_COUNT
 std::atomic<size_t> count_isTwoTrisInter = 0, count_getTrisDistance = 0, count_isTrisBoundBoxInter = 0, count_isTrisAndBoxInter = 0,
-count_pointInTri = 0, 
+count_pointInTri = 0, count_err_degen_tri = 0,
 count_err_inputbox = 0, count_err_inter_dist = 0, count_err_repeat_tri = 0, 
 count_err_tris_sepa = 0, count_err_tris_inter = 0;
 extern std::atomic<size_t> count_err_degen_tri;
@@ -1211,7 +1211,7 @@ std::array<Eigen::Vector3d, 2> getTwoTrianglesNearestPoints(const std::array<Eig
 #ifdef STATISTIC_DATA_COUNT
 	if (isTwoTrianglesIntersectSAT(triA, triB))
 		count_err_tris_inter++;
-	//	return res;
+		return res;
 #endif
 	double dmin = DBL_MAX, dtemp;
 	Eigen::Vector3d local, local2;

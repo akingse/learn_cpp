@@ -18,14 +18,13 @@ static const Triangle gTriYOZ = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(0,1,0)
 //replace .z() => [2]
 
 #ifdef STATISTIC_DATA_COUNT
-extern std::atomic<size_t> count_mesh_inside_mesh, count_getTrisDistance;
-extern std::atomic<size_t> count_reduced_exclude_pre, count_triA_inter, count_triB_inter,
+extern std::atomic<size_t> count_mesh_inside_mesh,
+count_reduced_exclude_pre, count_triA_inter, count_triB_inter,
 count_err_empty_mesh, count_tri_box_exclude_pre, count_trigon_coplanar, count_error_tris_sepa,
 count_point_inside_mesh;
 
 extern std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> triPairList, triRecordHard;
 extern std::vector<InterTriInfo> interTriInfoList;
-
 #endif //STATISTIC_DATA_COUNT
 
 enum class RelationOfRayAndTrigon : int
@@ -43,8 +42,11 @@ enum class RelationOfRayAndTrigon : int
 	COIN_EDGE_20,
 };
 
-bool psykronix::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
+bool psykronix::isMeshConvexPolyhedron(const ModelMesh& mesh)
+//bool psykronix::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
 {
+	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
+	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
 	Vector3d normal;
 	double projection, d_eps;
 	bool isFirst /*= true*/, isLeft /*= false*/, temp /*= false*/;
@@ -74,10 +76,10 @@ bool psykronix::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& vbo, 
 	return true;
 }
 
-bool psykronix::isMeshConvexPolyhedron(const ModelMesh& mesh)
-{
-	return isMeshConvexPolyhedron(mesh.vbo_, mesh.ibo_);
-}
+//bool psykronix::isMeshConvexPolyhedron(const ModelMesh& mesh)
+//{
+//	return isMeshConvexPolyhedron(mesh.vbo_, mesh.ibo_);
+//}
 
 // exclude point on face, ray is rotz
 RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector3d& _point, const ModelMesh& mesh)

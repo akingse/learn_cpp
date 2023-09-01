@@ -158,7 +158,7 @@ static void _test0()
 	{
 		start = clock();
 		//totalNum = 1;
-//#pragma omp parallel for //开启omp优化
+#pragma omp parallel for //开启omp优化
 		for (int i = 0; i < totalNum; i++)
 		{
 			//auto res = _get_circumcircle_center({ _get_rand() ,_get_rand() ,_get_rand() });
@@ -172,7 +172,7 @@ static void _test0()
 			//bool res = isTwoSegmentsIntersect(randData2[i], randData2_[i]);
 			// 
 			// 三角形相交测试
-			bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]);
+			//bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]);
 			//bool res = isSegmentCrossTriangleSurface(randData2[i], randData3_[i]);
 			//bool res = TriangularIntersectionTest(randData3[i], randData3_[i]);
 			//包围盒
@@ -190,7 +190,7 @@ static void _test0()
 			// 软碰撞
 			//double d = getTrianglesDistance(P, Q, randData3[i], randData3_[i]);
 			//double d = getTrianglesDistanceSAT(randData3[i], randData3_[i]);
-			//array<Vector3d, 2> res = getTwoTrianglesNearestPoints(randData3[i], randData3_[i]);
+			array<Vector3d, 2> res = getTwoTrianglesNearestPoints(randData3[i], randData3_[i]);
 			//array<Vector3d, 2> res = getTwoTrianglesIntersectPoints(randData3[i], randData3_[i]);
 			//array<Vector3d, 2> res = getTwoTrianglesIntersectPoints(randData3xy[i], randData3_xy[i]);
 			//double d = (res[1] - res[0]).norm(); << endl

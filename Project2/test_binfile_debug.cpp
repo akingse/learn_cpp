@@ -11,7 +11,7 @@ static constexpr unsigned long long ULL_MAX3 = 0xFFFFFFFFFFFFFFFF; //
 
 static Eigen::Vector3d P(std::nan("0"), std::nan("0"), std::nan("0"));
 static Eigen::Vector3d Q(std::nan("0"), std::nan("0"), std::nan("0"));
-static std::string binFilePath = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/";
+static std::string binFilePath = "C:/Users/Aking/source/repos/bimbase/src/bin_file/";
 #undef max
 #undef min
 
@@ -189,7 +189,7 @@ static void _test1()
 
 static void _test2()
 {
-	//string path = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/";
+	//string path = "C:/Users/Aking/source/repos/bimbase/src/bin_file/";
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris1 = _readTrigonFile(binFilePath + "triInterList_opt1.bin"); //4031
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris2 = _readTrigonFile(binFilePath + "triInterList_opt2.bin"); //4031
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris3 = _readTrigonFile(binFilePath + "triInterList_opt3.bin"); //4030

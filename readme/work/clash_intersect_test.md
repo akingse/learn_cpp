@@ -26,12 +26,12 @@
 | 三角面与包围盒 SAT                                           |                                                              | time = 11.168s<br/>time = 11.176s<br/>time = 11.663s<br />pre-judge<br />time = 5.512s<br/>time = 5.461s<br/>time = 5.476s |                                                              |
 | isPointRayAcrossTriangle                                     | SAT分离轴<br />求交点                                        | time = 1.576s<br/>time = 1.444s<br/>time = 1.447s<br />求交点<br />time = 1.512s<br/>time = 1.387s<br/>time = 1.436s |                                                              |
 | isTwoSegmentsIntersect<br />Vector3d                         | using prebox                                                 | time = 0.571s<br/>time = 0.564s<br/>time = 0.564s            |                                                              |
-| getTwoTrianglesNearestPoints                                 |                                                              |                                                              |                                                              |
+| getTwoTrianglesNearestPoints                                 |                                                              | time = 65.394s<br/>time = 65.323s<br/>time = 65.159s         |                                                              |
 | getTwoTrianglesIntersectPoints                               | USING_ACCURATE_NORMALIZED                                    | time = 38.246s<br/>time = 38.42s<br/>time = 39.058s<br />without<br />time = 32.608s<br/>time = 32.908s<br/>time = 32.791s |                                                              |
 | isPointInsidePolyhedronFL                                    | mesh 5233/2=208016546                                        | time=24.209s                                                 |                                                              |
 | isPointInsidePolyhedronCL                                    | mesh 5233/2                                                  | time=19.549s                                                 |                                                              |
 | isPointInsidePolyhedronAZ<br />包含isPointRayAcrossTriangleSAT | mesh 5233/20                                                 | time=40.587s                                                 |                                                              |
-| isPointInsidePolyhedronRZ                                    | mesh 5233/20                                                 | time=13.061s                                                 |                                                              |
+| isPointInsidePolyhedronROT                                   | mesh 5233/20ffvf                                             | time=13.061s                                                 |                                                              |
 
 
 
