@@ -74,6 +74,10 @@ bool _opLessInfo(const InterTriInfo& lhs, const InterTriInfo& rhs)
 {
 	return lhs.distance < rhs.distance;
 }
+bool _opMoreInfo(const InterTriInfo& lhs, const InterTriInfo& rhs)
+{
+	return lhs.distance > rhs.distance;
+}
 
 // 三角形相交测试
 static void _test1()
@@ -414,7 +418,7 @@ static void _test0()
 	cout << "return 0;" << endl;
 }
 
-//距离划分等级& 找不同
+//距离划分等级& 找不同EntityId
 #ifdef USING_FLATBUFFERS_SERIALIZATION
 static void _test4() //优化SAT的侵入距离计算，验证
 {
@@ -433,11 +437,13 @@ static void _test4() //优化SAT的侵入距离计算，验证
 	std::vector<InterTriInfo> triInfo200;
 
 	// find diff
-	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034_4.bin"); //more, latest
+	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034.bin");
+	//std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034_4.bin"); //more, latest
 	//std::vector<InterTriInfo> triInfo4034_all = read_InterTriInfo(binFilePath + "interTriInfo_4034_all.bin"); // all-iter
 	std::vector<InterTriInfo> triInfo4021 = read_InterTriInfo(binFilePath + "interTriInfo_4021.bin"); 
 	std::sort(triInfo4021.begin(), triInfo4021.end(), _opLessInfo);
 	triInfoSq = triInfo4034;
+	std::sort(triInfo4034.begin(), triInfo4034.end(), _opMoreInfo);
 	std::sort(triInfoSq.begin(), triInfoSq.end(), _opLessInfo); //-200
 	//std::vector<InterTriInfo> triInfo10_122;
 	//for (const auto& iter : interTriInfo_4034_5)
@@ -687,7 +693,7 @@ static void _test6()
 	ModelMesh meshA = meshs[0];
 	ModelMesh meshB = meshs[1];
 
-	RelationOfPointAndMesh b0 = isPointInsidePolyhedronROT(Vector3d(150, 50, 50), meshA.vbo_, meshA.ibo_);
+	RelationOfPointAndMesh b0 = isPointInsidePolyhedronROT(Vector3d(150, 50, 50), meshA);
 
 	//Vector3d df = getPenetrationDepthOfTwoMeshs(meshA, meshB);
 	//Vector3d di = getPenetrationDepthOfTwoMeshs(meshB, meshA);

@@ -80,8 +80,11 @@ bool psykronix::isMeshConvexPolyhedron(const ModelMesh& mesh)
 }
 
 // exclude point on face, ray is rotz
-RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
+RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector3d& _point, const ModelMesh& mesh)
 {
+	Eigen::Vector3d point = mesh.pose_.inverse() * _point;
+	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
+	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
 	//one mesh inside other mesh, the bounding-box must inside other mesh
 	Vector3d rayLine = Vector3d(1.0, 0.0, 0.0);
 	Vector3d normal, local;
@@ -162,12 +165,6 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector
 #endif
 	}
 	return (count % 2 == 1) ? RelationOfPointAndMesh::INNER : RelationOfPointAndMesh::OUTER;
-}
-
-RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector3d& point, const ModelMesh& mesh)
-{
-	Eigen::Vector3d pointR = mesh.pose_.inverse() * point;
-	return isPointInsidePolyhedronROT(pointR, mesh.vbo_, mesh.ibo_);
 }
 
 // include point on face
@@ -417,6 +414,8 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 	const std::vector<std::array<int, 3>>& iboB = meshB.ibo_;
 	const Eigen::Affine3d& matA = meshA.pose_;
 	const Eigen::Affine3d& matB = meshB.pose_;
+	Eigen::Affine3d matIAB = matA.inverse() * matB;
+	Eigen::Affine3d matIBA = matB.inverse() * matA;
 	double dminA = DBL_MAX, dminB = DBL_MAX;
 	double minA, maxA, minB, maxB, projection;//refresh min and max
 	Eigen::Vector3d direction, normal;
@@ -430,20 +429,20 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		normal = (vboA[faceA[1]] - vboA[faceA[0]]).cross(vboA[faceA[2]] - vboA[faceA[1]]).normalized(); //pose is same
 		for (const auto& vertexA : vboA)
 		{
-			projection = normal.dot(matA * vertexA);
+			projection = normal.dot(vertexA);
 			minA = std::min(minA, projection);
 			maxA = std::max(maxA, projection);
 		}
 		for (const auto& vertexB : vboB)
 		{
-			projection = normal.dot(matB * vertexB);
+			projection = normal.dot(matIAB * vertexB);
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
 		if (std::min(maxA - minB, maxB - minA) < dminA)//refresh 
 		{
 			dminA = std::min(maxA - minB, maxB - minA); // intersect meshs, dmin is positive
-			direction = normal;
+			direction = matA.rotation() * normal;
 		}
 	}
 	for (const auto& faceB : iboB) // iterate every face
@@ -455,25 +454,26 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		normal = (vboB[faceB[1]] - vboB[faceB[0]]).cross(vboB[faceB[2]] - vboB[faceB[1]]).normalized(); //pose is same
 		for (const auto& vertexA : vboA)
 		{
-			projection = normal.dot(matA * vertexA);
+			projection = normal.dot(matIBA * vertexA);
 			minA = std::min(minA, projection);
 			maxA = std::max(maxA, projection);
 		}
 		for (const auto& vertexB : vboB)
 		{
-			projection = normal.dot(matB * vertexB);
+			projection = normal.dot(vertexB);
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
 		if (std::min(maxA - minB, maxB - minA) < dminB)//refresh 
 		{
 			dminB = std::min(maxA - minB, maxB - minA); // intersect meshs, dmin is positive
-			direction = normal;
+			direction = matB.rotation() * normal;
 		}
 	}
 	return { std::min(dminA, dminB) * direction, indexAB };
 }
 
+// for inner depth
 std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConvexBOX(const ModelMesh& meshA, const ModelMesh& meshB)
 {
 	Eigen::AlignedBox3d boxA = meshA.bounding_;
@@ -506,6 +506,8 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 	const std::vector<std::array<int, 3>>& iboB = meshB.ibo_;
 	const Eigen::Affine3d& matA = meshA.pose_;
 	const Eigen::Affine3d& matB = meshB.pose_;
+	Eigen::Affine3d matIAB = matA.inverse() * matB;
+	Eigen::Affine3d matIBA = matB.inverse() * matA;
 	double dminA = DBL_MAX, dminB = DBL_MAX, dminA_V, dminB_V, tmpMaxA, tmpMaxB;
 	double minA, maxA, minB, maxB, projection, origin;//refresh min and max
 	Eigen::Vector3d directionA, directionB, directionA_V, directionB_V, normal;
@@ -535,20 +537,20 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		normal = (vboA[iboA[iA][1]] - vboA[iboA[iA][0]]).cross(vboA[iboA[iA][2]] - vboA[iboA[iA][1]]).normalized();
 		for (const auto& vertexA : vboSetA)
 		{
-			projection = normal.dot(matA * vboA[vertexA]);
+			projection = normal.dot(vboA[vertexA]);
 			minA = std::min(minA, projection);
 			maxA = std::max(maxA, projection);
 		}
 		for (const auto& vertexB : vboSetB)
 		{
-			projection = normal.dot(matB * vboB[vertexB]);
+			projection = normal.dot(matIAB * vboB[vertexB]);
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
 		if (std::min(maxA - minB, maxB - minA) < dminA)// the intersect mesh-part prejection segment
 		{
 			dminA = std::min(maxA - minB, maxB - minA); //always positive, but impacted by accuracy, forexample cross edges and normalized
-			directionA = normal;
+			directionA = matA.rotation() * normal;
 			indexA = iA ;
 #ifdef STATISTIC_DATA_RECORD
 			if (dminA < 0.0)
@@ -559,14 +561,14 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		}
 		dminA_V = 0.0;
 		tmpMaxA = 0.0;
-		origin = normal.dot(matA * vboA[iboA[iA][0]]); // relative projection value
+		origin = normal.dot(vboA[iboA[iA][0]]); // relative projection value
 		for (const auto& iB : vertexVectB) // the inside vertex's prejection
 		{
-			projection = normal.dot(matB * vboB[iB]) - origin;
+			projection = normal.dot(matIAB * vboB[iB]) - origin;
 			if (projection < dminA_V)
 			{
 				dminA_V = projection; // always negative
-				directionA_V = normal;
+				directionA_V = matA.rotation() * normal;
 				indexA_V = iA;
 			}
 			if (!meshA.convex_ && tmpMaxA < projection) // the direction not exact
@@ -588,20 +590,20 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		normal = (vboB[iboB[iB][1]] - vboB[iboB[iB][0]]).cross(vboB[iboB[iB][2]] - vboB[iboB[iB][1]]).normalized();
 		for (const auto& vertexA : vboSetA)
 		{
-			projection = normal.dot(matA * vboA[vertexA]);
+			projection = normal.dot(matIBA * vboA[vertexA]);
 			minA = std::min(minA, projection);
 			maxA = std::max(maxA, projection);
 		}
 		for (const auto& vertexB : vboSetB)
 		{
-			projection = normal.dot(matB * vboB[vertexB]);
+			projection = normal.dot(vboB[vertexB]);
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
 		if (std::min(maxA - minB, maxB - minA) < dminB)//refresh 
 		{
 			dminB = std::min(maxA - minB, maxB - minA);
-			directionB = normal;
+			directionB = matB.rotation() * normal;
 			indexB = iB;
 #ifdef STATISTIC_DATA_RECORD
 			if (dminB < 0.0)
@@ -619,7 +621,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 			if (projection < dminB_V)
 			{
 				dminB_V = projection;  // always negative
-				directionB_V = normal;
+				directionB_V = matB.rotation() * normal;
 				indexB_V = iB;
 			}
 			if (!meshB.convex_ && tmpMaxB < projection) // the direction not exact
@@ -650,6 +652,8 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfVertexAn
 	const std::vector<std::array<int, 3>>& iboB = meshB.ibo_;
 	const Eigen::Affine3d& matA = meshA.pose_;
 	const Eigen::Affine3d& matB = meshB.pose_;
+	Eigen::Affine3d matIAB = matA.inverse() * matB;
+	Eigen::Affine3d matIBA = matB.inverse() * matA;
 	Eigen::Vector3d directionA, directionB, normal;
 	double dminA = 0, dminB = 0, projection, origin, tmpMaxA = 0, tmpMaxB = 0;
 	size_t indexA = ULL_MAX, indexB = ULL_MAX;
@@ -664,18 +668,18 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfVertexAn
 			break;
 		}
 		normal = (vboA[iboA[iA][1]] - vboA[iboA[iA][0]]).cross(vboA[iboA[iA][2]] - vboA[iboA[iA][1]]).normalized();
-		origin = normal.dot(matA * vboA[iboA[iA][0]]); // relative projection value
+		origin = normal.dot(vboA[iboA[iA][0]]); // relative projection value
 		for (const auto& iB : vertexVectB)
 		{
 			//projection = normal.dot(matB * vboB[iB] - vboA[iboA[iA][0]]);
-			projection = normal.dot(matB * vboB[iB]) - origin;
+			projection = normal.dot(matIAB * vboB[iB]) - origin;
 #ifdef STATISTIC_DATA_RECORD
 			projectionA.insert(projection);
 #endif
 			if (projection < dminA) // always negative
 			{
 				dminA = projection;
-				directionA = normal;
+				directionA = matA.rotation() * normal;
 				indexA = iA;
 			}
 			if (!meshA.convex_ && tmpMaxA < projection) // the direction not exact
@@ -692,17 +696,17 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfVertexAn
 			break;
 		}
 		normal = (vboB[iboB[iB][1]] - vboB[iboB[iB][0]]).cross(vboB[iboB[iB][2]] - vboB[iboB[iB][1]]).normalized();
-		origin = normal.dot(matB * vboB[iboB[iB][0]]);
+		origin = normal.dot(vboB[iboB[iB][0]]);
 		for (const auto& iA : vertexVectA)
 		{
-			projection = normal.dot(matA * vboA[iA]) - origin;
+			projection = normal.dot(matIBA * vboA[iA]) - origin;
 #ifdef STATISTIC_DATA_RECORD
 			projectionB.insert(projection);
 #endif
 			if (projection < dminB)
 			{
 				dminB = projection;
-				directionB = normal;
+				directionB = matB.rotation() * normal;
 				indexB = iB;
 			}
 			if (!meshA.convex_ && tmpMaxB < projection) // the direction not exact
@@ -987,7 +991,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 	{
 		// precondition: boundingbox inside, polyface not intersect, mesh isnot empty
 		Eigen::Affine3d mat = meshA.pose_.inverse() * meshB.pose_;
-		RelationOfPointAndMesh relation = isPointInsidePolyhedronROT(mat * (*meshB.vbo_.begin()), meshA.vbo_, meshA.ibo_);// already pre judge, mesh isnot empty
+		RelationOfPointAndMesh relation = isPointInsidePolyhedronROT(mat * (*meshB.vbo_.begin()), meshA);// already pre judge, mesh isnot empty
 		if (RelationOfPointAndMesh::OUTER == relation)
 		{
 			return isContact ?
@@ -1009,7 +1013,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 	else if (meshB.bounding_.contains(meshA.bounding_))
 	{
 		Eigen::Affine3d mat = meshB.pose_.inverse() * meshA.pose_;
-		RelationOfPointAndMesh relation = isPointInsidePolyhedronROT(mat * (*meshA.vbo_.begin()), meshB.vbo_, meshB.ibo_);
+		RelationOfPointAndMesh relation = isPointInsidePolyhedronROT(mat * (*meshA.vbo_.begin()), meshB);
 		if (RelationOfPointAndMesh::OUTER == relation)
 		{
 			return isContact ?
