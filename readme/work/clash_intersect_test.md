@@ -21,14 +21,17 @@
 | _isTwoTriangles<br />BoundingBoxIntersect<br />三角面的包围盒求交 |                                                              | eigen<br />time = 1.617s<br/>time = 1.568s<br/>time = 1.495s<br />手写<br />time = 1.228s<br/>time = 1.242s<br/>time = 1.22s |                                                              |
 | 软碰撞<br />getTriDist<br />getTrianglesDistanceSAT          | using SAT<br />time = 47.853s<br/>time = 47.723s<br/>time = 47.657s<br />openMP<br />time = 7.771s<br/>time = 8.011s<br/>time = 8.128s | time = 56.686s<br/>time = 57.677s<br/>time = 57.643s<br />openMP<br />time = 33.12s<br/>time = 38.761s<br/>time = 39.656s | time = 9.058s<br/>time = 9.336s<br/>time = 9.22s<br />分开三角形<br />time = 6.302s<br/>time = 6.497s<br/>time = 6.521s |
 | 包围盒求交<br />AlignedBox3d::intersection                   | 1e8                                                          | time = 0.658s<br/>time = 0.616s<br/>time = 0.626s            |                                                              |
-| isTwoTrianglesIntersectSAT<br />分离轴定理                   | laptop strix<br />time = 4.271s<br/>time = 4.36s<br/>time = 4.311s | time = 8.723s<br/>time = 8.805s<br/>time = 8.774s<br />openmp<br />time = 1.17s<br/>time = 1.281s<br/>time = 1.277s |                                                              |
+| isTwoTrianglesIntersectSAT<br />分离轴定理                   | laptop strix<br />time = 4.271s<br/>time = 4.36s<br/>time = 4.311s | time = 8.723s<br/>time = 8.805s<br/>time = 8.774s<br />openmp<br />time = 1.17s<br/>time = 1.281s<br/>time = 1.277s | bug修复<br />time = 11.668s<br/>time = 11.145s<br/>time = 11.379s |
 | isTriangleAndBoundingBox<br />三角面与包围盒                 |                                                              | time = 7.706s<br/>time = 7.596s<br/>time = 8.258s            |                                                              |
 | 三角面与包围盒 SAT                                           |                                                              | time = 11.168s<br/>time = 11.176s<br/>time = 11.663s<br />pre-judge<br />time = 5.512s<br/>time = 5.461s<br/>time = 5.476s |                                                              |
 | isPointRayAcrossTriangle                                     | SAT分离轴<br />求交点                                        | time = 1.576s<br/>time = 1.444s<br/>time = 1.447s<br />求交点<br />time = 1.512s<br/>time = 1.387s<br/>time = 1.436s |                                                              |
 | isTwoSegmentsIntersect<br />Vector3d                         | using prebox                                                 | time = 0.571s<br/>time = 0.564s<br/>time = 0.564s            |                                                              |
-| getTwoTrianglesNearestPoints                                 |                                                              |                                                              |                                                              |
+| getTwoTrianglesNearestPoints                                 |                                                              | time = 65.394s<br/>time = 65.323s<br/>time = 65.159s         |                                                              |
 | getTwoTrianglesIntersectPoints                               | USING_ACCURATE_NORMALIZED                                    | time = 38.246s<br/>time = 38.42s<br/>time = 39.058s<br />without<br />time = 32.608s<br/>time = 32.908s<br/>time = 32.791s |                                                              |
-|                                                              |                                                              |                                                              |                                                              |
+| isPointInsidePolyhedronFL                                    | mesh 5233/2=208016546                                        | time=24.209s                                                 |                                                              |
+| isPointInsidePolyhedronCL                                    | mesh 5233/2                                                  | time=19.549s                                                 |                                                              |
+| isPointInsidePolyhedronAZ<br />包含isPointRayAcrossTriangleSAT | mesh 5233/20                                                 | time=40.587s                                                 |                                                              |
+| isPointInsidePolyhedronROT                                   | mesh 5233/20ffvf                                             | time=13.061s                                                 |                                                              |
 
 
 
@@ -39,7 +42,7 @@
 | 文件大小       | 27M-p3d<br />35M-rvt<br />                                   | 981M-p3d<br />81M-nwd                                        | 9.3M-p3d                                 |
 | entity数量     | 5233                                                         | 67059                                                        | 14                                       |
 | polyface数量   | 1982041                                                      | 36895577                                                     | 306656                                   |
-| bimbase用时    | 硬碰撞：1.3s，4031，4027，4028<br />软碰撞：1.6s，5099，5096，5110 | 硬碰撞：30s，48718<br />不使用内部判断48677<br />使用内部判断48696<br />软碰撞：31s，49162 | 硬碰撞：0.196，17<br />软碰撞：0.187，17 |
+| bimbase用时    | 硬碰撞：1.3s，4031，4027，4034<br />软碰撞：1.6s，5099，5096，5110 | 硬碰撞：30s，48718<br />不使用内部判断48677<br />使用内部判断48696<br />软碰撞：31s，49162 | 硬碰撞：0.196，17<br />软碰撞：0.187，17 |
 | 康博接口       | 硬碰撞：31s，3944<br />软碰撞：185s，5180                    | 硬碰撞：18:21s，54377<br />软碰撞：--s，                     |                                          |
 | navisworks用时 | 导入用时：120s<br />硬碰撞：0.8s，3954 <br />软碰撞：0.8s，4599 | 导入用时：72s<br />硬碰撞：25s，160267<br />软碰撞：34s，387139 |                                          |
 | 软碰撞d=1mm    |                                                              |                                                              |                                          |
@@ -50,19 +53,36 @@
 
 ### 阶段用时
 
-|                          | 金鼓郡          |      |
-| ------------------------ | --------------- | ---- |
-| 总用时 release           | 1.601000s       |      |
-| 总用时 openMP            |                 |      |
-| getEntitiesOfModel       | 0.015000s       |      |
-| LoadModel 转mesh最多用时 | 1.277000s-0.015 |      |
-| 判convex                 | 0.037           |      |
-| 预碰撞 preClash          | 0.097           |      |
-| 硬碰撞                   | 0.324           |      |
-| 软碰撞                   | -               |      |
-|                          |                 |      |
+|                          | 金鼓郡                                                       | 金鼓郡(hasPD)                                  |
+| ------------------------ | ------------------------------------------------------------ | ---------------------------------------------- |
+| 总用时 release           | 1.601000s                                                    | 4.762000s<br />优化：关record开openmp 1.919000 |
+| 总用时 openMP            |                                                              | 2.708000/2.231000                              |
+| getEntitiesOfModel       | 0.015000s                                                    | 0.005000s                                      |
+| LoadModel 转mesh最多用时 | 1.277000s-0.015                                              | 1.357000s<br />cost: 1.35                      |
+| 判convex                 | 0.037<br />count_mesh_convex="2581" / 2900                   |                                                |
+| 预碰撞 preClash          | 0.097                                                        | 1.418000s<br />cost: 0.06                      |
+| 硬碰撞                   | 0.324                                                        | 4.638000s<br />cost: 3.22s                     |
+| 软碰撞                   |                                                              | d=1mm 4.379000                                 |
+|                          | 优化<br />no：3.821000/3.850000/3.963000<br />no+omp: 1.760000/1.613000/1.546000<br />head:3.853000/3.787000/3.603000<br />head+omp:1.681000/1.635000/1.646000 |                                                |
+| 模型统计                 | 地漏排水：10<br />消防：1<br />洗手池：6<br />马桶：7        |                                                |
+|                          |                                                              |                                                |
 
 
+
+### 功能边界
+
+1. 固有限制：此版本碰撞检查全部基于离散后的mesh数据，碰撞精度受限于mesh精度；当离散接口发生错误时，将无法得到相关结果；
+2. 碰撞最小单元：BPEntity；
+3. 硬碰撞精度问题，硬碰撞定义为距离为浮点数0的碰撞，此碰撞结果易受浮点数精度影响，对于临界碰撞有概率问题；
+4. 算法：此版本算法使用分离轴定理，用于判断mesh最小单元三角面的碰撞，对于临界碰撞，有侵入距离和分离距离作为参考；；
+
+
+
+D1=80
+
+D2=210
+
+D3=56
 
 
 

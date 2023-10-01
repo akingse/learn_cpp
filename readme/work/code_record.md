@@ -915,3 +915,47 @@ std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<E
 
 ```
 
+
+
+
+
+轨道线性
+
+```py
+import sys
+import os
+mypath = r'C:\Users\Aking\source\repos\bimbase\Bin\Release\PythonScript\python-3.7.9-embed-amd64\Lib\site-packages'  # fixed path
+sys.path.append(os.path.join(os.path.dirname(__file__), mypath))
+
+txtname=r'C:\Users\Aking\source\repos\bimbase\Bin\Release\PythonScript\python-3.7.9-embed-amd64\Lib\site-packages\铁设城轨一期\线位里程坐标.txt'
+a = np.loadtxt(txtname, skiprows=1, usecols=(1, 2, 3))
+length = len(a) #204
+length=2
+
+#扣件
+        sec = rotate(Vec3(0,1,0),pi/2) * Section(scale(R_button) * Arc(pi),scale(R_button) * rotz(pi)*Arc(pi))
+        # Button = sweep_stere(sec,Line(ChooseLine)).color(122/255,255/255,212/255,1)
+        # Button.smooth = True
+        # create_geometry(sec)
+        # create_geometry(Line(ChooseLine))
+        sec=trans(ChooseLine[0])*sec
+        # Button = trans(-ChooseLine[0])*Sweep(sec,Line(SplineCurve(ChooseLine,0,2)))
+        Button = trans(-ChooseLine[0])*Sweep(sec,Line(ChooseLine)).color(122/255,255/255,212/255,1)
+
+        # # 扣件管 FilletPipe
+        # Button = FilletPipe(ChooseLine, [
+        #                     R_button]*len(ChooseLine), R_button).color(122/255, 255/255, 212/255, 1)
+        # Button = FilletPipe_Sweep(ChooseLine, [
+        #                     R_button]*len(ChooseLine), R_button).color(122/255, 255/255, 212/255, 1)
+        # create_geometry(Button)
+        # # 扣件管位置调整
+        # Button = translate(0, -50, self['螺扭高程']+37) * Button.color(screwcolor)
+
+
+```
+
+
+
+阵列参数
+
+10*20，100000-50000

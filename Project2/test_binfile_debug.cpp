@@ -5,9 +5,23 @@ using namespace para;
 using namespace Eigen;
 using namespace psykronix;
 
+static constexpr unsigned long long ULL_MAX1 = 18446744073709551615; // 
+static constexpr unsigned long long ULL_MAX2 = 2 ^ 64 - 1; //
+static constexpr unsigned long long ULL_MAX3 = 0xFFFFFFFFFFFFFFFF; //
+
 static Eigen::Vector3d P(std::nan("0"), std::nan("0"), std::nan("0"));
 static Eigen::Vector3d Q(std::nan("0"), std::nan("0"), std::nan("0"));
-static std::string binFilePath = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/";
+static std::string binFilePath = "C:/Users/Aking/source/repos/bimbase/src/bin_file/";
+#undef max
+#undef min
+
+enum class TwoMeshCon
+{
+	AOBO = 0,
+	AOBU,
+	AUBO,
+	AUBU,
+};
 
 bool isEqualTrigon(const Triangle& triA, const Triangle& triB)
 {
@@ -54,6 +68,15 @@ bool isEqualTrigon(const Triangle& triA, const Triangle& triB)
 
 	//area
 	//return getTrigonArea2(triA) == getTrigonArea2(triB);
+}
+
+bool _opLessInfo(const InterTriInfo& lhs, const InterTriInfo& rhs)
+{
+	return lhs.distance < rhs.distance;
+}
+bool _opMoreInfo(const InterTriInfo& lhs, const InterTriInfo& rhs)
+{
+	return lhs.distance > rhs.distance;
 }
 
 // 三角形相交测试
@@ -166,7 +189,7 @@ static void _test1()
 
 static void _test2()
 {
-	//string path = "C:/Users/Aking/source/repos/bimbase/src/P3d2Stl/bin_file/";
+	//string path = "C:/Users/Aking/source/repos/bimbase/src/bin_file/";
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris1 = _readTrigonFile(binFilePath + "triInterList_opt1.bin"); //4031
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris2 = _readTrigonFile(binFilePath + "triInterList_opt2.bin"); //4031
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> tris3 = _readTrigonFile(binFilePath + "triInterList_opt3.bin"); //4030
@@ -338,23 +361,155 @@ static void _test3()
 	cout << "return 0" << endl;
 }
 
+//数据测试
+static void _test0()
+{
+	double rd = double(rand());// / RAND_MAX;
+	rd = double(rand());
+	rd = double(rand());
+	// 不相交的三角形
+	Vector3d triA_0 = Vector3d(4924494.8122771187, -385870.18283433426, 5749.9999999999054);
+	Vector3d triA_1 = Vector3d(4924599.8122771177, -385945.18283433421, 5749.9999999999054);
+	Vector3d triA_2 = Vector3d(4924586.8713248633, -385946.88654301979, 5749.9999999999054);
+	Vector3d triB_0 = Vector3d(4924601.8102601077, -385940.89359764993, 5750.0000000000000);
+	Vector3d triB_1 = Vector3d(4924595.2577039087, -385951.32193110074, 5750.0000000000000);
+	Vector3d triB_2 = Vector3d(4924589.8109916430, -385975.18553675216, 5750.0000000000000);
+	Triangle triA = { triA_0, triA_1, triA_2 };
+	Triangle triB = { triB_0, triB_1, triB_2 };
+	//double d = getTrianglesDistanceSAT(triA, triB);
+
+	triA_0 = Vector3d(0, 0, 0);
+	triA_1 = Vector3d(0, 10, 0);
+	triA_2 = Vector3d(10, 5, 0);
+	triB_0 = Vector3d(-10, 0, 0);
+	triB_1 = Vector3d(-10, 10, 0);
+	triB_2 = Vector3d(-5, 5, 5);
+	triA = { triA_0, triA_1, triA_2 };
+	triB = { triB_0, triB_1, triB_2 };
+
+	double d0 = getTrianglesDistance(P, Q, triA, triB);
+	double d1 = getTrianglesDistanceSAT(triA, triB);
+	//double d2 = getDistanceOfPointAndPlaneINF(Vector3d(0, 0, 0), triB);
+	double d = std::nan("0");
+	if (0.0 > d) // nan not greater, not less
+		d++;
+	if (0.0 < d)
+		d++;
+
+	Vector3d v1(1, 0, 0);
+	Vector3d v2(1, 0, 0);
+	Vector3d v3 = v1.cross(v2).normalized(); //0的单位化还是0
+
+	size_t m2 = ULL_MAX1 + 2; //归零重新开始计数
+	double dm1 = DBL_MAX + 1;
+	double dm2 = DBL_MAX + DBL_MAX;
+	double dm3 = 2 * DBL_MAX;
+	double dm4 = DBL_MAX + 10000;
+	double dm5 = 1.1 * DBL_MAX;
+	double dm6 = DBL_MAX + 1e300;
+
+	double _inf = std::numeric_limits<double>::infinity();
+	double _max = std::numeric_limits<double>::max();
+	double _min = std::numeric_limits<double>::min();
+	bool s1 = signbit(1.2);
+	bool s2 = signbit(-1.2);
+	bool isi = isinf(DBL_MAX + 1);
+	bool isf = isfinite(gVecNaN[0]);// :ture is a finite value, false otherwise。可用来一起判断inf和nan。
+	cout << "return 0;" << endl;
+}
+
+//距离划分等级& 找不同EntityId
 #ifdef USING_FLATBUFFERS_SERIALIZATION
-//测试修复SAT相关
-static void _test4()
+static void _test4() //优化SAT的侵入距离计算，验证
 {
 	std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> triRec;
 
-	std::vector<InterTriInfo> triInfo1 = read_InterTriInfo(binFilePath + "interTriInfo_4027.bin");
-	std::vector<InterTriInfo> triInfo2 = read_InterTriInfo(binFilePath + "interTriInfo_4034.bin"); //more
-	std::vector<InterTriInfo> triInfo3 = read_InterTriInfo(binFilePath + "interTriInfo_4042.bin");
-	//find difference
-	for (int i = 0; i < triInfo2.size(); ++i)
+	std::vector<InterTriInfo> triInfo4027 = read_InterTriInfo(binFilePath + "interTriInfo_4027.bin");
+	std::vector<InterTriInfo> triInfo4042 = read_InterTriInfo(binFilePath + "interTriInfo_4042.bin");
+	// Category
+	std::vector<InterTriInfo> triInfoSq;
+	std::vector<InterTriInfo> triInfoZero;
+	std::vector<InterTriInfo> triInfo1e_6;
+	std::vector<InterTriInfo> triInfo1e_1;
+	std::vector<InterTriInfo> triInfo1;
+	std::vector<InterTriInfo> triInfo10;
+	std::vector<InterTriInfo> triInfo100;
+	std::vector<InterTriInfo> triInfo200;
+
+	// find diff
+	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034.bin");
+	//std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034_4.bin"); //more, latest
+	//std::vector<InterTriInfo> triInfo4034_all = read_InterTriInfo(binFilePath + "interTriInfo_4034_all.bin"); // all-iter
+	std::vector<InterTriInfo> triInfo4021 = read_InterTriInfo(binFilePath + "interTriInfo_4021.bin"); 
+	std::sort(triInfo4021.begin(), triInfo4021.end(), _opLessInfo);
+	triInfoSq = triInfo4034;
+	std::sort(triInfo4034.begin(), triInfo4034.end(), _opMoreInfo);
+	std::sort(triInfoSq.begin(), triInfoSq.end(), _opLessInfo); //-200
+	//std::vector<InterTriInfo> triInfo10_122;
+	//for (const auto& iter : interTriInfo_4034_5)
+	//{
+	//	if (-10.0 < iter.distance && iter.distance <= -1.0)
+	//		triInfo10_122.push_back(iter);
+	//}
+	std::vector<ModelMesh> meshs_5233 = read_ModelMesh(binFilePath + "cvtMeshVct_con.bin");
+
+	std::vector<InterTriInfo> triInfoDiff;
+	std::vector<InterTriInfo> triInfoEntityDiff;
+	std::vector<double> triInfoDiffd;
+	std::vector<tuple<size_t, size_t>> triInfoDiffCon; // 全是convex的entityid
+	double d_ins6, d_ins7; //-32.011189515236765
+	bool findflag = false;
+	bool isCon = false;
+	for (int i = 0; i < triInfo4034.size(); ++i )
 	{
 		bool findFlag = false;
-		for (int j = 0; j < triInfo1.size(); ++j) //big vector, findTri
+		for (int j = 0; j < triInfo4021.size(); ++j )
 		{
-			if (triInfo2[i].entityPair[0] == triInfo1[j].entityPair[0] && 
-				triInfo2[i].entityPair[1] == triInfo1[j].entityPair[1])
+			//找不同
+			//auto iter=find(triInfo4021.begin(), triInfo4021.end(), triInfo4034[i])
+			if ((triInfo4034[i].entityPair[0] == triInfo4021[j].entityPair[0] && triInfo4034[i].entityPair[1] == triInfo4021[j].entityPair[1])||
+				(triInfo4034[i].entityPair[0] == triInfo4021[j].entityPair[1] && triInfo4034[i].entityPair[1] == triInfo4021[j].entityPair[0]))
+				findFlag = true;
+
+			if (i <= j)
+				continue;
+			if (triInfo4034[i].entityPair[0] == triInfo4021[j].entityPair[0] &&
+				triInfo4034[i].entityPair[1] == triInfo4021[j].entityPair[1] &&
+				fabs(triInfo4034[i].distance - triInfo4021[j].distance) > eps)
+			{
+				double d1 = triInfo4034[i].distance;
+				double d2 = triInfo4021[j].distance;
+				bool conA = false, conB = false;// = triInfo4034[i].entityPair
+				for (auto& iter : meshs_5233)
+				{
+					if (iter.entityid_ == triInfo4034[i].entityPair[0] && iter.convex_)
+						conA = true;
+					if (iter.entityid_ == triInfo4034[i].entityPair[1] && iter.convex_)
+						conB = true;
+					if (iter.entityid_ == 1663 || iter.entityid_ == 1662)
+						findflag = true;
+					if (iter.entityid_ == 1663)
+						isCon = isMeshConvexPolyhedron(iter);
+				}
+				if (conA && conB) //(1480, 1474)
+					triInfoDiffCon.push_back({ triInfo4034[i].entityPair[0] ,triInfo4034[i].entityPair[1] });
+				triInfoDiff.push_back(triInfo4034[i]);
+				triInfoDiffd.push_back(d1 - d2);
+			}
+		}
+		if (!findFlag)
+			triInfoEntityDiff.push_back(triInfo4034[i]);
+	}
+
+	//find difference 查找指定entityID
+	for (int i = 0; i < triInfo4034.size(); ++i)
+	{
+		//
+		bool findFlag = false;
+		for (int j = 0; j < triInfo4027.size(); ++j) //big vector, findTri
+		{
+			if (triInfo4034[i].entityPair[0] == triInfo4027[j].entityPair[0] &&
+				triInfo4034[i].entityPair[1] == triInfo4027[j].entityPair[1])
 			{
 				findFlag = true;
 				//cout << "index=" << j << endl; //823,950,954
@@ -363,29 +518,58 @@ static void _test4()
 		}
 		if (!findFlag)
 		{
-			cout << triInfo2[i].entityPair[0] << ", " << triInfo2[i].entityPair[1] << endl;
-			triRec.push_back(triInfo2[i].trianglePair);
+			//cout << triInfo4034[i].entityPair[0] << ", " << triInfo4034[i].entityPair[1] << endl;
+			triRec.push_back(triInfo4034[i].trianglePair);
 		}
+		// the inside
+		size_t idA = 1418;
+		size_t idB = 1417;
+		if (triInfo4034[i].entityPair[0] == 6564 && triInfo4034[i].entityPair[1] == 4293)
+			d_ins6 = triInfo4034[i].distance;
+		if (triInfo4034[i].entityPair[0] == 6563 && triInfo4034[i].entityPair[1] == 4296)
+			d_ins7 = triInfo4034[i].distance;
 	}
+
+	for (int i = 0; i < triInfoSq.size(); ++i)
+	{
+		if (triInfoSq[i].distance <= -100)
+			triInfo200.push_back(triInfoSq[i]); // d=-196(6569,4279) d=-101(6572,4267)
+		else if (triInfoSq[i].distance <= -10)
+			triInfo100.push_back(triInfoSq[i]);
+		else if (triInfoSq[i].distance <= -1)
+			triInfo10.push_back(triInfoSq[i]);
+		else if (triInfoSq[i].distance <= -1e-1) //d=-9.5(5268,4706)
+			triInfo1.push_back(triInfoSq[i]);
+		else if (triInfoSq[i].distance <= -1e-6)
+			triInfo1e_1.push_back(triInfoSq[i]);
+		else if (triInfoSq[i].distance == 0.0) //d=0(4224,4221)
+			triInfoZero.push_back(triInfoSq[i]);
+		else 
+			triInfo1e_6.push_back(triInfoSq[i]); //d=1e-7(6125,6123)
+		// d=-2.3283064365386963e-10
+		//d<0 1521,1519
+		//d<0 2978,2976
+	}
+
+
 	/*
 	1443, 1411
 	1662, 1642
 	1935, 1903
 	2153, 2133
 	2255, 2243
-
+	//---
 	2418, 2386
 	2636, 2616
 	2901, 2869
 	3119, 3099
 	3384, 3352
-
+	//---
 	3599, 3579
 	3864, 3832
 	4080, 4060
 	4478, 4446
 	6509, 6134 //min
-
 	//inside
 	1418, 1417
 	1910, 1909
@@ -410,16 +594,22 @@ static void _test4()
 	Vector3d triB_1(4934994.8121505287, -380736.84932330565, -217.00000000000003);
 	Vector3d triB_2(4934988.3065321781, -380736.84932357143, -215.70595205269194);
 	double d0 = getTrianglesDistance(P, Q, { triA_0 ,triA_2 }, { triB_1 ,triB_2 });
-
 	double er = (triA_2 - triA_0).cross(triB_1 - triA_0).dot(triB_2 - triA_0);
 
 	Triangle triA = { triA_0, triA_1, triA_2 };
 	Triangle triB = { triB_0, triB_1, triB_2 };
 	double d1 = getTrianglesDistanceSAT(triA, triB);
-
 	auto pnt = getTwoTrianglesNearestPoints(triA, triB);
 	auto pnt2 = getTwoTrianglesIntersectPoints(triA, triB);
 
+	cout << "triInfoSq:" << triInfoSq.size() << endl;
+	cout << "triInfoZero:" << triInfoZero.size() << endl;
+	cout << "triInfo1e_6:" << triInfo1e_6.size() << endl;
+	cout << "triInfo1e_1:" << triInfo1e_1.size() << endl;
+	cout << "triInfo1:" << triInfo1.size() << endl;
+	cout << "triInfo10:" << triInfo10.size() << endl;
+	cout << "triInfo100:" << triInfo100.size() << endl;
+	cout << "triInfo200:" << triInfo200.size() << endl;
 
 	cout << "return 0" << endl;
 }
@@ -429,49 +619,26 @@ static void _test5()
 {
 	//std::vector<ModelMesh> meshs0;
 	//std::vector<ModelMesh> meshs = _read_ModelMesh(filename + "cvtMeshVct_6509_6134.bin");
-	std::vector<ModelMesh> meshs_5233 = read_ModelMesh(binFilePath + "cvtMeshVct_jingujun.bin");
-	std::vector<ModelMesh> meshs0 = read_ModelMesh(binFilePath + "cvtMeshVct_1.bin");
-	std::vector<ModelMesh> meshs2 = read_ModelMesh(binFilePath + "cvtMeshVct_2.bin");
-	std::vector<ModelMesh> meshs3 = read_ModelMesh(binFilePath + "cvtMeshVct_3.bin");
-	std::vector<ModelMesh> meshs4 = read_ModelMesh(binFilePath + "cvtMeshVct_4.bin");
-	std::vector<ModelMesh> meshs5 = read_ModelMesh(binFilePath + "cvtMeshVct_5.bin");
-	size_t count = 0, countInter = 0;
-	clock_t startT, endT;
+	//std::vector<ModelMesh> meshs_5233 = read_ModelMesh(binFilePath + "cvtMeshVct_jingujun.bin");
+	std::vector<ModelMesh> meshs_jgj = read_ModelMesh(binFilePath + "cvtMeshVct_jgj.bin");
+	std::vector<ModelMesh> meshs_5233 = read_ModelMesh(binFilePath + "cvtMeshVct_con.bin");
+	std::vector<ModelMesh> meshs_con = read_ModelMesh(binFilePath + "cvtMeshVct_con.bin");
+	//std::vector<ModelMesh> meshs0 = read_ModelMesh(binFilePath + "cvtMeshVct_1.bin"); //old fbs file
+	//std::vector<ModelMesh> meshs2 = read_ModelMesh(binFilePath + "cvtMeshVct_2.bin");
+	//std::vector<ModelMesh> meshs3 = read_ModelMesh(binFilePath + "cvtMeshVct_3.bin");
+	//std::vector<ModelMesh> meshs4 = read_ModelMesh(binFilePath + "cvtMeshVct_4.bin");
+	//std::vector<ModelMesh> meshs5 = read_ModelMesh(binFilePath + "cvtMeshVct_5.bin");
 
-	for (const auto& iter : meshs2)
+	std::vector<ModelMesh> meshs_conDiff;
+	for (size_t i = 0; i < meshs_jgj.size(); i++)
 	{
-		//bool b1 = isConvex(iter.vbo_, iter.ibo_);
-		//bool b2 = is_convex(iter.vbo_, iter.ibo_);
-		//cout << b1 << b2 << endl;
-		//bool isConvex = is_convex(iter.vbo_, iter.ibo_); //
-		bool isConvex = isMeshConvexPolyhedron(iter.vbo_, iter.ibo_); //
-		if (!isConvex)
-			count++;
+		if (meshs_jgj[i].convex_ != meshs_con[i].convex_)
+			meshs_conDiff.push_back(meshs_con[i]);
+		//1308, 1317 1794, 5216
 	}
-	//相交测试
-	bool isInter = false;
-	ModelMesh mesh_a = meshs2[0];
-	ModelMesh mesh_b = meshs2[1];
-	for (size_t i = 0; i < mesh_a.ibo_.size(); i++)
-	{
-		for (size_t j = 0; j < meshs2[1].ibo_.size(); j++)
-		{
-			std::array<Eigen::Vector3d, 3> triA = {
-				mesh_a.vbo_[mesh_a.ibo_[i][0]],
-				mesh_a.vbo_[mesh_a.ibo_[i][1]],
-				mesh_a.vbo_[mesh_a.ibo_[i][2]] };
-			std::array<Eigen::Vector3d, 3> triB = {
-				mesh_b.vbo_[mesh_b.ibo_[j][0]],
-				mesh_b.vbo_[mesh_b.ibo_[j][1]],
-				mesh_b.vbo_[mesh_b.ibo_[j][2]] };
-			if (isTwoTrianglesBoundingBoxIntersect(triA, triB))
-			{
-				countInter++;
-				if (isTwoTrianglesIntersectSAT(triA, triB))
-					isInter = true;
-			}
-		}
-	}
+
+	size_t count = 0, countInter = 0, countPre = 0, countLoop = 0;
+	clock_t startT, endT;
 
 	//测试一个点遍历所有mesh的效率
 	Vector3d point = Vector3d(rand(), rand(), rand());
@@ -489,30 +656,33 @@ static void _test5()
 		nVertex += meshs_5233[i].vbo_.size(); //977267  //506709
 	}
 
-//#define TEST_TIME_COST
+#define TEST_TIME_COST
 #ifdef TEST_TIME_COST
 #pragma omp parallel for // omp optimize
-	for (int i = 0; i < meshs_5233.size()/2; ++i)
+	for (int i = 0; i < meshs_5233.size()/20; ++i)
 	{
-		for (int j = 0; j < meshs_5233.size()/2; ++j)
+		for (int j = 0; j < meshs_5233.size()/20; ++j)
 		{
 			if (i <= j)
 				continue;
 			for (const auto& iter : meshs_5233[i].vbo_)
 			{
-				isIn = isPointInsidePolyhedronCEIL(iter, meshs_5233[j]);
+				/*isIn =*/ 
+				isPointInsidePolyhedronROT(iter, meshs_5233[j]);
 				//isIn = isPointInsidePolyhedronAZ(iter, meshs_5233[j]);
-				//isPointInsidePolyhedronRZ(iter, meshs_5233[j]);
+				//isIn = isPointInsidePolyhedronCL(iter, meshs_5233[j]);
+				//isIn = isPointInsidePolyhedronFL(iter, meshs_5233[j]);
+				countLoop++;
 			}
 		}
 	}
 #endif
-
 	endT = clock();
-	cout << "mesh count=" << meshs0.size() << endl;
+	cout << "mesh count=" << meshs_5233.size() << endl;
 	cout << "count=" << count << endl;
+	cout << "countLoop=" << countLoop << endl;
 	cout << "time=" << double(endT - startT) / CLOCKS_PER_SEC << "s" << endl;
-	cout << "return 0" << endl;
+	cout << "return 0;" << endl;
 }
 
 //三角形距离
@@ -523,52 +693,118 @@ static void _test6()
 	ModelMesh meshA = meshs[0];
 	ModelMesh meshB = meshs[1];
 
-	RelationOfPointAndMesh b0 = isPointInsidePolyhedronRZ(Vector3d(150, 50, 50), meshA.vbo_, meshA.ibo_);
+	RelationOfPointAndMesh b0 = isPointInsidePolyhedronROT(Vector3d(150, 50, 50), meshA);
 
-	Vector3d df = getPenetrationDepthOfTwoMeshs(meshA, meshB);
-	Vector3d di = getPenetrationDepthOfTwoMeshs(meshB, meshA);
+	//Vector3d df = getPenetrationDepthOfTwoMeshs(meshA, meshB);
+	//Vector3d di = getPenetrationDepthOfTwoMeshs(meshB, meshA);
+	auto df = getTwoMeshsIntersectRelation(meshA, meshB);
+	auto di = getTwoMeshsIntersectRelation(meshB, meshA);
 
 	std::array<Vector3d, 2> segmA = { Vector3d(0,0,0), Vector3d(100,100,0) };
 	std::array<Vector3d, 2> segmB = { Vector3d(100,0,100), Vector3d(0,100,100) };
 	bool b1 = isTwoSegmentsIntersect(segmA, segmB);
 
-	cout << "d_min=" << df << endl;
 	cout << "return 0" << endl;
-	// 不相交的三角形
-	Vector3d triA_0 = Vector3d(4924494.8122771187, -385870.18283433426, 5749.9999999999054);
-	Vector3d triA_1 = Vector3d(4924599.8122771177, -385945.18283433421, 5749.9999999999054);
-	Vector3d triA_2 = Vector3d(4924586.8713248633, -385946.88654301979, 5749.9999999999054);
-	Vector3d triB_0 = Vector3d(4924601.8102601077, -385940.89359764993, 5750.0000000000000);
-	Vector3d triB_1 = Vector3d(4924595.2577039087, -385951.32193110074, 5750.0000000000000);
-	Vector3d triB_2 = Vector3d(4924589.8109916430, -385975.18553675216, 5750.0000000000000);
-	Triangle triA = { triA_0, triA_1, triA_2 };
-	Triangle triB = { triB_0, triB_1, triB_2 };
-	//double d = getTrianglesDistanceSAT(triA, triB);
-
-	triA_0 = Vector3d(0, 0, 0);
-	triA_1 = Vector3d(0, 10, 0);
-	triA_2 = Vector3d(10, 5, 0);
-	triB_0 = Vector3d(-10, 0, 0);
-	triB_1 = Vector3d(-10, 10, 0);
-	triB_2 = Vector3d(-5, 5, 5);
-	triA = { triA_0, triA_1, triA_2 };
-	triB = { triB_0, triB_1, triB_2 };
-
-	double d0 = getTrianglesDistance(P, Q, triA, triB);
-	double d1 = getTrianglesDistanceSAT(triA, triB);
-	double d2 = getDistanceOfPointAndPlaneINF(Vector3d(0, 0, 0), triB);
-	d2 = sqrt(d2);
-
 }
 #endif // USING_FLATBUFFERS_SERIALIZATION
 
+//优化测试
+static void _test7()
+{
+
+	Vector3d triA_0 = Vector3d(4936998.2332053846, -383787.17924958991, 6015.6846000000369);
+	Vector3d triA_1 = Vector3d(4937024.8494758252, -383779.28694613208, 6070.1700860465535);
+	Vector3d triA_2 = Vector3d(4937029.5225078566, -383777.90129043174, 6060.6040417688109);
+	Vector3d triB_0 = Vector3d(4937021.0285847718, -383780.41992348642, 6057.7254248593736);
+	Vector3d triB_1 = Vector3d(4937022.2016856968, -383780.07207353070, 6050.0000000000000);
+	Vector3d triB_2 = Vector3d(4936824.6681833472, -383113.90342609736, 6050.0000000000000);
+
+	Triangle triA = { triA_0, triA_1, triA_2 };
+	Triangle triB = { triB_0, triB_1, triB_2 };
+	bool issat = isTwoTrianglesIntersectSAT(triA, triB);
+
+
+	std::vector<ModelMesh> cvtMeshVct_con = read_ModelMesh(binFilePath + "cvtMeshVct_con.bin"); //all mesh
+	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034.bin");
+	//size_t idA = 1521, idB = 1519; //same model
+	//size_t idA = 2978, idB = 2976;
+	//size_t idA = 1480, idB = 1474; //intru diff
+	//size_t idA = 6563, idB = 4296; // dp不同
+	//size_t idA = 6564, idB = 4293;
+	//size_t idA = 3871, idB = 3391; //双杆
+	size_t idA = 1521, idB = 1519; //inter but d<0
+
+	ModelMesh meshA, meshB;
+	double dtest;
+	for (const auto& iter : cvtMeshVct_con)
+	{
+		if (iter.entityid_ == idA)
+			meshA = iter;
+		if (iter.entityid_ == idB)
+			meshB = iter;
+		//bool b1 = isConvex(iter.vbo_, iter.ibo_);
+		//bool b2 = is_convex(iter.vbo_, iter.ibo_);
+		//cout << b1 << b2 << endl;
+		//bool isConvex = is_convex(iter.vbo_, iter.ibo_); //
+	}
+
+	//手动计算PenetrationDepth
+	std::tuple<Eigen::Vector3d, std::array<size_t, 2>> res1 = getPenetrationDepthOfTwoConvexALL(meshA, meshB);
+	double d1 = std::get<0>(res1).norm();
+	bool isInter2=isTwoMeshsIntersectSAT(meshA, meshB);
+	std::tuple<RelationOfTwoMesh, Eigen::Vector3d> res2 = getTwoMeshsIntersectRelation(meshA, meshB);
+	double d2 = std::get<1>(res2).norm();
+	double dinfo;
+	for (int i = 0; i < triInfo4034.size(); ++i)
+	{
+		if (triInfo4034[i].entityPair[0] == idA &&
+			triInfo4034[i].entityPair[1] == idB )
+		{
+			dinfo = triInfo4034[i].distance;
+		}
+	}
+	// without d = -75.000000000040018
+	 //with vertex d = -131.80984782427549
+
+	//相交测试
+	bool isInter = false;
+	double distance = nan("0");
+	for (size_t i = 0; i < meshA.ibo_.size(); i++)
+	{
+		for (size_t j = 0; j < meshB.ibo_.size(); j++)
+		{
+			std::array<Eigen::Vector3d, 3> triA = {
+				meshA.vbo_[meshA.ibo_[i][0]],
+				meshA.vbo_[meshA.ibo_[i][1]],
+				meshA.vbo_[meshA.ibo_[i][2]] };
+			std::array<Eigen::Vector3d, 3> triB = {
+				meshB.vbo_[meshB.ibo_[j][0]],
+				meshB.vbo_[meshB.ibo_[j][1]],
+				meshB.vbo_[meshB.ibo_[j][2]] };
+			if (isTwoTrianglesBoundingBoxIntersect(triA, triB))
+			{
+				if (isTwoTrianglesIntersectSAT(triA, triB))
+				{
+					isInter = true;
+					//distance = getTrianglesDistanceSAT(triA, triB);
+				}
+			}
+		}
+	}
+	bool isInter1= isTwoMeshsIntersectSAT(meshA, meshB);
+
+
+	cout << "return 0;" << endl;
+}
 
 static int enrol = []()->int
 {
 #ifdef USING_FLATBUFFERS_SERIALIZATION
-	//_test4();
-	_test5();
+	//_test0();
+	_test4();
+	//_test5();
 	//_test6();
+	//_test7();
 #endif
 	return 0;
 }();

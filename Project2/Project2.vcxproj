@@ -238,12 +238,13 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="test_triangle_intersect.cpp" />
     <ClCompile Include="test_type.cpp" />
     <ClCompile Include="test_vector.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="test_triangle_intersect.cpp" />
+    <ClCompile Include="my_triangle_intersect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="calculatePolyhedron.h" />
@@ -255,7 +256,7 @@
     <ClInclude Include="test_function.h" />
     <ClInclude Include="test_serialize.h" />
     <ClInclude Include="test_template0.h" />
-    <ClInclude Include="test_triangle_intersect.h" />
+    <ClInclude Include="my_triangle_intersect.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

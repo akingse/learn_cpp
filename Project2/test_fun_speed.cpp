@@ -158,14 +158,14 @@ static void _test0()
 	{
 		start = clock();
 		//totalNum = 1;
-//#pragma omp parallel for //开启omp优化
+#pragma omp parallel for //开启omp优化
 		for (int i = 0; i < totalNum; i++)
 		{
 			//auto res = _get_circumcircle_center({ _get_rand() ,_get_rand() ,_get_rand() });
 			//double res = _test_custom_calculate(nums);
 			// 点与三角形
 			//bool res = isPointInTriangle(randData2D[i][0], randData2D_[i]); //2D
-			bool res = isPointInTriangle(randData3[i][0], randData3_[i]); //3D
+			//bool res = isPointInTriangle(randData3[i][0], randData3_[i]); //3D
 			//bool res = isPointOnTriangleSurface(Vector3d(1,2,3), randData3[i]);
 			// 
 			// 线段
@@ -190,7 +190,7 @@ static void _test0()
 			// 软碰撞
 			//double d = getTrianglesDistance(P, Q, randData3[i], randData3_[i]);
 			//double d = getTrianglesDistanceSAT(randData3[i], randData3_[i]);
-			//array<Vector3d, 2> res = getTwoTrianglesNearestPoints(randData3[i], randData3_[i]);
+			array<Vector3d, 2> res = getTwoTrianglesNearestPoints(randData3[i], randData3_[i]);
 			//array<Vector3d, 2> res = getTwoTrianglesIntersectPoints(randData3[i], randData3_[i]);
 			//array<Vector3d, 2> res = getTwoTrianglesIntersectPoints(randData3xy[i], randData3_xy[i]);
 			//double d = (res[1] - res[0]).norm(); << endl
@@ -209,14 +209,6 @@ static void _test0()
 
 	}
 
-	cout << "count_edgeCrossTri=" << count_edgeCrossTri / 3 << endl;
-	cout << "count_pointInTri=" << count_pointInTri / 3 << endl;
-	cout << "count_segCrossTri=" << count_segCrossTri / 3 << endl;
-	cout << "count_across=" << count_across / 3 << endl;
-	count_edgeCrossTri = 0;
-	count_pointInTri = 0;
-	count_segCrossTri = 0;
-	count_across = 0;
 #endif
 
 	// 输出当前时间
@@ -231,7 +223,7 @@ static void _test0()
 
 static int enrol = []()->int
 {
-	//_test0();
+	_test0();
 	return 0;
 }();
 
