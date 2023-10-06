@@ -62,25 +62,20 @@ Computer Vision / Deep Learning
 
 ![image-20230325222439660](https://raw.githubusercontent.com/akingse/my-picbed/main/image-20230325222439660.png)
 
-Course  Logistics
 
-Modern Course
 
-Comprehensive but without hardware programming!
-
-全面但没有硬件编程！
-
-Pace / contents subject to change
-
-进度/内容如有变动
+---
 
 [课程](http://www.cs.ucsb.edu/~lingqi/teaching/games101.html)
 
-### 课程大纲：
+## 课程大纲：
 
-【1】：计算机图形学概述
+### 【1】：计算机图形学概述
+
 [官网](https://learnopengl-cn.github.io/) 
-【2】：向量与线性代数 Review of Linear Algebra
+
+### 【2】：向量与线性代数 Review of Linear Algebra
+
 基础数学
 线性代数、计算、数据处理
 基础物理 ：光学、力学
@@ -90,7 +85,7 @@ More dependent on Linear Algebra
 Vectors (dot products, cross products,)
 Matrices (matrix-matrix, matrix-vector mult., ...)
 
-### 基础概念
+#### 基础概念
 
 默认列向量，模长，单位向量，加法
 点乘 Dot (scalar) Product
@@ -117,7 +112,8 @@ Determine inside / outside确定内/外（点在三角形内部）
 
 ![image-20230325222706284](https://raw.githubusercontent.com/akingse/my-picbed/main/image-20230325222706284.png)
 
-【3】：基础变换（二维）
+### 【3】：基础变换（二维）
+
 Why study transformation .为什么要学习转变。
 modeling模型变换，view视图变换，坐标系运动学变换，投影成像
 2D transformations: rotation, scale, shear 2D变换：旋转、缩放、剪切
@@ -138,7 +134,8 @@ Composing transforms复合变换
 3D transformations三维变换
 projection 投影
 
-【4】：基础变换（三维）
+#### 【4】：基础变换（三维）
+
 Transformation Cont 续
 正交矩阵（inverse=transpose）
 公式 Rodrigues’ Rotation Formula
@@ -156,39 +153,77 @@ $$
 
 ![image-20230325223352632](https://raw.githubusercontent.com/akingse/my-picbed/main/image-20230325223352632.png)
 
-\- Projection (投影) transformation 三维到二维的投影
 
-\- Orthographic (正交) projection 
+
+- ### 【5】：三维到二维变换（模型、视图、投影）
+
+#### Projection (投影) transformation 
+
+三维到二维的投影
+
+**Orthographic projection**   (正交投影) 
 
 camera在origin，看向-z，
 
-\- Perspective (透视) projection，近大远小
+canonical cube标准立方体，[-1, 1]^3（包围盒？），右手系，左右lr，上下bt，远近nf
 
 ![image-20230725232511115](../../../../../AppData/Roaming/Typora/typora-user-images/image-20230725232511115.png)
 
+ **Perspective** (透视) projection，近大远小，更接近人眼，应用更广泛；
+
+ Frustum 截锥，这个n是相机距离near clip plane的距离，还是透视投影的参考点距离；
+
+![image-20231005192156361](../../../../../AppData/Roaming/Typora/typora-user-images/image-20231005192156361.png)
+
+
+
+- ### 【6】：光栅化（离散化三角形）
+
+####  Rasterization
+
+透视投影，定义一个视锥，长宽比aspect ratio，视角field of view，
+
+![image-20231005234332985](../../../../../AppData/Roaming/Typora/typora-user-images/image-20231005234332985.png)
+
+after MVP，model view projection
+
+Raster=Screen，pixel
+
+像素坐标系，左下角原点，[0,0]-[width-1, height-1]
+
+视口变换矩阵， M_viewport=translate(w/2,h/2,0)**scale(w/2,h/2,1)
+
+三角形，最基础的多边形，一定共面，内外清晰，内部渐变； 
+
+三角形与像素的关系，判断像素中心是否在三角形内； is_inside_2d(tri, x, y)
+
+using包围盒，逐行扫描；锯齿aliasing
+
+#### Antialiasing and Z-Buffering 抗锯齿
+
+
+
+
+
+Occlusions and Visibility
+
+
+
+
+
+- ### 【7】：光栅化（深度测试与抗锯齿）
+
  
 
-- 【5】：三维到二维变换（模型、视图、投影）
+- ### 【8】：着色（光照与基本着色模型）
 
  
 
-- 【6】：光栅化（离散化三角形）
+- ### 【9】：着色（着色频率、图形管线、纹理映射）
 
  
 
-- 【7】：光栅化（深度测试与抗锯齿）
-
- 
-
-- 【8】：着色（光照与基本着色模型）
-
- 
-
-- 【9】：着色（着色频率、图形管线、纹理映射）
-
- 
-
-- 【10】：几何（基本表示方法）
+- ### 【10】：几何（基本表示方法）
 
  
 
