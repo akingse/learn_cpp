@@ -297,12 +297,6 @@ bug修复
 
 
 
-
-
-
-
-
-
 ```c
 //顶点缓冲对象：Vertex Buffer Object，VBO
     std::vector<Eigen::Vector3d> vbo_; //所有顶点
@@ -339,6 +333,8 @@ bug修复
 
 ​	得到包围盒碰撞了的BPEntityId对（包含公差）；
 
+为了减少硬碰撞的检测个数，单独拿出来加了tolerance后软碰撞intersect但原始boundingbox不相交的部分；命名为is_soft
+
 ​	is_soft=false 无公差，硬碰撞
 ​	is_soft=false 有公差，但原始包围盒碰撞
 ​	is_soft=true，有公差，原始box separate分离，但是在公差内（enlarge box）碰撞
@@ -367,10 +363,6 @@ bug修复
 
 ./flatc --python convert_to_mesh.fbs
 ```
-
-
-
-
 
 
 

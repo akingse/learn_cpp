@@ -80,4 +80,29 @@ int main_file()
 }
 
 
+static void _test0()
+{
 
+    string mypath = "C:\\Users\\Aking\\Documents\\WXWork\\PythonScript\\python-3.7.9-embed-amd64\\Lib\\site-packages\\test_script0\\Cube²ÎÊý»¯.py";
+    string res;
+    int count = 0;
+	for (auto iter = mypath.rbegin(); iter != mypath.rend(); iter++)
+    {
+        if (*iter == '\\')
+            count++;
+		if (count < 2)
+            res += *iter;
+    }
+    std::reverse(res.begin(), res.end());
+	int id1 = mypath.find_last_of('\\');
+	string sub1 = mypath.substr(id1, mypath.size());
+
+    return;
+}
+
+
+static int enrol = []()->int
+{
+    //_test0();
+    return 0;
+}();

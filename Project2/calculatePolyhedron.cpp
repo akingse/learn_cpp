@@ -751,9 +751,10 @@ std::array<std::vector<size_t>, 2> _getReducedIntersectTrianglesOfMesh(const Mod
 	Eigen::AlignedBox3d boxMag(box.min() - toleSize, box.max() + toleSize);
 	std::vector<size_t> triA_Index; // using index of mesh IBO
 	Eigen::AlignedBox3d triA_Box; // iterate to lessen box
+	std::array<Eigen::Vector3d, 3> triIter;
 	for (size_t i = 0; i < meshA.ibo_.size(); ++i)
 	{
-		std::array<Eigen::Vector3d, 3> triIter = { // input matrix to avoid repeat calculate
+		triIter = { // input matrix to avoid repeat calculate
 				meshA.pose_ * meshA.vbo_[meshA.ibo_[i][0]],
 				meshA.pose_ * meshA.vbo_[meshA.ibo_[i][1]],
 				meshA.pose_ * meshA.vbo_[meshA.ibo_[i][2]] };
@@ -772,7 +773,7 @@ std::array<std::vector<size_t>, 2> _getReducedIntersectTrianglesOfMesh(const Mod
 	Eigen::AlignedBox3d triB_Box;
 	for (size_t j = 0; j < meshB.ibo_.size(); ++j)
 	{
-		std::array<Eigen::Vector3d, 3> triIter = {
+		triIter = {
 				meshB.pose_* meshB.vbo_[meshB.ibo_[j][0]],
 				meshB.pose_* meshB.vbo_[meshB.ibo_[j][1]],
 				meshB.pose_* meshB.vbo_[meshB.ibo_[j][2]] };
