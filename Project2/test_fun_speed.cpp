@@ -223,7 +223,7 @@ static void _test0()
 
 static int enrol = []()->int
 {
-	_test0();
+	//_test0();
 	return 0;
 }();
 
