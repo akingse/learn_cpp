@@ -1,13 +1,13 @@
 #include "pch.h"
 using namespace std;
 
-int MyCompare(const void* e1, const void* e2)
+static int MyCompare(const void* e1, const void* e2)
 { //用于qsort的比较函数
     return *((int*)e1) - *((int*)e2);
 }
 
 
-int main_file()
+static int main_file()
 {
 
     std::ifstream t("file.txt");
@@ -79,8 +79,49 @@ int main_file()
     return 0;
 }
 
-
 static void _test0()
+{
+    int x, y;
+    cin >> x >> y;
+    freopen("test01.txt", "w", stdout);
+    if (y == 0)
+        cerr << "error" << endl; //显示调试信息
+    else
+        cout << float(x) / y; //终端没有显示，重定向，写入了文件
+}
+
+static void _test1()
+{
+    double m, n;
+    cin >> m >> n;
+    try
+    {
+        cout << "before dividing." << endl;
+        if (n == 0)
+            throw - 1; //抛出int类型异常，程序停止运行
+        else
+            cout << m / n << endl;
+        cout << "after dividing." << endl;
+    }
+
+    //异常处理，从上到下，依次匹配
+    catch (int e)
+    {
+        cout << "catch(int) " << e << endl;
+    }
+    catch (double e)
+    {
+        cout << "catch(double) " << e << endl;
+    }
+    catch (...)//
+    {
+        cout << "catch(default) " << endl;
+    }
+    cout << "finished" << endl;
+    //return 0;
+}
+
+static void _test2()
 {
 
     string mypath = "C:\\Users\\Aking\\Documents\\WXWork\\PythonScript\\python-3.7.9-embed-amd64\\Lib\\site-packages\\test_script0\\Cube参数化.py";

@@ -31,9 +31,6 @@
     <Filter Include="test_template">
       <UniqueIdentifier>{69181f03-4b47-4a30-9afc-feb3fb814b3a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="design_pattern">
-      <UniqueIdentifier>{fad63b5c-db31-4022-a047-ded44ba1a370}</UniqueIdentifier>
-    </Filter>
     <Filter Include="test_math">
       <UniqueIdentifier>{ab0f9f34-e60c-4037-b9de-ff1246a48bea}</UniqueIdentifier>
     </Filter>
@@ -51,6 +48,9 @@
     </Filter>
     <Filter Include="test_bin">
       <UniqueIdentifier>{d1dda523-7d2c-4073-9e11-04735d696ee9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test_pattern">
+      <UniqueIdentifier>{bc964f22-f8dc-4621-a47d-f5eebd3d32d8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -102,15 +102,6 @@
     <ClCompile Include="test_set.cpp">
       <Filter>test_stl</Filter>
     </ClCompile>
-    <ClCompile Include="test_object_pool.cpp">
-      <Filter>design_pattern</Filter>
-    </ClCompile>
-    <ClCompile Include="test_factory.cpp">
-      <Filter>design_pattern</Filter>
-    </ClCompile>
-    <ClCompile Include="test_cache.cpp">
-      <Filter>design_pattern</Filter>
-    </ClCompile>
     <ClCompile Include="test_construct.cpp">
       <Filter>test_gram</Filter>
     </ClCompile>
@@ -137,9 +128,6 @@
     </ClCompile>
     <ClCompile Include="test_template0.cpp">
       <Filter>test_template</Filter>
-    </ClCompile>
-    <ClCompile Include="test_sgt.cpp">
-      <Filter>design_pattern</Filter>
     </ClCompile>
     <ClCompile Include="test_math.cpp">
       <Filter>test_math</Filter>
@@ -221,6 +209,21 @@
     </ClCompile>
     <ClCompile Include="test_triangle_intersect.cpp">
       <Filter>test_math</Filter>
+    </ClCompile>
+    <ClCompile Include="test_cache.cpp">
+      <Filter>test_pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="test_factory.cpp">
+      <Filter>test_pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="test_object_pool.cpp">
+      <Filter>test_pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="test_sgt.cpp">
+      <Filter>test_pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="test_mutex.cpp">
+      <Filter>test_thread</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
