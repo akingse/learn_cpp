@@ -113,6 +113,103 @@ std::time_mutex 比 std::mutex 多了两个成员函数，try_lock_for()，try_l
 `std::lock_guard`：与 mutex RAII 相关，方便线程对互斥量上锁。
 `std::unique_lock`：与 mutex RAII 相关，方便线程对互斥量上锁，但提供了更好的上锁和解锁控制。
 
+创建lock_guard对象时，它将尝试获取提供给它的互斥锁的所有权。当控制流离开lock_guard对象的作用域时，lock_guard析构并释放互斥量。lock_guard的特点：
+
+- 创建即加锁，作用域结束自动析构并解锁，无需手工解锁
+- 不能中途解锁，必须等作用域结束才解锁
+- 不能复制
+
+简单地讲，unique_lock 是 lock_guard 的升级加强版，它具有 lock_guard 的所有功能，同时又具有其他很多方法，使用起来更加灵活方便，能够应对更复杂的锁定需要。unique_lock的特点：
+
+- 创建时可以不锁定（通过指定第二个参数为std::defer_lock），而在需要时再锁定
+- 可以随时加锁解锁
+- 作用域规则同 lock_grard，析构时自动释放锁
+- 不可复制，可移动
+- 条件变量需要该类型的锁作为参数（此时必须使用unique_lock）
+
+所有 lock_guard 能够做到的事情，都可以使用 unique_lock 做到，反之则不然。那么何时使lock_guard呢？很简单，需要使用锁的时候，首先考虑使用 lock_guard，因为lock_guard是最简单的锁。
+
+#### condition_variable
+
+condition_variable头文件有两个variable类，一个是condition_variable，另一个是condition_variable_any。condition_variable必须结合unique_lock使用。condition_variable_any可以使用任何的锁。下面以condition_variable为例进行介绍。
+
+condition_variable条件变量可以阻塞（wait、wait_for、wait_until）调用的线程直到使用（notify_one或notify_all）通知恢复为止。condition_variable是一个类，这个类既有构造函数也有析构函数，使用时需要构造对应的condition_variable对象，调用对象相应的函数来实现上面的功能。
+
+| 类型               | 说明                                         |
+| ------------------ | -------------------------------------------- |
+| condition_variable | 构建对象                                     |
+| 析构               | 删除                                         |
+| wait               | Wait until notified                          |
+| wait_for           | Wait for timeout or until notified           |
+| wait_until         | Wait until notified or time point            |
+| notify_one         | 解锁一个线程，如果有多个，则未知哪个线程执行 |
+| notify_all         | 解锁所有线程                                 |
+| cv_status          | 这是一个类，表示variable 的状态，如下所示    |
+
+```text
+enum class cv_status { no_timeout, timeout };
+```
+
+### wait
+
+当前线程调用 wait() 后将被阻塞(此时当前线程应该获得了锁（mutex），不妨设获得锁 lck)，直到另外某个线程调用 notify_* 唤醒了当前线程。在线程被阻塞时，该函数会自动调用 lck.unlock() 释放锁，使得其他被阻塞在锁竞争上的线程得以继续执行。另外，一旦当前线程获得通知(notified，通常是另外某个线程调用 notify_* 唤醒了当前线程)，wait()函数也是自动调用 lck.lock()，使得lck的状态和 wait 函数被调用时相同。
+
+### wait_for
+
+与std::condition_variable::wait() 类似，不过 wait_for可以指定一个时间段，在当前线程收到通知或者指定的时间 rel_time 超时之前，该线程都会处于阻塞状态。而一旦超时或者收到了其他线程的通知，wait_for返回，剩下的处理步骤和 wait()类似。
+
+```text
+template <class Rep, class Period>
+  cv_status wait_for (unique_lock<mutex>& lck,
+                      const chrono::duration<Rep,Period>& rel_time);
+```
+
+另外，wait_for 的重载版本的最后一个参数pred表示 wait_for的预测条件，只有当 pred条件为false时调用 wait()才会阻塞当前线程，并且在收到其他线程的通知后只有当 pred为 true时才会被解除阻塞。
+
+```text
+template <class Rep, class Period, class Predicate>
+    bool wait_for (unique_lock<mutex>& lck,
+         const chrono::duration<Rep,Period>& rel_time, Predicate pred);
+```
+
+
+
+### 线程池
+
+### 4.1、概念
+
+在一个程序中，如果我们需要多次使用线程，这就意味着，需要多次的创建并销毁线程。而创建并销毁线程的过程势必会消耗内存，线程过多会带来调动的开销，进而影响缓存局部性和整体性能。线程的创建并销毁有以下一些缺点：
+
+- 创建太多线程，将会浪费一定的资源，有些线程未被充分使用。
+- 销毁太多线程，将导致之后浪费时间再次创建它们。
+- 创建线程太慢，将会导致长时间的等待，性能变差。
+- 销毁线程太慢，导致其它线程资源饥饿。
+
+线程池维护着多个线程，这避免了在处理短时间任务时，创建与销毁线程的代价。
+
+### 4.2、线程池的实现
+
+因为程序边运行边创建线程是比较耗时的，所以我们通过池化的思想：在程序开始运行前创建多个线程，这样，程序在运行时，只需要从线程池中拿来用就可以了．大大提高了程序运行效率．一般线程池都会有以下几个部分构成：
+
+1. 线程池管理器（ThreadPoolManager）:用于创建并管理线程池，也就是线程池类
+
+2. 工作线程（WorkThread）: 线程池中线程
+
+3. 任务队列task: 用于存放没有处理的任务。提供一种缓冲机制。
+
+4. append：用于添加任务的接口
+
+   
+
+   说明
+
+- 构造函数创建所需要的线程数
+- 一个线程对应一个任务，任务随时可能完成，线程则可能休眠，所以任务用队列queue实现（线程数量有限），线程用采用wait机制。
+- 任务在不断的添加，有可能大于线程数，处于队首的任务先执行。
+- 只有添加任务(append)后，才开启线程condition.notify_one()。
+- wait表示，任务为空时，则线程休眠，等待新任务的加入。
+- 添加任务时需要添加锁，因为共享资源。
+
 
 
 
