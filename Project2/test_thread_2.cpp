@@ -47,7 +47,6 @@ void transfer(Box& from, Box& to, int num)
 	from.num_things -= num;
 	to.num_things += num;//作用域结束自动解锁,也可以使用lock1.unlock()手动解锁
 }
-}
 
 static int main1()
 {
