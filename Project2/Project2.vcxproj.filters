@@ -90,13 +90,10 @@
     <ClCompile Include="test_stl.cpp">
       <Filter>test_stl</Filter>
     </ClCompile>
-    <ClCompile Include="test_pointer.cpp">
-      <Filter>test_thread</Filter>
-    </ClCompile>
     <ClCompile Include="test_atomic.cpp">
       <Filter>test_thread</Filter>
     </ClCompile>
-    <ClCompile Include="test_thread.cpp">
+    <ClCompile Include="test_thread_1.cpp">
       <Filter>test_thread</Filter>
     </ClCompile>
     <ClCompile Include="test_set.cpp">
@@ -223,6 +220,15 @@
       <Filter>test_pattern</Filter>
     </ClCompile>
     <ClCompile Include="test_mutex.cpp">
+      <Filter>test_thread</Filter>
+    </ClCompile>
+    <ClCompile Include="test_pointer.cpp">
+      <Filter>test_gram</Filter>
+    </ClCompile>
+    <ClCompile Include="test_thread_2.cpp">
+      <Filter>test_thread</Filter>
+    </ClCompile>
+    <ClCompile Include="test_thread_pool.cpp">
       <Filter>test_thread</Filter>
     </ClCompile>
   </ItemGroup>

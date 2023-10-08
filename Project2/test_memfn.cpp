@@ -67,7 +67,7 @@ public:
 
 
 template <class _Rx, class	_Ty>
-void enrol(long long id, _Rx _Ty::* _fun)
+void enrol_fun(long long id, _Rx _Ty::* _fun)
 {
 	auto get_fun = [&](BPObject* ptr)->int {
 		_Ty* sub_prt = dynamic_cast<_Ty*>(ptr);
@@ -292,7 +292,7 @@ int main_template () {
 	std::function<void(BPGeometricPrimitive*)> fp = &BPGeometricPrimitive::initIndex;
 	//size_t n5 = getNumArgs(&BPGeometricPrimitive::initIndex);
 	//size_t n3 = getInputVariablenumber(fp);
-	//enrol(1, &Cube::getLength);
+	//enrol_fun(1, &Cube::getLength);
 
 
 	return 0;

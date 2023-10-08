@@ -82,11 +82,11 @@ void count1m(int id)
 
 int main_t1()
 {
-    std::vector<std::thread> threads;
+    std::vector<std::thread> m_threads;
     std::cout << "spawning 10 threads that count to 1 million...\n";
-    for (int i = 1; i <= 10; ++i) threads.push_back(std::thread(count1m, i));
+    for (int i = 1; i <= 10; ++i) m_threads.push_back(std::thread(count1m, i));
     ready = true;
-    for (auto& th : threads) 
+    for (auto& th : m_threads) 
         th.join();
 
     return 0;

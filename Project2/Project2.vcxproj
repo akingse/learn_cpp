@@ -233,8 +233,10 @@
     <ClCompile Include="test_stl.cpp" />
     <ClCompile Include="test_template1.cpp" />
     <ClCompile Include="test_template2.cpp" />
-    <ClCompile Include="test_thread.cpp" />
+    <ClCompile Include="test_thread_1.cpp" />
     <ClCompile Include="test_template0.cpp" />
+    <ClCompile Include="test_thread_2.cpp" />
+    <ClCompile Include="test_thread_pool.cpp" />
     <ClCompile Include="test_tree.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>

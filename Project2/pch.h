@@ -11,7 +11,6 @@
 #include <time.h> //clock()
 #include <ctime>  // random seed
 #include <cassert>
-#include <thread>
 //#include <windows.h> //min max
 #define _AFXDLL
 //#include <afx.h> // MFC <cstring>
@@ -34,6 +33,11 @@
 #include <unordered_set>
 #include <regex>
 
+//thread
+#include <thread>
+#include <mutex> 
+#include <condition_variable>
+
 #include <process.h>
 #include <cassert>
 #include <typeinfo>
@@ -41,7 +45,6 @@
 #include <type_traits>
 #include <utility> 
 #include <any> 
-#include <mutex> 
 #include <string_view>
 #include <functional>
 #include <memory_resource>

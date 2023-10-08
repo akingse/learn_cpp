@@ -139,9 +139,9 @@ static void test2()
 	return;
 }
 
-static int _enrol = []()->int {
+static int enrol = []()->int {
 	//test0();
-	test2();
+	//test2();
 	return 0;
 }();
 

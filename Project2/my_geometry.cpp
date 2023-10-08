@@ -57,7 +57,7 @@ static void _test_geometry()
 	interface_enrol("CUBE", "长", cube_setLength);
 	interface_enrol("CUBE", "宽", cube_setWidth);
 	interface_enrol("CUBE", "mf高", &Cube::setHigh);
-	//enrol("CUBE", "高", cube_setHigh);
+	//enrol_fun("CUBE", "高", cube_setHigh);
 
 	BPGeometricPrimitive primitive(new Cube(100, 100, 200), false);
 	//BPGeometricPrimitive primitive(nullptr, false);

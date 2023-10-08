@@ -87,7 +87,7 @@ static void _test_set()
 
 static int enrol = []()->int
 {
-    _test_set();
+    //_test_set();
     //mainstl();
     return 0;
 }();

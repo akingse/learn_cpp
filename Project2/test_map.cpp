@@ -86,7 +86,7 @@ static int enrol = []()->int
 	//static void(*trigger)() = nullptr;
 	void (*trigger)() = nullptr;
 	//º¯ÊıÖ¸Õë
-	trigger = test_map;
+	//trigger = test_map;
 	//test_map();
 	return 0;
 }();

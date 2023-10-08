@@ -121,12 +121,12 @@ void fireworks() {
 
 static int main6()
 {
-	std::thread threads[10];
+	std::thread m_threads[10];
 	// spawn 10 threads:
 	for (int i = 0; i < 10; ++i)
-		threads[i] = std::thread(fireworks);
+		m_threads[i] = std::thread(fireworks);
 
-	for (auto& th : threads) 
+	for (auto& th : m_threads) 
 		th.join();
 
 	return 0;
@@ -304,17 +304,17 @@ static int main11()
 
 
 static int enrol = []()->int
-	{
-		//main1();
-		//main2();
-		//main3();
-		//main4();
-		//main5();
-		//main6();
-		//main7();
-		//main8();
-		//main9();
-		//main10();
-		main11();
-		return 0;
-	}();
+{
+	//main1();
+	//main2();
+	//main3();
+	//main4();
+	//main5();
+	//main6();
+	//main7();
+	//main8();
+	//main9();
+	//main10();
+	//main11();
+	return 0;
+}();
