@@ -241,7 +241,7 @@ static int main9()
 	return 0;
 }
 
-
+//lock_guard
 void thread_task9()
 {
 	for (int i = 0; i < 100000; ++i)
@@ -274,6 +274,7 @@ static int main10()
 	return 0;
 }
 
+//unique_lock
 void thread_task11()
 {
 	for (int i = 0; i < 100000; ++i)
@@ -302,19 +303,212 @@ static int main11()
 	return 0;
 }
 
+//std::try_lock
+std::once_flag g_flag;
+
+void thread_task13()
+{
+	++a;
+}
+
+void thread_task14()
+{
+	std::call_once(g_flag, thread_task1);
+}
+
+static int main12()
+{
+	std::thread t1(thread_task13);
+	std::thread t2(thread_task14);
+	t1.join();
+	t2.join();
+	std::cout << a << std::endl;
+	return 0;
+}
+
+//condition_variable
+std::condition_variable cond;
+
+void thread_task15()
+{
+	std::unique_lock<std::mutex> lock(mtx);
+	cond.wait(lock, [] {return !(a % 1000); });
+	//cond.wait(lock);
+	++a;
+}
+
+void thread_task16()
+{
+	for (int i = 0; i < 100000; ++i)
+	{
+		std::unique_lock<std::mutex> lock(mtx);
+		if (!(a % 1000))
+			cond.notify_one();
+		++a;
+	}
+}
+
+static int main13()
+{
+	std::thread t1(thread_task1);
+	std::thread t2(thread_task2);
+	t1.join();
+	t2.join();
+	std::cout << a << std::endl;
+	return 0;
+}
+
+
+//std::async、std::future、std::packaged_task、std::promise
+#include <future>	// std::future
+#include <thread>   // std::thread
+#include <mutex>    // std::mutex
+int thread_task17()
+{
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::cout << "thread_task" << std::endl;
+	return 0;
+}
+
+static int main14()
+{
+	std::async(thread_task17);
+	return 0;
+}
+
+int thread_task18()
+{
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::cout << "thread_task" << std::endl;
+	return 0;
+}
+
+static int main15()
+{
+	std::future<int> result = std::async(std::launch::deferred, thread_task18);
+	//std::cout << result.get() << std::endl;
+	return 0;
+}
+
+int thread_task19()
+{
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::cout << "thread_task" << std::endl;
+	return 0;
+}
+
+static int main16()
+{
+	std::future<int> result = std::async(std::launch::async, thread_task19);
+	//std::cout << result.get() << std::endl;
+	return 0;
+}
+
+
+int thread_task20()
+{
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::cout << "thread_task" << std::endl;
+	return 0;
+}
+
+static int main17()
+{
+	std::future<int> result = std::async(thread_task20);
+	std::cout << result.get() << std::endl;
+	return 0;
+}
+
+int thread_task21(int i)
+{
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::cout << "thread_task" << i << std::endl;
+	return 0;
+}
+
+static int main18()
+{
+	std::packaged_task<int(int)> pack(thread_task21);
+	std::thread mythread(std::ref(pack), 5);
+	mythread.join();
+	std::future<int> result = pack.get_future();
+	std::cout << result.get() << std::endl;
+	return 0;
+}
+
+int thread_task22(std::promise<int>& pro, int i)
+{
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::cout << "thread_task" << i << std::endl;
+	pro.set_value(i);
+	return 0;
+}
+
+static int main19()
+{
+	std::promise<int> pro;
+	std::thread mythread(thread_task22, std::ref(pro), 5);
+	mythread.join();
+	std::future<int> result = pro.get_future();
+	std::cout << result.get() << std::endl;
+	return 0;
+}
+
+int thread_task23(std::promise<int>& pro, int i)
+{
+	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::cout << "thread_task" << i << std::endl;
+	pro.set_value(i);
+	return 0;
+}
+
+static int main20()
+{
+	std::promise<int> pro;
+	std::thread mythread(thread_task23, std::ref(pro), 5);
+	mythread.join();
+	std::future<int> result = pro.get_future();
+	std::future_status status = result.wait_for(std::chrono::milliseconds(1000));
+	if (std::future_status::ready == status)
+	{
+		//线程已成功返回
+	}
+	else if (std::future_status::timeout == status)
+	{
+		//wait_for的时间已结束，线程仍未成功返回
+	}
+	else if (std::future_status::deferred == status)
+	{
+		//如果std::async的第一个参数设置为std::launch::deferred
+		//则该线程会直到std::future对象调用wait()或get()时才会执行
+		//这种情况就会满足
+	}
+	std::cout << result.get() << std::endl;
+	return 0;
+}
+
 
 static int enrol = []()->int
-{
-	//main1();
-	//main2();
-	//main3();
-	//main4();
-	//main5();
-	//main6();
-	//main7();
-	//main8();
-	//main9();
-	//main10();
-	//main11();
-	return 0;
-}();
+	{
+		//main1();
+		//main2();
+		//main3();
+		//main4();
+		//main5();
+		//main6();
+		//main7();
+		//main8();
+		//main9();
+		//main10();
+		//main11();
+		//main12();
+		//main13();
+		//main14();
+		//main15();
+		//main16();
+		//main17();
+		//main18();
+		//main19();
+		main20();
+		return 0;
+	}();
