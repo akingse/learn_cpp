@@ -196,7 +196,7 @@ private:
 
 static int enrol = []()->int
 {
-	main1();
+	//main1();
 	return 0;
 }();
 

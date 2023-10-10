@@ -360,9 +360,7 @@ static int main13()
 
 
 //std::async¡¢std::future¡¢std::packaged_task¡¢std::promise
-#include <future>	// std::future
-#include <thread>   // std::thread
-#include <mutex>    // std::mutex
+
 int thread_task17()
 {
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -509,6 +507,6 @@ static int enrol = []()->int
 		//main17();
 		//main18();
 		//main19();
-		main20();
+		//main20();
 		return 0;
 	}();
