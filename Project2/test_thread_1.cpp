@@ -260,28 +260,11 @@ void myThread2()
 {
 	testMutex1.lock();
 	cout << "mutex1 1ock" << endl; ;
-	std::this_thread::sleep_for(std::chrono::seconds(1));//延时-秒更好的能查看到std::dack簫待的效果
+	std::this_thread::sleep_for(std::chrono::seconds(1));//延时-秒更好的能查看到std::dack等待的效果
 	testMutex1.unlock();
 	cout << "mutex1 unlock" << endl;
 	std::this_thread::sleep_for(std::chrono::seconds(1));
 }
-
-
-
-/*
-多线程同步
-*/
-
-/*
-异步任务
-*/
-
-/*
-打包任务
-
-
-*/
-
 
 
 int main_thread()//不用就会忘

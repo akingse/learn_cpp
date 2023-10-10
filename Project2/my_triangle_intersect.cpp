@@ -53,13 +53,13 @@ Devillers & GuigueËã·¨(¼ò³ÆDevillers Ëã·¨) Í¨¹ýÈý½ÇÐÎ¸÷¶¥µã¹¹³ÉµÄÐÐÁÐÊ½Õý¸ºµÄ¼¸º
 #include <array>
 #include <vector>
 #include <memory>
-#include <ranges>
-#include <format>
 #include <cassert>
 #include <numeric>
 #include <fstream>
 #include <algorithm>
-#include <filesystem>
+//#include <filesystem> //warning, only with C++17 later
+//#include <format>
+//#include <ranges>
 #include <functional>
 #include <type_traits>
 #include "Eigen/Geometry"    

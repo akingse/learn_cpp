@@ -23,8 +23,11 @@ count_reduced_exclude_pre, count_triA_inter, count_triB_inter,
 count_err_empty_mesh, count_tri_box_exclude_pre, count_trigon_coplanar, count_error_tris_sepa,
 count_point_inside_mesh;
 
-extern std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> triPairList, triRecordHard;
+extern std::vector<std::array<Triangle, 2>> triPairList, triRecordHard; //std::array<Eigen::Vector3d, 3>
+extern std::vector<Triangle> triFaceVctA, triFaceVctB;
+extern std::vector<Vector3d> triVertexVctA, triVertexVctB;
 extern std::vector<InterTriInfo> interTriInfoList;
+
 #endif //STATISTIC_DATA_COUNT
 
 enum class RelationOfRayAndTrigon : int
@@ -523,12 +526,19 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		vboSetA.insert(iboA[iterA][0]);
 		vboSetA.insert(iboA[iterA][1]);
 		vboSetA.insert(iboA[iterA][2]);
+#ifdef CLASHDETECTION_DEBUG_TEMP
+	//output calculate intersect meshs triangless
+		triFaceVctA.push_back({ vboA[iboA[iterA][0]], vboA[iboA[iterA][1]], vboA[iboA[iterA][2]]});
+#endif
 	}
 	for (const auto& iterB : faceSetB)
 	{
 		vboSetB.insert(iboB[iterB][0]);
 		vboSetB.insert(iboB[iterB][1]);
 		vboSetB.insert(iboB[iterB][2]);
+#ifdef CLASHDETECTION_DEBUG_TEMP
+		triFaceVctB.push_back({ vboB[iboB[iterB][0]], vboB[iboB[iterB][1]], vboB[iboB[iterB][2]]});
+#endif
 	}
 	for (const auto& iA : faceSetA) // iterate every faceA
 	{
@@ -566,6 +576,9 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		origin = normal.dot(vboA[iboA[iA][0]]); // relative projection value
 		for (const auto& iB : vertexVectB) // the inside vertex's prejection
 		{
+#ifdef CLASHDETECTION_DEBUG_TEMP
+			triVertexVctB.push_back(vboB[iB]);
+#endif
 			projection = normal.dot(matIAB * vboB[iB]) - origin;
 			if (projection < dminA_V)
 			{
@@ -619,6 +632,9 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		origin = normal.dot(matA * vboB[iboB[iB][0]]); // relative projection value
 		for (const auto& iA : vertexVectA) // the inside vertex's prejection
 		{
+#ifdef CLASHDETECTION_DEBUG_TEMP
+			triVertexVctA.push_back(vboA[iA]);
+#endif
 			projection = normal.dot(matA * vboA[iA]) - origin;
 			if (projection < dminB_V)
 			{

@@ -226,6 +226,22 @@ void write_InterTriInfo(const std::vector<InterTriInfo>& infos, const std::strin
 		out.close();
 		builder.Clear();
 	}
+	else //if (!out.is_open())
+	{
+		stringstream ss;
+		ss << strerror(errno); //errno==2
+		string errorMsg = ss.str();
+		//cout << errorMsg << endl;
+		string w = strerror(errno);
+		cout << "cause:" << strerror(errno) << endl;
+		/*
+		- ENOENT - 文件不存在
+		- EACCES - 权限不足
+		- EROFS - 文件为只读
+		- ENOSPC - 磁盘空间不足
+		- EINVAL - 无效的参数
+		*/
+	}
 }
 
 std::vector<InterTriInfo> read_InterTriInfo(const std::string& fileName)
@@ -335,19 +351,19 @@ std::vector<ModelMesh> read_ModelMesh(const std::string& fileName)
 			auto _max = Eigen::Vector3d(mesh->aabb_max()->x(), mesh->aabb_max()->y(), mesh->aabb_max()->z());
 			std::vector<Eigen::Vector3d> vbo_;
 			std::vector<std::array<int, 3>> ibo_;
-			for (int i = 0; i < vbo->vbos()->size(); i++)
+			for (int size_t = 0; i < vbo->vbos()->size(); i++)
 			{
 				auto pt = vbo->vbos()->Get(i);
 				vbo_.push_back(Eigen::Vector3d(pt->x(), pt->y(), pt->z()));
 			}
-			for (int i = 0; i < ibo->ibos()->size(); i++)
+			for (int size_t = 0; i < ibo->ibos()->size(); i++)
 			{
 				auto id = ibo->ibos()->Get(i);
 				ibo_.push_back(std::array<int, 3>{id->id0(), id->id1(), id->id2()});
 			}
 			std::vector<int> _iboRaw;
 			auto iboRaw = mesh->ibo_raw();
-			for (int i = 0; i < iboRaw->size(); i++)
+			for (int size_t = 0; i < iboRaw->size(); i++)
 			{
 				_iboRaw.push_back(iboRaw->Get(i));
 			}
