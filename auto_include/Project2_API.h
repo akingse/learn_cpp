@@ -3,13 +3,10 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include <chrono>
 #include <iostream>
-#include <memory>
-#include <type_traits>
+#include <chrono>
 #include <ctime>
 #include <cassert>
-#include <functional>
 #include <cmath>
 #include <complex>
 #include <vector>
@@ -23,6 +20,7 @@
 #include <regex>
 #include <thread>
 #include <mutex>
+#include <future>
 #include <condition_variable>
 #include <cassert>
 #include <typeinfo>
@@ -32,6 +30,7 @@
 #include <any>
 #include <string_view>
 #include <functional>
+#include <memory>
 #include <memory_resource>
 
 /* Warning, change the file to script automatically.

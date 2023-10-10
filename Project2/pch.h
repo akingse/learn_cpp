@@ -4,18 +4,18 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm> 
-#include <chrono>   
 #include <iostream>
-#include <memory>
-#include <type_traits>
+//time
+#include <chrono>   
 #include <time.h> //clock()
 #include <ctime>  // random seed
 #include <cassert>
+
+//windows
 //#include <windows.h> //min max
 #define _AFXDLL
 //#include <afx.h> // MFC <cstring>
-#include <functional>  
-#include <omp.h>
+// 
 //math
 #define _USE_MATH_DEFINES //using M_PI
 #include <cmath>
@@ -34,8 +34,9 @@
 #include <regex>
 
 //thread
-#include <thread>
-#include <mutex> 
+#include <thread>   // std::thread
+#include <mutex>    // std::mutex
+#include <future>	// std::future
 #include <condition_variable>
 
 #include <process.h>
@@ -47,7 +48,11 @@
 #include <any> 
 #include <string_view>
 #include <functional>
+#include <memory>
 #include <memory_resource>
+
+// third party
+#include <omp.h>
 #include <Eigen/Dense>
 //#include <CGAL/>
 //#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
@@ -66,7 +71,7 @@ typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>
 #define DLLEXPORT __declspec(dllexport)
 #endif
 #define STATISTIC_DATA_TESTFOR
-#define USING_FLATBUFFERS_SERIALIZATION
+//#define USING_FLATBUFFERS_SERIALIZATION
 //#define STATISTIC_DATA_COUNT
 
 #include "my_class_fun.h"		
