@@ -4,7 +4,6 @@ namespace psykronix
     typedef std::array<Eigen::Vector3d, 2> Segment;
     typedef std::array<Eigen::Vector3d, 3> Triangle;
     typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>> Polyhedron;
-    //typedef std::array<size_t, 2> MeshPart;
     static Eigen::Vector3d gVecNaN(std::nan("0"), std::nan("0"), std::nan("0"));
     static Triangle gSegNaN = { gVecNaN, gVecNaN };
     static Triangle gTirNaN = { gVecNaN, gVecNaN, gVecNaN };

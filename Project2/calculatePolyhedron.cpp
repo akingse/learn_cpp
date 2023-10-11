@@ -21,7 +21,7 @@ static const Triangle gTriYOZ = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(0,1,0)
 extern std::atomic<size_t> count_mesh_inside_mesh,
 count_reduced_exclude_pre, count_triA_inter, count_triB_inter,
 count_err_empty_mesh, count_tri_box_exclude_pre, count_trigon_coplanar, count_error_tris_sepa,
-count_point_inside_mesh;
+count_point_inside_mesh, count_facesetA, count_facesetB, count_triAB_nan, count_triB_nan;
 
 extern std::vector<std::array<Triangle, 2>> triPairList, triRecordHard; //std::array<Eigen::Vector3d, 3>
 extern std::vector<Triangle> triFaceVctA, triFaceVctB;
@@ -280,6 +280,7 @@ bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& _point, const M
 	return count % 2 == 1;
 }
 
+// include point on surface
 bool psykronix::isPointInsidePolyhedronCL(const Eigen::Vector3d& _point, const ModelMesh& mesh) // more judge like ceil
 {
 #ifdef STATISTIC_DATA_COUNT
@@ -305,7 +306,7 @@ bool psykronix::isPointInsidePolyhedronCL(const Eigen::Vector3d& _point, const M
 			point.x() < std::min(std::min(p0[0], p1[0]), p2[0]) ||
 			point.y() > std::max(std::max(p0[1], p1[1]), p2[1]) ||
 			point.y() < std::min(std::min(p0[1], p1[1]), p2[1]) ||
-			point.z() > std::max(std::max(p0[2], p1[2]), p2[2])) //include z
+			point.z() > std::max(std::max(p0[2], p1[2]), p2[2]) + eps) //include z
 			return false;
 		double az = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
 		return //when vertical, az==0, always true
@@ -330,8 +331,7 @@ bool psykronix::isPointInsidePolyhedronCL(const Eigen::Vector3d& _point, const M
 		normal = (p1 - p0).cross(p2 - p1);
 		if (normal.z() == 0.0) // trigon is vertical
 		{
-			// point in segment collinear judge 
-			if ((point.x() - p0.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (point.y() - p0.y()) == 0.0) //cross product is zero
+			if ((point - p0).dot(normal) == 0.0) //point on plane judge, also using 2d dot
 			{
 				Vector3d normalA = normal.cross(p1 - p0);
 				Vector3d normalB = normal.cross(p2 - p1);
@@ -389,17 +389,18 @@ bool psykronix::isPointInsidePolyhedronFL(const Eigen::Vector3d& _point, const M
 		normal = (p1 - p0).cross(p2 - p1);
 		if (normal.z() == 0.0) // trigon is vertical
 		{
-			// point in segment collinear judge 
-			if ((point.x() - p0.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (point.y() - p0.y()) == 0.0) //cross product is zero
-			{
-				Vector3d normalA = normal.cross(p1 - p0);
-				Vector3d normalB = normal.cross(p2 - p1);
-				Vector3d normalC = normal.cross(p0 - p2);
-				// point under segment judge
-				if (normalA.dot(point - p0) * normalA.z() < 0.0 || normalB.dot(point - p1) * normalB.z() < 0.0 || normalC.dot(point - p2) * normalC.z() < 0.0)
-					count++; //
-			}
-			continue; //judge point under segment
+			if ((point - p0).dot(normal) == 0.0 && isPointInTriangle(point, { p0, p1 ,p2 })) //point on plane judge
+				return false; // exclude point on surface
+			//	//(point.x() - p0.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (point.y() - p0.y()) == 0.0) //cross product is zero in XoY
+			//{
+			//	Vector3d normalA = normal.cross(p1 - p0);
+			//	Vector3d normalB = normal.cross(p2 - p1);
+			//	Vector3d normalC = normal.cross(p0 - p2);
+			//	// point under segment judge
+			//	if (normalA.dot(point - p0) * normalA.z() < 0.0 || normalB.dot(point - p1) * normalB.z() < 0.0 || normalC.dot(point - p2) * normalC.z() < 0.0)
+			//		count++; //
+			//}
+			continue;
 		}
 		projection = normal.dot(point - p0);
 		if (fabs(projection) < normal.squaredNorm() * eps) //isPointOnTriangleSurface exclude
@@ -505,6 +506,8 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConvex(const ModelMesh& meshA, const ModelMesh& meshB, 
 	const set<size_t>& faceSetA, const set<size_t>& faceSetB, const vector<size_t>& vertexVectA, const vector<size_t>& vertexVectB)
 {
+	if (faceSetA.empty() && faceSetB.empty())
+		return { gVecZero, {ULL_MAX, ULL_MAX} };
 	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
 	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
 	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
@@ -540,6 +543,18 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		triFaceVctB.push_back({ vboB[iboB[iterB][0]], vboB[iboB[iterB][1]], vboB[iboB[iterB][2]]});
 #endif
 	}
+	//// append all vertex
+	//for (const auto& iterA : vertexVectA)
+	//	vboSetA.insert(iterA);
+	//for (const auto& iterB : vertexVectB)
+	//	vboSetB.insert(iterB);
+#ifdef CLASHDETECTION_DEBUG_TEMP
+	for (const auto& iA : vertexVectA)
+		triVertexVctA.push_back(vboA[iA]);
+	for (const auto& iB : vertexVectB)
+		triVertexVctB.push_back(vboB[iB]);
+#endif
+	// calculate depth using SAT
 	for (const auto& iA : faceSetA) // iterate every faceA
 	{
 		minA = DBL_MAX;
@@ -576,9 +591,6 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		origin = normal.dot(vboA[iboA[iA][0]]); // relative projection value
 		for (const auto& iB : vertexVectB) // the inside vertex's prejection
 		{
-#ifdef CLASHDETECTION_DEBUG_TEMP
-			triVertexVctB.push_back(vboB[iB]);
-#endif
 			projection = normal.dot(matIAB * vboB[iB]) - origin;
 			if (projection < dminA_V)
 			{
@@ -632,9 +644,6 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		origin = normal.dot(matA * vboB[iboB[iB][0]]); // relative projection value
 		for (const auto& iA : vertexVectA) // the inside vertex's prejection
 		{
-#ifdef CLASHDETECTION_DEBUG_TEMP
-			triVertexVctA.push_back(vboA[iA]);
-#endif
 			projection = normal.dot(matA * vboA[iA]) - origin;
 			if (projection < dminB_V)
 			{
@@ -898,10 +907,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 	bool isIntrusive = false;
 	std::set<size_t> faceSetA, faceSetB; // intersect and inside, to remove repeat
 	std::vector<size_t> vertexVectA, vertexVectB;
-	//std::array<Eigen::Vector3d, 2> pInter;
-#ifdef STATISTIC_DATA_TESTFOR
-	vector<double> cpVect;
-#endif
+	std::array<Eigen::Vector3d, 2> pInter;
 #ifdef STATISTIC_DATA_RECORD
 	Triangle trigon;
 #endif
@@ -929,11 +935,6 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 					continue;
 				isContact = true; //isIntersect// maybe intrusive or atleast contact
 				//intersect
-#ifdef STATISTIC_DATA_TESTFOR
-				//double cp = (triA[1] - triA[0]).cross(triA[2] - triA[1]).cross((triB[1] - triB[0]).cross(triB[2] - triB[1])).squaredNorm();
-				//cpVect.push_back(cp);
-				//sort(cpVect.begin(), cpVect.end());
-#endif
 				if ((triA[1] - triA[0]).cross(triA[2] - triA[1]).cross((triB[1] - triB[0]).cross(triB[2] - triB[1])).isZero(eps)) // intersect-coplanar
 				{
 #ifdef STATISTIC_DATA_COUNT
@@ -942,16 +943,27 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 					continue;
 				}
 				isIntrusive = true; 
-				faceSetA.insert(iA); //faceVectA.push_back(iA);
-				faceSetB.insert(iB); //faceVectB.push_back(iB);
-				//pInter = getTwoTrianglesIntersectPoints(triA, triB);
-				//if (!(pInter[1] - pInter[0]).isZero()) // also using eps
-				//{
-				//	//return RelationOfTwoMesh::INTRUSIVE;
-				//	isIntrusive = true; //for count all intersect
-				//	faceSetA.insert(iA); // only intrusive triangle insert, exclude contact triangle
-				//	faceSetB.insert(iB);
-				//}
+//#ifdef STATISTIC_DATA_COUNT
+//				if (faceSetA.find(iA) != faceSetA.end()) // many repetition
+//					count_facesetA++;
+//				if (faceSetB.find(iB) != faceSetB.end())
+//					count_facesetB++;
+//#endif  
+				//faceSetA.insert(iA); //faceVectA.push_back(iA);
+				//faceSetB.insert(iB); //faceVectB.push_back(iB);
+				// only intrusive triangle insert, exclude contact triangle
+				pInter = getTwoTrianglesIntersectPoints(triA, triB);
+#ifdef STATISTIC_DATA_COUNT
+				if (isnan(pInter[0][0]) && isnan(pInter[1][0]))
+					count_triAB_nan++;
+				if (!isnan(pInter[0][0]) && isnan(pInter[1][0]))
+					count_triB_nan++;
+#endif  
+				if (!isnan(pInter[0][0]) && !isnan(pInter[1][0]) && !(pInter[1] - pInter[0]).isZero(eps)) // also using eps
+				{
+					faceSetA.insert(iA);
+					faceSetB.insert(iB);
+				}
 			}
 		}
 	}

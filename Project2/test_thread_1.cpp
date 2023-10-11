@@ -1,6 +1,139 @@
 #include "pch.h"
 using namespace std;
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+//#include <unistd.h> //linux
+
+// 命令调取 CpuID
+#define CpuNum "wmic cpu get DeviceID"
+// 命令调取 Cpu 物理核数
+#define CpuCoreNum "wmic cpu get NumberOfCores"
+// 命令调取 Cpu 逻辑核数
+#define CpuLogicalCoreNum "wmic cpu get NumberOfLogicalProcessors"
+
+#define __AddressWidth "wmic cpu get AddressWidth"
+#define __Architecture "wmic cpu get Architecture"
+#define __AssetTag "wmic cpu get AssetTag"
+#define __Availability "wmic cpu get Availability"
+#define __Caption "wmic cpu get Caption"
+#define __Characteristics "wmic cpu get Characteristics"
+#define __ConfigManagerErrorCode "wmic cpu get ConfigManagerErrorCode"
+#define __ConfigManagerUserConfig "wmic cpu get ConfigManagerUserConfig"
+#define __CpuStatus "wmic cpu get CpuStatus"
+#define __CreationClassName "wmic cpu get CreationClassName"
+#define __CurrentClockSpeed "wmic cpu get CurrentClockSpeed"
+#define __CurrentVoltage "wmic cpu get CurrentVoltage"
+#define __DataWidth "wmic cpu get DataWidth"
+#define __Description "wmic cpu get Description"
+#define __DeviceID "wmic cpu get DeviceID"
+#define __ErrorCleared "wmic cpu get ErrorCleared"
+#define __ErrorDescription "wmic cpu get ErrorDescription"
+#define __ExtClock "wmic cpu get ExtClock"
+#define __Family "wmic cpu get Family"
+#define __InstallDate "wmic cpu get InstallDate"
+#define __L2CacheSize "wmic cpu get L2CacheSize"
+#define __L2CacheSpeed "wmic cpu get L2CacheSpeed"
+#define __L3CacheSize "wmic cpu get L3CacheSize"
+#define __L3CacheSpeed "wmic cpu get L3CacheSpeed"
+#define __LastErrorCode "wmic cpu get LastErrorCode"
+#define __Level "wmic cpu get Level"
+#define __LoadPercentage "wmic cpu get LoadPercentage"
+#define __Manufacturer "wmic cpu get Manufacturer"
+#define __MaxClockSpeed "wmic cpu get MaxClockSpeed"
+#define __Name "wmic cpu get Name"
+#define __NumberOfCores "wmic cpu get NumberOfCores"
+#define __NumberOfEnabledCore "wmic cpu get NumberOfEnabledCore"
+#define __NumberOfLogicalProcessors "wmic cpu get NumberOfLogicalProcessors"
+#define __OtherFamilyDescription "wmic cpu get OtherFamilyDescription"
+#define __PartNumber "wmic cpu get PartNumber"
+#define __PNPDeviceID "wmic cpu get PNPDeviceID"
+#define __PowerManagementCapabilities "wmic cpu get PowerManagementCapabilities"
+#define __PowerManagementSupported "wmic cpu get PowerManagementSupported"
+#define __ProcessorId "wmic cpu get ProcessorId"
+#define __ProcessorType "wmic cpu get ProcessorType"
+#define __Revision "wmic cpu get Revision"
+#define __Role "wmic cpu get Role"
+#define __SecondLevelAddressTranslationExtensions                              \
+    "wmic cpu get SecondLevelAddressTranslationExtensions"
+#define __SerialNumber "wmic cpu get SerialNumber"
+#define __SocketDesignation "wmic cpu get SocketDesignation"
+#define __Status "wmic cpu get Status"
+#define __StatusInfo "wmic cpu get StatusInfo"
+#define __Stepping "wmic cpu get Stepping"
+#define __SystemCreationClassName "wmic cpu get SystemCreationClassName"
+#define __SystemName "wmic cpu get SystemName"
+#define __ThreadCount "wmic cpu get ThreadCount"
+#define __UniqueId "wmic cpu get UniqueId"
+#define __UpgradeMethod "wmic cpu get UpgradeMethod"
+#define __Version "wmic cpu get Version"
+#define __VirtualizationFirmwareEnabled                                        \
+    "wmic cpu get VirtualizationFirmwareEnabled"
+#define __VMMonitorModeExtensions "wmic cpu get VMMonitorModeExtensions"
+#define __VoltageCaps "wmic cpu get VoltageCaps"
+
+// 获取 Cpu 信息
+void getCpuInformation(const char* command)
+{
+	// 获取windows命令回执
+	FILE* winCommand = _popen(command, "r");
+	char buf[100] = {};
+
+	if (!winCommand)
+	{
+		perror("popen");
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		// 输出命令回执
+		while (fgets(buf, sizeof(buf) - 1, winCommand) != 0)
+		{
+			printf("%s", buf);
+			memset(buf, 0, sizeof(buf));
+		}
+
+		_pclose(winCommand);
+	}
+}
+
+int GetNoOfProcessors()
+{
+	SYSTEM_INFO si;
+
+	GetSystemInfo(&si);
+
+	return si.dwNumberOfProcessors;
+}
+
+static int main0()
+{
+	// 具体核数要数ID个数
+	getCpuInformation(CpuNum);
+	// 具体物理核数直接给出
+	getCpuInformation(CpuCoreNum);
+	// 具体逻辑核数直接给出
+	getCpuInformation(CpuLogicalCoreNum);
+
+	return 0;
+}
+
+static int enrol = []()->int
+{
+	main0();
+	//main1();
+	//main2();
+
+	return 0;
+}();
+
+
+
+//----------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------
+// 
+// 基础知识
 //C++11多线程 https://blog.csdn.net/weixin_42193704/article/details/113920419
 
 //1 函数
@@ -164,13 +297,6 @@ C++11线程创建的方式
 4.成员函数做为线程入口
 */
 
-/*
-等待 detach
-*/
-
-/*
-传递数据
-*/
 
 void myThread_value(int t)//带参数传递的方式
 {
@@ -267,7 +393,7 @@ void myThread2()
 }
 
 
-int main_thread()//不用就会忘
+static int main_thread()//不用就会忘
 { 
 	//thread 创建方式
 	// std::thread thread_test(myThread_function);
@@ -293,10 +419,7 @@ int main_thread()//不用就会忘
 
 	thread thread1(myThread1);
 	thread thread2(myThread2);
-
 	thread1.join();
 	thread2.join();
-
-
 	return 0;
 }

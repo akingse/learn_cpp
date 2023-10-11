@@ -80,7 +80,7 @@ bool psykronix::isPointInTriangle(const Vector3d& point, const std::array<Vector
 	return
 		0.0 <= (trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) && //bool isLeftA
 		0.0 <= (trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) && //bool isLeftB
-		0.0 <= (trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal);	 //bool isLeftC
+		0.0 <= (trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal);	//bool isLeftC
 #endif //USING_THRESHOLD_GEOMETRIC
 	//+-*x< 0,5,1.5,2.5,1.5
 	//if (((trigon[1] - trigon[0]).cross(point - trigon[0])).dot(normal) < _eps) //bool isLeftA

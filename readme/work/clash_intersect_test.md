@@ -81,8 +81,9 @@ depth debug
 
 fileName = "bin_file/interTriInfo_4034.bin"
 
-严重性	代码	说明	项目	文件	行	禁止显示状态
-错误	C4996	'strerror': This function or variable may be unsafe. Consider using strerror_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.	P3d2Stl	C:\Users\Aking\source\repos\learn_cpp\Project2\test_file_rw.cpp	231	
+isPointInsidePolyhedronFL 多判
+
+i=6 8 17 20 28 29 37 40
 
 
 

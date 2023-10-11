@@ -364,6 +364,21 @@ static void _test3()
 //数据测试
 static void _test0()
 {
+	// 极限情形
+	Triangle triA = {
+			Vector3d(-3104.3029002511553, 203615.26133667614, -1.2996778653295850e-11),
+			Vector3d(-3286.9535856740031, 203476.36577477955, -1.2977752206211335e-11),
+			Vector3d(-2947.7343472114298, 203688.33348047285, -1.3011058896950091e-11),
+	};
+	Triangle triB = {
+			Vector3d(-3081.5417249541943, 203579.95860459140, -300.00000000001290),
+			Vector3d(-3092.6700295030910, 203597.76761461070, -300.00000000001290),
+			Vector3d(-3092.6700295030919, 203597.76761461070, 3999.9999999999854),
+	};
+	bool b1 = isTwoTrianglesIntersectSAT(triA, triB);
+	auto b2 = getTwoTrianglesIntersectPoints(triA, triB);
+
+
 	double rd = double(rand());// / RAND_MAX;
 	rd = double(rand());
 	rd = double(rand());
@@ -374,8 +389,8 @@ static void _test0()
 	Vector3d triB_0 = Vector3d(4924601.8102601077, -385940.89359764993, 5750.0000000000000);
 	Vector3d triB_1 = Vector3d(4924595.2577039087, -385951.32193110074, 5750.0000000000000);
 	Vector3d triB_2 = Vector3d(4924589.8109916430, -385975.18553675216, 5750.0000000000000);
-	Triangle triA = { triA_0, triA_1, triA_2 };
-	Triangle triB = { triB_0, triB_1, triB_2 };
+	//Triangle triA = { triA_0, triA_1, triA_2 };
+	//Triangle triB = { triB_0, triB_1, triB_2 };
 	//double d = getTrianglesDistanceSAT(triA, triB);
 
 	triA_0 = Vector3d(0, 0, 0);
@@ -799,8 +814,8 @@ static void _test7()
 
 static int enrol = []()->int
 {
+	_test0();
 #ifdef USING_FLATBUFFERS_SERIALIZATION
-	//_test0();
 	//_test4();
 	//_test5();
 	//_test6();
