@@ -85,6 +85,15 @@ isPointInsidePolyhedronFL 多判
 
 i=6 8 17 20 28 29 37 40
 
+threshold_0="-100" 
+threshold_1="-90" 
+threshold_2="-80.000000000000085" 
+threshold_3="-50" 
+threshold_4="-46.193976625564119" 
+threshold_5="0"/>
+
+
+
 
 
 ---

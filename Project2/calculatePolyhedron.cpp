@@ -543,11 +543,11 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		triFaceVctB.push_back({ vboB[iboB[iterB][0]], vboB[iboB[iterB][1]], vboB[iboB[iterB][2]]});
 #endif
 	}
-	//// append all vertex
-	//for (const auto& iterA : vertexVectA)
-	//	vboSetA.insert(iterA);
-	//for (const auto& iterB : vertexVectB)
-	//	vboSetB.insert(iterB);
+	// append all vertex
+	for (const auto& iterA : vertexVectA)
+		vboSetA.insert(iterA);
+	for (const auto& iterB : vertexVectB)
+		vboSetB.insert(iterB);
 #ifdef CLASHDETECTION_DEBUG_TEMP
 	for (const auto& iA : vertexVectA)
 		triVertexVctA.push_back(vboA[iA]);
@@ -586,27 +586,27 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 				isFixedFaceA = false;
 #endif
 		}
-		dminA_V = 0.0;
-		tmpMaxA = 0.0;
-		origin = normal.dot(vboA[iboA[iA][0]]); // relative projection value
-		for (const auto& iB : vertexVectB) // the inside vertex's prejection
-		{
-			projection = normal.dot(matIAB * vboB[iB]) - origin;
-			if (projection < dminA_V)
-			{
-				dminA_V = projection; // always negative
-				directionA_V = matA.rotation() * normal;
-				indexA_V = iA;
-			}
-			if (!meshA.convex_ && tmpMaxA < projection) // the direction not exact
-				tmpMaxA = projection;
-		}
-		if (dminA < tmpMaxA - dminA_V) // choose max, without vertex, dminV is zero
-		{
-			dminA = tmpMaxA - dminA_V;
-			directionA = directionA_V;
-			indexA = indexA_V;
-		}
+		//dminA_V = 0.0;
+		//tmpMaxA = 0.0;
+		//origin = normal.dot(vboA[iboA[iA][0]]); // relative projection value
+		//for (const auto& iB : vertexVectB) // the inside vertex's prejection
+		//{
+		//	projection = normal.dot(matIAB * vboB[iB]) - origin;
+		//	if (projection < dminA_V)
+		//	{
+		//		dminA_V = projection; // always negative
+		//		directionA_V = matA.rotation() * normal;
+		//		indexA_V = iA;
+		//	}
+		//	if (!meshA.convex_ && tmpMaxA < projection) // the direction not exact
+		//		tmpMaxA = projection;
+		//}
+		//if (dminA < tmpMaxA - dminA_V) // choose max, without vertex, dminV is zero
+		//{
+		//	dminA = tmpMaxA - dminA_V;
+		//	directionA = directionA_V;
+		//	indexA = indexA_V;
+		//}
 	}
 	for (const auto& iB : faceSetB) // iterate every faceB
 	{
@@ -639,27 +639,27 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 				isFixedFaceA = false;
 #endif
 		}
-		dminB_V = 0.0;
-		tmpMaxB = 0.0;
-		origin = normal.dot(matA * vboB[iboB[iB][0]]); // relative projection value
-		for (const auto& iA : vertexVectA) // the inside vertex's prejection
-		{
-			projection = normal.dot(matA * vboA[iA]) - origin;
-			if (projection < dminB_V)
-			{
-				dminB_V = projection;  // always negative
-				directionB_V = matB.rotation() * normal;
-				indexB_V = iB;
-			}
-			if (!meshB.convex_ && tmpMaxB < projection) // the direction not exact
-				tmpMaxB = projection;
-		}
-		if (dminB < tmpMaxB - dminB_V) // choose max
-		{
-			dminB = tmpMaxB - dminB_V;
-			directionB = directionB_V;
-			indexB = indexB_V;
-		}
+		//dminB_V = 0.0;
+		//tmpMaxB = 0.0;
+		//origin = normal.dot(matA * vboB[iboB[iB][0]]); // relative projection value
+		//for (const auto& iA : vertexVectA) // the inside vertex's prejection
+		//{
+		//	projection = normal.dot(matA * vboA[iA]) - origin;
+		//	if (projection < dminB_V)
+		//	{
+		//		dminB_V = projection;  // always negative
+		//		directionB_V = matB.rotation() * normal;
+		//		indexB_V = iB;
+		//	}
+		//	if (!meshB.convex_ && tmpMaxB < projection) // the direction not exact
+		//		tmpMaxB = projection;
+		//}
+		//if (dminB < tmpMaxB - dminB_V) // choose max
+		//{
+		//	dminB = tmpMaxB - dminB_V;
+		//	directionB = directionB_V;
+		//	indexB = indexB_V;
+		//}
 	}
 	//if (!isFixedFaceA)
 	//	direction = -direction;
@@ -961,8 +961,13 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 #endif  
 				if (!isnan(pInter[0][0]) && !isnan(pInter[1][0]) && !(pInter[1] - pInter[0]).isZero(eps)) // also using eps
 				{
-					faceSetA.insert(iA);
-					faceSetB.insert(iB);
+					//another case, two triangle edge collinear, using triangle vertex coincident judge
+					if ((pInter[0] != triA[0] && pInter[0] != triA[1] && pInter[0] != triA[2] && pInter[0] != triB[0] && pInter[0] != triB[1] && pInter[0] != triB[2]) ||
+						(pInter[1] != triA[0] && pInter[1] != triA[1] && pInter[1] != triA[2] && pInter[1] != triB[0] && pInter[1] != triB[1] && pInter[1] != triB[2]))
+					{
+						faceSetA.insert(iA);
+						faceSetB.insert(iB);
+					}
 				}
 			}
 		}
