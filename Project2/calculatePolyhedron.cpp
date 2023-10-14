@@ -516,8 +516,8 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 	const Eigen::Affine3d& matB = meshB.pose_;
 	Eigen::Affine3d matIAB = matA.inverse() * matB;
 	Eigen::Affine3d matIBA = matB.inverse() * matA;
-	double dminA = DBL_MAX, dminB = DBL_MAX, dminA_V, dminB_V, tmpMaxA, tmpMaxB;
-	double minA, maxA, minB, maxB, projection, origin;//refresh min and max
+	double dminA = DBL_MAX, dminB = DBL_MAX;// , dminA_V, dminB_V, tmpMaxA, tmpMaxB;
+	double minA, maxA, minB, maxB, projection;//refresh min and max
 	Eigen::Vector3d directionA, directionB, directionA_V, directionB_V, normal;
 	// the minimum distance must on the direction of face normal
 	bool isFixedFaceA = true;
@@ -529,9 +529,11 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		vboSetA.insert(iboA[iterA][0]);
 		vboSetA.insert(iboA[iterA][1]);
 		vboSetA.insert(iboA[iterA][2]);
+#ifdef STATISTIC_DATA_COUNT
 #ifdef CLASHDETECTION_DEBUG_TEMP
 	//output calculate intersect meshs triangless
 		triFaceVctA.push_back({ vboA[iboA[iterA][0]], vboA[iboA[iterA][1]], vboA[iboA[iterA][2]]});
+#endif
 #endif
 	}
 	for (const auto& iterB : faceSetB)
@@ -539,8 +541,10 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		vboSetB.insert(iboB[iterB][0]);
 		vboSetB.insert(iboB[iterB][1]);
 		vboSetB.insert(iboB[iterB][2]);
+#ifdef STATISTIC_DATA_COUNT
 #ifdef CLASHDETECTION_DEBUG_TEMP
 		triFaceVctB.push_back({ vboB[iboB[iterB][0]], vboB[iboB[iterB][1]], vboB[iboB[iterB][2]]});
+#endif
 #endif
 	}
 	// append all vertex
@@ -548,11 +552,14 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		vboSetA.insert(iterA);
 	for (const auto& iterB : vertexVectB)
 		vboSetB.insert(iterB);
+
+#ifdef STATISTIC_DATA_COUNT
 #ifdef CLASHDETECTION_DEBUG_TEMP
 	for (const auto& iA : vertexVectA)
 		triVertexVctA.push_back(vboA[iA]);
 	for (const auto& iB : vertexVectB)
 		triVertexVctB.push_back(vboB[iB]);
+#endif
 #endif
 	// calculate depth using SAT
 	for (const auto& iA : faceSetA) // iterate every faceA

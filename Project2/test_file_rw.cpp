@@ -306,10 +306,18 @@ void write_ModelMesh(const std::vector<ModelMesh>& meshs, const std::string& fil
 		}
 		auto _ibosVct = builder.CreateVector(ibos); //create fbs::Offset<fbs::Vector<fbs::Offset<T>>>
 		auto _ibos = CreateIBO(builder, _ibosVct);
+#ifdef CLASHDETECTION_DEBUG_TEMP
 		auto _ibos_raw = builder.CreateVector(iter.iboRaw_); //origin type
+#else
+		auto _ibos_raw = builder.CreateVector({ int(0)}); //origin type
+#endif
 		auto _min = CreatePoint3D(builder, iter.bounding_.min().x(), iter.bounding_.min().y(), iter.bounding_.min().z());
 		auto _max = CreatePoint3D(builder, iter.bounding_.max().x(), iter.bounding_.max().y(), iter.bounding_.max().z());
+#ifdef CLASHDETECTION_DEBUG_TEMP
 		auto mesh = CreateConvertToMesh(builder, _vbos, _ibos, _min, _max, _ibos_raw, iter.convex_, iter.entityid_); //order and content
+#else
+		auto mesh = CreateConvertToMesh(builder, _vbos, _ibos, _min, _max, _ibos_raw, iter.convex_, uint64_t(0)); //order and content
+#endif
 		meshVct.push_back(mesh);
 	}
 	auto _meshVct = builder.CreateVector(meshVct);
@@ -367,7 +375,11 @@ std::vector<ModelMesh> read_ModelMesh(const std::string& fileName)
 			{
 				_iboRaw.push_back(iboRaw->Get(i));
 			}
+#ifdef CLASHDETECTION_DEBUG_TEMP
 			res.push_back(ModelMesh{ vbo_, ibo_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(),mesh->convex(), _iboRaw, mesh->entityid() });
+#else
+			res.push_back(ModelMesh{ vbo_, ibo_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(),mesh->convex()});
+#endif
 		}
 		inFile.close();
 	}
