@@ -31,7 +31,7 @@ enum class RelationOfTrigon : int
 };
 
 //isPointInTriangle2D
-bool psykronix::isPointInTriangle(const Vector2d& point, const std::array<Vector2d, 3>& trigon) // 2D
+bool isPointInTriangle(const Vector2d& point, const std::array<Vector2d, 3>& trigon) // 2D
 {
 	// using isLeft test
 	const Vector2d& p0 = trigon[0];
@@ -96,7 +96,7 @@ bool psykronix::isPointInTriangle(const Vector3d& point, const std::array<Vector
 	//return 0.0 <= dot1 && 0.0 <= dot2 && dot1 + dot2 <= normal.dot(normal);
 }
 
-bool psykronix::isPointOnTriangleSurface(const Vector3d& point, const std::array<Vector3d, 3>& trigon)
+bool isPointOnTriangleSurface(const Vector3d& point, const std::array<Vector3d, 3>& trigon)
 {
 	if (point.x() < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
 		point.x() > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
@@ -570,7 +570,7 @@ std::tuple<Vector3d, double> psykronix::getTriangleBoundingCircle(const std::arr
 	return { p, (p - p0).norm() };
 }
 
-bool psykronix::isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& segment, const std::array<Vector3d, 3>& trigon)
+bool isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& segment, const std::array<Vector3d, 3>& trigon)
 {
 	//pre-box
 	if (std::max(segment[0][0], segment[1][0]) < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
@@ -658,7 +658,7 @@ bool psykronix::isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& s
 }
 
 // whlie ray across same edge of two triangles
-bool psykronix::isPointRayAcrossTriangleSAT(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon)
+bool isPointRayAcrossTriangleSAT(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon)
 {
 	//first pre-process, bounding box
 	double rayZ = std::max(std::max(trigon[0].z(), trigon[1].z()), trigon[2].z());

@@ -448,7 +448,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		if (std::min(maxA - minB, maxB - minA) < dminA)//refresh 
 		{
 			dminA = std::min(maxA - minB, maxB - minA); // intersect meshs, dmin is positive
-			direction = matA.rotation() * normal;
+			direction = matA.rotation() * normal; //get the rotation part
 		}
 	}
 	for (const auto& faceB : iboB) // iterate every face
