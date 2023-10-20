@@ -174,9 +174,6 @@
     <ClCompile Include="test_function.cpp">
       <Filter>test_gram</Filter>
     </ClCompile>
-    <ClCompile Include="test_serialize.cpp">
-      <Filter>test_bin</Filter>
-    </ClCompile>
     <ClCompile Include="test_file_rw.cpp">
       <Filter>test_bin</Filter>
     </ClCompile>
@@ -233,6 +230,9 @@
     </ClCompile>
     <ClCompile Include="test_thread_3.cpp">
       <Filter>test_thread</Filter>
+    </ClCompile>
+    <ClCompile Include="test_serialize.cpp">
+      <Filter>test_dsa</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

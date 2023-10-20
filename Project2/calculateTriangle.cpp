@@ -6,6 +6,7 @@ using namespace psykronix;
 #undef max //AlignedBox3d mem-fun
 #undef min
 #define USING_METHOD_SAT
+//#define USING_THRESHOLD_CUSTOMIZE
 //#define USING_ACCURATE_NORMALIZED
 //#define USING_THRESHOLD_GEOMETRIC // to process collinar and coplanar
 
@@ -697,9 +698,7 @@ bool isPointRayAcrossTriangleSAT(const Eigen::Vector3d& point, const std::array<
 		dotP = axis.dot(point);
 		dotR = axis.dot(rayPt);
 #ifdef USING_THRESHOLD_CUSTOMIZE
-		double minRay = std::min(axis.dot(point), axis.dot(rayPt));
-		double maxRay = std::max(axis.dot(point), axis.dot(rayPt));
-		if (minTri + eps < minRay || maxRay + eps < minTri)
+		if (minTri + eps < std::min(dotP, dotR) || std::max(dotP, dotR) + eps < minTri)
 #else
 		if (maxTri < std::min(dotP, dotR) || std::max(dotP, dotR) < minTri) // absolute zero
 #endif

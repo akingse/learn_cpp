@@ -78,6 +78,11 @@ bool _opMoreInfo(const InterTriInfo& lhs, const InterTriInfo& rhs)
 {
 	return lhs.distance > rhs.distance;
 }
+bool _opEntityId(const InterTriInfo& lhs, const InterTriInfo& rhs)
+{
+	return lhs.entityPair[0] < rhs.entityPair[0];
+}
+
 
 // 三角形相交测试
 static void _test1()
@@ -452,7 +457,7 @@ static void _test4() //优化SAT的侵入距离计算，验证
 	std::vector<InterTriInfo> triInfo200;
 
 	// find diff
-	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034.bin");
+	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4093.bin");
 	//std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034_4.bin"); //more, latest
 	//std::vector<InterTriInfo> triInfo4034_all = read_InterTriInfo(binFilePath + "interTriInfo_4034_all.bin"); // all-iter
 	std::vector<InterTriInfo> triInfo4021 = read_InterTriInfo(binFilePath + "interTriInfo_4021.bin"); 
@@ -515,6 +520,16 @@ static void _test4() //优化SAT的侵入距离计算，验证
 		if (!findFlag)
 			triInfoEntityDiff.push_back(triInfo4034[i]);
 	}
+	bool isInter;
+	size_t count_inter = 0;
+	std::sort(triInfoEntityDiff.begin(), triInfoEntityDiff.end(), _opEntityId);
+	for (auto& iter : triInfoEntityDiff)
+	{
+		cout << iter.entityPair[0] << ", " << iter.entityPair[1] << ", " << endl;
+		isInter = isTwoTrianglesIntersectSAT(iter.trianglePair[0], iter.trianglePair[1]);
+		if (isInter)
+			count_inter++;
+	}
 
 	//find difference 查找指定entityID
 	for (int i = 0; i < triInfo4034.size(); ++i)
@@ -545,7 +560,7 @@ static void _test4() //优化SAT的侵入距离计算，验证
 			d_ins7 = triInfo4034[i].distance;
 	}
 
-	for (int i = 0; i < triInfoSq.size(); ++i)
+	for (int i = 0; i < triInfoSq.size(); ++i) //按区间分类
 	{
 		if (triInfoSq[i].distance <= -100)
 			triInfo200.push_back(triInfoSq[i]); // d=-196(6569,4279) d=-101(6572,4267)
@@ -816,7 +831,7 @@ static int enrol = []()->int
 {
 	_test0();
 #ifdef USING_FLATBUFFERS_SERIALIZATION
-	//_test4();
+	_test4();
 	//_test5();
 	//_test6();
 	//_test7();

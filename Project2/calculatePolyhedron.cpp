@@ -502,7 +502,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 	return { dmin * coord,{index, ULL_MAX} };
 }
 
-// for intrusive meshs, using major method SAT
+// for intrusive meshs, using major method SAT, return normal vector and face index
 std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConvex(const ModelMesh& meshA, const ModelMesh& meshB, 
 	const set<size_t>& faceSetA, const set<size_t>& faceSetB, const vector<size_t>& vertexVectA, const vector<size_t>& vertexVectB)
 {
@@ -518,10 +518,10 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 	Eigen::Affine3d matIBA = matB.inverse() * matA;
 	double dminA = DBL_MAX, dminB = DBL_MAX;// , dminA_V, dminB_V, tmpMaxA, tmpMaxB;
 	double minA, maxA, minB, maxB, projection;//refresh min and max
-	Eigen::Vector3d directionA, directionB, directionA_V, directionB_V, normal;
+	Eigen::Vector3d directionA, directionB, normal;// directionA_V, directionB_V;
 	// the minimum distance must on the direction of face normal
 	bool isFixedFaceA = true;
-	size_t indexA = ULL_MAX, indexB = ULL_MAX, indexA_V = ULL_MAX, indexB_V = ULL_MAX;
+	size_t indexA = ULL_MAX, indexB = ULL_MAX;// indexA_V = ULL_MAX, indexB_V = ULL_MAX;
 	//std::array<size_t, 2> indexAB = { ULL_MAX , ULL_MAX };
 	std::set<int> vboSetA, vboSetB; // to remove repeat vertex
 	for (const auto& iterA : faceSetA) //merge vertex
@@ -530,10 +530,8 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		vboSetA.insert(iboA[iterA][1]);
 		vboSetA.insert(iboA[iterA][2]);
 #ifdef STATISTIC_DATA_COUNT
-#ifdef CLASHDETECTION_DEBUG_TEMP
 	//output calculate intersect meshs triangless
-		triFaceVctA.push_back({ vboA[iboA[iterA][0]], vboA[iboA[iterA][1]], vboA[iboA[iterA][2]]});
-#endif
+		triFaceVctA.push_back({ matA * vboA[iboA[iterA][0]], matA * vboA[iboA[iterA][1]], matA * vboA[iboA[iterA][2]] }); //world coord
 #endif
 	}
 	for (const auto& iterB : faceSetB)
@@ -542,9 +540,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		vboSetB.insert(iboB[iterB][1]);
 		vboSetB.insert(iboB[iterB][2]);
 #ifdef STATISTIC_DATA_COUNT
-#ifdef CLASHDETECTION_DEBUG_TEMP
-		triFaceVctB.push_back({ vboB[iboB[iterB][0]], vboB[iboB[iterB][1]], vboB[iboB[iterB][2]]});
-#endif
+		triFaceVctB.push_back({ matB * vboB[iboB[iterB][0]], matB * vboB[iboB[iterB][1]], matB * vboB[iboB[iterB][2]]});
 #endif
 	}
 	// append all vertex
@@ -552,14 +548,11 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		vboSetA.insert(iterA);
 	for (const auto& iterB : vertexVectB)
 		vboSetB.insert(iterB);
-
 #ifdef STATISTIC_DATA_COUNT
-#ifdef CLASHDETECTION_DEBUG_TEMP
 	for (const auto& iA : vertexVectA)
-		triVertexVctA.push_back(vboA[iA]);
+		triVertexVctA.push_back(matA * vboA[iA]);
 	for (const auto& iB : vertexVectB)
-		triVertexVctB.push_back(vboB[iB]);
-#endif
+		triVertexVctB.push_back(matB * vboB[iB]);
 #endif
 	// calculate depth using SAT
 	for (const auto& iA : faceSetA) // iterate every faceA
@@ -863,7 +856,7 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 				{
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
 					triRecordHard.push_back({ triA, triB });
-					interTriInfoList.push_back({ { triA, triB }, {}, 0.0 });
+					interTriInfoList.push_back({ { triA, triB }, {}, std::nan("0")}); // only no-depth call, default distance is nan
 #endif
 					return true;
 				}
@@ -884,7 +877,7 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 		if (isPointInsidePolyhedronAZ(meshA.pose_.inverse() * meshB.pose_ * meshB.vbo_[0], meshA))
 		{
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
-			triRecordHard.push_back({ gTirNaN, gTirNaN });
+			triRecordHard.push_back({ gTirNaN, gTirNaN }); //two trinan means inside
 			interTriInfoList.push_back({ { gTirNaN, gTirNaN }, {}, 0.0 });
 #endif
 			return true;
@@ -914,13 +907,10 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 	bool isIntrusive = false;
 	std::set<size_t> faceSetA, faceSetB; // intersect and inside, to remove repeat
 	std::vector<size_t> vertexVectA, vertexVectB;
-	std::array<Eigen::Vector3d, 2> pInter;
-#ifdef STATISTIC_DATA_RECORD
-	Triangle trigon;
-#endif
 	if (!indexAB[0].empty() && !indexAB[1].empty())
 	{
 		std::array<Eigen::Vector3d, 3> triA, triB;
+		std::array<Eigen::Vector3d, 2> pInter;
 		for (const auto& iA : indexAB[0]) //faces intersect
 		{
 			triA = { relative_matrix * meshA.vbo_[meshA.ibo_[iA][0]],
@@ -950,31 +940,23 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 					continue;
 				}
 				isIntrusive = true; 
-//#ifdef STATISTIC_DATA_COUNT
-//				if (faceSetA.find(iA) != faceSetA.end()) // many repetition
-//					count_facesetA++;
-//				if (faceSetB.find(iB) != faceSetB.end())
-//					count_facesetB++;
-//#endif  
 				//faceSetA.insert(iA); //faceVectA.push_back(iA);
 				//faceSetB.insert(iB); //faceVectB.push_back(iB);
 				// only intrusive triangle insert, exclude contact triangle
 				pInter = getTwoTrianglesIntersectPoints(triA, triB);
 #ifdef STATISTIC_DATA_COUNT
-				if (isnan(pInter[0][0]) && isnan(pInter[1][0]))
+				if (isnan(pInter[0][0]) && isnan(pInter[1][0])) //triangles intersect but no intersect points
 					count_triAB_nan++;
 				if (!isnan(pInter[0][0]) && isnan(pInter[1][0]))
 					count_triB_nan++;
 #endif  
-				if (!isnan(pInter[0][0]) && !isnan(pInter[1][0]) && !(pInter[1] - pInter[0]).isZero(eps)) // also using eps
+				if (!isnan(pInter[0][0]) && !isnan(pInter[1][0]) && !(pInter[1] - pInter[0]).isZero(eps) && // also using eps
+					((pInter[0] != triA[0] && pInter[0] != triA[1] && pInter[0] != triA[2] && pInter[0] != triB[0] && pInter[0] != triB[1] && pInter[0] != triB[2]) ||
+					(pInter[1] != triA[0] && pInter[1] != triA[1] && pInter[1] != triA[2] && pInter[1] != triB[0] && pInter[1] != triB[1] && pInter[1] != triB[2])))
 				{
 					//another case, two triangle edge collinear, using triangle vertex coincident judge
-					if ((pInter[0] != triA[0] && pInter[0] != triA[1] && pInter[0] != triA[2] && pInter[0] != triB[0] && pInter[0] != triB[1] && pInter[0] != triB[2]) ||
-						(pInter[1] != triA[0] && pInter[1] != triA[1] && pInter[1] != triA[2] && pInter[1] != triB[0] && pInter[1] != triB[1] && pInter[1] != triB[2]))
-					{
-						faceSetA.insert(iA);
-						faceSetB.insert(iB);
-					}
+					faceSetA.insert(iA);
+					faceSetB.insert(iB);
 				}
 			}
 		}
@@ -1008,7 +990,8 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 		std::tuple<Eigen::Vector3d, std::array<size_t, 2>> depth = getPenetrationDepthOfTwoConvex(meshA, meshB, faceSetA, faceSetB, vertexVectA, vertexVectB);
 		//std::tuple<Eigen::Vector3d, std::array<size_t, 2>> depth = getPenetrationDepthOfVertexAndFace(meshA, meshB, faceVectA, faceVectB, vertexVectA, vertexVectB);
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
-		if (std::get<1>(depth)[0] == ULL_MAX && std::get<1>(depth)[1] == ULL_MAX)
+		Triangle trigon;
+		if (std::get<1>(depth)[0] == ULL_MAX && std::get<1>(depth)[1] == ULL_MAX) // means no distance, generally due to surface contact
 			interTriInfoList.push_back({ { std::move(gTirNaN), std::move(gTirNaN) }, {}, -std::get<0>(depth).norm() });
 		else if (std::get<1>(depth)[0] != ULL_MAX) //bool isLeft 
 		{
