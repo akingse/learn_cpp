@@ -461,6 +461,11 @@ static void _test4() //优化SAT的侵入距离计算，验证
 	//std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034_4.bin"); //more, latest
 	//std::vector<InterTriInfo> triInfo4034_all = read_InterTriInfo(binFilePath + "interTriInfo_4034_all.bin"); // all-iter
 	std::vector<InterTriInfo> triInfo4021 = read_InterTriInfo(binFilePath + "interTriInfo_4021.bin"); 
+	// matrix-E
+	std::vector<InterTriInfo> triInfo_A = read_InterTriInfo(binFilePath + "interTriInfo_4093.bin"); //more
+	std::vector<InterTriInfo> triInfo_B = read_InterTriInfo(binFilePath + "interTriInfo_3896.bin"); //less
+	std::vector<InterTriInfo> triInfo_A_only, triInfo_B_only;
+
 	std::sort(triInfo4021.begin(), triInfo4021.end(), _opLessInfo);
 	triInfoSq = triInfo4034;
 	std::sort(triInfo4034.begin(), triInfo4034.end(), _opMoreInfo);
@@ -480,6 +485,36 @@ static void _test4() //优化SAT的侵入距离计算，验证
 	double d_ins6, d_ins7; //-32.011189515236765
 	bool findflag = false;
 	bool isCon = false;
+	for (int a = 0; a < triInfo_A.size(); ++a)
+	{
+		bool findFlag = false;
+		for (int b = 0; b < triInfo_B.size(); ++b)
+		{
+			if ((triInfo_A[a].entityPair[0] == triInfo_B[b].entityPair[0] && triInfo_A[a].entityPair[1] == triInfo_B[b].entityPair[1]) ||
+				(triInfo_A[a].entityPair[0] == triInfo_B[b].entityPair[1] && triInfo_A[a].entityPair[1] == triInfo_B[b].entityPair[0]))
+				findFlag = true;
+		}
+		if (!findFlag)
+			triInfo_A_only.push_back(triInfo_A[a]);
+	}
+	for (int b = 0; b < triInfo_B.size(); ++b)
+		{
+		bool findFlag = false;
+		for (int a = 0; a < triInfo_A.size(); ++a)
+		{
+			if ((triInfo_A[a].entityPair[0] == triInfo_B[b].entityPair[0] && triInfo_A[a].entityPair[1] == triInfo_B[b].entityPair[1]) ||
+				(triInfo_A[a].entityPair[0] == triInfo_B[b].entityPair[1] && triInfo_A[a].entityPair[1] == triInfo_B[b].entityPair[0]))
+				findFlag = true;
+		}
+		if (!findFlag)
+			triInfo_B_only.push_back(triInfo_B[b]); //triInfo_B_only is empty
+	}
+	for (auto& iter : triInfo_A_only)
+	{
+		if (fabs(iter.distance) > eps)
+			cout << iter.entityPair[0] << ", " << iter.entityPair[1] << ", " << "    " << iter.distance << endl;
+	}
+
 	for (int i = 0; i < triInfo4034.size(); ++i )
 	{
 		bool findFlag = false;

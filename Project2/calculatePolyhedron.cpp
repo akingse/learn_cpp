@@ -772,6 +772,7 @@ std::array<std::vector<size_t>, 2> _getReducedIntersectTrianglesOfMesh(const Mod
 {
 	//Eigen::AlignedBox3d boxMag(box.min() - 0.5 * Vector3d(tolerance, tolerance, tolerance), box.max() + 0.5 * Vector3d(tolerance, tolerance, tolerance));
 	Eigen::AlignedBox3d box = meshA.bounding_.intersection(meshB.bounding_);
+	//Vector3d toleSize = Vector3d(tolerance + eps, tolerance + eps, tolerance + eps);
 	Vector3d toleSize = Vector3d(tolerance, tolerance, tolerance);
 	Eigen::AlignedBox3d boxMag(box.min() - toleSize, box.max() + toleSize);
 	std::vector<size_t> triA_Index; // using index of mesh IBO
@@ -799,9 +800,9 @@ std::array<std::vector<size_t>, 2> _getReducedIntersectTrianglesOfMesh(const Mod
 	for (size_t j = 0; j < meshB.ibo_.size(); ++j)
 	{
 		triIter = {
-				meshB.pose_* meshB.vbo_[meshB.ibo_[j][0]],
-				meshB.pose_* meshB.vbo_[meshB.ibo_[j][1]],
-				meshB.pose_* meshB.vbo_[meshB.ibo_[j][2]] };
+				meshB.pose_ * meshB.vbo_[meshB.ibo_[j][0]],
+				meshB.pose_ * meshB.vbo_[meshB.ibo_[j][1]],
+				meshB.pose_ * meshB.vbo_[meshB.ibo_[j][2]] };
 		if (isTriangleAndBoundingBoxIntersectSAT(triIter, boxMag))
 		{
 			triB_Index.push_back(j);
@@ -829,7 +830,8 @@ std::array<std::vector<size_t>, 2> _getReducedIntersectTrianglesOfMesh(const Mod
 // ClashHard
 bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 {
-	Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
+	//Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
+	Eigen::Affine3d relative_matrix = meshB.pose_.inverse() * meshA.pose_; //without revise
 	// get the index param of mesh's ibo
 	std::array<std::vector<size_t>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, 0.0);
 	if (!indexAB[0].empty() && !indexAB[1].empty())
@@ -900,7 +902,8 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 // clash judge include penetration depth
 std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(const ModelMesh& meshA, const ModelMesh& meshB)
 {
-	Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
+	//Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
+	Eigen::Affine3d relative_matrix = meshB.pose_.inverse() * meshA.pose_;
 	// get the index param of mesh's ibo
 	std::array<std::vector<size_t>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, 0.0);
 	bool isContact = false; // vertex or edge or face contact
@@ -911,6 +914,24 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 	{
 		std::array<Eigen::Vector3d, 3> triA, triB;
 		std::array<Eigen::Vector3d, 2> pInter;
+#ifdef STATISTIC_DATA_COUNT
+		for (const auto& i : indexAB[0])
+		{
+			Triangle triIter = {
+				meshA.pose_* meshA.vbo_[meshA.ibo_[i][0]],
+				meshA.pose_* meshA.vbo_[meshA.ibo_[i][1]],
+				meshA.pose_* meshA.vbo_[meshA.ibo_[i][2]] };
+			triFaceVctA.push_back({ triIter[0], triIter[1], triIter[2] }); //world coord
+		}
+		for (const auto& j : indexAB[1])
+		{
+			Triangle triIter = {
+				meshB.pose_ * meshB.vbo_[meshB.ibo_[j][0]],
+				meshB.pose_ * meshB.vbo_[meshB.ibo_[j][1]],
+				meshB.pose_ * meshB.vbo_[meshB.ibo_[j][2]] };
+			triFaceVctB.push_back({ triIter[0], triIter[1], triIter[2] }); //world coord
+		}
+#endif
 		for (const auto& iA : indexAB[0]) //faces intersect
 		{
 			triA = { relative_matrix * meshA.vbo_[meshA.ibo_[iA][0]],
@@ -921,18 +942,15 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 				triB = { meshB.vbo_[meshB.ibo_[iB][0]],
 						meshB.vbo_[meshB.ibo_[iB][1]],
 						meshB.vbo_[meshB.ibo_[iB][2]] };
-				if (!isTwoTrianglesBoundingBoxIntersect(triA, triB)) // second pre-judge
-				{
 #ifdef STATISTIC_DATA_COUNT
+				if (!isTwoTrianglesBoundingBoxIntersect(triA, triB))
 					count_tri_box_exclude_pre++;
 #endif  
-					continue;
-				}
-				if (!isTwoTrianglesIntersectSAT(triA, triB)) //separate
+				if (!isTwoTrianglesBoundingBoxIntersect(triA, triB) || !isTwoTrianglesIntersectSAT(triA, triB)) // second pre-judge
 					continue;
 				isContact = true; //isIntersect// maybe intrusive or atleast contact
 				//intersect
-				if ((triA[1] - triA[0]).cross(triA[2] - triA[1]).cross((triB[1] - triB[0]).cross(triB[2] - triB[1])).isZero(eps)) // intersect-coplanar
+				if ((triA[1] - triA[0]).cross(triA[2] - triA[1]).cross((triB[1] - triB[0]).cross(triB[2] - triB[1])).isZero(eps)) // intersect-coplanar judge
 				{
 #ifdef STATISTIC_DATA_COUNT
 					count_trigon_coplanar++;
@@ -1067,7 +1085,8 @@ std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const
 #ifdef STATISTIC_DATA_RECORD
 	std::array<std::array<Eigen::Vector3d, 3>, 2> triDistPair;
 #endif    
-	Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
+	//Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
+	Eigen::Affine3d relative_matrix = meshB.pose_.inverse() * meshA.pose_; //without revise
 	// distance > tolerance, return double-max, to decrease calculate
 	double d = DBL_MAX, temp; // the res
 	std::array<size_t, 2> index = { ULL_MAX, ULL_MAX };
@@ -1130,7 +1149,7 @@ double getTwoMeshsPenetrationDepthEPA(const ModelMesh& meshA, const ModelMesh& m
 // return the vertex of meshA
 std::vector<Eigen::Vector3d> _getInsideVertexSet(const ModelMesh& meshA, const ModelMesh& meshB)
 {
-	Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
+	//Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
 	// the vertex of meshA inside meshB
 	std::vector<Eigen::Vector3d> res;
 	//for (const auto& iter : meshA.vbo_)
@@ -1143,7 +1162,7 @@ std::vector<Eigen::Vector3d> _getInsideVertexSet(const ModelMesh& meshA, const M
 
 std::vector<Eigen::Vector3d> _getIntersectVertexSet(const ModelMesh& meshA, const ModelMesh& meshB)
 {
-	Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
+	//Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
 	std::vector<Eigen::Vector3d> res;
 	//for (size_t i = 0; i < meshA.ibo_.size(); i++)
 	//{
