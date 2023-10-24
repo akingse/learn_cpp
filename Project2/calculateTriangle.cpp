@@ -912,8 +912,8 @@ bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, cons
 	if (edgesA[0].cross(edgesA[1]).isZero() || edgesB[0].cross(edgesB[1]).isZero())
 		count_err_degen_tri++;
 #endif
-	Vector3d normalA = edgesA[0].cross(edgesA[1]);
-	Vector3d normalB = edgesB[0].cross(edgesB[1]);
+	Eigen::Vector3d normalA = edgesA[0].cross(edgesA[1]);
+	Eigen::Vector3d normalB = edgesB[0].cross(edgesB[1]);
 	// to avoid precision error, cause normal isnot unique, different normal lead to two result
 	double projection0 = normalA.dot(triB[0] - triA[1]);
 	double projection1 = normalA.dot(triB[1] - triA[1]);

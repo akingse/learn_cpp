@@ -85,9 +85,9 @@ bool psykronix::isMeshConvexPolyhedron(const ModelMesh& mesh)
 //}
 
 // exclude point on face, ray is rotz
-RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector3d& _point, const ModelMesh& mesh)
+RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector3d& point, const ModelMesh& mesh)
 {
-	Eigen::Vector3d point = mesh.pose_.inverse() * _point;
+	//Eigen::Vector3d point = mesh.pose_.inverse() * _point; //already transformed before
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
 	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
 	//one mesh inside other mesh, the bounding-box must inside other mesh
@@ -173,12 +173,12 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector
 }
 
 // include point on face
-bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& _point, const ModelMesh& mesh)
+bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const ModelMesh& mesh)
 {
 #ifdef STATISTIC_DATA_COUNT
 	count_mesh_inside_mesh++;
 #endif  
-	Eigen::Vector3d point = mesh.pose_.inverse() * _point;
+	//Eigen::Vector3d point = mesh.pose_.inverse() * _point;
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
 	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
 	auto _relationOfPointAndTriangle = [&](/*const Vector3d& point,*/ const std::array<Vector3d, 3>& trigon)->RelationOfRayAndTrigon // axisZ direction
@@ -876,7 +876,7 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 	if (meshA.bounding_.contains(meshB.bounding_)) //boundingbox is world coord
 	{
 		// precondition: boundingbox inside, polyface not intersect, mesh isnot empty
-		if (isPointInsidePolyhedronAZ(meshA.pose_.inverse() * meshB.pose_ * meshB.vbo_[0], meshA))
+		if (isPointInsidePolyhedronROT(meshA.pose_.inverse() * meshB.pose_ * meshB.vbo_[0], meshA) != RelationOfPointAndMesh::OUTER)
 		{
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
 			triRecordHard.push_back({ gTirNaN, gTirNaN }); //two trinan means inside
@@ -887,7 +887,7 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 	}
 	else if (meshB.bounding_.contains(meshA.bounding_))
 	{
-		if (isPointInsidePolyhedronAZ(meshB.pose_.inverse() * meshA.pose_ * meshA.vbo_[0], meshB))
+		if (isPointInsidePolyhedronROT(meshB.pose_.inverse() * meshA.pose_ * meshA.vbo_[0], meshB) != RelationOfPointAndMesh::OUTER)
 		{
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
 			triRecordHard.push_back({ gTirNaN, gTirNaN });
