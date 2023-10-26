@@ -523,7 +523,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 	bool isFixedFaceA = true;
 	size_t indexA = ULL_MAX, indexB = ULL_MAX;// indexA_V = ULL_MAX, indexB_V = ULL_MAX;
 	//std::array<size_t, 2> indexAB = { ULL_MAX , ULL_MAX };
-	std::set<int> vboSetA, vboSetB; // to remove repeat vertex
+	std::set<size_t> vboSetA, vboSetB; // to remove repeat vertex
 	for (const auto& iterA : faceSetA) //merge vertex
 	{
 		vboSetA.insert(iboA[iterA][0]);
