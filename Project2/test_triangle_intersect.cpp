@@ -373,11 +373,38 @@ static void _test8()
 	cout << "countDiff2=" << countDiff2 << endl;
 }
 
+std::atomic<size_t> count_gRTT = 0;
+static void _test9()
+{
+	Vector3d triA_0 = Vector3d(0, 0, 0);
+	Vector3d triA_1 = Vector3d(10, 5, 0);
+	Vector3d triA_2 = Vector3d(0, 10, 0);
+
+	//Vector3d triB_0 = Vector3d(5, 0, 0);
+	Vector3d triB_0 = Vector3d(5, 0, -2);
+	Vector3d triB_1 = Vector3d(5, 10, 0);
+	Vector3d triB_2 = Vector3d(5, 5, 10);
+	Triangle triA = { triA_0, triA_1, triA_2 };
+	Triangle triB = { triB_0, triB_1, triB_2 };
+	std::array<Vector3d, 3> tri1 = { Vector3d(), Vector3d(), Vector3d()};
+	std::array<Vector3d, 3> tri2 = { { Vector3d(), Vector3d(), Vector3d()} };
+	//RelationOfTwoTriangles rela = getRelationOfTwoTrianglesSAT(triA, triB);
+	if (RelationOfTwoTriangles::COPLANAR == getRelationOfTwoTrianglesSAT(triA, triB)) //O2优化不掉两次运行
+		cout << "COPLANAR" << endl;
+	else if (RelationOfTwoTriangles::INTERSECT == getRelationOfTwoTrianglesSAT(triA, triB))
+		cout << "INTERSECT" << endl;
+	cout << "count_gRTT=" << count_gRTT << endl;
+
+	return;
+
+}
+
 static int enrol = []()->int
 {
 	//_test2();
 	//_test7();
 	//_test8();
+	_test9();
 	return 0;
 }();
 

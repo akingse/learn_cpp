@@ -3,8 +3,12 @@
 using namespace std;
 using namespace Eigen;
 using namespace psykronix;
-#undef max //AlignedBox3d mem-fun
-#undef min
+#ifdef max
+#undef max 
+#endif // max
+#ifdef min
+#undef min 
+#endif // min
 #define USING_METHOD_SAT
 //#define USING_THRESHOLD_CUSTOMIZE
 //#define USING_ACCURATE_NORMALIZED
@@ -19,8 +23,12 @@ std::atomic<size_t> count_isTwoTrisInter = 0, count_getTrisDistance = 0, count_i
 count_pointInTri = 0, count_err_degen_tri = 0,
 count_err_inputbox = 0, count_err_inter_dist = 0, count_err_repeat_tri = 0, 
 count_err_tris_sepa = 0, count_err_tris_inter = 0;
-extern std::atomic<size_t> count_err_degen_tri;
+extern std::atomic<size_t> count_err_degen_tri, count_trigon_coplanar;
 #endif //STATISTIC_DATA_COUNT
+#ifdef STATISTIC_DATA_TESTFOR
+extern std::atomic<size_t> count_gRTT;
+#endif
+
 
 enum class RelationOfTrigon : int
 {
@@ -493,6 +501,71 @@ bool psykronix::isTwoTrianglesIntersectEIT(const std::array<Vector3d, 3>& triL, 
 		}
 	}
 	return false;
+}
+
+//must intersect after SAT, using threshold
+RelationOfTwoTriangles psykronix::getRelationOfTwoTrianglesSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
+{
+#ifdef STATISTIC_DATA_TESTFOR
+	count_gRTT++;
+#endif
+	std::array<Eigen::Vector3d, 3> edgesA = { { triA[1] - triA[0],
+												triA[2] - triA[1],
+												triA[0] - triA[2] } };
+	std::array<Eigen::Vector3d, 3> edgesB = { { triB[1] - triB[0],
+												triB[2] - triB[1],
+												triB[0] - triB[2] } };
+	if (edgesA[0].cross(edgesA[1]).cross(edgesB[0].cross(edgesB[1])).isZero(eps))// && fabs(normalA.dot(triB[1] - triA[1])) < eps) //using approx
+	{
+		//Eigen::Vector3d normalA = edgesA[0].cross(edgesA[1]);
+		//Eigen::Vector3d normalB = edgesB[0].cross(edgesB[1]);
+		//std::array<Eigen::Vector3d, 6> axes = { {
+		//									normalA.cross(edgesA[0]),
+		//									normalA.cross(edgesA[1]),
+		//									normalA.cross(edgesA[2]),
+		//									normalB.cross(edgesB[0]),
+		//									normalB.cross(edgesB[1]),
+		//									normalB.cross(edgesB[2]) } };
+#ifdef STATISTIC_DATA_COUNT
+		count_trigon_coplanar++;
+#endif  
+		return RelationOfTwoTriangles::COPLANAR;
+	}
+	// using SAT, next not coplanar
+	std::array<Eigen::Vector3d, 9> axes = { {
+											edgesA[0].cross(edgesB[0]),
+											edgesA[0].cross(edgesB[1]),
+											edgesA[0].cross(edgesB[2]),
+											edgesA[1].cross(edgesB[0]),
+											edgesA[1].cross(edgesB[1]),
+											edgesA[1].cross(edgesB[2]),
+											edgesA[2].cross(edgesB[0]),
+											edgesA[2].cross(edgesB[1]),
+											edgesA[2].cross(edgesB[2]) } };
+	double dmin = DBL_MAX, minA, maxA, minB, maxB, projection;
+	for (const auto& axis : axes) //fast than index
+	{
+		minA = DBL_MAX;
+		maxA = -DBL_MAX;
+		minB = DBL_MAX;
+		maxB = -DBL_MAX;
+		for (const auto& vertex : triA) //fast than list
+		{
+			projection = axis.dot(vertex);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
+		}
+		for (const auto& vertex : triB)
+		{
+			projection = axis.dot(vertex);
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		dmin = std::min(std::min(maxA - minB, maxB - minA), dmin);
+	}
+	if (fabs(dmin) < eps)
+		return RelationOfTwoTriangles::CONTACT;
+	return RelationOfTwoTriangles::INTERSECT;
 }
 
 // decompose box to twelve triangles

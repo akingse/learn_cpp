@@ -12,6 +12,15 @@ namespace psykronix
     static constexpr double _eps = -FLT_EPSILON;
     static constexpr unsigned long long ULL_MAX = 18446744073709551615; // 2 ^ 64 - 1
 
+    enum class RelationOfTwoTriangles : int //two intersect triangle
+    {
+        COPLANAR = 0,   //intersect or separate
+        CONTACT,        //intersect but depth is zero
+        INTERSECT,      //sat intersect all
+        //PARALLEL,       //but not coplanr, must separate
+        //SEPARATE,
+    };
+
     // intersect of triangle
     DLLEXPORT bool isPointInTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon);
     DLLEXPORT bool isTwoSegmentsIntersect(const std::array<Eigen::Vector2d, 2>& segmA, const std::array<Eigen::Vector2d, 2>& segmB);
@@ -22,6 +31,7 @@ namespace psykronix
     DLLEXPORT bool isTwoTrianglesIntersectEIT(const std::array<Eigen::Vector3d, 3>& triL, const std::array<Eigen::Vector3d, 3>& triR);
     //DLLEXPORT bool isTwoTrianglesIntersectionSAT(const std::array<Eigen::Vector3d, 3>& T1, const std::array<Eigen::Vector3d, 3>& T2);
     // preprocess
+    DLLEXPORT RelationOfTwoTriangles getRelationOfTwoTrianglesSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
     DLLEXPORT bool isTriangleAndBoundingBoxIntersect(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box);
     DLLEXPORT std::tuple<Eigen::Vector3d, double> getTriangleBoundingCircle(const std::array<Eigen::Vector3d, 3>& trigon);
     // distance
