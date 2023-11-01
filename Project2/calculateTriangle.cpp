@@ -29,16 +29,6 @@ extern std::atomic<size_t> count_err_degen_tri, count_trigon_coplanar;
 extern std::atomic<size_t> count_gRTT;
 #endif
 
-
-enum class RelationOfTrigon : int
-{
-	SEPARATE = 0,
-	INTERSECT, //intersect point local one or two trigon
-	COPLANAR_AINB, //A_INSIDE_B
-	COPLANAR_BINA, //B_INSIDE_A
-	COPLANAR_INTERSECT,
-};
-
 //isPointInTriangle2D
 bool isPointInTriangle(const Vector2d& point, const std::array<Vector2d, 3>& trigon) // 2D
 {
@@ -207,13 +197,10 @@ bool psykronix::isSegmentCrossTriangle(const std::array<Vector3d, 2>& segment, c
 	if ((dot0 > eps && dot1 > eps && dot2 > eps) || (dot0 < _eps && dot1 < _eps && dot2 < _eps))
 		return false; //+-*x< 0,6,3,2,4.5
 	// double straddling test x3
-	if (isTwoSegmentsIntersect(segment, { trigon[0], trigon[1] }))
-		return true;
-	if (isTwoSegmentsIntersect(segment, { trigon[1], trigon[2] }))
-		return true;
-	if (isTwoSegmentsIntersect(segment, { trigon[2], trigon[0] }))
-		return true;
-	return false;
+	return isTwoSegmentsIntersect(segment, { trigon[0], trigon[1] }) ||
+			isTwoSegmentsIntersect(segment, { trigon[1], trigon[2] }) ||
+			isTwoSegmentsIntersect(segment, { trigon[2], trigon[0] });
+
 	//bool edgea2segm = ((segment[0] - trigon[0]).cross(trigon[1] - trigon[0])).dot((segment[1] - trigon[0]).cross(trigon[1] - trigon[0])) < eps;
 	//bool segm2edgea = ((trigon[1] - segment[0]).cross(vecSeg)).dot((trigon[0] - segment[0]).cross(vecSeg)) < eps;
 	//if (edgea2segm && segm2edgea)
@@ -542,6 +529,11 @@ RelationOfTwoTriangles psykronix::getRelationOfTwoTrianglesSAT(const std::array<
 											edgesA[2].cross(edgesB[0]),
 											edgesA[2].cross(edgesB[1]),
 											edgesA[2].cross(edgesB[2]) } };
+	for (auto& axis : axes) // revise zero vector
+	{
+		if (axis.isZero())
+			axis = Vector3d(1, 0, 0);
+	}
 	double dmin = DBL_MAX, minA, maxA, minB, maxB, projection;
 	for (const auto& axis : axes) //fast than index
 	{
@@ -565,7 +557,7 @@ RelationOfTwoTriangles psykronix::getRelationOfTwoTrianglesSAT(const std::array<
 	}
 	if (fabs(dmin) < eps)
 		return RelationOfTwoTriangles::CONTACT;
-	return RelationOfTwoTriangles::INTERSECT;
+	return RelationOfTwoTriangles::INTRUSIVE;
 }
 
 // decompose box to twelve triangles
@@ -665,6 +657,11 @@ bool isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& segment, con
 				normal.cross(trigon[1] - trigon[0]),
 				normal.cross(trigon[2] - trigon[1]),
 				normal.cross(trigon[0] - trigon[2]) } };
+		for (auto& axis : axes) // revise zero vector
+		{
+			if (axis.isZero())
+				axis = Vector3d(1, 0, 0);
+		}
 		for (const auto& axis : axes)
 		{
 			minA = DBL_MAX;
@@ -689,6 +686,11 @@ bool isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& segment, con
 				vecSeg.cross(trigon[1] - trigon[0]),
 				vecSeg.cross(trigon[2] - trigon[1]),
 				vecSeg.cross(trigon[0] - trigon[2])} };
+		for (auto& axis : axes) // revise zero vector
+		{
+			if (axis.isZero())
+				axis = Vector3d(1, 0, 0);
+		}
 		for (const auto& axis : axes)
 		{
 			minA = DBL_MAX;
@@ -748,7 +750,7 @@ bool isPointRayAcrossTriangleSAT(const Eigen::Vector3d& point, const std::array<
 										   trigon[2] - trigon[1],
 										   trigon[0] - trigon[2] };
 	Vector3d normal = edges[0].cross(edges[1]);
-	std::array<Eigen::Vector3d, 7> axes = { { //order matters speed
+	std::array<Eigen::Vector3d, 7> axes = { {
 			//axisZ, // using pre-box
 			axisZ.cross(edges[0]),
 			axisZ.cross(edges[1]),
@@ -757,6 +759,11 @@ bool isPointRayAcrossTriangleSAT(const Eigen::Vector3d& point, const std::array<
 			normal.cross(edges[0]),
 			normal.cross(edges[1]),
 			normal.cross(edges[2]) } };//add
+	for (auto& axis : axes) // revise zero vector
+	{
+		if (axis.isZero())
+			axis = Vector3d(1, 0, 0);
+	}
 	double minTri, maxTri, projection, dotP, dotR;
 	for (const auto& axis : axes) //fast than index
 	{
@@ -929,6 +936,11 @@ bool isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& 
 			coords[2].cross(edges[0]),
 			coords[2].cross(edges[1]),
 			coords[2].cross(edges[2]) } };
+	//for (auto& axis : axes) // absolute can give up
+	//{
+	//	if (axis.isZero())
+	//		axis = Vector3d(1, 0, 0);
+	//}
 	const Vector3d& origin = box.min();
 	Vector3d vertex = box.sizes();
 	std::array<Vector3d, 8> vertexes = { {
@@ -1038,7 +1050,7 @@ bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, cons
 			maxB = std::max(maxB, projection);
 		}
 #ifdef USING_THRESHOLD_CUSTOMIZE
-		if (maxA + eps < minB || maxB + eps < minA)
+		if (maxA + eps < minB || maxB + eps < minA) //only no threshold can avoid edge-pair parallel, that lead to zero vector
 #else
 		if (maxA < minB || maxB < minA) // absolute zero
 #endif
@@ -1172,9 +1184,9 @@ double getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const
 	}
 	// next reduce axis will cause speed slow
 	std::array<Eigen::Vector3d, 3> axes = { {
-		direction.normalized(),
-		(triA[1] - triA[0]).cross(triA[2] - triA[1]).normalized(),
-		(triB[1] - triB[0]).cross(triB[2] - triB[1]).normalized() } };
+		(triA[1] - triA[0]).cross(triA[2] - triA[1]).normalized(), //normalA
+		(triB[1] - triB[0]).cross(triB[2] - triB[1]).normalized(), //normalB
+		direction.normalized() } };
 	double dmax = -DBL_MAX, minA, maxA, minB, maxB, projection;
 	for (const auto& axis : axes) // check for overlap along each axis
 	{

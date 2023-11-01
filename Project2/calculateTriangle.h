@@ -16,9 +16,18 @@ namespace psykronix
     {
         COPLANAR = 0,   //intersect or separate
         CONTACT,        //intersect but depth is zero
-        INTERSECT,      //sat intersect all
+        INTRUSIVE,      //sat intersect all
         //PARALLEL,       //but not coplanr, must separate
         //SEPARATE,
+    };
+
+    enum class RelationOfTrigon : int
+    {
+        SEPARATE = 0,
+        INTERSECT, //intersect point local one or two trigon
+        COPLANAR_AINB, //A_INSIDE_B
+        COPLANAR_BINA, //B_INSIDE_A
+        COPLANAR_INTERSECT,
     };
 
     // intersect of triangle

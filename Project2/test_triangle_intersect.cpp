@@ -379,11 +379,23 @@ static void _test9()
 	Vector3d triA_0 = Vector3d(0, 0, 0);
 	Vector3d triA_1 = Vector3d(10, 5, 0);
 	Vector3d triA_2 = Vector3d(0, 10, 0);
-
 	//Vector3d triB_0 = Vector3d(5, 0, 0);
 	Vector3d triB_0 = Vector3d(5, 0, -2);
 	Vector3d triB_1 = Vector3d(5, 10, 0);
 	Vector3d triB_2 = Vector3d(5, 5, 10);
+
+	triA_0 = Vector3d(0, 0, 0);
+	triA_1 = Vector3d(10, 0, 0);
+	triA_2 = Vector3d(10, 10, 0);
+	triB_0 = Vector3d(8, 0, -1);
+	triB_1 = Vector3d(8, 10, -1);
+	triB_2 = Vector3d(8, 0, 10);
+	//para
+	triB_0 = Vector3d(0, 0, 20);
+	triB_1 = Vector3d(10, 0, 20);
+	triB_2 = Vector3d(10, 10, 20);
+
+
 	Triangle triA = { triA_0, triA_1, triA_2 };
 	Triangle triB = { triB_0, triB_1, triB_2 };
 	std::array<Vector3d, 3> tri1 = { Vector3d(), Vector3d(), Vector3d()};
@@ -391,9 +403,14 @@ static void _test9()
 	//RelationOfTwoTriangles rela = getRelationOfTwoTrianglesSAT(triA, triB);
 	if (RelationOfTwoTriangles::COPLANAR == getRelationOfTwoTrianglesSAT(triA, triB)) //O2优化不掉两次运行
 		cout << "COPLANAR" << endl;
-	else if (RelationOfTwoTriangles::INTERSECT == getRelationOfTwoTrianglesSAT(triA, triB))
-		cout << "INTERSECT" << endl;
+	else if (RelationOfTwoTriangles::CONTACT == getRelationOfTwoTrianglesSAT(triA, triB))
+		cout << "CONTACT" << endl;
+	else
+		cout << "INTRUSIVE" << endl;
 	cout << "count_gRTT=" << count_gRTT << endl;
+
+
+	double d1 = getTrianglesDistanceSAT(triA, triB);
 
 	return;
 
