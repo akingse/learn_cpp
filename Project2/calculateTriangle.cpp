@@ -97,12 +97,12 @@ bool psykronix::isPointInTriangle(const Vector3d& point, const std::array<Vector
 
 bool isPointOnTriangleSurface(const Vector3d& point, const std::array<Vector3d, 3>& trigon)
 {
-	if (point.x() < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
-		point.x() > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
-		point.y() < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
-		point.y() > std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
-		point.z() < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
-		point.z() > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]))
+	if (point[0] < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+		point[0] > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+		point[1] < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
+		point[1] > std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
+		point[2] < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
+		point[2] > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]))
 		return false;
 #ifdef USING_ACCURATE_NORMALIZED
 	Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[1]).normalized();// using isLeft test

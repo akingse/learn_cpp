@@ -26,7 +26,8 @@ extern std::atomic<size_t> count_mesh_inside_mesh,
 count_reduced_exclude_pre, count_triA_inter, count_triB_inter,
 count_err_empty_mesh, count_tri_box_exclude_pre, count_error_tris_sepa,
 count_point_inside_mesh, count_facesetA, count_facesetB, count_triAB_nan, count_triB_nan,
-count_meshs_isContact, count_meshs_isIntrusive, count_err_inter_mesh_sepa;
+count_meshs_isContact, count_meshs_isIntrusive, count_err_inter_mesh_sepa, count_repeat_sepa_axis,
+count_cal_sepa_axis;
 //container
 extern std::vector<std::array<Triangle, 2>> triPairList, triRecordHard; //std::array<Eigen::Vector3d, 3>
 extern std::vector<Triangle> triFaceVctA, triFaceVctB;
@@ -75,9 +76,23 @@ bool psykronix::isMeshConvexPolyhedron(const ModelMesh& mesh)
 //}
 
 // exclude point on face, ray is rotz
-RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector3d& point, const ModelMesh& mesh)
+RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector3d& _point, const ModelMesh& mesh)
 {
-	//Eigen::Vector3d point = mesh.pose_.inverse() * _point; //already transformed before
+	Eigen::Vector3d point = mesh.pose_.inverse() * _point; // to relative coordinate
+	if (!mesh.bounding_.contains(point))
+		return RelationOfPointAndMesh::OUTER;
+	//auto _isPointOnPolyhedronSurface = [&]()->bool
+	bool isSurface = false;
+	for (const auto& face : mesh.ibo_)
+	{
+		if (isPointOnTriangleSurface(point, { mesh.vbo_[face[0]], mesh.vbo_[face[1]], mesh.vbo_[face[2]] }))
+		{
+			isSurface = true;
+			break;
+		}
+	}
+	if (isSurface)
+		return RelationOfPointAndMesh::SURFACE;
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
 	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
 	//one mesh inside other mesh, the bounding-box must inside other mesh
@@ -398,6 +413,17 @@ bool psykronix::isPointInsidePolyhedronFL(const Eigen::Vector3d& _point, const M
 	return count % 2 == 1;
 }
 
+bool isPointOnPolyhedronSurface(const Eigen::Vector3d& _point, const ModelMesh& mesh)
+{
+	Eigen::Vector3d point = mesh.pose_.inverse() * _point;
+	for (const auto& face : mesh.ibo_)
+	{
+		if (isPointOnTriangleSurface(point, { mesh.vbo_[face[0]], mesh.vbo_[face[1]], mesh.vbo_[face[2]] }))
+			return true;
+	}
+	return false;
+}
+
 //using method SAT
 std::tuple<Eigen::Vector3d, std::array<size_t, 2>> _getPenetrationDepthOfTwoConvexALL(const ModelMesh& meshA, const ModelMesh& meshB)
 {
@@ -497,7 +523,7 @@ Eigen::Vector3d _getPenetrationDepthOfTwoMeshsBOX(const ModelMesh& meshA, const 
 	// no contain sequence
 	double dmin = DBL_MAX, dtemp;
 	Vector3d coord;
-	Triangle unitThree = { Eigen::Vector3d(1,0,0), Eigen::Vector3d(0,1,0), Eigen::Vector3d(0,0,1) };
+	Triangle unitThree = { Eigen::Vector3d(1,0,0), Eigen::Vector3d(0,1,0), Eigen::Vector3d(0,0,1) }; //choose one direction from xyz
 	for (int i = 0; i < 3; i++)
 	{
 		dtemp = std::min(boxA.max()[i] - boxB.min()[i], boxB.max()[i] - boxA.min()[i]); //x direction
@@ -922,18 +948,18 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 			}
 		}
 	}
+#ifdef STATISTIC_DATA_COUNT
 	if (meshA.vbo_.empty() || meshB.vbo_.empty()) // extra safe check
 	{
-#ifdef STATISTIC_DATA_COUNT
 		count_err_empty_mesh++;
-#endif  
-		return false;
+		//return false;
 	}
+#endif  
 	//judge whether mesh entirely inside mesh
 	if (meshA.bounding_.contains(meshB.bounding_)) //boundingbox is world coord
 	{
 		// precondition: boundingbox inside, polyface not intersect, mesh isnot empty
-		if (isPointInsidePolyhedronROT(meshA.pose_.inverse() * meshB.pose_ * meshB.vbo_[0], meshA) != RelationOfPointAndMesh::OUTER)
+		if (!meshB.vbo_.empty() && isPointInsidePolyhedronROT(meshB.pose_ * meshB.vbo_[0], meshA) != RelationOfPointAndMesh::OUTER)
 		{
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
 			triRecordHard.push_back({ gTirNaN, gTirNaN }); //two trinan means inside
@@ -944,7 +970,7 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 	}
 	else if (meshB.bounding_.contains(meshA.bounding_))
 	{
-		if (isPointInsidePolyhedronROT(meshB.pose_.inverse() * meshA.pose_ * meshA.vbo_[0], meshB) != RelationOfPointAndMesh::OUTER)
+		if (!meshA.vbo_.empty() && isPointInsidePolyhedronROT(meshA.pose_ * meshA.vbo_[0], meshB) != RelationOfPointAndMesh::OUTER)
 		{
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
 			triRecordHard.push_back({ gTirNaN, gTirNaN });
@@ -1074,12 +1100,20 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 					{
 						if (iter.cross(axis).isZero(eps))
 						{
+#ifdef STATISTIC_DATA_COUNT
+							count_repeat_sepa_axis++;
+#endif	
 							isExist = true;
 							break;
 						}
 					}
 					if (!isExist)
+					{
+#ifdef STATISTIC_DATA_COUNT
+						count_cal_sepa_axis++;
+#endif	
 						axesSepa.push_back(axis.normalized());
+					}
 				}
 #else
 				pInter = getTwoTrianglesIntersectPoints(triA, triB);
@@ -1177,27 +1211,17 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 #endif
 	}
 	//judge whether mesh entirely inside mesh 
-	bool isInner = false;
+	RelationOfPointAndMesh relation = RelationOfPointAndMesh::OUTER; //to avoid wholly enfold, exactly calculate depth
 	if (meshA.bounding_.contains(meshB.bounding_)) //boundingbox is world coord
 	{
 		// precondition: boundingbox inside, polyface not intersect, mesh isnot empty
-		Eigen::Affine3d mat = meshA.pose_.inverse() * meshB.pose_;
 		for (const auto& iterB : meshB.vbo_)
 		{
-			if (RelationOfPointAndMesh::INNER == isPointInsidePolyhedronROT(mat * iterB, meshA))
-			{
-				isInner = true;
+			relation = isPointInsidePolyhedronROT(meshB.pose_ * iterB, meshA);
+			if (RelationOfPointAndMesh::SURFACE != relation)
 				break;
-			}
 		}
-		//RelationOfPointAndMesh relation = isPointInsidePolyhedronROT(mat * (*meshB.vbo_.begin()), meshA);// already pre judge, mesh isnot empty
-		//if (RelationOfPointAndMesh::OUTER == relation) //CONTACT_OUTER return together after
-		//{
-		//	return isContact ?
-		//		tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::CONTACT_OUTER, gVecZero} :
-		//		tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::SEPARATE , gVecNaN };
-		//}
-		if (isInner)//(RelationOfPointAndMesh::INNER == relation)
+		if (RelationOfPointAndMesh::OUTER != relation)//all-inner or contact-inner or all-contact
 		{
 			//std::tuple<Eigen::Vector3d, std::array<size_t, 2>> depth = _getPenetrationDepthOfTwoConvexBOX(meshA, meshB);
 			Eigen::Vector3d depth = _getPenetrationDepthOfTwoMeshsBOX(meshA, meshB);
@@ -1208,30 +1232,20 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 #ifdef STATISTIC_DATA_COUNT
 			count_mesh_inside_mesh++;
 #endif	
-			return isContact ?
+			return isContact ? //equal some surface
 				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::INSEDE_BINA_CONT, depth } :
 				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::INSEDE_BINA , depth };
 		}
 	}
 	else if (meshB.bounding_.contains(meshA.bounding_))
 	{
-		Eigen::Affine3d mat = meshB.pose_.inverse() * meshA.pose_;
 		for (const auto& iterA : meshA.vbo_)
 		{
-			if (RelationOfPointAndMesh::INNER == isPointInsidePolyhedronROT(mat * iterA, meshB))
-			{
-				isInner = true;
+			relation = isPointInsidePolyhedronROT(meshA.pose_ * iterA, meshB);
+			if (RelationOfPointAndMesh::SURFACE != relation)
 				break;
-			}
 		}
-		//RelationOfPointAndMesh relation = isPointInsidePolyhedronROT(mat * (*meshA.vbo_.begin()), meshB);
-		//if (RelationOfPointAndMesh::OUTER == relation)
-		//{
-		//	return isContact ?
-		//		tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::CONTACT_OUTER, gVecZero} :
-		//		tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::SEPARATE , gVecNaN };
-		//}
-		if (isInner)//(RelationOfPointAndMesh::INNER == relation)
+		if (RelationOfPointAndMesh::OUTER != relation)
 		{
 			//std::tuple<Eigen::Vector3d, std::array<size_t, 2>> depth = _getPenetrationDepthOfTwoConvexBOX(meshA, meshB);
 			Eigen::Vector3d depth = _getPenetrationDepthOfTwoMeshsBOX(meshA, meshB);
