@@ -1108,17 +1108,6 @@ double getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const
 			return (segmA[0] + kA * vectA - segmB[0] - kB * vectB).squaredNorm();
 		return DBL_MAX; // nearest point outof segments
 	};
-	auto _getDistanceOfPointAndPlaneINF = [](const Vector3d& point, const std::array<Vector3d, 3>& plane)->double
-	{
-		Vector3d normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);
-		//if (normal.isZero()) // error triangle plane
-		//	return DBL_MAX;
-		double k = (plane[0] - point).dot(normal) / normal.dot(normal);
-		Vector3d local = point + k * normal;
-		if (!isPointInTriangle(local, plane))
-			return DBL_MAX;
-		return (k * normal).squaredNorm();
-	};
 #define EDGE_PAIR_CREATE_AXIS_OPTMIZE
 #ifdef EDGE_PAIR_CREATE_AXIS_OPTMIZE
 	auto _getNearestAxisOfTwoSegments = [&](const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB)// major capture axis
@@ -1210,6 +1199,17 @@ double getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const
 	}
 	return dmax;
 #else
+	auto _getDistanceOfPointAndPlaneINF = [](const Vector3d& point, const std::array<Vector3d, 3>& plane)->double
+	{
+		Vector3d normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);
+		//if (normal.isZero()) // error triangle plane
+		//	return DBL_MAX;
+		double k = (plane[0] - point).dot(normal) / normal.dot(normal);
+		Vector3d local = point + k * normal;
+		if (!isPointInTriangle(local, plane))
+			return DBL_MAX;
+		return (k * normal).squaredNorm();
+	};
 	for (const auto& iterA : triA)  //vertex to vertex
 	{
 		for (const auto& iterB : triB)

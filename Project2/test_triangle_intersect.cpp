@@ -387,18 +387,25 @@ static void _test9()
 	triA_0 = Vector3d(0, 0, 0);
 	triA_1 = Vector3d(10, 0, 0);
 	triA_2 = Vector3d(10, 10, 0);
-	triB_0 = Vector3d(8, 0, -1);
-	triB_1 = Vector3d(8, 10, -1);
-	triB_2 = Vector3d(8, 0, 10);
+	//triB_0 = Vector3d(8, 0, -1);
+	//triB_1 = Vector3d(8, 10, -1);
+	//triB_2 = Vector3d(8, 0, 10);
 	//para
-	triB_0 = Vector3d(0, 0, 20);
-	triB_1 = Vector3d(10, 0, 20);
-	triB_2 = Vector3d(10, 10, 20);
+	triB_0 = Vector3d(100, 0, 20);
+	triB_1 = Vector3d(110, 0, 20);
+	triB_2 = Vector3d(110, 10, 20);
+	Vector3d triA_00 = Vector3d(0, 0, 0).normalized();
 
 
 	Triangle triA = { triA_0, triA_1, triA_2 };
 	Triangle triB = { triB_0, triB_1, triB_2 };
-	std::array<Vector3d, 3> tri1 = { Vector3d(), Vector3d(), Vector3d()};
+
+
+	//double d0 = getTrianglesDistance(triA, triB); //判相交的17个分离轴，不一定含有最大的分离轴
+	double d1 = getTrianglesDistanceSAT(triA, triB);
+
+
+	std::array<Vector3d, 3> tri1 = { Vector3d(), Vector3d(), Vector3d()}; //both support
 	std::array<Vector3d, 3> tri2 = { { Vector3d(), Vector3d(), Vector3d()} };
 	//RelationOfTwoTriangles rela = getRelationOfTwoTrianglesSAT(triA, triB);
 	if (RelationOfTwoTriangles::COPLANAR == getRelationOfTwoTrianglesSAT(triA, triB)) //O2优化不掉两次运行
@@ -408,9 +415,6 @@ static void _test9()
 	else
 		cout << "INTRUSIVE" << endl;
 	cout << "count_gRTT=" << count_gRTT << endl;
-
-
-	double d1 = getTrianglesDistanceSAT(triA, triB);
 
 	return;
 
