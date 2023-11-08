@@ -47,7 +47,7 @@ Matrix4d psykronix::translate(const Eigen::Vector3d& vec)
     return psykronix::translate(vec.x(), vec.y(), vec.z());
 }
 
-Matrix4d psykronix::scale(double x, double y, double z /*= 0.0*/)
+Matrix4d psykronix::scale(double x, double y, double z /*= 1.0*/)
 {
     Matrix4d T;
     T << x, 0, 0, 0,

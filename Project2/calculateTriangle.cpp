@@ -30,7 +30,7 @@ extern std::atomic<size_t> count_gRTT;
 #endif
 
 //isPointInTriangle2D
-bool isPointInTriangle(const Vector2d& point, const std::array<Vector2d, 3>& trigon) // 2D
+bool psykronix::isPointInTriangle(const Vector2d& point, const std::array<Vector2d, 3>& trigon) // 2D
 {
 	// using isLeft test
 	const Vector2d& p0 = trigon[0];
@@ -143,6 +143,44 @@ bool psykronix::isTwoSegmentsIntersect(const std::array<Vector2d, 2>& segmA, con
 		((segmA[0] - segmB[0]).x() * (segmB[1] - segmB[0]).y() - (segmB[1] - segmB[0]).x() * (segmA[0] - segmB[0]).y()) *
 		((segmB[1] - segmB[0]).x() * (segmA[1] - segmB[0]).y() - (segmA[1] - segmB[0]).x() * (segmB[1] - segmB[0]).y()) >= 0.0;
 #endif
+}
+
+bool psykronix::isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector2d, 2>& segment, const Eigen::AlignedBox2d& box)
+{
+	if (box.contains(segment[0]) || box.contains(segment[1]))
+		return true;
+	std::array<Eigen::Vector2d, 3> axes = { {
+			Vector2d(1,0),
+			Vector2d(0,1),
+			Vector2d((segment[1] - segment[0]).y(),(segment[1] - segment[0]).x())} }; //canbe zero
+	std::array<Eigen::Vector2d, 4> boxVtx = { {
+			box.min(),
+			Vector2d(box.max().x(),box.min().y()),
+			box.max(),
+			Vector2d(box.min().x(),box.max().y())} };
+	double minA, maxA, minB, maxB, projection;
+	for (const auto& axis : axes) //fast than index
+	{
+		minA = DBL_MAX;
+		maxA = -DBL_MAX;
+		minB = DBL_MAX;
+		maxB = -DBL_MAX;
+		for (const auto& vertex : boxVtx) //fast than list
+		{
+			projection = axis.dot(vertex);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
+		}
+		for (const auto& vertex : segment)
+		{
+			projection = axis.dot(vertex);
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		if (maxA < minB || maxB < minA) // absolute zero
+			return false;
+	}
+	return true;
 }
 
 //double straddling test, must coplanar

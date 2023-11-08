@@ -220,10 +220,32 @@ static void _test0()
 	cout << "main over." << endl;
 }
 
+//test for clipper
+//#include "clipper2/clipper.h"
+//using namespace Clipper2Lib; //using C++17
+static void _test1()
+{
+	//PathD path1;
+	//path1.emplace_back(PointD(10.0, 10.0));
+	//path1.emplace_back(PointD(50.0, 10.0));
+	//path1.emplace_back(PointD(50.0, 50.0));
+	//path1.emplace_back(PointD(10.0, 50.0));
+
+	//PathD path2;
+	//path2.emplace_back(PointD(10.0, 0.0));
+	//path2.emplace_back(PointD(20.0, 0.0));
+	//path2.emplace_back(PointD(20.0, 10.0));
+	//path2.emplace_back(PointD(10.0, 10.0));
+
+	//PathsD res = BooleanOp(ClipType::Union, FillRule::EvenOdd, { path1 }, { path2 });
+
+	return;
+}
 
 static int enrol = []()->int
 {
 	//_test0();
+	_test1();
 	return 0;
 }();
 
