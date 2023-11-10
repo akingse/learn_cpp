@@ -78,7 +78,7 @@ typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>
 #include "calculateDataTree.h"
 #include "calculateTriangle.h"		//DLL-API
 #include "calculatePolyhedron.h"
-#include "test_file_rw.h" //file read and wirte
+#include "my_file_read_write.h" //file read and wirte
 
 //Eigen
 //typedef Vector3d Vec3;

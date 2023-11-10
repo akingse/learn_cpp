@@ -182,7 +182,7 @@
     <ClCompile Include="test_mutex.cpp" />
     <ClCompile Include="test_binfile_debug.cpp" />
     <ClCompile Include="test_case_triangle.cpp" />
-    <ClCompile Include="test_file_rw.cpp" />
+    <ClCompile Include="my_file_read_write.cpp" />
     <ClCompile Include="test_fun_speed.cpp" />
     <ClCompile Include="test_memfn.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -259,7 +259,7 @@
     <ClInclude Include="my_class_fun.h" />
     <ClInclude Include="my_geometry.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="test_file_rw.h" />
+    <ClInclude Include="my_file_read_write.h" />
     <ClInclude Include="test_function.h" />
     <ClInclude Include="test_serialize.h" />
     <ClInclude Include="test_template0.h" />

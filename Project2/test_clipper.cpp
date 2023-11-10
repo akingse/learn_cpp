@@ -98,9 +98,10 @@ static void test2()
 	//std::shared_ptr<KdTreeNode> kdTree = KdTree::createKdTree(polyVct);
 	KdTree kdtree(polyVct);
 	std::shared_ptr<KdTreeNode> tree = kdtree.get();
-	int a = sizeof(tree); //double pointor ==16
+	//int a = sizeof(tree); //double pointor ==16
 	Polygon2d target({ Vector2d(3,1), Vector2d(5,3) });
 	std::vector<size_t> indexes = kdtree.findIntersect(target);
+
 
 	return;
 }
