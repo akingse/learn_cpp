@@ -67,17 +67,22 @@ namespace psykronix
 				return false;
 			return memcmp(m_polygon.data(), rhs.m_polygon.data(), sizeof(Polygon2d) * m_polygon.size()) == -1;
 		}
-
-
 	};
+	// for PolyfaceHandlePtr, to fill into k-d tree
+	struct Polyface3d
+	{
+		long long m_index = -1;
+		Eigen::AlignedBox3d m_bound;
+	};
+
 }
 
 // the k-dimensional tree
-struct KdTreeNode
+struct KdTreeNode2d
 {
-	Eigen::AlignedBox2d m_box;  // 
-	std::shared_ptr<KdTreeNode> m_left;	//KdTreeNode* m_left;  
-	std::shared_ptr<KdTreeNode> m_right; //KdTreeNode* m_right; 
+	Eigen::AlignedBox2d m_bound;  // 
+	std::shared_ptr<KdTreeNode2d> m_left;	//KdTreeNode* m_left;  
+	std::shared_ptr<KdTreeNode2d> m_right; //KdTreeNode* m_right; 
 	// other data
 	long long m_index = -1; // the middle node's index
 	size_t m_dimension = 0; // also means m_depth
@@ -85,21 +90,18 @@ struct KdTreeNode
 	//KdTreeNode(const Polygon2d& poly) : m_box(poly.boungding()), m_left(nullptr), m_right(nullptr) {}
 	bool isValid() const
 	{
-		return m_box.isEmpty();
+		return m_bound.isEmpty();
 	}
 };
 
-class KdTree
+class KdTree2d
 {
 private:
-	std::shared_ptr<KdTreeNode> m_kdTree;
-	static std::shared_ptr<KdTreeNode> createKdTree(const std::vector<psykronix::Polygon2d>& polygons);
+	std::shared_ptr<KdTreeNode2d> m_kdTree;
+	//static std::shared_ptr<KdTreeNode2d> createKdTree(const std::vector<psykronix::Polygon2d>& polygons);
 public:
-	KdTree(const std::vector<psykronix::Polygon2d>& polygons)
-	{
-		m_kdTree = createKdTree(polygons);
-	}
-	std::shared_ptr<KdTreeNode> get() const
+	KdTree2d(const std::vector<psykronix::Polygon2d>& polygons);
+	std::shared_ptr<KdTreeNode2d> get() const
 	{
 		return m_kdTree;
 	}
@@ -107,4 +109,29 @@ public:
 
 };
 
+struct KdTreeNode3d
+{
+	Eigen::AlignedBox3d m_bound;  // the extend bounding box
+	std::shared_ptr<KdTreeNode3d> m_left;	//KdTreeNode* m_left;  
+	std::shared_ptr<KdTreeNode3d> m_right;  //KdTreeNode* m_right; 
+	// other data
+	long long m_index = -1; // the middle node's index
+	size_t m_dimension = 0; // also means m_depth
+};
 
+
+// the k-dimensional tree of 3d polyface, only build kd-tree when construct, only include research function
+class KdTree3d
+{
+private:
+	std::shared_ptr<KdTreeNode3d> m_kdTree;
+	//static std::shared_ptr<KdTreeNode3d> createKdTree(std::vector<psykronix::Polyface3d>& PolyfaceVct);
+public:
+	KdTree3d(std::vector<psykronix::Polyface3d>& polyfaceVct);
+	std::shared_ptr<KdTreeNode3d> get() const
+	{
+		return m_kdTree;
+	}
+	std::vector<size_t> findIntersect(const psykronix::Polyface3d& polyface); //searchFromKdTree
+
+};

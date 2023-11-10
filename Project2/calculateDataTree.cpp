@@ -111,7 +111,8 @@ void psykronix::BooleanOpIntersect(std::vector<Polygon2d>& polyVctA, std::vector
 //--------------------------------------------------------------------------------------------------
 
 
-std::shared_ptr<KdTreeNode> _createKdTree(std::vector<std::pair<size_t, Polygon2d>>& polygons, int dimension = 0)
+//sort the input polygons
+std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<std::pair<size_t, Polygon2d>>& polygons, int dimension = 0)
 {
 	// the kd-tree crud create read update delete
 	auto _getTotalBounding = [&](/*const std::vector<Polygon2d>& polygons*/)->Eigen::AlignedBox2d
@@ -172,31 +173,31 @@ std::shared_ptr<KdTreeNode> _createKdTree(std::vector<std::pair<size_t, Polygon2
 	int direction = dimension % 2;  // the direction of xy, x=0/y=1
 	//double splitValue = calculateSplitValue(/*polygons,*/ dimension); 
 	//KdTreeNode* currentNode = new KdTreeNode();
-	std::shared_ptr<KdTreeNode> currentNode = std::make_shared<KdTreeNode>();
+	std::shared_ptr<KdTreeNode2d> currentNode = std::make_shared<KdTreeNode2d>();
 	//copy polygons
 	//std::vector<Polygon2d> polySort = polygons;
 	//std::sort(polygons.begin(), polygons.end(), [](const Polygon2d& a, const Polygon2d& b) { return a.boungding().min()[0] < b.boungding().min()[0]; }); //x
 	if (polygons.size() != 1) //middle node
 	{
-		currentNode->m_box = _getTotalBounding();// calculateBoundingBox(polygons);  
+		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);  
 		if (direction % 2 == 0)
 			std::sort(polygons.begin(), polygons.end(),
-				[](pair<size_t, Polygon2d>& a, pair<size_t, Polygon2d>& b) { return a.second.boungding().min()[0] < b.second.boungding().min()[0]; }); //x
+				[](const pair<size_t, Polygon2d>& a, const pair<size_t, Polygon2d>& b) { return a.second.boungding().min()[0] < b.second.boungding().min()[0]; }); //x
 		else
 			std::sort(polygons.begin(), polygons.end(),
-				[](pair<size_t, Polygon2d>& a, pair<size_t, Polygon2d>& b) { return a.second.boungding().min()[1] < b.second.boungding().min()[1]; }); //y
+				[](const pair<size_t, Polygon2d>& a, const pair<size_t, Polygon2d>& b) { return a.second.boungding().min()[1] < b.second.boungding().min()[1]; }); //y
 		//splitPolygons(/*polygons, leftPolygons, rightPolygons */ dimension, splitValue);
 		size_t dichotomy = polygons.size() / 2; // less | more
 		vector<pair<size_t, Polygon2d>> leftPolygons(polygons.begin(), polygons.begin() + dichotomy); //for new child node
 		vector<pair<size_t, Polygon2d>> rightPolygons(polygons.begin() + dichotomy, polygons.end());
 		// using recursion
-		currentNode->m_left = _createKdTree(leftPolygons, dimension + 1);
-		currentNode->m_right = _createKdTree(rightPolygons, dimension + 1);
+		currentNode->m_left = _createKdTree2d(leftPolygons, dimension + 1);
+		currentNode->m_right = _createKdTree2d(rightPolygons, dimension + 1);
 		currentNode->m_index = -1; //not leaf node
 	}
 	else // end leaf node
 	{
-		currentNode->m_box = polygons[0].second.boungding();// short cut way
+		currentNode->m_bound = polygons[0].second.boungding();// short cut way
 		currentNode->m_left = nullptr;
 		currentNode->m_right = nullptr;
 		currentNode->m_index = polygons[0].first;
@@ -205,26 +206,27 @@ std::shared_ptr<KdTreeNode> _createKdTree(std::vector<std::pair<size_t, Polygon2
 	return currentNode;
 }
 
-std::shared_ptr<KdTreeNode> KdTree::createKdTree(const std::vector<Polygon2d>& _polygons/*, int depth = 0*/)
+KdTree2d::KdTree2d(const std::vector<Polygon2d>& _polygons/*, int depth = 0*/)
 {
 	std::vector<std::pair<size_t, Polygon2d>> polygons;
 	for (size_t i = 0; i < _polygons.size(); ++i)//(const auto& iter : _polygons)
 	{
 		polygons.emplace_back(std::pair<size_t, Polygon2d>{ i, _polygons[i] });
 	}
-	return _createKdTree(polygons);
+	//return _createKdTree2d(polygons);
+	m_kdTree = _createKdTree2d(polygons);
 }
 
-std::vector<size_t> KdTree::findIntersect(const Polygon2d& polygon)
+std::vector<size_t> KdTree2d::findIntersect(const Polygon2d& polygon)
 {
 	if (!m_kdTree->isValid() || !polygon.isValid())
 		return {}; //test whether is working
 	std::vector<size_t> indexes;
-	//auto _searchKdTree = [&](shared_ptr<KdTreeNode> node)->void
-	std::function<void(const shared_ptr<KdTreeNode>&)> _searchKdTree = [&](const shared_ptr<KdTreeNode>& node)->void
+	//auto _searchKdTree = [&](shared_ptr<KdTreeNode2d> node)->void
+	std::function<void(const shared_ptr<KdTreeNode2d>&)> _searchKdTree = [&](const shared_ptr<KdTreeNode2d>& node)->void
 	{
 		//using recursion
-		if (node->m_box.intersects(polygon.boungding()))
+		if (node->m_bound.intersects(polygon.boungding()))
 		{
 			if (node->m_index == -1) // is leaf node
 			{
@@ -241,5 +243,81 @@ std::vector<size_t> KdTree::findIntersect(const Polygon2d& polygon)
 	_searchKdTree(m_kdTree);
 	return indexes;
 }
+
+//sort the input polygons // Polyface3d self include index,
+std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<Polyface3d>& polyfaces, int dimension = 0)
+{
+	// the kd-tree crud create read update delete
+	auto _getTotalBounding = [&](/*const std::vector<Polygon2d>& polygons*/)->Eigen::AlignedBox3d
+	{
+		AlignedBox3d fullBox;
+		for (const auto& iter : polyfaces)
+		{
+			fullBox.extend(iter.m_bound.min());
+			fullBox.extend(iter.m_bound.max());
+		}
+		return fullBox;
+	};
+	if (polyfaces.empty()) //no chance
+		return nullptr;
+	const int direction = dimension % 3;  // the direction of xyz, x=0/y=1/z=2
+	std::shared_ptr<KdTreeNode3d> currentNode = std::make_shared<KdTreeNode3d>();
+	if (polyfaces.size() != 1) //middle node
+	{
+		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);
+		std::sort(polyfaces.begin(), polyfaces.end(),
+				[=](const Polyface3d& a, const Polyface3d& b) { return a.m_bound.min()[direction] < b.m_bound.min()[direction]; }); // index of Vector3d
+		//splitPolygons(/*polygons, leftPolygons, rightPolygons */ dimension, splitValue);
+		size_t dichotomy = polyfaces.size() / 2; // less | more
+		vector<Polyface3d> leftPolygons(polyfaces.begin(), polyfaces.begin() + dichotomy); //for new child node
+		vector<Polyface3d> rightPolygons(polyfaces.begin() + dichotomy, polyfaces.end());
+		// using recursion
+		currentNode->m_left = _createKdTree3d(leftPolygons, dimension + 1);
+		currentNode->m_right = _createKdTree3d(rightPolygons, dimension + 1);
+		currentNode->m_index = -1; //not leaf node
+	}
+	else // end leaf node
+	{
+		currentNode->m_bound = polyfaces[0].m_bound;// short cut way
+		currentNode->m_left = nullptr;
+		currentNode->m_right = nullptr;
+		currentNode->m_index = polyfaces[0].m_index;
+	}
+	currentNode->m_dimension = direction; //record the xy direciton, alse canbe depth, then use depth % 2
+	return currentNode;
+}
+
+KdTree3d::KdTree3d(std::vector<Polyface3d>& polyfaces/*, int depth = 0*/)
+{
+	//return _createKdTree3d(polyfaces);
+	m_kdTree = _createKdTree3d(polyfaces);
+}
+
+std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon)
+{
+	if (m_kdTree.get() == nullptr || !polygon.m_index == -1)
+		return {}; 
+	std::vector<size_t> indexes;
+	std::function<void(const shared_ptr<KdTreeNode3d>&)> _searchKdTree = [&](const shared_ptr<KdTreeNode3d>& node)->void
+	{
+		//using recursion
+		if (node->m_bound.intersects(polygon.m_bound))
+		{
+			if (node->m_index == -1) // is leaf node
+			{
+				_searchKdTree(node->m_left);
+				_searchKdTree(node->m_right);
+			}
+			else
+			{
+				indexes.push_back(node->m_index);
+				return;
+			}
+		}
+	};
+	_searchKdTree(m_kdTree);
+	return indexes;
+}
+
 
 
