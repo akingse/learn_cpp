@@ -121,7 +121,7 @@ static int main0()
 
 static int enrol = []()->int
 {
-	main0();
+	//main0();
 	//main1();
 	//main2();
 

@@ -1346,7 +1346,7 @@ std::array<Eigen::Vector3d, 2> getTwoTrianglesNearestPoints(const std::array<Eig
 		local = point + k * normal; // reference closure
 		if (!isPointInTriangle(local, plane))
 			return DBL_MAX;
-		return (k * normal).squaredNorm();
+		return (k * normal).squaredNorm(); //to be fast
 	};
 	auto _getDistanceOfTwoSegmentsINF = [&](const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)->double
 	{
