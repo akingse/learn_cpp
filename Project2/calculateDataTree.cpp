@@ -29,6 +29,96 @@ bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Vector2d, 2>& 
 	return fabs(_cross2d(segmA[1] - segmA[0], segmB[1] - segmB[0])) < eps;
 }
 
+//bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)
+//{
+//	if (!isTwoSegmentsIntersect(segmA, segmB))
+//		return false;
+//	return (segmA[1] - segmA[0]).cross(segmB[1] - segmB[0]).isZero(eps);
+//}
+
+double _getDistanceOfPointAndSegmentINF(const Vector3d& point, const std::array<Vector3d, 2>& segm)
+{
+	Vector3d vecSeg = segm[1] - segm[0];// not zero
+	double projection = vecSeg.dot(point);
+	//the projection must on segment
+	if (vecSeg.dot(segm[1]) < projection || projection < vecSeg.dot(segm[0]))
+		return DBL_MAX;
+	double k = vecSeg.dot(point - segm[0]) / vecSeg.dot(vecSeg);
+	return (segm[0] - point + k * vecSeg).squaredNorm();
+};
+
+#define USING_NORMALIZED_VECTOR
+bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB, 
+	double toleDis /*= 0*/, double toleAng /*= 0*/)
+{
+	// |A¡ÁB| <= |A||B|sin¦È, near zero sin¦È approx ¦È
+#ifdef USING_NORMALIZED_VECTOR
+	Vector3d segmVecA = (segmA[1] - segmA[0]).normalized();
+	Vector3d segmVecB = (segmB[1] - segmB[0]).normalized();
+	if (!segmVecA.cross(segmVecB).isZero(toleAng)) //cross product max component is toleAng
+		return false;
+#else
+	Vector3d segmVecA = segmA[1] - segmA[0];
+	Vector3d segmVecB = segmB[1] - segmB[0];
+	if (segmVecA.cross(segmVecB).squaredNorm() > segmVecA.squaredNorm() * segmVecB.squaredNorm() * toleAng * toleAng)
+		return false;
+#endif // USING_NORMALIZED_VECTOR
+	int interEnd = 0;
+#ifdef USING_NORMALIZED_VECTOR
+	for (const auto& endA : segmA)
+	{
+		segmVecA= segmB[0] - endA; // re-using variable name
+		segmVecB= segmB[1] - endA;
+		if (segmVecA.norm() <= toleDis || segmVecB.norm() <= toleDis) // point concident
+		{
+			interEnd++;
+			continue;
+		}
+		// point on segment, opposite direction //using triangles area to judge toleDis
+		if (segmVecA.dot(segmVecB) < 0 && segmVecA.cross(segmVecB).norm() <= toleDis * (segmVecA - segmVecB).norm()) //or using squaredNorm
+			interEnd++;
+	}
+	for (const auto& endB : segmB)
+	{
+		segmVecA = segmA[0] - endB;
+		segmVecB = segmA[1] - endB;
+		if (segmVecA.norm() <= toleDis || segmVecB.norm() <= toleDis) // point concident
+		{
+			interEnd++;
+			continue;
+		}
+		// point on segment, opposite direction //using triangles area to judge toleDis
+		if (segmVecA.dot(segmVecB) < 0 && segmVecA.cross(segmVecB).norm() <= toleDis * (segmVecA - segmVecB).norm())
+			interEnd++;
+	}
+#else
+	Vector3d vecSeg;
+	double projection, k;
+	auto _getDistanceOfPointAndSegmentINF = [&](const Vector3d& point, const std::array<Vector3d, 2>& segm)->double
+	{
+		vecSeg = segm[1] - segm[0];// not zero
+		projection = vecSeg.dot(point);
+		//the projection must on segment
+		if (vecSeg.dot(segm[1]) < projection || projection < vecSeg.dot(segm[0]))
+			return DBL_MAX;
+		k = vecSeg.dot(point - segm[0]) / vecSeg.dot(vecSeg);
+		return (segm[0] - point + k * vecSeg).squaredNorm();
+};
+	for (const auto& endA: segmA)
+	{
+		if (_getDistanceOfPointAndSegmentINF(endA, segmB) <= toleDis * toleDis)
+			interEnd++;
+	}
+	for (const auto& endB: segmB)
+	{
+		if (_getDistanceOfPointAndSegmentINF(endB, segmA) <= toleDis * toleDis)
+			interEnd++;
+	}
+#endif // USING_NORMALIZED_VECTOR
+	return (interEnd == 2 || interEnd == 4);
+	//return false;
+}
+
 bool psykronix::BooleanOpIntersect(Polygon2d& polyA, Polygon2d& polyB)
 {
 	if (!polyA.boungding().intersects(polyB.boungding())) // pre-intersect
@@ -310,7 +400,8 @@ std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon)
 			}
 			else
 			{
-				indexes.push_back(node->m_index);
+				if (polygon.m_index != node->m_index) //exclude self
+					indexes.push_back(node->m_index);
 				return;
 			}
 		}

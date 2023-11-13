@@ -183,6 +183,54 @@ bool psykronix::isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vect
 	return true;
 }
 
+bool psykronix::isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 2>& segment, const Eigen::AlignedBox3d& box)
+{
+	if (box.contains(segment[0]) || box.contains(segment[1]))
+		return true;
+	Vector3d vecSeg = segment[1] - segment[0];//segment direction
+	std::array<Eigen::Vector3d, 7> axes = { {
+			vecSeg, //maybe not work
+			Vector3d(1,0,0),
+			Vector3d(0,1,0),
+			Vector3d(0,0,1),
+			vecSeg.cross(Vector3d(1,0,0)),
+			vecSeg.cross(Vector3d(0,1,0)),
+			vecSeg.cross(Vector3d(0,0,1)) } }; 
+	Vector3d vecBox = box.max() - box.min();
+	std::array<Eigen::Vector3d, 8> boxVtx = { { //box.min() is origin
+			Vector3d(0,0,0),
+			Vector3d(vecBox[0],0,0),
+			Vector3d(vecBox[0],vecBox[1],0),
+			Vector3d(0,vecBox[1],0),
+			Vector3d(0,0,vecBox[2]),
+			Vector3d(vecBox[0],0,vecBox[2]),
+			vecBox, //Vector3d(vecBox[0],vecBox[1],vecBox[2])
+			Vector3d(0,vecBox[1],vecBox[2]) } };
+	double minA, maxA, minB, maxB, projection;
+	for (const auto& axis : axes) //fast than index
+	{
+		minA = DBL_MAX;
+		maxA = -DBL_MAX;
+		minB = DBL_MAX;
+		maxB = -DBL_MAX;
+		for (const auto& vertex : boxVtx) //fast than list
+		{
+			projection = axis.dot(vertex);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
+		}
+		for (const auto& vertex : segment) //only two point
+		{
+			projection = axis.dot(vertex - box.min());
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		if (maxA < minB || maxB < minA) // absolute zero
+			return false;
+	}
+	return true;
+}
+
 //double straddling test, must coplanar
 bool psykronix::isTwoSegmentsIntersect(const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)
 {
