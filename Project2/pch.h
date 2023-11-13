@@ -75,8 +75,8 @@ typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>
 //#define STATISTIC_DATA_COUNT
 
 #include "my_class_fun.h"		
-#include "calculateDataTree.h"
 #include "calculateTriangle.h"		//DLL-API
+#include "calculateDataTree.h"
 #include "calculatePolyhedron.h"
 #include "my_file_read_write.h" //file read and wirte
 

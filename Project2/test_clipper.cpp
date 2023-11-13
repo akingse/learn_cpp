@@ -102,6 +102,26 @@ static void test2()
 	Polygon2d target({ Vector2d(3,1), Vector2d(5,3) });
 	std::vector<size_t> indexes = kdtree.findIntersect(target);
 
+	return;
+}
+
+static void test3()
+{
+	//²âÊÔ¹²Ïßº¯Êý
+	bool isCC = false;
+	//std::array<Eigen::Vector3d, 2> segmA{Vector3d(10, 10, 0), Vector3d(20, 20, 0)};
+	//std::array<Eigen::Vector3d, 2> segmB{Vector3d(15, 15, 0), Vector3d(30, 30, 0)};
+	std::array<Eigen::Vector3d, 2> segmA{Vector3d(10, 10, 0), Vector3d(30, 30, 0)};
+	std::array<Eigen::Vector3d, 2> segmB{Vector3d(15, 15, 0), Vector3d(20, 20, 0)};
+	isCC=isTwoSegmentsCollinearCoincident(segmA, segmB);
+
+	segmB = { Vector3d(15, 15, 0), Vector3d(30, 30.0001, 0) };
+	isCC = isTwoSegmentsCollinearCoincident(segmA, segmB, 0.1, 0.1);
+	segmB = { Vector3d(15, 15.0001, 0), Vector3d(30, 30, 0) };
+	isCC = isTwoSegmentsCollinearCoincident(segmA, segmB, 0.1, 0.1);
+	segmB = { Vector3d(16, 15, 0), Vector3d(31, 30, 0) };
+	isCC = isTwoSegmentsCollinearCoincident(segmA, segmB, 0.1, 0.1);
+
 
 	return;
 }
@@ -110,8 +130,9 @@ static void test2()
 static int enrol = []()->int
 {
 	//test0();
-	test1();
-	test2(); //for funciton
+	//test1();
+	//test2(); //for funciton
+	test3();
 	cout << "test_clipper" << endl;
 	return 0;
 }();

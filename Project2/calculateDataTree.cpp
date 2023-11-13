@@ -36,16 +36,16 @@ bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Vector2d, 2>& 
 //	return (segmA[1] - segmA[0]).cross(segmB[1] - segmB[0]).isZero(eps);
 //}
 
-double _getDistanceOfPointAndSegmentINF(const Vector3d& point, const std::array<Vector3d, 2>& segm)
-{
-	Vector3d vecSeg = segm[1] - segm[0];// not zero
-	double projection = vecSeg.dot(point);
-	//the projection must on segment
-	if (vecSeg.dot(segm[1]) < projection || projection < vecSeg.dot(segm[0]))
-		return DBL_MAX;
-	double k = vecSeg.dot(point - segm[0]) / vecSeg.dot(vecSeg);
-	return (segm[0] - point + k * vecSeg).squaredNorm();
-};
+//double _getDistanceOfPointAndSegmentINF(const Vector3d& point, const std::array<Vector3d, 2>& segm)
+//{
+//	Vector3d vecSeg = segm[1] - segm[0];// not zero
+//	double projection = vecSeg.dot(point);
+//	//the projection must on segment
+//	if (vecSeg.dot(segm[1]) < projection || projection < vecSeg.dot(segm[0]))
+//		return DBL_MAX;
+//	double k = vecSeg.dot(point - segm[0]) / vecSeg.dot(vecSeg);
+//	return (segm[0] - point + k * vecSeg).squaredNorm();
+//};
 
 #define USING_NORMALIZED_VECTOR
 bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB, 
@@ -115,8 +115,15 @@ bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3
 			interEnd++;
 	}
 #endif // USING_NORMALIZED_VECTOR
-	return (interEnd == 2 || interEnd == 4);
-	//return false;
+	return 1 < interEnd; //interEnd == 2/3/4
+}
+
+std::array<Eigen::Vector3d, 2> getTwoSegmentsCollinearCoincidentPoints(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB,
+	double toleDis /*= 0*/, double toleAng /*= 0*/)
+{
+	std::array<Eigen::Vector3d, 2> res{gVecNaN, gVecNaN};
+
+	return res;
 }
 
 bool psykronix::BooleanOpIntersect(Polygon2d& polyA, Polygon2d& polyB)
