@@ -52,7 +52,7 @@ bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3
 	double toleDis /*= 0*/, double toleAng /*= 0*/)
 {
 	// |A×B| <= |A||B|sinθ, near zero sinθ approx θ
-#ifdef USING_NORMALIZED_VECTOR
+#ifndef USING_NORMALIZED_VECTOR
 	Vector3d segmVecA = (segmA[1] - segmA[0]).normalized();
 	Vector3d segmVecB = (segmB[1] - segmB[0]).normalized();
 	if (!segmVecA.cross(segmVecB).isZero(toleAng)) //cross product max component is toleAng
@@ -60,7 +60,8 @@ bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3
 #else
 	Vector3d segmVecA = segmA[1] - segmA[0];
 	Vector3d segmVecB = segmB[1] - segmB[0];
-	if (segmVecA.cross(segmVecB).squaredNorm() > segmVecA.squaredNorm() * segmVecB.squaredNorm() * toleAng * toleAng)
+	//if (segmVecA.cross(segmVecB).squaredNorm() > segmVecA.squaredNorm() * segmVecB.squaredNorm() * toleAng * toleAng)
+	if (segmVecA.norm() * segmVecB.norm() * toleAng < segmVecA.cross(segmVecB).norm())
 		return false;
 #endif // USING_NORMALIZED_VECTOR
 	int interEnd = 0;
@@ -75,7 +76,7 @@ bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3
 			continue;
 		}
 		// point on segment, opposite direction //using triangles area to judge toleDis
-		if (segmVecA.dot(segmVecB) < 0 && segmVecA.cross(segmVecB).norm() <= toleDis * (segmVecA - segmVecB).norm()) //or using squaredNorm
+		if (segmVecA.dot(segmVecB) < 0 && segmVecA.cross(segmVecB).norm() <= toleDis * (segmVecA - segmVecB).norm()) //norm fast than squaredNorm
 			interEnd++;
 	}
 	for (const auto& endB : segmB)
@@ -118,12 +119,73 @@ bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3
 	return 1 < interEnd; //interEnd == 2/3/4
 }
 
-std::array<Eigen::Vector3d, 2> getTwoSegmentsCollinearCoincidentPoints(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB,
+std::tuple<bool, std::array<double, 2>> psykronix::getTwoSegmentsCollinearCoincidentPoints(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB,
 	double toleDis /*= 0*/, double toleAng /*= 0*/)
 {
-	std::array<Eigen::Vector3d, 2> res{gVecNaN, gVecNaN};
-
-	return res;
+	Vector3d segmVecA = segmA[1] - segmA[0];
+	Vector3d segmVecB = segmB[1] - segmB[0];
+	double propA0 = std::nan("0"), propA1 = std::nan("0");
+	if (segmVecA.norm() * segmVecB.norm() * toleAng < segmVecA.cross(segmVecB).norm())
+		return { false, { propA0, propA1 } }; //not collinear
+	int endInter = 0;
+	//bool isA0 = false, isA1 = false; //end point on segmentB
+	for (const auto& endA : segmA) //pointA on segmentB
+	{
+		segmVecA = endA - segmB[0]; // re-using variable name
+		segmVecB = endA - segmB[1];
+		if (segmVecA.norm() <= toleDis || segmVecB.norm() <= toleDis) // point concident
+		{
+			endInter++;
+			continue;
+		}
+		// point on segment, opposite direction //using triangles area to judge toleDis
+		if (segmVecA.dot(segmVecB) < 0 && segmVecA.cross(segmVecB).norm() <= toleDis * (segmVecA - segmVecB).norm()) //norm fast than squaredNorm
+		{
+			endInter++;
+			//isA0 = (segmA[0] - segmB[0]).dot(segmA[0] - segmB[1]) < 0;
+			//isA1 = (segmA[1] - segmB[0]).dot(segmA[1] - segmB[1]) < 0;
+		}
+	}
+	//int bothIn = 0;
+	for (const auto& endB : segmB) //pointB on segmentA
+	{
+		segmVecA = endB - segmA[0];
+		segmVecB = endB - segmA[1];
+		if (segmVecA.norm() <= toleDis) // point concident
+		{
+			endInter++;
+			propA0 = 0.0;
+			continue;
+		}
+		if (segmVecB.norm() <= toleDis) // point concident
+		{
+			endInter++;
+			propA1 = 1.0;
+			continue;
+		}
+		// point on segment, opposite direction //using triangles area to judge toleDis
+		if (segmVecA.dot(segmVecB) < 0 && segmVecA.cross(segmVecB).norm() <= toleDis * (segmVecA - segmVecB).norm())
+		{
+			//bothIn++; //if bothIn==2 exchange propA0/propA1
+			endInter++;
+			if ((segmB[0] - segmA[0]).dot(segmB[0] - segmA[1]) < 0) 
+				propA0 = (segmB[0] - segmA[0]).norm() / (segmA[1] - segmA[0]).norm();
+			if ((segmB[1] - segmA[0]).dot(segmB[1] - segmA[1]) < 0)
+				propA1 = (segmB[1] - segmA[0]).norm() / (segmA[1] - segmA[0]).norm();
+			//if (0 < (segmB[0] - segmA[0]).dot(segmB[0] - segmA[1]) && (segmB[1] - segmA[0]).dot(segmB[1] - segmA[1]) < 0)
+			//	propA0 = (segmB[1] - segmA[0]).norm() / (segmA[1] - segmA[0]).norm();
+			//if ((segmB[0] - segmA[0]).dot(segmB[0] - segmA[1]) < 0 && 0 < (segmB[1] - segmA[0]).dot(segmB[1] - segmA[1])) //std::isnan(propA1) && 
+			//	propA1 = (segmB[0] - segmA[0]).norm() / (segmA[1] - segmA[0]).norm();
+		}
+	}
+	bool isInter = 1 < endInter; //interEnd == 2/3/4
+	if (!isInter)
+		return { isInter, { propA0, propA1 } }; 
+	if (isnan(propA0)) // propA0 means intersect part start, propA0 means end
+		propA0 = 0;
+	if (isnan(propA1))
+		propA1 = 1;
+	return { isInter, { propA0, propA1 }}; //
 }
 
 bool psykronix::BooleanOpIntersect(Polygon2d& polyA, Polygon2d& polyB)
@@ -222,47 +284,6 @@ std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<std::pair<size_t, Poly
 		}
 		return fullBox;
 	};
-
-	//auto calculateSplitValue = [&](int dimension)->double
-	//{
-	//	std::vector<double> values;
-	//	// 收集多边形在划分维度上的坐标值
-	//	for (const auto& polygon : polygons) 
-	//	{
-	//		for (const auto& point : polygon.get()) 
-	//			values.push_back((dimension == 0) ? point.x() : point.y());  // 根据划分维度选择x或y坐标
-	//	}
-	//	// 对坐标值进行排序
-	//	std::sort(values.begin(), values.end());
-	//	// 计算中值
-	//	double splitValue;
-	//	if (values.size() % 2 == 0) 
-	//		// 偶数个值，取中间两个值的平均值作为划分值
-	//		splitValue = (values[values.size() / 2 - 1] + values[values.size() / 2]) / 2.0;
-	//	else 
-	//		// 奇数个值，取中间值作为划分值
-	//		splitValue = values[values.size() / 2];
-	//	return splitValue;
-	//};
-	//auto splitPolygons = [&](int dimension, double splitValue)->void
-	//{
-	//	for (const auto& polygon : polygons) 
-	//	{
-	//		bool isLeft = true;
-	//		bool isRight = true;
-	//		for (const auto& point : polygon.get()) 
-	//		{
-	//			if ((dimension == 0 && point.x() > splitValue) || (dimension == 1 && point.y() > splitValue))
-	//				isLeft = false;
-	//			if ((dimension == 0 && point.x() < splitValue) || (dimension == 1 && point.y() < splitValue))
-	//				isRight = false;
-	//		}
-	//		//if (isLeft) 
-	//		//	leftPolygons.push_back(polygon);
-	//		//if (isRight) 
-	//		//	rightPolygons.push_back(polygon);
-	//	}
-	//};
 
 	if (polygons.empty()) //no chance
 		return nullptr;
