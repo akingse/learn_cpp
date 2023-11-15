@@ -125,29 +125,30 @@ static void test3()
 	// res function
 	segmA = { Vector3d(10, 0, 0), Vector3d(20, 0, 0) };
 	segmB = { Vector3d(10, 0, 0), Vector3d(20, 0, 0) };
-	std::tuple<bool, std::array<double, 2>> isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB);
+	std::tuple<bool, std::array<double, 4>> isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB);
 	//起点重合
 	segmB = { Vector3d(10, 0, 0), Vector3d(30, 0, 0) }; 
-	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB);
+	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB); //0-1
 	segmB = { Vector3d(10, 0, 0), Vector3d(15, 0, 0) };
-	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB);
+	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB); //0-0.5
 	//终点重合
 	segmB = { Vector3d(-10, 0, 0), Vector3d(20, 0, 0) }; 
-	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB);
+	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB); //0-1
 	segmB = { Vector3d(15, 0, 0), Vector3d(20, 0, 0) };
-	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB);
+	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB); //0.5-1
 	//segmB内部
 	segmB = { Vector3d(15, 0, 0), Vector3d(18, 0, 0) };
-	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB);
+	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB); //0.5-0.8
 	//segmB外部
-	segmB = { Vector3d(-15, 0, 0), Vector3d(30, 0, 0) };
-	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB);
+	segmB = { Vector3d(-10, 0, 0), Vector3d(30, 0, 0) };
+	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB); //0-1
 	//segmB左侧
-	segmB = { Vector3d(-15, 0, 0), Vector3d(15, 0, 0) };
-	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB);
+	segmB = { Vector3d(5, 0, 0), Vector3d(15, 0, 0) };
+	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB); //0-0.5 |
 	//segmB右侧
 	segmB = { Vector3d(15, 0, 0), Vector3d(30, 0, 0) };
-	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB);
+	//segmB = { Vector3d(30, 0, 0), Vector3d(15, 0, 0) };
+	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB); //0.5-1 
 
 	return;
 }

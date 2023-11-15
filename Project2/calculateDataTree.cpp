@@ -119,34 +119,53 @@ bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3
 	return 1 < interEnd; //interEnd == 2/3/4
 }
 
-std::tuple<bool, std::array<double, 2>> psykronix::getTwoSegmentsCollinearCoincidentPoints(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB,
+std::tuple<bool, array<double, 4>> psykronix::getTwoSegmentsCollinearCoincidentPoints(const array<Vector3d, 2>& segmA, const array<Vector3d, 2>& _segmB,
 	double toleDis /*= 0*/, double toleAng /*= 0*/)
 {
+	array<Eigen::Vector3d, 2> segmB = { _segmB[1], _segmB[0] };
 	Vector3d segmVecA = segmA[1] - segmA[0];
 	Vector3d segmVecB = segmB[1] - segmB[0];
-	double propA0 = std::nan("0"), propA1 = std::nan("0");
-	if (segmVecA.norm() * segmVecB.norm() * toleAng < segmVecA.cross(segmVecB).norm())
-		return { false, { propA0, propA1 } }; //not collinear
-	int endInter = 0;
-	//bool isA0 = false, isA1 = false; //end point on segmentB
+	double propA0 = std::nan("0"), propA1 = std::nan("0"), propB0 = std::nan("0"), propB1 = std::nan("0");
+	if (toleAng * segmVecA.norm() * segmVecB.norm() < segmVecA.cross(segmVecB).norm())
+		return { false, { propA0, propA1, propB0, propB1 } }; //not collinear
+	bool sameDirect = (segmVecA).dot(segmVecB) > 0;
+	int endInter = 0;// , midInter = 0;
 	for (const auto& endA : segmA) //pointA on segmentB
 	{
 		segmVecA = endA - segmB[0]; // re-using variable name
 		segmVecB = endA - segmB[1];
-		if (segmVecA.norm() <= toleDis || segmVecB.norm() <= toleDis) // point concident
+		if (segmVecA.norm() <= toleDis) // point concident
 		{
 			endInter++;
+			propB0 = 0.0;
+			continue;
+		}
+		if (segmVecB.norm() <= toleDis) // point concident
+		{
+			endInter++;
+			propB1 = 1.0;
 			continue;
 		}
 		// point on segment, opposite direction //using triangles area to judge toleDis
 		if (segmVecA.dot(segmVecB) < 0 && segmVecA.cross(segmVecB).norm() <= toleDis * (segmVecA - segmVecB).norm()) //norm fast than squaredNorm
 		{
 			endInter++;
-			//isA0 = (segmA[0] - segmB[0]).dot(segmA[0] - segmB[1]) < 0;
-			//isA1 = (segmA[1] - segmB[0]).dot(segmA[1] - segmB[1]) < 0;
+			if (sameDirect)
+			{
+				if ((segmA[0] - segmB[0]).dot(segmA[0] - segmB[1]) < 0) // pointA0 in segmB
+					propB0 = (segmA[0] - segmB[0]).norm() / (segmB[1] - segmB[0]).norm();
+				if ((segmA[1] - segmB[0]).dot(segmA[1] - segmB[1]) < 0) // pointA1 in segmB
+					propB1 = (segmA[1] - segmB[0]).norm() / (segmB[1] - segmB[0]).norm();
+			}
+			else //swap segmentA
+			{
+				if ((segmA[1] - segmB[0]).dot(segmA[1] - segmB[1]) < 0) // pointA0 in segmB
+					propB0 = (segmA[1] - segmB[0]).norm() / (segmB[1] - segmB[0]).norm();
+				if ((segmA[0] - segmB[0]).dot(segmA[0] - segmB[1]) < 0) // pointA1 in segmB
+					propB1 = (segmA[0] - segmB[0]).norm() / (segmB[1] - segmB[0]).norm();
+			}
 		}
 	}
-	//int bothIn = 0;
 	for (const auto& endB : segmB) //pointB on segmentA
 	{
 		segmVecA = endB - segmA[0];
@@ -166,26 +185,36 @@ std::tuple<bool, std::array<double, 2>> psykronix::getTwoSegmentsCollinearCoinci
 		// point on segment, opposite direction //using triangles area to judge toleDis
 		if (segmVecA.dot(segmVecB) < 0 && segmVecA.cross(segmVecB).norm() <= toleDis * (segmVecA - segmVecB).norm())
 		{
-			//bothIn++; //if bothIn==2 exchange propA0/propA1
 			endInter++;
-			if ((segmB[0] - segmA[0]).dot(segmB[0] - segmA[1]) < 0) 
-				propA0 = (segmB[0] - segmA[0]).norm() / (segmA[1] - segmA[0]).norm();
-			if ((segmB[1] - segmA[0]).dot(segmB[1] - segmA[1]) < 0)
-				propA1 = (segmB[1] - segmA[0]).norm() / (segmA[1] - segmA[0]).norm();
-			//if (0 < (segmB[0] - segmA[0]).dot(segmB[0] - segmA[1]) && (segmB[1] - segmA[0]).dot(segmB[1] - segmA[1]) < 0)
-			//	propA0 = (segmB[1] - segmA[0]).norm() / (segmA[1] - segmA[0]).norm();
-			//if ((segmB[0] - segmA[0]).dot(segmB[0] - segmA[1]) < 0 && 0 < (segmB[1] - segmA[0]).dot(segmB[1] - segmA[1])) //std::isnan(propA1) && 
-			//	propA1 = (segmB[0] - segmA[0]).norm() / (segmA[1] - segmA[0]).norm();
+			if (sameDirect)
+			{
+				if ((segmB[0] - segmA[0]).dot(segmB[0] - segmA[1]) < 0) // pointB0 in segmA
+					propA0 = (segmB[0] - segmA[0]).norm() / (segmA[1] - segmA[0]).norm();
+				if ((segmB[1] - segmA[0]).dot(segmB[1] - segmA[1]) < 0) // pointB1 in segmA
+					propA1 = (segmB[1] - segmA[0]).norm() / (segmA[1] - segmA[0]).norm();
+			}
+			else//swap segmentB
+			{
+				if ((segmB[1] - segmA[0]).dot(segmB[1] - segmA[1]) < 0) // pointB0 in segmA
+					propA0 = (segmB[1] - segmA[0]).norm() / (segmA[1] - segmA[0]).norm();
+				if ((segmB[0] - segmA[0]).dot(segmB[0] - segmA[1]) < 0) // pointB1 in segmA
+					propA1 = (segmB[0] - segmA[0]).norm() / (segmA[1] - segmA[0]).norm();
+			}
 		}
 	}
-	bool isInter = 1 < endInter; //interEnd == 2/3/4
+	bool isInter = 1 < endInter; //interPoints == 2/3/4
 	if (!isInter)
-		return { isInter, { propA0, propA1 } }; 
-	if (isnan(propA0)) // propA0 means intersect part start, propA0 means end
-		propA0 = 0;
+		return { isInter, { propA0, propA1, propB0, propB1  } };
+	// propA0 means intersect part start, propA0 means end
+	if (isnan(propA0)) 
+		propA0 = 0.0;
 	if (isnan(propA1))
-		propA1 = 1;
-	return { isInter, { propA0, propA1 }}; //
+		propA1 = 1.0;
+	if (isnan(propB0))
+		propB0 = 0.0;
+	if (isnan(propB1))
+		propB1 = 1.0;
+	return { isInter, { propA0, propA1, propB0, propB1  }}; //
 }
 
 bool psykronix::BooleanOpIntersect(Polygon2d& polyA, Polygon2d& polyB)
@@ -294,16 +323,16 @@ std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<std::pair<size_t, Poly
 	std::shared_ptr<KdTreeNode2d> currentNode = std::make_shared<KdTreeNode2d>();
 	//copy polygons
 	//std::vector<Polygon2d> polySort = polygons;
-	//std::sort(polygons.begin(), polygons.end(), [](const Polygon2d& a, const Polygon2d& b) { return a.boungding().min()[0] < b.boungding().min()[0]; }); //x
+	//std::sort(polygons.begin(), polygons.end(), [](const Polygon2d& a, const Polygon2d& b) { return a.boungding().min()[0] < b.boungding().min()[0]; });
 	if (polygons.size() != 1) //middle node
 	{
 		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);  
 		if (direction % 2 == 0)
-			std::sort(polygons.begin(), polygons.end(),
-				[](const pair<size_t, Polygon2d>& a, const pair<size_t, Polygon2d>& b) { return a.second.boungding().min()[0] < b.second.boungding().min()[0]; }); //x
+			std::sort(polygons.begin(), polygons.end(), [](const pair<size_t, Polygon2d>& a, const pair<size_t, Polygon2d>& b) 
+				{ return a.second.boungding().min()[0] < b.second.boungding().min()[0]; }); //x
 		else
-			std::sort(polygons.begin(), polygons.end(),
-				[](const pair<size_t, Polygon2d>& a, const pair<size_t, Polygon2d>& b) { return a.second.boungding().min()[1] < b.second.boungding().min()[1]; }); //y
+			std::sort(polygons.begin(), polygons.end(), [](const pair<size_t, Polygon2d>& a, const pair<size_t, Polygon2d>& b) 
+				{ return a.second.boungding().min()[1] < b.second.boungding().min()[1]; }); //y
 		//splitPolygons(/*polygons, leftPolygons, rightPolygons */ dimension, splitValue);
 		size_t dichotomy = polygons.size() / 2; // less | more
 		vector<pair<size_t, Polygon2d>> leftPolygons(polygons.begin(), polygons.begin() + dichotomy); //for new child node
