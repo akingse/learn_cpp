@@ -7,8 +7,7 @@ namespace psykronix
 	bool isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector2d, 2>& segmA, const std::array<Eigen::Vector2d, 2>& segmB);
 	//bool isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB);
 	bool isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB, double toleDis = 0, double toleAng = 0);
-	std::tuple<bool, std::array<double, 4>> getTwoSegmentsCollinearCoincidentPoints(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB,
-		double toleDis = 0, double toleAng = 0);
+	std::tuple<bool, std::array<double, 4>> getTwoSegmentsCollinearCoincidentPoints(const Segment& segmA, const Segment& segmB,	double toleDis = 0, double toleAng = 0);
 	bool BooleanOpIntersect(Polygon2d& polyA, Polygon2d& polyB);
 	void BooleanOpIntersect(std::vector<Polygon2d>& polyVct);
 	void BooleanOpIntersect(std::vector<Polygon2d>& polyVctA, std::vector<Polygon2d>& polyVctB);

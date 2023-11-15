@@ -105,6 +105,10 @@ static void test2()
 	return;
 }
 
+static void test4(Eigen::Vector3d* boxVtx)
+{
+
+}
 static void test3()
 {
 	//测试共线函数
@@ -149,6 +153,16 @@ static void test3()
 	segmB = { Vector3d(15, 0, 0), Vector3d(30, 0, 0) };
 	//segmB = { Vector3d(30, 0, 0), Vector3d(15, 0, 0) };
 	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB); //0.5-1 
+	//仅端点重合
+	segmB = { Vector3d(20, 0, 0), Vector3d(30, 0, 0) };
+	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB);
+	segmB = { Vector3d(-10, 0, 0), Vector3d(10, 0, 0) };
+	isSCC = getTwoSegmentsCollinearCoincidentPoints(segmA, segmB);
+
+
+	std::array<Eigen::Vector3d, 8> boxVtx;
+	Eigen::Vector3d boxArr[8];
+	test4(boxVtx.data());
 
 	return;
 }

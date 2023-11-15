@@ -373,13 +373,17 @@ bug修复
 
 ### 函数效率测试
 
-| isTwoSegmentsCollinearCoincident | optimal                           | time               |
-| -------------------------------- | --------------------------------- | ------------------ |
-| call 173480                      | <br />cross norm                  | 10ms               |
-| normalized更加耗时               | normalized<br />cross squaredNorm | 11ms               |
-|                                  | normalized<br />_getDistance      | 12ms               |
-|                                  | squaredNorm<br />cross norm       | 5510 5386 5452     |
-|                                  | norm<br />cross norm              | 5350 5205 5201 ms. |
+| isTwoSegmentsCollinearCoincident | optimal                           | time                  |
+| -------------------------------- | --------------------------------- | --------------------- |
+| call 173480                      | <br />cross norm                  | 10ms                  |
+| normalized更加耗时               | normalized<br />cross squaredNorm | 11ms                  |
+|                                  | normalized<br />_getDistance      | 12ms                  |
+|                                  | squaredNorm<br />cross norm       | 5.510 5.386 5.452     |
+|                                  | norm<br />cross norm              | 5.350 5.205 5.201 ms. |
+
+
+
+随机测试
 
 
 

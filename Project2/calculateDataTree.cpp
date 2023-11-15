@@ -119,24 +119,24 @@ bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3
 	return 1 < interEnd; //interEnd == 2/3/4
 }
 
-std::tuple<bool, array<double, 4>> psykronix::getTwoSegmentsCollinearCoincidentPoints(const array<Vector3d, 2>& segmA, const array<Vector3d, 2>& _segmB,
+std::tuple<bool, array<double, 4>> psykronix::getTwoSegmentsCollinearCoincidentPoints(const array<Vector3d, 2>& segmA, const array<Vector3d, 2>& segmB,
 	double toleDis /*= 0*/, double toleAng /*= 0*/)
 {
-	array<Eigen::Vector3d, 2> segmB = { _segmB[1], _segmB[0] };
 	Vector3d segmVecA = segmA[1] - segmA[0];
 	Vector3d segmVecB = segmB[1] - segmB[0];
 	double propA0 = std::nan("0"), propA1 = std::nan("0"), propB0 = std::nan("0"), propB1 = std::nan("0");
 	if (toleAng * segmVecA.norm() * segmVecB.norm() < segmVecA.cross(segmVecB).norm())
 		return { false, { propA0, propA1, propB0, propB1 } }; //not collinear
 	bool sameDirect = (segmVecA).dot(segmVecB) > 0;
-	int endInter = 0;// , midInter = 0;
+	bool midInter = false;
+	int endInter = 0;
 	for (const auto& endA : segmA) //pointA on segmentB
 	{
 		segmVecA = endA - segmB[0]; // re-using variable name
 		segmVecB = endA - segmB[1];
 		if (segmVecA.norm() <= toleDis) // point concident
 		{
-			endInter++;
+			endInter++; // same as segmentB 
 			propB0 = 0.0;
 			continue;
 		}
@@ -149,7 +149,7 @@ std::tuple<bool, array<double, 4>> psykronix::getTwoSegmentsCollinearCoincidentP
 		// point on segment, opposite direction //using triangles area to judge toleDis
 		if (segmVecA.dot(segmVecB) < 0 && segmVecA.cross(segmVecB).norm() <= toleDis * (segmVecA - segmVecB).norm()) //norm fast than squaredNorm
 		{
-			endInter++;
+			midInter = true;
 			if (sameDirect)
 			{
 				if ((segmA[0] - segmB[0]).dot(segmA[0] - segmB[1]) < 0) // pointA0 in segmB
@@ -172,20 +172,18 @@ std::tuple<bool, array<double, 4>> psykronix::getTwoSegmentsCollinearCoincidentP
 		segmVecB = endB - segmA[1];
 		if (segmVecA.norm() <= toleDis) // point concident
 		{
-			endInter++;
 			propA0 = 0.0;
 			continue;
 		}
 		if (segmVecB.norm() <= toleDis) // point concident
 		{
-			endInter++;
 			propA1 = 1.0;
 			continue;
 		}
 		// point on segment, opposite direction //using triangles area to judge toleDis
 		if (segmVecA.dot(segmVecB) < 0 && segmVecA.cross(segmVecB).norm() <= toleDis * (segmVecA - segmVecB).norm())
 		{
-			endInter++;
+			midInter = true;
 			if (sameDirect)
 			{
 				if ((segmB[0] - segmA[0]).dot(segmB[0] - segmA[1]) < 0) // pointB0 in segmA
@@ -202,10 +200,10 @@ std::tuple<bool, array<double, 4>> psykronix::getTwoSegmentsCollinearCoincidentP
 			}
 		}
 	}
-	bool isInter = 1 < endInter; //interPoints == 2/3/4
-	if (!isInter)
-		return { isInter, { propA0, propA1, propB0, propB1  } };
-	// propA0 means intersect part start, propA0 means end
+	//bool isInter = 1 < endInter; //interPoints == 2/3/4
+	if (!midInter && endInter < 2) // no intersect
+		return { false, { propA0, propA1, propB0, propB1  } };
+	// propA0 means intersect part start, propA1 means end
 	if (isnan(propA0)) 
 		propA0 = 0.0;
 	if (isnan(propA1))
@@ -214,7 +212,7 @@ std::tuple<bool, array<double, 4>> psykronix::getTwoSegmentsCollinearCoincidentP
 		propB0 = 0.0;
 	if (isnan(propB1))
 		propB1 = 1.0;
-	return { isInter, { propA0, propA1, propB0, propB1  }}; //
+	return { true, { propA0, propA1, propB0, propB1  }}; //
 }
 
 bool psykronix::BooleanOpIntersect(Polygon2d& polyA, Polygon2d& polyB)
@@ -442,7 +440,7 @@ KdTree3d::KdTree3d(std::vector<Polyface3d>& polyfaces/*, int depth = 0*/)
 
 std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon)
 {
-	if (m_kdTree.get() == nullptr || !polygon.m_index == -1)
+	if (m_kdTree.get() == nullptr || polygon.m_index == -1)
 		return {}; 
 	std::vector<size_t> indexes;
 	std::function<void(const shared_ptr<KdTreeNode3d>&)> _searchKdTree = [&](const shared_ptr<KdTreeNode3d>& node)->void
@@ -459,7 +457,7 @@ std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon)
 			{
 				if (polygon.m_index != node->m_index) //exclude self
 					indexes.push_back(node->m_index);
-				return;
+				//return;
 			}
 		}
 	};
