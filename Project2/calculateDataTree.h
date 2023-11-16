@@ -77,7 +77,16 @@ namespace psykronix
 		long long m_index = -1;
 		Eigen::AlignedBox3d m_bound;
 	};
-
+	//struct UnifiedIdentify
+	//{
+	//	int32_t mid = -2; //PModelId=-2;
+	//	uint64_t eid = 0; //PEntityId=0;
+	//};
+	//struct ModelInfo3d
+	//{
+	//	UnifiedIdentify m_index;
+	//	Eigen::AlignedBox3d m_bound;
+	//};
 }
 
 // the k-dimensional tree
@@ -111,6 +120,10 @@ public:
 	std::vector<size_t> findIntersect(const psykronix::Polygon2d& polygon); //searchFromKdTree
 
 };
+
+//----------------------------------------------------------------------------------------------------------------
+//  3d
+//----------------------------------------------------------------------------------------------------------------
 
 struct KdTreeNode3d
 {

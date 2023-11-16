@@ -373,7 +373,7 @@ std::vector<size_t> KdTree2d::findIntersect(const Polygon2d& polygon)
 		//using recursion
 		if (node->m_bound.intersects(polygon.boungding()))
 		{
-			if (node->m_index == -1) // is leaf node
+			if (node->m_index == -1) // isnot leaf node
 			{
 				_searchKdTree(node->m_left);
 				_searchKdTree(node->m_right);
@@ -448,7 +448,7 @@ std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon)
 		//using recursion
 		if (node->m_bound.intersects(polygon.m_bound))
 		{
-			if (node->m_index == -1) // is leaf node
+			if (node->m_index == -1) // isnot leaf node
 			{
 				_searchKdTree(node->m_left);
 				_searchKdTree(node->m_right);
