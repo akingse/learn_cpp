@@ -149,6 +149,13 @@ bool psykronix::isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vect
 {
 	if (box.contains(segment[0]) || box.contains(segment[1]))
 		return true;
+	const Vector2d& _min = box.min();
+	const Vector2d& _max = box.max();
+	if (std::max(segment[0].x(), segment[1].x()) < _min.x() ||
+		std::min(segment[0].x(), segment[1].x()) > _max.x() ||
+		std::max(segment[0].y(), segment[1].y()) < _min.y() ||
+		std::min(segment[0].y(), segment[1].y()) > _max.y())
+		return false;
 	std::array<Eigen::Vector2d, 3> axes = { {
 			Vector2d(1,0),
 			Vector2d(0,1),
@@ -185,8 +192,18 @@ bool psykronix::isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vect
 
 bool psykronix::isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 2>& segment, const Eigen::AlignedBox3d& box)
 {
+	//whlie segment with tolerance, using large box
 	if (box.contains(segment[0]) || box.contains(segment[1]))
 		return true;
+	const Vector3d& _min = box.min();
+	const Vector3d& _max = box.max();
+	if (std::max(segment[0].x(), segment[1].x()) < _min.x() ||
+		std::min(segment[0].x(), segment[1].x()) > _max.x() ||
+		std::max(segment[0].y(), segment[1].y()) < _min.y() ||
+		std::min(segment[0].y(), segment[1].y()) > _max.y() ||
+		std::max(segment[0].z(), segment[1].z()) < _min.z() ||
+		std::min(segment[0].z(), segment[1].z()) > _max.z())
+		return false;
 	Vector3d vecSeg = segment[1] - segment[0];//segment direction
 	std::array<Eigen::Vector3d, 7> axes = { {
 			vecSeg, //maybe not work
