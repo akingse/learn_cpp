@@ -7,6 +7,91 @@ using namespace std;
 using namespace psykronix;
 using namespace Eigen;
 
+// clipper2 style
+bool BooleanOpIntersect(Polygon2d& polyA, Polygon2d& polyB);
+
+bool BooleanOpIntersect(Polygon2d& polyA, Polygon2d& polyB)
+{
+	if (!polyA.bounding().intersects(polyB.bounding())) // pre-intersect
+		return false;
+	// using polygonA, iterate polyB
+	const std::vector<Eigen::Vector2d>& polygonA = polyA.get();
+	const std::vector<Eigen::Vector2d>& polygonB = polyB.get();
+	std::array<Eigen::Vector2d, 2> segmentA, segmentB;
+	bool isIntersect = false;
+#ifdef USING_AUTO_CLOSE
+	for (size_t iB = 0; iB < polygonB.size() - 1; ++iB)
+	{
+		// pre-intersect
+		segmentB = { polygonB[iB], polygonB[iB + 1] };
+		if (!psykronix::isSegmentAndBoundingBoxIntersectSAT(segmentB, polyA.bounding()))
+			continue;
+		for (size_t iA = 0; iA < polygonA.size() - 1; ++iA)
+		{
+			segmentA = { polygonA[iA], polygonA[iA + 1] };
+			if (psykronix::isTwoSegmentsCollinearCoincident(segmentA, segmentB))
+			{
+				polyA.intersection().push_back({iA,0,0});
+				polyB.intersection().push_back({iB,0,0});
+				isIntersect = true;
+				//return true;
+			}
+		}
+	}
+#else
+	for (size_t iB = 0; iB < polygonB.size(); ++iB)
+	{
+		// pre-intersect
+		segmentB = (iB != polygonB.size() - 1) ? array<Vector2d, 2>{polygonB[iB], polygonB[iB + 1]} : array<Vector2d, 2>{polygonB[iB], polygonB[0]};
+		if (!isSegmentAndBoundingBoxIntersectSAT(segmentB, polyA.boungding()))
+			continue;
+		for (size_t iA = 0; iA < polygonA.size(); ++iA)
+		{
+			segmentA = (iA != polygonA.size() - 1) ? array<Vector2d, 2>{polygonA[iA], polygonA[iA + 1]} : array<Vector2d, 2>{polygonA[iA], polygonA[0]};
+			if (isTwoSegmentsCollinearCoincident(segmentA, segmentB))
+			{
+				polyA.m_intersect.push_back({ iA,0,0 });
+				polyB.m_intersect.push_back({ iB,0,0 });
+				isIntersect = true;
+				//return true;
+			}
+		}
+	}
+#endif
+	return isIntersect;
+}
+
+void BooleanOpIntersect(std::vector<Polygon2d>& polyVct)
+{
+	for (size_t i = 0; i < polyVct.size(); ++i)
+	{
+		for (size_t j = 0; j < polyVct.size(); ++j)
+		{
+			if (i >= j)
+				continue;
+			BooleanOpIntersect(polyVct[i], polyVct[j]);
+		}
+	}
+}
+
+void BooleanOpIntersect(std::vector<Polygon2d>& polyVctA, std::vector<Polygon2d>& polyVctB)
+{
+	for (size_t i = 0; i < polyVctA.size(); ++i)
+	{
+		for (size_t j = 0; j < polyVctB.size(); ++j)
+		{
+			if (polyVctA[i] == polyVctB[j])
+				continue;
+			BooleanOpIntersect(polyVctA[i], polyVctB[j]);
+		}
+	}
+}
+
+//--------------------------------------------------------------------------------------------------
+//  test
+//--------------------------------------------------------------------------------------------------
+using namespace psykronix;
+
 static void test0()
 {
 	std::array<Eigen::Vector2d, 2> segment{Vector2d(11, 0), Vector2d(11, 0)};

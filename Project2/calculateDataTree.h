@@ -3,18 +3,14 @@
 #define USING_AUTO_CLOSE
 namespace psykronix
 {
-	class Polygon2d;
 	bool isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector2d, 2>& segmA, const std::array<Eigen::Vector2d, 2>& segmB);
 	//bool isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB);
 	bool isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB, double toleDis = 0, double toleAng = 0);
 	std::tuple<bool, std::array<double, 4>> getTwoSegmentsCollinearCoincidentPoints(const Segment& segmA, const Segment& segmB,	double toleDis = 0, double toleAng = 0);
-	bool BooleanOpIntersect(Polygon2d& polyA, Polygon2d& polyB);
-	void BooleanOpIntersect(std::vector<Polygon2d>& polyVct);
-	void BooleanOpIntersect(std::vector<Polygon2d>& polyVctA, std::vector<Polygon2d>& polyVctB);
 
 	class Polygon2d
 	{
-		friend bool BooleanOpIntersect(Polygon2d& polyA, Polygon2d& polyB);
+	private:
 		std::vector<Eigen::Vector2d> m_polygon;
 		Eigen::AlignedBox2d m_bound;
 		//record the number of polygon's segment, and the proportion of intersect point, and the number of other polygon
@@ -36,7 +32,11 @@ namespace psykronix
 		{
 			return m_polygon;
 		}
-		Eigen::AlignedBox2d boungding() const
+		std::vector<std::tuple<size_t, double, size_t>>& intersection()
+		{
+			return m_intersect;
+		}
+		Eigen::AlignedBox2d bounding() const
 		{
 			return m_bound;
 		}
@@ -71,6 +71,7 @@ namespace psykronix
 			return memcmp(m_polygon.data(), rhs.m_polygon.data(), sizeof(Polygon2d) * m_polygon.size()) == -1;
 		}
 	};
+
 	// for PolyfaceHandlePtr, to fill into k-d tree
 	struct Polyface3d
 	{
@@ -148,6 +149,6 @@ public:
 	{
 		return m_kdTree;
 	}
-	std::vector<size_t> findIntersect(const psykronix::Polyface3d& polyface); //searchFromKdTree
+	std::vector<size_t> findIntersect(const psykronix::Polyface3d& polyface, double tolerance = 0.0) const; //searchFromKdTree
 
 };
