@@ -12,6 +12,13 @@ namespace psykronix
     static constexpr double _eps = -FLT_EPSILON;
     static constexpr unsigned long long ULL_MAX = 18446744073709551615; // 2 ^ 64 - 1
 
+    // equal BPEntityId
+    struct UnifiedIdentify 
+    {
+        int32_t mid; //PModelId=-2; 
+        uint64_t eid; //PEntityId=0; 
+    };
+
     enum class RelationOfTwoTriangles : int //two intersect triangle
     {
         COPLANAR = 0,   //intersect or separate

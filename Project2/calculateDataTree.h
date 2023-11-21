@@ -5,8 +5,8 @@ namespace psykronix
 {
 	bool isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector2d, 2>& segmA, const std::array<Eigen::Vector2d, 2>& segmB);
 	//bool isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB);
-	bool isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB, double toleDis = 0, double toleAng = 0);
-	std::tuple<bool, std::array<double, 4>> getTwoSegmentsCollinearCoincidentPoints(const Segment& segmA, const Segment& segmB,	double toleDis = 0, double toleAng = 0);
+	bool isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB, double toleAng = 0, double toleDis = 0);
+	std::tuple<bool, std::array<double, 4>> getTwoSegmentsCollinearCoincidentPoints(const Segment& segmA, const Segment& segmB, double toleAng = 0,	double toleDis = 0);
 
 	class Polygon2d
 	{
@@ -75,19 +75,12 @@ namespace psykronix
 	// for PolyfaceHandlePtr, to fill into k-d tree
 	struct Polyface3d
 	{
-		long long m_index = -1;
-		Eigen::AlignedBox3d m_bound;
+		long long m_index = -1; // the index in the vector container
+		Eigen::AlignedBox3d m_bound;  // current polyface bounding box
+		// ifdef
+		UnifiedIdentify m_identify; // extra information
 	};
-	//struct UnifiedIdentify
-	//{
-	//	int32_t mid = -2; //PModelId=-2;
-	//	uint64_t eid = 0; //PEntityId=0;
-	//};
-	//struct ModelInfo3d
-	//{
-	//	UnifiedIdentify m_index;
-	//	Eigen::AlignedBox3d m_bound;
-	//};
+
 }
 
 // the k-dimensional tree
@@ -150,5 +143,6 @@ public:
 		return m_kdTree;
 	}
 	std::vector<size_t> findIntersect(const psykronix::Polyface3d& polyface, double tolerance = 0.0) const; //searchFromKdTree
+	std::vector<std::tuple<size_t, bool>> findIntersectClash(const psykronix::Polyface3d& polyface, double tolerance) const; // bool means soft-clash
 
 };

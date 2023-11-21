@@ -48,7 +48,7 @@ bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Vector2d, 2>& 
 
 #define USING_NORMALIZED_VECTOR
 bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB, 
-	double toleDis /*= 0*/, double toleAng /*= 0*/)
+	double toleAng /*= 0*/, double toleDis /*= 0*/)
 {
 	// |A¡ÁB| <= |A||B|sin¦È, near zero sin¦È approx ¦È
 #ifndef USING_NORMALIZED_VECTOR
@@ -119,7 +119,7 @@ bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3
 }
 
 std::tuple<bool, array<double, 4>> psykronix::getTwoSegmentsCollinearCoincidentPoints(const array<Vector3d, 2>& segmA, const array<Vector3d, 2>& segmB,
-	double toleDis /*= 0*/, double toleAng /*= 0*/)
+	double toleAng /*= 0*/, double toleDis /*= 0*/)
 {
 	Vector3d segmVecA = segmA[1] - segmA[0];
 	Vector3d segmVecB = segmB[1] - segmB[0];
@@ -367,15 +367,13 @@ KdTree3d::KdTree3d(std::vector<Polyface3d>& polyfaces)
 
 std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon, double tolerance /*= 0.0*/) const
 {
-	if (m_kdTree.get() == nullptr || polygon.m_index == -1)
+	if (m_kdTree.get() == nullptr || polygon.m_index == -1) // cannot be external polyface
 		return {}; 
 	std::vector<size_t> indexes;
 	Eigen::AlignedBox3d curBox = polygon.m_bound;
 	if (tolerance != 0.0)
 	{
 		Vector3d tole(tolerance, tolerance, tolerance);
-		curBox.min() -= tole;
-		curBox.max() += tole;
 		curBox.min() -= tole;
 		curBox.max() += tole;
 	}
@@ -401,5 +399,38 @@ std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon, double to
 	return indexes;
 }
 
-
+// only for clash, distinguish soft and hard
+std::vector<std::tuple<size_t, bool>> KdTree3d::findIntersectClash(const Polyface3d& polygon, double tolerance /*= 0.0*/) const
+{
+	if (m_kdTree.get() == nullptr || polygon.m_index == -1) // cannot be external polyface
+		return {};
+	std::vector<std::tuple<size_t, bool>> indexes;
+	Eigen::AlignedBox3d curBox = polygon.m_bound;
+	if (tolerance != 0.0)
+	{
+		Vector3d tole(tolerance, tolerance, tolerance);
+		curBox.min() -= tole;
+		curBox.max() += tole;
+	}
+	std::function<void(const shared_ptr<KdTreeNode3d>&)> _searchKdTree = [&](const shared_ptr<KdTreeNode3d>& node)->void
+	{
+		//using recursion
+		if (node->m_bound.intersects(curBox))
+		{
+			if (node->m_index == -1) // isnot leaf node
+			{
+				_searchKdTree(node->m_left);
+				_searchKdTree(node->m_right);
+			}
+			else
+			{
+				bool is_soft = tolerance > 0.0 && (node->m_bound.intersection(polygon.m_bound).sizes().array() < 0).any(); // origin box not intersect
+				if (polygon.m_index != node->m_index) //exclude self
+					indexes.push_back({ node->m_index, is_soft });
+			}
+		}
+	};
+	_searchKdTree(m_kdTree);
+	return indexes;
+}
 
