@@ -190,10 +190,6 @@ static void test2()
 	return;
 }
 
-static void test4(Eigen::Vector3d* boxVtx)
-{
-
-}
 static void test3()
 {
 	//²âÊÔ¹²Ïßº¯Êý
@@ -247,10 +243,48 @@ static void test3()
 
 	std::array<Eigen::Vector3d, 8> boxVtx;
 	Eigen::Vector3d boxArr[8];
-	test4(boxVtx.data());
+	//test4(boxVtx.data());
 
 	return;
 }
+
+
+//overload
+std::vector<double> mergeIntersectRegion(std::vector<pair<double, double>>& range, const std::array<double, 2>& prop)//->void
+{
+	std::vector<double> mergeRes;
+	for (const auto& iter : range)
+	{
+		mergeRes.push_back(iter.first);
+		mergeRes.push_back(iter.second);
+	}
+	mergeIntersectRegion(mergeRes, prop);
+	range.clear();
+	for (size_t i = 0; i < mergeRes.size() / 2; ++i)
+		range.push_back({ mergeRes[2 * i], mergeRes[2 * i + 1] });
+	return mergeRes;
+}
+
+static void test4()
+{
+	std::vector<pair<double, double>> range;
+	range.push_back({ 1,2 });
+	range.push_back({ 5,6 });
+	range.push_back({ 9,10 });
+
+
+	std::vector<pair<double, double>> range_copy = range;
+	std::array<double, 2> prop;
+	//prop = { 1.5, 3 };
+	//prop = { 1.5, 5. };
+	//prop = { 4, 7 };
+	//prop = { 0.5, 1 };
+	prop = { 1.5, 7 };
+	//prop = { 1.5, 9.6 };
+	std::vector<double> mergeRes = mergeIntersectRegion(range, prop);
+	return;
+}
+
 
 
 static int enrol = []()->int
@@ -258,7 +292,8 @@ static int enrol = []()->int
 	//test0();
 	//test1();
 	//test2(); //for funciton
-	test3();
+	//test3();
+	test4();
 	cout << "test_clipper" << endl;
 	return 0;
 }();

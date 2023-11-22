@@ -214,6 +214,73 @@ std::tuple<bool, array<double, 4>> psykronix::getTwoSegmentsCollinearCoincidentP
 	return { true, { propA0, propA1, propB0, propB1  }}; //
 }
 
+void psykronix::mergeIntersectRegion(std::vector<double>& _range, const std::array<double, 2>& prop)//->void
+{
+	//if (range.empty())
+	//	range = { { prop[0], prop[1] } };
+	//vector<> to vector<pair>
+	std::vector<pair<double, double>> range;
+	for (size_t i = 0; i < _range.size() / 2; ++i)
+		range.push_back({ _range[2 * i], _range[2 * i + 1] });
+	if (prop[1] < range.front().first)
+	{
+		range.push_back({ prop[0], prop[1] });
+		sort(range.begin(), range.end()); //ascending order
+		return;
+	}
+	if (prop[0] > range.back().second)
+	{
+		range.push_back({ prop[0], prop[1] });
+		return;
+	}
+	vector<pair<double, double>> mergeRes;
+	array<double, 2> segmIter = prop; // iterator segment
+	bool isCover = false;
+	for (const auto& iter : range)
+	{
+		// merge
+		if (prop[0] < iter.first) //p0 left
+		{
+			if (prop[1] < iter.first) //p1 left
+			{
+				mergeRes.push_back(iter); //p1 right
+				continue;// not intersect
+			}
+			if (prop[1] > iter.second)
+			{
+				isCover = true;
+				continue; //cover iter
+			}
+			segmIter = { segmIter[0], iter.second };// p1 bettwen
+			continue;
+		}
+		if (prop[0] > iter.second) //p0 right
+		{
+			mergeRes.push_back(iter);
+			continue;
+		}
+		// p0 bettwen
+		if (prop[1] > iter.second) //p1 right
+		{
+			segmIter = { iter.first, segmIter[1] };
+		}
+		else // p1 bettwen
+		{
+			mergeRes.push_back(iter);
+		}
+	}
+	if (prop != segmIter || isCover)
+		mergeRes.push_back({ segmIter[0], segmIter[1] });
+	sort(mergeRes.begin(), mergeRes.end()); //ascending order
+	//range = mergeRes;
+	//vector<pair> to vector<>
+	_range.clear();
+	for (const auto& iter : mergeRes)
+	{
+		_range.push_back(iter.first);
+		_range.push_back(iter.second);
+	}
+}
 
 //--------------------------------------------------------------------------------------------------
 //  K-dimensional Tree 2d
