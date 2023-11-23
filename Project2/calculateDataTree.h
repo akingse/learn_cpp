@@ -78,7 +78,7 @@ namespace psykronix
 	{
 		long long m_index = -1; // the index in the vector container
 		Eigen::AlignedBox3d m_bound;  // current polyface bounding box
-		// ifdef
+		// #ifdef USING_EXTRA_BPENTITYID
 		UnifiedIdentify m_identify; // extra information
 	};
 
