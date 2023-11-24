@@ -417,19 +417,68 @@ std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<Polyface3d>& polyfaces
 	}
 	else // end leaf node
 	{
-		currentNode->m_bound = polyfaces[0].m_bound;// short cut way
+		currentNode->m_bound = polyfaces.front().m_bound;// short cut way
 		currentNode->m_left = nullptr;
 		currentNode->m_right = nullptr;
-		currentNode->m_index = polyfaces[0].m_index;
+		currentNode->m_index = polyfaces.front().m_index;
 	}
 	currentNode->m_dimension = direction; //record the xy direciton, alse canbe depth, then use depth % 2
 	return currentNode;
 }
 
-KdTree3d::KdTree3d(std::vector<Polyface3d>& polyfaces)
+// record count and depth
+std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<Polyface3d>& polyfaces, size_t& count, size_t& depth, int dimension = 0)
 {
-	//return _createKdTree3d(polyfaces);
-	m_kdTree = _createKdTree3d(polyfaces);
+	// the kd-tree crud create read update delete
+	auto _getTotalBounding = [&](/*const std::vector<Polygon2d>& polygons*/)->Eigen::AlignedBox3d
+	{
+		AlignedBox3d fullBox;
+		for (const auto& iter : polyfaces)
+		{
+			fullBox.extend(iter.m_bound.min());
+			fullBox.extend(iter.m_bound.max());
+		}
+		return fullBox;
+	};
+	if (polyfaces.empty()) //no chance
+		return nullptr;
+	const int direction = dimension % 3;  // the direction of xyz, x=0/y=1/z=2
+	depth = dimension;
+	std::shared_ptr<KdTreeNode3d> currentNode = std::make_shared<KdTreeNode3d>();
+	if (polyfaces.size() != 1) //middle node
+	{
+		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);
+		std::sort(polyfaces.begin(), polyfaces.end(),
+			[=](const Polyface3d& a, const Polyface3d& b) { return a.m_bound.min()[direction] < b.m_bound.min()[direction]; }); // index of Vector3d
+		size_t dichotomy = polyfaces.size() / 2; // less | more
+		vector<Polyface3d> leftPolygons(polyfaces.begin(), polyfaces.begin() + dichotomy); //for new child node
+		vector<Polyface3d> rightPolygons(polyfaces.begin() + dichotomy, polyfaces.end());
+		// using recursion
+		currentNode->m_left = _createKdTree3d(leftPolygons, count, depth, dimension + 1);// using recursion
+		currentNode->m_right = _createKdTree3d(rightPolygons, count, depth, dimension + 1);
+		currentNode->m_index = -1; //not leaf node
+	}
+	else // end leaf node
+	{
+		currentNode->m_bound = polyfaces.front().m_bound;// last polyfaces.size()==1
+		currentNode->m_left = nullptr;
+		currentNode->m_right = nullptr;
+		currentNode->m_index = polyfaces.front().m_index;
+		count++;
+	}
+	currentNode->m_dimension = direction; //record the xy direciton, alse canbe depth, then use depth % 2
+	return currentNode;
+}
+
+
+KdTree3d::KdTree3d(const std::vector<Polyface3d>& polyfaces)
+{
+	std::vector<Polyface3d> _polyfaces = polyfaces;
+#ifdef CLASHDETECTION_DEBUG_TEMP
+	m_kdTree = _createKdTree3d(_polyfaces, m_count, m_depth);
+#else
+	m_kdTree = _createKdTree3d(_polyfaces);
+#endif // DEBUG
 }
 
 std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon, double tolerance /*= 0.0*/) const
@@ -458,7 +507,6 @@ std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon, double to
 			{
 				if (polygon.m_index != node->m_index) //exclude self
 					indexes.push_back(node->m_index);
-				//return;
 			}
 		}
 	};
@@ -473,30 +521,26 @@ std::vector<std::tuple<size_t, bool>> KdTree3d::findIntersectClash(const Polyfac
 		return {};
 	std::vector<std::tuple<size_t, bool>> indexes;
 	Eigen::AlignedBox3d toleBox = polygon.m_bound; //using extra eps
-	if (tolerance != 0.0)
-	{
-		Vector3d tole(tolerance, tolerance, tolerance);
-		toleBox.min() -= tole;
-		toleBox.max() += tole;
-	}
+	Vector3d tole = (tolerance == 0.0) ? Vector3d(eps, eps, eps) : Vector3d(tolerance, tolerance, tolerance);
+	toleBox.min() -= tole;
+	toleBox.max() += tole;
 	std::function<void(const shared_ptr<KdTreeNode3d>&)> _searchKdTree = [&](const shared_ptr<KdTreeNode3d>& node)->void
 	{
 		//using recursion
-		if (node->m_bound.intersects(toleBox))
+		if (!node->m_bound.intersects(toleBox))
+			return;
+		if (node->m_index == -1) // isnot leaf node
 		{
-			if (node->m_index == -1) // isnot leaf node
-			{
-				_searchKdTree(node->m_left);
-				_searchKdTree(node->m_right);
-			}
-			else
-			{
-				if (polygon.m_index >= node->m_index) //vector index, only small to large
-					return;
-				bool is_soft = 0.0 < tolerance && !node->m_bound.intersects(polygon.m_bound); // origin box not intersect
-				//if (polygon.m_index != node->m_index) //exclude self
-				indexes.push_back({ node->m_index, is_soft });
-			}
+			_searchKdTree(node->m_left);
+			_searchKdTree(node->m_right);
+		}
+		else
+		{
+			if (polygon.m_index >= node->m_index) //vector index, only small to large
+				return;
+			bool is_soft = 0.0 < tolerance && !node->m_bound.intersects(polygon.m_bound); // origin box not intersect
+			//if (polygon.m_index != node->m_index) //exclude self
+			indexes.push_back({ node->m_index, is_soft });
 		}
 	};
 	_searchKdTree(m_kdTree);

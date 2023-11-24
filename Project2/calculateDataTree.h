@@ -78,8 +78,9 @@ namespace psykronix
 	{
 		long long m_index = -1; // the index in the vector container
 		Eigen::AlignedBox3d m_bound;  // current polyface bounding box
-		// #ifdef USING_EXTRA_BPENTITYID
+#ifdef CLASHDETECTION_DEBUG_TEMP
 		UnifiedIdentify m_identify; // extra information
+#endif
 	};
 
 }
@@ -136,9 +137,12 @@ class KdTree3d
 {
 private:
 	std::shared_ptr<KdTreeNode3d> m_kdTree;
+	//for debug
+	size_t m_count = 0; //count total leafs
+	size_t m_depth = 0; //the max depth
 	//static std::shared_ptr<KdTreeNode3d> createKdTree(std::vector<psykronix::Polyface3d>& PolyfaceVct);
 public:
-	KdTree3d(std::vector<psykronix::Polyface3d>& polyfaceVct);
+	KdTree3d(const std::vector<psykronix::Polyface3d>& polyfaceVct);
 	std::shared_ptr<KdTreeNode3d> get() const
 	{
 		return m_kdTree;
