@@ -137,13 +137,19 @@ class KdTree3d
 {
 private:
 	std::shared_ptr<KdTreeNode3d> m_kdTree;
-	//for debug
+#ifdef CLASHDETECTION_DEBUG_TEMP //for debug
 	size_t m_count = 0; //count total leafs
 	size_t m_depth = 0; //the max depth
-	//static std::shared_ptr<KdTreeNode3d> createKdTree(std::vector<psykronix::Polyface3d>& PolyfaceVct);
+#endif
 public:
+	//static std::shared_ptr<KdTreeNode3d> createKdTree(std::vector<psykronix::Polyface3d>& PolyfaceVct);
+	KdTree3d() = delete;
 	KdTree3d(const std::vector<psykronix::Polyface3d>& polyfaceVct);
 	std::shared_ptr<KdTreeNode3d> get() const
+	{
+		return m_kdTree;
+	}
+	std::shared_ptr<KdTreeNode3d>& get()
 	{
 		return m_kdTree;
 	}
