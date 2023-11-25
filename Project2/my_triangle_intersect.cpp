@@ -476,15 +476,6 @@ void getSegmentsPoints(Eigen::Vector3d& VEC, Eigen::Vector3d& X, Eigen::Vector3d
 
 double getTrianglesDistance(Eigen::Vector3d& P, Eigen::Vector3d& Q, const std::array<Eigen::Vector3d, 3>& S, const std::array<Eigen::Vector3d, 3>& T)
 {
-#ifdef USING_INNER_PRE_JUDGE
-	if (isTwoTrianglesIntersectSAT(S, T)) // pre-judge intersect
-	{
-#ifdef STATISTIC_DATA_COUNT
-		count_err_inter_dist++;
-#endif
-		return 0.0;
-	}
-#endif
 	// Compute vectors along the 6 sides
 	std::array<Eigen::Vector3d, 3> Sv, Tv;
 	Vector3d VEC;

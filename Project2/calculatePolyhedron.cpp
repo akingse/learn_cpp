@@ -8,8 +8,12 @@ static const Triangle gTriXOY = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(1,0,0)
 static const Triangle gTriXOZ = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(1,0,0), Eigen::Vector3d(0,0,1) };
 static const Triangle gTriYOZ = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(0,1,0), Eigen::Vector3d(0,0,1) };
 
+#ifdef max
 #undef max 
-#undef min
+#endif // max
+#ifdef min
+#undef min 
+#endif // min
 #define USING_METHOD_SAT
 #define USING_RELATIVE_MATRIX_RECTIFY
 
@@ -20,30 +24,17 @@ static const Triangle gTriYOZ = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(0,1,0)
 #ifdef STATISTIC_DATA_COUNT
 extern std::atomic<size_t> count_mesh_inside_mesh,
 count_reduced_exclude_pre, count_triA_inter, count_triB_inter,
-count_err_empty_mesh, count_tri_box_exclude_pre, count_trigon_coplanar, count_error_tris_sepa,
-count_point_inside_mesh;
-
+count_err_empty_mesh, count_tri_box_exclude_pre, count_error_tris_sepa,
+count_point_inside_mesh, count_facesetA, count_facesetB, count_triAB_nan, count_triB_nan,
+count_meshs_isContact, count_meshs_isIntrusive, count_err_inter_mesh_sepa, count_repeat_sepa_axis,
+count_cal_sepa_axis;
+//container
 extern std::vector<std::array<Triangle, 2>> triPairList, triRecordHard; //std::array<Eigen::Vector3d, 3>
 extern std::vector<Triangle> triFaceVctA, triFaceVctB;
 extern std::vector<Vector3d> triVertexVctA, triVertexVctB;
 extern std::vector<InterTriInfo> interTriInfoList;
 
 #endif //STATISTIC_DATA_COUNT
-
-enum class RelationOfRayAndTrigon : int
-{
-	CROSS_OUTER = 0,
-	CROSS_INNER,
-	CROSS_VERTEX_0,
-	CROSS_VERTEX_1,
-	CROSS_VERTEX_2,
-	CROSS_EDGE_01,
-	CROSS_EDGE_12,
-	CROSS_EDGE_20,
-	COIN_EDGE_01, //collinear
-	COIN_EDGE_12,
-	COIN_EDGE_20,
-};
 
 bool psykronix::isMeshConvexPolyhedron(const ModelMesh& mesh)
 //bool psykronix::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
@@ -87,7 +78,21 @@ bool psykronix::isMeshConvexPolyhedron(const ModelMesh& mesh)
 // exclude point on face, ray is rotz
 RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector3d& _point, const ModelMesh& mesh)
 {
-	Eigen::Vector3d point = mesh.pose_.inverse() * _point;
+	Eigen::Vector3d point = mesh.pose_.inverse() * _point; // to relative coordinate
+	if (!mesh.bounding_.contains(point))
+		return RelationOfPointAndMesh::OUTER;
+	//auto _isPointOnPolyhedronSurface = [&]()->bool
+	bool isSurface = false;
+	for (const auto& face : mesh.ibo_)
+	{
+		if (isPointOnTriangleSurface(point, { mesh.vbo_[face[0]], mesh.vbo_[face[1]], mesh.vbo_[face[2]] }))
+		{
+			isSurface = true;
+			break;
+		}
+	}
+	if (isSurface)
+		return RelationOfPointAndMesh::SURFACE;
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
 	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
 	//one mesh inside other mesh, the bounding-box must inside other mesh
@@ -173,12 +178,9 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector
 }
 
 // include point on face
-bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& _point, const ModelMesh& mesh)
+bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const ModelMesh& mesh)
 {
-#ifdef STATISTIC_DATA_COUNT
-	count_mesh_inside_mesh++;
-#endif  
-	Eigen::Vector3d point = mesh.pose_.inverse() * _point;
+	//Eigen::Vector3d point = mesh.pose_.inverse() * _point;
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
 	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
 	auto _relationOfPointAndTriangle = [&](/*const Vector3d& point,*/ const std::array<Vector3d, 3>& trigon)->RelationOfRayAndTrigon // axisZ direction
@@ -280,6 +282,7 @@ bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& _point, const M
 	return count % 2 == 1;
 }
 
+// include point on surface
 bool psykronix::isPointInsidePolyhedronCL(const Eigen::Vector3d& _point, const ModelMesh& mesh) // more judge like ceil
 {
 #ifdef STATISTIC_DATA_COUNT
@@ -305,7 +308,7 @@ bool psykronix::isPointInsidePolyhedronCL(const Eigen::Vector3d& _point, const M
 			point.x() < std::min(std::min(p0[0], p1[0]), p2[0]) ||
 			point.y() > std::max(std::max(p0[1], p1[1]), p2[1]) ||
 			point.y() < std::min(std::min(p0[1], p1[1]), p2[1]) ||
-			point.z() > std::max(std::max(p0[2], p1[2]), p2[2])) //include z
+			point.z() > std::max(std::max(p0[2], p1[2]), p2[2]) + eps) //include z
 			return false;
 		double az = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
 		return //when vertical, az==0, always true
@@ -330,8 +333,7 @@ bool psykronix::isPointInsidePolyhedronCL(const Eigen::Vector3d& _point, const M
 		normal = (p1 - p0).cross(p2 - p1);
 		if (normal.z() == 0.0) // trigon is vertical
 		{
-			// point in segment collinear judge 
-			if ((point.x() - p0.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (point.y() - p0.y()) == 0.0) //cross product is zero
+			if ((point - p0).dot(normal) == 0.0) //point on plane judge, also using 2d dot
 			{
 				Vector3d normalA = normal.cross(p1 - p0);
 				Vector3d normalB = normal.cross(p2 - p1);
@@ -389,17 +391,18 @@ bool psykronix::isPointInsidePolyhedronFL(const Eigen::Vector3d& _point, const M
 		normal = (p1 - p0).cross(p2 - p1);
 		if (normal.z() == 0.0) // trigon is vertical
 		{
-			// point in segment collinear judge 
-			if ((point.x() - p0.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (point.y() - p0.y()) == 0.0) //cross product is zero
-			{
-				Vector3d normalA = normal.cross(p1 - p0);
-				Vector3d normalB = normal.cross(p2 - p1);
-				Vector3d normalC = normal.cross(p0 - p2);
-				// point under segment judge
-				if (normalA.dot(point - p0) * normalA.z() < 0.0 || normalB.dot(point - p1) * normalB.z() < 0.0 || normalC.dot(point - p2) * normalC.z() < 0.0)
-					count++; //
-			}
-			continue; //judge point under segment
+			if ((point - p0).dot(normal) == 0.0 && isPointInTriangle(point, { p0, p1 ,p2 })) //point on plane judge
+				return false; // exclude point on surface
+			//	//(point.x() - p0.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (point.y() - p0.y()) == 0.0) //cross product is zero in XoY
+			//{
+			//	Vector3d normalA = normal.cross(p1 - p0);
+			//	Vector3d normalB = normal.cross(p2 - p1);
+			//	Vector3d normalC = normal.cross(p0 - p2);
+			//	// point under segment judge
+			//	if (normalA.dot(point - p0) * normalA.z() < 0.0 || normalB.dot(point - p1) * normalB.z() < 0.0 || normalC.dot(point - p2) * normalC.z() < 0.0)
+			//		count++; //
+			//}
+			continue;
 		}
 		projection = normal.dot(point - p0);
 		if (fabs(projection) < normal.squaredNorm() * eps) //isPointOnTriangleSurface exclude
@@ -410,8 +413,19 @@ bool psykronix::isPointInsidePolyhedronFL(const Eigen::Vector3d& _point, const M
 	return count % 2 == 1;
 }
 
+bool isPointOnPolyhedronSurface(const Eigen::Vector3d& _point, const ModelMesh& mesh)
+{
+	Eigen::Vector3d point = mesh.pose_.inverse() * _point;
+	for (const auto& face : mesh.ibo_)
+	{
+		if (isPointOnTriangleSurface(point, { mesh.vbo_[face[0]], mesh.vbo_[face[1]], mesh.vbo_[face[2]] }))
+			return true;
+	}
+	return false;
+}
+
 //using method SAT
-std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConvexALL(const ModelMesh& meshA, const ModelMesh& meshB)
+std::tuple<Eigen::Vector3d, std::array<size_t, 2>> _getPenetrationDepthOfTwoConvexALL(const ModelMesh& meshA, const ModelMesh& meshB)
 {
 	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
 	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
@@ -447,7 +461,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		if (std::min(maxA - minB, maxB - minA) < dminA)//refresh 
 		{
 			dminA = std::min(maxA - minB, maxB - minA); // intersect meshs, dmin is positive
-			direction = matA.rotation() * normal;
+			direction = matA.rotation() * normal; //get the rotation part
 		}
 	}
 	for (const auto& faceB : iboB) // iterate every face
@@ -479,7 +493,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 }
 
 // for inner depth
-std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConvexBOX(const ModelMesh& meshA, const ModelMesh& meshB)
+std::tuple<Eigen::Vector3d, std::array<size_t, 2>> _getPenetrationDepthOfTwoConvexBOX(const ModelMesh& meshA, const ModelMesh& meshB)
 {
 	Eigen::AlignedBox3d boxA = meshA.bounding_;
 	Eigen::AlignedBox3d boxB = meshB.bounding_;
@@ -501,10 +515,33 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 	return { dmin * coord,{index, ULL_MAX} };
 }
 
-// for intrusive meshs, using major method SAT
+//simplify
+Eigen::Vector3d _getPenetrationDepthOfTwoMeshsBOX(const ModelMesh& meshA, const ModelMesh& meshB)
+{
+	Eigen::AlignedBox3d boxA = meshA.bounding_;
+	Eigen::AlignedBox3d boxB = meshB.bounding_;
+	// no contain sequence
+	double dmin = DBL_MAX, dtemp;
+	Vector3d coord;
+	Triangle unitThree = { Eigen::Vector3d(1,0,0), Eigen::Vector3d(0,1,0), Eigen::Vector3d(0,0,1) }; //choose one direction from xyz
+	for (int i = 0; i < 3; i++)
+	{
+		dtemp = std::min(boxA.max()[i] - boxB.min()[i], boxB.max()[i] - boxA.min()[i]); //x direction
+		if (dtemp < dmin)
+		{
+			dmin = dtemp;
+			coord = unitThree[i]; //Eigen::Vector3d::UnitX();
+		}
+	}
+	return dmin * coord;
+}
+
+// for intrusive meshs, using major method SAT, return normal vector and face index
 std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConvex(const ModelMesh& meshA, const ModelMesh& meshB, 
 	const set<size_t>& faceSetA, const set<size_t>& faceSetB, const vector<size_t>& vertexVectA, const vector<size_t>& vertexVectB)
 {
+	if (faceSetA.empty() && faceSetB.empty())
+		return { gVecZero, {ULL_MAX, ULL_MAX} };
 	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
 	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
 	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
@@ -513,22 +550,22 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 	const Eigen::Affine3d& matB = meshB.pose_;
 	Eigen::Affine3d matIAB = matA.inverse() * matB;
 	Eigen::Affine3d matIBA = matB.inverse() * matA;
-	double dminA = DBL_MAX, dminB = DBL_MAX, dminA_V, dminB_V, tmpMaxA, tmpMaxB;
-	double minA, maxA, minB, maxB, projection, origin;//refresh min and max
-	Eigen::Vector3d directionA, directionB, directionA_V, directionB_V, normal;
+	double dminA = DBL_MAX, dminB = DBL_MAX;// , dminA_V, dminB_V, tmpMaxA, tmpMaxB;
+	double minA, maxA, minB, maxB, projection, dtemp;//refresh min and max
+	Eigen::Vector3d directionA, directionB, normal;// directionA_V, directionB_V;
 	// the minimum distance must on the direction of face normal
 	bool isFixedFaceA = true;
-	size_t indexA = ULL_MAX, indexB = ULL_MAX, indexA_V = ULL_MAX, indexB_V = ULL_MAX;
+	size_t indexA = ULL_MAX, indexB = ULL_MAX;// indexA_V = ULL_MAX, indexB_V = ULL_MAX;
 	//std::array<size_t, 2> indexAB = { ULL_MAX , ULL_MAX };
-	std::set<int> vboSetA, vboSetB; // to remove repeat vertex
+	std::set<size_t> vboSetA, vboSetB; // to remove repeat vertex
 	for (const auto& iterA : faceSetA) //merge vertex
 	{
 		vboSetA.insert(iboA[iterA][0]);
 		vboSetA.insert(iboA[iterA][1]);
 		vboSetA.insert(iboA[iterA][2]);
-#ifdef CLASHDETECTION_DEBUG_TEMP
+#ifdef STATISTIC_DATA_COUNT
 	//output calculate intersect meshs triangless
-		triFaceVctA.push_back({ vboA[iboA[iterA][0]], vboA[iboA[iterA][1]], vboA[iboA[iterA][2]]});
+		triFaceVctA.push_back({ matA * vboA[iboA[iterA][0]], matA * vboA[iboA[iterA][1]], matA * vboA[iboA[iterA][2]] }); //world coord
 #endif
 	}
 	for (const auto& iterB : faceSetB)
@@ -536,10 +573,22 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		vboSetB.insert(iboB[iterB][0]);
 		vboSetB.insert(iboB[iterB][1]);
 		vboSetB.insert(iboB[iterB][2]);
-#ifdef CLASHDETECTION_DEBUG_TEMP
-		triFaceVctB.push_back({ vboB[iboB[iterB][0]], vboB[iboB[iterB][1]], vboB[iboB[iterB][2]]});
+#ifdef STATISTIC_DATA_COUNT
+		triFaceVctB.push_back({ matB * vboB[iboB[iterB][0]], matB * vboB[iboB[iterB][1]], matB * vboB[iboB[iterB][2]]});
 #endif
 	}
+	// append all vertex
+	for (const auto& iterA : vertexVectA)
+		vboSetA.insert(iterA);
+	for (const auto& iterB : vertexVectB)
+		vboSetB.insert(iterB);
+#ifdef STATISTIC_DATA_COUNT
+	for (const auto& iA : vertexVectA)
+		triVertexVctA.push_back(matA * vboA[iA]);
+	for (const auto& iB : vertexVectB)
+		triVertexVctB.push_back(matB * vboB[iB]);
+#endif
+	// calculate depth using SAT
 	for (const auto& iA : faceSetA) // iterate every faceA
 	{
 		minA = DBL_MAX;
@@ -559,9 +608,10 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
-		if (std::min(maxA - minB, maxB - minA) < dminA)// the intersect mesh-part prejection segment
+		dtemp = std::min(maxA - minB, maxB - minA);
+		if (dtemp < dminA)// the intersect mesh-part prejection segment
 		{
-			dminA = std::min(maxA - minB, maxB - minA); //always positive, but impacted by accuracy, forexample cross edges and normalized
+			dminA = dtemp; //always positive, but impacted by accuracy, forexample cross edges and normalized
 			directionA = matA.rotation() * normal;
 			indexA = iA ;
 #ifdef STATISTIC_DATA_RECORD
@@ -571,30 +621,27 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 				isFixedFaceA = false;
 #endif
 		}
-		dminA_V = 0.0;
-		tmpMaxA = 0.0;
-		origin = normal.dot(vboA[iboA[iA][0]]); // relative projection value
-		for (const auto& iB : vertexVectB) // the inside vertex's prejection
-		{
-#ifdef CLASHDETECTION_DEBUG_TEMP
-			triVertexVctB.push_back(vboB[iB]);
-#endif
-			projection = normal.dot(matIAB * vboB[iB]) - origin;
-			if (projection < dminA_V)
-			{
-				dminA_V = projection; // always negative
-				directionA_V = matA.rotation() * normal;
-				indexA_V = iA;
-			}
-			if (!meshA.convex_ && tmpMaxA < projection) // the direction not exact
-				tmpMaxA = projection;
-		}
-		if (dminA < tmpMaxA - dminA_V) // choose max, without vertex, dminV is zero
-		{
-			dminA = tmpMaxA - dminA_V;
-			directionA = directionA_V;
-			indexA = indexA_V;
-		}
+		//dminA_V = 0.0;
+		//tmpMaxA = 0.0;
+		//origin = normal.dot(vboA[iboA[iA][0]]); // relative projection value
+		//for (const auto& iB : vertexVectB) // the inside vertex's prejection
+		//{
+		//	projection = normal.dot(matIAB * vboB[iB]) - origin;
+		//	if (projection < dminA_V)
+		//	{
+		//		dminA_V = projection; // always negative
+		//		directionA_V = matA.rotation() * normal;
+		//		indexA_V = iA;
+		//	}
+		//	if (!meshA.convex_ && tmpMaxA < projection) // the direction not exact
+		//		tmpMaxA = projection;
+		//}
+		//if (dminA < tmpMaxA - dminA_V) // choose max, without vertex, dminV is zero
+		//{
+		//	dminA = tmpMaxA - dminA_V;
+		//	directionA = directionA_V;
+		//	indexA = indexA_V;
+		//}
 	}
 	for (const auto& iB : faceSetB) // iterate every faceB
 	{
@@ -615,9 +662,10 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
-		if (std::min(maxA - minB, maxB - minA) < dminB)//refresh 
+		dtemp = std::min(maxA - minB, maxB - minA);
+		if (dtemp < dminB)//refresh 
 		{
-			dminB = std::min(maxA - minB, maxB - minA);
+			dminB = dtemp;
 			directionB = matB.rotation() * normal;
 			indexB = iB;
 #ifdef STATISTIC_DATA_RECORD
@@ -627,30 +675,27 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 				isFixedFaceA = false;
 #endif
 		}
-		dminB_V = 0.0;
-		tmpMaxB = 0.0;
-		origin = normal.dot(matA * vboB[iboB[iB][0]]); // relative projection value
-		for (const auto& iA : vertexVectA) // the inside vertex's prejection
-		{
-#ifdef CLASHDETECTION_DEBUG_TEMP
-			triVertexVctA.push_back(vboA[iA]);
-#endif
-			projection = normal.dot(matA * vboA[iA]) - origin;
-			if (projection < dminB_V)
-			{
-				dminB_V = projection;  // always negative
-				directionB_V = matB.rotation() * normal;
-				indexB_V = iB;
-			}
-			if (!meshB.convex_ && tmpMaxB < projection) // the direction not exact
-				tmpMaxB = projection;
-		}
-		if (dminB < tmpMaxB - dminB_V) // choose max
-		{
-			dminB = tmpMaxB - dminB_V;
-			directionB = directionB_V;
-			indexB = indexB_V;
-		}
+		//dminB_V = 0.0;
+		//tmpMaxB = 0.0;
+		//origin = normal.dot(matA * vboB[iboB[iB][0]]); // relative projection value
+		//for (const auto& iA : vertexVectA) // the inside vertex's prejection
+		//{
+		//	projection = normal.dot(matA * vboA[iA]) - origin;
+		//	if (projection < dminB_V)
+		//	{
+		//		dminB_V = projection;  // always negative
+		//		directionB_V = matB.rotation() * normal;
+		//		indexB_V = iB;
+		//	}
+		//	if (!meshB.convex_ && tmpMaxB < projection) // the direction not exact
+		//		tmpMaxB = projection;
+		//}
+		//if (dminB < tmpMaxB - dminB_V) // choose max
+		//{
+		//	dminB = tmpMaxB - dminB_V;
+		//	directionB = directionB_V;
+		//	indexB = indexB_V;
+		//}
 	}
 	//if (!isFixedFaceA)
 	//	direction = -direction;
@@ -659,84 +704,132 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 		std::tuple<Eigen::Vector3d, std::array<size_t, 2>>{ dminB * directionB, { ULL_MAX, indexB } };
 }
 
-std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfVertexAndFace(const ModelMesh& meshA, const ModelMesh& meshB, 
-	const vector<size_t>& faceVectA, const vector<size_t>& faceVectB, const vector<size_t>& vertexVectA, const vector<size_t>& vertexVectB)
+// calculate depth self with tiny errors
+Eigen::Vector3d getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA, const ModelMesh& meshB, const std::vector<Vector3d>& axesSepa,
+	const std::set<size_t>& vboSetA, const std::set<size_t>& vboSetB)
 {
-	if ((faceVectA.empty() || vertexVectB.empty()) && (faceVectB.empty() || vertexVectA.empty())) // any empty cause zero
-		return { gVecZero, { ULL_MAX , ULL_MAX } }; // or gVecNaN separate
+	if (axesSepa.empty() || vboSetA.empty() || vboSetB.empty())
+		return gVecZero;
 	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
 	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
 	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
 	const std::vector<std::array<int, 3>>& iboB = meshB.ibo_;
 	const Eigen::Affine3d& matA = meshA.pose_;
 	const Eigen::Affine3d& matB = meshB.pose_;
-	Eigen::Affine3d matIAB = matA.inverse() * matB;
-	Eigen::Affine3d matIBA = matB.inverse() * matA;
-	Eigen::Vector3d directionA, directionB, normal;
-	double dminA = 0, dminB = 0, projection, origin, tmpMaxA = 0, tmpMaxB = 0;
-	size_t indexA = ULL_MAX, indexB = ULL_MAX;
-#ifdef STATISTIC_DATA_RECORD
-	set<double> projectionA, projectionB;
-#endif
-	for (const auto& iA : faceVectA) // the face normal direction always outwards
+	double dmin = DBL_MAX;// dminB = DBL_MAX;
+	double minA, maxA, minB, maxB, projection, dtemp;//refresh min and max
+	Eigen::Vector3d direction;
+	// calculate depth using SAT
+	for (const auto& axis : axesSepa) // every axis isnot zero-vector
 	{
-		if (vertexVectB.empty())
+		minA = DBL_MAX;
+		maxA = -DBL_MAX;
+		minB = DBL_MAX;
+		maxB = -DBL_MAX;
+		for (const auto& vertexA : vboSetA)
 		{
-			dminA = -DBL_MAX;
-			break;
+			projection = axis.dot(matA * vboA[vertexA]);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
 		}
-		normal = (vboA[iboA[iA][1]] - vboA[iboA[iA][0]]).cross(vboA[iboA[iA][2]] - vboA[iboA[iA][1]]).normalized();
-		origin = normal.dot(vboA[iboA[iA][0]]); // relative projection value
-		for (const auto& iB : vertexVectB)
+		for (const auto& vertexB : vboSetB)
 		{
-			//projection = normal.dot(matB * vboB[iB] - vboA[iboA[iA][0]]);
-			projection = normal.dot(matIAB * vboB[iB]) - origin;
-#ifdef STATISTIC_DATA_RECORD
-			projectionA.insert(projection);
-#endif
-			if (projection < dminA) // always negative
-			{
-				dminA = projection;
-				directionA = matA.rotation() * normal;
-				indexA = iA;
-			}
-			if (!meshA.convex_ && tmpMaxA < projection) // the direction not exact
-			{
-				tmpMaxA = projection;
-			}
+			projection = axis.dot(matB * vboB[vertexB]);
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		dtemp = std::min(maxA - minB, maxB - minA);
+#ifdef STATISTIC_DATA_COUNT
+		if (dtemp < 0.0)
+			count_err_inter_mesh_sepa++;
+#endif  
+		if (dtemp < dmin)// the intersect mesh-part prejection segment
+		{
+			dmin = dtemp; //always positive, but impacted by accuracy, forexample cross edges and normalized
+			direction = axis;
 		}
 	}
-	for (const auto& iB : faceVectB) // the face normal direction always outwards
-	{
-		if (vertexVectA.empty())
-		{
-			dminB = -DBL_MAX;
-			break;
-		}
-		normal = (vboB[iboB[iB][1]] - vboB[iboB[iB][0]]).cross(vboB[iboB[iB][2]] - vboB[iboB[iB][1]]).normalized();
-		origin = normal.dot(vboB[iboB[iB][0]]);
-		for (const auto& iA : vertexVectA)
-		{
-			projection = normal.dot(matIBA * vboA[iA]) - origin;
-#ifdef STATISTIC_DATA_RECORD
-			projectionB.insert(projection);
-#endif
-			if (projection < dminB)
-			{
-				dminB = projection;
-				directionB = matB.rotation() * normal;
-				indexB = iB;
-			}
-			if (!meshA.convex_ && tmpMaxB < projection) // the direction not exact
-			{
-				tmpMaxB = projection;
-			}
-		}
-	}
-	return (tmpMaxA - dminA < tmpMaxB - dminB) ? //return min
-		std::tuple<Eigen::Vector3d, std::array<size_t, 2>>{ (tmpMaxA - dminA) * directionA, { indexA, ULL_MAX }} :
-		std::tuple<Eigen::Vector3d, std::array<size_t, 2>>{ (tmpMaxB - dminB) * directionB, { ULL_MAX, indexB } };
+	return dmin * direction;
 }
+
+//std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfVertexAndFace(const ModelMesh& meshA, const ModelMesh& meshB, 
+//	const vector<size_t>& faceVectA, const vector<size_t>& faceVectB, const vector<size_t>& vertexVectA, const vector<size_t>& vertexVectB)
+//{
+//	if ((faceVectA.empty() || vertexVectB.empty()) && (faceVectB.empty() || vertexVectA.empty())) // any empty cause zero
+//		return { gVecZero, { ULL_MAX , ULL_MAX } }; // or gVecNaN separate
+//	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
+//	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
+//	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
+//	const std::vector<std::array<int, 3>>& iboB = meshB.ibo_;
+//	const Eigen::Affine3d& matA = meshA.pose_;
+//	const Eigen::Affine3d& matB = meshB.pose_;
+//	Eigen::Affine3d matIAB = matA.inverse() * matB;
+//	Eigen::Affine3d matIBA = matB.inverse() * matA;
+//	Eigen::Vector3d directionA, directionB, normal;
+//	double dminA = 0, dminB = 0, projection, origin, tmpMaxA = 0, tmpMaxB = 0;
+//	size_t indexA = ULL_MAX, indexB = ULL_MAX;
+//#ifdef STATISTIC_DATA_RECORD
+//	set<double> projectionA, projectionB;
+//#endif
+//	for (const auto& iA : faceVectA) // the face normal direction always outwards
+//	{
+//		if (vertexVectB.empty()) //cause no distance
+//		{
+//			dminA = -DBL_MAX;
+//			break;
+//		}
+//		normal = (vboA[iboA[iA][1]] - vboA[iboA[iA][0]]).cross(vboA[iboA[iA][2]] - vboA[iboA[iA][1]]).normalized();
+//		origin = normal.dot(vboA[iboA[iA][0]]); // relative projection value
+//		for (const auto& iB : vertexVectB)
+//		{
+//			//projection = normal.dot(matB * vboB[iB] - vboA[iboA[iA][0]]);
+//			projection = normal.dot(matIAB * vboB[iB]) - origin;
+//#ifdef STATISTIC_DATA_RECORD
+//			projectionA.insert(projection);
+//#endif
+//			if (projection < dminA) // always negative
+//			{
+//				dminA = projection;
+//				directionA = matA.rotation() * normal;
+//				indexA = iA;
+//			}
+//			if (!meshA.convex_ && tmpMaxA < projection) // the direction not exact
+//			{
+//				tmpMaxA = projection;
+//			}
+//		}
+//	}
+//	for (const auto& iB : faceVectB) // the face normal direction always outwards
+//	{
+//		if (vertexVectA.empty())
+//		{
+//			dminB = -DBL_MAX;
+//			break;
+//		}
+//		normal = (vboB[iboB[iB][1]] - vboB[iboB[iB][0]]).cross(vboB[iboB[iB][2]] - vboB[iboB[iB][1]]).normalized();
+//		origin = normal.dot(vboB[iboB[iB][0]]);
+//		for (const auto& iA : vertexVectA)
+//		{
+//			projection = normal.dot(matIBA * vboA[iA]) - origin;
+//#ifdef STATISTIC_DATA_RECORD
+//			projectionB.insert(projection);
+//#endif
+//			if (projection < dminB)
+//			{
+//				dminB = projection;
+//				directionB = matB.rotation() * normal;
+//				indexB = iB;
+//			}
+//			if (!meshA.convex_ && tmpMaxB < projection) // the direction not exact
+//			{
+//				tmpMaxB = projection;
+//			}
+//		}
+//	}
+//	return (tmpMaxA - dminA < tmpMaxB - dminB) ? //return min
+//		std::tuple<Eigen::Vector3d, std::array<size_t, 2>>{ (tmpMaxA - dminA) * directionA, { indexA, ULL_MAX }} :
+//		std::tuple<Eigen::Vector3d, std::array<size_t, 2>>{ (tmpMaxB - dminB) * directionB, { ULL_MAX, indexB } };
+//}
 
 //--------------------------------------------------------------------------------------------------------
 // mesh
@@ -763,6 +856,7 @@ std::array<std::vector<size_t>, 2> _getReducedIntersectTrianglesOfMesh(const Mod
 {
 	//Eigen::AlignedBox3d boxMag(box.min() - 0.5 * Vector3d(tolerance, tolerance, tolerance), box.max() + 0.5 * Vector3d(tolerance, tolerance, tolerance));
 	Eigen::AlignedBox3d box = meshA.bounding_.intersection(meshB.bounding_);
+	//Vector3d toleSize = Vector3d(tolerance + eps, tolerance + eps, tolerance + eps);
 	Vector3d toleSize = Vector3d(tolerance, tolerance, tolerance);
 	Eigen::AlignedBox3d boxMag(box.min() - toleSize, box.max() + toleSize);
 	std::vector<size_t> triA_Index; // using index of mesh IBO
@@ -789,10 +883,9 @@ std::array<std::vector<size_t>, 2> _getReducedIntersectTrianglesOfMesh(const Mod
 	Eigen::AlignedBox3d triB_Box;
 	for (size_t j = 0; j < meshB.ibo_.size(); ++j)
 	{
-		triIter = {
-				meshB.pose_* meshB.vbo_[meshB.ibo_[j][0]],
-				meshB.pose_* meshB.vbo_[meshB.ibo_[j][1]],
-				meshB.pose_* meshB.vbo_[meshB.ibo_[j][2]] };
+		triIter = { meshB.pose_ * meshB.vbo_[meshB.ibo_[j][0]],
+					meshB.pose_ * meshB.vbo_[meshB.ibo_[j][1]],
+					meshB.pose_ * meshB.vbo_[meshB.ibo_[j][2]] };
 		if (isTriangleAndBoundingBoxIntersectSAT(triIter, boxMag))
 		{
 			triB_Index.push_back(j);
@@ -820,7 +913,8 @@ std::array<std::vector<size_t>, 2> _getReducedIntersectTrianglesOfMesh(const Mod
 // ClashHard
 bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 {
-	Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
+	//Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
+	Eigen::Affine3d relative_matrix = meshB.pose_.inverse() * meshA.pose_; //without revise
 	// get the index param of mesh's ibo
 	std::array<std::vector<size_t>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, 0.0);
 	if (!indexAB[0].empty() && !indexAB[1].empty())
@@ -847,28 +941,28 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 				{
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
 					triRecordHard.push_back({ triA, triB });
-					interTriInfoList.push_back({ { triA, triB }, {}, 0.0 });
+					interTriInfoList.push_back({ { triA, triB }, {}, std::nan("0")}); // only no-depth call, default distance is nan
 #endif
 					return true;
 				}
 			}
 		}
 	}
+#ifdef STATISTIC_DATA_COUNT
 	if (meshA.vbo_.empty() || meshB.vbo_.empty()) // extra safe check
 	{
-#ifdef STATISTIC_DATA_COUNT
 		count_err_empty_mesh++;
-#endif  
-		return false;
+		//return false;
 	}
+#endif  
 	//judge whether mesh entirely inside mesh
 	if (meshA.bounding_.contains(meshB.bounding_)) //boundingbox is world coord
 	{
 		// precondition: boundingbox inside, polyface not intersect, mesh isnot empty
-		if (isPointInsidePolyhedronAZ(meshA.pose_.inverse() * meshB.pose_ * meshB.vbo_[0], meshA))
+		if (!meshB.vbo_.empty() && isPointInsidePolyhedronROT(meshB.pose_ * meshB.vbo_[0], meshA) != RelationOfPointAndMesh::OUTER)
 		{
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
-			triRecordHard.push_back({ gTirNaN, gTirNaN });
+			triRecordHard.push_back({ gTirNaN, gTirNaN }); //two trinan means inside
 			interTriInfoList.push_back({ { gTirNaN, gTirNaN }, {}, 0.0 });
 #endif
 			return true;
@@ -876,7 +970,7 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 	}
 	else if (meshB.bounding_.contains(meshA.bounding_))
 	{
-		if (isPointInsidePolyhedronAZ(meshB.pose_.inverse() * meshA.pose_ * meshA.vbo_[0], meshB))
+		if (!meshA.vbo_.empty() && isPointInsidePolyhedronROT(meshA.pose_ * meshA.vbo_[0], meshB) != RelationOfPointAndMesh::OUTER)
 		{
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
 			triRecordHard.push_back({ gTirNaN, gTirNaN });
@@ -889,25 +983,48 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 }
 
 // clash judge include penetration depth
+#define USING_ALL_SEPARATE_AXES_FOR_DEPTH
 std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(const ModelMesh& meshA, const ModelMesh& meshB)
 {
-	Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
+	//Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
+	Eigen::Affine3d relative_matrix = meshB.pose_.inverse() * meshA.pose_;
 	// get the index param of mesh's ibo
 	std::array<std::vector<size_t>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, 0.0);
 	bool isContact = false; // vertex or edge or face contact
 	bool isIntrusive = false;
+	bool isExist;
+#ifndef USING_ALL_SEPARATE_AXES_FOR_DEPTH
 	std::set<size_t> faceSetA, faceSetB; // intersect and inside, to remove repeat
 	std::vector<size_t> vertexVectA, vertexVectB;
-	//std::array<Eigen::Vector3d, 2> pInter;
-#ifdef STATISTIC_DATA_TESTFOR
-	vector<double> cpVect;
 #endif
-#ifdef STATISTIC_DATA_RECORD
-	Triangle trigon;
-#endif
+	// all axes version
+	std::vector<Vector3d> axesSepa; // in world coordinate
+	std::set<size_t> vboSetA, vboSetB; // to remove repeat vertex
 	if (!indexAB[0].empty() && !indexAB[1].empty())
 	{
 		std::array<Eigen::Vector3d, 3> triA, triB;
+		std::array<Eigen::Vector3d, 2> pInter;
+		std::array<Eigen::Vector3d, 3> edgesA, edgesB;
+		Eigen::Vector3d normalA, normalB;
+		std::array<Eigen::Vector3d, 17> axesPoten;
+#ifdef STATISTIC_DATA_COUNT
+		for (const auto& i : indexAB[0])
+		{
+			Triangle triIter = {
+				meshA.pose_* meshA.vbo_[meshA.ibo_[i][0]],
+				meshA.pose_* meshA.vbo_[meshA.ibo_[i][1]],
+				meshA.pose_* meshA.vbo_[meshA.ibo_[i][2]] };
+			triFaceVctA.push_back({ triIter[0], triIter[1], triIter[2] }); //world coord
+		}
+		for (const auto& j : indexAB[1])
+		{
+			Triangle triIter = {
+				meshB.pose_ * meshB.vbo_[meshB.ibo_[j][0]],
+				meshB.pose_ * meshB.vbo_[meshB.ibo_[j][1]],
+				meshB.pose_ * meshB.vbo_[meshB.ibo_[j][2]] };
+			triFaceVctB.push_back({ triIter[0], triIter[1], triIter[2] }); //world coord
+		}
+#endif
 		for (const auto& iA : indexAB[0]) //faces intersect
 		{
 			triA = { relative_matrix * meshA.vbo_[meshA.ibo_[iA][0]],
@@ -918,43 +1035,113 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 				triB = { meshB.vbo_[meshB.ibo_[iB][0]],
 						meshB.vbo_[meshB.ibo_[iB][1]],
 						meshB.vbo_[meshB.ibo_[iB][2]] };
-				if (!isTwoTrianglesBoundingBoxIntersect(triA, triB)) // second pre-judge
-				{
 #ifdef STATISTIC_DATA_COUNT
+				if (!isTwoTrianglesBoundingBoxIntersect(triA, triB))
 					count_tri_box_exclude_pre++;
 #endif  
-					continue;
-				}
-				if (!isTwoTrianglesIntersectSAT(triA, triB)) //separate
+				if (!isTwoTrianglesBoundingBoxIntersect(triA, triB) || !isTwoTrianglesIntersectSAT(triA, triB)) // second pre-judge, merge
 					continue;
 				isContact = true; //isIntersect// maybe intrusive or atleast contact
 				//intersect
-#ifdef STATISTIC_DATA_TESTFOR
-				//double cp = (triA[1] - triA[0]).cross(triA[2] - triA[1]).cross((triB[1] - triB[0]).cross(triB[2] - triB[1])).squaredNorm();
-				//cpVect.push_back(cp);
-				//sort(cpVect.begin(), cpVect.end());
-#endif
-				if ((triA[1] - triA[0]).cross(triA[2] - triA[1]).cross((triB[1] - triB[0]).cross(triB[2] - triB[1])).isZero(eps)) // intersect-coplanar
-				{
-#ifdef STATISTIC_DATA_COUNT
-					count_trigon_coplanar++;
-#endif  
-					continue;
-				}
-				isIntrusive = true; 
-				faceSetA.insert(iA); //faceVectA.push_back(iA);
-				faceSetB.insert(iB); //faceVectB.push_back(iB);
-				//pInter = getTwoTrianglesIntersectPoints(triA, triB);
-				//if (!(pInter[1] - pInter[0]).isZero()) // also using eps
+				//if ((triA[1] - triA[0]).cross(triA[2] - triA[1]).cross((triB[1] - triB[0]).cross(triB[2] - triB[1])).isZero(eps)) // intersect-coplanar judge
 				//{
-				//	//return RelationOfTwoMesh::INTRUSIVE;
-				//	isIntrusive = true; //for count all intersect
-				//	faceSetA.insert(iA); // only intrusive triangle insert, exclude contact triangle
-				//	faceSetB.insert(iB);
+				//	continue;
 				//}
+				//faceSetA.insert(iA); //faceVectA.push_back(iA);
+				//faceSetB.insert(iB); //faceVectB.push_back(iB);
+#ifdef USING_ALL_SEPARATE_AXES_FOR_DEPTH
+				// add the separate axis
+				//RelationOfTwoTriangles relation = getRelationOfTwoTrianglesSAT(triA, triB);
+				if (RelationOfTwoTriangles::INTRUSIVE != getRelationOfTwoTrianglesSAT(triA, triB))
+					continue;
+				isIntrusive = true;		
+				// add the faces vertex index
+				for (int i = 0; i < 3; ++i)
+				{
+					vboSetA.insert(meshA.ibo_[iA][i]);
+					vboSetB.insert(meshB.ibo_[iB][i]);
+				}
+				// caution, both mesh with matrix, axis direciton in self local coordinate, need transform to world
+				edgesA = { meshA.pose_ * (triA[1] - triA[0]),
+						meshA.pose_ * (triA[2] - triA[1]),
+						meshA.pose_ * (triA[0] - triA[2]) };
+				edgesB = { meshB.pose_ * (triB[1] - triB[0]),
+						meshB.pose_ * (triB[2] - triB[1]),
+						meshB.pose_ * (triB[0] - triB[2]) };
+				normalA = edgesA[0].cross(edgesA[1]); //normalA,
+				normalB = edgesB[0].cross(edgesB[1]); //normalB,
+				axesPoten = { {
+						normalA,
+						normalB,
+						normalA.cross(edgesA[0]),
+						normalA.cross(edgesA[1]),
+						normalA.cross(edgesA[2]),
+						normalB.cross(edgesB[0]),
+						normalB.cross(edgesB[1]),
+						normalB.cross(edgesB[2]),
+						edgesA[0].cross(edgesB[0]),
+						edgesA[0].cross(edgesB[1]),
+						edgesA[0].cross(edgesB[2]),
+						edgesA[1].cross(edgesB[0]),
+						edgesA[1].cross(edgesB[1]),
+						edgesA[1].cross(edgesB[2]),
+						edgesA[2].cross(edgesB[0]),
+						edgesA[2].cross(edgesB[1]),
+						edgesA[2].cross(edgesB[2]) } };
+				for (auto& axis : axesPoten) // revise zero vector
+				{
+					if (axis.isZero())
+						axis = Vector3d(1, 0, 0);
+				}
+				isExist = false;
+				for (const auto& axis : axesPoten)
+				{
+					for (const auto& iter : axesSepa)
+					{
+						if (iter.cross(axis).isZero(eps))
+						{
+#ifdef STATISTIC_DATA_COUNT
+							count_repeat_sepa_axis++;
+#endif	
+							isExist = true;
+							break;
+						}
+					}
+					if (!isExist)
+					{
+#ifdef STATISTIC_DATA_COUNT
+						count_cal_sepa_axis++;
+#endif	
+						axesSepa.push_back(axis.normalized());
+					}
+				}
+#else
+				pInter = getTwoTrianglesIntersectPoints(triA, triB);
+#ifdef STATISTIC_DATA_COUNT
+				if (isnan(pInter[0][0]) && isnan(pInter[1][0])) //triangles intersect but no intersect points
+					count_triAB_nan++;
+				if (!isnan(pInter[0][0]) && isnan(pInter[1][0]))
+					count_triB_nan++;
+#endif  
+				// only intrusive triangle insert, exclude contact triangle
+				if (!isnan(pInter[0][0]) && !isnan(pInter[1][0]) && !(pInter[1] - pInter[0]).isZero(eps) && // also using eps
+					((pInter[0] != triA[0] && pInter[0] != triA[1] && pInter[0] != triA[2] && pInter[0] != triB[0] && pInter[0] != triB[1] && pInter[0] != triB[2]) ||
+					(pInter[1] != triA[0] && pInter[1] != triA[1] && pInter[1] != triA[2] && pInter[1] != triB[0] && pInter[1] != triB[1] && pInter[1] != triB[2])))
+				{
+					//another case, two triangle edge collinear, using triangle vertex coincident judge
+					faceSetA.insert(iA);
+					faceSetB.insert(iB);
+				}
+#endif //USING_ALL_SEPARATE_AXES
 			}
 		}
 	}
+#ifdef STATISTIC_DATA_COUNT
+	if (isContact)
+		count_meshs_isContact++;
+	if (isIntrusive)
+		count_meshs_isIntrusive++;
+#endif	
 	if (isIntrusive)
 	{
 		//for (const auto& iA : indexAB[0]) //only insert intersect mesh
@@ -973,18 +1160,33 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 		//}
 		for (size_t i = 0; i < meshA.vbo_.size(); ++i)
 		{
+#ifdef USING_ALL_SEPARATE_AXES_FOR_DEPTH
+			if (vboSetA.find(i) == vboSetA.end() && isPointInsidePolyhedronFL(meshA.pose_ * meshA.vbo_[i], meshB))
+				vboSetA.insert(i);
+#else
 			if (isPointInsidePolyhedronFL(meshA.pose_ * meshA.vbo_[i], meshB))
 				vertexVectA.push_back(i);
+#endif // USING_ALL_SEPARATE_AXES
 		}
 		for (size_t i = 0; i < meshB.vbo_.size(); ++i)
 		{
+#ifdef USING_ALL_SEPARATE_AXES_FOR_DEPTH
+			if (vboSetB.find(i) == vboSetB.end() && isPointInsidePolyhedronFL(meshB.pose_ * meshB.vbo_[i], meshA))
+				vboSetB.insert(i);
+#else
 			if (isPointInsidePolyhedronFL(meshB.pose_ * meshB.vbo_[i], meshA))
 				vertexVectB.push_back(i);
+#endif // USING_ALL_SEPARATE_AXES
 		}
+#ifdef USING_ALL_SEPARATE_AXES_FOR_DEPTH
+		Eigen::Vector3d depth = getPenetrationDepthOfTwoMeshsParts(meshA, meshB, axesSepa, vboSetA, vboSetB);
+#else
 		std::tuple<Eigen::Vector3d, std::array<size_t, 2>> depth = getPenetrationDepthOfTwoConvex(meshA, meshB, faceSetA, faceSetB, vertexVectA, vertexVectB);
-		//std::tuple<Eigen::Vector3d, std::array<size_t, 2>> depth = getPenetrationDepthOfVertexAndFace(meshA, meshB, faceVectA, faceVectB, vertexVectA, vertexVectB);
+#endif
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
-		if (std::get<1>(depth)[0] == ULL_MAX && std::get<1>(depth)[1] == ULL_MAX)
+#ifndef USING_ALL_SEPARATE_AXES_FOR_DEPTH
+		Triangle trigon;
+		if (std::get<1>(depth)[0] == ULL_MAX && std::get<1>(depth)[1] == ULL_MAX) // means no distance, generally due to surface contact
 			interTriInfoList.push_back({ { std::move(gTirNaN), std::move(gTirNaN) }, {}, -std::get<0>(depth).norm() });
 		else if (std::get<1>(depth)[0] != ULL_MAX) //bool isLeft 
 		{
@@ -1000,59 +1202,73 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 					meshB.pose_ * meshB.vbo_[meshB.ibo_[get<1>(depth)[1]][2]] };
 			interTriInfoList.push_back({ { std::move(gTirNaN), std::move(trigon) }, {}, -std::get<0>(depth).norm() });
 		}
+#endif // !USING_ALL_SEPARATE_AXES
 #endif
-		//RelationOfTwoMesh::INTRUSIVE 
+#ifdef USING_ALL_SEPARATE_AXES_FOR_DEPTH
+		return { RelationOfTwoMesh::INTRUSIVE , depth };
+#else
 		return { RelationOfTwoMesh::INTRUSIVE , std::get<0>(depth) };
+#endif
 	}
 	//judge whether mesh entirely inside mesh 
-	//lefted, total inside, inner-contact or outer-contact
+	RelationOfPointAndMesh relation = RelationOfPointAndMesh::OUTER; //to avoid wholly enfold, exactly calculate depth
 	if (meshA.bounding_.contains(meshB.bounding_)) //boundingbox is world coord
 	{
 		// precondition: boundingbox inside, polyface not intersect, mesh isnot empty
-		Eigen::Affine3d mat = meshA.pose_.inverse() * meshB.pose_;
-		RelationOfPointAndMesh relation = isPointInsidePolyhedronROT(mat * (*meshB.vbo_.begin()), meshA);// already pre judge, mesh isnot empty
-		if (RelationOfPointAndMesh::OUTER == relation)
+		for (const auto& iterB : meshB.vbo_)
 		{
-			return isContact ?
-				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::CONTACT_OUTER, gVecZero} :
-				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::SEPARATE , gVecNaN };
+			relation = isPointInsidePolyhedronROT(meshB.pose_ * iterB, meshA);
+			if (RelationOfPointAndMesh::SURFACE != relation)
+				break;
 		}
-		else //if (RelationOfPointAndMesh::INNER == relation)
+		if (RelationOfPointAndMesh::OUTER != relation)//all-inner or contact-inner or all-contact
 		{
-			std::tuple<Eigen::Vector3d, std::array<size_t, 2>> depth = getPenetrationDepthOfTwoConvexBOX(meshA, meshB);
+			//std::tuple<Eigen::Vector3d, std::array<size_t, 2>> depth = _getPenetrationDepthOfTwoConvexBOX(meshA, meshB);
+			Eigen::Vector3d depth = _getPenetrationDepthOfTwoMeshsBOX(meshA, meshB);
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
 			std::array<Triangle, 3> triThree = { gTriYOZ ,gTriXOZ ,gTriXOY };
-			interTriInfoList.push_back({ { std::move(triThree[std::get<1>(depth)[0]]), std::move(gTirNaN)}, {}, -std::get<0>(depth).norm()});
+			interTriInfoList.push_back({ { std::move(triThree[0]), std::move(gTirNaN)}, {}, -depth.norm()});
 #endif
-			return isContact ?
-				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::INSEDE_BINA_CONT, std::get<0>(depth) } :
-				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::INSEDE_BINA , std::get<0>(depth) };
+#ifdef STATISTIC_DATA_COUNT
+			count_mesh_inside_mesh++;
+#endif	
+			return isContact ? //equal some surface
+				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::INSEDE_BINA_CONT, depth } :
+				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::INSEDE_BINA , depth };
 		}
 	}
 	else if (meshB.bounding_.contains(meshA.bounding_))
 	{
-		Eigen::Affine3d mat = meshB.pose_.inverse() * meshA.pose_;
-		RelationOfPointAndMesh relation = isPointInsidePolyhedronROT(mat * (*meshA.vbo_.begin()), meshB);
-		if (RelationOfPointAndMesh::OUTER == relation)
+		for (const auto& iterA : meshA.vbo_)
 		{
-			return isContact ?
-				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::CONTACT_OUTER, gVecZero} :
-				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::SEPARATE , gVecNaN };
+			relation = isPointInsidePolyhedronROT(meshA.pose_ * iterA, meshB);
+			if (RelationOfPointAndMesh::SURFACE != relation)
+				break;
 		}
-		else //if (RelationOfPointAndMesh::INNER == relation)
+		if (RelationOfPointAndMesh::OUTER != relation)
 		{
-			std::tuple<Eigen::Vector3d, std::array<size_t, 2>> depth = getPenetrationDepthOfTwoConvexBOX(meshA, meshB);
+			//std::tuple<Eigen::Vector3d, std::array<size_t, 2>> depth = _getPenetrationDepthOfTwoConvexBOX(meshA, meshB);
+			Eigen::Vector3d depth = _getPenetrationDepthOfTwoMeshsBOX(meshA, meshB);
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
 			std::array<Triangle, 3> triThree = { gTriYOZ ,gTriXOZ ,gTriXOY };
-			interTriInfoList.push_back({ { std::move(triThree[std::get<1>(depth)[0]]), std::move(gTirNaN)}, {}, -std::get<0>(depth).norm() });
+			interTriInfoList.push_back({ { std::move(triThree[0]), std::move(gTirNaN)}, {}, -depth.norm() });
 #endif
+#ifdef STATISTIC_DATA_COUNT
+			count_mesh_inside_mesh++;
+#endif		
 			return isContact ?
-				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::INSEDE_BINA_CONT, std::get<0>(depth) } :
-				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::INSEDE_BINA , std::get<0>(depth) };
+				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::INSEDE_BINA_CONT, depth } :
+				tuple<RelationOfTwoMesh, Vector3d>{ RelationOfTwoMesh::INSEDE_BINA , depth };
 		}
 	}
-	return { RelationOfTwoMesh::SEPARATE, gVecZero }; 
+	if (isContact)
+	{
+		return { RelationOfTwoMesh::CONTACT_OUTER, gVecZero };
+	}
+	return { RelationOfTwoMesh::SEPARATE, gVecZero };
 }
+
+
 
 // ClashSoft // return index of mesh_a and mesh_b ibo
 std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance)
@@ -1060,7 +1276,8 @@ std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const
 #ifdef STATISTIC_DATA_RECORD
 	std::array<std::array<Eigen::Vector3d, 3>, 2> triDistPair;
 #endif    
-	Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
+	//Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
+	Eigen::Affine3d relative_matrix = meshB.pose_.inverse() * meshA.pose_; //without revise
 	// distance > tolerance, return double-max, to decrease calculate
 	double d = DBL_MAX, temp; // the res
 	std::array<size_t, 2> index = { ULL_MAX, ULL_MAX };
@@ -1118,46 +1335,6 @@ bool isTwoMeshsIntersectGJK(const ModelMesh& meshA, const ModelMesh& meshB)
 double getTwoMeshsPenetrationDepthEPA(const ModelMesh& meshA, const ModelMesh& meshB)
 {
 	return 0.0;
-}
-
-// return the vertex of meshA
-std::vector<Eigen::Vector3d> _getInsideVertexSet(const ModelMesh& meshA, const ModelMesh& meshB)
-{
-	Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
-	// the vertex of meshA inside meshB
-	std::vector<Eigen::Vector3d> res;
-	//for (const auto& iter : meshA.vbo_)
-	//{
-	//	if (RelationOfPointAndMesh::INNER == isPointInsidePolyhedronROT(relative_matrix * iter, meshB.vbo_, meshB.ibo_))
-	//		res.push_back(meshA.pose_ * iter);
-	//}
-	return res;
-}
-
-std::vector<Eigen::Vector3d> _getIntersectVertexSet(const ModelMesh& meshA, const ModelMesh& meshB)
-{
-	Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
-	std::vector<Eigen::Vector3d> res;
-	//for (size_t i = 0; i < meshA.ibo_.size(); i++)
-	//{
-	//	std::array<Eigen::Vector3d, 3> triA = {
-	//			relative_matrix * meshA.vbo_[meshA.ibo_[i][0]],
-	//			relative_matrix * meshA.vbo_[meshA.ibo_[i][1]],
-	//			relative_matrix * meshA.vbo_[meshA.ibo_[i][2]] };
-	//	for (size_t j = 0; j < meshA.ibo_.size(); j++)
-	//	{
-	//		std::array<Eigen::Vector3d, 3> triB = {
-	//				meshB.vbo_[meshB.ibo_[j][0]],
-	//				meshB.vbo_[meshB.ibo_[j][1]],
-	//				meshB.vbo_[meshB.ibo_[j][2]] };
-	//		if (!isTwoTrianglesIntersectSAT(triA, triB))
-	//			continue;
-	//		std::array<Eigen::Vector3d, 2> pInter = getTwoTrianglesIntersectPoints(triA, triB);
-	//		res.push_back(meshB.pose_ * pInter[0]);
-	//		res.push_back(meshB.pose_ * pInter[1]);
-	//	}
-	//}
-	return res;
 }
 
 //manual body boolean

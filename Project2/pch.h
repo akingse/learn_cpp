@@ -71,13 +71,14 @@ typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>
 #define DLLEXPORT __declspec(dllexport)
 #endif
 #define STATISTIC_DATA_TESTFOR
-//#define USING_FLATBUFFERS_SERIALIZATION
+#define USING_FLATBUFFERS_SERIALIZATION
 //#define STATISTIC_DATA_COUNT
 
 #include "my_class_fun.h"		
 #include "calculateTriangle.h"		//DLL-API
+#include "calculateDataTree.h"
 #include "calculatePolyhedron.h"
-#include "test_file_rw.h" //file read and wirte
+#include "my_file_read_write.h" //file read and wirte
 
 //Eigen
 //typedef Vector3d Vec3;

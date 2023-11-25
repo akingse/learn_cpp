@@ -78,6 +78,11 @@ bool _opMoreInfo(const InterTriInfo& lhs, const InterTriInfo& rhs)
 {
 	return lhs.distance > rhs.distance;
 }
+bool _opEntityId(const InterTriInfo& lhs, const InterTriInfo& rhs)
+{
+	return lhs.entityPair[0] < rhs.entityPair[0];
+}
+
 
 // 三角形相交测试
 static void _test1()
@@ -364,6 +369,21 @@ static void _test3()
 //数据测试
 static void _test0()
 {
+	// 极限情形
+	Triangle triA = {
+			Vector3d(-3104.3029002511553, 203615.26133667614, -1.2996778653295850e-11),
+			Vector3d(-3286.9535856740031, 203476.36577477955, -1.2977752206211335e-11),
+			Vector3d(-2947.7343472114298, 203688.33348047285, -1.3011058896950091e-11),
+	};
+	Triangle triB = {
+			Vector3d(-3081.5417249541943, 203579.95860459140, -300.00000000001290),
+			Vector3d(-3092.6700295030910, 203597.76761461070, -300.00000000001290),
+			Vector3d(-3092.6700295030919, 203597.76761461070, 3999.9999999999854),
+	};
+	bool b1 = isTwoTrianglesIntersectSAT(triA, triB);
+	auto b2 = getTwoTrianglesIntersectPoints(triA, triB);
+
+
 	double rd = double(rand());// / RAND_MAX;
 	rd = double(rand());
 	rd = double(rand());
@@ -374,8 +394,8 @@ static void _test0()
 	Vector3d triB_0 = Vector3d(4924601.8102601077, -385940.89359764993, 5750.0000000000000);
 	Vector3d triB_1 = Vector3d(4924595.2577039087, -385951.32193110074, 5750.0000000000000);
 	Vector3d triB_2 = Vector3d(4924589.8109916430, -385975.18553675216, 5750.0000000000000);
-	Triangle triA = { triA_0, triA_1, triA_2 };
-	Triangle triB = { triB_0, triB_1, triB_2 };
+	//Triangle triA = { triA_0, triA_1, triA_2 };
+	//Triangle triB = { triB_0, triB_1, triB_2 };
 	//double d = getTrianglesDistanceSAT(triA, triB);
 
 	triA_0 = Vector3d(0, 0, 0);
@@ -437,10 +457,15 @@ static void _test4() //优化SAT的侵入距离计算，验证
 	std::vector<InterTriInfo> triInfo200;
 
 	// find diff
-	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034.bin");
+	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4093.bin");
 	//std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034_4.bin"); //more, latest
 	//std::vector<InterTriInfo> triInfo4034_all = read_InterTriInfo(binFilePath + "interTriInfo_4034_all.bin"); // all-iter
 	std::vector<InterTriInfo> triInfo4021 = read_InterTriInfo(binFilePath + "interTriInfo_4021.bin"); 
+	// matrix-E
+	std::vector<InterTriInfo> triInfo_A = read_InterTriInfo(binFilePath + "interTriInfo_4093.bin"); //more
+	std::vector<InterTriInfo> triInfo_B = read_InterTriInfo(binFilePath + "interTriInfo_3896.bin"); //less
+	std::vector<InterTriInfo> triInfo_A_only, triInfo_B_only;
+
 	std::sort(triInfo4021.begin(), triInfo4021.end(), _opLessInfo);
 	triInfoSq = triInfo4034;
 	std::sort(triInfo4034.begin(), triInfo4034.end(), _opMoreInfo);
@@ -460,6 +485,36 @@ static void _test4() //优化SAT的侵入距离计算，验证
 	double d_ins6, d_ins7; //-32.011189515236765
 	bool findflag = false;
 	bool isCon = false;
+	for (int a = 0; a < triInfo_A.size(); ++a)
+	{
+		bool findFlag = false;
+		for (int b = 0; b < triInfo_B.size(); ++b)
+		{
+			if ((triInfo_A[a].entityPair[0] == triInfo_B[b].entityPair[0] && triInfo_A[a].entityPair[1] == triInfo_B[b].entityPair[1]) ||
+				(triInfo_A[a].entityPair[0] == triInfo_B[b].entityPair[1] && triInfo_A[a].entityPair[1] == triInfo_B[b].entityPair[0]))
+				findFlag = true;
+		}
+		if (!findFlag)
+			triInfo_A_only.push_back(triInfo_A[a]);
+	}
+	for (int b = 0; b < triInfo_B.size(); ++b)
+		{
+		bool findFlag = false;
+		for (int a = 0; a < triInfo_A.size(); ++a)
+		{
+			if ((triInfo_A[a].entityPair[0] == triInfo_B[b].entityPair[0] && triInfo_A[a].entityPair[1] == triInfo_B[b].entityPair[1]) ||
+				(triInfo_A[a].entityPair[0] == triInfo_B[b].entityPair[1] && triInfo_A[a].entityPair[1] == triInfo_B[b].entityPair[0]))
+				findFlag = true;
+		}
+		if (!findFlag)
+			triInfo_B_only.push_back(triInfo_B[b]); //triInfo_B_only is empty
+	}
+	for (auto& iter : triInfo_A_only)
+	{
+		if (fabs(iter.distance) > eps)
+			cout << iter.entityPair[0] << ", " << iter.entityPair[1] << ", " << "    " << iter.distance << endl;
+	}
+
 	for (int i = 0; i < triInfo4034.size(); ++i )
 	{
 		bool findFlag = false;
@@ -500,6 +555,16 @@ static void _test4() //优化SAT的侵入距离计算，验证
 		if (!findFlag)
 			triInfoEntityDiff.push_back(triInfo4034[i]);
 	}
+	bool isInter;
+	size_t count_inter = 0;
+	std::sort(triInfoEntityDiff.begin(), triInfoEntityDiff.end(), _opEntityId);
+	for (auto& iter : triInfoEntityDiff)
+	{
+		cout << iter.entityPair[0] << ", " << iter.entityPair[1] << ", " << endl;
+		isInter = isTwoTrianglesIntersectSAT(iter.trianglePair[0], iter.trianglePair[1]);
+		if (isInter)
+			count_inter++;
+	}
 
 	//find difference 查找指定entityID
 	for (int i = 0; i < triInfo4034.size(); ++i)
@@ -530,7 +595,7 @@ static void _test4() //优化SAT的侵入距离计算，验证
 			d_ins7 = triInfo4034[i].distance;
 	}
 
-	for (int i = 0; i < triInfoSq.size(); ++i)
+	for (int i = 0; i < triInfoSq.size(); ++i) //按区间分类
 	{
 		if (triInfoSq[i].distance <= -100)
 			triInfo200.push_back(triInfoSq[i]); // d=-196(6569,4279) d=-101(6572,4267)
@@ -749,7 +814,7 @@ static void _test7()
 	}
 
 	//手动计算PenetrationDepth
-	std::tuple<Eigen::Vector3d, std::array<size_t, 2>> res1 = getPenetrationDepthOfTwoConvexALL(meshA, meshB);
+	std::tuple<Eigen::Vector3d, std::array<size_t, 2>> res1 = _getPenetrationDepthOfTwoConvexALL(meshA, meshB);
 	double d1 = std::get<0>(res1).norm();
 	bool isInter2=isTwoMeshsIntersectSAT(meshA, meshB);
 	std::tuple<RelationOfTwoMesh, Eigen::Vector3d> res2 = getTwoMeshsIntersectRelation(meshA, meshB);
@@ -799,8 +864,8 @@ static void _test7()
 
 static int enrol = []()->int
 {
+	_test0();
 #ifdef USING_FLATBUFFERS_SERIALIZATION
-	//_test0();
 	//_test4();
 	//_test5();
 	//_test6();

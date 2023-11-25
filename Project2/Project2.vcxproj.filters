@@ -43,14 +43,14 @@
     <Filter Include="test_thread">
       <UniqueIdentifier>{36f8d27e-e62a-4a23-9ae7-7eae5efe27d4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="test_triangle">
-      <UniqueIdentifier>{d75b882f-e37a-4826-a646-5b6d0ef51577}</UniqueIdentifier>
-    </Filter>
     <Filter Include="test_bin">
       <UniqueIdentifier>{d1dda523-7d2c-4073-9e11-04735d696ee9}</UniqueIdentifier>
     </Filter>
     <Filter Include="test_pattern">
       <UniqueIdentifier>{bc964f22-f8dc-4621-a47d-f5eebd3d32d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="my_triangle">
+      <UniqueIdentifier>{d75b882f-e37a-4826-a646-5b6d0ef51577}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -163,21 +163,18 @@
       <Filter>test_case</Filter>
     </ClCompile>
     <ClCompile Include="calculateTriangle.cpp">
-      <Filter>test_triangle</Filter>
+      <Filter>my_triangle</Filter>
     </ClCompile>
     <ClCompile Include="my_class_fun.cpp">
-      <Filter>test_triangle</Filter>
+      <Filter>my_triangle</Filter>
     </ClCompile>
     <ClCompile Include="my_triangle_intersect.cpp">
-      <Filter>test_triangle</Filter>
+      <Filter>my_triangle</Filter>
     </ClCompile>
     <ClCompile Include="test_function.cpp">
       <Filter>test_gram</Filter>
     </ClCompile>
-    <ClCompile Include="test_serialize.cpp">
-      <Filter>test_bin</Filter>
-    </ClCompile>
-    <ClCompile Include="test_file_rw.cpp">
+    <ClCompile Include="my_file_read_write.cpp">
       <Filter>test_bin</Filter>
     </ClCompile>
     <ClCompile Include="test_calculate0.cpp">
@@ -199,7 +196,7 @@
       <Filter>test_gram</Filter>
     </ClCompile>
     <ClCompile Include="calculatePolyhedron.cpp">
-      <Filter>test_triangle</Filter>
+      <Filter>my_triangle</Filter>
     </ClCompile>
     <ClCompile Include="test_binfile_debug.cpp">
       <Filter>test_case</Filter>
@@ -234,6 +231,15 @@
     <ClCompile Include="test_thread_3.cpp">
       <Filter>test_thread</Filter>
     </ClCompile>
+    <ClCompile Include="test_serialize.cpp">
+      <Filter>test_dsa</Filter>
+    </ClCompile>
+    <ClCompile Include="calculateDataTree.cpp">
+      <Filter>my_triangle</Filter>
+    </ClCompile>
+    <ClCompile Include="test_clipper.cpp">
+      <Filter>test_case</Filter>
+    </ClCompile>
     <ClCompile Include="test_thread_4.cpp">
       <Filter>test_thread</Filter>
     </ClCompile>
@@ -246,13 +252,13 @@
       <Filter>test_template</Filter>
     </ClInclude>
     <ClInclude Include="calculateTriangle.h">
-      <Filter>test_triangle</Filter>
+      <Filter>my_triangle</Filter>
     </ClInclude>
     <ClInclude Include="my_class_fun.h">
-      <Filter>test_triangle</Filter>
+      <Filter>my_triangle</Filter>
     </ClInclude>
     <ClInclude Include="my_triangle_intersect.h">
-      <Filter>test_triangle</Filter>
+      <Filter>my_triangle</Filter>
     </ClInclude>
     <ClInclude Include="test_function.h">
       <Filter>test_gram</Filter>
@@ -260,14 +266,17 @@
     <ClInclude Include="test_serialize.h">
       <Filter>test_bin</Filter>
     </ClInclude>
-    <ClInclude Include="test_file_rw.h">
+    <ClInclude Include="my_file_read_write.h">
       <Filter>test_bin</Filter>
     </ClInclude>
     <ClInclude Include="my_geometry.h">
       <Filter>test_math</Filter>
     </ClInclude>
     <ClInclude Include="calculatePolyhedron.h">
-      <Filter>test_triangle</Filter>
+      <Filter>my_triangle</Filter>
+    </ClInclude>
+    <ClInclude Include="calculateDataTree.h">
+      <Filter>my_triangle</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

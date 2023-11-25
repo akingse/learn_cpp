@@ -18,8 +18,8 @@
 | _isPointInTriangle<br />2D<br />3D                           | 2D，去if优化                                                 | time = 0.901s<br/>time = 0.903s<br/>time = 0.907s<br />3D<br />time = 0.737s<br/>time = 0.749s<br/>time = 0.732s |                                                              |
 | double<br />_isSegmentCrossTriangleSurface                   |                                                              | time = 1.732s<br/>time = 1.703s<br/>time = 1.805s            | time = 5.654s<br/>time = 5.792s<br/>time = 5.812s            |
 | double<br />getTriangleBoundingCircle                        |                                                              | 先判钝角<br />time = 4.735s<br/>time = 4.797s<br/>time = 4.817s |                                                              |
-| _isTwoTriangles<br />BoundingBoxIntersect<br />三角面的包围盒求交 |                                                              | eigen<br />time = 1.617s<br/>time = 1.568s<br/>time = 1.495s<br />手写<br />time = 1.228s<br/>time = 1.242s<br/>time = 1.22s |                                                              |
-| 软碰撞<br />getTriDist<br />getTrianglesDistanceSAT          | using SAT<br />time = 47.853s<br/>time = 47.723s<br/>time = 47.657s<br />openMP<br />time = 7.771s<br/>time = 8.011s<br/>time = 8.128s | time = 56.686s<br/>time = 57.677s<br/>time = 57.643s<br />openMP<br />time = 33.12s<br/>time = 38.761s<br/>time = 39.656s | time = 9.058s<br/>time = 9.336s<br/>time = 9.22s<br />分开三角形<br />time = 6.302s<br/>time = 6.497s<br/>time = 6.521s |
+| isTwoTrianglesBoundingBox<br />BoundingBoxIntersect<br />三角面的包围盒求交 |                                                              | eigen<br />time = 1.617s<br/>time = 1.568s<br/>time = 1.495s<br />手写<br />time = 1.228s<br/>time = 1.242s<br/>time = 1.22s |                                                              |
+| 软碰撞<br />getTriDist<br />getTrianglesDistanceSAT          | using SAT<br />time = 47.853s<br/>time = 47.723s<br/>time = 47.657s<br />openMP<br />time = 7.771s<br/>time = 8.011s<br/>time = 8.128s | time = 56.686s<br/>time = 57.677s<br/>time = 57.643s<br />openMP<br />time = 33.12s<br/>time = 38.761s<br/>time = 39.656s |                                                              |
 | 包围盒求交<br />AlignedBox3d::intersection                   | 1e8                                                          | time = 0.658s<br/>time = 0.616s<br/>time = 0.626s            |                                                              |
 | isTwoTrianglesIntersectSAT<br />分离轴定理                   | laptop strix<br />time = 4.271s<br/>time = 4.36s<br/>time = 4.311s | time = 8.723s<br/>time = 8.805s<br/>time = 8.774s<br />openmp<br />time = 1.17s<br/>time = 1.281s<br/>time = 1.277s | bug修复<br />time = 11.668s<br/>time = 11.145s<br/>time = 11.379s |
 | isTriangleAndBoundingBox<br />三角面与包围盒                 |                                                              | time = 7.706s<br/>time = 7.596s<br/>time = 8.258s            |                                                              |
@@ -31,7 +31,7 @@
 | isPointInsidePolyhedronFL                                    | mesh 5233/2=208016546                                        | time=24.209s                                                 |                                                              |
 | isPointInsidePolyhedronCL                                    | mesh 5233/2                                                  | time=19.549s                                                 |                                                              |
 | isPointInsidePolyhedronAZ<br />包含isPointRayAcrossTriangleSAT | mesh 5233/20                                                 | time=40.587s                                                 |                                                              |
-| isPointInsidePolyhedronROT                                   | mesh 5233/20ffvf                                             | time=13.061s                                                 |                                                              |
+| isPointInsidePolyhedronROT                                   | mesh 5233/20                                                 | time=13.061s                                                 |                                                              |
 
 
 
@@ -64,31 +64,12 @@
 | 硬碰撞                   | 0.324                                                        | 4.638000s<br />cost: 3.22s                     |                      |
 | 软碰撞                   |                                                              | d=1mm 4.379000                                 |                      |
 |                          | 优化<br />no：3.821000/3.850000/3.963000<br />no+omp: 1.760000/1.613000/1.546000<br />head:3.853000/3.787000/3.603000<br />head+omp:1.681000/1.635000/1.646000 |                                                |                      |
-| 模型统计                 | 地漏排水：10<br />消防：1<br />洗手池：6<br />马桶：7        |                                                |                      |
+| 模型统计。               | 地漏排水：10<br />消防：1<br />洗手池：6<br />马桶：7        |                                                |                      |
 |                          |                                                              |                                                |                      |
 
 depth debug
 
-数据，revit_2w 工字钢
 
--229.09497356522479 18509, 18510
-
--170.90502643489160 20009, 20010
-
--22.674650284810923 19929, 19930
-
--1.0186340659856796e-10 15507, 15508
-
-fileName = "bin_file/interTriInfo_4034.bin"
-
-严重性	代码	说明	项目	文件	行	禁止显示状态
-错误	C4996	'strerror': This function or variable may be unsafe. Consider using strerror_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.	P3d2Stl	C:\Users\Aking\source\repos\learn_cpp\Project2\test_file_rw.cpp	231	
-
-
-
----
-
-### 功能边界
 
 1. 固有限制：此版本碰撞检查全部基于离散后的mesh数据，碰撞精度受限于mesh精度；当离散接口发生错误时，将无法得到相关结果；
 2. 碰撞最小单元：BPEntity；
@@ -97,13 +78,9 @@ fileName = "bin_file/interTriInfo_4034.bin"
 
 
 
-D1=80
-
-D2=210
-
-D3=56
 
 
+---
 
 ## 碰撞检查应用场景和需求
 
@@ -255,7 +232,12 @@ return true;
 2不共面，15个分离轴，6个边各自法向量和对边叉积
     每个分离轴，计算三角形在轴上的投影，有分离则返回false，最后返回true
     
+使用分离轴需要注意：
+    若两个三角面有某个公共平行边，cross得出的分离轴将是零向量，此后的projection投影均为零，将无法正确计算穿透深度等；
+    机器精度的微小误差将影响分离轴的结果判断，比如分离轴是否单位化，法向量的cross边选取；
     
+
+
 ```
 
 
@@ -386,3 +368,24 @@ bug修复
 
 
 新bug，mesh为空，君启小区模型，count_err_empty_mesh="44345"
+
+
+
+### 函数效率测试
+
+| isTwoSegmentsCollinearCoincident | optimal                           | time                  |
+| -------------------------------- | --------------------------------- | --------------------- |
+| call 173480                      | <br />cross norm                  | 10ms                  |
+| normalized更加耗时               | normalized<br />cross squaredNorm | 11ms                  |
+|                                  | normalized<br />_getDistance      | 12ms                  |
+|                                  | squaredNorm<br />cross norm       | 5.510 5.386 5.452     |
+|                                  | norm<br />cross norm              | 5.350 5.205 5.201 ms. |
+
+
+
+随机测试
+
+
+
+
+

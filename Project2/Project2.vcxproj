@@ -72,13 +72,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)..\TPL\CGAL-5.5.2;$(SolutionDir)..\TPL\CGAL-5.5.2\include;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include;$(SolutionDir)..\TPL\eigen-3.4.0;$(SolutionDir)..\TPL\boost-1.81.0\;C:\Qt\6.4.3\msvc2019_64\include\;C:\Qt\6.4.3\msvc2019_64\include\QtWidgets\QApplication;$(SolutionDir)auto_include;$(SolutionDir)Project_cal;C:\Users\Aking\source\repos\bimbase\Include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\TPL\CGAL-5.5.2;$(SolutionDir)..\TPL\CGAL-5.5.2\include;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include;$(SolutionDir)..\TPL\eigen-3.4.0;C:\Users\Aking\source\repos\TPL\eigen-3.4.0;$(SolutionDir)..\TPL\boost-1.81.0\;C:\Users\Aking\source\repos\TPL\boost-1.81.0;C:\Qt\6.4.3\msvc2019_64\include\;C:\Qt\6.4.3\msvc2019_64\include\QtWidgets\QApplication;$(SolutionDir)auto_include;$(SolutionDir)Project_cal;C:\Users\Aking\source\repos\bimbase\Include;D:\Alluser\akingse\repos\bimbase\Include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\link</OutDir>
     <IntDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\compile</IntDir>
-    <LibraryPath>$(SolutionDir)..\TPL\boost-1.81.0\stage\lib;$(SolutionDir)..\TPL\boost-1.81.0\libs;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)x64\$(ConfigurationName);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)..\TPL\boost-1.81.0\stage\lib;$(SolutionDir)..\TPL\boost-1.81.0\libs;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib;$(SolutionDir)build\Project1\;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)x64\$(ConfigurationName);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)..\TPL\CGAL-5.5.2;$(SolutionDir)..\TPL\CGAL-5.5.2\include;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include;$(SolutionDir)..\TPL\eigen-3.4.0;$(SolutionDir)..\TPL\boost-1.81.0\;C:\Qt\6.4.3\msvc2019_64\include\;C:\Qt\6.4.3\msvc2019_64\include\QtWidgets\QApplication;$(SolutionDir)auto_include;$(SolutionDir)Project_cal;C:\Users\Aking\source\repos\bimbase\Include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\TPL\CGAL-5.5.2;$(SolutionDir)..\TPL\CGAL-5.5.2\include;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include;$(SolutionDir)..\TPL\eigen-3.4.0;C:\Users\Aking\source\repos\TPL\eigen-3.4.0;$(SolutionDir)..\TPL\boost-1.81.0\;C:\Users\Aking\source\repos\TPL\boost-1.81.0;C:\Qt\6.4.3\msvc2019_64\include\;C:\Qt\6.4.3\msvc2019_64\include\QtWidgets\QApplication;$(SolutionDir)auto_include;$(SolutionDir)Project_cal;C:\Users\Aking\source\repos\bimbase\Include;D:\Alluser\akingse\repos\bimbase\Include;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\link</OutDir>
     <IntDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\compile</IntDir>
     <LibraryPath>$(SolutionDir)..\TPL\boost-1.81.0\stage\lib;$(SolutionDir)..\TPL\boost-1.81.0\libs;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib;$(SolutionDir)build\Project1\;$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)x64\$(ConfigurationName);$(LibraryPath)</LibraryPath>
@@ -117,7 +117,7 @@
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>Default</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)auto_include;$(SolutionDir)Project_cal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)auto_include</AdditionalIncludeDirectories>
       <LanguageStandard>Default</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -125,12 +125,14 @@
       <OpenMPSupport>
       </OpenMPSupport>
       <BasicRuntimeChecks>UninitializedLocalUsageCheck</BasicRuntimeChecks>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <MinimalRebuild>true</MinimalRebuild>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)x64\$(ConfigurationName)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libgmp-10.lib;libmpfr-4.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreLinkEvent>
       <Command>$(SolutionDir)tools\python3-embed\python.exe $(SolutionDir)tools\export_header.py  $(ProjectName)</Command>
@@ -145,7 +147,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <Optimization>MaxSpeed</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)auto_include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)auto_include</AdditionalIncludeDirectories>
       <LanguageStandard>Default</LanguageStandard>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <DebugInformationFormat>None</DebugInformationFormat>
@@ -161,13 +163,14 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)build\Project1\$(PlatformTarget)\link;$(SolutionDir)x64\$(ConfigurationName)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libgmp-10.lib;libmpfr-4.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreLinkEvent>
       <Command>$(SolutionDir)tools\python3-embed\python.exe $(SolutionDir)tools\export_header.py  $(ProjectName)</Command>
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="calculateDataTree.cpp" />
     <ClCompile Include="calculatePolyhedron.cpp" />
     <ClCompile Include="calculateTriangle.cpp" />
     <ClCompile Include="main.cpp" />
@@ -177,10 +180,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="test_clipper.cpp" />
     <ClCompile Include="test_mutex.cpp" />
     <ClCompile Include="test_binfile_debug.cpp" />
     <ClCompile Include="test_case_triangle.cpp" />
-    <ClCompile Include="test_file_rw.cpp" />
+    <ClCompile Include="my_file_read_write.cpp" />
     <ClCompile Include="test_fun_speed.cpp" />
     <ClCompile Include="test_memfn.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -252,12 +256,13 @@
     <ClCompile Include="my_triangle_intersect.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="calculateDataTree.h" />
     <ClInclude Include="calculatePolyhedron.h" />
     <ClInclude Include="calculateTriangle.h" />
     <ClInclude Include="my_class_fun.h" />
     <ClInclude Include="my_geometry.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="test_file_rw.h" />
+    <ClInclude Include="my_file_read_write.h" />
     <ClInclude Include="test_function.h" />
     <ClInclude Include="test_serialize.h" />
     <ClInclude Include="test_template0.h" />

@@ -59,8 +59,8 @@ int main_vector()
 	char* pI;
 	pI = (char*)&insa + sizeof(void*); //only one pointor
 
-	int* pInt = (int*)(pI);		pI += sizeof(int); //len(char*)=1byte, as a unit length
 	//int* p1 = (int*)&insa + 1;
+	int* pInt = (int*)(pI);		pI += sizeof(int); //len(char*)=1byte, as a unit length
 	Vec3* pVec = (Vec3*)(pI);	pI += sizeof(Vec3);
 	char* pChar = (char*)(pI);	pI += sizeof(char); //&insa + sizeof(Vec3);
 	double* pDouble = (double*)(pI); //&insa + sizeof(char);
