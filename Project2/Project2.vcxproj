@@ -237,6 +237,7 @@
     <ClCompile Include="test_template0.cpp" />
     <ClCompile Include="test_thread_2.cpp" />
     <ClCompile Include="test_thread_3.cpp" />
+    <ClCompile Include="test_thread_4.cpp" />
     <ClCompile Include="test_thread_pool.cpp" />
     <ClCompile Include="test_tree.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>

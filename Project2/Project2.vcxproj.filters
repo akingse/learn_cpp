@@ -234,6 +234,9 @@
     <ClCompile Include="test_thread_3.cpp">
       <Filter>test_thread</Filter>
     </ClCompile>
+    <ClCompile Include="test_thread_4.cpp">
+      <Filter>test_thread</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">

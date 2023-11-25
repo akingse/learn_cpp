@@ -193,6 +193,10 @@ Raster=Screen，pixel
 
 视口变换矩阵， M_viewport=translate(w/2,h/2,0)**scale(w/2,h/2,1)
 
+
+
+- ### 【7】：光栅化（深度测试与抗锯齿）
+
 三角形，最基础的多边形，一定共面，内外清晰，内部渐变； 
 
 三角形与像素的关系，判断像素中心是否在三角形内； is_inside_2d(tri, x, y)
@@ -201,27 +205,88 @@ using包围盒，逐行扫描；锯齿aliasing
 
 #### Antialiasing and Z-Buffering 抗锯齿
 
+信号处理 jaggies锯齿 aliasing学名 artifact-固有缺陷
 
+先模糊后采样Filter then sample，傅里叶展开，周期函数都可以写成cossin的线性组合
 
+![image-20231025221000773](../../../../../AppData/Roaming/Typora/typora-user-images/image-20231025221000773.png)
 
+MSAA
 
 Occlusions and Visibility
-
-
-
-
-
-- ### 【7】：光栅化（深度测试与抗锯齿）
 
  
 
 - ### 【8】：着色（光照与基本着色模型）
 
- 
+ illumination 光照
+
+shading 着色
+
+pipeline 图形管线
+
+可见性 visibility occlusion
+
+解决方法：深度缓存 z-buffer
+
+画家算法，逐步遮挡覆盖
+
+逐个像素计算深度
+
+```c
+for (each triangle T)
+    for (each sample (x,y,z) in T)
+        if (z < zbuffer[x,y]) // closest sample so far
+            framebuffer[x,y] = rgb; // update color
+            zbuffer[x,y] = z; // update depth
+        else
+        	; // do nothing, this sample is occluded
+
+```
+
+
 
 - ### 【9】：着色（着色频率、图形管线、纹理映射）
 
+ shading 着色，引入明暗和颜色，应用不同材质 material；
+
+shading是局部的，不考虑遮挡的阴影
+
+布林冯-着色模型（3种光项，漫反射，高光，环境光）
+
+漫反射 diffuse reflection
+
+![image-20231116230138963](../../../../../AppData/Roaming/Typora/typora-user-images/image-20231116230138963.png)
+
+max(0,n·l)，只考虑同向夹角；
+
+漫反射与观察方向无关，即与v无关；
+
+高光 specular
+
+相机和光源夹角在范围内；半程向量，用于简化计算；
+
+![image-20231124235354238](../../../../../AppData/Roaming/Typora/typora-user-images/image-20231124235354238.png)
+
+衡量向量是否接近，指数p控制cos曲线下降，最终用于控制高光区域大小；
+
+环境光 ambient
+
+被环境（中的物体）反射的光线照亮；假设任何一个点接收到来自环境光是相同的；是一个常数，是某一种颜色，保证没有地方是黑的；
+$$
+L_a=k_a I_a\\
+
+L=L_a+L_d+L_s
+$$
+着色频率 shading frequency
+
+flat shading面face着色，gouraud shading顶点vertex着色，phong shading像素pixel着色；
+
+如何确定polyface顶点的法向量，
+
  
+
+
 
 - ### 【10】：几何（基本表示方法）
 
