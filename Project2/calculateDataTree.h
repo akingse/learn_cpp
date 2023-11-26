@@ -129,6 +129,22 @@ struct KdTreeNode3d
 	// other data
 	long long m_index = -1; // the middle node's index
 	size_t m_dimension = 0; // also means m_depth
+	KdTreeNode3d() = default;
+	KdTreeNode3d(const psykronix::Polyface3d& polyface, size_t dimension)
+	{
+		m_dimension = dimension;
+		m_bound = polyface.m_bound;
+		m_index = polyface.m_index;
+		//m_left = nullptr; m_right = nullptr;
+	}
+	bool isLeaf() const
+	{
+		return m_index != -1;
+	}
+	bool single() const
+	{
+		return m_left != nullptr && m_right == nullptr;
+	}
 };
 
 
@@ -155,5 +171,9 @@ public:
 	}
 	std::vector<size_t> findIntersect(const psykronix::Polyface3d& polyface, double tolerance = 0.0) const; //searchFromKdTree
 	std::vector<std::tuple<size_t, bool>> findIntersectClash(const psykronix::Polyface3d& polyface, double tolerance) const; // bool means soft-clash
+	bool insert(const psykronix::Polyface3d& polyface); //only insert the not exsit index
+	bool remove(size_t index);
+	bool remove(const psykronix::Polyface3d& polyface); //find by bound-box
+	bool update(const psykronix::Polyface3d& polyface); //using polyface self index
 
 };
