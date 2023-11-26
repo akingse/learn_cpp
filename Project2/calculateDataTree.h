@@ -172,8 +172,8 @@ public:
 	std::vector<size_t> findIntersect(const psykronix::Polyface3d& polyface, double tolerance = 0.0) const; //searchFromKdTree
 	std::vector<std::tuple<size_t, bool>> findIntersectClash(const psykronix::Polyface3d& polyface, double tolerance) const; // bool means soft-clash
 	bool insert(const psykronix::Polyface3d& polyface); //only insert the not exsit index
-	bool remove(size_t index);
-	bool remove(const psykronix::Polyface3d& polyface); //find by bound-box
+	//bool remove(size_t index);
+	bool remove(const psykronix::Polyface3d& polyface); //find by polyface index
 	bool update(const psykronix::Polyface3d& polyface); //using polyface self index
 
 };

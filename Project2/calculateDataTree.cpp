@@ -438,10 +438,12 @@ bool KdTree3d::insert(const psykronix::Polyface3d& polyface)
 	return true;
 }
 
-bool KdTree3d::remove(size_t index)
+//bool KdTree3d::remove(size_t index)
+bool KdTree3d::remove(const psykronix::Polyface3d& polyface)
 {
 	//retrieve first
 	//bool isFind = false;
+	long long index = polyface.m_index;
 	//std::function<bool(shared_ptr<KdTreeNode3d>&)> _searchKdTree = [&](shared_ptr<KdTreeNode3d>& node)->bool
 	std::function<tuple<bool, AlignedBox3d>(shared_ptr<KdTreeNode3d>&)> _searchKdTree = [&](shared_ptr<KdTreeNode3d>& node)
 		{
@@ -485,11 +487,6 @@ bool KdTree3d::remove(size_t index)
 			return tuple<bool, AlignedBox3d>{false, {}};
 		};
 	return std::get<0>(_searchKdTree(m_kdTree));
-}
-
-bool KdTree3d::remove(const psykronix::Polyface3d& polyface)
-{
-	return remove(polyface.m_index);
 }
 
 bool KdTree3d::update(const psykronix::Polyface3d& polyface)
