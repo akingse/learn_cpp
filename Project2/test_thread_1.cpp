@@ -423,3 +423,12 @@ static int main_thread()//不用就会忘
 	thread2.join();
 	return 0;
 }
+
+
+static int main6()
+{
+	auto tl = [](int i=1) //可以使用缺省参数/默认参数
+		{ 
+
+		};
+}

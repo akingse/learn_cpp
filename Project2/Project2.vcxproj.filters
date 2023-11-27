@@ -240,6 +240,9 @@
     <ClCompile Include="test_clipper.cpp">
       <Filter>test_case</Filter>
     </ClCompile>
+    <ClCompile Include="test_thread_4.cpp">
+      <Filter>test_thread</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">

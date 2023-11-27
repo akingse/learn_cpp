@@ -71,7 +71,7 @@ typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>
 #define DLLEXPORT __declspec(dllexport)
 #endif
 #define STATISTIC_DATA_TESTFOR
-#define USING_FLATBUFFERS_SERIALIZATION
+//#define USING_FLATBUFFERS_SERIALIZATION //only open in ThinkPad
 //#define STATISTIC_DATA_COUNT
 
 #include "my_class_fun.h"		

@@ -21,7 +21,7 @@ using namespace psykronix;
 #ifdef STATISTIC_DATA_COUNT
 std::atomic<size_t> count_isTwoTrisInter = 0, count_getTrisDistance = 0, count_isTrisBoundBoxInter = 0, count_isTrisAndBoxInter = 0,
 count_pointInTri = 0, count_err_degen_tri = 0,
-count_err_inputbox = 0, count_err_inter_dist = 0, count_err_repeat_tri = 0, 
+count_err_inputbox = 0, count_err_inter_dist = 0, count_err_repeat_tri = 0,
 count_err_tris_sepa = 0, count_err_tris_inter = 0;
 extern std::atomic<size_t> count_err_degen_tri, count_trigon_coplanar;
 #endif //STATISTIC_DATA_COUNT
@@ -238,7 +238,7 @@ bool psykronix::isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vect
 			Vector3d(0,0,1),
 			vecSeg.cross(Vector3d(1,0,0)),
 			vecSeg.cross(Vector3d(0,1,0)),
-			vecSeg.cross(Vector3d(0,0,1)) } }; 
+			vecSeg.cross(Vector3d(0,0,1)) } };
 	Vector3d vecBox = box.max() - box.min();
 	std::array<Eigen::Vector3d, 8> boxVtx = { { //box.min() is origin
 			Vector3d(0,0,0),
@@ -301,8 +301,8 @@ bool psykronix::isSegmentCrossTriangle(const std::array<Vector3d, 2>& segment, c
 		return false; //+-*x< 0,6,3,2,4.5
 	// double straddling test x3
 	return isTwoSegmentsIntersect(segment, { trigon[0], trigon[1] }) ||
-			isTwoSegmentsIntersect(segment, { trigon[1], trigon[2] }) ||
-			isTwoSegmentsIntersect(segment, { trigon[2], trigon[0] });
+		isTwoSegmentsIntersect(segment, { trigon[1], trigon[2] }) ||
+		isTwoSegmentsIntersect(segment, { trigon[2], trigon[0] });
 
 	//bool edgea2segm = ((segment[0] - trigon[0]).cross(trigon[1] - trigon[0])).dot((segment[1] - trigon[0]).cross(trigon[1] - trigon[0])) < eps;
 	//bool segm2edgea = ((trigon[1] - segment[0]).cross(vecSeg)).dot((trigon[0] - segment[0]).cross(vecSeg)) < eps;
@@ -1182,91 +1182,91 @@ double getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const
 	std::array<array<Vector3d, 2>, 3> edgesB = { { {triB[0], triB[1]},
 												{ triB[1], triB[2] },
 												{ triB[2], triB[0] } } };
-	auto _getDistanceOfPointAndSegmentINF = [&](const Vector3d& point, const std::array<Vector3d, 2>& segm)->double
-	{
-		vecSeg = segm[1] - segm[0];// not zero
-		double projection = vecSeg.dot(point);
-		//the projection must on segment
-		if (vecSeg.dot(segm[1]) < projection || projection < vecSeg.dot(segm[0]))
-			return DBL_MAX;
-		double k = vecSeg.dot(point - segm[0]) / vecSeg.dot(vecSeg);
-		return (segm[0] - point + k * vecSeg).squaredNorm();
-	};
-	auto _getDistanceOfTwoSegmentsINF = [&](const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)->double
-	{
-		//Vector3d vectA = segmA[1] - segmA[0];
-		//Vector3d vectB = segmB[1] - segmB[0];
-		double delta1 = (segmB[0] - segmA[0]).dot(vectA);
-		double delta2 = (segmB[0] - segmA[0]).dot(vectB);
-		// 2*2 inverse matrix, 1/|M|*(exchange main diagonal and -1 counter-diagonal)
-		double deno = -vectA.dot(vectA) * vectB.dot(vectB) + vectA.dot(vectB) * vectB.dot(vectA);//a*d-b*c
-		if (deno == 0.0) // parallel, must exclude, than distance of point to segment in next function
-			return DBL_MAX;
-		double kA = 1 / deno * (-vectB.dot(vectB) * delta1 + vectB.dot(vectA) * delta2);
-		double kB = 1 / deno * (-vectA.dot(vectB) * delta1 + vectA.dot(vectA) * delta2);
-		//	Vector3d pointA = segmA[0] + kA * vectA;
-		//	Vector3d pointB = segmB[0] + kB * vectB;
-		//whether two intersect-point inside segments
-		if (0 <= kA && kA <= 1 && 0 <= kB && kB <= 1)
-			return (segmA[0] + kA * vectA - segmB[0] - kB * vectB).squaredNorm();
-		return DBL_MAX; // nearest point outof segments
-	};
+	auto _getDistanceOfPointAndSegmentINF = [&vecSeg](const Vector3d& point, const std::array<Vector3d, 2>& segm)->double
+		{
+			vecSeg = segm[1] - segm[0];// not zero
+			double projection = vecSeg.dot(point);
+			//the projection must on segment
+			if (vecSeg.dot(segm[1]) < projection || projection < vecSeg.dot(segm[0]))
+				return DBL_MAX;
+			double k = vecSeg.dot(point - segm[0]) / vecSeg.dot(vecSeg);
+			return (segm[0] - point + k * vecSeg).squaredNorm();
+		};
+	auto _getDistanceOfTwoSegmentsINF = [&vectA, &vectB](const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)->double
+		{
+			//Vector3d vectA = segmA[1] - segmA[0];
+			//Vector3d vectB = segmB[1] - segmB[0];
+			double delta1 = (segmB[0] - segmA[0]).dot(vectA);
+			double delta2 = (segmB[0] - segmA[0]).dot(vectB);
+			// 2*2 inverse matrix, 1/|M|*(exchange main diagonal and -1 counter-diagonal)
+			double deno = -vectA.dot(vectA) * vectB.dot(vectB) + vectA.dot(vectB) * vectB.dot(vectA);//a*d-b*c
+			if (deno == 0.0) // parallel, must exclude, than distance of point to segment in next function
+				return DBL_MAX;
+			double kA = 1 / deno * (-vectB.dot(vectB) * delta1 + vectB.dot(vectA) * delta2);
+			double kB = 1 / deno * (-vectA.dot(vectB) * delta1 + vectA.dot(vectA) * delta2);
+			//	Vector3d pointA = segmA[0] + kA * vectA;
+			//	Vector3d pointB = segmB[0] + kB * vectB;
+			//whether two intersect-point inside segments
+			if (0 <= kA && kA <= 1 && 0 <= kB && kB <= 1)
+				return (segmA[0] + kA * vectA - segmB[0] - kB * vectB).squaredNorm();
+			return DBL_MAX; // nearest point outof segments
+		};
 #define EDGE_PAIR_CREATE_AXIS_OPTMIZE
 #ifdef EDGE_PAIR_CREATE_AXIS_OPTMIZE
-	auto _getNearestAxisOfTwoSegments = [&](const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB)// major capture axis
-	{
-		//enum RelationTwoSegment
-		//{
-		//	NearestMiddleMiddle, // edgeA.corss(edgeB)
-		//	NearestMiddleVertex, // (vertexA-vertexB).cross(edgesB).cross(edgesB)
-		//	NearestVertexVertex, // vertexA-vertexB
-		//};
-		vectA = segmA[1] - segmA[0];
-		vectB = segmB[1] - segmB[0];
-		dtemp = _getDistanceOfTwoSegmentsINF(segmA, segmB);
-		if (dtemp < dmin) //!= DBL_MAX)
+	auto _getNearestAxisOfTwoSegments = [&/*many*/](const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB)// major capture axis
 		{
-			direction = vectA.cross(vectB);
-			dmin = dtemp;
-			return;
-		}
-		for (const auto& iterA : segmA)
-		{
-			dtemp = _getDistanceOfPointAndSegmentINF(iterA, segmB);
-			if (dtemp == DBL_MAX)
+			//enum RelationTwoSegment
+			//{
+			//	NearestMiddleMiddle, // edgeA.corss(edgeB)
+			//	NearestMiddleVertex, // (vertexA-vertexB).cross(edgesB).cross(edgesB)
+			//	NearestVertexVertex, // vertexA-vertexB
+			//};
+			vectA = segmA[1] - segmA[0];
+			vectB = segmB[1] - segmB[0];
+			dtemp = _getDistanceOfTwoSegmentsINF(segmA, segmB);
+			if (dtemp < dmin) //!= DBL_MAX)
 			{
-				dtemp = (iterA - segmB[1]).squaredNorm();// total 4 times compare
-				if (dtemp < dmin)
+				direction = vectA.cross(vectB);
+				dmin = dtemp;
+				return;
+			}
+			for (const auto& iterA : segmA)
+			{
+				dtemp = _getDistanceOfPointAndSegmentINF(iterA, segmB);
+				if (dtemp == DBL_MAX)
 				{
-					direction = iterA - segmB[1];
+					dtemp = (iterA - segmB[1]).squaredNorm();// total 4 times compare
+					if (dtemp < dmin)
+					{
+						direction = iterA - segmB[1];
+						dmin = dtemp;
+					}
+				}
+				else if (dtemp < dmin)
+				{
+					direction = (iterA - segmB[0]).cross(vectB).cross(vectB);
 					dmin = dtemp;
 				}
 			}
-			else if (dtemp < dmin)
+			for (const auto& iterB : segmB)
 			{
-				direction = (iterA - segmB[0]).cross(vectB).cross(vectB);
-				dmin = dtemp;
-			}
-		}
-		for (const auto& iterB : segmB)
-		{
-			dtemp = _getDistanceOfPointAndSegmentINF(iterB, segmA);
-			if (dtemp == DBL_MAX)
-			{
-				dtemp = (iterB - segmA[1]).squaredNorm();
-				if (dtemp < dmin)
+				dtemp = _getDistanceOfPointAndSegmentINF(iterB, segmA);
+				if (dtemp == DBL_MAX)
 				{
-					direction = iterB - segmA[1];
+					dtemp = (iterB - segmA[1]).squaredNorm();
+					if (dtemp < dmin)
+					{
+						direction = iterB - segmA[1];
+						dmin = dtemp;
+					}
+				}
+				else if (dtemp < dmin)
+				{
+					direction = (iterB - segmA[0]).cross(vectA).cross(vectA);
 					dmin = dtemp;
 				}
 			}
-			else if (dtemp < dmin)
-			{
-				direction = (iterB - segmA[0]).cross(vectA).cross(vectA);
-				dmin = dtemp;
-			}
-		}
-	};
+		};
 	for (const auto& iterA : edgesA)
 	{
 		for (const auto& iterB : edgesB)
@@ -1303,16 +1303,16 @@ double getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const
 	return dmax;
 #else
 	auto _getDistanceOfPointAndPlaneINF = [](const Vector3d& point, const std::array<Vector3d, 3>& plane)->double
-	{
-		Vector3d normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);
-		//if (normal.isZero()) // error triangle plane
-		//	return DBL_MAX;
-		double k = (plane[0] - point).dot(normal) / normal.dot(normal);
-		Vector3d local = point + k * normal;
-		if (!isPointInTriangle(local, plane))
-			return DBL_MAX;
-		return (k * normal).squaredNorm();
-	};
+		{
+			Vector3d normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);
+			//if (normal.isZero()) // error triangle plane
+			//	return DBL_MAX;
+			double k = (plane[0] - point).dot(normal) / normal.dot(normal);
+			Vector3d local = point + k * normal;
+			if (!isPointInTriangle(local, plane))
+				return DBL_MAX;
+			return (k * normal).squaredNorm();
+		};
 	for (const auto& iterA : triA)  //vertex to vertex
 	{
 		for (const auto& iterB : triB)
@@ -1398,51 +1398,51 @@ std::array<Eigen::Vector3d, 2> getTwoTrianglesNearestPoints(const std::array<Eig
 #ifdef STATISTIC_DATA_COUNT
 	if (isTwoTrianglesIntersectSAT(triA, triB))
 		count_err_tris_inter++;
-		return res;
+	return res;
 #endif
 	double dmin = DBL_MAX, dtemp;
 	Eigen::Vector3d local, local2;
-	auto _getDistanceOfPointAndPlaneINF = [&](const Vector3d& point, const std::array<Vector3d, 3>& plane)->double
-	{
-		Vector3d normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);
-		//if (normal.isZero()) // error triangle plane
-		//	return DBL_MAX;
-		double k = (plane[0] - point).dot(normal) / normal.dot(normal);
-		local = point + k * normal; // reference closure
-		if (!isPointInTriangle(local, plane))
-			return DBL_MAX;
-		return (k * normal).squaredNorm(); //to be fast
-	};
-	auto _getDistanceOfTwoSegmentsINF = [&](const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)->double
-	{
-		Vector3d vectA = segmA[1] - segmA[0];
-		Vector3d vectB = segmB[1] - segmB[0];
-		double deltaA = (segmB[0] - segmA[0]).dot(vectA);
-		double deltaB = (segmB[0] - segmA[0]).dot(vectB);
-		double deno = -vectA.dot(vectA) * vectB.dot(vectB) + vectA.dot(vectB) * vectB.dot(vectA);//a*d-b*c
-		if (deno == 0.0) // parallel, must exclude, than distance of point to segment in next function
-			return DBL_MAX;
-		double kA = 1 / deno * (-vectB.dot(vectB) * deltaA + vectB.dot(vectA) * deltaB);
-		double kB = 1 / deno * (-vectA.dot(vectB) * deltaA + vectA.dot(vectA) * deltaB);
-		if (0 <= kA && kA <= 1 && 0 <= kB && kB <= 1)
+	auto _getDistanceOfPointAndPlaneINF = [&local](const Vector3d& point, const std::array<Vector3d, 3>& plane)->double
 		{
-			local = segmA[0] + kA * vectA;
-			local2 = segmB[0] + kB * vectB;
-			return (local - local2).squaredNorm();
-		}
-		return DBL_MAX; // means nearest point outof segments
-	};
-	auto _getDistanceOfPointAndSegmentINF = [&](const Vector3d& point, const std::array<Vector3d, 2>& segm)->double
-	{
-		Eigen::Vector3d vecSeg = (segm[1] - segm[0]);
-		double projection = vecSeg.dot(point);
-		//the projection must on segment
-		if (vecSeg.dot(segm[1]) < projection || projection < vecSeg.dot(segm[0]))
-			return DBL_MAX;
-		double k = vecSeg.dot(point - segm[0]) / vecSeg.dot(vecSeg);
-		local = segm[0] + k * vecSeg;
-		return (local - point).squaredNorm();
-	};
+			Vector3d normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);
+			//if (normal.isZero()) // error triangle plane
+			//	return DBL_MAX;
+			double k = (plane[0] - point).dot(normal) / normal.dot(normal);
+			local = point + k * normal; // reference closure
+			if (!isPointInTriangle(local, plane))
+				return DBL_MAX;
+			return (k * normal).squaredNorm(); //to be fast
+		};
+	auto _getDistanceOfTwoSegmentsINF = [&local, &local2](const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)->double
+		{
+			Vector3d vectA = segmA[1] - segmA[0];
+			Vector3d vectB = segmB[1] - segmB[0];
+			double deltaA = (segmB[0] - segmA[0]).dot(vectA);
+			double deltaB = (segmB[0] - segmA[0]).dot(vectB);
+			double deno = -vectA.dot(vectA) * vectB.dot(vectB) + vectA.dot(vectB) * vectB.dot(vectA);//a*d-b*c
+			if (deno == 0.0) // parallel, must exclude, than distance of point to segment in next function
+				return DBL_MAX;
+			double kA = 1 / deno * (-vectB.dot(vectB) * deltaA + vectB.dot(vectA) * deltaB);
+			double kB = 1 / deno * (-vectA.dot(vectB) * deltaA + vectA.dot(vectA) * deltaB);
+			if (0 <= kA && kA <= 1 && 0 <= kB && kB <= 1)
+			{
+				local = segmA[0] + kA * vectA;
+				local2 = segmB[0] + kB * vectB;
+				return (local - local2).squaredNorm();
+			}
+			return DBL_MAX; // means nearest point outof segments
+		};
+	auto _getDistanceOfPointAndSegmentINF = [&local](const Vector3d& point, const std::array<Vector3d, 2>& segm)->double
+		{
+			Eigen::Vector3d vecSeg = (segm[1] - segm[0]);
+			double projection = vecSeg.dot(point);
+			//the projection must on segment
+			if (vecSeg.dot(segm[1]) < projection || projection < vecSeg.dot(segm[0]))
+				return DBL_MAX;
+			double k = vecSeg.dot(point - segm[0]) / vecSeg.dot(vecSeg);
+			local = segm[0] + k * vecSeg;
+			return (local - point).squaredNorm();
+		};
 	std::array<array<Vector3d, 2>, 3> edgesA = { { {triA[0], triA[1]},
 												{triA[1], triA[2]},
 												{triA[2], triA[0] } } };
@@ -1525,39 +1525,39 @@ std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<E
 	//	return res;
 #endif
 	Vector3d vecSeg, normal, local;
-	auto _getIntersectOfSegmentAndPlaneINF = [&](const std::array<Vector3d, 2>& segment, const std::array<Eigen::Vector3d, 3>& plane)->double
-	{
-		vecSeg = segment[1] - segment[0];
+	auto _getIntersectOfSegmentAndPlaneINF = [&vecSeg, &normal](const std::array<Vector3d, 2>& segment, const std::array<Eigen::Vector3d, 3>& plane)->double
+		{
+			vecSeg = segment[1] - segment[0];
 #ifdef USING_ACCURATE_NORMALIZED
-		normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]).normalized(); // plane's normal isnot Zero
-		if (fabs(vecSeg.normalized().dot(normal)) < eps)// line parallel to plane, not always coplanar
-			return (fabs((segment[0] - plane[0]).normalized().dot(normal)) < eps) ? DBL_MAX : -DBL_MAX; // positive infinity means separate
+			normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]).normalized(); // plane's normal isnot Zero
+			if (fabs(vecSeg.normalized().dot(normal)) < eps)// line parallel to plane, not always coplanar
+				return (fabs((segment[0] - plane[0]).normalized().dot(normal)) < eps) ? DBL_MAX : -DBL_MAX; // positive infinity means separate
 #else
-		normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);// normalized();
-		if (fabs(vecSeg.dot(normal)) < eps)
-			return (fabs((segment[0] - plane[0]).dot(normal)) < eps) ? DBL_MAX : -DBL_MAX;
+			normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);// normalized();
+			if (fabs(vecSeg.dot(normal)) < eps)
+				return (fabs((segment[0] - plane[0]).dot(normal)) < eps) ? DBL_MAX : -DBL_MAX;
 #endif // USING_ACCURATE_NORMALIZED
-		return (plane[0] - segment[0]).dot(normal) / vecSeg.dot(normal); //k
-		//return segment[0] + k * vecSeg; // intersect point
-	};
-	auto _getPointOfTwoIntersectSegments = [&](const std::array<Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB)->double
-	{
-		normal = (segmB[0] - segmB[1]).cross(vecSeg);
-		if (normal.isZero(eps)) // intersect cause collinear
-			return DBL_MAX;
-		return (segmA[0] - segmB[0]).cross(segmA[0] - segmB[1]).norm() / normal.norm(); //k
-		//return segmA[0] + k * vecSeg;
-	};
-	auto _getEndPointsOfTwoCollinearSegments = [&](const std::array<Vector3d, 2>& edgeA, const std::array<Eigen::Vector3d, 2>& edgeB)
-	{
-		if ((edgeA[0] - edgeB[0]).dot(edgeA[0] - edgeB[1]) <= 0 && (edgeA[1] - edgeB[0]).dot(edgeA[1] - edgeB[1]) <= 0)
-			res = edgeA;
-		else if ((edgeB[0] - edgeA[0]).dot(edgeB[0] - edgeA[1]) <= 0 && (edgeB[1] - edgeA[0]).dot(edgeB[1] - edgeA[1]) <= 0)
-			res = edgeB;
-		else
-			res = { ((edgeA[0] - edgeB[0]).dot(edgeA[0] - edgeB[1])) <= 0.0 ? edgeA[0] : edgeA[1],
-					((edgeB[0] - edgeA[0]).dot(edgeB[0] - edgeA[1])) <= 0.0 ? edgeB[0] : edgeB[1] };
-	};
+			return (plane[0] - segment[0]).dot(normal) / vecSeg.dot(normal); //k
+			//return segment[0] + k * vecSeg; // intersect point
+		};
+	auto _getPointOfTwoIntersectSegments = [&vecSeg, &normal](const std::array<Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB)->double
+		{
+			normal = (segmB[0] - segmB[1]).cross(vecSeg);
+			if (normal.isZero(eps)) // intersect cause collinear
+				return DBL_MAX;
+			return (segmA[0] - segmB[0]).cross(segmA[0] - segmB[1]).norm() / normal.norm(); //k
+			//return segmA[0] + k * vecSeg;
+		};
+	auto _getEndPointsOfTwoCollinearSegments = [&res](const std::array<Vector3d, 2>& edgeA, const std::array<Eigen::Vector3d, 2>& edgeB)
+		{
+			if ((edgeA[0] - edgeB[0]).dot(edgeA[0] - edgeB[1]) <= 0 && (edgeA[1] - edgeB[0]).dot(edgeA[1] - edgeB[1]) <= 0)
+				res = edgeA;
+			else if ((edgeB[0] - edgeA[0]).dot(edgeB[0] - edgeA[1]) <= 0 && (edgeB[1] - edgeA[0]).dot(edgeB[1] - edgeA[1]) <= 0)
+				res = edgeB;
+			else
+				res = { ((edgeA[0] - edgeB[0]).dot(edgeA[0] - edgeB[1])) <= 0.0 ? edgeA[0] : edgeA[1],
+						((edgeB[0] - edgeA[0]).dot(edgeB[0] - edgeA[1])) <= 0.0 ? edgeB[0] : edgeB[1] };
+		};
 	std::array<array<Vector3d, 2>, 3> edgesA = { { {triA[0], triA[1]},
 												{triA[1], triA[2]},
 												{triA[2], triA[0] } } };
