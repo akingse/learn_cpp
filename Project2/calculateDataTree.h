@@ -9,6 +9,7 @@ namespace psykronix
 	std::tuple<bool, std::array<double, 4>> getTwoSegmentsCollinearCoincidentPoints(const Segment& segmA, const Segment& segmB, double toleAng = 0,	double toleDis = 0);
 	void mergeIntersectRegion(std::vector<double>& _range, const std::array<double, 2>& prop);
 
+#ifdef RESERVE_USING_POLYGON2D
 	class Polygon2d
 	{
 	private:
@@ -73,54 +74,55 @@ namespace psykronix
 		}
 	};
 
+	struct KdTreeNode2d
+	{
+		Eigen::AlignedBox2d m_bound;  // 
+		std::shared_ptr<KdTreeNode2d> m_left;	//KdTreeNode* m_left;  
+		std::shared_ptr<KdTreeNode2d> m_right; //KdTreeNode* m_right; 
+		// other data
+		long long m_index = -1; // the middle node's index
+		size_t m_dimension = 0; // also means m_depth
+		//KdTreeNode() : m_box(), m_left(nullptr), m_right(nullptr) {}
+		//KdTreeNode(const Polygon2d& poly) : m_box(poly.boungding()), m_left(nullptr), m_right(nullptr) {}
+		bool isValid() const
+		{
+			return m_bound.isEmpty();
+		}
+	};
+
+	class KdTree2d
+	{
+	private:
+		std::shared_ptr<KdTreeNode2d> m_kdTree;
+		//static std::shared_ptr<KdTreeNode2d> createKdTree(const std::vector<psykronix::Polygon2d>& polygons);
+	public:
+		KdTree2d(const std::vector<psykronix::Polygon2d>& polygons);
+		std::shared_ptr<KdTreeNode2d> get() const
+		{
+			return m_kdTree;
+		}
+		std::vector<size_t> findIntersect(const psykronix::Polygon2d& polygon); //searchFromKdTree
+
+	};
+#endif // RESERVE_USING_POLYGON2D
+
 	// for PolyfaceHandlePtr, to fill into k-d tree
 	struct Polyface3d
 	{
 		long long m_index = -1; // the index in the vector container
 		Eigen::AlignedBox3d m_bound;  // current polyface bounding box
-#ifdef CLASHDETECTION_DEBUG_TEMP
+#ifdef CLASH_DETECTION_DEBUG_TEMP
 		UnifiedIdentify m_identify; // extra information
 #endif
 	};
 
 }
 
-// the k-dimensional tree
-struct KdTreeNode2d
-{
-	Eigen::AlignedBox2d m_bound;  // 
-	std::shared_ptr<KdTreeNode2d> m_left;	//KdTreeNode* m_left;  
-	std::shared_ptr<KdTreeNode2d> m_right; //KdTreeNode* m_right; 
-	// other data
-	long long m_index = -1; // the middle node's index
-	size_t m_dimension = 0; // also means m_depth
-	//KdTreeNode() : m_box(), m_left(nullptr), m_right(nullptr) {}
-	//KdTreeNode(const Polygon2d& poly) : m_box(poly.boungding()), m_left(nullptr), m_right(nullptr) {}
-	bool isValid() const
-	{
-		return m_bound.isEmpty();
-	}
-};
-
-class KdTree2d
-{
-private:
-	std::shared_ptr<KdTreeNode2d> m_kdTree;
-	//static std::shared_ptr<KdTreeNode2d> createKdTree(const std::vector<psykronix::Polygon2d>& polygons);
-public:
-	KdTree2d(const std::vector<psykronix::Polygon2d>& polygons);
-	std::shared_ptr<KdTreeNode2d> get() const
-	{
-		return m_kdTree;
-	}
-	std::vector<size_t> findIntersect(const psykronix::Polygon2d& polygon); //searchFromKdTree
-
-};
-
 //----------------------------------------------------------------------------------------------------------------
 //  3d
 //----------------------------------------------------------------------------------------------------------------
 
+// the k-dimensional tree
 struct KdTreeNode3d
 {
 	Eigen::AlignedBox3d m_bound;  // the extend bounding box
@@ -131,13 +133,12 @@ struct KdTreeNode3d
 	size_t m_dimension = 0; // also means m_depth
 };
 
-
 // the k-dimensional tree of 3d polyface, only build kd-tree when construct, only include research function
 class KdTree3d
 {
 private:
 	std::shared_ptr<KdTreeNode3d> m_kdTree;
-#ifdef CLASHDETECTION_DEBUG_TEMP //for debug
+#ifdef CLASH_DETECTION_DEBUG_TEMP //for debug
 	size_t m_count = 0; //count total leafs
 	size_t m_depth = 0; //the max depth
 #endif

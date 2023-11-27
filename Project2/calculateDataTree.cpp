@@ -6,7 +6,6 @@ using namespace psykronix;
 using namespace Eigen;
 //static constexpr double eps = FLT_EPSILON; //1e-7
 
-size_t Polygon2d::m_id = 0;
 #ifdef min
 #undef min
 #endif // 
@@ -286,7 +285,8 @@ void psykronix::mergeIntersectRegion(std::vector<double>& _range, const std::arr
 //  K-dimensional Tree 2d
 //--------------------------------------------------------------------------------------------------
 
-
+#ifdef RESERVE_USING_POLYGON2D
+size_t Polygon2d::m_id = 0;
 //sort the input polygons
 std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<std::pair<size_t, Polygon2d>>& polygons, int dimension = 0)
 {
@@ -378,6 +378,7 @@ std::vector<size_t> KdTree2d::findIntersect(const Polygon2d& polygon)
 	_searchKdTree(m_kdTree);
 	return indexes;
 }
+#endif RESERVE_USING_POLYGON2D
 
 //--------------------------------------------------------------------------------------------------
 //  K-dimensional Tree 3d
@@ -474,7 +475,7 @@ std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<Polyface3d>& polyfaces
 KdTree3d::KdTree3d(const std::vector<Polyface3d>& polyfaces)
 {
 	std::vector<Polyface3d> _polyfaces = polyfaces;
-#ifdef CLASHDETECTION_DEBUG_TEMP
+#ifdef CLASH_DETECTION_DEBUG_TEMP
 	m_kdTree = _createKdTree3d(_polyfaces, m_count, m_depth);
 #else
 	m_kdTree = _createKdTree3d(_polyfaces);
