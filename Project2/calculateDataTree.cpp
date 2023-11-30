@@ -609,7 +609,6 @@ std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<Polyface3d>& polyfaces
 	return currentNode;
 }
 
-
 KdTree3d::KdTree3d(const std::vector<Polyface3d>& polyfaces)
 {
 	std::vector<Polyface3d> _polyfaces = polyfaces;

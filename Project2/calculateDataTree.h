@@ -178,3 +178,9 @@ public:
 	bool update(const psykronix::Polyface3d& polyface); //using polyface self index
 
 };
+
+
+class RTree3d
+{
+
+};

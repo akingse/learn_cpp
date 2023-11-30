@@ -7,6 +7,7 @@ using namespace std;
 using namespace psykronix;
 using namespace Eigen;
 
+#ifdef RESERVE_USING_POLYGON2D
 // clipper2 style
 bool BooleanOpIntersect(Polygon2d& polyA, Polygon2d& polyB);
 
@@ -86,6 +87,7 @@ void BooleanOpIntersect(std::vector<Polygon2d>& polyVctA, std::vector<Polygon2d>
 		}
 	}
 }
+#endif
 
 //--------------------------------------------------------------------------------------------------
 //  test
@@ -109,6 +111,7 @@ static void test0()
 
 //test cal time, by random rectange
 #define USING_KDTREE_METHOD
+#ifdef RESERVE_USING_POLYGON2D
 static void test1()
 {
 	const size_t  totalNum = 10000;
@@ -189,6 +192,7 @@ static void test2()
 
 	return;
 }
+#endif
 
 static void test3()
 {
@@ -267,6 +271,12 @@ std::vector<double> mergeIntersectRegion(std::vector<pair<double, double>>& rang
 
 static void test4()
 {
+	std::vector<std::pair<double, double>>* rangeP = new std::vector<pair<double, double>>;
+	rangeP->push_back({ 1,2 });
+	rangeP->push_back({ 5,6 });
+	rangeP->push_back({ 9,10 });
+
+
 	std::vector<pair<double, double>> range;
 	range.push_back({ 1,2 });
 	range.push_back({ 5,6 });
