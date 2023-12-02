@@ -4,8 +4,14 @@ using namespace psykronix;
 using namespace Eigen;
 using namespace std::chrono;
 
-//#define USING_KDTREE_METHOD
-#define USING_CONTAINER_SET
+#ifdef min
+#undef min
+#endif // 
+#ifdef max
+#undef max
+#endif // 
+#define USING_KDTREE_METHOD
+//#define USING_CONTAINER_SET
 
 //读写bin文件以保证数据一致，用于对比（kd-trer&double-loop）结果的统一行
 
@@ -61,6 +67,7 @@ static void test0()
 		set<array<size_t, 2>> findIndex;
 #else
 		vector<array<size_t, 2>> findIndex;
+		std::vector<std::tuple<size_t, bool>> findIndexClash;
 #endif // USING_CONTAINER_SET
 
 		//compare
@@ -75,6 +82,9 @@ static void test0()
 		start = std::chrono::high_resolution_clock::now();
 		for (size_t i = 0; i < N; ++i)
 		{
+			//vector<std::tuple<size_t, bool>> temp = kdtree.findIntersectClash(polyface3dVct[i]);
+			//findIndexClash.insert(findIndexClash.end(), temp.begin(), temp.end());
+
 			std::vector<size_t> temp = kdtree.findIntersect(polyface3dVct[i]);
 			for (auto& j : temp)
 			{
@@ -112,11 +122,53 @@ static void test0()
 	return;
 }
 
+static void test1()
+{
+	size_t N = 1e4;
+	std::vector<Polyface3d> polyface3dVct;// (N);
+	double* arr = _readBinFileAlignedBox(N);
+
+	steady_clock::time_point start, end;
+	microseconds duration;
+	start = std::chrono::high_resolution_clock::now();
+	for (int i = 0; i < N; i++)
+	{
+		double min_x = arr[6 * i + 0];
+		double min_y = arr[6 * i + 1];
+		double min_z = arr[6 * i + 2];
+		double max_x = arr[6 * i + 3];
+		double max_y = arr[6 * i + 4];
+		double max_z = arr[6 * i + 5];
+		AlignedBox3d box = { Vector3d(min_x,min_y,min_z), Vector3d(max_x,max_y,max_z) };
+		polyface3dVct.push_back(Polyface3d{ long long(i), box });
+	}
+	end = std::chrono::high_resolution_clock::now();
+	//duration = std::chrono::duration_cast<microseconds>(end - start);
+	//cout << "N=" << N << " load data time=" << duration.count() << " micro_seconds" << endl;
+
+	//std::sort函数使用快速排序（Quick Sort）
+	for (int i = 0; i < 3; i++)
+	{
+		std::vector<Polyface3d> polyface3dVctCopy = polyface3dVct;
+		start = std::chrono::high_resolution_clock::now();
+		std::sort(polyface3dVctCopy.begin(), polyface3dVctCopy.end(),
+			[](const Polyface3d& a, const Polyface3d& b) { return a.m_bound.min()[0] < b.m_bound.min()[0]; }); // index of Vector3d
+		end = std::chrono::high_resolution_clock::now();
+		duration = std::chrono::duration_cast<microseconds>(end - start);
+		cout << "N=" << N << " sort time=" << duration.count() << " micro_seconds" << endl;
+	}
+	double o1 = N * log2(N);
+	cout << "On=" << o1 << endl;
+	//时间复杂度为O(n log n)
+	//1e4=800 //1.32877
+	//1e5=12000 //1.66096e+06
+	//1e6=121302 //1.99316e+07
+}
 
 static int enrol = []()->int
 {
-	test0();
-	//test1();
+	//test0();
+	test1();
 	cout << "test_data_tree finished.\n" << endl;
 	return 0;
 }();
