@@ -1,6 +1,6 @@
 #pragma once
-//ÎÄ¼þ¶ÁÐ´
 
+//file write and read
 void _wirteTrigonFile(const std::vector<std::array<uint64_t, 2>>& tris, const std::string& fileName);
 void _wirteTrigonFile(const std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>>& tris, const std::string& fileName);
 std::vector<std::array<std::array<Eigen::Vector3d, 3>, 2>> _readTrigonFile(const std::string& fileName);
@@ -15,4 +15,8 @@ void write_InterTriInfo(const std::vector<InterTriInfo>& infos, const std::strin
 void write_ModelMesh(const std::vector<ModelMesh>& meshs, const std::string& fileName);
 std::vector<InterTriInfo> read_InterTriInfo(const std::string& fileName);
 std::vector<ModelMesh> read_ModelMesh(const std::string& fileName);
+
+// the AlignedBox data
+int _writeBinFileAlignedBox(size_t N);
+double* _readBinFileAlignedBox(size_t N); //call write inner
 

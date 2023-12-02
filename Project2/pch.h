@@ -21,6 +21,7 @@
 #include <cmath>
 #include <math.h>
 #include <complex>
+#include <random> //C++11 rand library
 
 //stl
 #include <vector>

@@ -158,20 +158,26 @@ private:
 	size_t m_count = 0; //count total leafs
 	size_t m_depth = 0; //the max depth
 #endif
+	mutable double m_tolerance = 0;
 public:
 	//static std::shared_ptr<KdTreeNode3d> createKdTree(std::vector<psykronix::Polyface3d>& PolyfaceVct);
 	KdTree3d() = delete;
 	KdTree3d(const std::vector<psykronix::Polyface3d>& polyfaceVct);
-	std::shared_ptr<KdTreeNode3d> get() const
+	void setTolerance(double tolerance)
+	{
+		m_tolerance = tolerance;
+	}
+	std::shared_ptr<KdTreeNode3d> getTree() const
 	{
 		return m_kdTree;
 	}
-	std::shared_ptr<KdTreeNode3d>& get()
+	std::shared_ptr<KdTreeNode3d>& getTree()
 	{
 		return m_kdTree;
 	}
 	std::vector<size_t> findIntersect(const psykronix::Polyface3d& polyface, double tolerance = 0.0) const; //searchFromKdTree
-	std::vector<std::tuple<size_t, bool>> findIntersectClash(const psykronix::Polyface3d& polyface, double tolerance) const; // bool means soft-clash
+	std::vector<std::tuple<size_t, bool>> findIntersectClash(const psykronix::Polyface3d& polyface) const; // bool means soft-clash
+	std::vector<std::tuple<size_t, bool>> findIntersectClash(const psykronix::Polyface3d& polyface, double tolerance) const; //custom tolerance
 	bool insert(const psykronix::Polyface3d& polyface); //only insert the not exsit index
 	//bool remove(size_t index);
 	bool remove(const psykronix::Polyface3d& polyface); //find by polyface index

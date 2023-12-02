@@ -6,6 +6,7 @@ using namespace psykronix;
 #undef max
 static std::string randNumName = "bin_file/random_1e8.bin";
 static std::string randNumNameSepa = "bin_file/random_1e8_sepa.bin";
+
 //wirte randnum file
 int _wirteNumberFile(size_t n, const string& filename)
 {
@@ -15,7 +16,6 @@ int _wirteNumberFile(size_t n, const string& filename)
 	{
 		arr[i] = static_cast<double>(rand() - 0x3fff);// rand()) / RAND_MAX;
 	}
-	// Ð´ÈëÎÄ¼þ
 	ofstream out(filename, ios::out | ios::binary);
 	if (!out.is_open()) {
 		cerr << "Error opening file" << endl;
@@ -24,6 +24,7 @@ int _wirteNumberFile(size_t n, const string& filename)
 	out.write(reinterpret_cast<char*>(&n), sizeof(int)); //
 	out.write(reinterpret_cast<char*>(arr), n * sizeof(double));
 	out.close();
+	delete[] arr;
 	return 0;
 }
 
@@ -40,7 +41,6 @@ int _wirteNumberFile(const std::vector<double>& _array, const string& filename)
 	out.close();
 	return 0;
 }
-
 
 int _wirteNumberFile(size_t n, double* _array, const string& filename) // n = size(triA, triB)
 {
@@ -59,6 +59,102 @@ int _wirteNumberFile(size_t n, double* _array, const string& filename) // n = si
 	out.write(reinterpret_cast<char*>(_array), n * sizeof(double));
 	out.close();
 	return 0;
+}
+
+//for AlignedBox3d
+int _writeBinFileAlignedBox(size_t N)
+{
+	auto _writeNumber = [=](size_t n, const string& filename)->int
+	{
+		n = 2 * 3 * n;
+		double* arr = new double[n];
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_real_distribution<> r_min(0, N); //double
+		std::uniform_real_distribution<> r_size(100, 300);
+		for (int i = 0; i < N; ++i)
+		{
+			double min_x = r_min(gen);
+			double min_y = r_min(gen);
+			double min_z = r_min(gen);
+			double max_x = min_x + r_size(gen);
+			double max_y = min_y + r_size(gen);
+			double max_z = min_z + r_size(gen);
+			arr[6 * i + 0] = min_x;
+			arr[6 * i + 1] = min_y;
+			arr[6 * i + 2] = min_z;
+			arr[6 * i + 3] = max_x;
+			arr[6 * i + 4] = max_y;
+			arr[6 * i + 5] = max_z;
+		}
+		ofstream out(filename, ios::out | ios::binary);
+		if (!out.is_open()) {
+			cerr << "Error opening file" << endl;
+			return -1;
+		}
+		out.write(reinterpret_cast<char*>(&n), sizeof(int)); //
+		out.write(reinterpret_cast<char*>(arr), n * sizeof(double));
+		out.close();
+		delete[] arr;
+		return 0;
+	};
+	if (N == 1e4)
+	{
+		string filename = "bin_file/random_AlignedBox_1e4.bin";
+		return _writeNumber(N, filename);
+	}
+	else if (N == 1e5)
+	{
+		string filename = "bin_file/random_AlignedBox_1e5.bin";
+		return _writeNumber(N, filename);
+	}
+	else if (N == 1e6)
+	{
+		string filename = "bin_file/random_AlignedBox_1e6.bin";
+		return _writeNumber(N, filename);
+	}
+	return -2;
+}
+
+double* _readBinFileAlignedBox(size_t N)
+{
+	auto _readNumber = [&](const string& filename)->double*
+	{
+		ifstream in(filename, ios::in | ios::binary);
+		if (!in.is_open()) 
+		{
+			_writeBinFileAlignedBox(N);
+			in = ifstream(filename, ios::in | ios::binary);
+			if (!in.is_open())
+				return nullptr;
+		}
+		N = 2 * 3 * N;
+		int read_n;
+		in.read(reinterpret_cast<char*>(&read_n), sizeof(int));
+		if (read_n != N) {
+			cerr << "Incorrect data size read from the input file" << endl;
+			return nullptr;
+		}
+		double* read_arr = new double[read_n];
+		in.read(reinterpret_cast<char*>(read_arr), read_n * sizeof(double));
+		return read_arr;
+	};
+	if (N == 1e4)
+	{
+		string filename = "bin_file/random_AlignedBox_1e4.bin";
+		return _readNumber(filename);
+	}
+	else if (N == 1e5)
+	{
+		string filename = "bin_file/random_AlignedBox_1e5.bin";
+		return _readNumber(filename);
+	}
+	else if (N == 1e6)
+	{
+		string filename = "bin_file/random_AlignedBox_1e6.bin";
+		return _readNumber(filename);
+	}
+	return nullptr;
 }
 
 double* _readNumberFile(size_t n, const string& filename)

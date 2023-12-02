@@ -1,6 +1,7 @@
 #pragma once
 namespace psykronix
 {
+    // global type and variable define 
     typedef std::array<Eigen::Vector3d, 2> Segment;
     typedef std::array<Eigen::Vector3d, 3> Triangle;
     typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>> Polyhedron;

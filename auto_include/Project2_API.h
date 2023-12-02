@@ -9,6 +9,7 @@
 #include <cassert>
 #include <cmath>
 #include <complex>
+#include <random>
 #include <vector>
 #include <map>
 #include <unordered_map>

@@ -556,7 +556,7 @@ std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<Polyface3d>& polyfaces
 	}
 	else // end leaf node
 	{
-		currentNode->m_bound = polyfaces.front().m_bound;// short cut way
+		currentNode->m_bound = polyfaces.front().m_bound;// size is 1
 		currentNode->m_left = nullptr;
 		currentNode->m_right = nullptr;
 		currentNode->m_index = polyfaces.front().m_index;
@@ -609,6 +609,7 @@ std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<Polyface3d>& polyfaces
 	return currentNode;
 }
 
+// constructor
 KdTree3d::KdTree3d(const std::vector<Polyface3d>& polyfaces)
 {
 	std::vector<Polyface3d> _polyfaces = polyfaces;
@@ -621,11 +622,11 @@ KdTree3d::KdTree3d(const std::vector<Polyface3d>& polyfaces)
 
 std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon, double tolerance /*= 0.0*/) const
 {
-	if (m_kdTree.get() == nullptr || polygon.m_index == -1) // cannot be external polyface
+	if (m_kdTree == nullptr || polygon.m_index == -1) // cannot be external polyface
 		return {};
 	std::vector<size_t> indexes;
 	Eigen::AlignedBox3d curBox = polygon.m_bound;
-	if (tolerance != 0.0)
+	if (tolerance != 0.0) // not using default eps
 	{
 		Vector3d tole(tolerance, tolerance, tolerance);
 		curBox.min() -= tole;
@@ -644,7 +645,7 @@ std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon, double to
 				else
 				{
 					if (polygon.m_index != node->m_index) //exclude self
-						indexes.push_back(node->m_index);
+						indexes.push_back(node->m_index); //if double loop, index canbe small to large
 				}
 			}
 		};
@@ -653,34 +654,43 @@ std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon, double to
 }
 
 // only for clash, distinguish soft and hard
-std::vector<std::tuple<size_t, bool>> KdTree3d::findIntersectClash(const Polyface3d& polygon, double tolerance /*= 0.0*/) const
+std::vector<std::tuple<size_t, bool>> KdTree3d::findIntersectClash(const Polyface3d& polygon, double tolerance) const
+{
+	double copy = m_tolerance;
+	m_tolerance = tolerance;
+	std::vector<std::tuple<size_t, bool>> resInter = findIntersectClash(polygon);
+	m_tolerance = copy;
+	return resInter;
+}
+
+std::vector<std::tuple<size_t, bool>> KdTree3d::findIntersectClash(const Polyface3d& polygon) const
 {
 	if (m_kdTree.get() == nullptr || polygon.m_index == -1) // cannot be external polyface
 		return {};
 	std::vector<std::tuple<size_t, bool>> indexes;
 	Eigen::AlignedBox3d toleBox = polygon.m_bound; //using extra eps
-	Vector3d tole = (tolerance == 0.0) ? Vector3d(eps, eps, eps) : Vector3d(tolerance, tolerance, tolerance);
+	Vector3d tole = (m_tolerance == 0.0) ? Vector3d(eps, eps, eps) : Vector3d(m_tolerance, m_tolerance, m_tolerance);
 	toleBox.min() -= tole;
 	toleBox.max() += tole;
 	std::function<void(const shared_ptr<KdTreeNode3d>&)> _searchKdTree = [&](const shared_ptr<KdTreeNode3d>& node)->void
+	{
+		//using recursion
+		if (!node->m_bound.intersects(toleBox))
+			return;
+		if (node->m_index == -1) // isnot leaf node
 		{
-			//using recursion
-			if (!node->m_bound.intersects(toleBox))
+			_searchKdTree(node->m_left);
+			_searchKdTree(node->m_right);
+		}
+		else
+		{
+			if (polygon.m_index >= node->m_index) //vector index, only small to large
 				return;
-			if (node->m_index == -1) // isnot leaf node
-			{
-				_searchKdTree(node->m_left);
-				_searchKdTree(node->m_right);
-			}
-			else
-			{
-				if (polygon.m_index >= node->m_index) //vector index, only small to large
-					return;
-				bool is_soft = 0.0 < tolerance && !node->m_bound.intersects(polygon.m_bound); // origin box not intersect
-				//if (polygon.m_index != node->m_index) //exclude self
-				indexes.push_back({ node->m_index, is_soft });
-			}
-		};
+			bool is_soft = 0.0 < m_tolerance && !node->m_bound.intersects(polygon.m_bound); // origin box not intersect
+			//if (polygon.m_index != node->m_index) //exclude self
+			indexes.push_back({ node->m_index, is_soft });
+		}
+	};
 	_searchKdTree(m_kdTree);
 	return indexes;
 }

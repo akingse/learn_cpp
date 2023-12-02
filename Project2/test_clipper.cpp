@@ -303,8 +303,8 @@ static int enrol = []()->int
 	//test1();
 	//test2(); //for funciton
 	//test3();
-	test4();
-	cout << "test_clipper" << endl;
+	//test4();
+	cout << "test_clipper finished.\n" << endl;
 	return 0;
 }();
 

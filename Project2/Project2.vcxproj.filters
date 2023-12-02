@@ -243,6 +243,9 @@
     <ClCompile Include="test_thread_4.cpp">
       <Filter>test_thread</Filter>
     </ClCompile>
+    <ClCompile Include="test_data_tree.cpp">
+      <Filter>test_case</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">

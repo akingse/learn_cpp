@@ -18,8 +18,8 @@ static void _test1()
 	auto b = abs(a);
 	std::array<Vector3f, 3>  triA;
 	std::array<Vector3f, 3>  triB;
-	triA = { Vertex(0,0), Vertex(100,0), Vertex(0,100) };
-	triB = { Vertex(0,0), Vertex(100,0), Vertex(0,100) };
+	//triA = { Vertex(0,0), Vertex(100,0), Vertex(0,100) };
+	//triB = { Vertex(0,0), Vertex(100,0), Vertex(0,100) };
 	//EXPECT_TRUE(TriangularIntersectionTest(triA, triB));
 	//EXPECT_TRUE(isTwoTrianglesIntersection1(triA, triB));
 	//µã½Ó´¥
