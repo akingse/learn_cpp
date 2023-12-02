@@ -158,14 +158,16 @@ private:
 	size_t m_count = 0; //count total leafs
 	size_t m_depth = 0; //the max depth
 #endif
-	mutable double m_tolerance = 0;
+	//mutable double m_tolerance = 0;
+	mutable Eigen::Vector3d m_tolerance = Eigen::Vector3d(psykronix::eps, psykronix::eps, psykronix::eps); //default with threshold eps
 public:
 	//static std::shared_ptr<KdTreeNode3d> createKdTree(std::vector<psykronix::Polyface3d>& PolyfaceVct);
 	KdTree3d() = delete;
 	KdTree3d(const std::vector<psykronix::Polyface3d>& polyfaceVct);
 	void setTolerance(double tolerance)
 	{
-		m_tolerance = tolerance;
+		//Vector3d tole = (m_tolerance == 0.0) ? Vector3d(eps, eps, eps) : Vector3d(m_tolerance, m_tolerance, m_tolerance);
+		m_tolerance = Eigen::Vector3d(tolerance, tolerance, tolerance);
 	}
 	std::shared_ptr<KdTreeNode3d> getTree() const
 	{

@@ -6,6 +6,7 @@ using namespace psykronix;
 #undef max
 static std::string randNumName = "bin_file/random_1e8.bin";
 static std::string randNumNameSepa = "bin_file/random_1e8_sepa.bin";
+#define USING_CONCRETE_NUMBER
 
 //wirte randnum file
 int _wirteNumberFile(size_t n, const string& filename)
@@ -98,22 +99,14 @@ int _writeBinFileAlignedBox(size_t N)
 		delete[] arr;
 		return 0;
 	};
-	if (N == 1e4)
-	{
-		string filename = "bin_file/random_AlignedBox_1e4.bin";
-		return _writeNumber(N, filename);
-	}
-	else if (N == 1e5)
-	{
-		string filename = "bin_file/random_AlignedBox_1e5.bin";
-		return _writeNumber(N, filename);
-	}
-	else if (N == 1e6)
-	{
-		string filename = "bin_file/random_AlignedBox_1e6.bin";
-		return _writeNumber(N, filename);
-	}
-	return -2;
+#ifdef USING_CONCRETE_NUMBER
+	string filename = "bin_file/random_AlignedBox_" + to_string(N) + ".bin";
+#else
+	int size = log10(N);
+	string filename = "bin_file/random_AlignedBox_1e" + to_string(size) + ".bin";
+#endif // USING_CONCRETE_NUMBER
+	return _writeNumber(N, filename);
+	//return -2;
 }
 
 double* _readBinFileAlignedBox(size_t N)
@@ -139,22 +132,14 @@ double* _readBinFileAlignedBox(size_t N)
 		in.read(reinterpret_cast<char*>(read_arr), read_n * sizeof(double));
 		return read_arr;
 	};
-	if (N == 1e4)
-	{
-		string filename = "bin_file/random_AlignedBox_1e4.bin";
-		return _readNumber(filename);
-	}
-	else if (N == 1e5)
-	{
-		string filename = "bin_file/random_AlignedBox_1e5.bin";
-		return _readNumber(filename);
-	}
-	else if (N == 1e6)
-	{
-		string filename = "bin_file/random_AlignedBox_1e6.bin";
-		return _readNumber(filename);
-	}
-	return nullptr;
+#ifdef USING_CONCRETE_NUMBER
+	string filename = "bin_file/random_AlignedBox_" + to_string(N) + ".bin";
+#else
+	int size = log10(N);
+	string filename = "bin_file/random_AlignedBox_1e" + to_string(size) + ".bin";
+#endif
+	return _readNumber(filename);
+	//return nullptr;
 }
 
 double* _readNumberFile(size_t n, const string& filename)
