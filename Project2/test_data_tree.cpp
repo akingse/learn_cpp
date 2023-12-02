@@ -18,7 +18,7 @@ using namespace std::chrono;
 static void test0()
 {
 	double g_tolerance = 0;
-	size_t N = 1000; //1e3//1e4//1e5//1e6
+	size_t N = 1e4; //1e3//1e4//1e5//1e6
 	std::vector<Polyface3d> polyface3dVct;// (N);
 
 //#pragma region custom
@@ -73,7 +73,7 @@ static void test0()
 #ifdef USING_KDTREE_METHOD
 		start = std::chrono::high_resolution_clock::now();
 		// time of build tree
-		KdTree3d kdtree(polyface3dVct); //时间线性增长
+		KdTree3d kdtree(polyface3dVct); //时间几乎线性增长
 		kdtree.setTolerance(g_tolerance);
 		end = std::chrono::high_resolution_clock::now();
 		duration = std::chrono::duration_cast<microseconds>(end - start);
@@ -129,7 +129,7 @@ static void test0()
 	return;
 }
 
-static void test1()
+static void test1() //测试sort函数
 {
 	size_t N = 1e4;
 	std::vector<Polyface3d> polyface3dVct;// (N);
@@ -172,10 +172,67 @@ static void test1()
 	//1e6=121302 //1.99316e+07
 }
 
+static void test2() //测试拆分kdtree
+{
+	size_t N = 1e4;
+	double* arr = _readBinFileAlignedBox(N);
+	size_t divide = 2;
+	vector<vector<Polyface3d>> polyface3dVct(divide);// = { {},{} };// (N);
+
+	steady_clock::time_point start, end;
+	microseconds duration;
+	for (int i = 0; i < N / divide; i++)
+	{
+		double min_x = arr[6 * i + 0];
+		double min_y = arr[6 * i + 1];
+		double min_z = arr[6 * i + 2];
+		double max_x = arr[6 * i + 3];
+		double max_y = arr[6 * i + 4];
+		double max_z = arr[6 * i + 5];
+		AlignedBox3d box = { Vector3d(min_x,min_y,min_z), Vector3d(max_x,max_y,max_z) };
+		polyface3dVct[0].push_back(Polyface3d{long long(i), box});
+	}
+	for (int i = N / divide; i < N; i++)
+	{
+		double min_x = arr[6 * i + 0];
+		double min_y = arr[6 * i + 1];
+		double min_z = arr[6 * i + 2];
+		double max_x = arr[6 * i + 3];
+		double max_y = arr[6 * i + 4];
+		double max_z = arr[6 * i + 5];
+		AlignedBox3d box = { Vector3d(min_x,min_y,min_z), Vector3d(max_x,max_y,max_z) };
+		polyface3dVct[1].push_back(Polyface3d{ long long(i), box });
+	}
+	std::vector<std::tuple<size_t, bool>> findIndexClash;
+	start = std::chrono::high_resolution_clock::now();
+	KdTree3d kdtree0(polyface3dVct[0]);
+	KdTree3d kdtree1(polyface3dVct[1]);
+	for (size_t i = 0; i < polyface3dVct[0].size(); ++i)
+	{
+		vector<std::tuple<size_t, bool>> temp0 = kdtree0.findIntersectClash(polyface3dVct[0][i]);
+		findIndexClash.insert(findIndexClash.end(), temp0.begin(), temp0.end());
+		vector<std::tuple<size_t, bool>> temp1 = kdtree1.findIntersectClash(polyface3dVct[0][i]);
+		findIndexClash.insert(findIndexClash.end(), temp1.begin(), temp1.end());
+	}
+	for (size_t i = 0; i < polyface3dVct[1].size(); ++i)
+	{
+		vector<std::tuple<size_t, bool>> temp0 = kdtree0.findIntersectClash(polyface3dVct[1][i]);
+		findIndexClash.insert(findIndexClash.end(), temp0.begin(), temp0.end());
+		vector<std::tuple<size_t, bool>> temp1 = kdtree1.findIntersectClash(polyface3dVct[1][i]);
+		findIndexClash.insert(findIndexClash.end(), temp1.begin(), temp1.end());
+	}
+	end = std::chrono::high_resolution_clock::now();
+	duration = std::chrono::duration_cast<microseconds>(end - start);
+	cout << "count_finded=" << findIndexClash.size() << " time=" << duration.count() + duration.count() << " micro_seconds" << endl;
+	// finded=3124 time=3078142, 用时刚好是2倍
+
+}
+
 static int enrol = []()->int
 {
 	test0();
 	//test1();
+	//test2();
 	cout << "test_data_tree finished.\n" << endl;
 	return 0;
 }();
