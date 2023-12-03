@@ -622,7 +622,7 @@ KdTree3d::KdTree3d(const std::vector<Polyface3d>& polyfaces)
 
 std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon, double tolerance /*= 0.0*/) const
 {
-	if (m_kdTree == nullptr || polygon.m_index == -1) // cannot be external polyface
+	if (m_kdTree == nullptr) // || polygon.m_index == -1 means cannot be external polyface
 		return {};
 	std::vector<size_t> indexes;
 	Eigen::AlignedBox3d curBox = polygon.m_bound;

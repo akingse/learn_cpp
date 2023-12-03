@@ -7,6 +7,11 @@ using namespace std;
 using namespace psykronix;
 using namespace Eigen;
 
+/*
+二维多边形算法，Sutherland-Hodgman算法，仅处理多边形为 凸多边形 ；将一个多边形作为被裁剪多边形（subject polygon），另一个多边形作为裁剪多边形（clip polygon）；
+Weiler-Atherton算法，处理凹多边形；
+*/
+
 #ifdef RESERVE_USING_POLYGON2D
 // clipper2 style
 bool BooleanOpIntersect(Polygon2d& polyA, Polygon2d& polyB);
