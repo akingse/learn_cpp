@@ -195,7 +195,7 @@
     <ClCompile Include="test_atomic.cpp" />
     <ClCompile Include="test_boost.cpp" />
     <ClCompile Include="test_cache.cpp" />
-    <ClCompile Include="test_calculate0.cpp" />
+    <ClCompile Include="test_geometry.cpp" />
     <ClCompile Include="test_cast.cpp" />
     <ClCompile Include="test_class.cpp" />
     <ClCompile Include="test_class_cast.cpp" />

@@ -5,14 +5,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="head">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="src">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
     <Filter Include="common">
       <UniqueIdentifier>{d060f9c4-d494-4a28-9a28-6f5192f3bcde}</UniqueIdentifier>
     </Filter>
@@ -33,9 +25,6 @@
     </Filter>
     <Filter Include="test_math">
       <UniqueIdentifier>{ab0f9f34-e60c-4037-b9de-ff1246a48bea}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="test_paste">
-      <UniqueIdentifier>{7db03efe-7c52-4f06-b2b9-61647caf6103}</UniqueIdentifier>
     </Filter>
     <Filter Include="test_case">
       <UniqueIdentifier>{137ff279-6265-431b-93cf-095b8a1c9b50}</UniqueIdentifier>
@@ -150,9 +139,6 @@
     <ClCompile Include="test_cast.cpp">
       <Filter>test_gram</Filter>
     </ClCompile>
-    <ClCompile Include="test_paste1.cpp">
-      <Filter>test_paste</Filter>
-    </ClCompile>
     <ClCompile Include="test_omp.cpp">
       <Filter>test_thread</Filter>
     </ClCompile>
@@ -177,7 +163,7 @@
     <ClCompile Include="my_file_read_write.cpp">
       <Filter>test_bin</Filter>
     </ClCompile>
-    <ClCompile Include="test_calculate0.cpp">
+    <ClCompile Include="test_geometry.cpp">
       <Filter>test_math</Filter>
     </ClCompile>
     <ClCompile Include="test_fun_speed.cpp">
@@ -200,9 +186,6 @@
     </ClCompile>
     <ClCompile Include="test_binfile_debug.cpp">
       <Filter>test_case</Filter>
-    </ClCompile>
-    <ClCompile Include="test_triangle_intersect.cpp">
-      <Filter>test_math</Filter>
     </ClCompile>
     <ClCompile Include="test_cache.cpp">
       <Filter>test_pattern</Filter>
@@ -245,6 +228,12 @@
     </ClCompile>
     <ClCompile Include="test_data_tree.cpp">
       <Filter>test_case</Filter>
+    </ClCompile>
+    <ClCompile Include="test_triangle_intersect.cpp">
+      <Filter>test_case</Filter>
+    </ClCompile>
+    <ClCompile Include="test_paste1.cpp">
+      <Filter>test_eg</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
