@@ -9,6 +9,8 @@ using namespace std::chrono;
 #ifdef max
 #undef max
 #endif // 
+//#define USING_RELATIVE_MATRIX
+
 
 namespace psykronix
 {
@@ -73,22 +75,8 @@ namespace psykronix
 		}
 		//else normals not parallel
 		Vector3d normal = planeA.normal().cross(planeB.normal());
-#ifdef using_relative_matrix
-		// inverse matrix
-		Vector3d B(planeA.origin().dot(planeA.normal()),
-			planeB.origin().dot(planeB.normal()),
-			0.5 * (planeA.origin() + planeB.origin()).dot(normal));//Ax=B
-		Eigen::Matrix3d matrix;
-		//matrix.row(0) << planeA.normal()[0], planeA.normal()[1], planeA.normal()[2];
-		//matrix.row(1) << planeB.normal()[0], planeB.normal()[1], planeB.normal()[2];
-		//matrix.row(2) << normal[0], normal[1], normal[2];
-		matrix << planeA.normal()[0], planeB.normal()[0], normal[0],
-			planeA.normal()[1], planeB.normal()[1], normal[1],
-			planeA.normal()[2], planeB.normal()[2], normal[2];
-		Vector3d origin = matrix.inverse() * B;
-		return { origin, normal };
-#else
-		// relative matrix 
+#ifdef USING_RELATIVE_MATRIX
+		// relative matrix //pair=500000 cost_time=81472 micro_seconds
 		Vector3d mz = planeA.normal().normalized();
 		Vector3d my = normal.normalized();
 		Vector3d mx = my.cross(mz);
@@ -101,6 +89,20 @@ namespace psykronix
 		Vector3d relaBn = matInv * planeB.normal();
 		Vector3d origin(relaBo[2] * relaBn[0] / relaBn[2] + relaBo[0], relaBo[1], 0);
 		return { matrix * origin, normal };
+#else
+		// inverse matrix //pair=500000 cost_time=49825 micro_seconds
+		Vector3d B(planeA.origin().dot(planeA.normal()),
+				planeB.origin().dot(planeB.normal()),
+				0.5 * (planeA.origin() + planeB.origin()).dot(normal));//Ax=B
+		Eigen::Matrix3d matrix;
+		//matrix.row(0) << planeA.normal()[0], planeA.normal()[1], planeA.normal()[2];
+		//matrix.row(1) << planeB.normal()[0], planeB.normal()[1], planeB.normal()[2];
+		//matrix.row(2) << normal[0], normal[1], normal[2];
+		matrix << planeA.normal()[0], planeB.normal()[0], normal[0],
+				planeA.normal()[1], planeB.normal()[1], normal[1],
+				planeA.normal()[2], planeB.normal()[2], normal[2];
+		Vector3d origin = matrix.inverse() * B;
+		return { origin, normal };
 #endif
 	}
 }
@@ -110,16 +112,60 @@ static void test1()
 {
 
 }
+
 static void test2()
 {
+	size_t N = N_10E_6;
+	double* arr = _readBinFileAlignedBox(N); //读取随机数据
+	std::vector<Plane3d> planeVct;// (N);
+	for (int i = 0; i < N; i++)
+	{
+		double min_x = arr[6 * i + 0];
+		double min_y = arr[6 * i + 1];
+		double min_z = arr[6 * i + 2];
+		double max_x = arr[6 * i + 3];
+		double max_y = arr[6 * i + 4];
+		double max_z = arr[6 * i + 5];
+		planeVct.emplace_back(Plane3d(Vector3d(min_x, min_y, min_z), Vector3d(max_x, max_y, max_z)));
+	}
+	steady_clock::time_point start, end;
+	microseconds duration;
+	vector<PosVec3d> resSeg;
+	for (int i = 0; i < 3; i++)
+	{
+		start = std::chrono::high_resolution_clock::now();
+		for (int j = 0; j < N / 2; j++)
+		{
+			resSeg.push_back(getIntersectLineOfTwoPlane(planeVct[2 * j], planeVct[2 * j + 1]));
+		}
+		end = std::chrono::high_resolution_clock::now();
+		duration = std::chrono::duration_cast<microseconds>(end - start);
+		cout << "pair=" << N / 2 << " cost_time=" << duration.count() << " micro_seconds" << endl;
+	}
 
+	return;
 }
 
 static void test3() //测试getIntersectLineOfTwoPlane
 {
-	Plane3d plane1(Vector3d(10, 20, 3), Vector3d(1, 2, 3));
-	Plane3d plane2(Vector3d(30, 10, -3), Vector3d(4, 5, 6));
-	auto res = getIntersectLineOfTwoPlane(plane1, plane2);
+	Plane3d plane1(Vector3d(0, 20, 0), Vector3d(-1, 0, 0)); //可以共线
+	Plane3d plane2(Vector3d(0, -10, 0), Vector3d(0, 0, 1));
+	PosVec3d interLine = getIntersectLineOfTwoPlane(plane1, plane2);
+
+	plane1 = Plane3d{ Vector3d(10, 20, 3), Vector3d(1, 2, 3) };
+	plane2 = Plane3d{ Vector3d(10, 20, 3), Vector3d(1, 2, 3) };
+	interLine = getIntersectLineOfTwoPlane(plane1, plane2);
 
 	return;
 }
+
+static int enrol = []()->int
+{
+	//test0();
+	//test1();
+	//test2();
+	test3();
+	cout << "test_geometry finished.\n" << endl;
+	return 0;
+}();
+

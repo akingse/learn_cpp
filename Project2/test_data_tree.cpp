@@ -18,7 +18,7 @@ using namespace std::chrono;
 static void test0()
 {
 	double g_tolerance = 0;
-	size_t N = 1e4; //1e3//1e4//1e5//1e6
+	size_t N = N_10E_4;
 	std::vector<Polyface3d> polyface3dVct;// (N);
 
 //#pragma region custom
@@ -131,7 +131,7 @@ static void test0()
 
 static void test1() //²âÊÔsortº¯Êý
 {
-	size_t N = 1e4;
+	size_t N = N_10E_4;
 	std::vector<Polyface3d> polyface3dVct;// (N);
 	double* arr = _readBinFileAlignedBox(N);
 
@@ -177,7 +177,7 @@ static void test1() //²âÊÔsortº¯Êý
 
 static void test2() //²âÊÔ²ð·Ökdtree
 {
-	size_t N = 1e4;
+	size_t N = N_10E_4;
 	double* arr = _readBinFileAlignedBox(N);
 	size_t divide = 2;
 	vector<vector<Polyface3d>> polyface3dVct(divide);// = { {},{} };// (N);

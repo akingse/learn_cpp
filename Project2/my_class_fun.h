@@ -1,6 +1,14 @@
 #pragma once
 namespace psykronix
 {
+
+    static constexpr size_t N_10E_3 = 1e3;
+    static constexpr size_t N_10E_4 = 1e4;
+    static constexpr size_t N_10E_5 = 1e5;
+    static constexpr size_t N_10E_6 = 1e6;
+    static constexpr size_t N_10E_7 = 1e7;
+    static constexpr size_t N_10E_8 = 1e8;
+
     class Vertex
     {
     public:
