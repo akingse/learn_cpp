@@ -3,7 +3,9 @@ namespace psykronix
 {
     // global type and variable define 
     typedef std::array<Eigen::Vector3d, 2> Segment;
+    typedef std::array<Eigen::Vector3d, 2> Segment3d;
     typedef std::array<Eigen::Vector3d, 3> Triangle;
+    typedef std::array<Eigen::Vector3d, 3> Triangle3d;
     typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>> Polyhedron;
     static Eigen::Vector3d gVecNaN(std::nan("0"), std::nan("0"), std::nan("0"));
     static Triangle gSegNaN = { gVecNaN, gVecNaN };

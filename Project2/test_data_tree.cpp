@@ -167,9 +167,12 @@ static void test1() //测试sort函数
 	double o1 = N * log2(N);
 	cout << "On=" << o1 << endl;
 	//时间复杂度为O(n log n)
+	// lg(10)/lg(2)=1/lg(2)=3.321928
 	//1e4=800 //1.32877
 	//1e5=12000 //1.66096e+06
 	//1e6=121302 //1.99316e+07
+	// nlog2(n)，log2(10^n)=n*log2(10)
+	// 比如从1e4开始，数据每增加10倍，用时增加5/4*10倍，约等于线性增长
 }
 
 static void test2() //测试拆分kdtree
@@ -190,7 +193,7 @@ static void test2() //测试拆分kdtree
 		double max_y = arr[6 * i + 4];
 		double max_z = arr[6 * i + 5];
 		AlignedBox3d box = { Vector3d(min_x,min_y,min_z), Vector3d(max_x,max_y,max_z) };
-		polyface3dVct[0].push_back(Polyface3d{long long(i), box});
+		polyface3dVct[0].push_back(Polyface3d{ long long(i), box });
 	}
 	for (int i = N / divide; i < N; i++)
 	{
@@ -226,6 +229,81 @@ static void test2() //测试拆分kdtree
 	cout << "count_finded=" << findIndexClash.size() << " time=" << duration.count() + duration.count() << " micro_seconds" << endl;
 	// finded=3124 time=3078142, 用时刚好是2倍
 
+}
+
+//两平面求交
+
+namespace psykronix
+{
+	typedef std::array<Eigen::Vector3d, 2> PosVec3d;
+
+	bool isParallel(const Vector3d& vecA, const Vector3d& vecB, double tole = 0)
+	{
+		tole = max(DBL_EPSILON * max(vecA.squaredNorm(), vecB.squaredNorm() + 1), tole);
+		return vecA.cross(vecB).isZero(tole);
+	}
+
+	bool isPerpendi(const Vector3d& vecA, const Vector3d& vecB, double tole = 0)
+	{
+		// dynamic accuracy
+		tole = max(DBL_EPSILON * max(vecA.squaredNorm(), vecB.squaredNorm() + 1), tole); //avoid all zero
+		return vecA.dot(vecB) < tole;
+	}
+
+	class Plane3d
+	{
+	public:
+		Vector3d m_origin;
+		Vector3d m_normal;
+		Plane3d()
+		{
+			m_origin = Vector3d(0, 0, 0);
+			m_normal = Vector3d(0, 0, 1);
+		}
+		Plane3d(const Vector3d& origin, const Vector3d& normal)
+		{
+			m_origin = origin;
+			if (normal.isApprox(Vector3d::Zero(), 0))
+				m_normal = gVecNaN;
+			else
+				m_normal = normal;
+		}
+		const Vector3d& origin() const
+		{
+			return m_origin;
+		}
+		const Vector3d& normal() const
+		{
+			return m_normal;
+		}
+
+	};
+
+	PosVec3d getIntersectLineOfTwoPlane(const Plane3d& planeA, const Plane3d& planeB)
+	{
+		if (isParallel(planeA.normal(), planeB.normal()))
+		{
+			//is_point_on_plane
+			if (isPerpendi(planeA.normal(), planeB.origin() - planeA.origin()))
+			{
+				if (planeA.normal().isApprox(Vector3d(0, 0, 1)))
+					return { planeA.origin(), Vector3d(1, 0, 0) }; //xoy plane
+				return { planeA.origin(), planeA.normal().cross(Vector3d(0, 0, 1))}; //on xoy plane
+			}
+			return { gVecNaN ,gVecNaN };
+		}
+		//else normals not parallel
+		Vector3d normal = planeA.normal().cross(planeB.normal());
+		Vector3d B( planeA.origin().dot(planeA.normal()), 
+					planeB.origin().dot(planeB.normal()), 
+					0.5 * (planeA.origin() + planeB.origin()).dot(normal));//Ax=B
+		Eigen::Matrix3d matrix;
+		matrix.row(0) << planeA.normal()[0], planeA.normal()[1], planeA.normal()[2];
+		matrix.row(1) << planeB.normal()[0], planeB.normal()[1], planeB.normal()[2];
+		matrix.row(2) << normal[0], normal[1], normal[2];
+		Vector3d origin = matrix.inverse() * B;
+		return { origin, normal };
+	}
 }
 
 static int enrol = []()->int
