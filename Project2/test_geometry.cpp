@@ -14,52 +14,6 @@ using namespace std::chrono;
 
 namespace psykronix
 {
-	typedef std::array<Eigen::Vector3d, 2> PosVec3d;
-	static const PosVec3d gPVNaN = { gVecNaN ,gVecNaN };
-
-	bool isParallel(const Vector3d& vecA, const Vector3d& vecB/*, double tole = 0*/)
-	{
-		// dynamic accuracy
-		double tole = DBL_EPSILON * std::max(vecA.squaredNorm(), vecB.squaredNorm() + 1);
-		return vecA.cross(vecB).isZero(tole);
-	}
-
-	bool isPerpendi(const Vector3d& vecA, const Vector3d& vecB/*, double tole = 0*/)
-	{
-		// dynamic accuracy
-		double tole = DBL_EPSILON * std::max(vecA.squaredNorm(), vecB.squaredNorm() + 1); //avoid all zero
-		return vecA.dot(vecB) < tole;
-	}
-
-	class Plane3d
-	{
-	public:
-		Vector3d m_origin;
-		Vector3d m_normal;
-		Plane3d()
-		{
-			m_origin = Vector3d(0, 0, 0);
-			m_normal = Vector3d(0, 0, 1);
-		}
-		Plane3d(const Vector3d& origin, const Vector3d& normal)
-		{
-			m_origin = origin;
-			if (normal.isApprox(Vector3d::Zero(), 0))
-				m_normal = gVecNaN;
-			else
-				m_normal = normal;
-		}
-		const Vector3d& origin() const
-		{
-			return m_origin;
-		}
-		const Vector3d& normal() const
-		{
-			return m_normal;
-		}
-
-	};
-
 	//两平面求交
 	PosVec3d getIntersectLineOfTwoPlane(const Plane3d& planeA, const Plane3d& planeB)
 	{
@@ -95,14 +49,27 @@ namespace psykronix
 		Vector3d B(planeA.origin().dot(planeA.normal()),
 				planeB.origin().dot(planeB.normal()),
 				0.5 * (planeA.origin() + planeB.origin()).dot(normal));//Ax=B
-		Eigen::Matrix3d matrix;
-		//matrix.row(0) << planeA.normal()[0], planeA.normal()[1], planeA.normal()[2];
-		//matrix.row(1) << planeB.normal()[0], planeB.normal()[1], planeB.normal()[2];
-		//matrix.row(2) << normal[0], normal[1], normal[2];
-		matrix << planeA.normal()[0], planeB.normal()[0], normal[0],
-				planeA.normal()[1], planeB.normal()[1], normal[1],
-				planeA.normal()[2], planeB.normal()[2], normal[2];
-		Vector3d origin = matrix.inverse() * B;
+		//Eigen::Matrix3d matrix;
+		////matrix.row(0) << planeA.normal()[0], planeA.normal()[1], planeA.normal()[2];
+		////matrix.row(1) << planeB.normal()[0], planeB.normal()[1], planeB.normal()[2];
+		////matrix.row(2) << normal[0], normal[1], normal[2];
+		//matrix << planeA.normal()[0], planeB.normal()[0], normal[0],
+		//		planeA.normal()[1], planeB.normal()[1], normal[1],
+		//		planeA.normal()[2], planeB.normal()[2], normal[2];
+		//Vector3d origin = matrix.inverse() * B;
+		// manual write matrix inverse
+		auto _inverse3x3 = [&](const Vector3d& v1, const Vector3d& v2, const Vector3d& v3)->Vector3d
+		{
+			double det = v1.x() * v2.y() * v3.z() - v1.x() * v2.z() * v3.y();
+			det -= v1.y() * v2.x() * v3.z() - v1.y() * v2.z() * v3.x();
+			det += v1.z() * v2.x() * v3.y() - v1.z() * v2.y() * v3.x();
+			//AdjugateMatrix 伴随矩阵
+			Vector3d row0(v2[1] * v3[2] - v3[1] * v2[2], -(v2[1] * v3[2] - v2[2] * v3[1]), v2[1] * v3[2] - v2[2] * v3[1]);
+			Vector3d row1(-(v2[0] * v3[2] - v2[2] * v3[1]), v2[1] * v3[2] - v2[2] * v3[1], -(v2[1] * v3[2] - v2[2] * v3[1]));
+			Vector3d row2(v2[0] * v3[2] - v2[2] * v3[1], -(v2[1] * v3[2] - v2[2] * v3[1]), v2[1] * v3[2] - v2[2] * v3[1]);
+			return 1 / det * Vector3d(row0.dot(B), row1.dot(B), row2.dot(B));
+		};
+		Vector3d origin = _inverse3x3(planeA.normal(), planeB.normal(), normal);
 		return { origin, normal };
 #endif
 	}
@@ -186,7 +153,8 @@ static void test2()
 		for (int j = 0; j < N / 2; j++)
 		{
 			//resSeg.push_back(getIntersectLineOfTwoPlane(planeVct[2 * j], planeVct[2 * j + 1]));
-			res = intersectWithTwoPlanes(planeVct[2 * j], planeVct[2 * j + 1]);
+			res = getIntersectLineOfTwoPlane(planeVct[2 * j], planeVct[2 * j + 1]);
+			//res = intersectWithTwoPlanes(planeVct[2 * j], planeVct[2 * j + 1]);
 			if (!isNaN(res[0]))
 				resSeg.push_back(res);
 		}
@@ -202,7 +170,7 @@ static void test2()
 
 static void test3() //测试getIntersectLineOfTwoPlane
 {
-	Plane3d plane1(Vector3d(0, 20, 0), Vector3d(-1, 0, 0)); //可以共线
+	Plane3d plane1(Vector3d(0, 10, 0), Vector3d(-1, 0, 0)); //可以共线
 	Plane3d plane2(Vector3d(0, -10, 0), Vector3d(0, 0, 1));
 	PosVec3d interLine = getIntersectLineOfTwoPlane(plane1, plane2);
 
@@ -215,9 +183,8 @@ static void test3() //测试getIntersectLineOfTwoPlane
 
 static int enrol = []()->int
 {
-	//test0();
 	//test1();
-	test2();
+	//test2();
 	test3();
 	cout << "test_geometry finished.\n" << endl;
 	return 0;

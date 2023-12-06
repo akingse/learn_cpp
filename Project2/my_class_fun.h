@@ -1,4 +1,26 @@
 #pragma once
+
+#ifndef CLASH_DETECTION_SOLUTION
+struct InterTriInfo
+{
+    std::array<std::array<Eigen::Vector3d, 3>, 2> trianglePair;
+    std::array<unsigned long long, 2> entityPair;
+    double distance;
+};
+
+struct ModelMesh
+{
+    std::vector<Eigen::Vector3d> vbo_;
+    std::vector<std::array<int, 3>> ibo_;
+    Eigen::AlignedBox3d bounding_;
+    Eigen::Affine3d pose_; // Eigen::Affine3d::Identity()
+    bool convex_; // isConvex default true
+    //uint64_t instanceid_;
+    std::vector<int> iboRaw_; //for test debug
+    uint64_t entityid_;
+};
+#endif
+
 namespace psykronix
 {
 
@@ -143,25 +165,4 @@ inline std::array<Eigen::Vector3d, 2> _get_rand2()
             Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff) };
 }
 
-#ifndef CLASH_DETECTION_SOLUTION
-struct InterTriInfo
-{
-    std::array<std::array<Eigen::Vector3d, 3>, 2> trianglePair;
-    std::array<unsigned long long, 2> entityPair;
-    double distance;
-};
 
-struct ModelMesh
-{
-    std::vector<Eigen::Vector3d> vbo_;
-    std::vector<std::array<int, 3>> ibo_;
-    Eigen::AlignedBox3d bounding_;
-    Eigen::Affine3d pose_; // Eigen::Affine3d::Identity()
-    bool convex_; // isConvex default true
-    //uint64_t instanceid_;
-    std::vector<int> iboRaw_; //for test debug
-    uint64_t entityid_;
-};
-
-
-#endif

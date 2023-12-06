@@ -1,48 +1,13 @@
 #pragma once
 namespace psykronix
 {
-    // global type and variable define 
-    typedef std::array<Eigen::Vector3d, 2> Segment;
-    typedef std::array<Eigen::Vector3d, 2> Segment3d;
-    typedef std::array<Eigen::Vector3d, 3> Triangle;
-    typedef std::array<Eigen::Vector3d, 3> Triangle3d;
-    typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>> Polyhedron;
-    static Eigen::Vector3d gVecNaN(std::nan("0"), std::nan("0"), std::nan("0"));
-    static Triangle gSegNaN = { gVecNaN, gVecNaN };
-    static Triangle gTirNaN = { gVecNaN, gVecNaN, gVecNaN };
-    static Eigen::Vector3d gVecZero(0, 0, 0);
-    static constexpr double eps = FLT_EPSILON; //1e-7
-    static constexpr double _eps = -FLT_EPSILON;
-    static constexpr unsigned long long ULL_MAX = 18446744073709551615; // 2 ^ 64 - 1
+    // vector
     inline bool isNaN(const Eigen::Vector3d& vec)
     {
         return std::isnan(vec[0]) || std::isnan(vec[1]) || std::isnan(vec[2]);
     }
-
-    // equal BPEntityId
-    struct UnifiedIdentify 
-    {
-        int32_t mid; //PModelId=-2; 
-        uint64_t eid; //PEntityId=0; 
-    };
-
-    enum class RelationOfTwoTriangles : int //two intersect triangle
-    {
-        COPLANAR = 0,   //intersect or separate
-        CONTACT,        //intersect but depth is zero
-        INTRUSIVE,      //sat intersect all
-        //PARALLEL,       //but not coplanr, must separate
-        //SEPARATE,
-    };
-
-    enum class RelationOfTrigon : int
-    {
-        SEPARATE = 0,
-        INTERSECT, //intersect point local one or two trigon
-        COPLANAR_AINB, //A_INSIDE_B
-        COPLANAR_BINA, //B_INSIDE_A
-        COPLANAR_INTERSECT,
-    };
+    bool isParallel(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB); // dynamic accuracy
+    bool isPerpendi(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB);
 
     // intersect of triangle
     DLLEXPORT bool isPointInTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon);

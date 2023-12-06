@@ -270,5 +270,8 @@
     <ClInclude Include="calculateDataTree.h">
       <Filter>my_triangle</Filter>
     </ClInclude>
+    <ClInclude Include="psykronixTypeDefine.h">
+      <Filter>my_triangle</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

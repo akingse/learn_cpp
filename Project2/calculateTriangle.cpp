@@ -29,6 +29,20 @@ extern std::atomic<size_t> count_err_degen_tri, count_trigon_coplanar;
 extern std::atomic<size_t> count_gRTT;
 #endif
 
+bool psykronix::isParallel(const Vector3d& vecA, const Vector3d& vecB/*, double tole = 0*/)
+{
+	// dynamic accuracy
+	double tole = DBL_EPSILON * std::max(vecA.squaredNorm(), vecB.squaredNorm() + 1);
+	return vecA.cross(vecB).isZero(tole);
+}
+
+bool psykronix::isPerpendi(const Vector3d& vecA, const Vector3d& vecB/*, double tole = 0*/)
+{
+	// dynamic accuracy
+	double tole = DBL_EPSILON * std::max(vecA.squaredNorm(), vecB.squaredNorm() + 1); //avoid all zero
+	return vecA.dot(vecB) < tole;
+}
+
 //isPointInTriangle2D
 bool psykronix::isPointInTriangle(const Vector2d& point, const std::array<Vector2d, 3>& trigon) // 2D
 {

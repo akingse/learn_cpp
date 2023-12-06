@@ -264,6 +264,7 @@
     <ClInclude Include="my_geometry.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="my_file_read_write.h" />
+    <ClInclude Include="psykronixTypeDefine.h" />
     <ClInclude Include="test_function.h" />
     <ClInclude Include="test_serialize.h" />
     <ClInclude Include="test_template0.h" />
