@@ -14,6 +14,10 @@ namespace psykronix
     static constexpr double eps = FLT_EPSILON; //1e-7
     static constexpr double _eps = -FLT_EPSILON;
     static constexpr unsigned long long ULL_MAX = 18446744073709551615; // 2 ^ 64 - 1
+    inline bool isNaN(const Eigen::Vector3d& vec)
+    {
+        return std::isnan(vec[0]) || std::isnan(vec[1]) || std::isnan(vec[2]);
+    }
 
     // equal BPEntityId
     struct UnifiedIdentify 
