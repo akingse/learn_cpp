@@ -632,6 +632,7 @@ double getTrianglesDistance(Eigen::Vector3d& P, Eigen::Vector3d& Q, const std::a
 //------------------------------------------------------------------------------------
 // Voxel 
 //------------------------------------------------------------------------------------
+#ifdef USING_METHOD_GRID
 
 class Grid
 {
@@ -999,3 +1000,4 @@ static void test()
 
 }
 
+#endif

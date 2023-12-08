@@ -1,6 +1,7 @@
 #include "pch.h"
 using namespace std;
 
+#if 0
 
 class A
 {
@@ -167,10 +168,4 @@ int main_rtti(int argc, char* argv[])
     return 0;
 }
 
-
-//void typeid1(void)
-//const char* TypeToName(const char* name)
-//{
-//    const char* __name = abi::__cxa_demangle(name, nullptr, nullptr, nullptr);
-//    return __name;
-//}
+#endif

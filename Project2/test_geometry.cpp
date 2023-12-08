@@ -125,6 +125,46 @@ PosVec3d intersectWithTwoPlanes(const Plane3d& planeA, const Plane3d& planeB)
 
 static void test1()
 {
+	//测试for循环变量定义对性能的影响
+	size_t N = N_10E_6;
+	double* arr = _readBinFileAlignedBox(N);
+
+	steady_clock::time_point start, end;
+	microseconds duration;
+	vector<AlignedBox3d> boxVct;
+
+	for (int i = 0; i < N; i++)
+	{
+		double min_x = arr[6 * i + 0];
+		double min_y = arr[6 * i + 1];
+		double min_z = arr[6 * i + 2];
+		double max_x = arr[6 * i + 3];
+		double max_y = arr[6 * i + 4];
+		double max_z = arr[6 * i + 5];
+		AlignedBox3d box = { Vector3d(min_x,min_y,min_z), Vector3d(max_x,max_y,max_z) };
+		boxVct.emplace_back(box);
+	}
+	for (size_t t = 0; t < 3; t++)
+	{
+		start = std::chrono::high_resolution_clock::now();
+		vector<int> interVct;
+		vector<Vector3d> corVct; //效率是一样的，写外面容易调试，但是会引起读代码误解
+		Vector3d cropro;
+		Triangle tri = { Vector3d(200,300,400), Vector3d(1200,300,400), Vector3d(200,300,1400) };
+		for (int i = 0; i < N; i++)
+		{
+			//AlignedBox3d tmp;
+			//Vector3d cropro = boxVct[i].min().cross(boxVct[i].max()); //time = 2346
+			//cropro = boxVct[i].min().cross(boxVct[i].max()); //time = 2342
+			//corVct.push_back(cropro); //time=72736
+			//corVct.emplace_back(cropro); //time=71642
+
+			bool isI = isTriangleAndBoundingBoxIntersectSAT(tri, boxVct[i]); // time=11022
+		}
+		end = std::chrono::high_resolution_clock::now();
+		duration = std::chrono::duration_cast<microseconds>(end - start);
+		cout << " time=" << duration.count() + duration.count() << " micro_seconds" << endl;
+	}
 
 }
 
@@ -183,9 +223,9 @@ static void test3() //测试getIntersectLineOfTwoPlane
 
 static int enrol = []()->int
 {
-	//test1();
+	test1();
 	//test2();
-	test3();
+	//test3();
 	cout << "test_geometry finished.\n" << endl;
 	return 0;
 }();

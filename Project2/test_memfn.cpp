@@ -2,6 +2,7 @@
 
 using namespace std;
 
+#if 0
 
 //宏
 #define ENROL_INTERFACE_MACRO(CLASS_NAME, FUN_NAME) \
@@ -297,6 +298,7 @@ int main_template () {
 
 	return 0;
 }
+#endif
 
 
 static int _enrol = []()->int {

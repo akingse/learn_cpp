@@ -54,8 +54,6 @@ int main_ml()
 }
 
 
-
-
 int& func()
 {
 	int a = 1;

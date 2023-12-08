@@ -218,7 +218,7 @@ std::tuple<bool, array<double, 4>> psykronix::getTwoSegmentsCollinearCoincidentP
 	return { true, { propA0, propA1, propB0, propB1  } }; //
 }
 
-void psykronix::mergeIntersectRegion(std::vector<double>& _range, const std::array<double, 2>& prop)//->void
+void psykronix::mergeIntersectRegionOfSegment(std::vector<double>& _range, const std::array<double, 2>& prop)//->void
 {
 	//if (range.empty())
 	//	range = { { prop[0], prop[1] } };
@@ -407,7 +407,7 @@ bool KdTree3d::insert(const psykronix::Polyface3d& polyface)
 		return false;
 	// insert and update bound box
 	std::function<AlignedBox3d(shared_ptr<KdTreeNode3d>, shared_ptr<KdTreeNode3d>)> _searchKdTree = [&]
-		(shared_ptr<KdTreeNode3d> node, shared_ptr<KdTreeNode3d> father)// return father node bound-box
+		(shared_ptr<KdTreeNode3d> node, shared_ptr<KdTreeNode3d> father)->AlignedBox3d// return father node bound-box
 		{
 			//using recursion
 			if (node->m_index == -1) // isnot leaf node
@@ -434,6 +434,7 @@ bool KdTree3d::insert(const psykronix::Polyface3d& polyface)
 					return father->m_bound.merged(polyface.m_bound); //change the box
 				}
 			}
+			return {};
 		};
 	_searchKdTree(m_kdTree, nullptr);
 	return true;
