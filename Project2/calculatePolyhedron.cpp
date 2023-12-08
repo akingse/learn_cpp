@@ -104,24 +104,24 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector
 	size_t countCr = 0, countPr = 0;
 #endif
 	auto _isRayAndTriangleIntersectParallel = [&point, &normal, &rayLine](std::array<Eigen::Vector3d, 3 >& trigon)->bool
-		{
-			//if (fabs((point - trigon[0]).dot(normal)) > eps) // not coplanar
-			if ((point - trigon[0]).dot(normal) != 0.0) // not coplanar
-				return false;
-			// negetive direction ray cause cross product result opposite
-			return
-				((trigon[0] - point).cross(rayLine).dot(rayLine.cross(trigon[1] - point)) >= 0.0 && (trigon[0] - point).cross(rayLine).dot((trigon[0] - point).cross(trigon[1] - point)) >= 0.0) ||
-				((trigon[1] - point).cross(rayLine).dot(rayLine.cross(trigon[2] - point)) >= 0.0 && (trigon[1] - point).cross(rayLine).dot((trigon[1] - point).cross(trigon[2] - point)) >= 0.0) ||
-				((trigon[2] - point).cross(rayLine).dot(rayLine.cross(trigon[0] - point)) >= 0.0 && (trigon[2] - point).cross(rayLine).dot((trigon[2] - point).cross(trigon[0] - point)) >= 0.0);
-		};
+	{
+		//if (fabs((point - trigon[0]).dot(normal)) > eps) // not coplanar
+		if ((point - trigon[0]).dot(normal) != 0.0) // not coplanar
+			return false;
+		// negetive direction ray cause cross product result opposite
+		return
+			((trigon[0] - point).cross(rayLine).dot(rayLine.cross(trigon[1] - point)) >= 0.0 && (trigon[0] - point).cross(rayLine).dot((trigon[0] - point).cross(trigon[1] - point)) >= 0.0) ||
+			((trigon[1] - point).cross(rayLine).dot(rayLine.cross(trigon[2] - point)) >= 0.0 && (trigon[1] - point).cross(rayLine).dot((trigon[1] - point).cross(trigon[2] - point)) >= 0.0) ||
+			((trigon[2] - point).cross(rayLine).dot(rayLine.cross(trigon[0] - point)) >= 0.0 && (trigon[2] - point).cross(rayLine).dot((trigon[2] - point).cross(trigon[0] - point)) >= 0.0);
+	};
 	auto _correctRayLine = [&angle, &rayLine]()
-		{
-			angle += 1.0; // 0.1(rad)~5.73(deg)
-			Affine3d rotation = Affine3d::Identity();
-			rotation.rotate(AngleAxisd(angle, Vector3d(rand(), rand(), rand()))); //Vector3d::UnitZ() //Vector3d(1, 1, 1)
-			rayLine = rotation * rayLine;
-			//countCr++;
-		};
+	{
+		angle += 1.0; // 0.1(rad)~5.73(deg)
+		Affine3d rotation = Affine3d::Identity();
+		rotation.rotate(AngleAxisd(angle, Vector3d(rand(), rand(), rand()))); //Vector3d::UnitZ() //Vector3d(1, 1, 1)
+		rayLine = rotation * rayLine;
+		//countCr++;
+	};
 	while (true)
 	{
 		bool isNew = false;//new rayX
@@ -182,46 +182,46 @@ bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const Mo
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
 	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
 	auto _relationOfPointAndTriangle = [&point](/*const Vector3d& point,*/ const std::array<Vector3d, 3>& trigon)->RelationOfRayAndTrigon // axisZ direction
-		{
-			//if (!isPointRayAcrossTriangle(point, trigon))
-			//	return PointOnTrigon::CROSS_OUTER;
-			// must intersect
-			if (point.x() == trigon[0].x() && point.y() == trigon[0].y()) // include ray and edge collinear
-				return RelationOfRayAndTrigon::CROSS_VERTEX_0;
-			else if (point.x() == trigon[1].x() && point.y() == trigon[1].y())
-				return RelationOfRayAndTrigon::CROSS_VERTEX_1;
-			else if (point.x() == trigon[2].x() && point.y() == trigon[2].y())
-				return RelationOfRayAndTrigon::CROSS_VERTEX_2;
-			else if ((point - trigon[1]).cross(point - trigon[0]).z() == 0.0) // point on edge's projection
-				return RelationOfRayAndTrigon::CROSS_EDGE_01;
-			else if ((point - trigon[2]).cross(point - trigon[1]).z() == 0.0)
-				return RelationOfRayAndTrigon::CROSS_EDGE_12;
-			else if ((point - trigon[0]).cross(point - trigon[2]).z() == 0.0)
-				return RelationOfRayAndTrigon::CROSS_EDGE_20;
-			return RelationOfRayAndTrigon::CROSS_INNER;
-		};
+	{
+		//if (!isPointRayAcrossTriangle(point, trigon))
+		//	return PointOnTrigon::CROSS_OUTER;
+		// must intersect
+		if (point.x() == trigon[0].x() && point.y() == trigon[0].y()) // include ray and edge collinear
+			return RelationOfRayAndTrigon::CROSS_VERTEX_0;
+		else if (point.x() == trigon[1].x() && point.y() == trigon[1].y())
+			return RelationOfRayAndTrigon::CROSS_VERTEX_1;
+		else if (point.x() == trigon[2].x() && point.y() == trigon[2].y())
+			return RelationOfRayAndTrigon::CROSS_VERTEX_2;
+		else if ((point - trigon[1]).cross(point - trigon[0]).z() == 0.0) // point on edge's projection
+			return RelationOfRayAndTrigon::CROSS_EDGE_01;
+		else if ((point - trigon[2]).cross(point - trigon[1]).z() == 0.0)
+			return RelationOfRayAndTrigon::CROSS_EDGE_12;
+		else if ((point - trigon[0]).cross(point - trigon[2]).z() == 0.0)
+			return RelationOfRayAndTrigon::CROSS_EDGE_20;
+		return RelationOfRayAndTrigon::CROSS_INNER;
+	};
 	auto isLeftAll = [&vbo](const std::array<int, 3>& trigon)->bool // buildin lambda function
+	{
+		Vector3d normal = (vbo[trigon[1]] - vbo[trigon[0]]).cross(vbo[trigon[2]] - vbo[trigon[1]]).normalized(); // for precision
+		bool isFirst = true, isLeft /*= false*/, temp /*= false*/;
+		for (size_t i = 0; i < vbo.size(); ++i)
 		{
-			Vector3d normal = (vbo[trigon[1]] - vbo[trigon[0]]).cross(vbo[trigon[2]] - vbo[trigon[1]]).normalized(); // for precision
-			bool isFirst = true, isLeft /*= false*/, temp /*= false*/;
-			for (size_t i = 0; i < vbo.size(); ++i)
+			if (i == trigon[0] || i == trigon[1] || i == trigon[2] || fabs(normal.dot((vbo[i] - vbo[trigon[0]]).normalized())) < eps) // self and coplanar
+				continue;
+			temp = normal.dot(vbo[i] - vbo[trigon[0]]) < 0.0;
+			if (isFirst)
 			{
-				if (i == trigon[0] || i == trigon[1] || i == trigon[2] || fabs(normal.dot((vbo[i] - vbo[trigon[0]]).normalized())) < eps) // self and coplanar
-					continue;
-				temp = normal.dot(vbo[i] - vbo[trigon[0]]) < 0.0;
-				if (isFirst)
-				{
-					isLeft = temp;
-					isFirst = false;
-				}
-				else
-				{
-					if (temp != isLeft)
-						return false;
-				}
+				isLeft = temp;
+				isFirst = false;
 			}
-			return true;
-		};
+			else
+			{
+				if (temp != isLeft)
+					return false;
+			}
+		}
+		return true;
+	};
 	size_t count = 0;
 	set<int> vertexSet;
 	set<array<int, 2>> edgeSet;
@@ -301,19 +301,19 @@ bool psykronix::isPointInsidePolyhedronCL(const Eigen::Vector3d& _point, const M
 	//		0.0 <= az * ((trigon[0][0] - trigon[2][0]) * (point[1] - trigon[2][1]) - (point[0] - trigon[2][0]) * (trigon[0][1] - trigon[2][1]));
 	//};
 	auto _isPointInTriangle2D = [&point](const Eigen::Vector3d& p0, const Eigen::Vector3d& p1, const Eigen::Vector3d& p2)->bool
-		{	//pre-box
-			if (point.x() > std::max(std::max(p0[0], p1[0]), p2[0]) ||
-				point.x() < std::min(std::min(p0[0], p1[0]), p2[0]) ||
-				point.y() > std::max(std::max(p0[1], p1[1]), p2[1]) ||
-				point.y() < std::min(std::min(p0[1], p1[1]), p2[1]) ||
-				point.z() > std::max(std::max(p0[2], p1[2]), p2[2]) + eps) //include z
-				return false;
-			double az = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
-			return //when vertical, az==0, always true
-				0.0 <= az * ((p1[0] - p0[0]) * (point[1] - p0[1]) - (point[0] - p0[0]) * (p1[1] - p0[1])) &&
-				0.0 <= az * ((p2[0] - p1[0]) * (point[1] - p1[1]) - (point[0] - p1[0]) * (p2[1] - p1[1])) &&
-				0.0 <= az * ((p0[0] - p2[0]) * (point[1] - p2[1]) - (point[0] - p2[0]) * (p0[1] - p2[1]));
-		};
+	{	//pre-box
+		if (point.x() > std::max(std::max(p0[0], p1[0]), p2[0]) ||
+			point.x() < std::min(std::min(p0[0], p1[0]), p2[0]) ||
+			point.y() > std::max(std::max(p0[1], p1[1]), p2[1]) ||
+			point.y() < std::min(std::min(p0[1], p1[1]), p2[1]) ||
+			point.z() > std::max(std::max(p0[2], p1[2]), p2[2]) + eps) //include z
+			return false;
+		double az = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
+		return //when vertical, az==0, always true
+			0.0 <= az * ((p1[0] - p0[0]) * (point[1] - p0[1]) - (point[0] - p0[0]) * (p1[1] - p0[1])) &&
+			0.0 <= az * ((p2[0] - p1[0]) * (point[1] - p1[1]) - (point[0] - p1[0]) * (p2[1] - p1[1])) &&
+			0.0 <= az * ((p0[0] - p2[0]) * (point[1] - p2[1]) - (point[0] - p2[0]) * (p0[1] - p2[1]));
+	};
 	if (!mesh.bounding_.contains(_point)) //mesh boundingbox is world coordinate
 		return false;
 	// using axisZ
@@ -357,19 +357,19 @@ bool psykronix::isPointInsidePolyhedronFL(const Eigen::Vector3d& _point, const M
 #endif
 	Eigen::Vector3d point = mesh.pose_.inverse() * _point; // all vertex using self coordinate
 	auto _isPointInTriangle2D = [&point](const Eigen::Vector3d& p0, const Eigen::Vector3d& p1, const Eigen::Vector3d& p2)->bool
-		{	//pre-box
-			if (point.x() > std::max(std::max(p0[0], p1[0]), p2[0]) ||
-				point.x() < std::min(std::min(p0[0], p1[0]), p2[0]) ||
-				point.y() > std::max(std::max(p0[1], p1[1]), p2[1]) ||
-				point.y() < std::min(std::min(p0[1], p1[1]), p2[1]) ||
-				point.z() > std::max(std::max(p0[2], p1[2]), p2[2]) + eps) // isPointOnSurface with threshold
-				return false;
-			double az = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
-			return //when vertical, az==0, always true
-				0.0 <= az * ((p1[0] - p0[0]) * (point[1] - p0[1]) - (point[0] - p0[0]) * (p1[1] - p0[1])) &&
-				0.0 <= az * ((p2[0] - p1[0]) * (point[1] - p1[1]) - (point[0] - p1[0]) * (p2[1] - p1[1])) &&
-				0.0 <= az * ((p0[0] - p2[0]) * (point[1] - p2[1]) - (point[0] - p2[0]) * (p0[1] - p2[1]));
-		};
+	{	//pre-box
+		if (point.x() > std::max(std::max(p0[0], p1[0]), p2[0]) ||
+			point.x() < std::min(std::min(p0[0], p1[0]), p2[0]) ||
+			point.y() > std::max(std::max(p0[1], p1[1]), p2[1]) ||
+			point.y() < std::min(std::min(p0[1], p1[1]), p2[1]) ||
+			point.z() > std::max(std::max(p0[2], p1[2]), p2[2]) + eps) // isPointOnSurface with threshold
+			return false;
+		double az = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
+		return //when vertical, az==0, always true
+			0.0 <= az * ((p1[0] - p0[0]) * (point[1] - p0[1]) - (point[0] - p0[0]) * (p1[1] - p0[1])) &&
+			0.0 <= az * ((p2[0] - p1[0]) * (point[1] - p1[1]) - (point[0] - p1[0]) * (p2[1] - p1[1])) &&
+			0.0 <= az * ((p0[0] - p2[0]) * (point[1] - p2[1]) - (point[0] - p2[0]) * (p0[1] - p2[1]));
+	};
 	if (!mesh.bounding_.contains(_point)) //mesh boundingbox is world coordinate
 		return false;
 	// using axisZ
@@ -932,7 +932,7 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 					count_tri_box_exclude_pre++;
 #endif  
 					continue;
-			}
+				}
 				if (isTwoTrianglesIntersectSAT(triA, triB))
 				{
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
@@ -940,9 +940,9 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 					interTriInfoList.push_back({ { triA, triB }, {}, std::nan("0") }); // only no-depth call, default distance is nan
 #endif
 					return true;
+				}
+			}
 		}
-	}
-}
 	}
 #ifdef STATISTIC_DATA_COUNT
 	if (meshA.vbo_.empty() || meshB.vbo_.empty()) // extra safe check
@@ -962,7 +962,7 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 			interTriInfoList.push_back({ { gTirNaN, gTirNaN }, {}, 0.0 });
 #endif
 			return true;
-	}
+		}
 	}
 	else if (meshB.bounding_.contains(meshA.bounding_))
 	{
@@ -973,7 +973,7 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 			interTriInfoList.push_back({ { gTirNaN, gTirNaN }, {}, 0.0 });
 #endif
 			return true;
-	}
+		}
 	}
 	return false;
 }
@@ -1019,7 +1019,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 				meshB.pose_ * meshB.vbo_[meshB.ibo_[j][1]],
 				meshB.pose_ * meshB.vbo_[meshB.ibo_[j][2]] };
 			triFaceVctB.push_back({ triIter[0], triIter[1], triIter[2] }); //world coord
-	}
+		}
 #endif
 		for (const auto& iA : indexAB[0]) //faces intersect
 		{
@@ -1101,15 +1101,15 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 #endif	
 							isExist = true;
 							break;
+						}
 					}
-				}
 					if (!isExist)
 					{
 #ifdef STATISTIC_DATA_COUNT
 						count_cal_sepa_axis++;
 #endif	
 						axesSepa.push_back(axis.normalized());
-				}
+					}
 				}
 #else
 				pInter = getTwoTrianglesIntersectPoints(triA, triB);
@@ -1127,10 +1127,10 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 					//another case, two triangle edge collinear, using triangle vertex coincident judge
 					faceSetA.insert(iA);
 					faceSetB.insert(iB);
-			}
+				}
 #endif //USING_ALL_SEPARATE_AXES
+			}
 		}
-}
 	}
 #ifdef STATISTIC_DATA_COUNT
 	if (isContact)
@@ -1298,7 +1298,7 @@ std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const
 				count_tri_box_exclude_pre++;
 #endif                    
 				continue;
-		}
+			}
 			double temp = getTrianglesDistanceSAT(triA, triB);// two trigons distance calculate
 			if (temp <= tolerance && temp < d) // update d
 			{
@@ -1308,7 +1308,7 @@ std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const
 				triDistPair = { triA, triB }; //record last tri-pair
 #endif    
 			}
-	}
+		}
 	}
 #ifdef STATISTIC_DATA_RECORD
 	if (d <= tolerance)

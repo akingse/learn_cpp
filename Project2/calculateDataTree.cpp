@@ -18,10 +18,10 @@ bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Vector2d, 2>& 
 {
 	//double operator^(const Vector2d& vec1, const Vector2d& vec2)
 	auto _cross2d = [](const Vector2d& vec1, const Vector2d& vec2)->double
-		{
-			//return vec1.x() * vec2.y() - vec2.x() * vec1.y();
-			return vec1[0] * vec2[1] - vec2[0] * vec1[1];
-		};
+	{
+		//return vec1.x() * vec2.y() - vec2.x() * vec1.y();
+		return vec1[0] * vec2[1] - vec2[0] * vec1[1];
+	};
 	if (!isTwoSegmentsIntersect(segmA, segmB))
 		return false;
 	//return (segmA[1] - segmA[0]).cross(segmB[1] - segmB[0]).isZero(eps);
@@ -94,15 +94,15 @@ bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3
 	Vector3d vecSeg;
 	double projection, k;
 	auto _getDistanceOfPointAndSegmentINF = [&](const Vector3d& point, const std::array<Vector3d, 2>& segm)->double
-		{
-			vecSeg = segm[1] - segm[0];// not zero
-			projection = vecSeg.dot(point);
-			//the projection must on segment
-			if (vecSeg.dot(segm[1]) < projection || projection < vecSeg.dot(segm[0]))
-				return DBL_MAX;
-			k = vecSeg.dot(point - segm[0]) / vecSeg.dot(vecSeg);
-			return (segm[0] - point + k * vecSeg).squaredNorm();
-		};
+	{
+		vecSeg = segm[1] - segm[0];// not zero
+		projection = vecSeg.dot(point);
+		//the projection must on segment
+		if (vecSeg.dot(segm[1]) < projection || projection < vecSeg.dot(segm[0]))
+			return DBL_MAX;
+		k = vecSeg.dot(point - segm[0]) / vecSeg.dot(vecSeg);
+		return (segm[0] - point + k * vecSeg).squaredNorm();
+	};
 	for (const auto& endA : segmA)
 	{
 		if (_getDistanceOfPointAndSegmentINF(endA, segmB) <= toleDis * toleDis)
@@ -297,15 +297,15 @@ std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<std::pair<size_t, Poly
 {
 	// the kd-tree crud create read update delete
 	auto _getTotalBounding = [&polygons](/*const std::vector<Polygon2d>& polygons*/)->Eigen::AlignedBox2d
+	{
+		AlignedBox2d fullBox;
+		for (const auto& iter : polygons)
 		{
-			AlignedBox2d fullBox;
-			for (const auto& iter : polygons)
-			{
-				fullBox.extend(iter.second.bounding().min());
-				fullBox.extend(iter.second.bounding().max());
-			}
-			return fullBox;
-		};
+			fullBox.extend(iter.second.bounding().min());
+			fullBox.extend(iter.second.bounding().max());
+		}
+		return fullBox;
+	};
 
 	if (polygons.empty()) //no chance
 		return nullptr;
@@ -363,22 +363,22 @@ std::vector<size_t> KdTree2d::findIntersect(const Polygon2d& polygon)
 		return {}; //test whether is working
 	std::vector<size_t> indexes;
 	std::function<void(const shared_ptr<KdTreeNode2d>&)> _searchKdTree = [&](const shared_ptr<KdTreeNode2d>& node)->void
+	{
+		//using recursion
+		if (node->m_bound.intersects(polygon.bounding()))
 		{
-			//using recursion
-			if (node->m_bound.intersects(polygon.bounding()))
+			if (node->m_index == -1) // isnot leaf node
 			{
-				if (node->m_index == -1) // isnot leaf node
-				{
-					_searchKdTree(node->m_left);
-					_searchKdTree(node->m_right);
-				}
-				else
-				{
-					indexes.push_back(node->m_index);
-					return;
-				}
+				_searchKdTree(node->m_left);
+				_searchKdTree(node->m_right);
 			}
-		};
+			else
+			{
+				indexes.push_back(node->m_index);
+				return;
+			}
+		}
+	};
 	_searchKdTree(m_kdTree);
 	return indexes;
 }
@@ -392,50 +392,50 @@ bool KdTree3d::insert(const psykronix::Polyface3d& polyface)
 {
 	//must be new index of polyface
 	std::function<bool(const shared_ptr<KdTreeNode3d>&)> _findIndex = [&](const shared_ptr<KdTreeNode3d>& node)->bool
+	{
+		//using recursion
+		if (node->m_index == -1) // isnot leaf node
 		{
-			//using recursion
-			if (node->m_index == -1) // isnot leaf node
-			{
-				if (_findIndex(node->m_left))
-					return true;
-				if (_findIndex(node->m_right))
-					return true;
-			}
-			return node->m_index == polyface.m_index;
-		};
+			if (_findIndex(node->m_left))
+				return true;
+			if (_findIndex(node->m_right))
+				return true;
+		}
+		return node->m_index == polyface.m_index;
+	};
 	if (_findIndex(m_kdTree))
 		return false;
 	// insert and update bound box
 	std::function<AlignedBox3d(shared_ptr<KdTreeNode3d>, shared_ptr<KdTreeNode3d>)> _searchKdTree = [&]
-		(shared_ptr<KdTreeNode3d> node, shared_ptr<KdTreeNode3d> father)->AlignedBox3d// return father node bound-box
+	(shared_ptr<KdTreeNode3d> node, shared_ptr<KdTreeNode3d> father)->AlignedBox3d// return father node bound-box
+	{
+		//using recursion
+		if (node->m_index == -1) // isnot leaf node
 		{
-			//using recursion
-			if (node->m_index == -1) // isnot leaf node
+			if (polyface.m_bound.min()[node->m_dimension] < node->m_bound.min()[node->m_dimension]) //compare xyz
 			{
-				if (polyface.m_bound.min()[node->m_dimension] < node->m_bound.min()[node->m_dimension]) //compare xyz
-				{
-					node->m_bound = _searchKdTree(node->m_left, node);
-				}
-				else
-				{
-					node->m_bound = _searchKdTree(node->m_right, node);
-				}
+				node->m_bound = _searchKdTree(node->m_left, node);
 			}
-			else //if (node->m_index==-1)
+			else
 			{
-				if (father->single()) // right leaf is empty
-				{
-					father->m_right = std::make_shared<KdTreeNode3d>(KdTreeNode3d(polyface, node->m_dimension));
-					return father->m_left->m_bound.merged(father->m_right->m_bound);
-				}
-				else
-				{
-					node->m_left = std::make_shared<KdTreeNode3d>(KdTreeNode3d(polyface, (node->m_dimension + 1) % 3));
-					return father->m_bound.merged(polyface.m_bound); //change the box
-				}
+				node->m_bound = _searchKdTree(node->m_right, node);
 			}
-			return {};
-		};
+		}
+		else //if (node->m_index==-1)
+		{
+			if (father->single()) // right leaf is empty
+			{
+				father->m_right = std::make_shared<KdTreeNode3d>(KdTreeNode3d(polyface, node->m_dimension));
+				return father->m_left->m_bound.merged(father->m_right->m_bound);
+			}
+			else
+			{
+				node->m_left = std::make_shared<KdTreeNode3d>(KdTreeNode3d(polyface, (node->m_dimension + 1) % 3));
+				return father->m_bound.merged(polyface.m_bound); //change the box
+			}
+		}
+		return {};
+	};
 	_searchKdTree(m_kdTree, nullptr);
 	return true;
 }
@@ -448,77 +448,77 @@ bool KdTree3d::remove(const psykronix::Polyface3d& polyface)
 	long long index = polyface.m_index;
 	//std::function<bool(shared_ptr<KdTreeNode3d>&)> _searchKdTree = [&](shared_ptr<KdTreeNode3d>& node)->bool
 	std::function<tuple<bool, AlignedBox3d>(shared_ptr<KdTreeNode3d>&)> _searchKdTree = [&](shared_ptr<KdTreeNode3d>& node)
+	{
+		//using recursion
+		if (node->m_index == -1) // isnot leaf node
 		{
-			//using recursion
-			if (node->m_index == -1) // isnot leaf node
+			if (std::get<0>(_searchKdTree(node->m_left)))
 			{
-				if (std::get<0>(_searchKdTree(node->m_left)))
+				if (node->m_right != nullptr)
 				{
-					if (node->m_right != nullptr)
-					{
-						node->m_bound = std::get<1>(_searchKdTree(node->m_left));
-						return tuple<bool, AlignedBox3d>{true, node->m_bound};
-					}
-					else
-					{
-						node.reset();
-						return tuple<bool, AlignedBox3d>{false, {}};
-					}
+					node->m_bound = std::get<1>(_searchKdTree(node->m_left));
+					return tuple<bool, AlignedBox3d>{true, node->m_bound};
 				}
-				if (std::get<0>(_searchKdTree(node->m_right)))
+				else
 				{
-					if (node->m_left != nullptr)
-					{
-						node->m_bound = std::get<1>(_searchKdTree(node->m_right));
-						return tuple<bool, AlignedBox3d>{true, node->m_bound};
-					}
-					else
-					{
-						node.reset();
-						return tuple<bool, AlignedBox3d>{false, {}};
-					}
+					node.reset();
+					return tuple<bool, AlignedBox3d>{false, {}};
 				}
 			}
-			if (node->m_index == index)
+			if (std::get<0>(_searchKdTree(node->m_right)))
 			{
-				//node = nullptr;
-				//node->m_index = -1;
-				node.reset(); //release the pointer
-				return tuple<bool, AlignedBox3d>{true, {}};
+				if (node->m_left != nullptr)
+				{
+					node->m_bound = std::get<1>(_searchKdTree(node->m_right));
+					return tuple<bool, AlignedBox3d>{true, node->m_bound};
+				}
+				else
+				{
+					node.reset();
+					return tuple<bool, AlignedBox3d>{false, {}};
+				}
 			}
-			return tuple<bool, AlignedBox3d>{false, {}};
-		};
+		}
+		if (node->m_index == index)
+		{
+			//node = nullptr;
+			//node->m_index = -1;
+			node.reset(); //release the pointer
+			return tuple<bool, AlignedBox3d>{true, {}};
+		}
+		return tuple<bool, AlignedBox3d>{false, {}};
+	};
 	return std::get<0>(_searchKdTree(m_kdTree));
 }
 
 bool KdTree3d::update(const psykronix::Polyface3d& polyface)
 {
 	std::function<tuple<bool, AlignedBox3d>(shared_ptr<KdTreeNode3d>&)> _searchKdTree = [&](shared_ptr<KdTreeNode3d>& node)//->bool
+	{
+		//using recursion
+		if (node->m_index == -1) // isnot leaf node
 		{
-			//using recursion
-			if (node->m_index == -1) // isnot leaf node
+			if (std::get<0>(_searchKdTree(node->m_left)))
 			{
-				if (std::get<0>(_searchKdTree(node->m_left)))
-				{
-					node->m_bound = std::get<1>(_searchKdTree(node->m_left));
-					//if (node->m_right->isLeaf())
-					node->m_bound.merged(node->m_right->m_bound);
-					return tuple<bool, AlignedBox3d>{true, node->m_bound};
-				}
-				if (std::get<0>(_searchKdTree(node->m_right)))
-				{
-					node->m_bound = std::get<1>(_searchKdTree(node->m_right));
-					node->m_bound.merged(node->m_left->m_bound);
-					return tuple<bool, AlignedBox3d>{true, node->m_bound};
-				}
+				node->m_bound = std::get<1>(_searchKdTree(node->m_left));
+				//if (node->m_right->isLeaf())
+				node->m_bound.merged(node->m_right->m_bound);
+				return tuple<bool, AlignedBox3d>{true, node->m_bound};
 			}
-			if (node->m_index == polyface.m_index)
+			if (std::get<0>(_searchKdTree(node->m_right)))
 			{
-				node->m_bound = polyface.m_bound; //change the box
-				return tuple<bool, AlignedBox3d>{true, polyface.m_bound};
+				node->m_bound = std::get<1>(_searchKdTree(node->m_right));
+				node->m_bound.merged(node->m_left->m_bound);
+				return tuple<bool, AlignedBox3d>{true, node->m_bound};
 			}
-			return tuple<bool, AlignedBox3d>{false, {}};
-		};
+		}
+		if (node->m_index == polyface.m_index)
+		{
+			node->m_bound = polyface.m_bound; //change the box
+			return tuple<bool, AlignedBox3d>{true, polyface.m_bound};
+		}
+		return tuple<bool, AlignedBox3d>{false, {}};
+	};
 	return std::get<0>(_searchKdTree(m_kdTree));
 	//return false;
 }
@@ -528,15 +528,15 @@ std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<Polyface3d>& polyfaces
 {
 	// the kd-tree crud create read update delete
 	auto _getTotalBounding = [&](/*const std::vector<Polygon2d>& polygons*/)->Eigen::AlignedBox3d
+	{
+		AlignedBox3d fullBox;
+		for (const auto& iter : polyfaces)
 		{
-			AlignedBox3d fullBox;
-			for (const auto& iter : polyfaces)
-			{
-				fullBox.extend(iter.m_bound.min());
-				fullBox.extend(iter.m_bound.max());
-			}
-			return fullBox;
-		};
+			fullBox.extend(iter.m_bound.min());
+			fullBox.extend(iter.m_bound.max());
+		}
+		return fullBox;
+	};
 	if (polyfaces.empty()) //no chance
 		return nullptr;
 	const int direction = dimension % 3;  // the direction of xyz, x=0/y=1/z=2
@@ -571,15 +571,15 @@ std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<Polyface3d>& polyfaces
 {
 	// the kd-tree crud create read update delete
 	auto _getTotalBounding = [&polyfaces](/*const std::vector<Polygon2d>& polygons*/)->Eigen::AlignedBox3d
+	{
+		AlignedBox3d fullBox;
+		for (const auto& iter : polyfaces)
 		{
-			AlignedBox3d fullBox;
-			for (const auto& iter : polyfaces)
-			{
-				fullBox.extend(iter.m_bound.min());
-				fullBox.extend(iter.m_bound.max());
-			}
-			return fullBox;
-		};
+			fullBox.extend(iter.m_bound.min());
+			fullBox.extend(iter.m_bound.max());
+		}
+		return fullBox;
+	};
 	if (polyfaces.empty()) //no chance
 		return nullptr;
 	const int direction = dimension % 3;  // the direction of xyz, x=0/y=1/z=2
@@ -634,22 +634,22 @@ std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon, double to
 		curBox.max() += tole;
 	}
 	std::function<void(const shared_ptr<KdTreeNode3d>&)> _searchKdTree = [&](const shared_ptr<KdTreeNode3d>& node)->void
+	{
+		//using recursion
+		if (node->m_bound.intersects(curBox))
 		{
-			//using recursion
-			if (node->m_bound.intersects(curBox))
+			if (node->m_index == -1) // isnot leaf node
 			{
-				if (node->m_index == -1) // isnot leaf node
-				{
-					_searchKdTree(node->m_left);
-					_searchKdTree(node->m_right);
-				}
-				else
-				{
-					if (polygon.m_index != node->m_index) //exclude self
-						indexes.push_back(node->m_index); //if double loop, index canbe small to large
-				}
+				_searchKdTree(node->m_left);
+				_searchKdTree(node->m_right);
 			}
-		};
+			else
+			{
+				if (polygon.m_index != node->m_index) //exclude self
+					indexes.push_back(node->m_index); //if double loop, index canbe small to large
+			}
+		}
+	};
 	_searchKdTree(m_kdTree);
 	return indexes;
 }
