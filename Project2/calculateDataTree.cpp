@@ -222,28 +222,32 @@ void psykronix::mergeIntersectRegionOfSegment(std::vector<double>& _range, const
 {
 	//if (range.empty())
 	//	range = { { prop[0], prop[1] } };
-	//vector<> to vector<pair>
+	if (prop[1] < _range.front()) //prop left
+	{
+		//range.push_back({ prop[0], prop[1] });
+		_range.push_back(prop[0]);
+		_range.push_back(prop[1]);
+		sort(_range.begin(), _range.end());
+		return;
+	}
+	if (prop[0] > _range.back())//prop right
+	{
+		//range.push_back({ prop[0], prop[1] });
+		_range.push_back(prop[0]);
+		_range.push_back(prop[1]);
+		return;
+	}
+	//transform vector<> to vector<pair>
 	std::vector<pair<double, double>> range;
 	for (size_t i = 0; i < _range.size() / 2; ++i)
 		range.push_back({ _range[2 * i], _range[2 * i + 1] });
-	if (prop[1] < range.front().first)
-	{
-		range.push_back({ prop[0], prop[1] });
-		sort(range.begin(), range.end()); //ascending order
-		return;
-	}
-	if (prop[0] > range.back().second)
-	{
-		range.push_back({ prop[0], prop[1] });
-		return;
-	}
 	vector<pair<double, double>> mergeRes;
 	array<double, 2> segmIter = prop; // iterator segment
-	bool isCover = false;
+	bool isCover = false; //prop cover _range
 	for (const auto& iter : range)
 	{
-		// merge
-		if (prop[0] < iter.first) //p0 left
+		// merge // propSegm={p0, p1}
+		if (prop[0] <= iter.first) //p0 left
 		{
 			if (prop[1] < iter.first) //p1 left
 			{
@@ -277,12 +281,15 @@ void psykronix::mergeIntersectRegionOfSegment(std::vector<double>& _range, const
 		mergeRes.push_back({ segmIter[0], segmIter[1] });
 	sort(mergeRes.begin(), mergeRes.end()); //ascending order
 	//range = mergeRes;
-	//vector<pair> to vector<>
-	_range.clear();
-	for (const auto& iter : mergeRes)
+	// transform vector<pair> to vector<>
+	if (!mergeRes.empty())
 	{
-		_range.push_back(iter.first);
-		_range.push_back(iter.second);
+		_range.clear();
+		for (const auto& iter : mergeRes)
+		{
+			_range.push_back(iter.first);
+			_range.push_back(iter.second);
+		}
 	}
 }
 
