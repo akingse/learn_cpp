@@ -13,7 +13,7 @@
 
 //windows
 //#include <windows.h> //min max
-//#define _AFXDLL
+#define _AFXDLL
 //#include <afx.h> // MFC <cstring>
 // 
 //math

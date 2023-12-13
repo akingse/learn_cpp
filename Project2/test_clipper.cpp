@@ -282,19 +282,23 @@ static void test4()
 	rangeP->push_back({ 9,10 });
 
 
-	std::vector<pair<double, double>> range;
-	range.push_back({ 1,2 });
-	range.push_back({ 5,6 });
-	range.push_back({ 9,10 });
+	std::vector<pair<double, double>> range1;
+	//range.push_back({ 1,2 });
+	//range.push_back({ 5,6 });
+	//range.push_back({ 9,10 });
 
+
+	std::vector<pair<double, double>> range;
+	//range = { {0, 1} };
+	range = { {2, 3} };
 
 	std::vector<pair<double, double>> range_copy = range;
 	std::array<double, 2> prop;
 	//prop = { 1.5, 3 };
 	//prop = { 1.5, 5. };
 	//prop = { 4, 7 };
-	//prop = { 0.5, 1 };
-	prop = { 1.5, 7 };
+	prop = { 0.5, 1.5 };
+	//prop = { 1.5, 7 };
 	//prop = { 1.5, 9.6 };
 	std::vector<double> mergeRes = mergeIntersectRegionOfSegment(range, prop);
 	return;
@@ -308,7 +312,7 @@ static int enrol = []()->int
 	//test1();
 	//test2(); //for funciton
 	//test3();
-	//test4();
+	test4();
 	cout << "test_clipper finished.\n" << endl;
 	return 0;
 }();
