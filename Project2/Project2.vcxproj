@@ -209,7 +209,6 @@
     <ClCompile Include="test_extern.cpp" />
     <ClCompile Include="test_factory.cpp" />
     <ClCompile Include="test_file.cpp" />
-    <ClCompile Include="test_function.cpp" />
     <ClCompile Include="test_hash.cpp" />
     <ClCompile Include="test_lambda.cpp" />
     <ClCompile Include="test_map.cpp">
@@ -224,8 +223,8 @@
     <ClCompile Include="test_memory_leak.cpp" />
     <ClCompile Include="test_object_pool.cpp" />
     <ClCompile Include="test_ope.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="test_overload.cpp" />
     <ClCompile Include="test_recursion.cpp" />
@@ -240,7 +239,6 @@
     <ClCompile Include="test_template1.cpp" />
     <ClCompile Include="test_template2.cpp" />
     <ClCompile Include="test_thread_1.cpp" />
-    <ClCompile Include="test_template0.cpp" />
     <ClCompile Include="test_thread_2.cpp" />
     <ClCompile Include="test_thread_3.cpp" />
     <ClCompile Include="test_thread_4.cpp" />
@@ -266,9 +264,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="my_file_read_write.h" />
     <ClInclude Include="psykronixTypeDefine.h" />
-    <ClInclude Include="test_function.h" />
     <ClInclude Include="test_serialize.h" />
-    <ClInclude Include="test_template0.h" />
     <ClInclude Include="my_triangle_intersect.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

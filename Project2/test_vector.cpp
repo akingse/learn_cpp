@@ -29,7 +29,7 @@ public:
 	virtual void inheriFun2() override {}
 	virtual void inheriFun3() override {}
 
-	void setter(int a, Vec3 vec, char b, double c) {
+	void setter(int a, Vec3d vec, char b, double c) {
 		this->a = a;
 		this->vec = vec;
 		this->b = b;
@@ -37,7 +37,7 @@ public:
 	}
 private:
 	int a;
-	Vec3 vec;
+	Vec3d vec;
 	
 	char b;
 	double c;
@@ -55,13 +55,13 @@ int main_vector()
 	auto ss2 = sizeof(size_t);//8
 
 	A insa;
-	insa.setter(1112, Vec3(1,2,3), 'a', 3.14159);
+	insa.setter(1112, Vec3d(1,2,3), 'a', 3.14159);
 	char* pI;
 	pI = (char*)&insa + sizeof(void*); //only one pointor
 
 	//int* p1 = (int*)&insa + 1;
 	int* pInt = (int*)(pI);		pI += sizeof(int); //len(char*)=1byte, as a unit length
-	Vec3* pVec = (Vec3*)(pI);	pI += sizeof(Vec3);
+	Vec3d* pVec = (Vec3d*)(pI);	pI += sizeof(Vec3d);
 	char* pChar = (char*)(pI);	pI += sizeof(char); //&insa + sizeof(Vec3);
 	double* pDouble = (double*)(pI); //&insa + sizeof(char);
 	// (Vec3*)0x00000032f42fed98

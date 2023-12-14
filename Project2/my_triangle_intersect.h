@@ -1,12 +1,72 @@
 #pragma once
 #include <afx.h>
+
+class Vec3d
+{
+public:
+	double x;
+	double y;
+	double z;
+	Vec3d() = default; //C++11 new feature
+	Vec3d(double x, double y, double z = 0) : x(x), y(y), z(z)
+	{
+	}
+	Vec3d(const Vec3d& vec) : x(vec.x), y(vec.y), z(vec.z) //拷贝构造
+	{
+	}
+
+	Vec3d(Vec3d&& rhs) //移动构造
+	{
+		this->x = rhs.x;
+		this->y = rhs.y;
+		this->z = rhs.z;
+	}
+
+	Vec3d operator=(const Vec3d& rhs)  //拷贝赋值
+	{
+		if (&rhs != this)
+			memcpy(this, &rhs, sizeof(Vec3d));
+			//x = rhs.x;
+			//y = rhs.y;
+			//z = rhs.z;
+		return *this;
+	}
+
+	Vec3d operator=(Vec3d&& rhs)  //移动赋值
+	{
+		this->x = rhs.x;
+		this->y = rhs.y;
+		this->z = rhs.z;
+		return *this;
+	}
+	//compare
+	bool operator==(const Vec3d& vec) const
+	{
+		//return abs(vec.x - x) + abs(vec.y - y) + abs(vec.z - z) < eps;
+		return memcmp(this, &vec, sizeof(Vec3d)) == 0;
+	}
+	bool operator<(const Vec3d& vec) const
+	{
+		//return vec.x * vec.x + vec.y * vec.y + vec.z * vec.z < x* x + y * y + z * z;
+		return memcmp(this, &vec, sizeof(Vec3d)) < 0; // ==-1
+	}
+	//operator bool() const
+	//{
+	//	return (abs(x) + abs(y) + abs(z) < eps);
+	//}
+	~Vec3d()
+	{
+	}
+};
+
+
 inline std::string getExePath() // include<afx.h>
 {
 	TCHAR buff[MAX_PATH];
 	GetModuleFileNameW(NULL, buff, MAX_PATH);
 	CString path = buff;
 	path = path.Left(path.ReverseFind('\\')); // delete exename
-	return (CStringA)path;
+	return (std::string)(CStringA)path;
 }
 
 bool TriangularIntersectionTest(const std::array<Eigen::Vector3d, 3>& T1, const std::array<Eigen::Vector3d, 3>& T2);

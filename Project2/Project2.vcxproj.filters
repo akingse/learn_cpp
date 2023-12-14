@@ -112,9 +112,6 @@
     <ClCompile Include="test_template1.cpp">
       <Filter>test_template</Filter>
     </ClCompile>
-    <ClCompile Include="test_template0.cpp">
-      <Filter>test_template</Filter>
-    </ClCompile>
     <ClCompile Include="test_math.cpp">
       <Filter>test_math</Filter>
     </ClCompile>
@@ -156,9 +153,6 @@
     </ClCompile>
     <ClCompile Include="my_triangle_intersect.cpp">
       <Filter>my_triangle</Filter>
-    </ClCompile>
-    <ClCompile Include="test_function.cpp">
-      <Filter>test_gram</Filter>
     </ClCompile>
     <ClCompile Include="my_file_read_write.cpp">
       <Filter>test_bin</Filter>
@@ -240,9 +234,6 @@
     <ClInclude Include="pch.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="test_template0.h">
-      <Filter>test_template</Filter>
-    </ClInclude>
     <ClInclude Include="calculateTriangle.h">
       <Filter>my_triangle</Filter>
     </ClInclude>
@@ -251,9 +242,6 @@
     </ClInclude>
     <ClInclude Include="my_triangle_intersect.h">
       <Filter>my_triangle</Filter>
-    </ClInclude>
-    <ClInclude Include="test_function.h">
-      <Filter>test_gram</Filter>
     </ClInclude>
     <ClInclude Include="test_serialize.h">
       <Filter>test_bin</Filter>

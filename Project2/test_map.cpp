@@ -12,7 +12,7 @@ int main_geo()
 	double h = cone3.get_h();
 	ToGeCone::sm_coneMap;
 	ToGeCone::sm_totalCount;
-	Vec3 vec;
+	Vec3d vec;
 
 	//test 局部变量析构
 

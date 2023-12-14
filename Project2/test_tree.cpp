@@ -53,16 +53,16 @@ void operator+=(std::vector<T>& vct1, const std::vector<T>& vct2)
 }
 
 
-vector<tuple<char,int>> recursion0(Tree tree, int layer=0)
+vector<tuple<char, int>> recursion0(Tree tree, int layer = 0)
 {
 	vector<tuple<char, int>> res;
 	res.push_back({ tree.m,layer });
 	for (auto& iter : tree.p)
 	{
-		res.push_back({ iter.m,layer+1 });
+		res.push_back({ iter.m,layer + 1 });
 		vector<tuple<char, int>>  temp;
 		for (auto& iterII : iter.p)
-			temp =temp + recursion0(iterII, layer + 1);
+			temp = temp + recursion0(iterII, layer + 1);
 		res = res + temp;
 	}
 	return res;
@@ -74,9 +74,9 @@ vector<tuple<char, int>> getFlatten(Tree tree, size_t& max, int layer = 0)
 	res.push_back({ tree.m,layer });
 	for (auto& iter : tree.p)
 	{
-		res += getFlatten(iter,max, layer + 1);
-		if (layer+1 > max)
-			max = layer+1;
+		res += getFlatten(iter, max, layer + 1);
+		if (layer + 1 > max)
+			max = layer + 1;
 	}
 	return res;
 }
@@ -102,15 +102,15 @@ vector<tuple<char, int>> getFlattenPN(Tree _tree)
 	vector<tuple<char, int>> res;
 	if (tree.size() != 0)
 		res.push_back({ std::get<0>(*tree.begin()),-1 });
-	for (size_t i=1;i<max+1;++i)
+	for (size_t i = 1; i < max + 1; ++i)
 	{
 		//for (const auto& iterI : tree)
-		for (auto iterI=tree.begin();iterI!=tree.end();++iterI)
+		for (auto iterI = tree.begin(); iterI != tree.end(); ++iterI)
 		{
 			if (std::get<1>(*iterI) == i)
 			{
 				auto iterII = iterI; //copy iterator
-				while (std::get<1>(*iterII) != i-1 )
+				while (std::get<1>(*iterII) != i - 1)
 					iterII--; //find prev key
 				for (size_t j = 0; j < res.size(); ++j) //find the index in array
 				{
@@ -127,7 +127,7 @@ vector<tuple<char, int>> getFlattenPN(Tree _tree)
 }
 
 
-	//反向生成树
+//反向生成树
 Tree getAssemble0(const vector<tuple<char, int>>& tree)
 {
 	Tree res;
@@ -152,7 +152,7 @@ Tree getAssemble0(const vector<tuple<char, int>>& tree)
 	{
 		std::vector<Tree> temp;
 		//for (auto iterR = tree.rbegin(); iterR != tree.rend(); ++iterR) // using reverse_iterator
-		for (int j=tree.size()-1;j>=0;--j) //using index
+		for (size_t j = tree.size() - 1; j >= 0; --j) //using index
 		{
 			//if (cmp == std::get<1>(*iterR))
 			if (cmp == std::get<1>(tree[j]))
@@ -178,9 +178,9 @@ Tree getAssemble1(const vector<tuple<char, int>>& tree)
 	Tree res;
 	if (tree.size() == 0)
 		return res; //unvalid
-	std::vector<tuple<Tree,int>> tList; //create all nest tree
+	std::vector<tuple<Tree, size_t>> tList; //create all nest tree
 	for (auto& iter : tree)
-	//for (auto& iter=tree.rbegin();iter!=tree.rend();++iter)//reverse , not work
+		//for (auto& iter=tree.rbegin();iter!=tree.rend();++iter)//reverse , not work
 		tList.push_back({ Tree(std::get<0>(iter)), std::get<1>(iter) });
 	//auto iter = std::get<1>(*tree.rbegin());
 	//for (auto iter = tList.rbegin(); iter != tList.rend(); iter++)
@@ -192,11 +192,11 @@ Tree getAssemble1(const vector<tuple<char, int>>& tree)
 	//		iterB--;
 	//	get<0>(*iterB).append(get<0>(*iter));
 	//}
-	
+
 	//must using index
-	for (int i = tList.size()-1; i >=0; --i) //inverse order
+	for (size_t i = tList.size() - 1; i >= 0; --i) //inverse order
 	{
-		int j = i;
+		size_t j = i;
 		if (get<1>(tList[j]) == 0)
 			break;
 		while (get<1>(tList[j]) + 1 != get<1>(tList[i]))
@@ -238,7 +238,7 @@ int main_tree()
 
 
 	size_t max = 0;
-	vector<tuple<char, int>>  res0 = getFlatten(A,max);
+	vector<tuple<char, int>>  res0 = getFlatten(A, max);
 	//vector<tuple<Tree, int>>  res1 = recursion2(A,max);
 	vector<tuple<char, int>> res2 = getFlattenPN(A);
 	Tree res3 = getAssemble0(res2);
@@ -280,7 +280,7 @@ typedef struct {              //表头结构
 typedef struct {              //树结构
 	CTBox nodes[MAX_TREE_SIZE];    //结点数组
 	int  r, n;                     //根节点的位置和结点数
-};
+} tree;
 
 
 
@@ -412,7 +412,7 @@ std::vector<unsigned char> getNestedGeometrySerialize(const std::vector<BPGeomet
 			//memcpy(res.data() + res.size() - szKey, &std::tuple<size_t, BPParaTransform>(pointor, iter.getTransform()), szKey);
 		}
 	}
-	//test 
+	//test
 	std::vector<BPGeometricPrimitive> partsDe = getNestedGeometryDeserialize(res);
 	return res;
 }
@@ -442,7 +442,7 @@ std::vector<BPGeometricPrimitive> getNestedGeometryDeserialize(const std::vector
 }
 */
 
-static int _enrol = []()->int 
+static int _enrol = []()->int
 {
 
 	return 0;

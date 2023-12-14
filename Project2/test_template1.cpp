@@ -10,7 +10,26 @@ static constexpr bool __has_transform<T, std::void_t<decltype(std::declval<T>().
 // std::decltype()
 // std::declval<>
 
+class Generic //__PrimitiveInterface
+{
+public:
+    const Generic* m_imp;
+    size_t m_count;
 
+};
+
+
+template<typename T>
+class Gene : public Generic
+{
+public:
+    T m_data;
+    Gene(const T& data) :
+        m_data(data)
+    {
+    }
+
+};
 
 template<typename T>
 class __Primitive
@@ -169,12 +188,12 @@ class E { public:int foo(int) { return 2; } };
 int main_p1()
 {
     //序列化
-    std::vector<unsigned char> buf(sizeof(Vec3));
-    Vec3 vecIn(1,1,1);
-	memcpy(buf.data(), &vecIn, sizeof(Vec3));
+    std::vector<unsigned char> buf(sizeof(Vec3d));
+    Vec3d vecIn(1,1,1);
+	memcpy(buf.data(), &vecIn, sizeof(Vec3d));
     //反序列化
-    Vec3 vecOut;
-    memcpy(&vecOut, buf.data(), sizeof(Vec3));
+    Vec3d vecOut;
+    memcpy(&vecOut, buf.data(), sizeof(Vec3d));
 
 
 

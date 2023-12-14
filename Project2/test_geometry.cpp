@@ -223,7 +223,7 @@ static void test3() //²âÊÔgetIntersectLineOfTwoPlane
 
 static int enrol = []()->int
 {
-	test1();
+	//test1();
 	//test2();
 	//test3();
 	cout << "test_geometry finished.\n" << endl;

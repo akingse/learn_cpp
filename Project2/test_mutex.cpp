@@ -370,7 +370,7 @@ int thread_task17()
 
 static int main14()
 {
-	std::async(thread_task17);
+	auto res = std::async(thread_task17);
 	return 0;
 }
 

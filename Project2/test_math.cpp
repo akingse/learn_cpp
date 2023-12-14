@@ -1,5 +1,9 @@
 #include "pch.h"
 using namespace std;
+//https://www.cnblogs.com/xiaoxi666/p/6421228.html
+//#define N 5
+static constexpr int N = 5;
+
 static int _test1()
 {
     std::cout << "Hello World!\n";
@@ -46,10 +50,6 @@ static int _test1()
     return 0;
 }
 
-
-//https://www.cnblogs.com/xiaoxi666/p/6421228.html
-
-#define N 5
 //¾ØÕó³Ë·¨
 double* multiply(double A[N * N], double B[N * N])
 {
@@ -256,10 +256,9 @@ double* LUP_solve_inverse(double A[N * N])
     return inv_A;
 }
 
-int main4()
+static int test0()
 {
     double* A = new double[N * N]();
-
     srand((unsigned)time(0));
     for (int i = 0; i < N; i++)
     {
@@ -268,7 +267,6 @@ int main4()
             A[i * N + j] = rand() % 100 * 0.01;
         }
     }
-
 
     double* E_test = new double[N * N]();
     double* invOfA = new double[N * N]();
@@ -333,7 +331,7 @@ int math_sign(float x)
     return (x > 0) ? (1) : (-1);
 }
 
-int main2()
+static int test1()
 {
     int p = 5, b = 2;
     int c = funtion(5, b);
@@ -352,5 +350,30 @@ int main2()
     return 0;
 }
 
+static void test2()
+{
+    //float
+    double a = 0.1;
+    double b = 0.2;
+    double c = a + b;
 
+    if (c == 0.3) {
+        std::cout << "Equal" << std::endl;
+    }
+    else {
+        std::cout << "Not equal" << std::endl;
+    }
+
+    return;
+}
+
+static int enrol = []()->int
+{
+    //test0();
+    //test1();
+    test2(); //for funciton
+    //test3();
+    cout << "test_math finished.\n" << endl;
+    return 0;
+}();
 
