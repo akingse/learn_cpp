@@ -56,11 +56,9 @@ int main_ml()
 
 int& func()
 {
-	int a = 1;
-	return a;
+	int* a = new int(1);
+	return *a;
 }
-
-
 
 //µ¥ÀıÀà
 class Manage

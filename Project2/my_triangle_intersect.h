@@ -54,7 +54,7 @@ public:
 	//{
 	//	return (abs(x) + abs(y) + abs(z) < eps);
 	//}
-	~Vec3d()
+	virtual ~Vec3d()
 	{
 	}
 };

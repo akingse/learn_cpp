@@ -19,7 +19,7 @@ namespace psykronix
     static const Eigen::Vector3d gVecAxisZ(0, 0, 1); //Eigen::Vector3d::UnitZ()
     static constexpr double eps = FLT_EPSILON; //1e-7
     static constexpr double _eps = -FLT_EPSILON;
-    static constexpr unsigned long long ULL_MAX = 18446744073709551615; // 2 ^ 64 - 1
+    //static constexpr unsigned long long ULL_MAX = 18446744073709551615; // 2 ^ 64 - 1 //ULLONG_MAX
 
     class Plane3d
     {

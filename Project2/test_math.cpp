@@ -364,15 +364,118 @@ static void test2()
         std::cout << "Not equal" << std::endl;
     }
 
+    //double浮点数通过位移，改变大小，
+    //std::fegetround();
+
+    float n0 = 131071.0f;
+    float n1 = 131071.1f;
+    float n2 = 131071.2f;
+
+    float m0 = 131072.0f;
+    float m1 = 131072.1f;
+    float m2 = 131072.2f;
+
+    float b0 = 1310720000.0f;
+    float b1 = 1310720000.1f;
+    float b2 = 1310720000.2f;
+
+    float d1 = b2 - b1;
+    float d0 = b1 - b0;
+    if (b0 == b1)
+        return;
+
     return;
+}
+
+static void test3()
+{
+
+    double a1 = 1 + 1e-6;
+    double a2 = 1 + 2*1e-6;
+    double ad = a2 - a1;
+
+    double b1 = 1e6 + 1e-6;
+    double b2 = 1e6 + 2 * 1e-6;
+    double bd = b2 - b1;
+    //小数的精确位数和整数位数据大小有关
+    double c = bd - ad; //1e-12
+
+    return;
+}
+
+
+static void test4() //C++数学函数 
+{
+    //https://blog.csdn.net/weixin_33858249/article/details/87960866?spm=1001.2101.3001.6650.6&utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-6-87960866-blog-128446271.235%5Ev39%5Epc_relevant_yljh&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-6-87960866-blog-128446271.235%5Ev39%5Epc_relevant_yljh&utm_relevant_index=13
+
+    long long llmax = LLONG_MAX;
+    size_t ullmax = ULLONG_MAX;
+    DBL_MIN; //并不是指最小可表示的浮点数，而是最小规格化浮点值
+    //浮点数的存储由：S(sign)符号位、E(exponent)指数位、M(mantissa 或significand)尾数位三个部分组成。
+    INFINITY;
+    NAN;
+    bool is = isfinite(INFINITY);
+    is = isnan(NAN);
+    //如果一个浮点数中指数位部分全为0，而尾数位部分不全为0则这个浮点数称为非规格化浮点数
+
+    int x = 0;
+    //如果x是正无穷大返回1，负无穷大返回-1，否则返回0
+    int isinf(x);
+
+    //如果x是无穷大返回0
+    int isfinite(x);
+
+    //如果x是一个规格化浮点数则返回非0
+    int  isnormal(x);
+
+    //如果x是一个非法的数字返回非0
+    int isnan(x);
+
+    //如果x是负数返回非0
+    int signbit(x);
+
+    /**
+    *返回浮点数的分类：
+    FP_INFINITE:  x是无穷大或者无穷小
+    FP_NAN：x是一个非法数字
+    FP_NORMAL：x是一个规格化浮点数
+    FP_SUBNORMAL：x是一个非规格化浮点数
+    FP_ZERO：x是0
+    */
+    //int fpclassify(x);
+
+    int y = 1;
+    double res;
+    res = log(x); //ln(x)
+    res = log2(x); //log2(x)
+    res = log10(x); //log10(x)
+    res = sqrt(x);
+    res = cbrt(x); //立方根
+    res = hypot(x, y); //d =√x^2+y^2
+
+
+    //extern double erf(double x); 误差函数
+    //extern double lgamma(double x);伽玛函数
+    //extern double tgamma(double x); 阶乘
+    //extern double ceil(double x);
+    //extern double floor(double x);
+    //extern double nearbyint(double x);
+    //extern double rint(double x);
+    //extern long lrint(double x);
+    //extern double round(double x); //四舍五入
+    //extern double trunc(double x);//数字拆分
+    //extern double fmod(double x, double y);//取余
+    //extern double modf(double x, double p);//分解出x的整数和小数部分
+
+
 }
 
 static int enrol = []()->int
 {
     //test0();
     //test1();
-    test2(); //for funciton
-    //test3();
+    //test2(); //for funciton
+    test3();
     cout << "test_math finished.\n" << endl;
     return 0;
 }();

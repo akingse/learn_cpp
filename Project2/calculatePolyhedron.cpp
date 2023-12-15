@@ -432,7 +432,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> _getPenetrationDepthOfTwoConv
 	double dminA = DBL_MAX, dminB = DBL_MAX;
 	double minA, maxA, minB, maxB, projection;//refresh min and max
 	Eigen::Vector3d direction, normal;
-	std::array<size_t, 2> indexAB = { 0, 0 };// { ULL_MAX, ULL_MAX };
+	std::array<size_t, 2> indexAB = { 0, 0 };// { ULLONG_MAX, ULLONG_MAX };
 	for (const auto& faceA : iboA) // iterate every face
 	{
 		minA = DBL_MAX;
@@ -506,7 +506,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> _getPenetrationDepthOfTwoConv
 //			index = i;
 //		}
 //	}
-//	return { dmin * coord,{index, ULL_MAX} };
+//	return { dmin * coord,{index, ULLONG_MAX} };
 //}
 
 //simplify
@@ -535,7 +535,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 	const set<size_t>& faceSetA, const set<size_t>& faceSetB, const vector<size_t>& vertexVectA, const vector<size_t>& vertexVectB)
 {
 	if (faceSetA.empty() && faceSetB.empty())
-		return { gVecZero, {ULL_MAX, ULL_MAX} };
+		return { gVecZero, {ULLONG_MAX, ULLONG_MAX} };
 	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
 	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
 	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
@@ -582,8 +582,8 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 	double minA, maxA, minB, maxB, projection, dtemp;//refresh min and max
 	Eigen::Vector3d directionA, directionB, normal;// directionA_V, directionB_V;
 	// the minimum distance must on the direction of face normal
-	size_t indexA = ULL_MAX, indexB = ULL_MAX;// indexA_V = ULL_MAX, indexB_V = ULL_MAX;
-	//std::array<size_t, 2> indexAB = { ULL_MAX , ULL_MAX };
+	size_t indexA = ULLONG_MAX, indexB = ULLONG_MAX;// indexA_V = ULLONG_MAX, indexB_V = ULLONG_MAX;
+	//std::array<size_t, 2> indexAB = { ULLONG_MAX , ULLONG_MAX };
 	// calculate depth using SAT
 	for (const auto& iA : faceSetA) // iterate every faceA
 	{
@@ -696,8 +696,8 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 	//if (!isFixedFaceA)
 	//	direction = -direction;
 	return (dminA < dminB) ?
-		std::tuple<Eigen::Vector3d, std::array<size_t, 2>>{ dminA* directionA, { indexA, ULL_MAX }} :
-		std::tuple<Eigen::Vector3d, std::array<size_t, 2>>{ dminB * directionB, { ULL_MAX, indexB } };
+		std::tuple<Eigen::Vector3d, std::array<size_t, 2>>{ dminA* directionA, { indexA, ULLONG_MAX }} :
+		std::tuple<Eigen::Vector3d, std::array<size_t, 2>>{ dminB * directionB, { ULLONG_MAX, indexB } };
 }
 
 // calculate depth self with tiny errors
@@ -752,7 +752,7 @@ Eigen::Vector3d getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA, const
 //	const vector<size_t>& faceVectA, const vector<size_t>& faceVectB, const vector<size_t>& vertexVectA, const vector<size_t>& vertexVectB)
 //{
 //	if ((faceVectA.empty() || vertexVectB.empty()) && (faceVectB.empty() || vertexVectA.empty())) // any empty cause zero
-//		return { gVecZero, { ULL_MAX , ULL_MAX } }; // or gVecNaN separate
+//		return { gVecZero, { ULLONG_MAX , ULLONG_MAX } }; // or gVecNaN separate
 //	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
 //	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
 //	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
@@ -763,7 +763,7 @@ Eigen::Vector3d getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA, const
 //	Eigen::Affine3d matIBA = matB.inverse() * matA;
 //	Eigen::Vector3d directionA, directionB, normal;
 //	double dminA = 0, dminB = 0, projection, origin, tmpMaxA = 0, tmpMaxB = 0;
-//	size_t indexA = ULL_MAX, indexB = ULL_MAX;
+//	size_t indexA = ULLONG_MAX, indexB = ULLONG_MAX;
 //#ifdef STATISTIC_DATA_RECORD
 //	set<double> projectionA, projectionB;
 //#endif
@@ -823,8 +823,8 @@ Eigen::Vector3d getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA, const
 //		}
 //	}
 //	return (tmpMaxA - dminA < tmpMaxB - dminB) ? //return min
-//		std::tuple<Eigen::Vector3d, std::array<size_t, 2>>{ (tmpMaxA - dminA) * directionA, { indexA, ULL_MAX }} :
-//		std::tuple<Eigen::Vector3d, std::array<size_t, 2>>{ (tmpMaxB - dminB) * directionB, { ULL_MAX, indexB } };
+//		std::tuple<Eigen::Vector3d, std::array<size_t, 2>>{ (tmpMaxA - dminA) * directionA, { indexA, ULLONG_MAX }} :
+//		std::tuple<Eigen::Vector3d, std::array<size_t, 2>>{ (tmpMaxB - dminB) * directionB, { ULLONG_MAX, indexB } };
 //}
 
 //--------------------------------------------------------------------------------------------------------
@@ -1182,9 +1182,9 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
 #ifndef USING_ALL_SEPARATE_AXES_FOR_DEPTH
 		Triangle trigon;
-		if (std::get<1>(depth)[0] == ULL_MAX && std::get<1>(depth)[1] == ULL_MAX) // means no distance, generally due to surface contact
+		if (std::get<1>(depth)[0] == ULLONG_MAX && std::get<1>(depth)[1] == ULLONG_MAX) // means no distance, generally due to surface contact
 			interTriInfoList.push_back({ { std::move(gTirNaN), std::move(gTirNaN) }, {}, -std::get<0>(depth).norm() });
-		else if (std::get<1>(depth)[0] != ULL_MAX) //bool isLeft 
+		else if (std::get<1>(depth)[0] != ULLONG_MAX) //bool isLeft 
 		{
 			trigon = { meshA.pose_ * meshA.vbo_[meshA.ibo_[get<1>(depth)[0]][0]],
 					meshA.pose_ * meshA.vbo_[meshA.ibo_[get<1>(depth)[0]][1]],
@@ -1276,7 +1276,7 @@ std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const
 	Eigen::Affine3d relative_matrix = meshB.pose_.inverse() * meshA.pose_; //without revise
 	// distance > tolerance, return double-max, to decrease calculate
 	double d = DBL_MAX; // the res
-	std::array<size_t, 2> index = { ULL_MAX, ULL_MAX };
+	std::array<size_t, 2> index = { ULLONG_MAX, ULLONG_MAX };
 	std::array<vector<size_t>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, tolerance);
 	if (indexAB[0].empty() || indexAB[1].empty())
 		return { d, index };

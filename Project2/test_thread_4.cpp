@@ -55,7 +55,7 @@ void foo(int&& x) {
 
 template <typename T>
 void bar(T&& x) {
-	std::forward<T>(x);
+	auto res = std::forward<T>(x);
 	foo(std::forward<T>(x));
 }
 

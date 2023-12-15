@@ -16,11 +16,12 @@ const string& shorterString(const string& s1, const string& s2)
     return s1.size() < s2.size() ? s1 : s2;
 }
 
-//禁止返回局部对象的引用（我的dev c++ 没有报错，比较可怕）   
+//禁止返回局部对象的引用（我的dev c++ 没有报错，比较可怕）   //会报警告
 const string& mainip(const string& s)
 {
-    string ret = s;
-    return ret;
+    //string ret = s;
+    string* ret = new string;
+    return *ret;
 }
 //引用返回左值  
 char& get_val(string& str, string::size_type ix)

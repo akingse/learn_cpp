@@ -133,7 +133,7 @@ static void test2()
 	Affine3d pose = Eigen::Affine3d::Identity();
 	for (size_t i = 0; i < 4; i++)
 		for (size_t j = 0; j < 4; j++)
-			pose(i, j) = i+j;
+			pose(i, j) = double(i+j);
 
 
 	return;
@@ -173,7 +173,7 @@ void eigen_matlab0()
 	Vector3f x, y, z;                     // 3x1 float matrix.
 	RowVector3f a, b, c;                  // 1x3 float matrix.
 	VectorXd v;                           // Dynamic column vector of doubles
-	double s;
+	//double s;
 
 	// Basic usage
 	// Eigen          // Matlab           // comments
@@ -195,7 +195,7 @@ void eigen_matlab0()
 	B << A, A, A;     // B is three horizontally stacked A's.
 	A.fill(10);       // Fill A with all 10's.
 
-	int rows = 1, cols = 1, size, low, high, step;
+	int rows = 1, cols = 1, size = 1, low = 1, high = 1, step = 1;
 	// Eigen                                    // Matlab
 	MatrixXd::Identity(rows, cols);               // eye(rows,cols)
 	C.setIdentity(rows, cols);                    // C = eye(rows,cols)
