@@ -368,7 +368,19 @@ Bezier曲线
 
 - 【12】：几何（前沿动态）
 
- 
+ 三角形面
+
+mesh细分
+
+loop subdivision 路普细分
+
+
+
+mesh简化
+
+mesh正则化
+
+
 
 
 

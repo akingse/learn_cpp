@@ -1359,3 +1359,32 @@ double getMoveDistanceOfAssignedDirection(const ModelMesh& meshA, const ModelMes
 	return 0;
 }
 
+// practice of games101
+ModelMesh mesh::meshLoopSubdivision(const ModelMesh& mesh)
+{
+	//every new vertes
+	auto _getNewVertex = [](const Vector3d& A, const Vector3d& B, const Vector3d& C, const Vector3d& D)->Vector3d// 3/8*(A+B)+1/8*(A+D)
+		{
+			return 0.375 * (A + B) + 0.125 * (C + D);
+		};
+	// update old
+	auto _updateOldVertex = [](const Vector3d& origin, const vector<Vector3d>& round)->Vector3d// 3/8*(A+B)+1/8*(A+D)
+		{
+			int n = round.size(); //vertex degree
+			double u = (n == 3) ? 0.1875 : 3 / (8 * n);
+			Vector3d sum = Vector3d::Zero(); //neighbor position sum
+			for (const auto& iter : round)
+				sum += iter;
+			return (1 - n * u) * origin + u * sum;
+		};
+
+
+
+	return ModelMesh();
+}
+
+ModelMesh meshGeneralSubdivision(const ModelMesh& mesh) //catmull-clark subdivision
+{
+
+	return ModelMesh();
+}

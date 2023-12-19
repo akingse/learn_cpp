@@ -13,7 +13,6 @@ using namespace Eigen;
 #undef max
 #endif // 
 
-
 bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB)
 {
 	//double operator^(const Vector2d& vec1, const Vector2d& vec2)
@@ -702,3 +701,4 @@ std::vector<std::tuple<size_t, bool>> KdTree3d::findIntersectClash(const Polyfac
 	_searchKdTree(m_kdTree);
 	return indexes;
 }
+
