@@ -1359,6 +1359,29 @@ double getMoveDistanceOfAssignedDirection(const ModelMesh& meshA, const ModelMes
 	return 0;
 }
 
+class FaceList
+{
+public:
+	std::array<int, 3> m_face;
+	FaceList* m_edge_01;
+	FaceList* m_edge_12;
+	FaceList* m_edge_21;
+	//diagonal
+	int m_dia_0; 
+	int m_dia_1; 
+	int m_dia_2; 
+};
+
+class PolyFaceList
+{
+public:
+	std::vector<FaceList> m_ibo;
+	PolyFaceList(const ModelMesh& mesh)
+	{
+
+	}
+};
+
 // practice of games101
 ModelMesh mesh::meshLoopSubdivision(const ModelMesh& mesh)
 {
@@ -1377,13 +1400,99 @@ ModelMesh mesh::meshLoopSubdivision(const ModelMesh& mesh)
 				sum += iter;
 			return (1 - n * u) * origin + u * sum;
 		};
+	// invent wheel and optimize wheel
+	vector<std::array<int, 3>> edgeMap(mesh.ibo_.size(), {-1,-1,-1}); //init
+	for (int i = 0; i < mesh.ibo_.size(); ++i)
+	//for (const auto& face : mesh.ibo_)
+	{
+		std::array<int, 3> faceA = mesh.ibo_[i]; //copy
+		std::sort(faceA.begin(), faceA.end());
+		int find = 0;
+		array<int, 3> faceDia;
+		for (int j = 0; j < mesh.ibo_.size(); ++j)
+		{
+			if (i == j || (edgeMap[i][0] != -1 && edgeMap[i][1] != -1 && edgeMap[i][2] != -1))
+				continue;
+			std::array<int, 3> faceB = mesh.ibo_[j]; //copy
+			std::sort(faceB.begin(), faceB.end());
+			if (faceB[2] < faceA[0] || faceB[0]> faceA[2]) //bound box
+				continue;
+			int coin = 0;
+			for (const int it : faceB)
+			{
+				if (it == faceA[0] || it == faceA[1] || it == faceA[2])
+					coin++;
+			}
+			if (coin == 2)
+			{
+				int diaA, diaB;
+				if (faceA[0] != faceB[0] && faceA[0] != faceB[1] && faceA[0] != faceB[2])
+					diaA = faceA[0];
+				else if (faceA[1] != faceB[0] && faceA[1] != faceB[1] && faceA[1] != faceB[2])
+					diaA = faceA[1];
+				else
+					diaA = faceA[2];
+				if (faceB[0] != faceA[0] && faceB[0] != faceA[1] && faceB[0] != faceA[2])
+					diaB = faceB[0];
+				else if (faceB[1] != faceA[0] && faceB[1] != faceA[1] && faceB[1] != faceA[2])
+					diaB = faceB[1];
+				else
+					diaB = faceB[2];
+				int indexI, indexJ;
+				if (diaA == mesh.ibo_[i][0])
+					indexI = 1;
+				else if (diaA == mesh.ibo_[i][1])
+					indexI = 2;
+				else
+					indexI = 0;
+				if (diaB == mesh.ibo_[j][0])
+					indexJ = 1;
+				else if (diaB == mesh.ibo_[j][1])
+					indexJ = 2;
+				else
+					indexJ = 0;
+				//record
+				edgeMap[i][indexI] = diaB;
+				edgeMap[j][indexJ] = diaA;
+				find++;
+			}
+			if (find == 3)
+				//edgeMap[i] = faceDia;
+				break;
+		}
+	}
 
+	ModelMesh meshNew = mesh;
+	std::vector<Eigen::Vector3d>& vboNew = meshNew.vbo_;
+	std::vector<std::array<int, 3>>& iboNew = meshNew.ibo_;
+	// create new
+	std::vector<std::array<int, 3>> iboSub;
+	vector<tuple<array<int, 2>, array<int,2>>> edgeCommon;
+	//map<array<int, 2>, int> edgeSubed;
+	for (int i = 0; i < mesh.ibo_.size(); ++i)
+	{
+		//array<int, 2> edge01 = (face[0] < face[1]) ? array<int, 2>{ face[0], face[1] } : array<int, 2>{face[1], face[2] }; //the unique edge, small->large
+		//if (edgeSubed.find(edge0) == edgeSubed.end())
+		//	edgeSubed.insert({ edge0,vboNew.size() });
+		const std::array<int, 3>& face = mesh.ibo_[i]; 
+		array<int, 2> edge01 = { face[0], face[1] };
+		Vector3d pointNew = _getNewVertex(vboNew[edge01[0]], vboNew[edge01[1]], vboNew[face[2]], vboNew[edgeMap[i][0]]);
+		vboNew.push_back(pointNew);
+
+	}
+	
 
 
 	return ModelMesh();
 }
 
 ModelMesh meshGeneralSubdivision(const ModelMesh& mesh) //catmull-clark subdivision
+{
+
+	return ModelMesh();
+}
+
+ModelMesh meshQuadricErrorSimpIification(const ModelMesh& mesh) //edge collapse and quadirc error metrics
 {
 
 	return ModelMesh();
