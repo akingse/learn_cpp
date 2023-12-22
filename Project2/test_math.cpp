@@ -399,6 +399,12 @@ static void test3()
     double bd = b2 - b1;
     //小数的精确位数和整数位数据大小有关
     double c = bd - ad; //1e-12
+    // 必然如此，float浮点数，故名思意，2^E表示法是浮动的，
+    //当整数位变大，将会占用整体的数据长度，留给小数位的数据变短，小数位将变得更不精确；
+    std::vector<tuple<int, int>> test0 = { {1,2} };
+    std::vector<pair<int, int>> test1 = { {1,2} };
+    std::vector<array<int, 2>> test2 = { {1,2} }; //调试1层看不到
+
 
     return;
 }

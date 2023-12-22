@@ -13,10 +13,10 @@ namespace psykronix
     static const Triangle gSegNaN = { gVecNaN, gVecNaN };
     static const Triangle gTirNaN = { gVecNaN, gVecNaN, gVecNaN };
     static const PosVec3d gPVNaN = { gVecNaN ,gVecNaN };
-    static const Eigen::Vector3d gVecZero(0, 0, 0); //Eigen::Vector3d::Zero()
-    static const Eigen::Vector3d gVecAxisX(1, 0, 0); //Eigen::Vector3d::UnitX()
-    static const Eigen::Vector3d gVecAxisY(0, 1, 0); //Eigen::Vector3d::UnitY()
-    static const Eigen::Vector3d gVecAxisZ(0, 0, 1); //Eigen::Vector3d::UnitZ()
+    static const Eigen::Vector3d gVecZero = Eigen::Vector3d::Zero();// Vector3d(0, 0, 0);
+    //static const Eigen::Vector3d gVecAxisX(1, 0, 0); //Eigen::Vector3d::UnitX()
+    //static const Eigen::Vector3d gVecAxisY(0, 1, 0); //Eigen::Vector3d::UnitY()
+    //static const Eigen::Vector3d gVecAxisZ(0, 0, 1); //Eigen::Vector3d::UnitZ()
     static constexpr double eps = FLT_EPSILON; //1e-7
     static constexpr double _eps = -FLT_EPSILON;
     //static constexpr unsigned long long ULL_MAX = 18446744073709551615; // 2 ^ 64 - 1 //ULLONG_MAX
@@ -71,4 +71,40 @@ namespace psykronix
         COPLANAR_BINA, //B_INSIDE_A
         COPLANAR_INTERSECT,
     };
+
+    enum class RelationOfPointAndMesh : int
+    {
+        SURFACE = 0,
+        INNER,
+        OUTER,
+    };
+
+    enum class RelationOfTwoMesh : int
+    {
+        SEPARATE = 0,
+        INTRUSIVE, //d>0
+        CONTACT_OUTER, //d==0
+        INSEDE_AINB, //total inside
+        INSEDE_AINB_CONT, // partly cont 
+        INSEDE_AINB_FIT, //all vertex cont
+        INSEDE_BINA,
+        INSEDE_BINA_CONT,
+        INSEDE_BINA_FIT,
+    };
+
+    enum class RelationOfRayAndTrigon : int
+    {
+        CROSS_OUTER = 0,
+        CROSS_INNER,
+        CROSS_VERTEX_0,
+        CROSS_VERTEX_1,
+        CROSS_VERTEX_2,
+        CROSS_EDGE_01,
+        CROSS_EDGE_12,
+        CROSS_EDGE_20,
+        COIN_EDGE_01, //collinear
+        COIN_EDGE_12,
+        COIN_EDGE_20,
+    };
+
 }
