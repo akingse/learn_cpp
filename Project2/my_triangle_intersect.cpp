@@ -156,7 +156,7 @@ bool TriangularIntersectionTest(const std::array<Eigen::Vector3d, 3>& T1, const 
 		double A1_k2 = B2A1.dot(B2C2_outboard);
 		double B1_k2 = B2B1.dot(B2C2_outboard);
 		double C1_k2 = B2C1.dot(B2C2_outboard);
-		if (A1_k1 > 0 && B1_k1 > 0 && C1_k1 > 0)
+		if (A1_k2 > 0 && B1_k2 > 0 && C1_k2 > 0)
 			return false; // +*/<  132,168,0,33
 		Eigen::Vector3d C2A2_outboard = C2A2.cross(n2);
 		double A1_k3 = C2A1.dot(C2A2_outboard);

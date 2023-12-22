@@ -422,3 +422,4 @@ std::vector<std::tuple<size_t, bool>> KdTree3d::findIntersectClash(const Polyfac
 	_searchKdTree(m_kdTree);
 	return indexes;
 }
+

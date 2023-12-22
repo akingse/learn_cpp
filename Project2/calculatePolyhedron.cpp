@@ -103,7 +103,6 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector
 	double angle = 0.0;
 #ifdef STATISTIC_DATA_TESTFOR
 	clock_t startT = clock(), endT;
-	size_t countCr = 0, countPr = 0;
 #endif
 	auto _isRayAndTriangleIntersectParallel = [&point, &normal, &rayLine](std::array<Eigen::Vector3d, 3 >& trigon)->bool
 	{
@@ -709,9 +708,9 @@ Eigen::Vector3d getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA, const
 	if (axesSepa.empty() || vboSetA.empty() || vboSetB.empty())
 		return gVecZero;
 	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
-	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
 	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
-	const std::vector<std::array<int, 3>>& iboB = meshB.ibo_;
+	//const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
+	//const std::vector<std::array<int, 3>>& iboB = meshB.ibo_;
 	const Eigen::Affine3d& matA = meshA.pose_;
 	const Eigen::Affine3d& matB = meshB.pose_;
 	double dmin = DBL_MAX;// dminB = DBL_MAX;
@@ -1321,6 +1320,7 @@ std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const
 //  penetration depth
 //---------------------------------------------------------------------------
 
+#if 0
 // only for convex polytope 
 bool isTwoMeshsIntersectGJK(const ModelMesh& meshA, const ModelMesh& meshB)
 {
@@ -1358,4 +1358,183 @@ double getMoveDistanceOfAssignedDirection(const ModelMesh& meshA, const ModelMes
 {
 	return 0;
 }
+#endif
 
+tuple<vector<std::array<int, 3>>, vector<set<int>>> _getMeshVertexLinkedInfo(const ModelMesh& mesh)
+{
+	//get diagonal vertex index of each face-edge
+	vector<std::array<int, 3>> edgeDiag(mesh.ibo_.size(), { -1,-1,-1 }); //init
+	// generate new middle vertex
+	for (int i = 0; i < mesh.ibo_.size(); ++i)
+	{
+		std::array<int, 3> faceA = mesh.ibo_[i]; //copy
+		std::sort(faceA.begin(), faceA.end());
+		int find = 0;
+		for (int j = 0; j < mesh.ibo_.size(); ++j)
+		{
+			if (i == j || (edgeDiag[i][0] != -1 && edgeDiag[i][1] != -1 && edgeDiag[i][2] != -1))
+				continue;
+			std::array<int, 3> faceB = mesh.ibo_[j]; //copy
+			std::sort(faceB.begin(), faceB.end());
+			if (faceB[2] < faceA[0] || faceB[0]> faceA[2]) //bound box
+				continue;
+			int coin = 0;
+			for (const int it : faceB)
+			{
+				if (it == faceA[0] || it == faceA[1] || it == faceA[2])
+					coin++;
+			}
+			if (coin == 2) //means common edge
+			{
+				int diaA, diaB; // diagonal vertex index
+				if (faceA[0] != faceB[0] && faceA[0] != faceB[1] && faceA[0] != faceB[2])
+					diaA = faceA[0];
+				else if (faceA[1] != faceB[0] && faceA[1] != faceB[1] && faceA[1] != faceB[2])
+					diaA = faceA[1];
+				else
+					diaA = faceA[2];
+				if (faceB[0] != faceA[0] && faceB[0] != faceA[1] && faceB[0] != faceA[2])
+					diaB = faceB[0];
+				else if (faceB[1] != faceA[0] && faceB[1] != faceA[1] && faceB[1] != faceA[2])
+					diaB = faceB[1];
+				else
+					diaB = faceB[2];
+				int indexI, indexJ; // faces origin number
+				if (diaA == mesh.ibo_[i][0])
+					indexI = 1;
+				else if (diaA == mesh.ibo_[i][1])
+					indexI = 2;
+				else
+					indexI = 0;
+				if (diaB == mesh.ibo_[j][0])
+					indexJ = 1;
+				else if (diaB == mesh.ibo_[j][1])
+					indexJ = 2;
+				else
+					indexJ = 0;
+				//record
+				edgeDiag[i][indexI] = diaB;
+				edgeDiag[j][indexJ] = diaA;
+				find++;
+			}
+			if (find == 3)
+				break;
+		}
+	}
+	// update origin vertex
+	vector<set<int>> roundVct(mesh.vbo_.size());
+	for (int i = 0; i < mesh.vbo_.size(); ++i)
+	{
+		set<int> round; ;// vector<Vector3d> round;
+		for (const auto& face : mesh.ibo_)
+		{
+			if (face[0] == i || face[1] == i || face[2] == i)
+			{
+				if (face[0] != i)
+					round.insert(face[0]);
+				if (face[1] != i)
+					round.insert(face[1]);
+				if (face[2] != i)
+					round.insert(face[2]);
+			}
+		}
+		roundVct[i] = round;
+		//vboNew[i] = _updateOldVertex(mesh.vbo_[i], round);
+	}
+	return { edgeDiag, roundVct };
+}
+
+// practice of games101
+ModelMesh mesh::meshLoopSubdivision(const ModelMesh& mesh)
+{
+	//every new vertes
+	auto _getNewVertex = [](const Vector3d& A, const Vector3d& B, const Vector3d& C, const Vector3d& D)->Vector3d// 3/8*(A+B)+1/8*(A+D)
+		{
+			return 0.375 * (A + B) + 0.125 * (C + D);
+		};
+	// update old
+	auto _updateOldVertex = [](const Vector3d& origin, const vector<Vector3d>& round)->Vector3d// 3/8*(A+B)+1/8*(A+D)
+		{
+			size_t n = round.size(); //vertex degree
+			double u = (n == 3) ? 0.1875 : 3 / (8 * n);
+			Vector3d sum = Vector3d::Zero(); //neighbor position sum
+			for (const auto& iter : round)
+				sum += iter;
+			return (1 - n * u) * origin + u * sum;
+		};
+	// invent wheel and optimize wheel
+	ModelMesh meshNew = mesh; //copy
+	std::vector<Eigen::Vector3d>& vboNew = meshNew.vbo_;
+	std::vector<std::array<int, 3>> iboNew;// reload
+	//vector<tuple<array<int, 2>, array<int,2>>> edgeCommon;
+	tuple<vector<std::array<int, 3>>, vector<set<int>>> info = _getMeshVertexLinkedInfo(mesh);
+	const vector<std::array<int, 3>>& edgeDiag = get<0>(info);
+	map<array<int, 2>, int> uniqueEdge;
+	for (int i = 0; i < mesh.ibo_.size(); ++i)
+	{
+		const std::array<int, 3>& face = mesh.ibo_[i]; 
+		int mid01, mid12, mid20;
+		//the unique edge, small->large
+		array<int, 2> edge01 = (face[0] < face[1]) ? array<int, 2>{ face[0], face[1] } : array<int, 2>{face[1], face[0] }; 
+		if (uniqueEdge.find(edge01) != uniqueEdge.end())
+		{
+			mid01 = uniqueEdge.at(edge01);
+		}
+		else
+		{
+			mid01 = (int)vboNew.size();
+			uniqueEdge.insert({ edge01, mid01 }); //index of new edge middle
+			Vector3d pointNew = _getNewVertex(vboNew[face[0]], vboNew[face[1]], vboNew[face[2]], vboNew[edgeDiag[i][0]]);
+			vboNew.push_back(pointNew);
+		}
+		array<int, 2> edge12 = (face[1] < face[2]) ? array<int, 2>{ face[1], face[2] } : array<int, 2>{face[2], face[1] };
+		if (uniqueEdge.find(edge12) != uniqueEdge.end())
+		{
+			mid12 = uniqueEdge.at(edge12);
+		}
+		else
+		{
+			mid12 = (int)vboNew.size();
+			uniqueEdge.insert({ edge12, mid12 });
+			Vector3d pointNew = _getNewVertex(vboNew[face[1]], vboNew[face[2]], vboNew[face[0]], vboNew[edgeDiag[i][1]]);
+			vboNew.push_back(pointNew);
+		}
+		array<int, 2> edge20 = (face[2] < face[0]) ? array<int, 2>{ face[2], face[0] } : array<int, 2>{face[0], face[2] };
+		if (uniqueEdge.find(edge20) != uniqueEdge.end())
+		{
+			mid20 = uniqueEdge.at(edge20);
+		}
+		else
+		{
+			mid20 = (int)vboNew.size();
+			uniqueEdge.insert({ edge20, mid20 });
+			Vector3d pointNew = _getNewVertex(vboNew[face[2]], vboNew[face[0]], vboNew[face[1]], vboNew[edgeDiag[i][2]]);
+			vboNew.push_back(pointNew);
+		}
+		iboNew.push_back({ face[0],mid01,mid20 });
+		iboNew.push_back({ face[1],mid12,mid01 });
+		iboNew.push_back({ face[2],mid20,mid12 });
+		iboNew.push_back({ mid01,mid12,mid20 });
+	}
+	const vector<set<int>>& roundIndex = get<1>(info);
+	for (int i = 0; i < mesh.vbo_.size(); ++i)
+	{
+		vector<Vector3d> round;
+		for (const auto& j : roundIndex[i])
+			round.push_back(mesh.vbo_[j]);
+		vboNew[i] = _updateOldVertex(mesh.vbo_[i], round);
+	}
+	return meshNew;
+}
+
+ModelMesh meshGeneralSubdivision(const ModelMesh& mesh) //catmull-clark subdivision
+{
+
+	return mesh;
+}
+
+ModelMesh meshQuadricErrorSimpIification(const ModelMesh& mesh) //edge collapse and quadirc error metrics
+{
+
+	return mesh;
+}

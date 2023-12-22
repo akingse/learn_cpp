@@ -120,7 +120,6 @@ namespace psykronix
 
 inline Vec2 _get_rand()
 {
-    double r = 100;
     return Vec2(rand(), rand());
 }
 

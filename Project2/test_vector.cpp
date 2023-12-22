@@ -29,11 +29,11 @@ public:
 	virtual void inheriFun2() override {}
 	virtual void inheriFun3() override {}
 
-	void setter(int a, Vec3d vec, char b, double c) {
-		this->a = a;
-		this->vec = vec;
-		this->b = b;
-		this->c = c;
+	void setter(int _a, Vec3d _vec, char _b, double _c) {
+		this->a = _a;
+		this->vec = _vec;
+		this->b = _b;
+		this->c = _c;
 	}
 private:
 	int a;

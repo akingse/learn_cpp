@@ -356,15 +356,31 @@ CSG 体素法
 
 signed Distance Function距离函数
 
-
-
 - 【11】：几何（曲线与曲面）
 
- 
+ 显式表示法：三角面mesh，bezier曲面，细分曲面，NURBS，点云
+
+polygon mesh 最广泛的应用；obj文件中，f v/vt/vn
+
+Bezier曲线
+
+
 
 - 【12】：几何（前沿动态）
 
- 
+ 三角形面
+
+mesh细分
+
+loop subdivision 路普细分
+
+
+
+mesh简化
+
+mesh正则化
+
+
 
 
 
