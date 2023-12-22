@@ -101,7 +101,6 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector
 	double angle = 0.0;
 #ifdef STATISTIC_DATA_TESTFOR
 	clock_t startT = clock(), endT;
-	size_t countCr = 0, countPr = 0;
 #endif
 	auto _isRayAndTriangleIntersectParallel = [&point, &normal, &rayLine](std::array<Eigen::Vector3d, 3 >& trigon)->bool
 	{
@@ -707,9 +706,9 @@ Eigen::Vector3d getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA, const
 	if (axesSepa.empty() || vboSetA.empty() || vboSetB.empty())
 		return gVecZero;
 	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
-	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
 	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
-	const std::vector<std::array<int, 3>>& iboB = meshB.ibo_;
+	//const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
+	//const std::vector<std::array<int, 3>>& iboB = meshB.ibo_;
 	const Eigen::Affine3d& matA = meshA.pose_;
 	const Eigen::Affine3d& matB = meshB.pose_;
 	double dmin = DBL_MAX;// dminB = DBL_MAX;
@@ -1321,6 +1320,7 @@ std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const
 //  penetration depth
 //---------------------------------------------------------------------------
 
+#if 0
 // only for convex polytope 
 bool isTwoMeshsIntersectGJK(const ModelMesh& meshA, const ModelMesh& meshB)
 {
@@ -1358,6 +1358,7 @@ double getMoveDistanceOfAssignedDirection(const ModelMesh& meshA, const ModelMes
 {
 	return 0;
 }
+#endif
 
 class FaceList
 {
@@ -1464,26 +1465,77 @@ ModelMesh mesh::meshLoopSubdivision(const ModelMesh& mesh)
 
 	ModelMesh meshNew = mesh;
 	std::vector<Eigen::Vector3d>& vboNew = meshNew.vbo_;
-	std::vector<std::array<int, 3>>& iboNew = meshNew.ibo_;
+	std::vector<std::array<int, 3>> iboNew;// = meshNew.ibo_;
 	// create new
 	std::vector<std::array<int, 3>> iboSub;
 	vector<tuple<array<int, 2>, array<int,2>>> edgeCommon;
-	//map<array<int, 2>, int> edgeSubed;
+	//set<array<int, 2>> uniqueEdge;
+	map<array<int, 2>, int> uniqueEdge;
 	for (int i = 0; i < mesh.ibo_.size(); ++i)
 	{
-		//array<int, 2> edge01 = (face[0] < face[1]) ? array<int, 2>{ face[0], face[1] } : array<int, 2>{face[1], face[2] }; //the unique edge, small->large
-		//if (edgeSubed.find(edge0) == edgeSubed.end())
-		//	edgeSubed.insert({ edge0,vboNew.size() });
 		const std::array<int, 3>& face = mesh.ibo_[i]; 
-		array<int, 2> edge01 = { face[0], face[1] };
-		Vector3d pointNew = _getNewVertex(vboNew[edge01[0]], vboNew[edge01[1]], vboNew[face[2]], vboNew[edgeMap[i][0]]);
-		vboNew.push_back(pointNew);
-
+		int mid01, mid12, mid20;
+		//the unique edge, small->large
+		array<int, 2> edge01 = (face[0] < face[1]) ? array<int, 2>{ face[0], face[1] } : array<int, 2>{face[1], face[0] }; 
+		if (uniqueEdge.find(edge01) != uniqueEdge.end())
+		{
+			mid01 = uniqueEdge.at(edge01);
+		}
+		else
+		{
+			mid01 = vboNew.size();
+			uniqueEdge.insert({ edge01, mid01 }); //index of new edge middle
+			Vector3d pointNew = _getNewVertex(vboNew[face[0]], vboNew[face[1]], vboNew[face[2]], vboNew[edgeMap[i][0]]);
+			vboNew.push_back(pointNew);
+		}
+		array<int, 2> edge12 = (face[1] < face[2]) ? array<int, 2>{ face[1], face[2] } : array<int, 2>{face[2], face[1] };
+		if (uniqueEdge.find(edge12) != uniqueEdge.end())
+		{
+			mid12 = uniqueEdge.at(edge12);
+		}
+		else
+		{
+			mid12 = vboNew.size();
+			uniqueEdge.insert({ edge12, mid12 });
+			Vector3d pointNew = _getNewVertex(vboNew[face[1]], vboNew[face[2]], vboNew[face[0]], vboNew[edgeMap[i][1]]);
+			vboNew.push_back(pointNew);
+		}
+		array<int, 2> edge20 = (face[2] < face[0]) ? array<int, 2>{ face[2], face[0] } : array<int, 2>{face[0], face[2] };
+		if (uniqueEdge.find(edge20) != uniqueEdge.end())
+		{
+			mid20 = uniqueEdge.at(edge20);
+		}
+		else
+		{
+			mid20 = vboNew.size();
+			uniqueEdge.insert({ edge20, mid20 });
+			Vector3d pointNew = _getNewVertex(vboNew[face[2]], vboNew[face[0]], vboNew[face[1]], vboNew[edgeMap[i][2]]);
+			vboNew.push_back(pointNew);
+		}
+		iboNew.push_back({ face[0],mid01,mid20 });
+		iboNew.push_back({ face[1],mid12,mid01 });
+		iboNew.push_back({ face[2],mid20,mid12 });
+		iboNew.push_back({ mid01,mid12,mid20 });
 	}
-	
-
-
-	return ModelMesh();
+	set<int> uniqueVertex;
+	for (int i = 0; i < mesh.vbo_.size(); ++i)
+	{
+		vector<Vector3d> round;
+		for (const auto& face : mesh.ibo_)
+		{
+			if (face[0] == i || face[1] == i || face[2] == i)
+			{
+				if (face[0] != i)
+					round.push_back(mesh.vbo_[face[0]]);
+				if (face[1] != i)
+					round.push_back(mesh.vbo_[face[1]]);
+				if (face[2] != i)
+					round.push_back(mesh.vbo_[face[2]]);
+			}
+		}
+		vboNew[i] = _updateOldVertex(mesh.vbo_[i], round);
+	}
+	return meshNew;
 }
 
 ModelMesh meshGeneralSubdivision(const ModelMesh& mesh) //catmull-clark subdivision
