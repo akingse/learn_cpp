@@ -1445,7 +1445,7 @@ tuple<vector<std::array<int, 3>>, vector<set<int>>> _getMeshVertexLinkedInfo(con
 }
 
 // practice of games101
-ModelMesh mesh::meshLoopSubdivision(const ModelMesh& mesh)
+ModelMesh games::meshLoopSubdivision(const ModelMesh& mesh)
 {
 	//every new vertes
 	auto _getNewVertex = [](const Vector3d& A, const Vector3d& B, const Vector3d& C, const Vector3d& D)->Vector3d// 3/8*(A+B)+1/8*(A+D)
@@ -1524,6 +1524,7 @@ ModelMesh mesh::meshLoopSubdivision(const ModelMesh& mesh)
 			round.push_back(mesh.vbo_[j]);
 		vboNew[i] = _updateOldVertex(mesh.vbo_[i], round);
 	}
+	meshNew.ibo_ = iboNew;
 	return meshNew;
 }
 

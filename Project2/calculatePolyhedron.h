@@ -27,7 +27,7 @@ DLLEXPORT bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& m
 DLLEXPORT std::tuple<psykronix::RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(const ModelMesh& meshA, const ModelMesh& meshB);
 DLLEXPORT std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance);
 
-namespace mesh
+namespace games
 {
 	ModelMesh meshLoopSubdivision(const ModelMesh& mesh);
 
