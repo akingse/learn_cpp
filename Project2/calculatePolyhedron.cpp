@@ -16,6 +16,7 @@ static const Triangle gTriYOZ = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(0,1,0)
 #endif // min
 #define USING_METHOD_SAT
 #define USING_RELATIVE_MATRIX_RECTIFY
+#define DEBUG_POLYHEDRON_MESH
 
 //replace .x() => [0]
 //replace .y() => [1]
@@ -29,6 +30,11 @@ count_point_inside_mesh, count_facesetA, count_facesetB, count_triAB_nan, count_
 count_meshs_isContact, count_meshs_isIntrusive, count_err_inter_mesh_sepa, count_repeat_sepa_axis,
 count_cal_sepa_axis;
 #endif //STATISTIC_DATA_COUNT
+
+#ifdef DEBUG_POLYHEDRON_MESH
+static int count_edgediag_full = 0;
+#endif // DEBUG_POLYHEDRON_MESH
+
 
 #ifdef STATISTIC_DATA_RECORD
 //container
@@ -1367,21 +1373,28 @@ tuple<vector<std::array<int, 3>>, vector<set<int>>> _getMeshVertexLinkedInfo(con
 	// generate new middle vertex
 	for (int i = 0; i < mesh.ibo_.size(); ++i)
 	{
+		if ((edgeDiag[i][0] != -1 && edgeDiag[i][1] != -1 && edgeDiag[i][2] != -1))
+		{
+#ifdef DEBUG_POLYHEDRON_MESH
+			count_edgediag_full++; //not empty
+#endif // DEBUG_POLYHEDRON_MESH
+			continue;
+		}
 		std::array<int, 3> faceA = mesh.ibo_[i]; //copy
 		std::sort(faceA.begin(), faceA.end());
 		int find = 0;
 		for (int j = 0; j < mesh.ibo_.size(); ++j)
 		{
-			if (i == j || (edgeDiag[i][0] != -1 && edgeDiag[i][1] != -1 && edgeDiag[i][2] != -1))
+			if (i >= j) //edgeDiag[j] been revised
 				continue;
 			std::array<int, 3> faceB = mesh.ibo_[j]; //copy
 			std::sort(faceB.begin(), faceB.end());
 			if (faceB[2] < faceA[0] || faceB[0]> faceA[2]) //bound box
 				continue;
 			int coin = 0;
-			for (const int it : faceB)
+			for (const int vtB : faceB) //find two common vertex
 			{
-				if (it == faceA[0] || it == faceA[1] || it == faceA[2])
+				if (vtB == faceA[0] || vtB == faceA[1] || vtB == faceA[2])
 					coin++;
 			}
 			if (coin == 2) //means common edge
@@ -1399,7 +1412,7 @@ tuple<vector<std::array<int, 3>>, vector<set<int>>> _getMeshVertexLinkedInfo(con
 					diaB = faceB[1];
 				else
 					diaB = faceB[2];
-				int indexI, indexJ; // faces origin number
+				int indexI, indexJ; // faces origin index
 				if (diaA == mesh.ibo_[i][0])
 					indexI = 1;
 				else if (diaA == mesh.ibo_[i][1])
@@ -1456,7 +1469,7 @@ ModelMesh games::meshLoopSubdivision(const ModelMesh& mesh)
 	auto _updateOldVertex = [](const Vector3d& origin, const vector<Vector3d>& round)->Vector3d// 3/8*(A+B)+1/8*(A+D)
 		{
 			size_t n = round.size(); //vertex degree
-			double u = (n == 3) ? 0.1875 : 3 / (8 * n);
+			double u = (n == 3) ? 0.1875 : 3.0 / (8 * n); //double
 			Vector3d sum = Vector3d::Zero(); //neighbor position sum
 			for (const auto& iter : round)
 				sum += iter;
