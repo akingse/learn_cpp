@@ -183,7 +183,7 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector
 }
 
 // include point on face
-bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const ModelMesh& mesh)
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbool isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const ModelMesh& mesh)
 {
 	//Eigen::Vector3d point = mesh.pose_.inverse() * _point;
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
@@ -288,7 +288,7 @@ bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const Mo
 }
 
 // include point on surface
-bool psykronix::isPointInsidePolyhedronCL(const Eigen::Vector3d& _point, const ModelMesh& mesh) // more judge like ceil
+bool isPointInsidePolyhedronCL(const Eigen::Vector3d& _point, const ModelMesh& mesh) // more judge like ceil
 {
 #ifdef STATISTIC_DATA_COUNT
 	count_point_inside_mesh++;
@@ -357,7 +357,7 @@ bool psykronix::isPointInsidePolyhedronCL(const Eigen::Vector3d& _point, const M
 }
 
 // exclude point on surface
-bool psykronix::isPointInsidePolyhedronFL(const Eigen::Vector3d& _point, const ModelMesh& mesh) // less judge like floor
+bool isPointInsidePolyhedronFL(const Eigen::Vector3d& _point, const ModelMesh& mesh) // less judge like floor
 {
 #ifdef STATISTIC_DATA_COUNT
 	count_point_inside_mesh++;
@@ -1164,7 +1164,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 		for (size_t i = 0; i < meshA.vbo_.size(); ++i)
 		{
 #ifdef USING_ALL_SEPARATE_AXES_FOR_DEPTH
-			if (vboSetA.find(i) == vboSetA.end() && isPointInsidePolyhedronFL(meshA.pose_ * meshA.vbo_[i], meshB))
+			if (vboSetA.find(i) == vboSetA.end() && RelationOfPointAndMesh::INNER == isPointInsidePolyhedronROT(meshA.pose_ * meshA.vbo_[i], meshB))
 				vboSetA.insert(i);
 #else
 			if (isPointInsidePolyhedronFL(meshA.pose_ * meshA.vbo_[i], meshB))
@@ -1174,7 +1174,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 		for (size_t i = 0; i < meshB.vbo_.size(); ++i)
 		{
 #ifdef USING_ALL_SEPARATE_AXES_FOR_DEPTH
-			if (vboSetB.find(i) == vboSetB.end() && isPointInsidePolyhedronFL(meshB.pose_ * meshB.vbo_[i], meshA))
+			if (vboSetB.find(i) == vboSetB.end() && RelationOfPointAndMesh::INNER == isPointInsidePolyhedronROT(meshB.pose_ * meshB.vbo_[i], meshA))
 				vboSetB.insert(i);
 #else
 			if (isPointInsidePolyhedronFL(meshB.pose_ * meshB.vbo_[i], meshA))
@@ -1362,30 +1362,29 @@ Eigen::Vector3d getPenetrationDepthOfTwoMeshs(const ModelMesh& meshA, const Mode
 
 double getMoveDistanceOfAssignedDirection(const ModelMesh& meshA, const ModelMesh& meshB, const Eigen::Vector3d& direction)
 {
-	return 0;
 }
 #endif
 
 static void sort3(std::array<int, 3>& face)
 {
 	//small to large
-	if (face[0] <= face[1] <= face[2])
+	if (face[0] <= face[1] && face[1] <= face[2])
 		return;
-	else if (face[0] <= face[2] < face[1])
+	else if (face[0] <= face[2] && face[2] < face[1])
 	{
 		int tmp = face[1];
 		face[1] = face[2];
 		face[2] = tmp;
 		return;
 	}
-	else if (face[1] <= face[0] <= face[2])
+	else if (face[1] <= face[0] && face[0] <= face[2])
 	{
 		int tmp = face[1];
 		face[1] = face[0];
 		face[0] = tmp;
 		return;
 	}
-	else if (face[1] <= face[2] <= face[0])
+	else if (face[1] <= face[2] && face[2] <= face[0])
 	{
 		int tmp = face[2];
 		face[2] = face[0];
@@ -1393,7 +1392,7 @@ static void sort3(std::array<int, 3>& face)
 		face[1] = tmp;
 		return;
 	}
-	else if (face[2] <= face[0] <= face[1])
+	else if (face[2] <= face[0] && face[0] <= face[1])
 	{
 		int tmp = face[0];
 		face[0] = face[2];
@@ -1434,6 +1433,9 @@ tuple<vector<std::array<int, 3>>, vector<set<int>>> _getMeshVertexLinkedInfo(con
 			std::array<int, 3> faceB = mesh.ibo_[j]; //copy
 			//std::sort(faceB.begin(), faceB.end());
 			//if (faceB[2] < faceA[0] || faceB[0] > faceA[2]) //1d bound box
+			//	continue;
+			//if (std::max(std::max(faceA[0], faceA[1]), faceA[2]) < std::min(std::min(faceB[0], faceB[1]), faceB[2]) ||
+			//	std::max(std::max(faceB[0], faceB[1]), faceB[2]) < std::min(std::min(faceA[0], faceA[1]), faceA[2]))
 			//	continue;
 			int coin = 0;
 			for (const int vtB : faceB) //find two common vertex
@@ -1596,3 +1598,4 @@ ModelMesh meshQuadricErrorSimpIification(const ModelMesh& mesh) //edge collapse 
 
 	return mesh;
 }
+
