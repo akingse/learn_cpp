@@ -1366,6 +1366,50 @@ double getMoveDistanceOfAssignedDirection(const ModelMesh& meshA, const ModelMes
 }
 #endif
 
+static void sort3(std::array<int, 3>& face)
+{
+	//small to large
+	if (face[0] <= face[1] <= face[2])
+		return;
+	else if (face[0] <= face[2] < face[1])
+	{
+		int tmp = face[1];
+		face[1] = face[2];
+		face[2] = tmp;
+		return;
+	}
+	else if (face[1] <= face[0] <= face[2])
+	{
+		int tmp = face[1];
+		face[1] = face[0];
+		face[0] = tmp;
+		return;
+	}
+	else if (face[1] <= face[2] <= face[0])
+	{
+		int tmp = face[2];
+		face[2] = face[0];
+		face[0] = face[1];
+		face[1] = tmp;
+		return;
+	}
+	else if (face[2] <= face[0] <= face[1])
+	{
+		int tmp = face[0];
+		face[0] = face[2];
+		face[1] = face[0];
+		face[2] = tmp;
+		return;
+	}
+	else//(face[2] <= face[1] <= face[0])
+	{
+		int tmp = face[2];
+		face[2] = face[0];
+		face[0] = tmp;
+		return;
+	}
+}
+
 tuple<vector<std::array<int, 3>>, vector<set<int>>> _getMeshVertexLinkedInfo(const ModelMesh& mesh)
 {
 	//get diagonal vertex index of each face-edge
@@ -1381,16 +1425,16 @@ tuple<vector<std::array<int, 3>>, vector<set<int>>> _getMeshVertexLinkedInfo(con
 			continue;
 		}
 		std::array<int, 3> faceA = mesh.ibo_[i]; //copy
-		std::sort(faceA.begin(), faceA.end());
+		//std::sort(faceA.begin(), faceA.end()); //cost alot of time
 		int find = 0;
 		for (int j = 0; j < mesh.ibo_.size(); ++j)
 		{
 			if (i >= j) //edgeDiag[j] been revised
 				continue;
 			std::array<int, 3> faceB = mesh.ibo_[j]; //copy
-			std::sort(faceB.begin(), faceB.end());
-			if (faceB[2] < faceA[0] || faceB[0]> faceA[2]) //bound box
-				continue;
+			//std::sort(faceB.begin(), faceB.end());
+			//if (faceB[2] < faceA[0] || faceB[0] > faceA[2]) //1d bound box
+			//	continue;
 			int coin = 0;
 			for (const int vtB : faceB) //find two common vertex
 			{
