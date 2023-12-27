@@ -814,8 +814,8 @@ static void _test7()
 	}
 
 	// ÷∂Øº∆À„PenetrationDepth
-	std::tuple<Eigen::Vector3d, std::array<size_t, 2>> res1 = getPenetrationDepthOfTwoConvexALL(meshA, meshB);
-	double d1 = std::get<0>(res1).norm();
+	//std::tuple<Eigen::Vector3d, std::array<size_t, 2>> res1 = getPenetrationDepthOfTwoConvexALL(meshA, meshB);
+	//double d1 = std::get<0>(res1).norm();
 	bool isInter2=isTwoMeshsIntersectSAT(meshA, meshB);
 	std::tuple<RelationOfTwoMesh, Eigen::Vector3d> res2 = getTwoMeshsIntersectRelation(meshA, meshB);
 	double d2 = std::get<1>(res2).norm();

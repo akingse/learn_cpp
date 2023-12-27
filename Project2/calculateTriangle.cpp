@@ -1669,8 +1669,23 @@ std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<E
 //	return RelationOfTrigon::INTERSECT;
 //}
 
+//the distance of two triangle no more than this number
+double getApproDistanceOfTwoTrianglesMax(const Triangle& triA, const Triangle& triB)
+{
+	double disSquare = 0.0;
+	for (const auto& vtA : triA)
+	{
+		for (const auto& vtB : triB)
+		{
+			double disTmp = (vtA - vtB).squaredNorm();
+			if (disSquare < disTmp)
+				disSquare = disTmp;
+		}
+	}
+	return std::sqrt(disSquare);
+}
 
-
+// for profile section
 bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB)
 {
 	//double operator^(const Vector2d& vec1, const Vector2d& vec2)

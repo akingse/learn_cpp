@@ -183,7 +183,7 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector
 }
 
 // include point on face
-bbbbbbbbbbbbbbbbbbbbbbbbbbbbool isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const ModelMesh& mesh)
+bool isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const ModelMesh& mesh)
 {
 	//Eigen::Vector3d point = mesh.pose_.inverse() * _point;
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;

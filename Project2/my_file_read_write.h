@@ -20,13 +20,13 @@ std::vector<ModelMesh> read_ModelMesh(const std::string& fileName);
 int _writeBinFileAlignedBox(size_t N);
 double* _readBinFileAlignedBox(size_t N); //call write inner
 
-inline std::wstring transfer_string_to_wstring(const string& str) //ANSIToUnicode
+inline std::wstring transfer_string_to_wstring(const std::string& str) //ANSIToUnicode
 {
     int lengthW = MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, NULL, NULL);
     wchar_t* pUnicode = new wchar_t[lengthW * sizeof(wchar_t)];
     memset(pUnicode, 0, lengthW * sizeof(pUnicode));
     MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, pUnicode, lengthW);
-    wstring strw = pUnicode;
+    std::wstring strw = pUnicode;
     delete[] pUnicode;
     return strw;
 }
