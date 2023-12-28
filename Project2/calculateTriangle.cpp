@@ -977,19 +977,26 @@ bool isTwoTrianglesBoundingBoxIntersect(const std::array<Eigen::Vector3d, 3>& tr
 	count_isTrisBoundBoxInter++;
 #endif
 	//get min and max of two trigons
-	if (std::max(std::max(triB[0].x(), triB[1].x()), triB[2].x()) < std::min(std::min(triA[0].x(), triA[1].x()), triA[2].x()) - tolerance)
-		return false;
-	if (std::max(std::max(triA[0].x(), triA[1].x()), triA[2].x()) + tolerance < std::min(std::min(triB[0].x(), triB[1].x()), triB[2].x()))
-		return false;
-	if (std::max(std::max(triB[0].y(), triB[1].y()), triB[2].y()) < std::min(std::min(triA[0].y(), triA[1].y()), triA[2].y()) - tolerance)
-		return false;
-	if (std::max(std::max(triA[0].y(), triA[1].y()), triA[2].y()) + tolerance < std::min(std::min(triB[0].y(), triB[1].y()), triB[2].y()))
-		return false;
-	if (std::max(std::max(triB[0].z(), triB[1].z()), triB[2].z()) < std::min(std::min(triA[0].z(), triA[1].z()), triA[2].z()) - tolerance)
-		return false;
-	if (std::max(std::max(triA[0].z(), triA[1].z()), triA[2].z()) + tolerance < std::min(std::min(triB[0].z(), triB[1].z()), triB[2].z()))
-		return false;
-	return true;
+	return !(
+		std::max(std::max(triB[0][0], triB[1][0]), triB[2][0]) < std::min(std::min(triA[0][0], triA[1][0]), triA[2][0]) - tolerance ||
+		std::max(std::max(triA[0][0], triA[1][0]), triA[2][0]) + tolerance < std::min(std::min(triB[0][0], triB[1][0]), triB[2][0]) ||
+		std::max(std::max(triB[0][1], triB[1][1]), triB[2][1]) < std::min(std::min(triA[0][1], triA[1][1]), triA[2][1]) - tolerance ||
+		std::max(std::max(triA[0][1], triA[1][1]), triA[2][1]) + tolerance < std::min(std::min(triB[0][1], triB[1][1]), triB[2][1]) ||
+		std::max(std::max(triB[0][2], triB[1][2]), triB[2][2]) < std::min(std::min(triA[0][2], triA[1][2]), triA[2][2]) - tolerance ||
+		std::max(std::max(triA[0][2], triA[1][2]), triA[2][2]) + tolerance < std::min(std::min(triB[0][2], triB[1][2]), triB[2][2]));
+	//if (std::max(std::max(triB[0].x(), triB[1].x()), triB[2].x()) < std::min(std::min(triA[0].x(), triA[1].x()), triA[2].x()) - tolerance)
+	//	return false;
+	//if (std::max(std::max(triA[0].x(), triA[1].x()), triA[2].x()) + tolerance < std::min(std::min(triB[0].x(), triB[1].x()), triB[2].x()))
+	//	return false;
+	//if (std::max(std::max(triB[0].y(), triB[1].y()), triB[2].y()) < std::min(std::min(triA[0].y(), triA[1].y()), triA[2].y()) - tolerance)
+	//	return false;
+	//if (std::max(std::max(triA[0].y(), triA[1].y()), triA[2].y()) + tolerance < std::min(std::min(triB[0].y(), triB[1].y()), triB[2].y()))
+	//	return false;
+	//if (std::max(std::max(triB[0].z(), triB[1].z()), triB[2].z()) < std::min(std::min(triA[0].z(), triA[1].z()), triA[2].z()) - tolerance)
+	//	return false;
+	//if (std::max(std::max(triA[0].z(), triA[1].z()), triA[2].z()) + tolerance < std::min(std::min(triB[0].z(), triB[1].z()), triB[2].z()))
+	//	return false;
+	//return true;
 	//double xminA = std::min(std::min(triA[0].x(), triA[1].x()), triA[2].x()) - tolerance;
 	//double xmaxA = std::max(std::max(triA[0].x(), triA[1].x()), triA[2].x()) + tolerance;
 	//double yminA = std::min(std::min(triA[0].y(), triA[1].y()), triA[2].y()) - tolerance;

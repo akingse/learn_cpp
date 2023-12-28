@@ -995,7 +995,6 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 	std::array<std::vector<size_t>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, 0.0);
 	bool isContact = false; // vertex or edge or face contact
 	bool isIntrusive = false;
-	bool isExist;
 #ifndef USING_ALL_SEPARATE_AXES_FOR_DEPTH
 	std::set<size_t> faceSetA, faceSetB; // intersect and inside, to remove repeat
 	std::vector<size_t> vertexVectA, vertexVectB;
@@ -1093,10 +1092,10 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 						edgesA[2].cross(edgesB[2]) } };
 				for (auto& axis : axesPoten) // revise zero vector
 				{
-					if (axis.isZero())
+					if (axis.isZero()) // clean data
 						axis = Vector3d(1, 0, 0);
 				}
-				isExist = false;
+				bool isExist = false; //to remove repeat
 				for (const auto& axis : axesPoten)
 				{
 					for (const auto& iter : axesSepa)
@@ -1135,7 +1134,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 					faceSetA.insert(iA);
 					faceSetB.insert(iB);
 				}
-#endif //USING_ALL_SEPARATE_AXES
+#endif //USING_ALL_SEPARATE_AXES_FOR_DEPTH
 			}
 		}
 	}
@@ -1169,7 +1168,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 #else
 			if (isPointInsidePolyhedronFL(meshA.pose_ * meshA.vbo_[i], meshB))
 				vertexVectA.push_back(i);
-#endif // USING_ALL_SEPARATE_AXES
+#endif // USING_ALL_SEPARATE_AXES_FOR_DEPTH
 		}
 		for (size_t i = 0; i < meshB.vbo_.size(); ++i)
 		{
@@ -1179,7 +1178,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 #else
 			if (isPointInsidePolyhedronFL(meshB.pose_ * meshB.vbo_[i], meshA))
 				vertexVectB.push_back(i);
-#endif // USING_ALL_SEPARATE_AXES
+#endif // USING_ALL_SEPARATE_AXES_FOR_DEPTH
 		}
 #ifdef USING_ALL_SEPARATE_AXES_FOR_DEPTH
 		Eigen::Vector3d depth = getPenetrationDepthOfTwoMeshsParts(meshA, meshB, axesSepa, vboSetA, vboSetB);
