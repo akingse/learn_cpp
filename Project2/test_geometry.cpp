@@ -221,11 +221,31 @@ static void test3() //≤‚ ‘getIntersectLineOfTwoPlane
 	return;
 }
 
+
+static void test4()
+{
+	//Eigen::Vector2d point(1-1e-8,0);// (0, 0);
+	//Eigen::Vector2d point(-2, -1); //π≤œﬂ
+	Eigen::Vector2d point(0, 0); 
+	vector<Eigen::Vector2d> polygon = { Vector2d(1,1),Vector2d(-1,1),Vector2d(-1,-1),Vector2d(1,-1) };
+	//polygon.push_back(polygon.front());
+	//polygon.push_back(Vector2d(2, -1));
+	bool isin = isPointInPolygon2D(point, polygon);
+
+	Plane3d plane(Vector3d(20, 20, 0), Vector3d(2, 1, 0));
+
+	Matrix4d mat = getProjectionMatrixByPlane(plane);
+	cout << mat;
+
+	return;
+}
+
 static int enrol = []()->int
 {
 	//test1();
 	//test2();
 	//test3();
+	test4();
 	cout << "test_geometry finished.\n" << endl;
 	return 0;
 }();

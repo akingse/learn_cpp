@@ -20,3 +20,22 @@ std::vector<ModelMesh> read_ModelMesh(const std::string& fileName);
 int _writeBinFileAlignedBox(size_t N);
 double* _readBinFileAlignedBox(size_t N); //call write inner
 
+inline std::wstring transfer_string_to_wstring(const std::string& str) //ANSIToUnicode
+{
+    int lengthW = MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, NULL, NULL);
+    wchar_t* pUnicode = new wchar_t[lengthW * sizeof(wchar_t)];
+    memset(pUnicode, 0, lengthW * sizeof(pUnicode));
+    MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, pUnicode, lengthW);
+    std::wstring strw = pUnicode;
+    delete[] pUnicode;
+    return strw;
+}
+
+inline std::string getExePath() // include<afx.h>
+{
+    TCHAR buff[MAX_PATH];
+    GetModuleFileNameW(NULL, buff, MAX_PATH);
+    CString path = buff;
+    path = path.Left(path.ReverseFind('\\')); // delete exename
+    return (std::string)(CStringA)path;
+}
