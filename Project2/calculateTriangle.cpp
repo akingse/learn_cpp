@@ -1964,3 +1964,62 @@ void psykronix::mergeIntersectRegionOfSegment(std::vector<double>& _range, const
 		}
 	}
 }
+
+
+bool isPointInPolygon2D(const Eigen::Vector2d& point, const vector<Eigen::Vector2d>& polygon)// pnpoly
+{
+	AlignedBox2d box;
+	for (const auto& iter : polygon)
+		box.extend(iter);
+	if (!box.contains(point))
+		return false;
+	bool isIn = false;
+	size_t nvert = polygon.size(); // polygon need not close
+	int i, j;
+	for (i = 0, j = nvert - 1; i < nvert; j = i++)
+	{
+		if (((polygon[i][1] > point[1]) != (polygon[j][1] > point[1])) &&
+			(point[0] < (polygon[j][0] - polygon[i][0]) * (point[1] - polygon[i][1]) / (polygon[j][1] - polygon[i][1]) + polygon[i][0]))
+			isIn = !isIn;
+	}
+	return isIn;
+}
+
+bool isPointInPolygon2D(const Eigen::Vector3d& point, const vector<Eigen::Vector3d>& polygon)// pnpoly
+{
+	// point on polygon means false
+	bool isIn = false;
+	size_t nvert = polygon.size();
+	int i, j;
+	for (i = 0, j = nvert - 1; i < nvert; j = i++)
+	{
+		if (((polygon[i][1] > point[1]) != (polygon[j][1] > point[1])) &&
+			(point[0] < (polygon[j][0] - polygon[i][0]) * (point[1] - polygon[i][1]) / (polygon[j][1] - polygon[i][1]) + polygon[i][0]))
+			isIn = !isIn;
+	}
+	return isIn;
+}
+
+Matrix4d getProjectionMatrixByPlane(const Plane3d& plane)
+{
+	//get rot matrix from one vector
+	const Vector3d& axisz = plane.normal().normalized();
+	Vector3d axisx = (Vector3d(0,0,1).cross(axisz)).normalized();
+	Vector3d axisy = axisz.cross(axisx);
+	double o_n = plane.origin().dot(plane.normal());
+	Vector3d origin = (o_n == 0.0) ? 
+		plane.origin() : o_n / plane.normal().dot(plane.normal()) * plane.normal(); //get the point on normal that through world origin
+	Matrix4d mat; //unit and orth
+	mat << axisx[0], axisy[0], axisz[0], origin[0],
+		axisx[1], axisy[1], axisz[1], origin[1],
+		axisx[2], axisy[2], axisz[2], origin[2],
+		0, 0, 0, 1;
+	Matrix4d inv;
+	inv << axisx[0], axisx[1], axisx[2], 0,
+		axisy[0], axisy[1], axisy[2], 0,
+		//plane.normal()[0], plane.normal()[1], plane.normal()[2], -plane.origin()[2],
+		0, 0, 0, 0,
+		0, 0, 0, 1;
+	return mat * inv;
+}
+
