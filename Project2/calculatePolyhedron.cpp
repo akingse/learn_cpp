@@ -82,7 +82,29 @@ bool psykronix::isMeshConvexPolyhedron(const ModelMesh& mesh)
 //	return isMeshConvexPolyhedron(mesh.vbo_, mesh.ibo_);
 //}
 
-// exclude point on face, ray is rotz
+//Moller Trumbore Algorithm (Cost = 0 div, 27 mul, 17 add)
+int isRayLineCrossTriangleMTA(const Eigen::Vector3d& origin, const Eigen::Vector3d& deriction, const Triangle& trigon)
+{
+	Vector3d E1 = trigon[1] - trigon[0];
+	Vector3d E2 = trigon[2] - trigon[0];
+	Vector3d S = origin - trigon[0];
+	Vector3d S1 = deriction.cross(E2);
+	Vector3d S2 = S.cross(E1);
+	double k = 1.0 / S1.dot(E1);
+	double t = k * S2.dot(E2);
+	if (t < 0)
+		return 0;//false
+	double b1 = k * S1.dot(S);
+	double b2 = k * S2.dot(deriction);
+	double b3 = 1.0 - b1 - b2;
+	if (b1 < 0 || b2 < 0 || b3 < 0)
+		return 0;//false
+	if (t == 0 || b1 == 0 || b2 == 0 || b2 == 0)
+		return -1;// intersect point on triangle || intersect point on edge
+	return 1;
+}
+
+// exclude point on face, ray is rotate random
 RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector3d& _point, const ModelMesh& mesh)
 {
 	Eigen::Vector3d point = mesh.pose_.inverse() * _point; // to relative coordinate
