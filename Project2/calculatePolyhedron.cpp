@@ -2,6 +2,7 @@
 #include "calculatePolyhedron.h"
 using namespace std;
 using namespace Eigen;
+using namespace games;
 using namespace psykronix;
 //static constexpr double eps_d = 10 * DBL_EPSILON; // double
 static const Triangle gTriXOY = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(1,0,0), Eigen::Vector3d(0,1,0) };
@@ -111,24 +112,24 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector
 	clock_t startT = clock(), endT;
 #endif
 	auto _isRayAndTriangleIntersectParallel = [&point, &normal, &rayLine](std::array<Eigen::Vector3d, 3 >& trigon)->bool
-	{
-		//if (fabs((point - trigon[0]).dot(normal)) > eps) // not coplanar
-		if ((point - trigon[0]).dot(normal) != 0.0) // not coplanar
-			return false;
-		// negetive direction ray cause cross product result opposite
-		return
-			((trigon[0] - point).cross(rayLine).dot(rayLine.cross(trigon[1] - point)) >= 0.0 && (trigon[0] - point).cross(rayLine).dot((trigon[0] - point).cross(trigon[1] - point)) >= 0.0) ||
-			((trigon[1] - point).cross(rayLine).dot(rayLine.cross(trigon[2] - point)) >= 0.0 && (trigon[1] - point).cross(rayLine).dot((trigon[1] - point).cross(trigon[2] - point)) >= 0.0) ||
-			((trigon[2] - point).cross(rayLine).dot(rayLine.cross(trigon[0] - point)) >= 0.0 && (trigon[2] - point).cross(rayLine).dot((trigon[2] - point).cross(trigon[0] - point)) >= 0.0);
-	};
+		{
+			//if (fabs((point - trigon[0]).dot(normal)) > eps) // not coplanar
+			if ((point - trigon[0]).dot(normal) != 0.0) // not coplanar
+				return false;
+			// negetive direction ray cause cross product result opposite
+			return
+				((trigon[0] - point).cross(rayLine).dot(rayLine.cross(trigon[1] - point)) >= 0.0 && (trigon[0] - point).cross(rayLine).dot((trigon[0] - point).cross(trigon[1] - point)) >= 0.0) ||
+				((trigon[1] - point).cross(rayLine).dot(rayLine.cross(trigon[2] - point)) >= 0.0 && (trigon[1] - point).cross(rayLine).dot((trigon[1] - point).cross(trigon[2] - point)) >= 0.0) ||
+				((trigon[2] - point).cross(rayLine).dot(rayLine.cross(trigon[0] - point)) >= 0.0 && (trigon[2] - point).cross(rayLine).dot((trigon[2] - point).cross(trigon[0] - point)) >= 0.0);
+		};
 	auto _correctRayLine = [&angle, &rayLine]()
-	{
-		angle += 1.0; // 0.1(rad)~5.73(deg)
-		Affine3d rotation = Affine3d::Identity();
-		rotation.rotate(AngleAxisd(angle, Vector3d(rand(), rand(), rand()))); //Vector3d::UnitZ() //Vector3d(1, 1, 1)
-		rayLine = rotation * rayLine;
-		//countCr++;
-	};
+		{
+			angle += 1.0; // 0.1(rad)~5.73(deg)
+			Affine3d rotation = Affine3d::Identity();
+			rotation.rotate(AngleAxisd(angle, Vector3d(rand(), rand(), rand()))); //Vector3d::UnitZ() //Vector3d(1, 1, 1)
+			rayLine = rotation * rayLine;
+			//countCr++;
+		};
 	while (true)
 	{
 		bool isNew = false;//new rayX
@@ -189,46 +190,46 @@ bool psykronix::isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const Mo
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
 	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
 	auto _relationOfPointAndTriangle = [&point](/*const Vector3d& point,*/ const std::array<Vector3d, 3>& trigon)->RelationOfRayAndTrigon // axisZ direction
-	{
-		//if (!isPointRayAcrossTriangle(point, trigon))
-		//	return PointOnTrigon::CROSS_OUTER;
-		// must intersect
-		if (point.x() == trigon[0].x() && point.y() == trigon[0].y()) // include ray and edge collinear
-			return RelationOfRayAndTrigon::CROSS_VERTEX_0;
-		else if (point.x() == trigon[1].x() && point.y() == trigon[1].y())
-			return RelationOfRayAndTrigon::CROSS_VERTEX_1;
-		else if (point.x() == trigon[2].x() && point.y() == trigon[2].y())
-			return RelationOfRayAndTrigon::CROSS_VERTEX_2;
-		else if ((point - trigon[1]).cross(point - trigon[0]).z() == 0.0) // point on edge's projection
-			return RelationOfRayAndTrigon::CROSS_EDGE_01;
-		else if ((point - trigon[2]).cross(point - trigon[1]).z() == 0.0)
-			return RelationOfRayAndTrigon::CROSS_EDGE_12;
-		else if ((point - trigon[0]).cross(point - trigon[2]).z() == 0.0)
-			return RelationOfRayAndTrigon::CROSS_EDGE_20;
-		return RelationOfRayAndTrigon::CROSS_INNER;
-	};
-	auto isLeftAll = [&vbo](const std::array<int, 3>& trigon)->bool // buildin lambda function
-	{
-		Vector3d normal = (vbo[trigon[1]] - vbo[trigon[0]]).cross(vbo[trigon[2]] - vbo[trigon[1]]).normalized(); // for precision
-		bool isFirst = true, isLeft /*= false*/, temp /*= false*/;
-		for (size_t i = 0; i < vbo.size(); ++i)
 		{
-			if (i == trigon[0] || i == trigon[1] || i == trigon[2] || fabs(normal.dot((vbo[i] - vbo[trigon[0]]).normalized())) < eps) // self and coplanar
-				continue;
-			temp = normal.dot(vbo[i] - vbo[trigon[0]]) < 0.0;
-			if (isFirst)
+			//if (!isPointRayAcrossTriangle(point, trigon))
+			//	return PointOnTrigon::CROSS_OUTER;
+			// must intersect
+			if (point.x() == trigon[0].x() && point.y() == trigon[0].y()) // include ray and edge collinear
+				return RelationOfRayAndTrigon::CROSS_VERTEX_0;
+			else if (point.x() == trigon[1].x() && point.y() == trigon[1].y())
+				return RelationOfRayAndTrigon::CROSS_VERTEX_1;
+			else if (point.x() == trigon[2].x() && point.y() == trigon[2].y())
+				return RelationOfRayAndTrigon::CROSS_VERTEX_2;
+			else if ((point - trigon[1]).cross(point - trigon[0]).z() == 0.0) // point on edge's projection
+				return RelationOfRayAndTrigon::CROSS_EDGE_01;
+			else if ((point - trigon[2]).cross(point - trigon[1]).z() == 0.0)
+				return RelationOfRayAndTrigon::CROSS_EDGE_12;
+			else if ((point - trigon[0]).cross(point - trigon[2]).z() == 0.0)
+				return RelationOfRayAndTrigon::CROSS_EDGE_20;
+			return RelationOfRayAndTrigon::CROSS_INNER;
+		};
+	auto isLeftAll = [&vbo](const std::array<int, 3>& trigon)->bool // buildin lambda function
+		{
+			Vector3d normal = (vbo[trigon[1]] - vbo[trigon[0]]).cross(vbo[trigon[2]] - vbo[trigon[1]]).normalized(); // for precision
+			bool isFirst = true, isLeft /*= false*/, temp /*= false*/;
+			for (size_t i = 0; i < vbo.size(); ++i)
 			{
-				isLeft = temp;
-				isFirst = false;
+				if (i == trigon[0] || i == trigon[1] || i == trigon[2] || fabs(normal.dot((vbo[i] - vbo[trigon[0]]).normalized())) < eps) // self and coplanar
+					continue;
+				temp = normal.dot(vbo[i] - vbo[trigon[0]]) < 0.0;
+				if (isFirst)
+				{
+					isLeft = temp;
+					isFirst = false;
+				}
+				else
+				{
+					if (temp != isLeft)
+						return false;
+				}
 			}
-			else
-			{
-				if (temp != isLeft)
-					return false;
-			}
-		}
-		return true;
-	};
+			return true;
+		};
 	size_t count = 0;
 	set<int> vertexSet;
 	set<array<int, 2>> edgeSet;
@@ -308,19 +309,19 @@ bool psykronix::isPointInsidePolyhedronCL(const Eigen::Vector3d& _point, const M
 	//		0.0 <= az * ((trigon[0][0] - trigon[2][0]) * (point[1] - trigon[2][1]) - (point[0] - trigon[2][0]) * (trigon[0][1] - trigon[2][1]));
 	//};
 	auto _isPointInTriangle2D = [&point](const Eigen::Vector3d& p0, const Eigen::Vector3d& p1, const Eigen::Vector3d& p2)->bool
-	{	//pre-box
-		if (point.x() > std::max(std::max(p0[0], p1[0]), p2[0]) ||
-			point.x() < std::min(std::min(p0[0], p1[0]), p2[0]) ||
-			point.y() > std::max(std::max(p0[1], p1[1]), p2[1]) ||
-			point.y() < std::min(std::min(p0[1], p1[1]), p2[1]) ||
-			point.z() > std::max(std::max(p0[2], p1[2]), p2[2]) + eps) //include z
-			return false;
-		double az = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
-		return //when vertical, az==0, always true
-			0.0 <= az * ((p1[0] - p0[0]) * (point[1] - p0[1]) - (point[0] - p0[0]) * (p1[1] - p0[1])) &&
-			0.0 <= az * ((p2[0] - p1[0]) * (point[1] - p1[1]) - (point[0] - p1[0]) * (p2[1] - p1[1])) &&
-			0.0 <= az * ((p0[0] - p2[0]) * (point[1] - p2[1]) - (point[0] - p2[0]) * (p0[1] - p2[1]));
-	};
+		{	//pre-box
+			if (point.x() > std::max(std::max(p0[0], p1[0]), p2[0]) ||
+				point.x() < std::min(std::min(p0[0], p1[0]), p2[0]) ||
+				point.y() > std::max(std::max(p0[1], p1[1]), p2[1]) ||
+				point.y() < std::min(std::min(p0[1], p1[1]), p2[1]) ||
+				point.z() > std::max(std::max(p0[2], p1[2]), p2[2]) + eps) //include z
+				return false;
+			double az = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
+			return //when vertical, az==0, always true
+				0.0 <= az * ((p1[0] - p0[0]) * (point[1] - p0[1]) - (point[0] - p0[0]) * (p1[1] - p0[1])) &&
+				0.0 <= az * ((p2[0] - p1[0]) * (point[1] - p1[1]) - (point[0] - p1[0]) * (p2[1] - p1[1])) &&
+				0.0 <= az * ((p0[0] - p2[0]) * (point[1] - p2[1]) - (point[0] - p2[0]) * (p0[1] - p2[1]));
+		};
 	if (!mesh.bounding_.contains(_point)) //mesh boundingbox is world coordinate
 		return false;
 	// using axisZ
@@ -364,19 +365,19 @@ bool psykronix::isPointInsidePolyhedronFL(const Eigen::Vector3d& _point, const M
 #endif
 	Eigen::Vector3d point = mesh.pose_.inverse() * _point; // all vertex using self coordinate
 	auto _isPointInTriangle2D = [&point](const Eigen::Vector3d& p0, const Eigen::Vector3d& p1, const Eigen::Vector3d& p2)->bool
-	{	//pre-box
-		if (point.x() > std::max(std::max(p0[0], p1[0]), p2[0]) ||
-			point.x() < std::min(std::min(p0[0], p1[0]), p2[0]) ||
-			point.y() > std::max(std::max(p0[1], p1[1]), p2[1]) ||
-			point.y() < std::min(std::min(p0[1], p1[1]), p2[1]) ||
-			point.z() > std::max(std::max(p0[2], p1[2]), p2[2]) + eps) // isPointOnSurface with threshold
-			return false;
-		double az = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
-		return //when vertical, az==0, always true
-			0.0 <= az * ((p1[0] - p0[0]) * (point[1] - p0[1]) - (point[0] - p0[0]) * (p1[1] - p0[1])) &&
-			0.0 <= az * ((p2[0] - p1[0]) * (point[1] - p1[1]) - (point[0] - p1[0]) * (p2[1] - p1[1])) &&
-			0.0 <= az * ((p0[0] - p2[0]) * (point[1] - p2[1]) - (point[0] - p2[0]) * (p0[1] - p2[1]));
-	};
+		{	//pre-box
+			if (point.x() > std::max(std::max(p0[0], p1[0]), p2[0]) ||
+				point.x() < std::min(std::min(p0[0], p1[0]), p2[0]) ||
+				point.y() > std::max(std::max(p0[1], p1[1]), p2[1]) ||
+				point.y() < std::min(std::min(p0[1], p1[1]), p2[1]) ||
+				point.z() > std::max(std::max(p0[2], p1[2]), p2[2]) + eps) // isPointOnSurface with threshold
+				return false;
+			double az = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
+			return //when vertical, az==0, always true
+				0.0 <= az * ((p1[0] - p0[0]) * (point[1] - p0[1]) - (point[0] - p0[0]) * (p1[1] - p0[1])) &&
+				0.0 <= az * ((p2[0] - p1[0]) * (point[1] - p1[1]) - (point[0] - p1[0]) * (p2[1] - p1[1])) &&
+				0.0 <= az * ((p0[0] - p2[0]) * (point[1] - p2[1]) - (point[0] - p2[0]) * (p0[1] - p2[1]));
+		};
 	if (!mesh.bounding_.contains(_point)) //mesh boundingbox is world coordinate
 		return false;
 	// using axisZ
@@ -1485,10 +1486,10 @@ ModelMesh games::meshLoopSubdivision(const ModelMesh& mesh)
 	map<array<int, 2>, int> uniqueEdge;
 	for (int i = 0; i < mesh.ibo_.size(); ++i)
 	{
-		const std::array<int, 3>& face = mesh.ibo_[i]; 
+		const std::array<int, 3>& face = mesh.ibo_[i];
 		int mid01, mid12, mid20;
 		//the unique edge, small->large
-		array<int, 2> edge01 = (face[0] < face[1]) ? array<int, 2>{ face[0], face[1] } : array<int, 2>{face[1], face[0] }; 
+		array<int, 2> edge01 = (face[0] < face[1]) ? array<int, 2>{ face[0], face[1] } : array<int, 2>{face[1], face[0] };
 		if (uniqueEdge.find(edge01) != uniqueEdge.end())
 		{
 			mid01 = uniqueEdge.at(edge01);
@@ -1541,14 +1542,112 @@ ModelMesh games::meshLoopSubdivision(const ModelMesh& mesh)
 	return meshNew;
 }
 
-ModelMesh meshGeneralSubdivision(const ModelMesh& mesh) //catmull-clark subdivision
-{
+//ModelMesh meshGeneralSubdivision(const ModelMesh& mesh) //catmull-clark subdivision
+//{
+//	return mesh;
+//}
 
-	return mesh;
+double computeError(const Vertex& v, const std::vector<Vertex>& vertices)
+{
+	double totalError = 0.0;
+	for (const Vertex& neighbor : vertices)
+	{
+		double dx = neighbor.m_vertex.x() - v.m_vertex.x();
+		double dy = neighbor.m_vertex.y() - v.m_vertex.y();
+		double dz = neighbor.m_vertex.z() - v.m_vertex.z();
+		double distance = std::sqrt(dx * dx + dy * dy + dz * dz);
+		totalError += distance;
+	}
+	return totalError;
 }
 
-ModelMesh meshQuadricErrorSimpIification(const ModelMesh& mesh) //edge collapse and quadirc error metrics
+ModelMesh games::meshQuadricErrorSimpIification(const ModelMesh& mesh, size_t targetVertexCount /*= 0*/) //edge collapse and quadirc error metrics
 {
+	typedef std::array<int, 3 > Face;
+	//void simplifyMesh(std::vector<Vertex>&vertices, std::vector<Face>&faces, int targetVertexCount) {
+	if (targetVertexCount == 0)
+		targetVertexCount = mesh.ibo_.size() / 2;
+	std::vector<Vertex> vertices;
+	for (const auto& iter : mesh.vbo_)
+		vertices.push_back({ iter,0.0 });
+	std::vector<std::array<int, 3>> faces = mesh.ibo_;
+	int vertexCount = mesh.vbo_.size();
+
+	// 计算每个顶点的误差并构建优先队列
+	std::priority_queue<Vertex, std::vector<Vertex>, CompareVertex> pq;
+	for (Vertex& v : vertices)
+	{
+		v.m_error = computeError(v, vertices);
+		pq.push(v);
+	}
+
+	// 不断合并顶点，直到达到目标顶点数量
+	while (vertexCount > targetVertexCount) {
+		// 从优先队列中取出误差最小的顶点
+		Vertex vertex = pq.top();
+		pq.pop();
+
+		// 找到与该顶点相邻的顶点
+		std::vector<int> neighboringVertices;
+		//for (const array<int, 3>& face : faces) 
+		//{
+		//	if (face[0] == v || face[1] == v || face.v3 == v) {
+		//		if (face[0] != v && std::find(neighboringVertices.begin(), neighboringVertices.end(), face[0]) == neighboringVertices.end()) {
+		//			neighboringVertices.push_back(face[0]);
+		//		}
+		//		if (face[1] != v && std::find(neighboringVertices.begin(), neighboringVertices.end(), face[1]) == neighboringVertices.end()) {
+		//			neighboringVertices.push_back(face[1]);
+		//		}
+		//		if (face.v3 != v && std::find(neighboringVertices.begin(), neighboringVertices.end(), face.v3) == neighboringVertices.end()) {
+		//			neighboringVertices.push_back(face.v3);
+		//		}
+		//	}
+		//}
+
+		// 计算合并后的顶点位置
+		double newX = 0.0, newY = 0.0, newZ = 0.0;
+		for (int neighbor : neighboringVertices)
+		{
+			newX += vertices[neighbor].m_vertex.x();
+			newY += vertices[neighbor].m_vertex.y();
+			newZ += vertices[neighbor].m_vertex.z();
+		}
+		newX /= neighboringVertices.size();
+		newY /= neighboringVertices.size();
+		newZ /= neighboringVertices.size();
+
+		// 更新合并后的顶点信息
+		vertex.m_vertex.x() = newX;
+		vertex.m_vertex.y() = newY;
+		vertex.m_vertex.z() = newZ;
+		vertex.m_error = computeError(vertex, vertices);
+
+		// 更新相邻顶点的误差并重新加入优先队列
+		for (int neighbor : neighboringVertices)
+		{
+			vertices[neighbor].m_error = computeError(vertices[neighbor], vertices);
+			pq.push(vertices[neighbor]);
+		}
+
+		// 移除与合并顶点相邻的面
+		//faces.erase(std::remove_if(faces.begin(), faces.end(), [&](const Face& face){
+		//	return face.v1 == v || face.v2 == v || face.v3 == v;}), faces.end());
+
+		// 更新顶点索引
+		//for (Face& face : faces) 
+		//{
+		//	if (face.v1 > v) 
+		//		face.v1--;
+		//	if (face.v2 > v) 
+		//		face.v2--;
+		//	if (face.v3 > v) 
+		//		face.v3--;
+		//}
+
+		vertexCount--;
+	}
+
+
 
 	return mesh;
 }

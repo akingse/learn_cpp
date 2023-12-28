@@ -29,6 +29,20 @@ DLLEXPORT std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanc
 
 namespace games
 {
-	ModelMesh meshLoopSubdivision(const ModelMesh& mesh);
+	struct Vertex 
+	{
+		Eigen::Vector3d m_vertex;
+		double m_error = 0.0;
+		//Vertex(double x, double y, double z) : x(x), y(y), z(z), error(0.0) {}
+	};
 
+	struct CompareVertex 
+	{
+		bool operator()(const Vertex& v1, const Vertex& v2) 
+		{
+			return v1.m_error > v2.m_error;
+		}
+	};
+	ModelMesh meshLoopSubdivision(const ModelMesh& mesh);
+	ModelMesh meshQuadricErrorSimpIification(const ModelMesh& mesh, size_t targetVertexCount = 0);
 }

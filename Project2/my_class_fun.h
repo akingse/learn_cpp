@@ -31,35 +31,35 @@ namespace psykronix
     static constexpr size_t N_10E_7 = (size_t)1e7;
     static constexpr size_t N_10E_8 = (size_t)1e8;
 
-    class Vertex
+    class Vertex3d
     {
     public:
         double x = 0.0;
         double y = 0.0;
         double z = 0.0;
-        Vertex() {}
-        Vertex(double x_, double y_, double z_ = 0.0) :
+        Vertex3d() {}
+        Vertex3d(double x_, double y_, double z_ = 0.0) :
             x(x_),
             y(y_),
             z(z_)
         {
         }
-        inline bool operator==(const Vertex& rhs) const
+        inline bool operator==(const Vertex3d& rhs) const
         {
-            return memcmp(this, &rhs, sizeof(Vertex)) == 0;
+            return memcmp(this, &rhs, sizeof(Vertex3d)) == 0;
         }
-        inline bool operator<(const Vertex& rhs) const
+        inline bool operator<(const Vertex3d& rhs) const
         {
-            return memcmp(this, &rhs, sizeof(Vertex)) < 0;
+            return memcmp(this, &rhs, sizeof(Vertex3d)) < 0;
         }
 #ifdef EIGEN_WORLD_VERSION
-        Vertex(const Eigen::Vector3d& vec) :
+        Vertex3d(const Eigen::Vector3d& vec) :
             x(vec.x()),
             y(vec.y()),
             z(vec.z())
         {
         }
-        Vertex(const Eigen::Vector3f& vec) :
+        Vertex3d(const Eigen::Vector3f& vec) :
             x(vec.x()),
             y(vec.y()),
             z(vec.z())

@@ -14,13 +14,13 @@ using namespace psykronix;
 static void test0()
 {
 	//std::array<Vector3d, 3> trigon = { Vertex(-87, 21), Vertex(-27, -20), Vertex(-90, 95) };
-	std::array<Vector3d, 3> trigon = { Vertex(-10, 0), Vertex(70, 0), Vertex(50, 50) };
+	std::array<Vector3d, 3> trigon = { Vertex3d(-10, 0), Vertex3d(70, 0), Vertex3d(50, 50) };
 	auto res = getTriangleBoundingCircle(trigon);
 	Eigen::AlignedBox3d box(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(1, 1, 1));
 	Eigen::AlignedBox3d box_(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(1, 1, -1));
 	bool isC = box.contains(Eigen::Vector3d(0.5, 0.5, 0.5));
 
-	std::array<Vector3d, 3> trigonA = { Vertex(-10, -10), Vertex(10, -10), Vertex(0, 10) };
+	std::array<Vector3d, 3> trigonA = { Vertex3d(-10, -10), Vertex3d(10, -10), Vertex3d(0, 10) };
 	std::array<Vector3d, 3> trigonB = psykronix::scale(2, 2, 2) * trigonA;
 	isTwoTrianglesIntersectPIT(trigonA, trigonA);
 
