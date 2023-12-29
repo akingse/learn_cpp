@@ -2010,12 +2010,13 @@ bool isPointInPolygon2D(const Eigen::Vector3d& point, const vector<Eigen::Vector
 Matrix4d getProjectionMatrixByPlane(const Plane3d& plane)
 {
 	//get rot matrix from one vector
-	const Vector3d& axisz = plane.normal().normalized();
-	Vector3d axisx = (Vector3d(0,0,1).cross(axisz)).normalized();
+	const Vector3d& axisz = plane.m_normal.normalized();
+	Vector3d axisx = Vector3d(0,0,1).cross(axisz).normalized();
 	Vector3d axisy = axisz.cross(axisx);
-	double o_n = plane.origin().dot(plane.normal());
+	//get the point on normal that through world origin
+	double o_n = plane.m_origin.dot(plane.m_normal);
 	Vector3d origin = (o_n == 0.0) ? 
-		plane.origin() : o_n / plane.normal().dot(plane.normal()) * plane.normal(); //get the point on normal that through world origin
+		plane.m_origin : o_n / plane.m_normal.squaredNorm() * plane.m_normal;
 	Matrix4d mat; //unit and orth
 	mat << axisx[0], axisy[0], axisz[0], origin[0],
 		axisx[1], axisy[1], axisz[1], origin[1],
@@ -2024,7 +2025,7 @@ Matrix4d getProjectionMatrixByPlane(const Plane3d& plane)
 	Matrix4d inv;
 	inv << axisx[0], axisx[1], axisx[2], 0,
 		axisy[0], axisy[1], axisy[2], 0,
-		//plane.normal()[0], plane.normal()[1], plane.normal()[2], -plane.origin()[2],
+		//plane.normal()[0], plane.normal()[1], plane.normal()[2], 0,
 		0, 0, 0, 0,
 		0, 0, 0, 1;
 	return mat * inv;
