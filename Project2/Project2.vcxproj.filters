@@ -232,6 +232,9 @@
     <ClCompile Include="test_data_structure.cpp">
       <Filter>test_dsa</Filter>
     </ClCompile>
+    <ClCompile Include="my_cal_geo.cpp">
+      <Filter>test_math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -263,6 +266,9 @@
     </ClInclude>
     <ClInclude Include="psykronixTypeDefine.h">
       <Filter>my_triangle</Filter>
+    </ClInclude>
+    <ClInclude Include="my_cal_geo.h">
+      <Filter>test_math</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

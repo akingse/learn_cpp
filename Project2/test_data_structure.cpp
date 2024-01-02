@@ -1,5 +1,7 @@
 #include "pch.h"
 using namespace std;
+using namespace Eigen;
+using namespace games;
 
 //堆（二叉堆） heap
 //堆是必须一个完全二叉树， C++内置了std::priority_queue
@@ -121,10 +123,27 @@ static void _test0()
 	priority_queue<int, vector<int>, function<bool(int, int)>> pq3(myCom);
 
 }
+static void _test1()
+{
+	Vertex v1 = { Vector3d(1,1,1),1 };
+	Vertex v2 = { Vector3d(1,1,1),2 };
+	Vertex v3 = { Vector3d(1,1,1),3 };
+	Vertex v4 = { Vector3d(1,1,1),4 };
+	std::priority_queue<Vertex> pq;
+	pq.push(v2);
+	pq.push(v1);
+	pq.push(v4);
+	pq.push(v3);
+
+	pq.pop();
+
+	return;
+}
 
 static int enrol = []()->int
 	{
-		_test0();
+		//_test0();
+		_test1();
 		cout << "test_data_structure finished.\n" << endl;
 		return 0;
 	}();

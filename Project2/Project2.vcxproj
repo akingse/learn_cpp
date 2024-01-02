@@ -175,6 +175,7 @@
     <ClCompile Include="calculatePolyhedron.cpp" />
     <ClCompile Include="calculateTriangle.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="my_cal_geo.cpp" />
     <ClCompile Include="my_class_fun.cpp" />
     <ClCompile Include="my_geometry.cpp" />
     <ClCompile Include="pch.cpp">
@@ -260,6 +261,7 @@
     <ClInclude Include="calculateDataTree.h" />
     <ClInclude Include="calculatePolyhedron.h" />
     <ClInclude Include="calculateTriangle.h" />
+    <ClInclude Include="my_cal_geo.h" />
     <ClInclude Include="my_class_fun.h" />
     <ClInclude Include="my_geometry.h" />
     <ClInclude Include="pch.h" />

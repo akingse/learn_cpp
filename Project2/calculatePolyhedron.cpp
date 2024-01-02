@@ -1385,7 +1385,6 @@ Eigen::Vector3d getPenetrationDepthOfTwoMeshs(const ModelMesh& meshA, const Mode
 double getMoveDistanceOfAssignedDirection(const ModelMesh& meshA, const ModelMesh& meshB, const Eigen::Vector3d& direction)
 {
 }
-#endif
 
 static void sort3(std::array<int, 3>& face)
 {
@@ -1430,6 +1429,7 @@ static void sort3(std::array<int, 3>& face)
 		return;
 	}
 }
+#endif
 
 tuple<vector<std::array<int, 3>>, vector<set<int>>> _getMeshVertexLinkedInfo(const ModelMesh& mesh)
 {
@@ -1630,6 +1630,7 @@ ModelMesh games::meshQuadricErrorSimpIification(const ModelMesh& mesh, size_t ta
 	//void simplifyMesh(std::vector<Vertex>&vertices, std::vector<Face>&faces, int targetVertexCount) {
 	if (targetVertexCount == 0)
 		targetVertexCount = mesh.ibo_.size() / 2;
+	//process on
 	std::vector<Vertex> vertices;
 	for (const auto& iter : mesh.vbo_)
 		vertices.push_back({ iter,0.0 });
@@ -1637,7 +1638,7 @@ ModelMesh games::meshQuadricErrorSimpIification(const ModelMesh& mesh, size_t ta
 	int vertexCount = mesh.vbo_.size();
 
 	// 计算每个顶点的误差并构建优先队列
-	std::priority_queue<Vertex, std::vector<Vertex>, CompareVertex> pq;
+	std::priority_queue<Vertex> pq;
 	for (Vertex& v : vertices)
 	{
 		v.m_error = computeError(v, vertices);
