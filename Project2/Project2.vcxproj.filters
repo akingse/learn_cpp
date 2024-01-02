@@ -229,6 +229,9 @@
     <ClCompile Include="test_paste1.cpp">
       <Filter>test_eg</Filter>
     </ClCompile>
+    <ClCompile Include="test_data_structure.cpp">
+      <Filter>test_dsa</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">

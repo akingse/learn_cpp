@@ -98,8 +98,8 @@ int isRayLineCrossTriangleMTA(const Eigen::Vector3d& origin, const Eigen::Vector
 	double b2 = k * S2.dot(deriction);
 	double b3 = 1.0 - b1 - b2;
 	if (b1 < 0 || b2 < 0 || b3 < 0)
-		return 0;//false
-	if (t == 0 || b1 == 0 || b2 == 0 || b2 == 0)
+		return 0;//false, out of triangle
+	if (t == 0 || b1 == 0 || b2 == 0 || b3 == 0)
 		return -1;// intersect point on triangle || intersect point on edge
 	return 1;
 }
@@ -1619,11 +1619,7 @@ double computeError(const Vertex& v, const std::vector<Vertex>& vertices)
 	double totalError = 0.0;
 	for (const Vertex& neighbor : vertices)
 	{
-		double dx = neighbor.m_vertex.x() - v.m_vertex.x();
-		double dy = neighbor.m_vertex.y() - v.m_vertex.y();
-		double dz = neighbor.m_vertex.z() - v.m_vertex.z();
-		double distance = std::sqrt(dx * dx + dy * dy + dz * dz);
-		totalError += distance;
+		totalError += (neighbor.m_vertex - v.m_vertex).norm();
 	}
 	return totalError;
 }
