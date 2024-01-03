@@ -374,9 +374,11 @@ mesh细分
 
 loop subdivision 路普细分
 
+mesh简化，二次误差度量
+
+![image-20240103003924110](../../../../../AppData/Roaming/Typora/typora-user-images/image-20240103003924110.png)
 
 
-mesh简化
 
 mesh正则化
 

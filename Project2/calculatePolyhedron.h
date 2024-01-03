@@ -41,18 +41,18 @@ namespace games
 		}
 	};
 
-	struct CompareVertex //using for priority_queue template
-	{
-		bool operator()(const Vertex& v1, const Vertex& v2) 
-		{
-			return v1.m_error < v2.m_error;
-		}
-	};
-	//operator<
-	bool cmpless_QuadricError(const Vertex& vA, const Vertex& vB) //using as function-pointer
-	{
-		return vA.m_error < vB.m_error;
-	}
+	//struct CompareVertex //using for priority_queue template
+	//{
+	//	bool operator()(const Vertex& v1, const Vertex& v2) 
+	//	{
+	//		return v1.m_error < v2.m_error;
+	//	}
+	//};
+	////operator<
+	//bool cmpless_QuadricError(const Vertex& vA, const Vertex& vB) //using as function-pointer
+	//{
+	//	return vA.m_error < vB.m_error;
+	//}
 
 	//utility
 	ModelMesh meshLoopSubdivision(const ModelMesh& mesh);

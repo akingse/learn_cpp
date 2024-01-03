@@ -1624,6 +1624,7 @@ double computeError(const Vertex& v, const std::vector<Vertex>& vertices)
 	return totalError;
 }
 
+//edge collapsing
 ModelMesh games::meshQuadricErrorSimpIification(const ModelMesh& mesh, size_t targetVertexCount /*= 0*/) //edge collapse and quadirc error metrics
 {
 	typedef std::array<int, 3 > Face;
