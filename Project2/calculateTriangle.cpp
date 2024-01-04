@@ -1996,7 +1996,7 @@ bool isPointInPolygon2D(const Eigen::Vector3d& point, const vector<Eigen::Vector
 {
 	// point on polygon means false
 	bool isIn = false;
-	size_t nvert = polygon.size();
+	int nvert = (int)polygon.size();
 	int i, j;
 	for (i = 0, j = nvert - 1; i < nvert; j = i++)
 	{

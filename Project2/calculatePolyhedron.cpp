@@ -1631,6 +1631,8 @@ ModelMesh games::meshQuadricErrorSimpIification(const ModelMesh& mesh, size_t ta
 	//void simplifyMesh(std::vector<Vertex>&vertices, std::vector<Face>&faces, int targetVertexCount) {
 	if (targetVertexCount == 0)
 		targetVertexCount = mesh.ibo_.size() / 2;
+	if (targetVertexCount >= mesh.ibo_.size())
+		return {};
 	//process on
 	std::vector<Vertex> vertices;
 	for (const auto& iter : mesh.vbo_)

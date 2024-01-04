@@ -3,6 +3,7 @@ namespace psykronix
 {
     // global type and variable define 
     typedef std::array<Eigen::Vector3d, 2> Segment;
+    typedef std::array<Eigen::Vector2d, 2> Segment2d;
     typedef std::array<Eigen::Vector3d, 2> Segment3d;
     typedef std::array<Eigen::Vector3d, 3> Triangle;
     typedef std::array<Eigen::Vector3d, 3> Triangle3d;
