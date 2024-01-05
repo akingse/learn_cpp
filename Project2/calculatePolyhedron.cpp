@@ -1509,18 +1509,15 @@ tuple<vector<std::array<int, 3>>, vector<set<int>>> _getMeshVertexLinkedInfo(con
 		set<int> round; ;// vector<Vector3d> round;
 		for (const auto& face : mesh.ibo_)
 		{
-			if (face[0] == i || face[1] == i || face[2] == i)
+			if (face[0] != i && face[1] != i && face[2] == i)
+				continue;
+			for (int j = 0; j < 3; j++)
 			{
-				if (face[0] != i)
-					round.insert(face[0]);
-				if (face[1] != i)
-					round.insert(face[1]);
-				if (face[2] != i)
-					round.insert(face[2]);
+				if (face[j] != i)
+					round.insert(face[j]);
 			}
 		}
 		roundVct[i] = round;
-		//vboNew[i] = _updateOldVertex(mesh.vbo_[i], round);
 	}
 	return { edgeDiag, roundVct };
 }
@@ -1614,106 +1611,121 @@ ModelMesh games::meshLoopSubdivision(const ModelMesh& mesh)
 //	return mesh;
 //}
 
-double computeError(const Vertex& v, const std::vector<Vertex>& vertices)
-{
-	double totalError = 0.0;
-	for (const Vertex& neighbor : vertices)
-	{
-		totalError += (neighbor.m_vertex - v.m_vertex).norm();
-	}
-	return totalError;
-}
-
 //edge collapsing
-ModelMesh games::meshQuadricErrorSimpIification(const ModelMesh& mesh, size_t targetVertexCount /*= 0*/) //edge collapse and quadirc error metrics
+ModelMesh games::meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, size_t collapseEdgeCount /*= 0*/) //edge collapse and quadirc error metrics
 {
-	typedef std::array<int, 3 > Face;
-	//void simplifyMesh(std::vector<Vertex>&vertices, std::vector<Face>&faces, int targetVertexCount) {
-	if (targetVertexCount == 0)
-		targetVertexCount = mesh.ibo_.size() / 2;
-	//process on
-	std::vector<Vertex> vertices;
-	for (const auto& iter : mesh.vbo_)
-		vertices.push_back({ iter,0.0 });
-	std::vector<std::array<int, 3>> faces = mesh.ibo_;
-	int vertexCount = mesh.vbo_.size();
+	auto _computeEdgeError = [&](const Vector3d& v, const array<vector<int>, 2>& neighbor)->double
+		{
+			const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
+			const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
+			double totalError = 0.0;
+			for (const auto& iter : neighbor[0])
+			{
+				Vector3d v0 = vbo[ibo[iter][0]];
+				Vector3d v1 = vbo[ibo[iter][1]];
+				Vector3d v2 = vbo[ibo[iter][2]];
+				Vector3d n = (v1 - v0).cross(v2 - v1);
+				totalError += (v0 - v).dot(n) * ((v0 - v).dot(n)) / n.dot(n);
+			}
+			for (const auto& iter : neighbor[1])
+			{
+				Vector3d v0 = vbo[ibo[iter][0]];
+				Vector3d v1 = vbo[ibo[iter][1]];
+				Vector3d v2 = vbo[ibo[iter][2]];
+				Vector3d n = (v1 - v0).cross(v2 - v1);
+				totalError += (v0 - v).dot(n) * ((v0 - v).dot(n)) / n.dot(n);
+			}
+			return totalError;
+		};
+	if (collapseEdgeCount == 0)
+		collapseEdgeCount = mesh.ibo_.size() / 2;
+	if (collapseEdgeCount >= mesh.ibo_.size())
+		return {};
 
-	// 计算每个顶点的误差并构建优先队列
-	std::priority_queue<Vertex> pq;
-	for (Vertex& v : vertices)
+	vector<Edge> eEdge;
+	set<array<int, 2>> uniqueEdge;
+	for (const auto& iter : mesh.ibo_)
 	{
-		v.m_error = computeError(v, vertices);
-		pq.push(v);
+		array<int, 4> tri = { iter[0], iter[1], iter[2], iter[0] };
+		for (int i = 0; i < 3; i++)
+		{
+			array<int, 2> edge = (tri[i] < tri[i + 1]) ? array<int, 2>{tri[i], tri[i + 1]} : array<int, 2>{tri[i + 1], tri[i]};
+			uniqueEdge.insert(edge);
+		}
+	}
+	//typedef array<int, 3> IBO;
+	map<array<int, 2>, array<vector<int>, 2>> edgeNeighborFace;
+	map<array<int, 2>, array<int, 2>> edgeOnFace;
+	for (const auto& edge : uniqueEdge)
+	{
+		//get edgeNeighborFace
+		vector<int> edge0, edge1;
+		for (int i = 0; i < mesh.ibo_.size(); i++)
+		{
+			const array<int, 3>& face = mesh.ibo_[i];
+			if (face[0] == edge[0] || face[1] == edge[0] || face[2] == edge[0])
+				edge0.push_back(i);
+			if (face[0] == edge[1] || face[1] == edge[1] || face[2] == edge[1])
+				edge1.push_back(i);
+		}
+		edgeNeighborFace.insert({ edge, { edge0, edge1 } });
+		// get edgeOnFace
+		array<int, 2> faceTwo;
+		int find = 0;
+		for (int i = 0; i < mesh.ibo_.size(); i++)
+		{
+			int coin = 0;
+			const array<int, 3>& face = mesh.ibo_[i];
+			for (const int& vt : face) //find two common vertex
+			{
+				if (vt == edge[0] || vt == edge[1])
+					coin++;
+			}
+			if (coin == 2) //means common edge
+			{
+				faceTwo[find] = i;
+				find++;
+			}
+			if (find == 2)
+			{
+				edgeOnFace.insert({ edge, faceTwo });
+				break;
+			}
+		}
 	}
 
-	// 不断合并顶点，直到达到目标顶点数量
-	while (vertexCount > targetVertexCount) {
-		// 从优先队列中取出误差最小的顶点
-		Vertex vertex = pq.top();
-		pq.pop();
-
-		// 找到与该顶点相邻的顶点
-		std::vector<int> neighboringVertices;
-		//for (const array<int, 3>& face : faces) 
-		//{
-		//	if (face[0] == v || face[1] == v || face.v3 == v) {
-		//		if (face[0] != v && std::find(neighboringVertices.begin(), neighboringVertices.end(), face[0]) == neighboringVertices.end()) {
-		//			neighboringVertices.push_back(face[0]);
-		//		}
-		//		if (face[1] != v && std::find(neighboringVertices.begin(), neighboringVertices.end(), face[1]) == neighboringVertices.end()) {
-		//			neighboringVertices.push_back(face[1]);
-		//		}
-		//		if (face.v3 != v && std::find(neighboringVertices.begin(), neighboringVertices.end(), face.v3) == neighboringVertices.end()) {
-		//			neighboringVertices.push_back(face.v3);
-		//		}
-		//	}
-		//}
-
-		// 计算合并后的顶点位置
-		double newX = 0.0, newY = 0.0, newZ = 0.0;
-		for (int neighbor : neighboringVertices)
-		{
-			newX += vertices[neighbor].m_vertex.x();
-			newY += vertices[neighbor].m_vertex.y();
-			newZ += vertices[neighbor].m_vertex.z();
-		}
-		newX /= neighboringVertices.size();
-		newY /= neighboringVertices.size();
-		newZ /= neighboringVertices.size();
-
-		// 更新合并后的顶点信息
-		vertex.m_vertex.x() = newX;
-		vertex.m_vertex.y() = newY;
-		vertex.m_vertex.z() = newZ;
-		vertex.m_error = computeError(vertex, vertices);
-
-		// 更新相邻顶点的误差并重新加入优先队列
-		for (int neighbor : neighboringVertices)
-		{
-			vertices[neighbor].m_error = computeError(vertices[neighbor], vertices);
-			pq.push(vertices[neighbor]);
-		}
-
-		// 移除与合并顶点相邻的面
-		//faces.erase(std::remove_if(faces.begin(), faces.end(), [&](const Face& face){
-		//	return face.v1 == v || face.v2 == v || face.v3 == v;}), faces.end());
-
-		// 更新顶点索引
-		//for (Face& face : faces) 
-		//{
-		//	if (face.v1 > v) 
-		//		face.v1--;
-		//	if (face.v2 > v) 
-		//		face.v2--;
-		//	if (face.v3 > v) 
-		//		face.v3--;
-		//}
-
-		vertexCount--;
+	//process on
+	std::priority_queue<Edge> pQueue;
+	for (const auto& iter : uniqueEdge)
+	{
+		Edge edge;
+		edge.m_edge = iter;
+		edge.m_vertex = 0.5 * (mesh.vbo_[iter[0]] + mesh.vbo_[iter[1]]);
+		edge.m_error = _computeEdgeError(edge.m_vertex, edgeNeighborFace[iter]);
+		pQueue.push(edge);
 	}
-
-
-
-	return mesh;
+	std::vector<std::array<int, 3>> faces = mesh.ibo_;
+	ModelMesh meshNew = mesh;//copy
+	std::vector<Eigen::Vector3d>& vbo = meshNew.vbo_;
+	std::vector<std::array<int, 3>>& ibo = meshNew.ibo_;
+	//contract edge
+	while (meshNew.vbo_.size() > collapseEdgeCount)
+	{
+		Edge edge = pQueue.top();
+		pQueue.pop();
+		ibo.erase(ibo.begin() + edgeOnFace[edge.m_edge][0]);
+		ibo.erase(ibo.begin() + edgeOnFace[edge.m_edge][1]);
+		vbo[edge.m_edge[0]] = edge.m_vertex;
+		vbo.erase(vbo.begin() + edge.m_edge[1]);
+		for (auto& face : ibo)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				if (face[i] == edge.m_edge[1])
+					face[i] == edge.m_edge[0];
+			}
+		}
+	}
+	return meshNew;
 }
 
