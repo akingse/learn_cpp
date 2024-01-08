@@ -459,7 +459,7 @@ std::vector<ModelMesh> read_ModelMesh(const std::string& fileName)
 				_iboRaw.push_back(iboRaw->Get(i));
 			}
 #ifdef CLASH_DETECTION_DEBUG_TEMP
-			res.push_back(ModelMesh{ vbo_, ibo_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(),mesh->convex(), _iboRaw, mesh->entityid() });
+			res.push_back(ModelMesh{ vbo_, ibo_,{/*fno*/}, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(),mesh->convex(), _iboRaw, mesh->entityid()});
 #else
 			res.push_back(ModelMesh{ vbo_, ibo_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(),mesh->convex()});
 #endif

@@ -2031,3 +2031,22 @@ Matrix4d getProjectionMatrixByPlane(const Plane3d& plane)
 	return mat * inv;
 }
 
+std::array<Eigen::Matrix4d, 2> getRelativeMatrixByPlane(const Plane3d& plane)
+{
+	Matrix4d mat, inv;// = Eigen::Affine3d::Identity();
+	Vector3d axisz = plane.m_normal.normalized();
+	Vector3d axisx = Vector3d(0, 0, 1).cross(axisz).normalized();
+	Vector3d axisy = axisz.cross(axisx);
+	//mat.setByOriginAndVectors();
+	mat <<
+		axisx[0], axisy[0], axisz[0], plane.m_origin[0],
+		axisx[1], axisy[1], axisz[1], plane.m_origin[1],
+		axisx[2], axisy[2], axisz[2], plane.m_origin[2],
+		0, 0, 0, 1;
+	inv <<
+		axisx[0], axisx[1], axisx[2], -plane.m_origin[0],
+		axisy[0], axisy[1], axisy[2], -plane.m_origin[1],
+		axisz[0], axisz[1], axisz[2], -plane.m_origin[2],
+		0, 0, 0, 1;
+	return { mat,inv };
+}
