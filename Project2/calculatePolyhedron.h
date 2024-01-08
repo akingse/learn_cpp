@@ -40,7 +40,6 @@ namespace games
 			return m_error > rhs.m_error; //for small root heap
 		}
 	};
-
 	//struct CompareVertex //using for priority_queue template
 	//{
 	//	bool operator()(const Vertex& v1, const Vertex& v2) 
@@ -54,7 +53,18 @@ namespace games
 	//	return vA.m_error < vB.m_error;
 	//}
 
+	struct Edge //unique
+	{
+		std::array<int, 2> m_edge;
+		Eigen::Vector3d m_vertex;
+		double m_error = 0.0;
+		bool operator<(const Edge& rhs) const
+		{
+			return m_error > rhs.m_error; //for small root heap
+		}
+	};
+
 	//utility
 	ModelMesh meshLoopSubdivision(const ModelMesh& mesh);
-	ModelMesh meshQuadricErrorSimpIification(const ModelMesh& mesh, size_t targetVertexCount = 0);
+	ModelMesh meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, size_t collapseEdgeCount = 0);
 }
