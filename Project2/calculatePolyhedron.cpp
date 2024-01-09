@@ -77,10 +77,24 @@ bool psykronix::isMeshConvexPolyhedron(const ModelMesh& mesh)
 	return true;
 }
 
-//bool psykronix::isMeshConvexPolyhedron(const ModelMesh& mesh)
-//{
-//	return isMeshConvexPolyhedron(mesh.vbo_, mesh.ibo_);
-//}
+int psykronix::getMeshGenusNumber(const ModelMesh& mesh)
+{
+	set<array<int, 2>> uniqueEdge;
+	for (const auto& iter : mesh.ibo_)
+	{
+		array<int, 4> tri = { iter[0], iter[1], iter[2], iter[0] };
+		for (int i = 0; i < 3; i++)
+		{
+			array<int, 2> edge = (tri[i] < tri[i + 1]) ?
+				array<int, 2>{tri[i], tri[i + 1]} : array<int, 2>{tri[i + 1], tri[i]};
+			uniqueEdge.insert(edge);
+		}
+	}
+	size_t V = mesh.vbo_.size();
+	size_t F = mesh.ibo_.size();
+	size_t E = uniqueEdge.size();
+	return 1 - (V - E + F) / 2; //V - E + F = 2(1-g)
+}
 
 //Moller Trumbore Algorithm (Cost = 0 div, 27 mul, 17 add)
 int isRayLineCrossTriangleMTA(const Eigen::Vector3d& origin, const Eigen::Vector3d& deriction, const Triangle& trigon)
