@@ -6,7 +6,10 @@ namespace psykronix
 	{
 		return std::isnan(vec[0]) || std::isnan(vec[1]) || std::isnan(vec[2]);
 	}
-	bool isParallel(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB); // dynamic accuracy
+	// dynamic accuracy
+	bool isParallel(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB);
+	bool isParallel(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB); 
+	bool isPerpendi(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB);
 	bool isPerpendi(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB);
 
 	// intersect of triangle
@@ -42,6 +45,8 @@ bool isPointRayAcrossTriangleSAT(const Eigen::Vector3d& point, const std::array<
 bool isTwoTrianglesBoundingBoxIntersect(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance = 0.0);
 bool isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box);
 bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
+bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB, double tolerance = psykronix::eps);
+bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance = psykronix::eps);
 double getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
 std::array<Eigen::Vector3d, 2> getTwoTrianglesNearestPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
 std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
@@ -49,5 +54,7 @@ std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<E
 // pnpoly
 bool isPointInPolygon2D(const Eigen::Vector2d& point, const std::vector<Eigen::Vector2d>& polygon);
 bool isPointInPolygon2D(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& polygon);
+// generate matrix
 Eigen::Matrix4d getProjectionMatrixByPlane(const psykronix::Plane3d& plane);
 std::array<Eigen::Matrix4d,2> getRelativeMatrixByPlane(const psykronix::Plane3d& plane);
+

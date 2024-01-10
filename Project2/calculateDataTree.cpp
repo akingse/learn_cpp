@@ -4,7 +4,6 @@
 using namespace std;
 using namespace psykronix;
 using namespace Eigen;
-//static constexpr double eps = FLT_EPSILON; //1e-7
 
 #ifdef min
 #undef min
@@ -20,7 +19,7 @@ using namespace Eigen;
 #ifdef RESERVE_USING_POLYGON2D
 size_t Polygon2d::m_id = 0;
 //sort the input polygons
-std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<std::pair<size_t, Polygon2d>>& polygons, int dimension = 0)
+std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<Polygon2d>& polygons, int dimension = 0)
 {
 	// the kd-tree crud create read update delete
 	auto _getTotalBounding = [&polygons](/*const std::vector<Polygon2d>& polygons*/)->Eigen::AlignedBox2d
@@ -28,15 +27,13 @@ std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<std::pair<size_t, Poly
 		AlignedBox2d fullBox;
 		for (const auto& iter : polygons)
 		{
-			fullBox.extend(iter.second.bounding().min());
-			fullBox.extend(iter.second.bounding().max());
+			fullBox.extend(iter.bounding().min());
+			fullBox.extend(iter.bounding().max());
 		}
 		return fullBox;
 	};
-
 	if (polygons.empty()) //no chance
 		return nullptr;
-
 	int direction = dimension % 2;  // the direction of xy, x=0/y=1
 	//double splitValue = calculateSplitValue(/*polygons,*/ dimension); 
 	//KdTreeNode* currentNode = new KdTreeNode();
@@ -48,15 +45,15 @@ std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<std::pair<size_t, Poly
 	{
 		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);  
 		if (direction % 2 == 0)
-			std::sort(polygons.begin(), polygons.end(), [](const pair<size_t, Polygon2d>& a, const pair<size_t, Polygon2d>& b)
-				{ return a.second.bounding().min()[0] < b.second.bounding().min()[0]; }); //x
+			std::sort(polygons.begin(), polygons.end(), [](const Polygon2d& a, const Polygon2d& b)
+				{ return a.bounding().min()[0] < b.bounding().min()[0]; }); //x
 		else
-			std::sort(polygons.begin(), polygons.end(), [](const pair<size_t, Polygon2d>& a, const pair<size_t, Polygon2d>& b)
-				{ return a.second.bounding().min()[1] < b.second.bounding().min()[1]; }); //y
+			std::sort(polygons.begin(), polygons.end(), [](const Polygon2d& a, const Polygon2d& b)
+				{ return a.bounding().min()[1] < b.bounding().min()[1]; }); //y
 		//splitPolygons(/*polygons, leftPolygons, rightPolygons */ dimension, splitValue);
 		size_t dichotomy = polygons.size() / 2; // less | more
-		vector<pair<size_t, Polygon2d>> leftPolygons(polygons.begin(), polygons.begin() + dichotomy); //for new child node
-		vector<pair<size_t, Polygon2d>> rightPolygons(polygons.begin() + dichotomy, polygons.end());
+		vector<Polygon2d> leftPolygons(polygons.begin(), polygons.begin() + dichotomy); //for new child node
+		vector<Polygon2d> rightPolygons(polygons.begin() + dichotomy, polygons.end());
 		// using recursion
 		currentNode->m_left = _createKdTree2d(leftPolygons, dimension + 1);
 		currentNode->m_right = _createKdTree2d(rightPolygons, dimension + 1);
@@ -64,10 +61,10 @@ std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<std::pair<size_t, Poly
 	}
 	else // end leaf node
 	{
-		currentNode->m_bound = polygons[0].second.bounding();// short cut way
+		currentNode->m_bound = polygons[0].bounding();// short cut way
 		currentNode->m_left = nullptr;
 		currentNode->m_right = nullptr;
-		currentNode->m_index = polygons[0].first;
+		currentNode->m_index = polygons[0].m_index;
 	}
 	currentNode->m_dimension = direction; //record the xy direciton, alse canbe depth, then use depth % 2
 	return currentNode;
@@ -75,18 +72,71 @@ std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<std::pair<size_t, Poly
 
 KdTree2d::KdTree2d(const std::vector<Polygon2d>& _polygons/*, int depth = 0*/)
 {
-	std::vector<std::pair<size_t, Polygon2d>> polygons;
-	for (size_t i = 0; i < _polygons.size(); ++i)//(const auto& iter : _polygons)
-	{
-		polygons.emplace_back(std::pair<size_t, Polygon2d>{ i, _polygons[i] });
-	}
-	//return _createKdTree2d(polygons);
+	//std::vector<std::pair<size_t, Polygon2d>> polygons;
+	//for (size_t i = 0; i < _polygons.size(); ++i)//(const auto& iter : _polygons)
+	//{
+	//	polygons.emplace_back(std::pair<size_t, Polygon2d>{ i, _polygons[i] });
+	//}
+	std::vector<Polygon2d> polygons = _polygons; //copy
 	m_kdTree = _createKdTree2d(polygons);
+}
+
+//template<class T>
+std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<TrigonPart>& triangles, int dimension = 0)
+{
+	// the kd-tree crud create read update delete
+	auto _getTotalBounding = [&triangles](/*const std::vector<TrigonPart>& polygons*/)->Eigen::AlignedBox2d
+	{
+		AlignedBox2d fullBox;
+		for (const auto& iter : triangles)
+		{
+			fullBox.extend(iter.m_box2d.min());
+			fullBox.extend(iter.m_box2d.max());
+		}
+		return fullBox;
+	};
+	if (triangles.empty()) //no chance
+		return nullptr;
+	int direction = dimension % 2;  // the direction of xy, x=0/y=1
+	std::shared_ptr<KdTreeNode2d> currentNode = std::make_shared<KdTreeNode2d>();
+	if (triangles.size() != 1) //middle node
+	{
+		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);  
+		if (direction % 2 == 0)
+			std::sort(triangles.begin(), triangles.end(), [](const TrigonPart& a, const TrigonPart& b)
+				{ return a.m_box2d.min()[0] < b.m_box2d.min()[0]; }); //x
+		else
+			std::sort(triangles.begin(), triangles.end(), [](const TrigonPart& a, const TrigonPart& b)
+				{ return a.m_box2d.min()[1] < b.m_box2d.min()[1]; }); //y
+		//splitPolygons(/*polygons, leftPolygons, rightPolygons */ dimension, splitValue);
+		size_t dichotomy = triangles.size() / 2; // less | more
+		vector<TrigonPart> leftPolygons(triangles.begin(), triangles.begin() + dichotomy); //for new child node
+		vector<TrigonPart> rightPolygons(triangles.begin() + dichotomy, triangles.end());
+		// using recursion
+		currentNode->m_left = _createKdTree2d(leftPolygons, dimension + 1);
+		currentNode->m_right = _createKdTree2d(rightPolygons, dimension + 1);
+		//currentNode->m_index = -1; //not leaf node
+	}
+	else // end leaf node
+	{
+		currentNode->m_bound = triangles[0].m_box2d;
+		currentNode->m_left = nullptr;
+		currentNode->m_right = nullptr;
+		currentNode->m_index2 = triangles[0].m_index;
+	}
+	currentNode->m_dimension = direction; //record the xy direciton, alse canbe depth, then use depth % 2
+	return currentNode;
+}
+
+KdTree2d::KdTree2d(const std::vector<TrigonPart>& _triangles)
+{
+	std::vector<TrigonPart> triangles = _triangles; //copy
+	m_kdTree = _createKdTree2d(triangles);
 }
 
 std::vector<size_t> KdTree2d::findIntersect(const Polygon2d& polygon)
 {
-	if (!m_kdTree->isValid() || !polygon.isValid())
+	if (m_kdTree == nullptr || !polygon.isValid())
 		return {}; //test whether is working
 	std::vector<size_t> indexes;
 	std::function<void(const shared_ptr<KdTreeNode2d>&)> _searchKdTree = [&](const shared_ptr<KdTreeNode2d>& node)->void
@@ -101,16 +151,44 @@ std::vector<size_t> KdTree2d::findIntersect(const Polygon2d& polygon)
 			}
 			else
 			{
-				indexes.push_back(node->m_index);
-				return;
+				if (polygon.m_index != node->m_index) //exclude self
+					indexes.push_back(node->m_index);
+				//return;
 			}
 		}
 	};
 	_searchKdTree(m_kdTree);
 	return indexes;
 }
-#endif RESERVE_USING_POLYGON2D
 
+std::vector<std::array<int, 2>> KdTree2d::findIntersect(const TrigonPart& trigon)
+{
+	if (m_kdTree == nullptr)
+		return {}; //test whether is working
+	std::vector<array<int, 2>> indexes;
+	std::function<void(const shared_ptr<KdTreeNode2d>&)> _searchKdTree = [&](const shared_ptr<KdTreeNode2d>& node)->void
+	{
+		//using recursion
+		if (node->m_bound.intersects(trigon.m_box2d))
+		{
+			if (node->isLeaf()) 
+			{
+				if (trigon.m_index != node->m_index2) //exclude self
+					indexes.push_back(node->m_index2);
+				//return;
+			}
+			else // isnot leaf node
+			{
+				_searchKdTree(node->m_left);
+				_searchKdTree(node->m_right);
+			}
+		}
+	};
+	_searchKdTree(m_kdTree);
+	return indexes;
+}
+
+#endif RESERVE_USING_POLYGON2D
 //--------------------------------------------------------------------------------------------------
 //  K-dimensional Tree 3d
 //--------------------------------------------------------------------------------------------------
@@ -348,6 +426,54 @@ KdTree3d::KdTree3d(const std::vector<Polyface3d>& polyfaces)
 #endif // DEBUG
 }
 
+std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<TrigonPart>& triangles, int dimension = 0)
+{
+	// the kd-tree crud create read update delete
+	auto _getTotalBounding = [&](/*const std::vector<Polygon2d>& polygons*/)->Eigen::AlignedBox3d
+	{
+		AlignedBox3d fullBox;
+		for (const auto& iter : triangles)
+		{
+			fullBox.extend(iter.m_box3d.min());
+			fullBox.extend(iter.m_box3d.max());
+		}
+		return fullBox;
+	};
+	if (triangles.empty()) //no chance
+		return nullptr;
+	const int direction = dimension % 3;  // the direction of xyz, x=0/y=1/z=2
+	std::shared_ptr<KdTreeNode3d> currentNode = std::make_shared<KdTreeNode3d>();
+	if (triangles.size() != 1) //middle node
+	{
+		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);
+		std::sort(triangles.begin(), triangles.end(),
+			[=](const TrigonPart& a, const TrigonPart& b) { return a.m_box3d.min()[direction] < b.m_box3d.min()[direction]; }); // index of Vector3d
+		//splitPolygons(/*polygons, leftPolygons, rightPolygons */ dimension, splitValue);
+		size_t dichotomy = triangles.size() / 2; // less | more
+		vector<TrigonPart> leftPolygons(triangles.begin(), triangles.begin() + dichotomy); //for new child node
+		vector<TrigonPart> rightPolygons(triangles.begin() + dichotomy, triangles.end());
+		// using recursion
+		currentNode->m_left = _createKdTree3d(leftPolygons, dimension + 1);
+		currentNode->m_right = _createKdTree3d(rightPolygons, dimension + 1);
+		//currentNode->m_index = -1; //not leaf node
+	}
+	else // end leaf node
+	{
+		currentNode->m_bound = triangles.front().m_box3d;// size is 1
+		currentNode->m_left = nullptr;
+		currentNode->m_right = nullptr;
+		currentNode->m_index2 = triangles.front().m_index;
+	}
+	currentNode->m_dimension = direction; //record the xy direciton, alse canbe depth, then use depth % 2
+	return currentNode;
+}
+
+KdTree3d::KdTree3d(const std::vector<TrigonPart>& _triangles)
+{
+	std::vector<TrigonPart> triangles = _triangles;
+	m_kdTree = _createKdTree3d(triangles);
+}
+
 std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon, double tolerance /*= 0.0*/) const
 {
 	if (m_kdTree == nullptr) // || polygon.m_index == -1 means cannot be external polyface
@@ -374,6 +500,32 @@ std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon, double to
 			{
 				if (polygon.m_index != node->m_index) //exclude self
 					indexes.push_back(node->m_index); //if double loop, index canbe small to large
+			}
+		}
+	};
+	_searchKdTree(m_kdTree);
+	return indexes;
+}
+
+std::set<std::array<int, 2>> KdTree3d::findIntersect(const TrigonPart& trigon)
+{
+	if (m_kdTree == nullptr) // || polygon.m_index == -1 means cannot be external polyface
+		return {};
+	std::set<array<int, 2>> indexes;
+	std::function<void(const shared_ptr<KdTreeNode3d>&)> _searchKdTree = [&](const shared_ptr<KdTreeNode3d>& node)->void
+	{
+		//using recursion
+		if (node->m_bound.intersects(trigon.m_box3d))
+		{
+			if (node->isLeaf2()) // is leaf node
+			{
+				if (trigon.m_index[0] != node->m_index2[0]) //same mesh, must 3d-sepa
+					indexes.insert(node->m_index2); //if double loop, index canbe small to large
+			}
+			else
+			{
+				_searchKdTree(node->m_left);
+				_searchKdTree(node->m_right);
 			}
 		}
 	};
