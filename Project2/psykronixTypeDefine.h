@@ -128,7 +128,7 @@ enum class OcclusionStatus :int //means cover
 
 struct TrigonPart
 {
-    array<int, 2> m_index; // mesh index | triangle index
+    std::array<int, 2> m_index; // mesh index | triangle index
     OcclusionStatus m_visible = OcclusionStatus::EXPOSED;
     Eigen::AlignedBox3d m_box3d;
     Eigen::AlignedBox2d m_box2d;
@@ -136,8 +136,8 @@ struct TrigonPart
     //array<Eigen::Vector2d, 3> m_triangle2d;
 
     // profile boolean operation
-    vector<array<int, 2>> m_intersect;
-    vector<array<int, 2>> m_occlusion;
+    std::vector<std::array<int, 2>> m_intersect;
+    std::vector<std::array<int, 2>> m_occlusion;
 };
 
 struct MeshProjection
@@ -146,5 +146,5 @@ struct MeshProjection
     OcclusionStatus m_visible;
     Eigen::AlignedBox3d m_box3d;
     Eigen::AlignedBox2d m_box2d;
-    vector<long long> m_intersect;
+    std::vector<long long> m_intersect;
 };
