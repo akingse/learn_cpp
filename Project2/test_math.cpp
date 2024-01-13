@@ -256,7 +256,7 @@ double* LUP_solve_inverse(double A[N * N])
     return inv_A;
 }
 
-static int test0()
+static void test0()
 {
     double* A = new double[N * N]();
     srand((unsigned)time(0));
@@ -304,9 +304,8 @@ static int test0()
         cout << endl;
     }
 
-    return 0;
+    return;
 }
-
 
 int funtion(int a, int b)
 {
@@ -331,7 +330,7 @@ int math_sign(float x)
     return (x > 0) ? (1) : (-1);
 }
 
-static int test1()
+static void test1()
 {
     int p = 5, b = 2;
     int c = funtion(5, b);
@@ -347,7 +346,7 @@ static int test1()
     //cout << numList[0] << endl;
     cout << math_sign(-10) << endl;
 
-    return 0;
+    return;
 }
 
 static void test2()
@@ -408,7 +407,6 @@ static void test3()
 
     return;
 }
-
 
 static void test4() //C++数学函数 
 {
@@ -474,6 +472,72 @@ static void test4() //C++数学函数
     //extern double modf(double x, double p);//分解出x的整数和小数部分
 
 
+}
+
+//数学特殊数字
+static void _test5()
+{
+    ///double NaN = 0.0 / 0.0;
+//puts(NaN);
+//double nan = 0xFFFFFFFFFFFFFFFF;// 0x7FF0000000000000;
+//if (nan == 0xFFFFFFFFFFFFFFFF)
+//	puts("yes");
+//	cout << nan << endl;
+
+//float x = 0.0f / 0.0f;
+//if (isnan(x))
+//	puts("yes");
+//cout << isnan(0.0f / 0.0f) << endl;
+    double fnan = nan("0");
+    double f2 = fnan * 2;
+
+
+    double i = 0;
+    double in = 1 / i;
+    double na = 0 / i;
+    cout << in << endl; //inf 
+    cout << na << endl; //nan
+
+    cout << DBL_MAX << endl;
+    cout << DBL_MIN << endl;
+    ;
+    double n2 = 1 - in;
+    //cout << 1 / i << endl; //inf 
+    //cout << 0 / i << endl; //nan
+    double nas = std::nan("0");
+    //double in = std::asinf(0);
+
+    //数字转字符
+    //string转const char*
+    float fa = 1234;
+    string sn = "5678";
+    cout << stoi(sn) << endl;
+    cout << stod(sn) << endl;
+
+    puts(to_string(fa).c_str());
+
+    if (isinf(in))
+        puts("is_inf");
+    if (isnan(na))
+        puts("is_nan");
+
+    float zero = 0; //为什么必须定义成变量
+    cout << sqrt(-1) << endl;//显示nan
+    cout << 1 / zero << endl; //显示inf
+
+    double infm = 1 / zero;
+    cout << "inf 1/0=" << infm << endl;
+
+
+    double constexpr nanValue = std::numeric_limits<double>::quiet_NaN();
+    double constexpr infValue = std::numeric_limits<double>::infinity();
+    bool is1 = isnan(nanValue);
+    bool is2 = isnan(infValue);
+    bool is3 = isinf(nanValue);
+    bool is4 = isinf(infValue);
+
+
+    return;
 }
 
 static int enrol = []()->int

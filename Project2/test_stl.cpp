@@ -22,10 +22,8 @@ vector<int> alist()
 
 int test_fun(int a)
 {
-
 	assert(a ==10);
 	return 0;
-
 }
 void print_number(int* myInt) {
 	assert(myInt != NULL);  //如果myInt!=NULL,程序继续执行，反之程序打印报错信息，程序终止运行
@@ -112,8 +110,8 @@ static int mainstl()
 		cout << "success" << endl;
 
 
-
 	//-----------------------------------------------------
+
 	map<string, int> mymap;
 	mymap["b"] = 1;
 	mymap["a"] = 2;
@@ -175,56 +173,6 @@ static int mainstl()
 	}
 	std::reverse(name.begin(), name.end());
 
-	///double NaN = 0.0 / 0.0;
-	//puts(NaN);
-	//double nan = 0xFFFFFFFFFFFFFFFF;// 0x7FF0000000000000;
-	//if (nan == 0xFFFFFFFFFFFFFFFF)
-	//	puts("yes");
-	//	cout << nan << endl;
-
-	//float x = 0.0f / 0.0f;
-	//if (isnan(x))
-	//	puts("yes");
-	//cout << isnan(0.0f / 0.0f) << endl;
-	double fnan = nan("0");
-	double f2 = fnan * 2;
-
-
-	double i = 0;   
-	double in = 1 / i;
-	double na = 0 / i;
-	cout << in << endl; //inf 
-	cout << na << endl; //nan
-
-	cout << DBL_MAX << endl;
-	cout << DBL_MIN << endl;
-	;
-	double n2 = 1 - in;
-	//cout << 1 / i << endl; //inf 
-	//cout << 0 / i << endl; //nan
-	double nas = std::nan("0");
-	//double in = std::asinf(0);
-
-	//数字转字符
-	//string转const char*
-	float fa = 1234;
-	string sn = "5678";
-	cout << stoi(sn) << endl;
-	cout << stod(sn) << endl;
-
-	puts(to_string(fa).c_str());
-
-	if (isinf(in))
-		puts("is_inf");
-	if (isnan(na))
-		puts("is_nan");
-
-	float zero = 0; //为什么必须定义成变量
-	cout << sqrt(-1) << endl;//显示nan
-	cout << 1 / zero << endl; //显示inf
-
-	double infm = 1 / zero;
-	cout << "inf 1/0=" << infm << endl;
 
 	vector<vector<int>> G2(10); //一种二维数组的写法
 	G2[0].push_back(1);
@@ -244,14 +192,12 @@ static int mainstl()
 	//cout << *emp.begin()<<endl;
 	bool ism = emp.empty(); //使用之前先判空
 
-
 	//测试erase返回值
 	map<int, string> mymap3;
 	mymap3[1] = "1";
 	bool bl1 = mymap3.erase(2);
 	MyStruct a1;
 	auto b1 = MyStruct();
-
 
 	map<MyEnum, int> mymap5;
 	mymap5[MyEnum(1)] = 1;
@@ -268,11 +214,6 @@ static int mainstl()
 		else
 			it++;
 	}
-
-
-
-
 	return 0;
 }
-
 

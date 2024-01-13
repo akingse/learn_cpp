@@ -121,6 +121,17 @@ static void test1()
 
 static void test2()
 {
+	MatrixXd m(2, 2);
+	m(0, 0) = 3;
+	m(1, 0) = 2.5;
+	m(0, 1) = -1;
+	m(1, 1) = m(1, 0) + m(0, 1);
+	//std::cout << "Here is the matrix m:\n" << m << std::endl;
+	Vector2d v(2);
+	v(0) = 4;
+	v(1) = v(0) - 1;
+	//std::cout << "Here is the vector v:\n" << v << std::endl;
+
 	Eigen::AlignedBox3d box;
 	//Eigen::AlignedBox3d box(Eigen::Vector3d(1, 2, 3), Eigen::Vector3d(4, 5, 6));
 	//box.setEmpty();
@@ -136,31 +147,24 @@ static void test2()
 			pose(i, j) = double(i+j);
 
 
+	Eigen::Affine3d affine;
+	affine.translation() = Eigen::Vector3d(1.0, 2.0, 3.0);
+
+	Vector3d vec(1,2,3);
+	Vector4d vec4 = vec.homogeneous();
+	Vector4d vec41 = *(Vector4d*)&vec;
+
 	return;
 }
 
 static int enrol = []()->int {
 	//test0();
-	//test2();
+	test2();
+	cout << "test_eigen finished.\n" << endl;
 	return 0;
 }();
 
-static int main_eg()
-{
-	MatrixXd m(2, 2);
-	m(0, 0) = 3;
-	m(1, 0) = 2.5;
-	m(0, 1) = -1;
-	m(1, 1) = m(1, 0) + m(0, 1);
-	std::cout << "Here is the matrix m:\n" << m << std::endl;
-	Vector2d v(2);
-	v(0) = 4;
-	v(1) = v(0) - 1;
-	std::cout << "Here is the vector v:\n" << v << std::endl;
-	return 0;
-}
-
-void eigen_matlab0()
+void eigen_matlab()
 {
 	// A simple quickref for Eigen. Add anything that's missing.
 	// Main author: Keir Mierle
@@ -211,7 +215,6 @@ void eigen_matlab0()
 	//
 
 }
-
 
 /*
 void eigen_matlab1()

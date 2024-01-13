@@ -396,14 +396,11 @@ static void _test9()
 	triB_2 = Vector3d(110, 10, 20);
 	Vector3d triA_00 = Vector3d(0, 0, 0).normalized();
 
-
 	Triangle triA = { triA_0, triA_1, triA_2 };
 	Triangle triB = { triB_0, triB_1, triB_2 };
 
-
 	//double d0 = getTrianglesDistance(triA, triB); //判相交的17个分离轴，不一定含有最大的分离轴
 	double d1 = getTrianglesDistanceSAT(triA, triB);
-
 
 	std::array<Vector3d, 3> tri1 = { Vector3d(), Vector3d(), Vector3d()}; //both support
 	std::array<Vector3d, 3> tri2 = { { Vector3d(), Vector3d(), Vector3d()} };
@@ -417,7 +414,27 @@ static void _test9()
 	cout << "count_gRTT=" << count_gRTT << endl;
 
 	return;
+}
 
+static void _test10()
+{
+	Vector3d triA_0 = Vector3d(0, 0, 0);
+	Vector3d triA_1 = Vector3d(10, 0, 0);
+	Vector3d triA_2 = Vector3d(0, 10, 0);
+	//
+	Vector3d triB_0 = Vector3d(10-0.1, 0, 0);
+	Vector3d triB_1 = Vector3d(20, 0, 0);
+	Vector3d triB_2 = Vector3d(20, 10, 0);
+	Triangle triA = { triA_0, triA_1, triA_2 };
+	Triangle triB = { triB_0, triB_1, triB_2 };
+	bool isInter = false;
+	isInter= isTwoTrianglesIntersectSAT(triA, triB);
+	isInter= isTwoTrianglesPenetrationSAT(triA, triB);
+	Triangle2d triA2 = { *(Vector2d*)triA[0].data(),  *(Vector2d*)triA[1].data(),  *(Vector2d*)triA[2].data() };
+	Triangle2d triB2 = { *(Vector2d*)triB[0].data(),  *(Vector2d*)triB[1].data(),  *(Vector2d*)triB[2].data() };
+	isInter = isTwoTrianglesPenetrationSAT(triA2, triB2);
+
+	return;
 }
 
 static int enrol = []()->int
@@ -426,6 +443,7 @@ static int enrol = []()->int
 	//_test7();
 	//_test8();
 	//_test9();
+	_test10();
 	cout << "test_triangle_intersect finished.\n" << endl;
 	return 0;
 }();
