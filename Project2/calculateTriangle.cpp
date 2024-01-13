@@ -71,9 +71,9 @@ bool psykronix::isPointInTriangle(const Vector2d& point, const std::array<Vector
 #else
 	double axisz = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
 	return
-		0.0 <= axisz * ((p1[0] - p0[0]) * (point[1] - p0[1]) - (point[0] - p0[0]) * (p1[1] - p0[1])) &&
-		0.0 <= axisz * ((p2[0] - p1[0]) * (point[1] - p1[1]) - (point[0] - p1[0]) * (p2[1] - p1[1])) &&
-		0.0 <= axisz * ((p0[0] - p2[0]) * (point[1] - p2[1]) - (point[0] - p2[0]) * (p0[1] - p2[1]));
+		0.0 < axisz * ((p1[0] - p0[0]) * (point[1] - p0[1]) - (point[0] - p0[0]) * (p1[1] - p0[1])) &&
+		0.0 < axisz * ((p2[0] - p1[0]) * (point[1] - p1[1]) - (point[0] - p1[0]) * (p2[1] - p1[1])) &&
+		0.0 < axisz * ((p0[0] - p2[0]) * (point[1] - p2[1]) - (point[0] - p2[0]) * (p0[1] - p2[1]));
 #endif
 }
 
@@ -1150,7 +1150,7 @@ bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, cons
 	projection2 = normalB.dot(triA[2] - triB[1]);
 	if ((0.0 < projection0 && 0.0 < projection1 && 0.0 < projection2) || (0.0 > projection0 && 0.0 > projection1 && 0.0 > projection2))
 		return false;
-	std::array<Eigen::Vector3d, 15> axes = { { //order matters speed
+	std::array<Eigen::Vector3d, 15> axes = { { // compat zero-vector from parallel edges
 			//normalA,
 			//normalB,
 			normalA.cross(edgesA[0]),
@@ -1221,13 +1221,15 @@ bool isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, const std
 	double k = 0;
 	for (auto& iter : edgesAB)
 	{
-		k = std::max(k, iter.norm());
+		k = std::max(k, iter.squaredNorm());
 		iter = Vector2d(-iter[1], iter[0]); //rotz(pi/2)
 	}
 	tolerance = k * tolerance;
 	double minA, maxA, minB, maxB, projection;
 	for (const auto& axis : edgesAB)
 	{
+		if (axis.isZero())
+			continue;
 		minA = DBL_MAX;
 		maxA = -DBL_MAX;
 		minB = DBL_MAX;
@@ -1244,10 +1246,10 @@ bool isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, const std
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
-		if (tolerance < minB - maxA || tolerance < minA - maxB)
-			return true; //without normlized
+		if (maxA < minB + tolerance || maxB < minA + tolerance)
+			return false; //without normlized
 	}
-	return false;
+	return true;
 }
 
 //must intersect
@@ -1276,13 +1278,15 @@ bool isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, const std
 			edgesA[2].cross(edgesB[2]) } };
 	double k = 0;
 	for (const auto& iter : edgesA)
-		k = std::max(k, iter.norm());
+		k = std::max(k, iter.squaredNorm());
 	for (const auto& iter : edgesB)
-		k = std::max(k, iter.norm());
+		k = std::max(k, iter.squaredNorm());
 	tolerance = k * tolerance;
 	double minA, maxA, minB, maxB, projection;
 	for (const auto& axis : axes) 
 	{
+		if (axis.isZero())
+			continue;
 		minA = DBL_MAX;
 		maxA = -DBL_MAX;
 		minB = DBL_MAX;
@@ -1299,10 +1303,10 @@ bool isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, const std
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
-		if (tolerance < minB - maxA || tolerance < minA - maxB)
-			return true; //without normlized
+		if (maxA < minB + tolerance || maxB < minA + tolerance)
+			return false; //without normlized
 	}
-	return false;
+	return true;
 }
 
 // must separate

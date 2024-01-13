@@ -1736,7 +1736,7 @@ ModelMesh games::meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, si
 			for (int i = 0; i < 3; i++)
 			{
 				if (face[i] == edge.m_edge[1])
-					face[i] == edge.m_edge[0];
+					face[i] = edge.m_edge[0];
 			}
 		}
 	}

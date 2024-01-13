@@ -123,8 +123,7 @@ public:
 		return m_kdTree;
 	}
 	std::vector<size_t> findIntersect(const psykronix::Polygon2d& polygon); //searchFromKdTree
-	std::vector<std::array<int, 2>> findIntersect(const TrigonPart& trigon);
-
+	std::vector<size_t> findIntersect(const TrigonPart& trigon);
 };
 //----------------------------------------------------------------------------------------------------------------
 //  3d
@@ -198,7 +197,7 @@ public:
 	bool remove(const psykronix::Polyface3d& polyface); //find by polyface index
 	bool update(const psykronix::Polyface3d& polyface); //using polyface self index
 	std::vector<size_t> findIntersect(const psykronix::Polyface3d& polyface, double tolerance = 0.0) const; //searchFromKdTree
-	std::set<std::array<int, 2>> findIntersect(const TrigonPart& trigon);
+	std::vector<size_t> findIntersect(const TrigonPart& trigon);
 	std::vector<std::tuple<size_t, bool>> findIntersectClash(const psykronix::Polyface3d& polyface) const; // bool means soft-clash
 	std::vector<std::tuple<size_t, bool>> findIntersectClash(const psykronix::Polyface3d& polyface, double tolerance) const; //custom tolerance
 };

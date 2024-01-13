@@ -123,6 +123,7 @@ std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<TrigonPart>& triangles
 		currentNode->m_left = nullptr;
 		currentNode->m_right = nullptr;
 		currentNode->m_index2 = triangles[0].m_index;
+		currentNode->m_index = triangles[0].m_number;
 	}
 	currentNode->m_dimension = direction; //record the xy direciton, alse canbe depth, then use depth % 2
 	return currentNode;
@@ -161,21 +162,22 @@ std::vector<size_t> KdTree2d::findIntersect(const Polygon2d& polygon)
 	return indexes;
 }
 
-std::vector<std::array<int, 2>> KdTree2d::findIntersect(const TrigonPart& trigon)
+std::vector<size_t> KdTree2d::findIntersect(const TrigonPart& trigon)
 {
 	if (m_kdTree == nullptr)
 		return {}; //test whether is working
-	std::vector<array<int, 2>> indexes;
+	std::vector<size_t> indexes;
 	std::function<void(const shared_ptr<KdTreeNode2d>&)> _searchKdTree = [&](const shared_ptr<KdTreeNode2d>& node)->void
 	{
 		//using recursion
 		if (node->m_bound.intersects(trigon.m_box2d))
 		{
-			if (node->isLeaf()) 
+			if (node->m_index != -1)
 			{
-				if (trigon.m_index != node->m_index2) //exclude self
-					indexes.push_back(node->m_index2);
-				//return;
+				//vector index, only small to large
+				if (trigon.m_number < node->m_index) //exclude self
+					indexes.push_back(node->m_index);
+				return;
 			}
 			else // isnot leaf node
 			{
@@ -306,7 +308,6 @@ bool KdTree3d::update(const psykronix::Polyface3d& polyface)
 			if (std::get<0>(_searchKdTree(node->m_left)))
 			{
 				node->m_bound = std::get<1>(_searchKdTree(node->m_left));
-				//if (node->m_right->isLeaf())
 				node->m_bound.merged(node->m_right->m_bound);
 				return tuple<bool, AlignedBox3d>{true, node->m_bound};
 			}
@@ -463,6 +464,7 @@ std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<TrigonPart>& triangles
 		currentNode->m_left = nullptr;
 		currentNode->m_right = nullptr;
 		currentNode->m_index2 = triangles.front().m_index;
+		currentNode->m_index = triangles.front().m_number;
 	}
 	currentNode->m_dimension = direction; //record the xy direciton, alse canbe depth, then use depth % 2
 	return currentNode;
@@ -500,6 +502,7 @@ std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon, double to
 			{
 				if (polygon.m_index != node->m_index) //exclude self
 					indexes.push_back(node->m_index); //if double loop, index canbe small to large
+				return;
 			}
 		}
 	};
@@ -507,20 +510,22 @@ std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon, double to
 	return indexes;
 }
 
-std::set<std::array<int, 2>> KdTree3d::findIntersect(const TrigonPart& trigon)
+std::vector<size_t> KdTree3d::findIntersect(const TrigonPart& trigon)
 {
 	if (m_kdTree == nullptr) // || polygon.m_index == -1 means cannot be external polyface
 		return {};
-	std::set<array<int, 2>> indexes;
+	//std::vector<array<int, 2>> indexes;
+	std::vector<size_t> indexes;
 	std::function<void(const shared_ptr<KdTreeNode3d>&)> _searchKdTree = [&](const shared_ptr<KdTreeNode3d>& node)->void
 	{
 		//using recursion
 		if (node->m_bound.intersects(trigon.m_box3d))
 		{
-			if (node->isLeaf2()) // is leaf node
+			if (node->m_index != -1) // is leaf node
 			{
-				if (trigon.m_index[0] != node->m_index2[0]) //same mesh, must 3d-sepa
-					indexes.insert(node->m_index2); //if double loop, index canbe small to large
+				if (trigon.m_number < node->m_index && trigon.m_index[0] != node->m_index2[0]) //same mesh, must 3d-sepa
+					indexes.push_back(node->m_index); //if double loop, index canbe small to large
+				return;
 			}
 			else
 			{

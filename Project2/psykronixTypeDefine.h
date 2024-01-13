@@ -6,6 +6,7 @@ namespace psykronix
     typedef std::array<Eigen::Vector2d, 2> Segment2d;
     typedef std::array<Eigen::Vector3d, 2> Segment3d;
     typedef std::array<Eigen::Vector3d, 3> Triangle;
+    typedef std::array<Eigen::Vector2d, 3> Triangle2d;
     typedef std::array<Eigen::Vector3d, 3> Triangle3d;
     typedef std::array<Eigen::Vector3d, 2> PosVec3d;
     typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>> Polyhedron;
@@ -128,16 +129,18 @@ enum class OcclusionStatus :int //means cover
 
 struct TrigonPart
 {
+    long long m_number;
     std::array<int, 2> m_index; // mesh index | triangle index
     OcclusionStatus m_visible = OcclusionStatus::EXPOSED;
     Eigen::AlignedBox3d m_box3d;
     Eigen::AlignedBox2d m_box2d;
-    //array<Eigen::Vector3d, 3> m_triangle3d;
-    //array<Eigen::Vector2d, 3> m_triangle2d;
-
+#ifdef CLASH_DETECTION_DEBUG_TEMP
+    std::array<Eigen::Vector3d, 3> m_triangle3d;
+    std::array<Eigen::Vector2d, 3> m_triangle2d;
+#endif
     // profile boolean operation
     std::vector<std::array<int, 2>> m_intersect;
-    std::vector<std::array<int, 2>> m_occlusion;
+    std::vector<std::array<int, 2>> m_shielded;
 };
 
 struct MeshProjection
