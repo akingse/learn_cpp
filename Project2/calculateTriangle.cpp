@@ -2149,7 +2149,7 @@ Matrix4d getProjectionMatrixByPlane(const Plane3d& plane)
 	return mat * inv;
 }
 
-std::array<Eigen::Matrix4d, 2> getRelativeMatrixByPlane(const Plane3d& plane)
+std::array<Eigen::Matrix4d, 2> getRelativeMatrixByProjectionPlane(const Plane3d& plane)
 {
 	Matrix4d mat, inv;// = Eigen::Affine3d::Identity();
 	Vector3d axisz = plane.m_normal.normalized();

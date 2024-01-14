@@ -96,26 +96,155 @@ int psykronix::getMeshGenusNumber(const ModelMesh& mesh)
 	return 1 - (V - E + F) / 2; //V - E + F = 2(1-g)
 }
 
-//Moller Trumbore Algorithm (Cost = 0 div, 27 mul, 17 add)
-int isRayLineCrossTriangleMTA(const Eigen::Vector3d& origin, const Eigen::Vector3d& deriction, const Triangle& trigon)
+int psykronix::isRayLineCrossTriangleMTA(const Eigen::Vector3d& origin, const Eigen::Vector3d& direction, const Triangle& trigon)
 {
+	//Moller Trumbore Algorithm (Cost = 0 div, 27 mul, 17 add)
 	Vector3d E1 = trigon[1] - trigon[0];
 	Vector3d E2 = trigon[2] - trigon[0];
 	Vector3d S = origin - trigon[0];
-	Vector3d S1 = deriction.cross(E2);
+	Vector3d S1 = direction.cross(E2);
 	Vector3d S2 = S.cross(E1);
 	double k = 1.0 / S1.dot(E1);
 	double t = k * S2.dot(E2);
 	if (t < 0)
 		return 0;//false
 	double b1 = k * S1.dot(S);
-	double b2 = k * S2.dot(deriction);
+	double b2 = k * S2.dot(direction);
 	double b3 = 1.0 - b1 - b2;
 	if (b1 < 0 || b2 < 0 || b3 < 0)
 		return 0;//false, out of triangle
 	if (t == 0 || b1 == 0 || b2 == 0 || b3 == 0)
 		return -1;// intersect point on triangle || intersect point on edge
 	return 1;
+}
+
+vector<Vector3d> psykronix::getNormalVectorOfMeshFace(const ModelMesh& mesh) //using ray method
+{
+	vector<Vector3d> fno; //res
+	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
+	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
+	Vector3d bary;//barycentric coordinates
+	auto _correctRayLine = [&bary](const Triangle& face)->void
+	{
+		double a = (double)std::rand() / RAND_MAX; 
+		double b = 0.5 * (1 - a);
+		bary = a * face[0] + b * face[1] + b * face[2];
+	};
+	for (const auto& faceid : ibo) 
+	{
+		Triangle face = { vbo[faceid[0]] ,vbo[faceid[1]] ,vbo[faceid[2]] };
+		Vector3d bary = 1 / 3 * (face[0] + face[1] + face[2]);
+		Vector3d normal = (face[1] - face[0]).cross(face[2] - face[1]);
+		int count = 0;
+		while (true)
+		{
+			bool isNew = false;//new ray-line
+			for (const auto& iter : ibo) // iterate every trigon
+			{
+				Triangle trigon = { vbo[iter[0]] ,vbo[iter[1]] ,vbo[iter[2]] };
+				int cross = isRayLineCrossTriangleMTA(bary, normal, trigon);
+				if (cross == 0)
+					continue;
+				else if (cross == 1) 
+					count++;
+				else// if (cross == -1)// on edge
+				{
+					_correctRayLine(trigon);
+					isNew = true;
+					break;
+				}
+			}
+			if (isNew == false)
+				break;//end while
+		}
+		if (count % 2 == 1) //inner
+			normal = -normal;
+		fno.push_back(normal);
+	}
+	return fno;
+}
+
+vector<Eigen::Vector3d> psykronix::getProfileOutOfMesh(const ModelMesh& mesh, const Plane3d& plane)
+{
+	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
+	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
+	vector<array<int, 3>> faceVisible;
+	vector<Vector3d> fno = getNormalVectorOfMeshFace(mesh); //correct face normal
+	for (int i = 0; i < ibo.size(); ++i) //fno_ size equal
+	{
+		Triangle face = { vbo[ibo[i][0]] ,vbo[ibo[i][1]] ,vbo[ibo[i][2]] };
+		Vector3d normal = (face[1] - face[0]).cross(face[2] - face[1]);
+		if ( std::acos(plane.m_normal.dot(fno[i]) / (plane.m_normal.norm() * fno[i].norm())) < M_PI_2)
+			faceVisible.push_back(mesh.ibo_[i]);
+	}
+	// for convex polyhedron, no shielded, no genus
+	set<array<int, 2>> profileEdge;
+	for (const auto& iter : faceVisible)
+	{
+		array<int, 4> tri = { iter[0], iter[1], iter[2], iter[0] };
+		for (int i = 0; i < 3; i++)
+		{
+			array<int, 2> edge = (tri[i] < tri[i + 1]) ? array<int, 2>{tri[i], tri[i + 1]} : array<int, 2>{tri[i + 1], tri[i]};
+			if (profileEdge.find(edge) != profileEdge.end())
+				profileEdge.erase(edge);
+			else
+				profileEdge.insert(edge);
+		}
+	}
+	if (profileEdge.empty())
+		return {};
+	// merge to close profile
+	vector<int> profileIndex = { (*profileEdge.begin())[0], (*profileEdge.begin())[1] };
+	profileEdge.erase(profileEdge.begin());
+	while (!profileEdge.empty())
+	{
+		for (const auto& iter : profileEdge)
+		{
+			if (iter[0] == profileIndex.back() || iter[1] == profileIndex.back())
+			{
+				(iter[0] == profileIndex.back()) ? 
+					profileIndex.push_back(iter[1]) : profileIndex.push_back(iter[0]);
+				profileEdge.erase(iter);
+			}
+		}
+	}
+	vector<Vector3d> profilePoints;
+	for (const int& i : profileIndex)
+		profilePoints.push_back(vbo[i]);
+	Matrix4d matSha = getProjectionMatrixByPlane(plane);
+	for (auto& iter: profilePoints)
+		iter = (matSha * iter.homogeneous()).hnormalized();
+	return profilePoints;
+}
+
+bool psykronix::isPointInsidePolyhedronMTA(const Eigen::Vector3d& point, const ModelMesh& mesh)
+{
+	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
+	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
+	Vector3d direction = Vector3d(1.0, 0.0, 0.0);
+	int count = 0;
+	while (true)
+	{
+		bool isNew = false;//new ray-line
+		for (const auto& iter : ibo) // iterate every trigon
+		{
+			Triangle trigon = { vbo[iter[0]] ,vbo[iter[1]] ,vbo[iter[2]] };
+			int cross = isRayLineCrossTriangleMTA(point, direction, trigon);
+			if (cross == 0)
+				continue;
+			else if (cross == 1)
+				count++;
+			else// if (cross == -1)// on edge
+			{
+				direction = Vector3d(rand(), rand(), rand());
+				isNew = true;
+				break;
+			}
+		}
+		if (isNew == false)
+			break;//end while
+	}
+	return count % 2 == 1;
 }
 
 // exclude point on face, ray is rotate random

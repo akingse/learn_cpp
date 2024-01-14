@@ -56,5 +56,5 @@ bool isPointInPolygon2D(const Eigen::Vector2d& point, const std::vector<Eigen::V
 bool isPointInPolygon2D(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& polygon);
 // generate matrix
 Eigen::Matrix4d getProjectionMatrixByPlane(const psykronix::Plane3d& plane);
-std::array<Eigen::Matrix4d,2> getRelativeMatrixByPlane(const psykronix::Plane3d& plane);
+std::array<Eigen::Matrix4d,2> getRelativeMatrixByProjectionPlane(const psykronix::Plane3d& plane);
 
