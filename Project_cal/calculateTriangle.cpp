@@ -496,7 +496,6 @@ bool psykronix::isTwoTrianglesIntersectEIT(const std::array<Vector3d, 3>& triL, 
 	bool acrossL2R_C = (veczR.dot(triL[2] - triL[0])) * (veczR.dot(triL[0] - triL[0])) < eps;
 	if (!acrossL2R_A && !acrossL2R_B && !acrossL2R_C)
 		return false;
-	return true;
 	// using face to-left test
 	bool pointOnfaceS /*= false*/;
 	bool pointOnfaceE /*= false*/;
@@ -743,6 +742,22 @@ std::tuple<Vector3d, double> psykronix::getTriangleBoundingCircle(const std::arr
 	auto _inverse3x3 = [](const Vector3d& v0, const Vector3d& v1, const Vector3d& v2, const Vector3d& B)->Vector3d //set as row
 	{
 		//fast than eigon
+		double cofactor00 = v1[1] * v2[2] - v1[2] * v2[1];
+		double cofactor01 = -(v1[0] * v2[2] - v1[2] * v2[0]);
+		double cofactor02 = v1[0] * v2[1] - v1[1] * v2[0];
+		double cofactor10 = -(v0[1] * v2[2] - v0[2] * v2[1]);
+		double cofactor11 = v0[0] * v2[2] - v0[2] * v2[0];
+		double cofactor12 = -(v0[0] * v2[1] - v0[1] * v2[0]);
+		double cofactor20 = v0[1] * v1[2] - v0[2] * v1[1];
+		double cofactor21 = -(v0[0] * v1[2] - v0[2] * v1[0]);
+		double cofactor22 = v0[0] * v1[1] - v0[1] * v1[0];
+		double det = v0[0] * cofactor00 + v1[0] * cofactor01 + v2[0] * cofactor02;
+		det = 1.0 / det;
+		Matrix3d inv;
+		inv << det * cofactor00, det * cofactor10, det * cofactor20,
+				det* cofactor01, det * cofactor11, det * cofactor21,
+				det* cofactor02, det * cofactor12, det * cofactor22;
+		return inv * B;
 	};
 	Vector3d vecA = trigon[1] - trigon[0];
 	Vector3d vecB = trigon[2] - trigon[1];

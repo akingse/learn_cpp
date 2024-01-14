@@ -1,18 +1,26 @@
 #pragma once
 #include<iostream>
-#include<Eigen/Dense>
-//#include"Eigen/Geometry"   
 #define _USE_MATH_DEFINES //using M_PI
+#define _AFXDLL
+
 #include<math.h>
 #include<chrono>
 #include<array>
 #include<vector>
-//#define IS_EXPORT
-#ifdef IS_EXPORT
-#define DLLEXPORT __declspec(dllimport)
+#include<map>
+#include<set>
+#include<queue>
+#include<Eigen/Dense>
+//#define CAL_DLLEXPORT_DEFINE //set on pre-processor define
+#ifdef CAL_DLLEXPORT_DEFINE
+#define DLLEXPORT_CAL __declspec(dllimport)
 #else
-#define DLLEXPORT __declspec(dllexport)
+#define DLLEXPORT_CAL __declspec(dllexport)
 #endif
-//#include "my_class_fun.h"
-//#include "calculateTriangle.h"
 
+
+#include "psykronixTypeDefine.h"		
+#include "my_class_fun.h"		
+#include "calculateTriangle.h"	
+#include "calculateDataTree.h"
+#include "calculatePolyhedron.h"

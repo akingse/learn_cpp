@@ -22,9 +22,6 @@
     <Filter Include="geometry">
       <UniqueIdentifier>{b77325ff-4b59-41c0-b1ab-f42203b78bcb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="my_triangle">
-      <UniqueIdentifier>{e277615b-e3da-4f97-969a-ab5b916da535}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="my_vec.cpp">

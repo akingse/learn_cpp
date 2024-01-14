@@ -23,7 +23,6 @@ struct ModelMesh
 
 namespace psykronix
 {
-
     static constexpr size_t N_10E_3 = (size_t)1e3;
     static constexpr size_t N_10E_4 = (size_t)1e4;
     static constexpr size_t N_10E_5 = (size_t)1e5;
@@ -82,21 +81,20 @@ namespace psykronix
     };
 
     //overload
-    DLLEXPORT Eigen::Matrix4d rotx(double theta);
-    DLLEXPORT Eigen::Matrix4d roty(double theta);
-    DLLEXPORT Eigen::Matrix4d rotz(double theta);
-    DLLEXPORT Eigen::Matrix4d rotate(const Eigen::Vector3d& axis = { 0, 0, 1 }, double theta = 0.0);
-    DLLEXPORT Eigen::Matrix4d translate(const Eigen::Vector3d& vec);
-    DLLEXPORT Eigen::Matrix4d translate(double x, double y, double z = 0.0);
-    DLLEXPORT Eigen::Matrix4d scale(double x, double y, double z = 1.0);
-    DLLEXPORT Eigen::Matrix4d mirrorx();
-    DLLEXPORT Eigen::Matrix4d mirrory();
-    DLLEXPORT Eigen::Matrix4d mirrorz();
-    DLLEXPORT Eigen::Vector3d operator*=(const Eigen::Matrix4d& mat, const Eigen::Vector3d& vec); //operator* been occupied
-    DLLEXPORT std::array<Eigen::Vector3d, 2> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 2>& seg);
-    DLLEXPORT std::array<Eigen::Vector3d, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 3>& tri);
-    DLLEXPORT std::array<Eigen::Vector3f, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3f, 3>& tri);
-
+    Eigen::Matrix4d rotx(double theta);
+    Eigen::Matrix4d roty(double theta);
+    Eigen::Matrix4d rotz(double theta);
+    Eigen::Matrix4d rotate(const Eigen::Vector3d& axis = { 0, 0, 1 }, double theta = 0.0);
+    Eigen::Matrix4d translate(const Eigen::Vector3d& vec);
+    Eigen::Matrix4d translate(double x, double y, double z = 0.0);
+    Eigen::Matrix4d scale(double x, double y, double z = 1.0);
+    Eigen::Matrix4d mirrorx();
+    Eigen::Matrix4d mirrory();
+    Eigen::Matrix4d mirrorz();
+    Eigen::Vector3d operator*=(const Eigen::Matrix4d& mat, const Eigen::Vector3d& vec); //operator* been occupied
+    std::array<Eigen::Vector3d, 2> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 2>& seg);
+    std::array<Eigen::Vector3d, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 3>& tri);
+    std::array<Eigen::Vector3f, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3f, 3>& tri);
 
     inline void print_triangle(const std::array<Eigen::Vector3d, 3>& T1) //not accurate
     {
@@ -116,52 +114,3 @@ namespace psykronix
     }
 
 }
-
-
-inline Vec2 _get_rand()
-{
-    return Vec2(rand(), rand());
-}
-
-inline Eigen::Vector3d _to2D(const Eigen::Vector3d& vec3)
-{
-    return Eigen::Vector3d(vec3.x(), vec3.y(), 0.0);
-}
-
-inline std::array<para::BPParaVec, 3> _get_rand3v()
-{
-    // rand -16384 -> 16384 
-    //srand((int)time(0));
-    //Sleep(100);
-    return std::array<para::BPParaVec, 3> {
-        para::BPParaVec(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
-            para::BPParaVec(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
-            para::BPParaVec(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff) };
-}
-inline std::array<Eigen::Vector3d, 3> _get_rand3(int i = 0)
-{
-    if (i == 0)
-        return std::array<Eigen::Vector3d, 3> {
-        Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
-            Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
-            Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff) };
-    if (i == 1)
-        return std::array<Eigen::Vector3d, 3> {
-        Eigen::Vector3d(rand(), rand(), rand()),
-            Eigen::Vector3d(rand(), rand(), rand()),
-            Eigen::Vector3d(rand(), rand(), rand()) };
-    if (i == -1)
-        return std::array<Eigen::Vector3d, 3> {
-        Eigen::Vector3d(rand() - 0x7fff, rand() - 0x7fff, rand() - 0x7fff),
-            Eigen::Vector3d(rand() - 0x7fff, rand() - 0x7fff, rand() - 0x7fff),
-            Eigen::Vector3d(rand() - 0x7fff, rand() - 0x7fff, rand() - 0x7fff) };
-}
-
-inline std::array<Eigen::Vector3d, 2> _get_rand2()
-{
-    return std::array<Eigen::Vector3d, 2> {
-        Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
-            Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff) };
-}
-
-

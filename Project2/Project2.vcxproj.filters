@@ -38,9 +38,6 @@
     <Filter Include="test_pattern">
       <UniqueIdentifier>{bc964f22-f8dc-4621-a47d-f5eebd3d32d8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="my_triangle">
-      <UniqueIdentifier>{d75b882f-e37a-4826-a646-5b6d0ef51577}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -145,15 +142,6 @@
     <ClCompile Include="test_case_triangle.cpp">
       <Filter>test_case</Filter>
     </ClCompile>
-    <ClCompile Include="calculateTriangle.cpp">
-      <Filter>my_triangle</Filter>
-    </ClCompile>
-    <ClCompile Include="my_class_fun.cpp">
-      <Filter>my_triangle</Filter>
-    </ClCompile>
-    <ClCompile Include="my_triangle_intersect.cpp">
-      <Filter>my_triangle</Filter>
-    </ClCompile>
     <ClCompile Include="my_file_read_write.cpp">
       <Filter>test_bin</Filter>
     </ClCompile>
@@ -174,9 +162,6 @@
     </ClCompile>
     <ClCompile Include="test_rtti.cpp">
       <Filter>test_gram</Filter>
-    </ClCompile>
-    <ClCompile Include="calculatePolyhedron.cpp">
-      <Filter>my_triangle</Filter>
     </ClCompile>
     <ClCompile Include="test_binfile_debug.cpp">
       <Filter>test_case</Filter>
@@ -211,9 +196,6 @@
     <ClCompile Include="test_serialize.cpp">
       <Filter>test_dsa</Filter>
     </ClCompile>
-    <ClCompile Include="calculateDataTree.cpp">
-      <Filter>my_triangle</Filter>
-    </ClCompile>
     <ClCompile Include="test_clipper.cpp">
       <Filter>test_case</Filter>
     </ClCompile>
@@ -246,15 +228,6 @@
     <ClInclude Include="pch.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="calculateTriangle.h">
-      <Filter>my_triangle</Filter>
-    </ClInclude>
-    <ClInclude Include="my_class_fun.h">
-      <Filter>my_triangle</Filter>
-    </ClInclude>
-    <ClInclude Include="my_triangle_intersect.h">
-      <Filter>my_triangle</Filter>
-    </ClInclude>
     <ClInclude Include="test_serialize.h">
       <Filter>test_bin</Filter>
     </ClInclude>
@@ -263,15 +236,6 @@
     </ClInclude>
     <ClInclude Include="my_geometry.h">
       <Filter>test_math</Filter>
-    </ClInclude>
-    <ClInclude Include="calculatePolyhedron.h">
-      <Filter>my_triangle</Filter>
-    </ClInclude>
-    <ClInclude Include="calculateDataTree.h">
-      <Filter>my_triangle</Filter>
-    </ClInclude>
-    <ClInclude Include="psykronixTypeDefine.h">
-      <Filter>my_triangle</Filter>
     </ClInclude>
     <ClInclude Include="my_cal_geo.h">
       <Filter>test_math</Filter>

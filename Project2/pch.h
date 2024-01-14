@@ -59,6 +59,7 @@
 //#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 
 #include "Project1_API.h"
+#include "Poject_CAL_API.h"
 #include "my_geometry.h"			//export
 #include "test_serialize.h"
 #include "my_triangle_intersect.h"
@@ -70,12 +71,6 @@
 #define STATISTIC_DATA_TESTFOR
 //#define USING_FLATBUFFERS_SERIALIZATION //only open in ThinkPad
 //#define STATISTIC_DATA_COUNT
-
-#include "psykronixTypeDefine.h"		
-#include "my_class_fun.h"		
-#include "calculateTriangle.h"		//DLL-API
-#include "calculateDataTree.h"
-#include "calculatePolyhedron.h"
 #include "my_file_read_write.h" //file read and wirte
 
 //Eigen
