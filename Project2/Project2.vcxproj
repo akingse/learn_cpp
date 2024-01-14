@@ -236,6 +236,8 @@
     <ClCompile Include="test_serialize.cpp" />
     <ClCompile Include="test_set.cpp" />
     <ClCompile Include="test_sgt.cpp" />
+    <ClCompile Include="test_singleton.cpp" />
+    <ClCompile Include="test_singleton2.cpp" />
     <ClCompile Include="test_speed.cpp" />
     <ClCompile Include="test_stl.cpp" />
     <ClCompile Include="test_template1.cpp" />
@@ -269,6 +271,8 @@
     <ClInclude Include="psykronixTypeDefine.h" />
     <ClInclude Include="test_serialize.h" />
     <ClInclude Include="my_triangle_intersect.h" />
+    <ClInclude Include="test_singleton.h" />
+    <ClInclude Include="test_singleton2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

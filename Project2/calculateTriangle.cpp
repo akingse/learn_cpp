@@ -1105,15 +1105,15 @@ bool isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& 
 		maxA = -DBL_MAX;
 		minB = DBL_MAX;
 		maxB = -DBL_MAX;
-		for (const auto& vertex : trigon)
+		for (const auto& iter : trigon)
 		{
-			projection = (vertex - origin).dot(axis);
+			projection = (iter - origin).dot(axis);
 			minA = std::min(minA, projection);
 			maxA = std::max(maxA, projection);
 		}
-		for (const auto& vertex : vertexes)
+		for (const auto& iter : vertexes)
 		{
-			projection = vertex.dot(axis);
+			projection = iter.dot(axis);
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
@@ -2104,7 +2104,7 @@ bool isPointInPolygon2D(const Eigen::Vector2d& point, const vector<Eigen::Vector
 	if (!box.contains(point))
 		return false;
 	bool isIn = false;
-	size_t nvert = polygon.size(); // polygon need not close
+	int nvert = (int)polygon.size(); // polygon need not close
 	int i, j;
 	for (i = 0, j = nvert - 1; i < nvert; j = i++)
 	{

@@ -93,7 +93,7 @@ int psykronix::getMeshGenusNumber(const ModelMesh& mesh)
 	size_t V = mesh.vbo_.size();
 	size_t F = mesh.ibo_.size();
 	size_t E = uniqueEdge.size();
-	return 1 - (V - E + F) / 2; //V - E + F = 2(1-g)
+	return int(1 - (V - E + F) / 2); //V - E + F = 2(1-g)
 }
 
 int psykronix::isRayLineCrossTriangleMTA(const Eigen::Vector3d& origin, const Eigen::Vector3d& direction, const Triangle& trigon)
@@ -125,15 +125,15 @@ vector<Vector3d> psykronix::getNormalVectorOfMeshFace(const ModelMesh& mesh) //u
 	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
 	Vector3d bary;//barycentric coordinates
 	auto _correctRayLine = [&bary](const Triangle& face)->void
-	{
-		double a = (double)std::rand() / RAND_MAX; 
-		double b = 0.5 * (1 - a);
-		bary = a * face[0] + b * face[1] + b * face[2];
-	};
-	for (const auto& faceid : ibo) 
+		{
+			double a = (double)std::rand() / RAND_MAX;
+			double b = 0.5 * (1 - a);
+			bary = a * face[0] + b * face[1] + b * face[2];
+		};
+	for (const auto& faceid : ibo)
 	{
 		Triangle face = { vbo[faceid[0]] ,vbo[faceid[1]] ,vbo[faceid[2]] };
-		Vector3d bary = 1 / 3 * (face[0] + face[1] + face[2]);
+		bary = 1 / 3 * (face[0] + face[1] + face[2]);
 		Vector3d normal = (face[1] - face[0]).cross(face[2] - face[1]);
 		int count = 0;
 		while (true)
@@ -145,7 +145,7 @@ vector<Vector3d> psykronix::getNormalVectorOfMeshFace(const ModelMesh& mesh) //u
 				int cross = isRayLineCrossTriangleMTA(bary, normal, trigon);
 				if (cross == 0)
 					continue;
-				else if (cross == 1) 
+				else if (cross == 1)
 					count++;
 				else// if (cross == -1)// on edge
 				{
@@ -174,7 +174,7 @@ vector<Eigen::Vector3d> psykronix::getProfileOutOfMesh(const ModelMesh& mesh, co
 	{
 		Triangle face = { vbo[ibo[i][0]] ,vbo[ibo[i][1]] ,vbo[ibo[i][2]] };
 		Vector3d normal = (face[1] - face[0]).cross(face[2] - face[1]);
-		if ( std::acos(plane.m_normal.dot(fno[i]) / (plane.m_normal.norm() * fno[i].norm())) < M_PI_2)
+		if (std::acos(plane.m_normal.dot(fno[i]) / (plane.m_normal.norm() * fno[i].norm())) < M_PI_2)
 			faceVisible.push_back(mesh.ibo_[i]);
 	}
 	// for convex polyhedron, no shielded, no genus
@@ -202,7 +202,7 @@ vector<Eigen::Vector3d> psykronix::getProfileOutOfMesh(const ModelMesh& mesh, co
 		{
 			if (iter[0] == profileIndex.back() || iter[1] == profileIndex.back())
 			{
-				(iter[0] == profileIndex.back()) ? 
+				(iter[0] == profileIndex.back()) ?
 					profileIndex.push_back(iter[1]) : profileIndex.push_back(iter[0]);
 				profileEdge.erase(iter);
 			}
@@ -212,7 +212,7 @@ vector<Eigen::Vector3d> psykronix::getProfileOutOfMesh(const ModelMesh& mesh, co
 	for (const int& i : profileIndex)
 		profilePoints.push_back(vbo[i]);
 	Matrix4d matSha = getProjectionMatrixByPlane(plane);
-	for (auto& iter: profilePoints)
+	for (auto& iter : profilePoints)
 		iter = (matSha * iter.homogeneous()).hnormalized();
 	return profilePoints;
 }
@@ -1768,7 +1768,7 @@ ModelMesh games::meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, si
 		array<int, 4> tri = { iter[0], iter[1], iter[2], iter[0] };
 		for (int i = 0; i < 3; i++)
 		{
-			array<int, 2> edge = (tri[i] < tri[i + 1]) ? 
+			array<int, 2> edge = (tri[i] < tri[i + 1]) ?
 				array<int, 2>{tri[i], tri[i + 1]} : array<int, 2>{tri[i + 1], tri[i]};
 			uniqueEdge.insert(edge);
 		}
@@ -1817,33 +1817,33 @@ ModelMesh games::meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, si
 	std::vector<Eigen::Vector3d>& vbo = meshNew.vbo_;
 	std::vector<std::array<int, 3>>& ibo = meshNew.ibo_;
 	auto _computeEdgeError = [&](const Vector3d& v, const array<vector<int>, 2>& neighbor)->double
-	{
-		double totalError = 0.0;
-		for (const auto& faces : neighbor) //two vertex neighbor face
 		{
-			for (const int& iter : faces)
+			double totalError = 0.0;
+			for (const auto& faces : neighbor) //two vertex neighbor face
 			{
-				Vector3d v0 = vbo[ibo[iter][0]];
-				Vector3d v1 = vbo[ibo[iter][1]];
-				Vector3d v2 = vbo[ibo[iter][2]];
-				Vector3d n = (v1 - v0).cross(v2 - v1);
-				totalError += (v0 - v).dot(n) * ((v0 - v).dot(n)) / n.dot(n);
+				for (const int& iter : faces)
+				{
+					Vector3d v0 = vbo[ibo[iter][0]];
+					Vector3d v1 = vbo[ibo[iter][1]];
+					Vector3d v2 = vbo[ibo[iter][2]];
+					Vector3d n = (v1 - v0).cross(v2 - v1);
+					totalError += (v0 - v).dot(n) * ((v0 - v).dot(n)) / n.dot(n);
+				}
 			}
-		}
-		return totalError;
-	};
+			return totalError;
+		};
 	std::priority_queue<Edge> collapseEdgeQueue;
 	auto _updateCollapseEdgeQueue = [&]()->void
-	{
-		for (const auto& iter : uniqueEdge)
 		{
-			Edge edge;
-			edge.m_edge = iter;
-			edge.m_vertex = 0.5 * (vbo[iter[0]] + vbo[iter[1]]);
-			edge.m_error = _computeEdgeError(edge.m_vertex, edgeNeighborFace[iter]);
-			collapseEdgeQueue.push(edge);
-		}
-	};
+			for (const auto& iter : uniqueEdge)
+			{
+				Edge edge;
+				edge.m_edge = iter;
+				edge.m_vertex = 0.5 * (vbo[iter[0]] + vbo[iter[1]]);
+				edge.m_error = _computeEdgeError(edge.m_vertex, edgeNeighborFace[iter]);
+				collapseEdgeQueue.push(edge);
+			}
+		};
 	_updateCollapseEdgeQueue();
 	//contract edge
 	size_t collaCout = 0;

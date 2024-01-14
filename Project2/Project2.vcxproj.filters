@@ -235,6 +235,12 @@
     <ClCompile Include="my_cal_geo.cpp">
       <Filter>test_math</Filter>
     </ClCompile>
+    <ClCompile Include="test_singleton.cpp">
+      <Filter>test_pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="test_singleton2.cpp">
+      <Filter>test_pattern</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -269,6 +275,12 @@
     </ClInclude>
     <ClInclude Include="my_cal_geo.h">
       <Filter>test_math</Filter>
+    </ClInclude>
+    <ClInclude Include="test_singleton.h">
+      <Filter>test_pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="test_singleton2.h">
+      <Filter>test_pattern</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

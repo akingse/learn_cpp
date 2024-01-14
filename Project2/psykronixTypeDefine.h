@@ -39,13 +39,13 @@ namespace psykronix
             m_normal = (normal.isApprox(Eigen::Vector3d::Zero(), 0)) ? gVecNaN : normal;
         }
         //get the plane origin through world coordinate origin
-        const Eigen::Vector3d& origin() const
+        Eigen::Vector3d origin() const
         {
             double o_n = m_origin.dot(m_normal);
 			return (fabs(o_n) < eps) ? m_origin : o_n / m_normal.squaredNorm() * m_normal;
         }
         //get normalized vector
-        const Eigen::Vector3d& normal() const
+        Eigen::Vector3d normal() const
         {
 			if (fabs(m_normal.squaredNorm() - 1) < eps)
                 return m_normal;

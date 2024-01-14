@@ -16,24 +16,18 @@
     <Filter Include="common">
       <UniqueIdentifier>{efdc9d3b-8f52-4156-aa69-0e960479f637}</UniqueIdentifier>
     </Filter>
-    <Filter Include="test_eg">
-      <UniqueIdentifier>{21088a41-a15b-492e-8094-7fceb7d09a25}</UniqueIdentifier>
-    </Filter>
     <Filter Include="component">
       <UniqueIdentifier>{82bbbae9-70d1-4416-ad70-6c695ba9afaf}</UniqueIdentifier>
     </Filter>
     <Filter Include="geometry">
       <UniqueIdentifier>{b77325ff-4b59-41c0-b1ab-f42203b78bcb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="my_triangle">
+      <UniqueIdentifier>{e277615b-e3da-4f97-969a-ab5b916da535}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="my_vec.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="object_pool.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="half_edge.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="my_gnrc.cpp">
@@ -52,12 +46,6 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="my_handle.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="test_guid.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="test_singleton.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="BPParaTransform.cpp">
@@ -83,9 +71,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="my_template.h">
-      <Filter>head</Filter>
-    </ClInclude>
     <ClInclude Include="my_gnrc.h">
       <Filter>head</Filter>
     </ClInclude>
@@ -96,9 +81,6 @@
       <Filter>head</Filter>
     </ClInclude>
     <ClInclude Include="my_ref_count.h">
-      <Filter>head</Filter>
-    </ClInclude>
-    <ClInclude Include="test_singleton.h">
       <Filter>head</Filter>
     </ClInclude>
     <ClInclude Include="pch.h">
