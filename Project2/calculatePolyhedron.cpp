@@ -1757,48 +1757,24 @@ ModelMesh games::meshLoopSubdivision(const ModelMesh& mesh)
 //edge collapsing
 ModelMesh games::meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, size_t collapseEdgeCount /*= 0*/) //edge collapse and quadirc error metrics
 {
-	auto _computeEdgeError = [&](const Vector3d& v, const array<vector<int>, 2>& neighbor)->double
-		{
-			const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
-			const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
-			double totalError = 0.0;
-			for (const auto& iter : neighbor[0])
-			{
-				Vector3d v0 = vbo[ibo[iter][0]];
-				Vector3d v1 = vbo[ibo[iter][1]];
-				Vector3d v2 = vbo[ibo[iter][2]];
-				Vector3d n = (v1 - v0).cross(v2 - v1);
-				totalError += (v0 - v).dot(n) * ((v0 - v).dot(n)) / n.dot(n);
-			}
-			for (const auto& iter : neighbor[1])
-			{
-				Vector3d v0 = vbo[ibo[iter][0]];
-				Vector3d v1 = vbo[ibo[iter][1]];
-				Vector3d v2 = vbo[ibo[iter][2]];
-				Vector3d n = (v1 - v0).cross(v2 - v1);
-				totalError += (v0 - v).dot(n) * ((v0 - v).dot(n)) / n.dot(n);
-			}
-			return totalError;
-		};
 	if (collapseEdgeCount == 0)
 		collapseEdgeCount = mesh.ibo_.size() / 2;
 	if (collapseEdgeCount >= mesh.ibo_.size())
 		return {};
-
-	vector<Edge> eEdge;
+	//get edge
 	set<array<int, 2>> uniqueEdge;
 	for (const auto& iter : mesh.ibo_)
 	{
 		array<int, 4> tri = { iter[0], iter[1], iter[2], iter[0] };
 		for (int i = 0; i < 3; i++)
 		{
-			array<int, 2> edge = (tri[i] < tri[i + 1]) ? array<int, 2>{tri[i], tri[i + 1]} : array<int, 2>{tri[i + 1], tri[i]};
+			array<int, 2> edge = (tri[i] < tri[i + 1]) ? 
+				array<int, 2>{tri[i], tri[i + 1]} : array<int, 2>{tri[i + 1], tri[i]};
 			uniqueEdge.insert(edge);
 		}
 	}
-	//typedef array<int, 3> IBO;
-	map<array<int, 2>, array<vector<int>, 2>> edgeNeighborFace;
-	map<array<int, 2>, array<int, 2>> edgeOnFace;
+	map<array<int, 2>, array<vector<int>, 2>> edgeNeighborFace; // edge vertex index | two vertex NeighborFace index
+	map<array<int, 2>, array<int, 2>> edgeOnFace; // edge vertex index | two faces index
 	for (const auto& edge : uniqueEdge)
 	{
 		//get edgeNeighborFace
@@ -1836,39 +1812,89 @@ ModelMesh games::meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, si
 			}
 		}
 	}
-
-	//process on
-	std::priority_queue<Edge> pQueue;
-	for (const auto& iter : uniqueEdge)
-	{
-		Edge edge;
-		edge.m_edge = iter;
-		edge.m_vertex = 0.5 * (mesh.vbo_[iter[0]] + mesh.vbo_[iter[1]]);
-		edge.m_error = _computeEdgeError(edge.m_vertex, edgeNeighborFace[iter]);
-		pQueue.push(edge);
-	}
-	std::vector<std::array<int, 3>> faces = mesh.ibo_;
+	//process come on
 	ModelMesh meshNew = mesh;//copy
 	std::vector<Eigen::Vector3d>& vbo = meshNew.vbo_;
 	std::vector<std::array<int, 3>>& ibo = meshNew.ibo_;
-	//contract edge
-	while (meshNew.vbo_.size() > collapseEdgeCount)
+	auto _computeEdgeError = [&](const Vector3d& v, const array<vector<int>, 2>& neighbor)->double
 	{
-		Edge edge = pQueue.top();
-		pQueue.pop();
-		ibo.erase(ibo.begin() + edgeOnFace[edge.m_edge][0]);
-		ibo.erase(ibo.begin() + edgeOnFace[edge.m_edge][1]);
+		double totalError = 0.0;
+		for (const auto& faces : neighbor) //two vertex neighbor face
+		{
+			for (const int& iter : faces)
+			{
+				Vector3d v0 = vbo[ibo[iter][0]];
+				Vector3d v1 = vbo[ibo[iter][1]];
+				Vector3d v2 = vbo[ibo[iter][2]];
+				Vector3d n = (v1 - v0).cross(v2 - v1);
+				totalError += (v0 - v).dot(n) * ((v0 - v).dot(n)) / n.dot(n);
+			}
+		}
+		return totalError;
+	};
+	std::priority_queue<Edge> collapseEdgeQueue;
+	auto _updateCollapseEdgeQueue = [&]()->void
+	{
+		for (const auto& iter : uniqueEdge)
+		{
+			Edge edge;
+			edge.m_edge = iter;
+			edge.m_vertex = 0.5 * (vbo[iter[0]] + vbo[iter[1]]);
+			edge.m_error = _computeEdgeError(edge.m_vertex, edgeNeighborFace[iter]);
+			collapseEdgeQueue.push(edge);
+		}
+	};
+	_updateCollapseEdgeQueue();
+	//contract edge
+	size_t collaCout = 0;
+	while (collaCout < collapseEdgeCount)
+	{
+		Edge edge = collapseEdgeQueue.top();
+		collapseEdgeQueue.pop(); //delete edge
+		uniqueEdge.erase(edge.m_edge);
+		//ibo.erase(ibo.begin() + edgeOnFace[edge.m_edge][0]); //delete face
+		//(edgeOnFace[edge.m_edge][0] < edgeOnFace[edge.m_edge][1]) ? // the index change because vector size changed
+		//	ibo.erase(ibo.begin() + edgeOnFace[edge.m_edge][1] - 1) : ibo.erase(ibo.begin() + edgeOnFace[edge.m_edge][1]);
+		//vbo[edge.m_edge[0]] = edge.m_vertex;
+		//vbo.erase(vbo.begin() + edge.m_edge[1]); //delete vertex
+		ibo[edgeOnFace[edge.m_edge][0]] = { -1,-1,-1 };
+		ibo[edgeOnFace[edge.m_edge][1]] = { -1,-1,-1 };
 		vbo[edge.m_edge[0]] = edge.m_vertex;
-		vbo.erase(vbo.begin() + edge.m_edge[1]);
+		vbo[edge.m_edge[1]] = gVecNaN;
+		// change record map
 		for (auto& face : ibo)
 		{
 			for (int i = 0; i < 3; i++)
 			{
+				//if (face[i] == edge.m_edge[0]) continue;
 				if (face[i] == edge.m_edge[1])
 					face[i] = edge.m_edge[0];
 			}
 		}
+		_updateCollapseEdgeQueue();
+		collaCout++;
 	}
-	return meshNew;
+	ModelMesh meshSim;
+	//map<int, int> indexMap;
+	vector<int> indexMap;
+	int j = 0;
+	for (int i = 0; i < vbo.size(); i++)
+	{
+		indexMap.push_back(j);
+		if (!isNaN(vbo[i]))
+		{
+			meshSim.vbo_.push_back(vbo[i]);
+			j++;
+		}
+	}
+	for (const auto& iter : ibo)
+	{
+		if (iter[0] != -1) //valid
+		{
+			std::array<int, 3> face = { indexMap[iter[0]], indexMap[iter[1]], indexMap[iter[2]] };
+			meshSim.ibo_.push_back(face);
+		}
+	}
+	return meshSim;
 }
 

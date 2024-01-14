@@ -63,7 +63,7 @@ namespace games
 	struct Edge //unique
 	{
 		std::array<int, 2> m_edge;
-		Eigen::Vector3d m_vertex;
+		Eigen::Vector3d m_vertex; //the new merged vertex of edge
 		double m_error = 0.0;
 		bool operator<(const Edge& rhs) const
 		{
