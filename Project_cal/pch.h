@@ -11,13 +11,12 @@
 #include<set>
 #include<queue>
 #include<Eigen/Dense>
-//#define CAL_DLLEXPORT_DEFINE //set on pre-processor define
+#define CAL_DLLEXPORT_DEFINE //set on pre-processor define
 #ifdef CAL_DLLEXPORT_DEFINE
-#define DLLEXPORT_CAL __declspec(dllimport)
-#else
 #define DLLEXPORT_CAL __declspec(dllexport)
+#else
+#define DLLEXPORT_CAL __declspec(dllimport)
 #endif
-
 
 #include "psykronixTypeDefine.h"		
 #include "my_class_fun.h"		

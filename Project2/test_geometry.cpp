@@ -195,7 +195,7 @@ static void test2()
 			//resSeg.push_back(getIntersectLineOfTwoPlane(planeVct[2 * j], planeVct[2 * j + 1]));
 			res = getIntersectLineOfTwoPlane(planeVct[2 * j], planeVct[2 * j + 1]);
 			//res = intersectWithTwoPlanes(planeVct[2 * j], planeVct[2 * j + 1]);
-			if (!isNaN(res[0]))
+			if (!isnan(res[0][0]))
 				resSeg.push_back(res);
 		}
 		end = std::chrono::high_resolution_clock::now();

@@ -290,7 +290,7 @@ static void _test7()
 				break;
 
 #endif
-			d0 = getTrianglesDistance(P, Q, triA, triB);
+			//d0 = getTrianglesDistance(P, Q, triA, triB);
 			d1 = getTrianglesDistanceSAT(triA, triB);
 			//cout << d0-d1 << endl;
 			if (fabs(d0 - d1) > eps)
@@ -357,7 +357,7 @@ static void _test8()
 		}
 		if (!isInter)
 		{
-			d0 = getTrianglesDistance(P, Q, triA, triB);
+			//d0 = getTrianglesDistance(P, Q, triA, triB);
 			d1 = getTrianglesDistanceSAT(triA, triB);
 			array<Vector3d, 2> pn2 = getTwoTrianglesNearestPoints(triA, triB);
 			d2 = (pn2[1] - pn2[0]).norm();

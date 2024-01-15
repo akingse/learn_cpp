@@ -1881,7 +1881,7 @@ ModelMesh games::meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, si
 	for (int i = 0; i < vbo.size(); i++)
 	{
 		indexMap.push_back(j);
-		if (!isNaN(vbo[i]))
+		if (!isnan(vbo[i][0]))
 		{
 			meshSim.vbo_.push_back(vbo[i]);
 			j++;

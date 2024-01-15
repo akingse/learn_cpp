@@ -407,7 +407,7 @@ static void _test0()
 	triA = { triA_0, triA_1, triA_2 };
 	triB = { triB_0, triB_1, triB_2 };
 
-	double d0 = getTrianglesDistance(P, Q, triA, triB);
+	//double d0 = getTrianglesDistance(P, Q, triA, triB);
 	double d1 = getTrianglesDistanceSAT(triA, triB);
 	//double d2 = getDistanceOfPointAndPlaneINF(Vector3d(0, 0, 0), triB);
 	double d = std::nan("0");
