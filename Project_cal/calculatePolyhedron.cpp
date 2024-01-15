@@ -50,7 +50,7 @@ bool psykronix::isMeshConvexPolyhedron(const ModelMesh& mesh)
 {
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
 	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
-	bool isLeft /*= false*/;
+	bool isLeft = false;
 	for (const auto& face : ibo)
 	{
 		Vector3d normal = (vbo[face[1]] - vbo[face[0]]).cross(vbo[face[2]] - vbo[face[1]]);// .normalized();
@@ -376,7 +376,7 @@ bool isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const ModelMesh& me
 	auto isLeftAll = [&vbo](const std::array<int, 3>& trigon)->bool // buildin lambda function
 		{
 			Vector3d normal = (vbo[trigon[1]] - vbo[trigon[0]]).cross(vbo[trigon[2]] - vbo[trigon[1]]).normalized(); // for precision
-			bool isFirst = true, isLeft /*= false*/, temp /*= false*/;
+			bool isFirst = true, isLeft = false, temp /*= false*/;
 			for (size_t i = 0; i < vbo.size(); ++i)
 			{
 				if (i == trigon[0] || i == trigon[1] || i == trigon[2] || fabs(normal.dot((vbo[i] - vbo[trigon[0]]).normalized())) < eps) // self and coplanar

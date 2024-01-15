@@ -40,7 +40,7 @@ inline std::string getExePath() // include<afx.h>
     return (std::string)(CStringA)path;
 }
 
-
+#ifdef USING_CONDITIONAL_COMPILE_PROJECT_2
 inline Vec2 _get_rand()
 {
     return Vec2(rand(), rand());
@@ -86,3 +86,4 @@ inline std::array<Eigen::Vector3d, 2> _get_rand2()
         Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
             Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff) };
 }
+#endif
