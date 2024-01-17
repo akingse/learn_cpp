@@ -202,6 +202,35 @@ bool psykronix::isTwoSegmentsIntersect(const std::array<Vector3d, 2>& segmA, con
 #endif
 }
 
+Eigen::Vector2d psykronix::getTwoSegmentsIntersectPoint(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB)
+{
+	if (!isTwoSegmentsIntersect(segmA, segmB))
+		return Vector2d(std::nan("0"), std::nan("0"));
+	//get intersect point 2D
+	const Eigen::Vector2d& A1 = segmA[0];
+	const Eigen::Vector2d& A2 = segmA[1];
+	const Eigen::Vector2d& B1 = segmB[0];
+	const Eigen::Vector2d& B2 = segmB[1];
+	double kA = -((B2.x() - B1.x()) * (A1.y() - B1.y()) - (B2.y() - B1.y()) * (A1.x() - B1.x())) /
+		((B2.x() - B1.x()) * (A2.y() - A1.y()) - (B2.y() - B1.y()) * (A2.x() - A1.x())); //not parallel
+	return A1 + kA * (A2 - A1); 
+	//double kB = -((A2.x() - A1.x()) * (B1.y() - A1.y()) - (A2.y() - A1.y()) * (B1.x() - A1.x())) /
+	//	((A2.x() - A1.x()) * (B2.y() - B1.y()) - (A2.y() - A1.y()) * (B2.x() - B1.x())); //not parallel
+	//return B1 + kB * (B2 - B1);
+}
+
+Eigen::Vector3d psykronix::getTwoSegmentsIntersectPoint(const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)
+{
+	if (!isTwoSegmentsIntersect(segmA, segmB))
+		return gVecNaN;
+	Vector3d vecSeg = segmA[0] - segmA[1];
+	Vector3d normal = (segmB[0] - segmB[1]).cross(vecSeg);
+	if (normal.isZero(eps)) // intersect cause collinear
+		return segmA[0];
+	double k = (segmA[0] - segmB[0]).cross(segmA[0] - segmB[1]).norm() / normal.norm(); //k
+	return segmA[0] + k * vecSeg;
+}
+
 bool psykronix::isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector2d, 2>& segment, const Eigen::AlignedBox2d& box)
 {
 	if (box.contains(segment[0]) || box.contains(segment[1]))
@@ -1537,16 +1566,16 @@ double getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const
 		}
 	}
 	direction.normalize();
-	double minA = DBL_MAX, minB = DBL_MAX, maxA = -DBL_MAX, maxB = -DBL_MAX;
+	double minA = DBL_MAX, minB = DBL_MAX, maxA = -DBL_MAX, maxB = -DBL_MAX, projection;
 	for (const auto& vertex : triA) //fast than list
 	{
-		double projection = direction.dot(vertex);
+		projection = direction.dot(vertex);
 		minA = std::min(minA, projection);
 		maxA = std::max(maxA, projection);
 	}
 	for (const auto& vertex : triB)
 	{
-		double projection = direction.dot(vertex);
+		projection = direction.dot(vertex);
 		minB = std::min(minB, projection);
 		maxB = std::max(maxB, projection);
 	}
@@ -1815,20 +1844,20 @@ std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<E
 //}
 
 //the distance of two triangle no more than this number
-double getApproDistanceOfTwoTrianglesMax(const Triangle& triA, const Triangle& triB)
-{
-	double disSquare = 0.0;
-	for (const auto& vtA : triA)
-	{
-		for (const auto& vtB : triB)
-		{
-			double disTmp = (vtA - vtB).squaredNorm();
-			if (disSquare < disTmp)
-				disSquare = disTmp;
-		}
-	}
-	return std::sqrt(disSquare);
-}
+//double getApproDistanceOfTwoTrianglesMax(const Triangle& triA, const Triangle& triB)
+//{
+//	double disSquare = 0.0;
+//	for (const auto& vtA : triA)
+//	{
+//		for (const auto& vtB : triB)
+//		{
+//			double disTmp = (vtA - vtB).squaredNorm();
+//			if (disSquare < disTmp)
+//				disSquare = disTmp;
+//		}
+//	}
+//	return std::sqrt(disSquare);
+//}
 
 // for profile section
 bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB)
@@ -2110,7 +2139,6 @@ void psykronix::mergeIntersectRegionOfSegment(std::vector<double>& _range, const
 	}
 }
 
-
 bool isPointInPolygon2D(const Eigen::Vector2d& point, const vector<Eigen::Vector2d>& polygon)// pnpoly
 {
 	AlignedBox2d box;
@@ -2155,36 +2183,37 @@ Matrix4d getProjectionMatrixByPlane(const Plane3d& plane)
 	double o_n = plane.m_origin.dot(plane.m_normal);
 	Vector3d origin = (o_n == 0.0) ? 
 		plane.m_origin : o_n / plane.m_normal.squaredNorm() * plane.m_normal;
-	Matrix4d mat; //unit and orth
-	mat << axisx[0], axisy[0], axisz[0], origin[0],
+	Matrix4d matOri; //unit and orth
+	matOri <<
+		axisx[0], axisy[0], axisz[0], origin[0],
 		axisx[1], axisy[1], axisz[1], origin[1],
 		axisx[2], axisy[2], axisz[2], origin[2],
 		0, 0, 0, 1;
-	Matrix4d inv;
-	inv << axisx[0], axisx[1], axisx[2], 0,
+	Matrix4d invPro; // projection
+	invPro << // shadow_xoy * inverse
+		axisx[0], axisx[1], axisx[2], 0,
 		axisy[0], axisy[1], axisy[2], 0,
-		//plane.normal()[0], plane.normal()[1], plane.normal()[2], 0,
 		0, 0, 0, 0,
 		0, 0, 0, 1;
-	return mat * inv;
+	return matOri * invPro;
 }
 
 std::array<Eigen::Matrix4d, 2> getRelativeMatrixByProjectionPlane(const Plane3d& plane)
 {
-	Matrix4d mat, inv;// = Eigen::Affine3d::Identity();
 	Vector3d axisz = plane.m_normal.normalized();
 	Vector3d axisx = Vector3d(0, 0, 1).cross(axisz).normalized();
 	Vector3d axisy = axisz.cross(axisx);
+	Matrix4d matFor, matInv;// = Eigen::Affine3d::Identity();
 	//mat.setByOriginAndVectors();
-	mat <<
+	matFor << //forword matrix
 		axisx[0], axisy[0], axisz[0], plane.m_origin[0],
 		axisx[1], axisy[1], axisz[1], plane.m_origin[1],
 		axisx[2], axisy[2], axisz[2], plane.m_origin[2],
 		0, 0, 0, 1;
-	inv <<
+	matInv << //inverse matrix
 		axisx[0], axisx[1], axisx[2], -plane.m_origin[0],
 		axisy[0], axisy[1], axisy[2], -plane.m_origin[1],
 		axisz[0], axisz[1], axisz[2], -plane.m_origin[2],
 		0, 0, 0, 1;
-	return { mat,inv };
+	return { matFor,matInv };
 }
