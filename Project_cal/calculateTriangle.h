@@ -59,6 +59,8 @@ DLLEXPORT_CAL std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(cons
 DLLEXPORT_CAL bool isPointInPolygon2D(const Eigen::Vector2d& point, const std::vector<Eigen::Vector2d>& polygon);
 DLLEXPORT_CAL bool isPointInPolygon2D(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& polygon);
 // generate matrix
+DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
 DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const psykronix::Plane3d& plane);
+DLLEXPORT_CAL std::array<Eigen::Matrix4d,2> getRelativeMatrixByProjectionPlane(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
 DLLEXPORT_CAL std::array<Eigen::Matrix4d,2> getRelativeMatrixByProjectionPlane(const psykronix::Plane3d& plane);
 

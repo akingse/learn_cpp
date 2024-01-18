@@ -135,6 +135,7 @@ struct TrigonPart
     Eigen::AlignedBox3d m_box3d;
     Eigen::AlignedBox2d m_box2d;
 #ifdef CLASH_DETECTION_DEBUG_TEMP
+    Eigen::Vector3d m_normal;
     std::array<Eigen::Vector3d, 3> m_triangle3d;
     std::array<Eigen::Vector2d, 3> m_triangle2d;
 #endif
