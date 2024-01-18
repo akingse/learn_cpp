@@ -43,8 +43,12 @@ $(SolutionDir)build\Project1\$(PlatformTarget)\link
 
 第三方库
 $(SolutionDir)..\third_party_library\name
+
 加载dll（调试->环境）
-PATH=$(SolutionDir)build\Project1\$(PlatformTarget)\link
+PATH=$(SolutionDir)build\Project1\$(PlatformTarget)\link;
+分号分割
+$(SolutionDir)$(Platform)\$(Configuration);
+
 ```
 
 

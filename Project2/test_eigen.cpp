@@ -76,7 +76,6 @@ bool operator<(const Eigen::Vector3d& lhs, const Eigen::Vector3d& rhs)
 	return memcmp(&lhs, &rhs, sizeof(Eigen::Vector3d)) == -1;
 }
 
-
 static void test1()
 {
 	Eigen::AlignedBox3d box1(Eigen::Vector3d(1, 2, 3), Eigen::Vector3d(4, 5, 6));
@@ -157,12 +156,38 @@ static void test2()
 	return;
 }
 
-static int enrol = []()->int {
-	//test0();
-	test2();
-	cout << "test_eigen finished.\n" << endl;
-	return 0;
-}();
+static void test3()
+{
+	Matrix4d Q = Matrix4d::Identity();
+	Q <<
+		1, 0, 0, 1,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 0;
+	Vector4d vec = { 1,2,3,1 }; //默认列向量
+	Vector4d dv = Q * vec;
+/*	cout << mat << endl;
+	cout << dv << endl*/;
+	Eigen::RowVector4d rv(1.0, 2.0, 3.0, 1);
+	Eigen::Vector4d v(1.0, 2.0, 3.0, 1);
+	Eigen::RowVector4d vt = Eigen::RowVector4d::Map(v.data());
+	//std::cout << "Row vector: " << rowVector << std::endl;
+	Vector4d v1 = vt * Q;
+	RowVector4d v2 = Q * v;
+	double r1 = vt * Q * v; //顺序无关
+	double r2 = vt * (Q * v);
+
+	return;
+}
+
+static int enrol = []()->int
+	{
+		//test0();
+		//test2();
+		test3();
+		cout << "test_eigen finished.\n" << endl;
+		return 0;
+	}();
 
 void eigen_matlab()
 {
