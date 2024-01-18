@@ -160,21 +160,22 @@ static void test3()
 {
 	Matrix4d Q = Matrix4d::Identity();
 	Q <<
-		1, 0, 0, 1,
+		1, 0, 0, 4,
 		0, 1, 0, 0,
 		0, 0, 1, 0,
-		0, 0, 0, 0;
+		0, 0, 0, 1;
 	Vector4d vec = { 1,2,3,1 }; //默认列向量
 	Vector4d dv = Q * vec;
 /*	cout << mat << endl;
 	cout << dv << endl*/;
-	Eigen::RowVector4d rv(1.0, 2.0, 3.0, 1);
-	Eigen::Vector4d v(1.0, 2.0, 3.0, 1);
+	//Eigen::RowVector4d rv(1.0, 2.0, 3.0, 1);
+
+	Eigen::Vector4d v(1.0, 2.0, 3.0, 1); //ColVector4d
 	Eigen::RowVector4d vt = Eigen::RowVector4d::Map(v.data());
 	//std::cout << "Row vector: " << rowVector << std::endl;
-	Vector4d v1 = vt * Q;
-	RowVector4d v2 = Q * v;
-	double r1 = vt * Q * v; //顺序无关
+	Vector4d v1 = vt * Q; //(1,2,3,5)
+	RowVector4d v2 = Q * v;//(5,2,3,1)
+	double r1 = (vt * Q) * v; //顺序无关
 	double r2 = vt * (Q * v);
 
 	return;

@@ -235,7 +235,7 @@ static void test4()
 	Plane3d plane(Vector3d(20, 20, 0), Vector3d(2, 1, 0));
 
 	Matrix4d mat = getProjectionMatrixByPlane(plane);
-	cout << mat;
+	cout << mat << endl;
 
 	return;
 }
