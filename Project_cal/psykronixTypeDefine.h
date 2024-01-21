@@ -144,11 +144,13 @@ struct TrigonPart
     std::vector<std::array<int, 2>> m_shielded;
 };
 
-struct MeshProjection
+struct ProfilePart
 {
     long long m_index; // mesh index
-    OcclusionStatus m_visible;
+    OcclusionStatus m_visible = OcclusionStatus::EXPOSED;
     Eigen::AlignedBox3d m_box3d;
-    Eigen::AlignedBox2d m_box2d;
+    //Eigen::AlignedBox2d m_box2d; // contained in box3d
     std::vector<long long> m_intersect;
+    //std::vector<Eigen::Vector3d> m_profile3d; 
+    std::vector<Eigen::Vector2d> m_profile2d; // outer profile
 };

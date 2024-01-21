@@ -32,6 +32,7 @@
 | isPointInsidePolyhedronCL                                    | mesh 5233/2                                                  | time=19.549s                                                 |                                                              |
 | isPointInsidePolyhedronAZ<br />包含isPointRayAcrossTriangleSAT | mesh 5233/20                                                 | time=40.587s                                                 |                                                              |
 | isPointInsidePolyhedronROT                                   | mesh 5233/20                                                 | time=13.061s                                                 |                                                              |
+| isMeshConvexPolyhedron                                       | all mesh                                                     | 0.034s                                                       |                                                              |
 
 
 
