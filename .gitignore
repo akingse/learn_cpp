@@ -366,3 +366,4 @@ FodyWeavers.xsd
 /Project2/random3_1e8.bin
 /Project2/entityIdList.bin
 *.bin
+*.off
