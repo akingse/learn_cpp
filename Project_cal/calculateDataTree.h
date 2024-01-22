@@ -1,4 +1,12 @@
 #pragma once
+/*******************************************************************************
+* Author    :  akingse		                                                   *
+* Date      :  from November 2023											   *
+* Website   :  https://github.com/akingse                                      *
+* Copyright :  All rights reserved											   *
+* Purpose   :  Some common and simple k-dimensional tree methods			   *
+* License   :  MIT									                           *
+*******************************************************************************/
 
 #define USING_AUTO_CLOSE
 #define RESERVE_USING_POLYGON2D

@@ -1898,3 +1898,207 @@ ModelMesh games::meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, si
 	return meshSim;
 }
 
+inline void getPlaneCoefficient(const Vector3d& A, const Vector3d& B, const Vector3d& C, double& a, double& b, double& c, double& d)
+{
+	// a*x + b*y + c*z + d = 0
+	Vector3d N = (A - B).cross(C - B); // N_x*(x-A_x) + N_y*(y-A_y) + N_z*(y-A_z) = 0
+	assert(!N.isZero());
+	a = N[0];
+	b = N[1];
+	c = N[2];
+	d = -N.dot(A);
+	double len = std::sqrt(a * a + b * b + c * c); //a^2 + b^2 + c^2 = 1
+	a /= len;
+	b /= len;
+	c /= len;
+	d /= len;
+}
+
+ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collapseEdgeCount /*= 0*/)
+{
+	//get edge
+	set<array<int, 2>> uniqueEdge;
+	for (const auto& iter : mesh.ibo_)
+	{
+		array<int, 4> tri = { iter[0], iter[1], iter[2], iter[0] };
+		for (int i = 0; i < 3; i++)
+		{
+			array<int, 2> edge = (tri[i] < tri[i + 1]) ?
+				array<int, 2>{tri[i], tri[i + 1]} : array<int, 2>{tri[i + 1], tri[i]};
+			uniqueEdge.insert(edge);
+		}
+	}
+	//get edge located face2
+	map<array<int, 2>, array<int, 2>> edgeOnFace; // edge vertex index | two faces index
+	for (const auto& edge : uniqueEdge)
+	{
+		array<int, 2> faceTwo;
+		int find = 0;
+		for (int i = 0; i < mesh.ibo_.size(); i++)
+		{
+			int coin = 0;
+			const array<int, 3>& face = mesh.ibo_[i];
+			for (const int& vt : face) //find two common vertex
+			{
+				if (vt == edge[0] || vt == edge[1])
+					coin++;
+			}
+			if (coin == 2) //means common edge
+			{
+				faceTwo[find] = i;
+				find++;
+			}
+			if (find == 2)
+			{
+				edgeOnFace.emplace(edge, faceTwo);
+				break;
+			}
+		}
+	}
+	// calculate Q of every vertex
+	auto _getQMatrixOfVertex = [](const std::vector<std::array<int, 3>>& ibo, const std::vector<Eigen::Vector3d>& vbo, int i)->Matrix4d
+	{
+		Matrix4d Q = Eigen::Matrix4d::Zero();
+		for (const auto& face : ibo)
+		{
+			if (face[0] != i && face[1] != i && face[2] != i) //find all adjacent faces 
+				continue;
+			double a, b, c, d;
+			getPlaneCoefficient(vbo[face[0]], vbo[face[1]], vbo[face[2]], a, b, c, d);
+			Vector4d p(a, b, c, d);
+			Q += p * p.transpose(); //Kp matrix sigma
+		}
+		return Q;
+	};
+	std::vector<Eigen::Matrix4d> Qs;
+	for (int i = 0; i < mesh.vbo_.size(); i++)
+	{
+		//Eigen::Matrix4d Q = Eigen::Matrix4d::Zero();
+		//for (const auto& face : mesh.ibo_)
+		//{
+		//	if (face[0] != i && face[1] != i && face[2] != i) //find the adjacent faces 
+		//		continue;
+		//	double a, b, c, d;
+		//	getPlaneCoefficient(mesh.vbo_[face[0]], mesh.vbo_[face[1]], mesh.vbo_[face[2]], a, b, c, d);
+		//	Vector4d p(a, b, c, d);
+		//	Q += p * p.transpose(); //Kp matrix sigma
+		//}
+		//Qs.push_back(Q);
+		Qs.push_back(_getQMatrixOfVertex(mesh.ibo_, mesh.vbo_, i));
+	}
+	// place edge into heap
+	std::priority_queue<Edge> heap;
+	Eigen::Vector4d b(0, 0, 0, 1);
+	auto _getCostAndVbarOfEdge = [&b, &Qs](const std::vector<Eigen::Vector3d>& vbo, const array<int, 2 >& i)->Edge
+	{
+		Edge edge;
+		edge.m_edge = i;
+		//calculate cost and v_bar
+		Eigen::Matrix4d Q_bar = Qs[i[0]] + Qs[i[1]];
+		Eigen::Matrix4d Q_h = Q_bar;//homogeneous
+		Q_h.row(3) = Eigen::RowVector4d(0, 0, 0, 1);
+		Eigen::Matrix4d inverse;
+		bool invertible;
+		Q_h.computeInverseWithCheck(inverse, invertible);
+		Eigen::Vector4d v_bar = (invertible) ?
+			v_bar = inverse * b : //v_bar = (1 / v_bar[3]) * v_bar; //hnormalized
+			v_bar = (0.5 * (vbo[i[0]] + vbo[i[0]])).homogeneous();
+		double error = v_bar.transpose() * Q_bar * v_bar; // the cost
+		edge.m_vbar = v_bar;
+		edge.m_error = error;
+		return edge;
+	};
+	for (const auto& iter : uniqueEdge)
+	{
+		Edge edge = _getCostAndVbarOfEdge(mesh.vbo_, iter);
+		heap.push(edge);
+	}
+	ModelMesh meshSim = mesh;//copy
+	std::vector<Eigen::Vector3d>& vbo = meshSim.vbo_;
+	std::vector<std::array<int, 3>>& ibo = meshSim.ibo_;
+	auto _updateCollapseEdgeHeap = [&](int i_bar) ->void
+	{
+		set<int> adjacentVertex;
+		set<array<int, 2>> adjacentEdge;
+		Eigen::Matrix4d Q = Eigen::Matrix4d::Zero();
+		for (const auto& face : ibo)
+		{
+			if (face[0] != i_bar && face[1] != i_bar && face[2] != i_bar) //find the adjacent faces 
+				continue;
+			if (face[0] == i_bar)
+			{
+				adjacentVertex.insert(face[1]);
+				adjacentVertex.insert(face[2]);
+				(face[0] < face[1]) ? adjacentEdge.insert({ face[0], face[1] }) : adjacentEdge.insert({ face[1], face[0] });
+				(face[0] < face[2]) ? adjacentEdge.insert({ face[0], face[2] }) : adjacentEdge.insert({ face[2], face[0] });
+			}
+			else if (face[1] == i_bar)
+			{
+				adjacentVertex.insert(face[0]);
+				adjacentVertex.insert(face[2]);
+				(face[1] < face[0]) ? adjacentEdge.insert({ face[1], face[0] }) : adjacentEdge.insert({face[0], face[1]});
+				(face[1] < face[2]) ? adjacentEdge.insert({ face[1], face[2] }) : adjacentEdge.insert({ face[2], face[1] });
+			}
+			else//if (face[2] == i_bar)
+			{
+				adjacentVertex.insert(face[1]);
+				adjacentVertex.insert(face[0]);
+				(face[2] < face[1]) ? adjacentEdge.insert({ face[2], face[1] }) : adjacentEdge.insert({ face[1], face[2] });
+				(face[2] < face[0]) ? adjacentEdge.insert({ face[2], face[0] }) : adjacentEdge.insert({ face[0], face[2] });
+			}
+		}
+		// update Q of adjacent Vertex
+		Qs[i_bar] = _getQMatrixOfVertex(ibo, vbo, i_bar);
+		for (const int& i : adjacentVertex)
+		{
+			Qs[i] = _getQMatrixOfVertex(ibo, vbo, i);
+		}
+		// add new edges
+		for (const auto& iter : adjacentEdge)
+		{
+			Edge edge = _getCostAndVbarOfEdge(vbo, iter);
+			heap.push(edge);
+		}
+	};
+	//contract edge
+	size_t collaCout = 0;
+	while (collaCout < collapseEdgeCount)
+	{
+		const Edge& edge = heap.top();
+		ibo[edgeOnFace[edge.m_edge][0]] = { -1,-1,-1 }; //delete two face
+		ibo[edgeOnFace[edge.m_edge][1]] = { -1,-1,-1 };
+		vbo[edge.m_edge[0]] = edge.m_vbar.hnormalized();
+		vbo[edge.m_edge[1]] = gVecNaN; //delete one vertex
+		for (auto& face : ibo) //change face who own deleted vertex
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				if (face[i] == edge.m_edge[1])
+					face[i] = edge.m_edge[0];
+			}
+		}
+		heap.pop(); //delete one edge
+		_updateCollapseEdgeHeap(edge.m_edge[0]); //新的edge的error会不会小于受vbar影响而改变的edge
+		collaCout++;
+	}
+	vector<int> indexMap; // origin face's vertex index -> new index
+	int j = 0;
+	for (int i = 0; i < vbo.size(); i++)
+	{
+		indexMap.push_back(j);
+		if (!isnan(vbo[i][0]))
+		{
+			meshSim.vbo_.push_back(vbo[i]);
+			j++;
+		}
+	}
+	for (const auto& iter : ibo)
+	{
+		if (iter[0] != -1) //valid
+		{
+			std::array<int, 3> face = { indexMap[iter[0]], indexMap[iter[1]], indexMap[iter[2]] };
+			meshSim.ibo_.push_back(face);
+		}
+	}
+	return meshSim;
+}

@@ -1,4 +1,13 @@
 #pragma once
+/*******************************************************************************
+* Author    :  akingse		                                                   *
+* Date      :  from June 2023												   *
+* Website   :  https://github.com/akingse                                      *
+* Copyright :  All rights reserved											   *
+* Purpose   :  Some common and simple polyhedron calculation methods		   *
+* License   :  MIT									                           *
+*******************************************************************************/
+
 namespace psykronix
 {
 	int isRayLineCrossTriangleMTA(const Eigen::Vector3d& origin, const Eigen::Vector3d& direction, const Triangle& trigon);
@@ -60,10 +69,11 @@ namespace games
 	//	return vA.m_error < vB.m_error;
 	//}
 
-	struct Edge //unique
+	struct Edge
 	{
-		std::array<int, 2> m_edge;
+		std::array<int, 2> m_edge; //unique
 		Eigen::Vector3d m_vertex; //the new merged vertex of edge
+		Eigen::Vector4d m_vbar;
 		double m_error = 0.0;
 		bool operator<(const Edge& rhs) const
 		{
@@ -73,5 +83,6 @@ namespace games
 
 	//utility
 	ModelMesh meshLoopSubdivision(const ModelMesh& mesh);
+	ModelMesh meshQuadricSimpIification(const ModelMesh& mesh, size_t collapseEdgeCount = 0);
 	ModelMesh meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, size_t collapseEdgeCount = 0);
 }
