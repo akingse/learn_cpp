@@ -1898,7 +1898,7 @@ ModelMesh games::meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, si
 	return meshSim;
 }
 
-inline void getPlaneCoefficient(const Vector3d& A, const Vector3d& B, const Vector3d& C, double& a, double& b, double& c, double& d)
+inline void _getPlaneCoefficient(const Vector3d& A, const Vector3d& B, const Vector3d& C, double& a, double& b, double& c, double& d)
 {
 	// a*x + b*y + c*z + d = 0
 	Vector3d N = (A - B).cross(C - B); // N_x*(x-A_x) + N_y*(y-A_y) + N_z*(y-A_z) = 0
@@ -1912,6 +1912,43 @@ inline void getPlaneCoefficient(const Vector3d& A, const Vector3d& B, const Vect
 	b /= len;
 	c /= len;
 	d /= len;
+}
+
+// calculate Q of every vertex
+inline Matrix4d _getQMatrixOfVertex(const std::vector<std::array<int, 3>>& ibo, const std::vector<Eigen::Vector3d>& vbo, int i)
+{
+	Matrix4d Q = Eigen::Matrix4d::Zero();
+	for (const auto& face : ibo)
+	{
+		if (face[0] != i && face[1] != i && face[2] != i) //find all adjacent faces 
+			continue;
+		double a, b, c, d;
+		_getPlaneCoefficient(vbo[face[0]], vbo[face[1]], vbo[face[2]], a, b, c, d);
+		Vector4d p(a, b, c, d);
+		Q += p * p.transpose(); //Kp matrix sigma
+	}
+	return Q;
+}
+
+inline Edge _getCostAndVbarOfEdge(const std::vector<Matrix4d>& Qs, const std::vector<Vector3d>& vbo, const array<int, 2 >& i) 
+{
+	Edge edge;
+	edge.m_edge = i;
+	//calculate cost and v_bar
+	Eigen::Matrix4d Q_bar = Qs[i[0]] + Qs[i[1]];
+	Eigen::Matrix4d Q_h = Q_bar;//homogeneous
+	Q_h.row(3) = Eigen::RowVector4d(0, 0, 0, 1);
+	Eigen::Matrix4d inverse;
+	bool invertible;
+	Q_h.computeInverseWithCheck(inverse, invertible);
+	Eigen::Vector4d b(0, 0, 0, 1);
+	Eigen::Vector4d v_bar = (invertible) ?
+		v_bar = inverse * b : //v_bar = (1 / v_bar[3]) * v_bar; //hnormalized
+		v_bar = (0.5 * (vbo[i[0]] + vbo[i[0]])).homogeneous();
+	double error = v_bar.transpose() * Q_bar * v_bar; // the cost
+	edge.m_vbar = v_bar;
+	edge.m_error = error;
+	return edge;
 }
 
 ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collapseEdgeCount /*= 0*/)
@@ -1955,21 +1992,6 @@ ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collaps
 			}
 		}
 	}
-	// calculate Q of every vertex
-	auto _getQMatrixOfVertex = [](const std::vector<std::array<int, 3>>& ibo, const std::vector<Eigen::Vector3d>& vbo, int i)->Matrix4d
-	{
-		Matrix4d Q = Eigen::Matrix4d::Zero();
-		for (const auto& face : ibo)
-		{
-			if (face[0] != i && face[1] != i && face[2] != i) //find all adjacent faces 
-				continue;
-			double a, b, c, d;
-			getPlaneCoefficient(vbo[face[0]], vbo[face[1]], vbo[face[2]], a, b, c, d);
-			Vector4d p(a, b, c, d);
-			Q += p * p.transpose(); //Kp matrix sigma
-		}
-		return Q;
-	};
 	std::vector<Eigen::Matrix4d> Qs;
 	for (int i = 0; i < mesh.vbo_.size(); i++)
 	{
@@ -1988,29 +2010,9 @@ ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collaps
 	}
 	// place edge into heap
 	std::priority_queue<Edge> heap;
-	Eigen::Vector4d b(0, 0, 0, 1);
-	auto _getCostAndVbarOfEdge = [&b, &Qs](const std::vector<Eigen::Vector3d>& vbo, const array<int, 2 >& i)->Edge
-	{
-		Edge edge;
-		edge.m_edge = i;
-		//calculate cost and v_bar
-		Eigen::Matrix4d Q_bar = Qs[i[0]] + Qs[i[1]];
-		Eigen::Matrix4d Q_h = Q_bar;//homogeneous
-		Q_h.row(3) = Eigen::RowVector4d(0, 0, 0, 1);
-		Eigen::Matrix4d inverse;
-		bool invertible;
-		Q_h.computeInverseWithCheck(inverse, invertible);
-		Eigen::Vector4d v_bar = (invertible) ?
-			v_bar = inverse * b : //v_bar = (1 / v_bar[3]) * v_bar; //hnormalized
-			v_bar = (0.5 * (vbo[i[0]] + vbo[i[0]])).homogeneous();
-		double error = v_bar.transpose() * Q_bar * v_bar; // the cost
-		edge.m_vbar = v_bar;
-		edge.m_error = error;
-		return edge;
-	};
 	for (const auto& iter : uniqueEdge)
 	{
-		Edge edge = _getCostAndVbarOfEdge(mesh.vbo_, iter);
+		Edge edge = _getCostAndVbarOfEdge(Qs, mesh.vbo_, iter);
 		heap.push(edge);
 	}
 	ModelMesh meshSim = mesh;//copy
@@ -2056,7 +2058,7 @@ ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collaps
 		// add new edges
 		for (const auto& iter : adjacentEdge)
 		{
-			Edge edge = _getCostAndVbarOfEdge(vbo, iter);
+			Edge edge = _getCostAndVbarOfEdge(Qs, vbo, iter);
 			heap.push(edge);
 		}
 	};

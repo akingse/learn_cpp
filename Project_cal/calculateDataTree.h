@@ -125,13 +125,13 @@ private:
 public:
 	KdTree2d() = delete;
 	KdTree2d(const std::vector<psykronix::Polygon2d>& polygons);
-	KdTree2d(const std::vector<TrigonPart>& triangles);
+	KdTree2d(const std::vector<eigen::TrigonPart>& triangles);
 	std::shared_ptr<KdTreeNode2d> get() const
 	{
 		return m_kdTree;
 	}
 	std::vector<size_t> findIntersect(const psykronix::Polygon2d& polygon); //searchFromKdTree
-	std::vector<size_t> findIntersect(const TrigonPart& trigon);
+	std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon);
 };
 //----------------------------------------------------------------------------------------------------------------
 //  3d
@@ -185,7 +185,7 @@ public:
 	//static std::shared_ptr<KdTreeNode3d> createKdTree(std::vector<psykronix::Polyface3d>& PolyfaceVct);
 	KdTree3d() = delete;
 	KdTree3d(const std::vector<psykronix::Polyface3d>& polyfaceVct); // using origin bound-box
-	KdTree3d(const std::vector<TrigonPart>& triangles);
+	KdTree3d(const std::vector<eigen::TrigonPart>& triangles);
 	void setTolerance(double tolerance)
 	{
 		//Vector3d tole = (m_tolerance == 0.0) ? Vector3d(eps, eps, eps) : Vector3d(m_tolerance, m_tolerance, m_tolerance);
@@ -205,7 +205,7 @@ public:
 	bool remove(const psykronix::Polyface3d& polyface); //find by polyface index
 	bool update(const psykronix::Polyface3d& polyface); //using polyface self index
 	std::vector<size_t> findIntersect(const psykronix::Polyface3d& polyface, double tolerance = 0.0) const; //searchFromKdTree
-	std::vector<size_t> findIntersect(const TrigonPart& trigon);
+	std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon);
 	std::vector<std::tuple<size_t, bool>> findIntersectClash(const psykronix::Polyface3d& polyface) const; // bool means soft-clash
 	std::vector<std::tuple<size_t, bool>> findIntersectClash(const psykronix::Polyface3d& polyface, double tolerance) const; //custom tolerance
 };

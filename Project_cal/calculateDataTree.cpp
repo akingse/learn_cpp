@@ -4,6 +4,7 @@
 using namespace std;
 using namespace psykronix;
 using namespace Eigen;
+using namespace eigen;
 
 #ifdef min
 #undef min
@@ -427,6 +428,7 @@ KdTree3d::KdTree3d(const std::vector<Polyface3d>& polyfaces)
 #endif // DEBUG
 }
 
+#ifdef RESERVE_USING_BOUNDBOX_3D
 std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<TrigonPart>& triangles, int dimension = 0)
 {
 	// the kd-tree crud create read update delete
@@ -469,11 +471,12 @@ std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<TrigonPart>& triangles
 	currentNode->m_dimension = direction; //record the xy direciton, alse canbe depth, then use depth % 2
 	return currentNode;
 }
+#endif
 
 KdTree3d::KdTree3d(const std::vector<TrigonPart>& _triangles)
 {
 	std::vector<TrigonPart> triangles = _triangles;
-	m_kdTree = _createKdTree3d(triangles);
+	//m_kdTree = _createKdTree3d(triangles);
 }
 
 std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon, double tolerance /*= 0.0*/) const
@@ -510,6 +513,7 @@ std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon, double to
 	return indexes;
 }
 
+#ifdef RESERVE_USING_BOUNDBOX_3D
 std::vector<size_t> KdTree3d::findIntersect(const TrigonPart& trigon)
 {
 	if (m_kdTree == nullptr) // || polygon.m_index == -1 means cannot be external polyface
@@ -537,6 +541,7 @@ std::vector<size_t> KdTree3d::findIntersect(const TrigonPart& trigon)
 	_searchKdTree(m_kdTree);
 	return indexes;
 }
+#endif
 
 // only for clash, distinguish soft and hard
 std::vector<std::tuple<size_t, bool>> KdTree3d::findIntersectClash(const Polyface3d& polygon, double tolerance) const

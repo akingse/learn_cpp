@@ -8,6 +8,7 @@ using namespace psykronix;
 static std::string randNumName = "bin_file/random_1e8.bin";
 static std::string randNumNameSepa = "bin_file/random_1e8_sepa.bin";
 #define USING_CONCRETE_NUMBER
+#define USING_FLATBUFFERS_SERIALIZATION
 
 //wirte randnum file
 int _wirteNumberFile(size_t n, const string& filename)
@@ -275,8 +276,129 @@ std::vector<std::array<uint64_t, 2>> _readEntityIDFile(const std::string& fileNa
 #include "flatbuffers/flatbuffers.h"
 using namespace flatbuffers;
 
-//#include "C:/Users/Aking/source/repos/bimbase/Include/fbs/inter_triangels_info_generated.h" 
+//#include "C:/Users/Aking/source/repos/bimbase/Include/fbs/convert_to_mesh_generated.h"
+#include "D:/Alluser/akingse/repos/bimbase/Include/fbs/convert_to_mesh_generated.h"
+
+void write_ModelMesh(const std::vector<ModelMesh>& meshs, const std::string& fileName)
+{
+	flatbuffers::FlatBufferBuilder builder;
+	std::vector<flatbuffers::Offset<ConvertToMesh>> meshVct;
+	for (const auto& iter : meshs)
+	{
+		std::vector<flatbuffers::Offset<Point3D>> vbos;
+		for (auto& iterV : iter.vbo_)
+		{
+			auto vbo = CreatePoint3D(builder, iterV[0], iterV[1], iterV[2]);
+			vbos.push_back(vbo);
+		}
+		auto _vbosVct = builder.CreateVector(vbos); //create fbs::Offset<fbs::Vector<fbs::Offset<T>>>
+		auto _vbos = CreateVBO(builder, _vbosVct);
+		std::vector<flatbuffers::Offset<Point3D>> fnos;
+		for (auto& iterV : iter.fno_)
+		{
+			auto fno = CreatePoint3D(builder, iterV[0], iterV[1], iterV[2]);
+			fnos.push_back(fno);
+		}
+		auto _fnosVct = builder.CreateVector(fnos); //create fbs::Offset<fbs::Vector<fbs::Offset<T>>>
+		auto _fnos = CreateFNO(builder, _fnosVct);
+		std::vector<flatbuffers::Offset<IndexVt>> ibos;
+		for (auto& iterI : iter.ibo_)
+		{
+			auto ibo = CreateIndexVt(builder, iterI[0], iterI[1], iterI[2]);
+			ibos.push_back(ibo);
+		}
+		auto _ibosVct = builder.CreateVector(ibos); //create fbs::Offset<fbs::Vector<fbs::Offset<T>>>
+		auto _ibos = CreateIBO(builder, _ibosVct);
+#ifdef CLASH_DETECTION_DEBUG_TEMP
+		auto _ibos_raw = builder.CreateVector(iter.iboRaw_); //origin type
+#else
+		auto _ibos_raw = builder.CreateVector({ int(0) }); //origin type
+#endif
+		auto _min = CreatePoint3D(builder, iter.bounding_.min().x(), iter.bounding_.min().y(), iter.bounding_.min().z());
+		auto _max = CreatePoint3D(builder, iter.bounding_.max().x(), iter.bounding_.max().y(), iter.bounding_.max().z());
+#ifdef CLASH_DETECTION_DEBUG_TEMP
+		auto mesh = CreateConvertToMesh(builder, _vbos, _ibos, _fnos, _min, _max, _ibos_raw, iter.convex_, iter.genus_, iter.entityid_); //order and content
+#else
+#endif
+		meshVct.push_back(mesh);
+	}
+	auto _meshVct = builder.CreateVector(meshVct);
+	auto triList = CreateMeshVct(builder, _meshVct);
+	builder.Finish(triList);
+	// get the pointer and size
+	uint8_t* bufferPointer = builder.GetBufferPointer();
+	size_t bufferSize = builder.GetSize();
+	ofstream out(fileName, ios::out | ios::binary);
+	if (out.is_open())
+	{
+		out.write(reinterpret_cast<char*>(bufferPointer), bufferSize);
+		out.close();
+		builder.Clear();
+	}
+}
+
+std::vector<ModelMesh> read_ModelMesh(const std::string& fileName)
+{
+	std::ifstream inFile(fileName, std::ios::in | std::ios::binary);
+	std::vector<ModelMesh> res;
+	if (inFile.is_open())
+	{
+		inFile.seekg(0, std::ios::end);
+		std::streampos fileSize = inFile.tellg();
+		inFile.seekg(0, std::ios::beg);
+		std::vector<uint8_t> bufferPointer(fileSize);
+		if (!inFile.read(reinterpret_cast<char*>(bufferPointer.data()), fileSize))
+			return {};
+		// deseria
+		const  MeshVct* meshVct = GetMeshVct(bufferPointer.data());
+		size_t n = meshVct->meshs()->size();
+		for (size_t i = 0; i < n; ++i)
+		{
+			const ConvertToMesh* mesh = meshVct->meshs()->Get(i);
+			auto vbo = mesh->vbo();
+			auto ibo = mesh->ibo();
+			auto fno = mesh->fno();
+			auto _min = Eigen::Vector3d(mesh->aabb_min()->x(), mesh->aabb_min()->y(), mesh->aabb_min()->z());
+			auto _max = Eigen::Vector3d(mesh->aabb_max()->x(), mesh->aabb_max()->y(), mesh->aabb_max()->z());
+			std::vector<Eigen::Vector3d> vbo_;
+			std::vector<Eigen::Vector3d> fno_;
+			std::vector<std::array<int, 3>> ibo_;
+			for (int i = 0; i < vbo->vbos()->size(); i++)
+			{
+				auto pt = vbo->vbos()->Get(i);
+				vbo_.push_back(Eigen::Vector3d(pt->x(), pt->y(), pt->z()));
+			}
+			for (int i = 0; i < fno->fnos()->size(); i++)
+			{
+				auto pt = fno->fnos()->Get(i);
+				fno_.push_back(Eigen::Vector3d(pt->x(), pt->y(), pt->z()));
+			}
+			for (int i = 0; i < ibo->ibos()->size(); i++)
+			{
+				auto id = ibo->ibos()->Get(i);
+				ibo_.push_back(std::array<int, 3>{id->id0(), id->id1(), id->id2()});
+			}
+			std::vector<int> _iboRaw;
+			auto iboRaw = mesh->ibo_raw();
+			for (int i = 0; i < iboRaw->size(); i++)
+			{
+				_iboRaw.push_back(iboRaw->Get(i));
+			}
+			bool convex = mesh->convex();
+			int genus = mesh->genus();
+#ifdef CLASH_DETECTION_DEBUG_TEMP
+			res.push_back(ModelMesh{ vbo_, ibo_, fno_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(), convex, genus, _iboRaw, mesh->entityid() });
+#else
+			//res.push_back(ModelMesh{ vbo_, ibo_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(),mesh->convex()});
+#endif
+		}
+		inFile.close();
+	}
+	return res;
+}
+
 #include "D:/Alluser/akingse/repos/bimbase/Include/fbs/inter_triangels_info_generated.h" //change path
+//commented out struct Point3D; about
 void write_InterTriInfo(const std::vector<InterTriInfo>& infos, const std::string& fileName)
 {
 	//flat buffer
@@ -363,111 +485,5 @@ std::vector<InterTriInfo> read_InterTriInfo(const std::string& fileName)
 	}
 	return res;
 }
-
-//#include "C:/Users/Aking/source/repos/bimbase/Include/fbs/convert_to_mesh_generated.h"
-#include "D:/Alluser/akingse/repos/bimbase/Include/fbs/convert_to_mesh_generated.h"
-
-void write_ModelMesh(const std::vector<ModelMesh>& meshs, const std::string& fileName)
-{
-	flatbuffers::FlatBufferBuilder builder;
-	std::vector<flatbuffers::Offset<ConvertToMesh>> meshVct;
-	for (const auto& iter : meshs)
-	{
-		std::vector<flatbuffers::Offset<Point3D>> vbos;
-		for (auto& iterV : iter.vbo_)
-		{
-			auto vbo = CreatePoint3D(builder, iterV.x(), iterV.y(), iterV.z());
-			vbos.push_back(vbo);
-		}
-		auto _vbosVct = builder.CreateVector(vbos); //create fbs::Offset<fbs::Vector<fbs::Offset<T>>>
-		auto _vbos = CreateVBO(builder, _vbosVct);
-		std::vector<flatbuffers::Offset<IndexVt>> ibos;
-		for (auto& iterI : iter.ibo_)
-		{
-			auto ibo = CreateIndexVt(builder, iterI[0], iterI[1], iterI[2]);
-			ibos.push_back(ibo);
-		}
-		auto _ibosVct = builder.CreateVector(ibos); //create fbs::Offset<fbs::Vector<fbs::Offset<T>>>
-		auto _ibos = CreateIBO(builder, _ibosVct);
-#ifdef CLASH_DETECTION_DEBUG_TEMP
-		auto _ibos_raw = builder.CreateVector(iter.iboRaw_); //origin type
-#else
-		auto _ibos_raw = builder.CreateVector({ int(0)}); //origin type
-#endif
-		auto _min = CreatePoint3D(builder, iter.bounding_.min().x(), iter.bounding_.min().y(), iter.bounding_.min().z());
-		auto _max = CreatePoint3D(builder, iter.bounding_.max().x(), iter.bounding_.max().y(), iter.bounding_.max().z());
-#ifdef CLASH_DETECTION_DEBUG_TEMP
-		auto mesh = CreateConvertToMesh(builder, _vbos, _ibos, _min, _max, _ibos_raw, iter.convex_, iter.entityid_); //order and content
-#else
-		auto mesh = CreateConvertToMesh(builder, _vbos, _ibos, _min, _max, _ibos_raw, iter.convex_, uint64_t(0)); //order and content
-#endif
-		meshVct.push_back(mesh);
-	}
-	auto _meshVct = builder.CreateVector(meshVct);
-	auto triList = CreateMeshVct(builder, _meshVct);
-	builder.Finish(triList);
-	// get the pointer and size
-	uint8_t* bufferPointer = builder.GetBufferPointer();
-	size_t bufferSize = builder.GetSize();
-	ofstream out(fileName, ios::out | ios::binary);
-	if (out.is_open())
-	{
-		out.write(reinterpret_cast<char*>(bufferPointer), bufferSize);
-		out.close();
-		builder.Clear();
-	}
-}
-
-std::vector<ModelMesh> read_ModelMesh(const std::string& fileName)
-{
-	std::ifstream inFile(fileName, std::ios::in | std::ios::binary);
-	std::vector<ModelMesh> res;
-	if (inFile.is_open())
-	{
-		inFile.seekg(0, std::ios::end);
-		std::streampos fileSize = inFile.tellg();
-		inFile.seekg(0, std::ios::beg);
-		std::vector<uint8_t> bufferPointer(fileSize);
-		if (!inFile.read(reinterpret_cast<char*>(bufferPointer.data()), fileSize))
-			return {};
-		// deseria
-		const  MeshVct* meshVct = GetMeshVct(bufferPointer.data());
-		size_t n = meshVct->meshs()->size();
-		for (size_t i = 0; i < n; ++i)
-		{
-			const ConvertToMesh* mesh = meshVct->meshs()->Get(i);
-			auto vbo = mesh->vbo();
-			auto ibo = mesh->ibo();
-			auto _min = Eigen::Vector3d(mesh->aabb_min()->x(), mesh->aabb_min()->y(), mesh->aabb_min()->z());
-			auto _max = Eigen::Vector3d(mesh->aabb_max()->x(), mesh->aabb_max()->y(), mesh->aabb_max()->z());
-			std::vector<Eigen::Vector3d> vbo_;
-			std::vector<std::array<int, 3>> ibo_;
-			for (int size_t = 0; i < vbo->vbos()->size(); i++)
-			{
-				auto pt = vbo->vbos()->Get(i);
-				vbo_.push_back(Eigen::Vector3d(pt->x(), pt->y(), pt->z()));
-			}
-			for (int size_t = 0; i < ibo->ibos()->size(); i++)
-			{
-				auto id = ibo->ibos()->Get(i);
-				ibo_.push_back(std::array<int, 3>{id->id0(), id->id1(), id->id2()});
-			}
-			std::vector<int> _iboRaw;
-			auto iboRaw = mesh->ibo_raw();
-			for (int size_t = 0; i < iboRaw->size(); i++)
-			{
-				_iboRaw.push_back(iboRaw->Get(i));
-			}
-#ifdef CLASH_DETECTION_DEBUG_TEMP
-			res.push_back(ModelMesh{ vbo_, ibo_,{/*fno*/}, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(),mesh->convex(), 0, _iboRaw, mesh->entityid()});
-#else
-			res.push_back(ModelMesh{ vbo_, ibo_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(),mesh->convex()});
-#endif
-		}
-		inFile.close();
-	}
-	return res;
-}
-
 
 #endif //USING_FLATBUFFERS_SERIALIZATION

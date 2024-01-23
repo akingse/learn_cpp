@@ -381,16 +381,21 @@ bug修复
 
 ### 使用FlatBuffers
 
-定义数据结构：创建一个`.fbs`文件（变量命名有要求，注意ulong）
+定义数据结构：创建一个`.fbs`文件（类型命名有要求，注意ulong类型）
 
 生成代码：使用FlatBuffers编译器（`flatc`）将`.fbs`文件编译为对应的C++或其他语言的代码
 
 ```shell
+Windows powershell
 ./flatc --cpp inter_triangels_info.fbs
 ./flatc --cpp convert_to_mesh.fbs
 
 ./flatc --python convert_to_mesh.fbs
 ```
+
+手写输出bin和读取bin的代码
+
+
 
 
 

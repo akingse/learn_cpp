@@ -12,12 +12,14 @@ struct ModelMesh
 {
     std::vector<Eigen::Vector3d> vbo_;
     std::vector<std::array<int, 3>> ibo_;
+    std::vector<Eigen::Vector3d> fno_; //Face Normal
     Eigen::AlignedBox3d bounding_;
     Eigen::Affine3d pose_; // Eigen::Affine3d::Identity()
     bool convex_; // isConvex default true
-    //uint64_t instanceid_;
+    int genus_ = 0; //number of genus, default 0
     std::vector<int> iboRaw_; //for test debug
     uint64_t entityid_;
+    //uint64_t instanceid_;
 };
 #endif
 
