@@ -1091,14 +1091,16 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 		std::array<Eigen::Vector3d, 3> triA, triB;
 		for (const auto& iA : indexAB[0])
 		{
-			triA = { relative_matrix * meshA.vbo_[meshA.ibo_[iA][0]],
-					relative_matrix * meshA.vbo_[meshA.ibo_[iA][1]],
-					relative_matrix * meshA.vbo_[meshA.ibo_[iA][2]] };
+			triA = { 
+				relative_matrix * meshA.vbo_[meshA.ibo_[iA][0]],
+				relative_matrix * meshA.vbo_[meshA.ibo_[iA][1]],
+				relative_matrix * meshA.vbo_[meshA.ibo_[iA][2]] };
 			for (const auto& iB : indexAB[1])
 			{
-				triB = { meshB.vbo_[meshB.ibo_[iB][0]],
-						meshB.vbo_[meshB.ibo_[iB][1]],
-						meshB.vbo_[meshB.ibo_[iB][2]] };
+				triB = { 
+					meshB.vbo_[meshB.ibo_[iB][0]],
+					meshB.vbo_[meshB.ibo_[iB][1]],
+					meshB.vbo_[meshB.ibo_[iB][2]] };
 				if (!isTwoTrianglesBoundingBoxIntersect(triA, triB)) // second pre-judge
 				{
 #ifdef STATISTIC_DATA_COUNT
@@ -1195,14 +1197,16 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 #endif
 		for (const auto& iA : indexAB[0]) //faces intersect
 		{
-			triA = { relative_matrix * meshA.vbo_[meshA.ibo_[iA][0]],
-					relative_matrix * meshA.vbo_[meshA.ibo_[iA][1]],
-					relative_matrix * meshA.vbo_[meshA.ibo_[iA][2]] };
+			triA = { 
+				relative_matrix * meshA.vbo_[meshA.ibo_[iA][0]],
+				relative_matrix * meshA.vbo_[meshA.ibo_[iA][1]],
+				relative_matrix * meshA.vbo_[meshA.ibo_[iA][2]] };
 			for (const auto& iB : indexAB[1])
 			{
-				triB = { meshB.vbo_[meshB.ibo_[iB][0]],
-						meshB.vbo_[meshB.ibo_[iB][1]],
-						meshB.vbo_[meshB.ibo_[iB][2]] };
+				triB = { 
+					meshB.vbo_[meshB.ibo_[iB][0]],
+					meshB.vbo_[meshB.ibo_[iB][1]],
+					meshB.vbo_[meshB.ibo_[iB][2]] };
 #ifdef STATISTIC_DATA_RECORD
 				if (!isTwoTrianglesBoundingBoxIntersect(triA, triB))
 					count_tri_box_exclude_pre++;
@@ -1230,32 +1234,34 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 					vboSetB.insert(meshB.ibo_[iB][i]);
 				}
 				// caution, both mesh with matrix, axis direciton in self local coordinate, need transform to world
-				edgesA = { meshA.pose_ * (triA[1] - triA[0]),
-						meshA.pose_ * (triA[2] - triA[1]),
-						meshA.pose_ * (triA[0] - triA[2]) };
-				edgesB = { meshB.pose_ * (triB[1] - triB[0]),
-						meshB.pose_ * (triB[2] - triB[1]),
-						meshB.pose_ * (triB[0] - triB[2]) };
+				edgesA = { 
+					meshA.pose_ * (triA[1] - triA[0]),
+					meshA.pose_ * (triA[2] - triA[1]),
+					meshA.pose_ * (triA[0] - triA[2]) };
+				edgesB = { 
+					meshB.pose_ * (triB[1] - triB[0]),
+					meshB.pose_ * (triB[2] - triB[1]),
+					meshB.pose_ * (triB[0] - triB[2]) };
 				normalA = edgesA[0].cross(edgesA[1]); //normalA,
 				normalB = edgesB[0].cross(edgesB[1]); //normalB,
 				axesPoten = { {
-						normalA,
-						normalB,
-						normalA.cross(edgesA[0]),
-						normalA.cross(edgesA[1]),
-						normalA.cross(edgesA[2]),
-						normalB.cross(edgesB[0]),
-						normalB.cross(edgesB[1]),
-						normalB.cross(edgesB[2]),
-						edgesA[0].cross(edgesB[0]),
-						edgesA[0].cross(edgesB[1]),
-						edgesA[0].cross(edgesB[2]),
-						edgesA[1].cross(edgesB[0]),
-						edgesA[1].cross(edgesB[1]),
-						edgesA[1].cross(edgesB[2]),
-						edgesA[2].cross(edgesB[0]),
-						edgesA[2].cross(edgesB[1]),
-						edgesA[2].cross(edgesB[2]) } };
+					normalA,
+					normalB,
+					normalA.cross(edgesA[0]),
+					normalA.cross(edgesA[1]),
+					normalA.cross(edgesA[2]),
+					normalB.cross(edgesB[0]),
+					normalB.cross(edgesB[1]),
+					normalB.cross(edgesB[2]),
+					edgesA[0].cross(edgesB[0]),
+					edgesA[0].cross(edgesB[1]),
+					edgesA[0].cross(edgesB[2]),
+					edgesA[1].cross(edgesB[0]),
+					edgesA[1].cross(edgesB[1]),
+					edgesA[1].cross(edgesB[2]),
+					edgesA[2].cross(edgesB[0]),
+					edgesA[2].cross(edgesB[1]),
+					edgesA[2].cross(edgesB[2]) } };
 				for (auto& axis : axesPoten) // revise zero vector
 				{
 					if (axis.isZero()) // clean data
@@ -1358,16 +1364,18 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 			interTriInfoList.push_back({ { std::move(gTirNaN), std::move(gTirNaN) }, {}, -std::get<0>(depth).norm() });
 		else if (std::get<1>(depth)[0] != ULLONG_MAX) //bool isLeft 
 		{
-			trigon = { meshA.pose_ * meshA.vbo_[meshA.ibo_[get<1>(depth)[0]][0]],
-					meshA.pose_ * meshA.vbo_[meshA.ibo_[get<1>(depth)[0]][1]],
-					meshA.pose_ * meshA.vbo_[meshA.ibo_[get<1>(depth)[0]][2]] };
+			trigon = { 
+				meshA.pose_ * meshA.vbo_[meshA.ibo_[get<1>(depth)[0]][0]],
+				meshA.pose_ * meshA.vbo_[meshA.ibo_[get<1>(depth)[0]][1]],
+				meshA.pose_ * meshA.vbo_[meshA.ibo_[get<1>(depth)[0]][2]] };
 			interTriInfoList.push_back({ { std::move(trigon), std::move(gTirNaN) }, {}, -std::get<0>(depth).norm() });
 		}
 		else
 		{
-			trigon = { meshB.pose_ * meshB.vbo_[meshB.ibo_[get<1>(depth)[1]][0]],
-					meshB.pose_ * meshB.vbo_[meshB.ibo_[get<1>(depth)[1]][1]],
-					meshB.pose_ * meshB.vbo_[meshB.ibo_[get<1>(depth)[1]][2]] };
+			trigon = { 
+				meshB.pose_ * meshB.vbo_[meshB.ibo_[get<1>(depth)[1]][0]],
+				meshB.pose_ * meshB.vbo_[meshB.ibo_[get<1>(depth)[1]][1]],
+				meshB.pose_ * meshB.vbo_[meshB.ibo_[get<1>(depth)[1]][2]] };
 			interTriInfoList.push_back({ { std::move(gTirNaN), std::move(trigon) }, {}, -std::get<0>(depth).norm() });
 		}
 #endif // !USING_ALL_SEPARATE_AXES
@@ -1453,15 +1461,15 @@ std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const
 	for (const auto& iA : indexAB[0])
 	{
 		std::array<Eigen::Vector3d, 3> triA = {
-				relative_matrix * meshA.vbo_[meshA.ibo_[iA][0]],
-				relative_matrix * meshA.vbo_[meshA.ibo_[iA][1]],
-				relative_matrix * meshA.vbo_[meshA.ibo_[iA][2]] };
+			relative_matrix * meshA.vbo_[meshA.ibo_[iA][0]],
+			relative_matrix * meshA.vbo_[meshA.ibo_[iA][1]],
+			relative_matrix * meshA.vbo_[meshA.ibo_[iA][2]] };
 		for (const auto& iB : indexAB[1])
 		{
 			std::array<Eigen::Vector3d, 3> triB = {
-					meshB.vbo_[meshB.ibo_[iB][0]],
-					meshB.vbo_[meshB.ibo_[iB][1]],
-					meshB.vbo_[meshB.ibo_[iB][2]] };
+				meshB.vbo_[meshB.ibo_[iB][0]],
+				meshB.vbo_[meshB.ibo_[iB][1]],
+				meshB.vbo_[meshB.ibo_[iB][2]] };
 			if (!isTwoTrianglesBoundingBoxIntersect(triA, triB, tolerance))
 			{
 #ifdef STATISTIC_DATA_COUNT
@@ -1769,7 +1777,8 @@ ModelMesh games::meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, si
 		for (int i = 0; i < 3; i++)
 		{
 			array<int, 2> edge = (tri[i] < tri[i + 1]) ?
-				array<int, 2>{tri[i], tri[i + 1]} : array<int, 2>{tri[i + 1], tri[i]};
+				array<int, 2>{tri[i], tri[i + 1]} : 
+				array<int, 2>{tri[i + 1], tri[i]};
 			uniqueEdge.insert(edge);
 		}
 	}
@@ -2038,7 +2047,7 @@ ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collaps
 			{
 				adjacentVertex.insert(face[0]);
 				adjacentVertex.insert(face[2]);
-				(face[1] < face[0]) ? adjacentEdge.insert({ face[1], face[0] }) : adjacentEdge.insert({face[0], face[1]});
+				(face[1] < face[0]) ? adjacentEdge.insert({ face[1], face[0] }) : adjacentEdge.insert({ face[0], face[1] });
 				(face[1] < face[2]) ? adjacentEdge.insert({ face[1], face[2] }) : adjacentEdge.insert({ face[2], face[1] });
 			}
 			else//if (face[2] == i_bar)

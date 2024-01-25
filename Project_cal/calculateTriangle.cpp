@@ -84,9 +84,10 @@ bool psykronix::isPointInTriangle(const Vector2d& point, const std::array<Vector
 	// compare z-value
 #ifdef USING_THRESHOLD_GEOMETRIC
 	double axisz = (p1.x() - p0.x()) * (p2.y() - p0.y()) - (p2.x() - p0.x()) * (p1.y() - p0.y());
-	return !(axisz * ((p1.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p1.y() - p0.y()) < _eps) ||//bool isLeftA
-			axisz * ((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y()) < _eps) || //bool isLeftB
-			axisz * ((p0.x() - p2.x()) * (point.y() - p2.y()) - (point.x() - p2.x()) * (p0.y() - p2.y()) < _eps)); //bool isLeftC
+	return !(
+		axisz * ((p1.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p1.y() - p0.y()) < _eps) || //bool isLeftA
+		axisz * ((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y()) < _eps) || //bool isLeftB
+		axisz * ((p0.x() - p2.x()) * (point.y() - p2.y()) - (point.x() - p2.x()) * (p0.y() - p2.y()) < _eps));  //bool isLeftC
 #else
 	double axisz = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
 	return
@@ -117,9 +118,10 @@ bool psykronix::isPointInTriangle(const Vector3d& point, const std::array<Vector
 #endif // USING_ACCURATE_NORMALIZED
 #ifdef USING_THRESHOLD_GEOMETRIC
 	// 3D triangle, input point must coplanar
-	return !((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) < _eps || //bool isNotLeftA
+	return !(
+		(trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) < _eps || //bool isNotLeftA
 		(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) < _eps || //bool isNotLeftB
-		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal) < _eps); //bool isNotLeftC
+		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal) < _eps);  //bool isNotLeftC
 #else
 	return
 		0.0 <= (trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) && //bool isLeftA
@@ -213,10 +215,12 @@ bool psykronix::isTwoSegmentsIntersect(const std::array<Vector3d, 2>& segmA, con
 		std::min(segmA[0][2], segmA[1][2]) > std::max(segmB[0][2], segmB[1][2])) //index will be fast
 		return false;
 #ifdef USING_THRESHOLD_GEOMETRIC
-	return !((segmB[0] - segmA[0]).cross(segmA[1] - segmA[0]).dot((segmA[1] - segmA[0]).cross(segmB[1] - segmA[0])) < _eps || //double separate
+	return !(
+		(segmB[0] - segmA[0]).cross(segmA[1] - segmA[0]).dot((segmA[1] - segmA[0]).cross(segmB[1] - segmA[0])) < _eps || //double separate
 		(segmA[0] - segmB[0]).cross(segmB[1] - segmB[0]).dot((segmB[1] - segmB[0]).cross(segmA[1] - segmB[0])) < _eps);
 #else
-	return 0.0 <= (segmB[0] - segmA[0]).cross(segmA[1] - segmA[0]).dot((segmA[1] - segmA[0]).cross(segmB[1] - segmA[0])) &&
+	return 
+		0.0 <= (segmB[0] - segmA[0]).cross(segmA[1] - segmA[0]).dot((segmA[1] - segmA[0]).cross(segmB[1] - segmA[0])) &&
 		0.0 <= (segmA[0] - segmB[0]).cross(segmB[1] - segmB[0]).dot((segmB[1] - segmB[0]).cross(segmA[1] - segmB[0]));
 #endif
 }
@@ -262,14 +266,14 @@ bool psykronix::isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vect
 		std::min(segment[0].y(), segment[1].y()) > _max.y())
 		return false;
 	std::array<Eigen::Vector2d, 3> axes = { {
-			Vector2d(1,0),
-			Vector2d(0,1),
-			Vector2d((segment[1] - segment[0]).y(),(segment[1] - segment[0]).x())} }; //canbe zero
+		Vector2d(1,0),
+		Vector2d(0,1),
+		Vector2d(-(segment[1] - segment[0]).y(),(segment[1] - segment[0]).x())} }; //canbe zero
 	std::array<Eigen::Vector2d, 4> boxVtx = { {
-			box.min(),
-			Vector2d(box.max().x(),box.min().y()),
-			box.max(),
-			Vector2d(box.min().x(),box.max().y())} };
+		box.min(),
+		Vector2d(box.max().x(),box.min().y()),
+		box.max(),
+		Vector2d(box.min().x(),box.max().y())} };
 	double minA, maxA, minB, maxB, projection;
 	for (const auto& axis : axes) //fast than index
 	{
@@ -311,23 +315,23 @@ bool psykronix::isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vect
 		return false;
 	Vector3d vecSeg = segment[1] - segment[0];//segment direction
 	std::array<Eigen::Vector3d, 7> axes = { {
-			vecSeg, //maybe not work
-			Vector3d(1,0,0),
-			Vector3d(0,1,0),
-			Vector3d(0,0,1),
-			vecSeg.cross(Vector3d(1,0,0)),
-			vecSeg.cross(Vector3d(0,1,0)),
-			vecSeg.cross(Vector3d(0,0,1)) } };
+		vecSeg, //maybe not work
+		Vector3d(1,0,0),
+		Vector3d(0,1,0),
+		Vector3d(0,0,1),
+		vecSeg.cross(Vector3d(1,0,0)),
+		vecSeg.cross(Vector3d(0,1,0)),
+		vecSeg.cross(Vector3d(0,0,1)) } };
 	Vector3d vecBox = box.max() - box.min();
 	std::array<Eigen::Vector3d, 8> boxVtx = { { //box.min() is origin
-			Vector3d(0,0,0),
-			Vector3d(vecBox[0],0,0),
-			Vector3d(vecBox[0],vecBox[1],0),
-			Vector3d(0,vecBox[1],0),
-			Vector3d(0,0,vecBox[2]),
-			Vector3d(vecBox[0],0,vecBox[2]),
-			vecBox, //Vector3d(vecBox[0],vecBox[1],vecBox[2])
-			Vector3d(0,vecBox[1],vecBox[2]) } };
+		Vector3d(0,0,0),
+		Vector3d(vecBox[0],0,0),
+		Vector3d(vecBox[0],vecBox[1],0),
+		Vector3d(0,vecBox[1],0),
+		Vector3d(0,0,vecBox[2]),
+		Vector3d(vecBox[0],0,vecBox[2]),
+		vecBox, //Vector3d(vecBox[0],vecBox[1],vecBox[2])
+		Vector3d(0,vecBox[1],vecBox[2]) } };
 	double minA, maxA, minB, maxB, projection;
 	for (const auto& axis : axes) //fast than index
 	{
@@ -358,7 +362,8 @@ bool psykronix::isSegmentCrossTriangle(const std::array<Vector3d, 2>& segment, c
 {
 	//judge box
 	//Eigen::AlignedBox3d boxSeg(segment[0], segment[1]);
-	//Eigen::AlignedBox3d boxTri(Vector3d(
+	//Eigen::AlignedBox3d boxTri(
+	//	Vector3d(
 	//		std::min(trigon[0].x(), trigon[1].x(), trigon[2].x()),
 	//		std::min(trigon[0].y(), trigon[1].y(), trigon[2].y()),
 	//		std::min(trigon[0].z(), trigon[1].z(), trigon[2].z())),
@@ -379,7 +384,8 @@ bool psykronix::isSegmentCrossTriangle(const std::array<Vector3d, 2>& segment, c
 	if ((dot0 > eps && dot1 > eps && dot2 > eps) || (dot0 < _eps && dot1 < _eps && dot2 < _eps))
 		return false; //+-*x< 0,6,3,2,4.5
 	// double straddling test x3
-	return isTwoSegmentsIntersect(segment, { trigon[0], trigon[1] }) ||
+	return 
+		isTwoSegmentsIntersect(segment, { trigon[0], trigon[1] }) ||
 		isTwoSegmentsIntersect(segment, { trigon[1], trigon[2] }) ||
 		isTwoSegmentsIntersect(segment, { trigon[2], trigon[0] });
 
@@ -677,23 +683,25 @@ RelationOfTwoTriangles psykronix::getRelationOfTwoTrianglesSAT(const std::array<
 #ifdef STATISTIC_DATA_TESTFOR
 	count_gRTT++;
 #endif
-	std::array<Eigen::Vector3d, 3> edgesA = { { triA[1] - triA[0],
-												triA[2] - triA[1],
-												triA[0] - triA[2] } };
-	std::array<Eigen::Vector3d, 3> edgesB = { { triB[1] - triB[0],
-												triB[2] - triB[1],
-												triB[0] - triB[2] } };
+	std::array<Eigen::Vector3d, 3> edgesA = { { 
+		triA[1] - triA[0],
+		triA[2] - triA[1],
+		triA[0] - triA[2] } };
+	std::array<Eigen::Vector3d, 3> edgesB = { { 
+		triB[1] - triB[0],
+		triB[2] - triB[1],
+		triB[0] - triB[2] } };
 	if (edgesA[0].cross(edgesA[1]).cross(edgesB[0].cross(edgesB[1])).isZero(eps))// && fabs(normalA.dot(triB[1] - triA[1])) < eps) //using approx
 	{
 		//Eigen::Vector3d normalA = edgesA[0].cross(edgesA[1]);
 		//Eigen::Vector3d normalB = edgesB[0].cross(edgesB[1]);
 		//std::array<Eigen::Vector3d, 6> axes = { {
-		//									normalA.cross(edgesA[0]),
-		//									normalA.cross(edgesA[1]),
-		//									normalA.cross(edgesA[2]),
-		//									normalB.cross(edgesB[0]),
-		//									normalB.cross(edgesB[1]),
-		//									normalB.cross(edgesB[2]) } };
+		//	normalA.cross(edgesA[0]),
+		//	normalA.cross(edgesA[1]),
+		//	normalA.cross(edgesA[2]),
+		//	normalB.cross(edgesB[0]),
+		//	normalB.cross(edgesB[1]),
+		//	normalB.cross(edgesB[2]) } };
 #ifdef STATISTIC_DATA_COUNT
 		count_trigon_coplanar++;
 #endif  
@@ -701,15 +709,15 @@ RelationOfTwoTriangles psykronix::getRelationOfTwoTrianglesSAT(const std::array<
 	}
 	// using SAT, next not coplanar
 	std::array<Eigen::Vector3d, 9> axes = { {
-											edgesA[0].cross(edgesB[0]),
-											edgesA[0].cross(edgesB[1]),
-											edgesA[0].cross(edgesB[2]),
-											edgesA[1].cross(edgesB[0]),
-											edgesA[1].cross(edgesB[1]),
-											edgesA[1].cross(edgesB[2]),
-											edgesA[2].cross(edgesB[0]),
-											edgesA[2].cross(edgesB[1]),
-											edgesA[2].cross(edgesB[2]) } };
+		edgesA[0].cross(edgesB[0]),
+		edgesA[0].cross(edgesB[1]),
+		edgesA[0].cross(edgesB[2]),
+		edgesA[1].cross(edgesB[0]),
+		edgesA[1].cross(edgesB[1]),
+		edgesA[1].cross(edgesB[2]),
+		edgesA[2].cross(edgesB[0]),
+		edgesA[2].cross(edgesB[1]),
+		edgesA[2].cross(edgesB[2]) } };
 	for (auto& axis : axes) // revise zero vector
 	{
 		if (axis.isZero())
@@ -802,9 +810,10 @@ std::tuple<Vector3d, double> psykronix::getTriangleBoundingCircle(const std::arr
 		double det = v0[0] * cofactor00 + v1[0] * cofactor01 + v2[0] * cofactor02;
 		det = 1.0 / det;
 		Matrix3d inv;
-		inv << det * cofactor00, det * cofactor10, det * cofactor20,
-				det* cofactor01, det * cofactor11, det * cofactor21,
-				det* cofactor02, det * cofactor12, det * cofactor22;
+		inv << 
+			det * cofactor00, det * cofactor10, det * cofactor20,
+			det * cofactor01, det * cofactor11, det * cofactor21,
+			det * cofactor02, det * cofactor12, det * cofactor22;
 		return inv * B;
 	};
 	Vector3d vecA = trigon[1] - trigon[0];
@@ -854,10 +863,10 @@ bool isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& segment, con
 	if (fabs(normal.dot(segment[0] - trigon[0])) < eps && fabs(normal.dot(segment[1] - trigon[0])) < eps)// 2D-SAT, coplanar
 	{
 		std::array<Eigen::Vector3d, 4> axes = { {
-				normal.cross(vecSeg),
-				normal.cross(trigon[1] - trigon[0]),
-				normal.cross(trigon[2] - trigon[1]),
-				normal.cross(trigon[0] - trigon[2]) } };
+			normal.cross(vecSeg),
+			normal.cross(trigon[1] - trigon[0]),
+			normal.cross(trigon[2] - trigon[1]),
+			normal.cross(trigon[0] - trigon[2]) } };
 		for (auto& axis : axes) // revise zero vector
 		{
 			if (axis.isZero())
@@ -883,10 +892,10 @@ bool isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& segment, con
 	else // 3D-SAT, not coplanar
 	{
 		std::array<Eigen::Vector3d, 4> axes = { {
-				normal,
-				vecSeg.cross(trigon[1] - trigon[0]),
-				vecSeg.cross(trigon[2] - trigon[1]),
-				vecSeg.cross(trigon[0] - trigon[2])} };
+			normal,
+			vecSeg.cross(trigon[1] - trigon[0]),
+			vecSeg.cross(trigon[2] - trigon[1]),
+			vecSeg.cross(trigon[0] - trigon[2])} };
 		for (auto& axis : axes) // revise zero vector
 		{
 			if (axis.isZero())
@@ -1123,27 +1132,29 @@ bool isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& 
 	//	(p0.z() > max.z() && p1.z() > max.z() && p2.z() > max.z()))
 	//	return false;
 	// Separating Axis Theorem
-	std::array<Eigen::Vector3d, 3> edges = { trigon[1] - trigon[0],
-										   trigon[2] - trigon[1],
-										   trigon[0] - trigon[2] };
-	std::array<Eigen::Vector3d, 3> coords = { Vector3d(1,0,0),
-											   Vector3d(0,1,0),
-											   Vector3d(0,0,1) };
+	std::array<Eigen::Vector3d, 3> edges = { 
+		trigon[1] - trigon[0],
+		trigon[2] - trigon[1],
+		trigon[0] - trigon[2] };
+	std::array<Eigen::Vector3d, 3> coords = { 
+		Vector3d(1,0,0),
+		Vector3d(0,1,0),
+		Vector3d(0,0,1) };
 	std::array<Eigen::Vector3d, 13> axes = { {
-			coords[0],
-			coords[1],
-			coords[2],
-			edges[0].cross(edges[1]), //normal
-			//normal.cross(edges[]),
-			coords[0].cross(edges[0]),
-			coords[0].cross(edges[1]),
-			coords[0].cross(edges[2]),
-			coords[1].cross(edges[0]),
-			coords[1].cross(edges[1]),
-			coords[1].cross(edges[2]),
-			coords[2].cross(edges[0]),
-			coords[2].cross(edges[1]),
-			coords[2].cross(edges[2]) } };
+		coords[0],
+		coords[1],
+		coords[2],
+		edges[0].cross(edges[1]), //normal
+		//normal.cross(edges[]),
+		coords[0].cross(edges[0]),
+		coords[0].cross(edges[1]),
+		coords[0].cross(edges[2]),
+		coords[1].cross(edges[0]),
+		coords[1].cross(edges[1]),
+		coords[1].cross(edges[2]),
+		coords[2].cross(edges[0]),
+		coords[2].cross(edges[1]),
+		coords[2].cross(edges[2]) } };
 	//for (auto& axis : axes) // absolute can give up
 	//{
 	//	if (axis.isZero())
@@ -1152,14 +1163,14 @@ bool isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& 
 	const Vector3d& origin = box.min();
 	Vector3d vertex = box.sizes();
 	std::array<Vector3d, 8> vertexes = { {
-			Vector3d(0, 0, 0),
-			Vector3d(vertex.x(), 0, 0),
-			Vector3d(vertex.x(), vertex.y(), 0),
-			Vector3d(0, vertex.y(), 0),
-			Vector3d(0, 0, vertex.z()),
-			Vector3d(vertex.x(), 0, vertex.z()),
-			Vector3d(vertex.x(), vertex.y(), vertex.z()),
-			Vector3d(0, vertex.y(), vertex.z()) } };
+		Vector3d(0, 0, 0),
+		Vector3d(vertex.x(), 0, 0),
+		Vector3d(vertex.x(), vertex.y(), 0),
+		Vector3d(0, vertex.y(), 0),
+		Vector3d(0, 0, vertex.z()),
+		Vector3d(vertex.x(), 0, vertex.z()),
+		Vector3d(vertex.x(), vertex.y(), vertex.z()),
+		Vector3d(0, vertex.y(), vertex.z()) } };
 	// iterate
 	double minA, maxA, minB, maxB, projection;
 	for (const auto& axis : axes) //fast than index
@@ -1192,12 +1203,14 @@ bool isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& 
 
 bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {
-	std::array<Eigen::Vector3d, 3> edgesA = { triA[1] - triA[0],
-											triA[2] - triA[1],
-											triA[0] - triA[2] };
-	std::array<Eigen::Vector3d, 3> edgesB = { triB[1] - triB[0],
-											triB[2] - triB[1],
-											triB[0] - triB[2] };
+	std::array<Eigen::Vector3d, 3> edgesA = { 
+		triA[1] - triA[0],
+		triA[2] - triA[1],
+		triA[0] - triA[2] };
+	std::array<Eigen::Vector3d, 3> edgesB = { 
+		triB[1] - triB[0],
+		triB[2] - triB[1],
+		triB[0] - triB[2] };
 #ifdef STATISTIC_DATA_COUNT
 	count_isTwoTrisInter++;
 	if (triA[0] == triB[0] && triA[1] == triB[1] && triA[2] == triB[2])
@@ -1219,24 +1232,24 @@ bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, cons
 	if ((0.0 < projection0 && 0.0 < projection1 && 0.0 < projection2) || (0.0 > projection0 && 0.0 > projection1 && 0.0 > projection2))
 		return false;
 	std::array<Eigen::Vector3d, 15> axes = { { // compat zero-vector from parallel edges
-			//normalA,
-			//normalB,
-			normalA.cross(edgesA[0]),
-			normalA.cross(edgesA[1]),
-			normalA.cross(edgesA[2]),
-			normalB.cross(edgesB[0]),
-			normalB.cross(edgesB[1]),
-			normalB.cross(edgesB[2]),
-			//cross edge pair
-			edgesA[0].cross(edgesB[0]),
-			edgesA[0].cross(edgesB[1]),
-			edgesA[0].cross(edgesB[2]),
-			edgesA[1].cross(edgesB[0]),
-			edgesA[1].cross(edgesB[1]),
-			edgesA[1].cross(edgesB[2]),
-			edgesA[2].cross(edgesB[0]),
-			edgesA[2].cross(edgesB[1]),
-			edgesA[2].cross(edgesB[2]) } };
+		//normalA,
+		//normalB,
+		normalA.cross(edgesA[0]),
+		normalA.cross(edgesA[1]),
+		normalA.cross(edgesA[2]),
+		normalB.cross(edgesB[0]),
+		normalB.cross(edgesB[1]),
+		normalB.cross(edgesB[2]),
+		//cross edge pair
+		edgesA[0].cross(edgesB[0]),
+		edgesA[0].cross(edgesB[1]),
+		edgesA[0].cross(edgesB[2]),
+		edgesA[1].cross(edgesB[0]),
+		edgesA[1].cross(edgesB[1]),
+		edgesA[1].cross(edgesB[2]),
+		edgesA[2].cross(edgesB[0]),
+		edgesA[2].cross(edgesB[1]),
+		edgesA[2].cross(edgesB[2]) } };
 	// Check for overlap along each axis
 	double minA, maxA, minB, maxB, projection;
 	for (const auto& axis : axes) //fast than index
@@ -1324,27 +1337,29 @@ bool isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, const std
 //must intersect
 bool isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB, double tolerance /*= eps*/)
 {
-	std::array<Eigen::Vector3d, 3> edgesA = { triA[1] - triA[0],
-											triA[2] - triA[1],
-											triA[0] - triA[2] };
-	std::array<Eigen::Vector3d, 3> edgesB = { triB[1] - triB[0],
-											triB[2] - triB[1],
-											triB[0] - triB[2] };
+	std::array<Eigen::Vector3d, 3> edgesA = { 
+		triA[1] - triA[0],
+		triA[2] - triA[1],
+		triA[0] - triA[2] };
+	std::array<Eigen::Vector3d, 3> edgesB = { 
+		triB[1] - triB[0],
+		triB[2] - triB[1],
+		triB[0] - triB[2] };
 	Eigen::Vector3d normalA = edgesA[0].cross(edgesA[1]);
 	Eigen::Vector3d normalB = edgesB[0].cross(edgesB[1]);
 	if (normalA.cross(normalB).isZero(eps)) //is parallel
 		return false;//exclude coplanar
 	std::array<Eigen::Vector3d, 9> axes = { { 
-			// only cross edge pair
-			edgesA[0].cross(edgesB[0]),
-			edgesA[0].cross(edgesB[1]),
-			edgesA[0].cross(edgesB[2]),
-			edgesA[1].cross(edgesB[0]),
-			edgesA[1].cross(edgesB[1]),
-			edgesA[1].cross(edgesB[2]),
-			edgesA[2].cross(edgesB[0]),
-			edgesA[2].cross(edgesB[1]),
-			edgesA[2].cross(edgesB[2]) } };
+		// only cross edge pair
+		edgesA[0].cross(edgesB[0]),
+		edgesA[0].cross(edgesB[1]),
+		edgesA[0].cross(edgesB[2]),
+		edgesA[1].cross(edgesB[0]),
+		edgesA[1].cross(edgesB[1]),
+		edgesA[1].cross(edgesB[2]),
+		edgesA[2].cross(edgesB[0]),
+		edgesA[2].cross(edgesB[1]),
+		edgesA[2].cross(edgesB[2]) } };
 	double k = 0;
 	for (const auto& iter : edgesA)
 		k = std::max(k, iter.squaredNorm());
@@ -1388,12 +1403,14 @@ double getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const
 	//	return 0.0;
 	double dmin = DBL_MAX, dtemp;
 	Vector3d direction, vecSeg, vectA, vectB; // to iterate, get nearest direction
-	std::array<array<Vector3d, 2>, 3> edgesA = { { { triA[0], triA[1] },
-													{ triA[1], triA[2] },
-													{ triA[2], triA[0] } } };
-	std::array<array<Vector3d, 2>, 3> edgesB = { { { triB[0], triB[1] },
-													{ triB[1], triB[2] },
-													{ triB[2], triB[0] } } };
+	std::array<array<Vector3d, 2>, 3> edgesA = { {
+		{ triA[0], triA[1] },
+		{ triA[1], triA[2] },
+		{ triA[2], triA[0] } } };
+	std::array<array<Vector3d, 2>, 3> edgesB = { { 
+		{ triB[0], triB[1] },
+		{ triB[1], triB[2] },
+		{ triB[2], triB[0] } } };
 	auto _getDistanceOfPointAndSegmentINF = [&vecSeg](const Vector3d& point, const std::array<Vector3d, 2>& segm)->double
 	{
 		vecSeg = segm[1] - segm[0];// not zero
@@ -1655,12 +1672,14 @@ std::array<Eigen::Vector3d, 2> getTwoTrianglesNearestPoints(const std::array<Eig
 		local = segm[0] + k * vecSeg;
 		return (local - point).squaredNorm();
 	};
-	std::array<array<Vector3d, 2>, 3> edgesA = { { {triA[0], triA[1]},
-												{ triA[1], triA[2] },
-												{ triA[2], triA[0] } } };
-	std::array<array<Vector3d, 2>, 3> edgesB = { { {triB[0], triB[1]},
-												{ triB[1], triB[2] },
-												{ triB[2], triB[0] } } };
+	std::array<array<Vector3d, 2>, 3> edgesA = { {
+		{ triA[0], triA[1] },
+		{ triA[1], triA[2] },
+		{ triA[2], triA[0] } } };
+	std::array<array<Vector3d, 2>, 3> edgesB = { { 
+		{ triB[0], triB[1] },
+		{ triB[1], triB[2] },
+		{ triB[2], triB[0] } } };
 	// iterate all
 	for (const auto& iterA : triA)  //vertex to vertex
 	{
@@ -1770,12 +1789,14 @@ std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<E
 			res = { ((edgeA[0] - edgeB[0]).dot(edgeA[0] - edgeB[1])) <= 0.0 ? edgeA[0] : edgeA[1],
 					((edgeB[0] - edgeA[0]).dot(edgeB[0] - edgeA[1])) <= 0.0 ? edgeB[0] : edgeB[1] };
 	};
-	std::array<array<Vector3d, 2>, 3> edgesA = { { {triA[0], triA[1]},
-												{ triA[1], triA[2] },
-												{ triA[2], triA[0] } } };
-	std::array<array<Vector3d, 2>, 3> edgesB = { { {triB[0], triB[1]},
-												{ triB[1], triB[2] },
-												{ triB[2], triB[0] } } };
+	std::array<array<Vector3d, 2>, 3> edgesA = { { 
+		{ triA[0], triA[1] },
+		{ triA[1], triA[2] },
+		{ triA[2], triA[0] } } };
+	std::array<array<Vector3d, 2>, 3> edgesB = { { 
+		{ triB[0], triB[1] },
+		{ triB[1], triB[2] },
+		{ triB[2], triB[0] } } };
 	int count = 0;
 	double k, k2;
 	for (const auto& edgeA : edgesA)
