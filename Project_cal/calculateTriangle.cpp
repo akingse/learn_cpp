@@ -55,6 +55,25 @@ bool psykronix::isPerpendi(const Vector3d& vecA, const Vector3d& vecB/*, double 
 	return vecA.dot(vecB) < tole;
 }
 
+double psykronix::computeTriangleArea(const std::array<Vector2d, 3>& triangle)
+{
+	Vector2d a = triangle[1] - triangle[0];
+	Vector2d b = triangle[2] - triangle[0];
+	return 0.5 * fabs(a[0] * b[1] - a[1] * b[0]); //cross value
+}
+
+double psykronix::computeTriangleArea(const std::array<Vector3d, 3>& triangle, bool is2D /*= true*/) //is2D means OnXoY
+{
+	Vector3d AB = triangle[1] - triangle[0];
+	Vector3d AC = triangle[2] - triangle[0];
+	if (is2D)
+	{
+		AB[2] = 0.0; //to xoy plane
+		AC[2] = 0.0;
+	}
+	return 0.5 * AB.cross(AC).norm();
+}
+
 //isPointInTriangle2D
 bool psykronix::isPointInTriangle(const Vector2d& point, const std::array<Vector2d, 3>& trigon) // 2D
 {
@@ -1261,12 +1280,13 @@ bool isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, const std
 		std::max(std::max(triB[0][0], triB[1][0]), triB[2][0]) <= std::min(std::min(triA[0][0], triA[1][0]), triA[2][0]) ||
 		std::max(std::max(triB[0][1], triB[1][1]), triB[2][1]) <= std::min(std::min(triA[0][1], triA[1][1]), triA[2][1]))
 		return false;
-	std::array<Eigen::Vector2d, 6> edgesAB = { triA[1] - triA[0],
-											triA[2] - triA[1],
-											triA[0] - triA[2],
-											triB[1] - triB[0],
-											triB[2] - triB[1],
-											triB[0] - triB[2] };
+	std::array<Eigen::Vector2d, 6> edgesAB = {
+		triA[1] - triA[0],
+		triA[2] - triA[1],
+		triA[0] - triA[2],
+		triB[1] - triB[0],
+		triB[2] - triB[1],
+		triB[0] - triB[2] };
 	double k = 0;
 	for (auto& iter : edgesAB)
 	{
@@ -2171,6 +2191,58 @@ bool isPointInPolygon2D(const Eigen::Vector3d& point, const vector<Eigen::Vector
 			isIn = !isIn;
 	}
 	return isIn;
+}
+
+bool isTwoPolygonsIntersectSAT(const std::vector<Eigen::Vector2d>& polygonA, const std::vector<Eigen::Vector2d>& polygonB)
+{
+	// has been boundbox pre-judge
+	vector<Eigen::Vector2d> axes;
+	size_t i;
+	Vector2d edge;
+	for (i = 0; i < polygonA.size() - 1; i++)
+	{
+		edge = polygonA[i + 1] - polygonA[i];
+		if (!edge.isZero())
+			axes.push_back(Vector2d(-edge[1], edge[0]));
+	}
+	edge = polygonA[i] - polygonA[0];
+	if (!edge.isZero())
+		axes.push_back(Vector2d(-edge[1], edge[0]));
+	for (i = 0; i < polygonB.size() - 1; i++)
+	{
+		edge = polygonB[i + 1] - polygonB[i];
+		if (!edge.isZero())
+			axes.push_back(Vector2d(-edge[1], edge[0]));
+	}
+	edge = polygonB[i] - polygonB[0];
+	if (!edge.isZero())
+		axes.push_back(Vector2d(-edge[1], edge[0]));
+	//do judge
+	double minA, maxA, minB, maxB, projection;
+	for (const auto& axis : axes)
+	{
+		if (axis.isZero())
+			continue;
+		minA = DBL_MAX;
+		maxA = -DBL_MAX;
+		minB = DBL_MAX;
+		maxB = -DBL_MAX;
+		for (const auto& vertex : polygonA)
+		{
+			projection = axis.dot(vertex);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
+		}
+		for (const auto& vertex : polygonB)
+		{
+			projection = axis.dot(vertex);
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		if (maxA < minB + eps || maxB < minA + eps)
+			return false;
+	}
+	return true;
 }
 
 Eigen::Matrix4d getProjectionMatrixByPlane(const Eigen::Vector3d& point, const Eigen::Vector3d& normal)

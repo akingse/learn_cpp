@@ -1,13 +1,25 @@
 #pragma once
 
-inline std::wstring transfer_string_to_wstring(const std::string& str) //ANSIToUnicode
+//inline std::wstring transfer_string_to_wstring(const std::string& str) //ANSIToUnicode
+//{
+//	int lengthW = MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, NULL, NULL);
+//    wchar_t* pUnicode = new wchar_t[lengthW * sizeof(wchar_t)];
+//    memset(pUnicode, 0, lengthW * sizeof(wchar_t));
+//    MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, pUnicode, lengthW);
+//    std::wstring strw = pUnicode;
+//    delete[] pUnicode;
+//    return strw;
+//}
+
+inline std::wstring transfer_string_to_wstring(const std::string& str)
 {
+    std::wstring strw;
     int lengthW = MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, NULL, NULL);
-    wchar_t* pUnicode = new wchar_t[lengthW * sizeof(wchar_t)];
-    memset(pUnicode, 0, lengthW * sizeof(pUnicode));
-    MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, pUnicode, lengthW);
-    std::wstring strw = pUnicode;
-    delete[] pUnicode;
+	wchar_t* pUnicode = new wchar_t[lengthW + 1];
+	MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, pUnicode, lengthW);
+    pUnicode[lengthW] = L'\0';
+    strw.append(pUnicode);
+	delete[] pUnicode;
     return strw;
 }
 
@@ -18,6 +30,32 @@ inline std::string getExePath() // include<afx.h>
     CString path = buff;
     path = path.Left(path.ReverseFind('\\')); // delete exename
     return (std::string)(CStringA)path;
+}
+
+static size_t countFile = 0;
+inline void printLogTxt(const std::string& context, const std::string& fileName = {})
+{
+    std::time_t currentTime = std::time(nullptr);
+    std::string timeString = std::ctime(&currentTime);
+    if (!timeString.empty() && timeString[timeString.length() - 1] == '\n') 
+        timeString.erase(timeString.length() - 6); // 2024\n
+    for (char& c : timeString) 
+    {
+        if (c == ' ' || c == ':')
+            c = '_';
+    }
+    std::string fileNameO = fileName;
+    if (fileNameO.empty())
+        fileNameO = "../txt_file/LogTxt_" + timeString + "_N" + std::to_string(countFile) + ".txt";
+    std::ofstream outputFile(fileNameO);
+    if (outputFile.is_open()) 
+    {
+        outputFile << "create time:\n" << timeString << std::endl;
+        outputFile << context;
+        outputFile.close();
+        countFile++;
+    }
+    return;
 }
 
 //file write and read

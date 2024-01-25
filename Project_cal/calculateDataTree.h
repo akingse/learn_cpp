@@ -22,12 +22,13 @@ namespace psykronix
 		long long m_index = -1; // the index in the vector container
 		//record the number of polygon's segment, and the proportion of intersect point, and the number of other polygon
 		std::vector<std::tuple<size_t, double, size_t>> m_intersect;
-		static size_t m_id;
+		//static size_t m_id;
 	public:
+		Polygon2d() = default;
 		Polygon2d(const std::vector<Eigen::Vector2d>& polyline)
 		{
 			m_polygon = polyline;
-			m_id++;
+			//m_id++;
 			for (const auto& iter : m_polygon)
 				m_bound.extend(iter);
 #ifdef USING_AUTO_CLOSE
@@ -126,13 +127,16 @@ public:
 	KdTree2d() = delete;
 	KdTree2d(const std::vector<psykronix::Polygon2d>& polygons);
 	KdTree2d(const std::vector<eigen::TrigonPart>& triangles);
+	KdTree2d(const std::vector<eigen::ProfilePart>& profiles);
 	std::shared_ptr<KdTreeNode2d> get() const
 	{
 		return m_kdTree;
 	}
 	std::vector<size_t> findIntersect(const psykronix::Polygon2d& polygon); //searchFromKdTree
 	std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon);
+	std::vector<size_t> findIntersect(const eigen::ProfilePart& profile);
 };
+
 //----------------------------------------------------------------------------------------------------------------
 //  3d
 //----------------------------------------------------------------------------------------------------------------

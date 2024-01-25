@@ -18,7 +18,7 @@ using namespace eigen;
 //--------------------------------------------------------------------------------------------------
 
 #ifdef RESERVE_USING_POLYGON2D
-size_t Polygon2d::m_id = 0;
+//size_t Polygon2d::m_id = 0;
 //sort the input polygons
 std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<Polygon2d>& polygons, int dimension = 0)
 {
@@ -136,6 +136,21 @@ KdTree2d::KdTree2d(const std::vector<TrigonPart>& _triangles)
 	m_kdTree = _createKdTree2d(triangles);
 }
 
+KdTree2d::KdTree2d(const std::vector<ProfilePart>& profiles)
+{
+	std::vector<Polygon2d> polygons;
+	for (size_t i = 0; i < profiles.size(); ++i)
+	{
+		Polygon2d polygon;
+		polygon.m_index = i;
+		const Vector3d& min = profiles[i].m_box3d.min();
+		const Vector3d& max = profiles[i].m_box3d.max();
+		polygon.m_bound = AlignedBox2d(Vector2d(min[0], min[1]), Vector2d(max[0], max[1]));
+		polygons.push_back(polygon);
+	}
+	m_kdTree = _createKdTree2d(polygons);
+}
+
 std::vector<size_t> KdTree2d::findIntersect(const Polygon2d& polygon)
 {
 	if (m_kdTree == nullptr || !polygon.isValid())
@@ -184,6 +199,36 @@ std::vector<size_t> KdTree2d::findIntersect(const TrigonPart& trigon)
 			{
 				_searchKdTree(node->m_left);
 				_searchKdTree(node->m_right);
+			}
+		}
+	};
+	_searchKdTree(m_kdTree);
+	return indexes;
+}
+
+std::vector<size_t> KdTree2d::findIntersect(const ProfilePart& profile)
+{
+	if (m_kdTree == nullptr || profile.isEmpty())
+		return {}; //test whether is working
+	std::vector<size_t> indexes;
+	//const Vector3d& min = profile.m_box3d.min();
+	//const Vector3d& max = profile.m_box3d.max();
+	//AlignedBox2d bound = AlignedBox2d(Vector2d(min[0], min[1]), Vector2d(max[0], max[1]));
+	std::function<void(const shared_ptr<KdTreeNode2d>&)> _searchKdTree = [&](const shared_ptr<KdTreeNode2d>& node)->void
+	{
+		//using recursion
+		if (node->m_bound.intersects(profile.m_box2d))
+		{
+			if (node->m_index == -1) // isnot leaf node
+			{
+				_searchKdTree(node->m_left);
+				_searchKdTree(node->m_right);
+			}
+			else
+			{
+				if (profile.m_index < node->m_index) //exclude self
+					indexes.push_back(node->m_index);
+				//return;
 			}
 		}
 	};

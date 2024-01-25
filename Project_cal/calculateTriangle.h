@@ -20,6 +20,8 @@ namespace psykronix
 	DLLEXPORT_CAL bool isParallel(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB); 
 	DLLEXPORT_CAL bool isPerpendi(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB);
 	DLLEXPORT_CAL bool isPerpendi(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB);
+	double computeTriangleArea(const std::array<Eigen::Vector2d, 3>& triangle);
+	double computeTriangleArea(const std::array<Eigen::Vector3d, 3>& triangle, bool is2D = true);
 
 	// intersect of triangle
 	DLLEXPORT_CAL bool isPointInTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon);
@@ -67,6 +69,9 @@ DLLEXPORT_CAL std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(cons
 // pnpoly
 DLLEXPORT_CAL bool isPointInPolygon2D(const Eigen::Vector2d& point, const std::vector<Eigen::Vector2d>& polygon);
 DLLEXPORT_CAL bool isPointInPolygon2D(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& polygon);
+//for convex polygon
+DLLEXPORT_CAL bool isTwoPolygonsIntersectSAT(const std::vector<Eigen::Vector2d>& polygonA, const std::vector<Eigen::Vector2d>& polygonB);
+
 // generate matrix
 DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
 DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const psykronix::Plane3d& plane);

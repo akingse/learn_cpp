@@ -153,11 +153,21 @@ namespace eigen
     {
         long long m_index; // mesh index
         OcclusionStatus m_visible = OcclusionStatus::EXPOSED;
-        Eigen::AlignedBox3d m_box3d;
-        //Eigen::AlignedBox2d m_box2d; // contained in box3d
-        std::vector<long long> m_intersect;
+        Eigen::AlignedBox3d m_box3d; //to judge front
+        Eigen::AlignedBox2d m_box2d; // contained in box3d
+        std::vector<long long> m_shielded;
         //std::vector<Eigen::Vector3d> m_profile3d; 
-        std::vector<Eigen::Vector2d> m_profile2d; // outer profile
+        //std::vector<Eigen::Vector2d> m_profile2d; // outer profile
+        std::vector<std::vector<Eigen::Vector2d>> m_contour2d;
+        std::vector<TrigonPart> m_trigons; //to judge front
+        bool isEmpty() const
+        {
+            return m_contour2d.empty();
+        }
+        const std::vector<Eigen::Vector2d>& getOuter() const
+        {
+            return m_contour2d[0];
+        }
 #ifdef CLASH_DETECTION_DEBUG_TEMP
         double m_area;
 #endif
