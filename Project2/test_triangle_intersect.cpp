@@ -433,6 +433,12 @@ static void _test10()
 	Triangle2d triA2 = { *(Vector2d*)triA[0].data(),  *(Vector2d*)triA[1].data(),  *(Vector2d*)triA[2].data() };
 	Triangle2d triB2 = { *(Vector2d*)triB[0].data(),  *(Vector2d*)triB[1].data(),  *(Vector2d*)triB[2].data() };
 	isInter = isTwoTrianglesPenetrationSAT(triA2, triB2);
+	
+	Vector2d poly_0 = Vector2d(0, 0);
+	Vector2d poly_1 = Vector2d(10, 0);
+	Vector2d poly_2 = Vector2d(0, 10);
+	std::vector<Eigen::Vector2d> polygonA = { poly_0 ,poly_1 ,poly_2 };
+	isInter = isTwoPolygonsIntersectSAT(polygonA, polygonA);
 
 	return;
 }

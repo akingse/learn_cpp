@@ -218,6 +218,13 @@ static int _test_chatgpt_1()
 		std::cout << "没有找到目标值" << target1 << std::endl;
 	}
 
+	vector<int> vec3 = { 1,2,3 };
+	void* ptr1 = &vec3;
+	void* ptr2 = vec3.data();
+	vector<int> vec4 = *reinterpret_cast<vector<int>*>(ptr1);
+	int i0 = *(int*)ptr2;
+	int i1 = *(int*)ptr2 + 1;
+	int i2 = *(int*)ptr2 + 2;
 	return 0;
 
 }
@@ -225,7 +232,8 @@ static int _test_chatgpt_1()
 
 static int _enrol = []()->int {
 
-	//_test_chatgpt_1();
 	//test_list();
+	_test_chatgpt_1();
+	cout << "test_vector finished.\n" << endl;
 	return 0;
 }();
