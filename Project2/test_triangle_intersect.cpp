@@ -430,10 +430,22 @@ static void _test10()
 	bool isInter = false;
 	isInter= isTwoTrianglesIntersectSAT(triA, triB);
 	isInter= isTwoTrianglesPenetrationSAT(triA, triB);
+
+	Vector2d tri2A_0 = Vector2d(0,1);
+	Vector2d tri2A_1 = Vector2d(1,2);
+	Vector2d tri2A_2 = Vector2d(0,2);
+	Vector2d tri2B_0 = Vector2d(0,1);
+	Vector2d tri2B_1 = Vector2d(1,2);
+	Vector2d tri2B_2 = Vector2d(0,0);
+	Triangle2d tri2A = { tri2A_0, tri2A_1, tri2A_2 };
+	Triangle2d tri2B = { tri2B_0, tri2B_1, tri2B_2 };
+	isInter = isTwoTrianglesPenetrationSAT(tri2A, tri2B);
+
 	Triangle2d triA2 = { *(Vector2d*)triA[0].data(),  *(Vector2d*)triA[1].data(),  *(Vector2d*)triA[2].data() };
 	Triangle2d triB2 = { *(Vector2d*)triB[0].data(),  *(Vector2d*)triB[1].data(),  *(Vector2d*)triB[2].data() };
 	isInter = isTwoTrianglesPenetrationSAT(triA2, triB2);
-	
+	//std::vector<Eigen::Vector2d> polyA(triA2.data(), 3);
+
 	Vector2d poly_0 = Vector2d(0, 0);
 	Vector2d poly_1 = Vector2d(10, 0);
 	Vector2d poly_2 = Vector2d(0, 10);

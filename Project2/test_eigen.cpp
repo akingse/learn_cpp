@@ -181,6 +181,8 @@ static void test3()
 	Eigen::Vector4d b1(1.0, 2.0, 3.0, 2);
 	Eigen::Vector3d b2 = b1.hnormalized(); //尾部单位化，尾部数字会除以前面的数字，以实现单位化
 	Eigen::Vector4d b3 = b1.hnormalized().homogeneous();
+	Eigen::Vector3d b4(1, 2, 3);
+	Eigen::Vector2d b5 = b4.hnormalized();
 	return;
 }
 
