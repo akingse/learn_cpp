@@ -1907,6 +1907,7 @@ ModelMesh games::meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, si
 	return meshSim;
 }
 
+// all function of QEM
 inline void _getPlaneCoefficient(const Vector3d& A, const Vector3d& B, const Vector3d& C, double& a, double& b, double& c, double& d)
 {
 	// a*x + b*y + c*z + d = 0
@@ -2004,17 +2005,6 @@ ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collaps
 	std::vector<Eigen::Matrix4d> Qs;
 	for (int i = 0; i < mesh.vbo_.size(); i++)
 	{
-		//Eigen::Matrix4d Q = Eigen::Matrix4d::Zero();
-		//for (const auto& face : mesh.ibo_)
-		//{
-		//	if (face[0] != i && face[1] != i && face[2] != i) //find the adjacent faces 
-		//		continue;
-		//	double a, b, c, d;
-		//	getPlaneCoefficient(mesh.vbo_[face[0]], mesh.vbo_[face[1]], mesh.vbo_[face[2]], a, b, c, d);
-		//	Vector4d p(a, b, c, d);
-		//	Q += p * p.transpose(); //Kp matrix sigma
-		//}
-		//Qs.push_back(Q);
 		Qs.push_back(_getQMatrixOfVertex(mesh.ibo_, mesh.vbo_, i));
 	}
 	// place edge into heap
@@ -2024,9 +2014,9 @@ ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collaps
 		Edge edge = _getCostAndVbarOfEdge(Qs, mesh.vbo_, iter);
 		heap.push(edge);
 	}
-	ModelMesh meshSim = mesh;//copy
-	std::vector<Eigen::Vector3d>& vbo = meshSim.vbo_;
-	std::vector<std::array<int, 3>>& ibo = meshSim.ibo_;
+	ModelMesh meshC = mesh;//copy
+	std::vector<Eigen::Vector3d>& vbo = meshC.vbo_;
+	std::vector<std::array<int, 3>>& ibo = meshC.ibo_;
 	auto _updateCollapseEdgeHeap = [&](int i_bar) ->void
 	{
 		set<int> adjacentVertex;
@@ -2092,6 +2082,7 @@ ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collaps
 		_updateCollapseEdgeHeap(edge.m_edge[0]); //新的edge的error会不会小于受vbar影响而改变的edge
 		collaCout++;
 	}
+	ModelMesh meshSim; //new mesh
 	vector<int> indexMap; // origin face's vertex index -> new index
 	int j = 0;
 	for (int i = 0; i < vbo.size(); i++)
@@ -2112,4 +2103,75 @@ ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collaps
 		}
 	}
 	return meshSim;
+}
+
+HeMesh::HeMesh(const ModelMesh& mesh)
+{
+	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
+	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
+	HeMesh heMesh;
+	for (int i = 0; i < mesh.vbo_.size(); ++i)
+	{
+		HeVertex* heVertex = new HeVertex(mesh.vbo_[i]);
+		heVertex->m_index = i;
+		heMesh.m_vertexes.push_back(heVertex);
+	}
+	int countEdge = 0;
+	map<array<int, 2>, int> uniqueEdge;
+	for (int i = 0; i < mesh.ibo_.size(); ++i)
+	{
+		HeFace* heFace = new HeFace;
+		heFace->m_index = i;
+		//heFace->m_normal = (v1 - v0).cross(v2 - v1); // with normalized
+		heFace->m_normal = (vbo[ibo[i][1]] - vbo[ibo[i][0]]).cross(vbo[ibo[i][2]] - vbo[ibo[i][1]]);
+		int firstEdge = countEdge;
+		for (int j = 0; j < 3; ++j) //create 3 edges from 1 face
+		{
+			HeEdge* heEdge = new HeEdge;
+			heEdge->m_index = countEdge;
+			heEdge->m_incFace = heFace;
+			heEdge->m_oriVertex = m_vertexes[ibo[i][j]];
+			m_edges.push_back(heEdge);
+			countEdge++;
+		}
+		array<int, 4> face = { ibo[i][0], ibo[i][1], ibo[i][2], ibo[i][0] };
+		for (int j = 0; j < 3; ++j) // add adjacent relation after create edges
+		{
+			int prev = j - 1 < 0 ? 2 : j - 1;
+			m_edges[firstEdge + j]->m_prevEdge = m_edges[firstEdge + prev];
+			int next = j + 1 > 2 ? 0 : j + 1;
+			m_edges[firstEdge + j]->m_nextEdge = m_edges[firstEdge + next];
+			array<int, 2> edge = (face[j] < face[j + 1]) ?
+				array<int, 2>{face[j], face[j + 1]} :
+				array<int, 2>{face[j + 1], face[j]};
+			if (uniqueEdge.find(edge) == uniqueEdge.end())
+				uniqueEdge.emplace(edge, firstEdge + j);
+			else //means twinEdge added
+			{
+				m_edges[firstEdge + j]->m_twinEdge = m_edges[uniqueEdge[edge]];
+				m_edges[uniqueEdge[edge]]->m_twinEdge = m_edges[firstEdge + j];
+			}
+		}
+		heFace->m_incEdge = m_edges[firstEdge];
+		m_faces.push_back(heFace);
+	}
+}
+
+HeMesh::operator ModelMesh() const
+{
+	ModelMesh mesh;
+	std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
+	std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
+	for (const auto& v : m_vertexes)
+		vbo.push_back(v->m_coor);
+	for (const auto& iter : m_faces)
+	{
+		HeEdge* edge = iter->m_incEdge;
+		std::array<int, 3> face = {
+			edge->m_prevEdge->m_oriVertex->m_index,
+			edge->m_oriVertex->m_index,
+			edge->m_nextEdge->m_oriVertex->m_index, };
+		ibo.push_back(face);
+	}
+	return mesh;
 }

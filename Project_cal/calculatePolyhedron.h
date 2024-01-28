@@ -46,7 +46,7 @@ std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const
 
 namespace games
 {
-	struct Vertex 
+	struct Vertex
 	{
 		Eigen::Vector3d m_vertex;
 		double m_error = 0.0;
@@ -56,6 +56,19 @@ namespace games
 			return m_error > rhs.m_error; //for small root heap
 		}
 	};
+
+	struct Edge
+	{
+		std::array<int, 2> m_edge; //unique
+		Eigen::Vector3d m_vertex; //using in first average method
+		Eigen::Vector4d m_vbar; //using in QEM
+		double m_error = 0.0;
+		bool operator<(const Edge& rhs) const
+		{
+			return m_error > rhs.m_error; //for small root heap
+		}
+	};
+
 	//struct CompareVertex //using for priority_queue template
 	//{
 	//	bool operator()(const Vertex& v1, const Vertex& v2) 
@@ -69,16 +82,96 @@ namespace games
 	//	return vA.m_error < vB.m_error;
 	//}
 
-	struct Edge
+	//The half edge data structure
+	struct HeEdge;
+	struct HeFace;
+#define USING_POINTER_VERION
+	struct HeVertex
 	{
-		std::array<int, 2> m_edge; //unique
-		Eigen::Vector3d m_vertex; //the new merged vertex of edge
-		Eigen::Vector4d m_vbar;
-		double m_error = 0.0;
-		bool operator<(const Edge& rhs) const
+		HeVertex() = default;
+		HeVertex(const Eigen::Vector3d& v) :m_coor(v) {}
+		Eigen::Vector3d m_coor;// start vertex coordinate of HalfEdge
+		HeEdge* m_incEdge = nullptr; //incident edge, the start of edge
+		int m_index = -1;
+	};
+
+	struct HeEdge //the half edge
+	{
+		HeEdge() = default;
+		//HeEdge(HeVertex* v0, HeVertex* v1) :m_oriVertex(v0), m_desVertex(v1) {}
+		HeVertex* m_oriVertex = nullptr; //start origin vertex
+		//HeVertex* m_desVertex = nullptr; //end destination vertex, get by nextEdge
+		HeEdge* m_twinEdge = nullptr; //means pair opposite halfedge, get by index
+		HeEdge* m_prevEdge = nullptr;
+		HeEdge* m_nextEdge = nullptr;
+		HeFace* m_incFace = nullptr; //incident face
+		int m_index = -1;
+		//int m_edge; //the unique edge index
+	};
+
+	struct HeFace
+	{
+		HeFace() = default;
+		HeFace(HeEdge* edge) : m_incEdge(edge) {}
+		HeEdge* m_incEdge = nullptr; //any one of edges
+		Eigen::Vector3d m_normal;
+		int m_index = -1;
+	};
+
+	struct HeMesh
+	{
+#ifdef USING_POINTER_VERION
+		std::vector<HeVertex*> m_vertexes;
+		std::vector<HeEdge*> m_edges;
+		std::vector<HeFace*> m_faces;
+#else //using_vector_index
+		std::vector<HeVertex> m_vertexes;
+		std::vector<HeEdge> m_edges;
+		std::vector<HeFace> m_faces;
+#endif
+		bool isManifold = true;
+		//std::vector<bool> is_border;
+		HeMesh() = default;
+		void clear()
 		{
-			return m_error > rhs.m_error; //for small root heap
+			//Reset();
+			for (size_t i = 0; i != m_vertexes.size(); ++i)
+			{
+				if (m_vertexes[i])
+					delete m_vertexes[i];
+			}
+			for (size_t i = 0; i != m_edges.size(); ++i)
+			{
+				if (m_edges[i])
+					delete m_edges[i];
+			}
+			for (size_t i = 0; i != m_faces.size(); ++i)
+			{
+				if (m_faces[i])
+					delete m_faces[i];
+			}
+			m_vertexes.clear();
+			m_edges.clear();
+			m_faces.clear();
 		}
+		~HeMesh()
+		{
+			clear();
+		}
+		//convert
+		HeMesh(const ModelMesh& mesh); //fromTriangleMesh
+		operator ModelMesh() const; //toTriangleMesh
+
+		//Retrieve/CRUD
+		std::vector<HeEdge*> findEdges(const HeVertex*) const;
+		std::vector<HeEdge*> findEdges(const HeFace*) const;
+		std::vector<HeFace*> findFaces(const HeEdge*) const;
+
+		//function
+		void update();
+		void rearrangeFaceIncEdge();
+		std::vector<int> findConnectedFaces(size_t fid);
+
 	};
 
 	//utility
