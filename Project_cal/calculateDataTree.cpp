@@ -136,7 +136,7 @@ KdTree2d::KdTree2d(const std::vector<TrigonPart>& _triangles)
 	m_kdTree = _createKdTree2d(triangles);
 }
 
-KdTree2d::KdTree2d(const std::vector<ProfilePart>& profiles)
+KdTree2d::KdTree2d(const std::vector<ContourPart>& profiles)
 {
 	std::vector<Polygon2d> polygons;
 	for (size_t i = 0; i < profiles.size(); ++i)
@@ -206,7 +206,7 @@ std::vector<size_t> KdTree2d::findIntersect(const TrigonPart& trigon)
 	return indexes;
 }
 
-std::vector<size_t> KdTree2d::findIntersect(const ProfilePart& profile)
+std::vector<size_t> KdTree2d::findIntersect(const ContourPart& profile)
 {
 	if (m_kdTree == nullptr || profile.isEmpty())
 		return {}; //test whether is working

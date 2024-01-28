@@ -97,6 +97,48 @@ bool psykronix::isPointInTriangle(const Vector2d& point, const std::array<Vector
 #endif
 }
 
+// using BarycentricCoordinates
+bool isPointInTriangleBC(const Vector2d& point, const std::array<Vector2d, 3>& triangle)
+{
+	Eigen::Vector2d v0 = triangle[1] - triangle[0];
+	Eigen::Vector2d v1 = triangle[2] - triangle[0];
+	Eigen::Vector2d v2 = point - triangle[0];
+	double d00 = v0.dot(v0);
+	double d01 = v0.dot(v1);
+	double d11 = v1.dot(v1);
+	double d20 = v2.dot(v0);
+	double d21 = v2.dot(v1);
+	double denom = d00 * d11 - d01 * d01;
+	double a = (d11 * d20 - d01 * d21) / denom;
+	double b = (d00 * d21 - d01 * d20) / denom;
+	double c = 1.0 - a - b;
+	return 0.0 < a && 0.0 < b && 0.0 < c;
+}
+
+bool isPointInTriangleSAT(const Vector2d& point, const std::array<Vector2d, 3>& triangle)
+{
+	std::array<Vector2d, 3> axes = {
+		triangle[1] - triangle[0],
+		triangle[2] - triangle[1],
+		triangle[0] - triangle[2] };
+	for (auto& axis : axes)
+		axis = Vector2d(-axis[1], axis[0]);
+	double min = DBL_MAX, max = -DBL_MAX, projection;
+	for (const auto& axis : axes)
+	{
+		for (const auto& vertex : triangle)
+		{
+			projection = axis.dot(vertex);
+			min = std::min(min, projection);
+			max = std::max(max, projection);
+		}
+		projection = axis.dot(point);
+		if (max < projection || projection < min)
+			return false;
+	}
+	return true;
+}
+
 //must coplanar
 bool psykronix::isPointInTriangle(const Vector3d& point, const std::array<Vector3d, 3>& trigon) //3D
 {
@@ -956,19 +998,19 @@ bool isPointRayAcrossTriangleSAT(const Eigen::Vector3d& point, const std::array<
 		return false; // range box judge
 	//using SAT
 	Vector3d rayPt(point.x(), point.y(), rayZ), axisZ(0, 0, 1);
-	std::array<Eigen::Vector3d, 3> edges = { trigon[1] - trigon[0],
+	std::array<Eigen::Vector3d, 3> m_edges = { trigon[1] - trigon[0],
 										   trigon[2] - trigon[1],
 										   trigon[0] - trigon[2] };
-	Vector3d normal = edges[0].cross(edges[1]);
+	Vector3d normal = m_edges[0].cross(m_edges[1]);
 	std::array<Eigen::Vector3d, 7> axes = { {
 			//axisZ, // using pre-box
-			axisZ.cross(edges[0]),
-			axisZ.cross(edges[1]),
-			axisZ.cross(edges[2]),
+			axisZ.cross(m_edges[0]),
+			axisZ.cross(m_edges[1]),
+			axisZ.cross(m_edges[2]),
 			normal,
-			normal.cross(edges[0]),
-			normal.cross(edges[1]),
-			normal.cross(edges[2]) } };//add
+			normal.cross(m_edges[0]),
+			normal.cross(m_edges[1]),
+			normal.cross(m_edges[2]) } };//add
 	for (auto& axis : axes) // revise zero vector
 	{
 		if (axis.isZero())
@@ -1132,7 +1174,7 @@ bool isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& 
 	//	(p0.z() > max.z() && p1.z() > max.z() && p2.z() > max.z()))
 	//	return false;
 	// Separating Axis Theorem
-	std::array<Eigen::Vector3d, 3> edges = { 
+	std::array<Eigen::Vector3d, 3> m_edges = { 
 		trigon[1] - trigon[0],
 		trigon[2] - trigon[1],
 		trigon[0] - trigon[2] };
@@ -1144,17 +1186,17 @@ bool isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& 
 		coords[0],
 		coords[1],
 		coords[2],
-		edges[0].cross(edges[1]), //normal
+		m_edges[0].cross(m_edges[1]), //normal
 		//normal.cross(edges[]),
-		coords[0].cross(edges[0]),
-		coords[0].cross(edges[1]),
-		coords[0].cross(edges[2]),
-		coords[1].cross(edges[0]),
-		coords[1].cross(edges[1]),
-		coords[1].cross(edges[2]),
-		coords[2].cross(edges[0]),
-		coords[2].cross(edges[1]),
-		coords[2].cross(edges[2]) } };
+		coords[0].cross(m_edges[0]),
+		coords[0].cross(m_edges[1]),
+		coords[0].cross(m_edges[2]),
+		coords[1].cross(m_edges[0]),
+		coords[1].cross(m_edges[1]),
+		coords[1].cross(m_edges[2]),
+		coords[2].cross(m_edges[0]),
+		coords[2].cross(m_edges[1]),
+		coords[2].cross(m_edges[2]) } };
 	//for (auto& axis : axes) // absolute can give up
 	//{
 	//	if (axis.isZero())

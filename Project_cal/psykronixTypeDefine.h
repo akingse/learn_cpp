@@ -136,37 +136,37 @@ namespace eigen
         long long m_number;
         std::array<int, 2> m_index; // mesh index | triangle index
         OcclusionStatus m_visible = OcclusionStatus::EXPOSED;
-        //Eigen::AlignedBox3d m_box3d;
+        Eigen::AlignedBox3d m_box3d;
         Eigen::AlignedBox2d m_box2d;
-        //#ifdef CLASH_DETECTION_DEBUG_TEMP
         Eigen::Vector3d m_normal; //normal of m_triangle3d, always upward
         std::array<Eigen::Vector3d, 3> m_triangle3d;
         std::array<Eigen::Vector2d, 3> m_triangle2d;
-        //#endif
-            // profile boolean operation
-            //std::vector<std::array<int, 2>> m_intersect;
-        std::vector<std::array<int, 2>> m_shielded;
-        //std::shared_ptr<std::vector<std::array<int, 2>>> m_shielded = nullptr;
+        // profile boolean operation
+        //std::vector<std::array<int, 2>> m_intersect;
+        //std::vector<std::array<int, 2>> m_shielded;
+        std::vector<long long> m_shielded;
+        std::vector<std::vector<Eigen::Vector2d>> m_contour;
     };
 
-    struct ProfilePart
+    struct ContourPart
     {
         long long m_index; // mesh index
+        uint64_t m_entityid; // record belong to same polyface
         OcclusionStatus m_visible = OcclusionStatus::EXPOSED;
         Eigen::AlignedBox3d m_box3d; //to judge front
         Eigen::AlignedBox2d m_box2d; // contained in box3d
         std::vector<long long> m_shielded;
-        //std::vector<Eigen::Vector3d> m_profile3d; 
-        //std::vector<Eigen::Vector2d> m_profile2d; // outer profile
-        std::vector<std::vector<Eigen::Vector2d>> m_contour2d;
+        std::vector<std::vector<Eigen::Vector2d>> m_contour; //contour of mesh
+        std::vector<std::vector<Eigen::Vector2d>> m_profile; //fillArea, the bool result
         std::vector<TrigonPart> m_trigons; //to judge front
+
         bool isEmpty() const
         {
-            return m_contour2d.empty();
+            return m_contour.empty();
         }
         const std::vector<Eigen::Vector2d>& getOuter() const
         {
-            return m_contour2d[0];
+            return m_contour[0];
         }
 #ifdef CLASH_DETECTION_DEBUG_TEMP
         double m_area;

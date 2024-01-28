@@ -127,14 +127,14 @@ public:
 	KdTree2d() = delete;
 	KdTree2d(const std::vector<psykronix::Polygon2d>& polygons);
 	KdTree2d(const std::vector<eigen::TrigonPart>& triangles);
-	KdTree2d(const std::vector<eigen::ProfilePart>& profiles);
+	KdTree2d(const std::vector<eigen::ContourPart>& profiles);
 	std::shared_ptr<KdTreeNode2d> get() const
 	{
 		return m_kdTree;
 	}
 	std::vector<size_t> findIntersect(const psykronix::Polygon2d& polygon); //searchFromKdTree
 	std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon);
-	std::vector<size_t> findIntersect(const eigen::ProfilePart& profile);
+	std::vector<size_t> findIntersect(const eigen::ContourPart& profile);
 };
 
 //----------------------------------------------------------------------------------------------------------------
