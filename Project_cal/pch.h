@@ -17,6 +17,8 @@
 #else
 #define DLLEXPORT_CAL __declspec(dllimport)
 #endif
+#define USING_HALFEDGE_STRUCTURE
+#define USING_POINTER_VERION
 
 #include "psykronixTypeDefine.h"		
 #include "my_class_fun.h"		

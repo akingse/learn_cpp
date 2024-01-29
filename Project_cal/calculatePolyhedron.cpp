@@ -1499,7 +1499,7 @@ std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const
 //  penetration depth
 //---------------------------------------------------------------------------
 
-#if 0
+#ifdef USING_DISCARD_FUNCTION
 // only for convex polytope 
 bool isTwoMeshsIntersectGJK(const ModelMesh& meshA, const ModelMesh& meshB)
 {
@@ -1841,12 +1841,12 @@ ModelMesh games::meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, si
 			}
 			return totalError;
 		};
-	std::priority_queue<Edge> collapseEdgeQueue;
+	std::priority_queue<QEMEdge> collapseEdgeQueue;
 	auto _updateCollapseEdgeQueue = [&]()->void
 		{
 			for (const auto& iter : uniqueEdge)
 			{
-				Edge edge;
+				QEMEdge edge;
 				edge.m_edge = iter;
 				edge.m_vertex = 0.5 * (vbo[iter[0]] + vbo[iter[1]]);
 				edge.m_error = _computeEdgeError(edge.m_vertex, edgeNeighborFace[iter]);
@@ -1858,7 +1858,7 @@ ModelMesh games::meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, si
 	size_t collaCout = 0;
 	while (collaCout < collapseEdgeCount)
 	{
-		Edge edge = collapseEdgeQueue.top();
+		QEMEdge edge = collapseEdgeQueue.top();
 		collapseEdgeQueue.pop(); //delete edge
 		uniqueEdge.erase(edge.m_edge);
 		//ibo.erase(ibo.begin() + edgeOnFace[edge.m_edge][0]); //delete face
@@ -1908,20 +1908,22 @@ ModelMesh games::meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, si
 }
 
 // all function of QEM
-inline void _getPlaneCoefficient(const Vector3d& A, const Vector3d& B, const Vector3d& C, double& a, double& b, double& c, double& d)
+inline void _getPlaneCoefficient(const array<Vector3d,3>& trigon, double& a, double& b, double& c, double& d)
 {
 	// a*x + b*y + c*z + d = 0
-	Vector3d N = (A - B).cross(C - B); // N_x*(x-A_x) + N_y*(y-A_y) + N_z*(y-A_z) = 0
-	assert(!N.isZero());
-	a = N[0];
-	b = N[1];
-	c = N[2];
-	d = -N.dot(A);
+	//Vector3d N = (A - B).cross(C - B); // N_x*(x-A_x) + N_y*(y-A_y) + N_z*(y-A_z) = 0
+	//assert(!N.isZero());
+	Vector3d normal = (trigon[0] - trigon[1]).cross(trigon[2] - trigon[1]);
+	a = normal[0];
+	b = normal[1];
+	c = normal[2];
+	d = -normal.dot(trigon[0]);
 	double len = std::sqrt(a * a + b * b + c * c); //a^2 + b^2 + c^2 = 1
 	a /= len;
 	b /= len;
 	c /= len;
 	d /= len;
+	//return;
 }
 
 // calculate Q of every vertex
@@ -1933,16 +1935,31 @@ inline Matrix4d _getQMatrixOfVertex(const std::vector<std::array<int, 3>>& ibo, 
 		if (face[0] != i && face[1] != i && face[2] != i) //find all adjacent faces 
 			continue;
 		double a, b, c, d;
-		_getPlaneCoefficient(vbo[face[0]], vbo[face[1]], vbo[face[2]], a, b, c, d);
+		_getPlaneCoefficient({ vbo[face[0]], vbo[face[1]], vbo[face[2]] }, a, b, c, d);
 		Vector4d p(a, b, c, d);
 		Q += p * p.transpose(); //Kp matrix sigma
 	}
 	return Q;
 }
 
-inline Edge _getCostAndVbarOfEdge(const std::vector<Matrix4d>& Qs, const std::vector<Vector3d>& vbo, const array<int, 2 >& i) 
+inline Matrix4d _getQMatrixOfVertex(const HeMesh& mesh, int i)
 {
-	Edge edge;
+	Matrix4d Q = Eigen::Matrix4d::Zero();
+	for (const auto& face : mesh.m_faces)
+	{
+		if (!face->include(mesh.m_vertexes[i]))
+			continue;
+		double a, b, c, d;
+		_getPlaneCoefficient(face->ibo_v(), a, b, c, d);
+		Vector4d p(a, b, c, d);
+		Q += p * p.transpose(); //Kp matrix sigma
+	}
+	return Q;
+}
+
+inline QEMEdge _getCostAndVbarOfEdge(const std::vector<Matrix4d>& Qs, const std::vector<Vector3d>& vbo, const array<int, 2 >& i) 
+{
+	QEMEdge edge;
 	edge.m_edge = i;
 	//calculate cost and v_bar
 	Eigen::Matrix4d Q_bar = Qs[i[0]] + Qs[i[1]];
@@ -1961,6 +1978,28 @@ inline Edge _getCostAndVbarOfEdge(const std::vector<Matrix4d>& Qs, const std::ve
 	return edge;
 }
 
+inline QEMEdge _getCostAndVbarOfEdge(const std::vector<Matrix4d>& Qs, const HeEdge* i)
+{
+	QEMEdge edge;
+	edge.m_index = i->m_index;
+	//calculate cost and v_bar
+	Eigen::Matrix4d Q_bar = Qs[i->m_oriVertex->m_index] + Qs[i->m_nextEdge->m_oriVertex->m_index]; //get vertex index
+	Eigen::Matrix4d Q_h = Q_bar;//homogeneous
+	Q_h.row(3) = Eigen::RowVector4d(0, 0, 0, 1);
+	Eigen::Matrix4d inverse;
+	bool invertible;
+	Q_h.computeInverseWithCheck(inverse, invertible);
+	Eigen::Vector4d b(0, 0, 0, 1);
+	Eigen::Vector4d v_bar = (invertible) ?
+		v_bar = inverse * b : //v_bar = (1 / v_bar[3]) * v_bar; //hnormalized
+		v_bar = (0.5 * (i->m_oriVertex->m_coord + i->m_nextEdge->m_oriVertex->m_coord)).homogeneous(); //get vertex coord
+	double error = v_bar.transpose() * Q_bar * v_bar; // the cost
+	edge.m_vbar = v_bar;
+	edge.m_error = error;
+	return edge;
+}
+
+//#ifndef USING_HALFEDGE_STRUCTURE
 ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collapseEdgeCount /*= 0*/)
 {
 	//get edge
@@ -2008,10 +2047,10 @@ ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collaps
 		Qs.push_back(_getQMatrixOfVertex(mesh.ibo_, mesh.vbo_, i));
 	}
 	// place edge into heap
-	std::priority_queue<Edge> heap;
+	std::priority_queue<QEMEdge> heap;
 	for (const auto& iter : uniqueEdge)
 	{
-		Edge edge = _getCostAndVbarOfEdge(Qs, mesh.vbo_, iter);
+		QEMEdge edge = _getCostAndVbarOfEdge(Qs, mesh.vbo_, iter);
 		heap.push(edge);
 	}
 	ModelMesh meshC = mesh;//copy
@@ -2021,7 +2060,7 @@ ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collaps
 	{
 		set<int> adjacentVertex;
 		set<array<int, 2>> adjacentEdge;
-		Eigen::Matrix4d Q = Eigen::Matrix4d::Zero();
+		//Eigen::Matrix4d Q = Eigen::Matrix4d::Zero();
 		for (const auto& face : ibo)
 		{
 			if (face[0] != i_bar && face[1] != i_bar && face[2] != i_bar) //find the adjacent faces 
@@ -2050,14 +2089,14 @@ ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collaps
 		}
 		// update Q of adjacent Vertex
 		Qs[i_bar] = _getQMatrixOfVertex(ibo, vbo, i_bar);
-		for (const int& i : adjacentVertex)
+		for (const int& iter : adjacentVertex)
 		{
-			Qs[i] = _getQMatrixOfVertex(ibo, vbo, i);
+			Qs[iter] = _getQMatrixOfVertex(ibo, vbo, iter);
 		}
 		// add new edges
 		for (const auto& iter : adjacentEdge)
 		{
-			Edge edge = _getCostAndVbarOfEdge(Qs, vbo, iter);
+			QEMEdge edge = _getCostAndVbarOfEdge(Qs, vbo, iter);
 			heap.push(edge);
 		}
 	};
@@ -2065,7 +2104,7 @@ ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collaps
 	size_t collaCout = 0;
 	while (collaCout < collapseEdgeCount)
 	{
-		const Edge& edge = heap.top();
+		const QEMEdge& edge = heap.top();
 		ibo[edgeOnFace[edge.m_edge][0]] = { -1,-1,-1 }; //delete two face
 		ibo[edgeOnFace[edge.m_edge][1]] = { -1,-1,-1 };
 		vbo[edge.m_edge[0]] = edge.m_vbar.hnormalized();
@@ -2104,6 +2143,7 @@ ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collaps
 	}
 	return meshSim;
 }
+//#endif
 
 HeMesh::HeMesh(const ModelMesh& mesh)
 {
@@ -2137,10 +2177,13 @@ HeMesh::HeMesh(const ModelMesh& mesh)
 		array<int, 4> face = { ibo[i][0], ibo[i][1], ibo[i][2], ibo[i][0] };
 		for (int j = 0; j < 3; ++j) // add adjacent relation after create edges
 		{
+			//m_prevEdge
 			int prev = j - 1 < 0 ? 2 : j - 1;
 			m_edges[firstEdge + j]->m_prevEdge = m_edges[firstEdge + prev];
+			//m_nextEdge
 			int next = j + 1 > 2 ? 0 : j + 1;
 			m_edges[firstEdge + j]->m_nextEdge = m_edges[firstEdge + next];
+			//m_twinEdge
 			array<int, 2> edge = (face[j] < face[j + 1]) ?
 				array<int, 2>{face[j], face[j + 1]} :
 				array<int, 2>{face[j + 1], face[j]};
@@ -2163,15 +2206,146 @@ HeMesh::operator ModelMesh() const
 	std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
 	std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
 	for (const auto& v : m_vertexes)
-		vbo.push_back(v->m_coor);
+		vbo.push_back(v->m_coord);
 	for (const auto& iter : m_faces)
-	{
-		HeEdge* edge = iter->m_incEdge;
-		std::array<int, 3> face = {
-			edge->m_prevEdge->m_oriVertex->m_index,
-			edge->m_oriVertex->m_index,
-			edge->m_nextEdge->m_oriVertex->m_index, };
-		ibo.push_back(face);
-	}
+		ibo.push_back(iter->ibo());
 	return mesh;
 }
+
+// mesh operation with halfedge
+#ifdef USING_HALFEDGE_STRUCTURE
+HeMesh games::meshQuadricSimpIification(const HeMesh& mesh, size_t edgeCollapseTarget /*= 0*/)
+{
+	std::vector<Eigen::Matrix4d> Qs;
+	for (int i = 0; i < mesh.m_vertexes.size(); i++)
+	{
+		Qs.push_back(_getQMatrixOfVertex(mesh, i));
+	}
+	// place edge into heap
+	std::priority_queue<QEMEdge> heap;
+	std::set<int> uniqueEdge;
+	for (const auto& iter : mesh.m_edges) // only unique edge, halfedge means double amount
+	{
+		if (uniqueEdge.find(iter->m_index) == uniqueEdge.end() &&
+			uniqueEdge.find(iter->m_twinEdge->m_index) == uniqueEdge.end())
+		{
+			uniqueEdge.insert(iter->m_index);
+			QEMEdge edge = _getCostAndVbarOfEdge(Qs, iter);
+			heap.push(edge);
+		}
+	}
+	size_t edgeCollapseCurrent = 0;
+	HeMesh meshC = mesh;//copy
+	auto _updateCollapseEdgeHeap = [&](const HeVertex* vbar) ->void
+	{
+		//update neibor vertex qme-value
+		set<int> adjacentVertex;
+		for (const auto iter : meshC.m_faces)
+		{
+			if (iter->include(vbar))
+			{
+				const std::array<int, 3>& ibo = iter->ibo();
+				for (const auto i : ibo)
+					adjacentVertex.insert(i); //include vbar->m_index self
+			}
+		}
+		for (const auto iter : adjacentVertex)
+			Qs[iter] = _getQMatrixOfVertex(meshC, iter);
+		//update neibor edge qme-value
+		for (const auto iter : meshC.m_edges)
+		{
+			if (iter->m_oriVertex == vbar) //keep half amout
+			{
+				QEMEdge edge = _getCostAndVbarOfEdge(Qs, iter);
+				heap.push(edge);
+			}
+		}
+	};
+	//contract edge
+	while (edgeCollapseCurrent < edgeCollapseTarget)
+	{
+		const QEMEdge& mini = heap.top();
+		HeEdge* heEdge = meshC.m_edges[mini.m_index];
+		//update first vertex, delete second vertex
+		heEdge->m_oriVertex->m_coord = mini.m_vbar.hnormalized(); //update merged vertex
+		for (auto iter : mesh.m_edges)
+		{
+			if (iter->m_oriVertex->m_index == heEdge->m_twinEdge->m_oriVertex->m_index)
+				iter->m_oriVertex = heEdge->m_oriVertex;
+		}
+		if (heEdge->m_oriVertex->m_incEdge == heEdge) //avoid heVertex hold nullptr
+			heEdge->m_oriVertex->m_incEdge = heEdge->m_prevEdge->m_twinEdge;
+		if (heEdge->m_twinEdge->m_oriVertex)
+		{
+			delete heEdge->m_twinEdge->m_oriVertex; //also heEdge->m_nextEdge->m_oriVertex
+			heEdge->m_twinEdge->m_oriVertex = nullptr;
+		}
+		//change the twin edge of deleted face
+		int merge0 = heEdge->m_nextEdge->m_twinEdge->m_index;
+		int merge1 = heEdge->m_prevEdge->m_twinEdge->m_index;
+		meshC.m_edges[merge0]->m_twinEdge = meshC.m_edges[merge1];
+		meshC.m_edges[merge1]->m_twinEdge = meshC.m_edges[merge0];
+		merge0 = heEdge->m_twinEdge->m_nextEdge->m_twinEdge->m_index;
+		merge1 = heEdge->m_twinEdge->m_prevEdge->m_twinEdge->m_index;
+		meshC.m_edges[merge0]->m_twinEdge = meshC.m_edges[merge1];
+		meshC.m_edges[merge1]->m_twinEdge = meshC.m_edges[merge0];
+		// delete two face
+		if (heEdge->m_incFace)
+		{
+			delete heEdge->m_incFace;
+			heEdge->m_incFace = nullptr;
+		}
+		if (heEdge->m_twinEdge->m_incFace)
+		{
+			delete heEdge->m_twinEdge->m_incFace;
+			heEdge->m_twinEdge->m_incFace = nullptr;
+		}
+		_updateCollapseEdgeHeap(heEdge->m_oriVertex);
+		//delete one edge
+		if (heEdge)
+		{
+			delete heEdge;
+			heEdge = nullptr;
+		}
+		if (heEdge->m_twinEdge)
+		{
+			delete heEdge->m_twinEdge;
+			heEdge->m_twinEdge = nullptr;
+		}
+		heap.pop();
+		edgeCollapseCurrent++;
+	}
+	HeMesh meshSim; //new mesh
+	int j = 0;
+	for (int i = 0; i < meshC.m_vertexes.size(); i++)
+	{
+		if (meshC.m_vertexes[i] != nullptr)
+		{
+			meshC.m_vertexes[i]->m_index = j;
+			meshSim.m_vertexes.emplace_back(meshC.m_vertexes[i]);
+			j++;
+		}
+	}
+	j = 0;
+	for (int i = 0; i < meshC.m_edges.size(); i++)
+	{
+		if (meshC.m_edges[i] != nullptr)
+		{
+			meshC.m_edges[i]->m_index = j;
+			meshSim.m_edges.emplace_back(meshC.m_edges[i]);
+			j++;
+		}
+	}
+	j = 0;
+	for (int i = 0; i < meshC.m_faces.size(); i++)
+	{
+		if (meshC.m_faces[i] != nullptr)
+		{
+			meshC.m_faces[i]->m_index = j;
+			meshSim.m_faces.emplace_back(meshC.m_faces[i]);
+			j++;
+		}
+	}
+	return meshSim;
+}
+#endif //USING_HALFEDGE_STRUCTURE
