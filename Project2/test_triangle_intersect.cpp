@@ -3,6 +3,7 @@
 using namespace std;
 using namespace para;
 using namespace Eigen;
+using namespace eigen;
 using namespace psykronix;
 #undef max
 #undef min
@@ -159,14 +160,14 @@ static void _test1()
 	//测试旋转对平行的影响
 	array<Vector3d, 3> points0 = { Vector3d(100000.1,0,0),  Vector3d(200000.2,0,0),  Vector3d(300000.3,0,0) };
 	Vector3d croPro = (points0[1] - points0[0]).cross((points0[1] - points0[0]));
-	array<Vector3d, 3> points1 = psykronix::rotz(M_PI / 2) * points0;
+	array<Vector3d, 3> points1 = eigen::rotz(M_PI / 2) * points0;
 	Vector3d croPro1 = (points1[1] - points1[0]).cross((points1[1] - points1[0]));
 
-	points1 = psykronix::rotz(M_PI) * points0;
+	points1 = eigen::rotz(M_PI) * points0;
 	croPro1 = (points1[1] - points1[0]).cross((points1[1] - points1[0]));
-	points1 = psykronix::rotz(M_PI / 3) * points0;
+	points1 = eigen::rotz(M_PI / 3) * points0;
 	croPro1 = (points1[1] - points1[0]).cross((points1[1] - points1[0]));
-	points1 = psykronix::rotz(M_PI / 4) * points0;
+	points1 = eigen::rotz(M_PI / 4) * points0;
 	croPro1 = (points1[1] - points1[0]).cross((points1[1] - points1[0]));
 
 	//射线法，测试点是否在mesh内部
@@ -188,10 +189,10 @@ static void _test2()
 	Vector3d triB_1 = Vector3d(20.983265, 2.9384856, 10.2398456);
 	Vector3d triB_2 = Vector3d();
 	Triangle plane = { triA_0, triA_1, triA_2 };
-	plane = psykronix::scale(1e6, 1e6, 1e6) * plane;
+	plane = eigen::scale(1e6, 1e6, 1e6) * plane;
 	//Triangle triB = { triB_0, triB_1, triB_2 };
 	Segment segment = { triB_0 ,triB_1 };
-	segment = psykronix::scale(1e6, 1e6, 1e6) * segment;
+	segment = eigen::scale(1e6, 1e6, 1e6) * segment;
 
 	//calculate
 	Vector3d vecSeg = segment[1] - segment[0];

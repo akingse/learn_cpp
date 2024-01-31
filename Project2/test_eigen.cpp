@@ -6,6 +6,7 @@
 using namespace std;
 using namespace para;
 using namespace Eigen;
+using namespace eigen;
 using namespace psykronix;
 #undef max
 #undef min
@@ -21,7 +22,7 @@ static void test0()
 	bool isC = box.contains(Eigen::Vector3d(0.5, 0.5, 0.5));
 
 	std::array<Vector3d, 3> trigonA = { Vertex3d(-10, -10), Vertex3d(10, -10), Vertex3d(0, 10) };
-	std::array<Vector3d, 3> trigonB = psykronix::scale(2, 2, 2) * trigonA;
+	std::array<Vector3d, 3> trigonB = eigen::scale(2, 2, 2) * trigonA;
 	isTwoTrianglesIntersectPIT(trigonA, trigonA);
 
 	Eigen::AlignedBox3d box1(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(1, 1, 1));
@@ -183,6 +184,13 @@ static void test3()
 	Eigen::Vector4d b3 = b1.hnormalized().homogeneous();
 	Eigen::Vector3d b4(1, 2, 3);
 	Eigen::Vector2d b5 = b4.hnormalized();
+
+	std::array<Eigen::Vector2d, 3> triangle = {
+		Vector2d(0, 0),
+		Vector2d(2, 0),
+		Vector2d(1, 1)	};
+
+	Eigen::Matrix4d mat = getMatrixFromThreePoints(triangle);
 	return;
 }
 

@@ -50,7 +50,7 @@ inline void printLogTxt(const std::string& context, const std::string& fileName 
     std::ofstream outputFile(fileNameO);
     if (outputFile.is_open()) 
     {
-        outputFile << "create time:\n" << timeString << std::endl;
+        outputFile << "| create time: |" << timeString << "| \n| ---- | ---- | \n";
         outputFile << context;
         outputFile.close();
         countFile++;
