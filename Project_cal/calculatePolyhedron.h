@@ -46,24 +46,25 @@ std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const
 
 namespace games
 {
-	struct Vertex
+	struct QEMVertex
 	{
 		Eigen::Vector3d m_vertex;
 		double m_error = 0.0;
 		//Vertex(double x, double y, double z) : x(x), y(y), z(z), error(0.0) {}
-		bool operator<(const Vertex& rhs) const
+		bool operator<(const QEMVertex& rhs) const
 		{
 			return m_error > rhs.m_error; //for small root heap
 		}
 	};
 
-	struct Edge
+	struct QEMEdge
 	{
-		std::array<int, 2> m_edge; //unique
+		std::array<int, 2> m_edge; //unique index
+		int m_index; //index of HeMesh
 		Eigen::Vector3d m_vertex; //using in first average method
 		Eigen::Vector4d m_vbar; //using in QEM
 		double m_error = 0.0;
-		bool operator<(const Edge& rhs) const
+		bool operator<(const QEMEdge& rhs) const
 		{
 			return m_error > rhs.m_error; //for small root heap
 		}
@@ -85,12 +86,12 @@ namespace games
 	//The half edge data structure
 	struct HeEdge;
 	struct HeFace;
-#define USING_POINTER_VERION
+
 	struct HeVertex
 	{
 		HeVertex() = default;
-		HeVertex(const Eigen::Vector3d& v) :m_coor(v) {}
-		Eigen::Vector3d m_coor;// start vertex coordinate of HalfEdge
+		HeVertex(const Eigen::Vector3d& v) :m_coord(v) {}
+		Eigen::Vector3d m_coord;// start vertex coordinate of HalfEdge
 		HeEdge* m_incEdge = nullptr; //incident edge, the start of edge
 		int m_index = -1;
 	};
@@ -116,14 +117,37 @@ namespace games
 		HeEdge* m_incEdge = nullptr; //any one of edges
 		Eigen::Vector3d m_normal;
 		int m_index = -1;
+		inline std::array<int, 3> ibo() const
+		{
+			std::array<int, 3> face = {
+				m_incEdge->m_oriVertex->m_index,
+				m_incEdge->m_nextEdge->m_oriVertex->m_index, 
+				m_incEdge->m_prevEdge->m_oriVertex->m_index };
+			return face;
+		}
+		inline std::array<Eigen::Vector3d, 3> ibo_v() const
+		{
+			std::array<Eigen::Vector3d, 3> face = {
+				m_incEdge->m_oriVertex->m_coord,
+				m_incEdge->m_nextEdge->m_oriVertex->m_coord,
+				m_incEdge->m_prevEdge->m_oriVertex->m_coord };
+			return face;
+		}
+		inline bool include(const HeVertex* vt) const
+		{
+			return //using pointer judge
+				vt == m_incEdge->m_oriVertex ||
+				vt == m_incEdge->m_nextEdge->m_oriVertex ||
+				vt == m_incEdge->m_prevEdge->m_oriVertex;
+		}
 	};
 
 	struct HeMesh
 	{
 #ifdef USING_POINTER_VERION
-		std::vector<HeVertex*> m_vertexes;
+		std::vector<HeVertex*> m_vertexes; //vbo
 		std::vector<HeEdge*> m_edges;
-		std::vector<HeFace*> m_faces;
+		std::vector<HeFace*> m_faces; //ibo
 #else //using_vector_index
 		std::vector<HeVertex> m_vertexes;
 		std::vector<HeEdge> m_edges;
@@ -178,4 +202,7 @@ namespace games
 	ModelMesh meshLoopSubdivision(const ModelMesh& mesh);
 	ModelMesh meshQuadricSimpIification(const ModelMesh& mesh, size_t collapseEdgeCount = 0);
 	ModelMesh meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, size_t collapseEdgeCount = 0);
+	//halfedge
+	HeMesh meshQuadricSimpIification(const HeMesh& mesh, size_t edgeCollapseTarget = 0);
+
 }

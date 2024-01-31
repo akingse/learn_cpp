@@ -125,11 +125,11 @@ static void _test0()
 }
 static void _test1()
 {
-	Vertex v1 = { Vector3d(1,1,1),1 };
-	Vertex v2 = { Vector3d(1,1,1),2 };
-	Vertex v3 = { Vector3d(1,1,1),3 };
-	Vertex v4 = { Vector3d(1,1,1),4 };
-	std::priority_queue<Vertex> pq;
+	QEMVertex v1 = { Vector3d(1,1,1),1 };
+	QEMVertex v2 = { Vector3d(1,1,1),2 };
+	QEMVertex v3 = { Vector3d(1,1,1),3 };
+	QEMVertex v4 = { Vector3d(1,1,1),4 };
+	std::priority_queue<QEMVertex> pq;
 	pq.push(v2);
 	pq.push(v1);
 	pq.push(v4);
