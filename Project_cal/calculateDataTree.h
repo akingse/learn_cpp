@@ -13,6 +13,14 @@
 
 namespace psykronix
 {
+	class RectBase2d
+	{
+		Eigen::AlignedBox2d m_bound;
+		long long m_index = -1;
+		RectBase2d() = default;
+		virtual ~RectBase2d() {};
+	};
+
 #ifdef RESERVE_USING_POLYGON2D
 	class Polygon2d
 	{
@@ -104,7 +112,7 @@ struct KdTreeNode2d
 	std::shared_ptr<KdTreeNode2d> m_right; //KdTreeNode* m_right; 
 	// other data
 	long long m_index = -1; // the middle node's index
-	std::array<int, 2> m_index2 = { -1,-1 }; //for TrigonPart
+	//std::array<int, 2> m_index2 = { -1,-1 }; //for TrigonPart
 	size_t m_dimension = 0; // also means m_depth
 	//KdTreeNode() : m_box(), m_left(nullptr), m_right(nullptr) {}
 	//KdTreeNode(const Polygon2d& poly) : m_box(poly.boungding()), m_left(nullptr), m_right(nullptr) {}
@@ -112,10 +120,7 @@ struct KdTreeNode2d
 	{
 		return m_bound.isEmpty();
 	}
-	bool isLeaf() const  //for TrigonPart
-	{
-		return m_index2 != std::array<int, 2>{ -1, -1 };
-	}
+
 };
 
 class KdTree2d
@@ -133,8 +138,9 @@ public:
 		return m_kdTree;
 	}
 	std::vector<size_t> findIntersect(const psykronix::Polygon2d& polygon); //searchFromKdTree
-	std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon);
 	std::vector<size_t> findIntersect(const eigen::ContourPart& profile);
+	std::vector<size_t> findIntersectOpLess(const eigen::TrigonPart& trigon);
+	std::vector<size_t> findIntersectOp(const eigen::TrigonPart& trigon); //operate
 };
 
 //----------------------------------------------------------------------------------------------------------------

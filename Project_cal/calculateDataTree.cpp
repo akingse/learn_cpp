@@ -94,6 +94,8 @@ std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<TrigonPart>& triangles
 			fullBox.extend(iter.m_box2d.min());
 			fullBox.extend(iter.m_box2d.max());
 		}
+		//fullBox.min() += Vector2d(eps, eps, eps);
+		//fullBox.max() -= Vector2d(eps, eps, eps);
 		return fullBox;
 	};
 	if (triangles.empty()) //no chance
@@ -109,7 +111,6 @@ std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<TrigonPart>& triangles
 		else
 			std::sort(triangles.begin(), triangles.end(), [](const TrigonPart& a, const TrigonPart& b)
 				{ return a.m_box2d.min()[1] < b.m_box2d.min()[1]; }); //y
-		//splitPolygons(/*polygons, leftPolygons, rightPolygons */ dimension, splitValue);
 		size_t dichotomy = triangles.size() / 2; // less | more
 		vector<TrigonPart> leftPolygons(triangles.begin(), triangles.begin() + dichotomy); //for new child node
 		vector<TrigonPart> rightPolygons(triangles.begin() + dichotomy, triangles.end());
@@ -120,11 +121,11 @@ std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<TrigonPart>& triangles
 	}
 	else // end leaf node
 	{
+		// lessen bound-box
 		currentNode->m_bound = triangles[0].m_box2d;
 		currentNode->m_left = nullptr;
 		currentNode->m_right = nullptr;
-		currentNode->m_index2 = triangles[0].m_index;
-		currentNode->m_index = triangles[0].m_number;
+		currentNode->m_index = triangles[0].m_index;
 	}
 	currentNode->m_dimension = direction; //record the xy direciton, alse canbe depth, then use depth % 2
 	return currentNode;
@@ -178,7 +179,7 @@ std::vector<size_t> KdTree2d::findIntersect(const Polygon2d& polygon)
 	return indexes;
 }
 
-std::vector<size_t> KdTree2d::findIntersect(const TrigonPart& trigon)
+std::vector<size_t> KdTree2d::findIntersectOp(const TrigonPart& trigon)
 {
 	if (m_kdTree == nullptr)
 		return {}; //test whether is working
@@ -191,7 +192,7 @@ std::vector<size_t> KdTree2d::findIntersect(const TrigonPart& trigon)
 			if (node->m_index != -1)
 			{
 				//vector index, only small to large
-				if (trigon.m_number < node->m_index) //exclude self
+				if (trigon.m_index != node->m_index)
 					indexes.push_back(node->m_index);
 				return;
 			}
@@ -199,6 +200,36 @@ std::vector<size_t> KdTree2d::findIntersect(const TrigonPart& trigon)
 			{
 				_searchKdTree(node->m_left);
 				_searchKdTree(node->m_right);
+				return;
+			}
+		}
+	};
+	_searchKdTree(m_kdTree);
+	return indexes;
+}
+
+std::vector<size_t> KdTree2d::findIntersectOpLess(const TrigonPart& trigon)
+{
+	if (m_kdTree == nullptr)
+		return {}; //test whether is working
+	std::vector<size_t> indexes;
+	std::function<void(const shared_ptr<KdTreeNode2d>&)> _searchKdTree = [&](const shared_ptr<KdTreeNode2d>& node)->void
+	{
+		//using recursion
+		if (node->m_bound.intersects(trigon.m_box2d))
+		{
+			if (node->m_index != -1)
+			{
+				//vector index, only small to large
+				if (trigon.m_index < node->m_index)
+					indexes.push_back(node->m_index);
+				return;
+			}
+			else // isnot leaf node
+			{
+				_searchKdTree(node->m_left);
+				_searchKdTree(node->m_right);
+				return;
 			}
 		}
 	};

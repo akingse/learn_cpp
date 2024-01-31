@@ -89,6 +89,7 @@ bool psykronix::isPointInTriangle(const Vector2d& point, const std::array<Vector
 		axisz * ((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y()) < _eps) || //bool isLeftB
 		axisz * ((p0.x() - p2.x()) * (point.y() - p2.y()) - (point.x() - p2.x()) * (p0.y() - p2.y()) < _eps));  //bool isLeftC
 #else
+	// (p1-p0).cross(p2-p1)
 	double axisz = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
 	return
 		0.0 < axisz * ((p1[0] - p0[0]) * (point[1] - p0[1]) - (point[0] - p0[0]) * (p1[1] - p0[1])) &&
@@ -1329,12 +1330,12 @@ bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, cons
 // intersect and penetration judge
 bool isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, const std::array<Vector2d, 3>& triB, double tolerance /*= eps*/)
 {
-	// bound box judge
-	if (std::max(std::max(triA[0][0], triA[1][0]), triA[2][0]) <= std::min(std::min(triB[0][0], triB[1][0]), triB[2][0]) ||
-		std::max(std::max(triA[0][1], triA[1][1]), triA[2][1]) <= std::min(std::min(triB[0][1], triB[1][1]), triB[2][1]) ||
-		std::max(std::max(triB[0][0], triB[1][0]), triB[2][0]) <= std::min(std::min(triA[0][0], triA[1][0]), triA[2][0]) ||
-		std::max(std::max(triB[0][1], triB[1][1]), triB[2][1]) <= std::min(std::min(triA[0][1], triA[1][1]), triA[2][1]))
-		return false;
+	// bound box been judged
+	//if (std::max(std::max(triA[0][0], triA[1][0]), triA[2][0]) <= std::min(std::min(triB[0][0], triB[1][0]), triB[2][0]) ||
+	//	std::max(std::max(triA[0][1], triA[1][1]), triA[2][1]) <= std::min(std::min(triB[0][1], triB[1][1]), triB[2][1]) ||
+	//	std::max(std::max(triB[0][0], triB[1][0]), triB[2][0]) <= std::min(std::min(triA[0][0], triA[1][0]), triA[2][0]) ||
+	//	std::max(std::max(triB[0][1], triB[1][1]), triB[2][1]) <= std::min(std::min(triA[0][1], triA[1][1]), triA[2][1]))
+	//	return false;
 	std::array<Eigen::Vector2d, 6> edgesAB = {
 		triA[1] - triA[0],
 		triA[2] - triA[1],
@@ -1345,7 +1346,7 @@ bool isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, const std
 	double k = 0;
 	for (auto& iter : edgesAB)
 	{
-		k = std::max(k, iter.squaredNorm());
+		k = std::max(k, std::max(iter[0], iter[1]));// iter.squaredNorm());
 		iter = Vector2d(-iter[1], iter[0]); //rotz(pi/2)
 	}
 	tolerance = k * tolerance;

@@ -321,12 +321,12 @@ RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector
 			Vector3d local = point + k * rayLine;
 			if (!isPointInTriangle(local, trigon))
 				continue;
-			if ((local - trigon[0]).isZero() ||
-				(local - trigon[1]).isZero() ||
-				(local - trigon[2]).isZero() ||
-				(local - trigon[0]).cross(local - trigon[1]).isZero() ||
-				(local - trigon[1]).cross(local - trigon[2]).isZero() ||
-				(local - trigon[2]).cross(local - trigon[0]).isZero()) //singularity
+			if ((local - trigon[0]).isZero(eps) ||
+				(local - trigon[1]).isZero(eps) ||
+				(local - trigon[2]).isZero(eps) ||
+				(local - trigon[0]).cross(local - trigon[1]).isZero(eps) ||
+				(local - trigon[1]).cross(local - trigon[2]).isZero(eps) ||
+				(local - trigon[2]).cross(local - trigon[0]).isZero(eps)) //singularity
 			{
 				_correctRayLine();
 				isNew = true;

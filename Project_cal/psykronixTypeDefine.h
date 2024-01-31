@@ -127,14 +127,12 @@ enum class OcclusionStatus :int //means cover
     DEGENERACY, // become segment
 };
 
-//#pragma Pack(8)
-//#ifdef USING_MATRIX_LIBRARY_EIGEN
 namespace eigen
 {
     struct TrigonPart
     {
-        long long m_number;
-        std::array<int, 2> m_index; // mesh index | triangle index
+        long long m_index;
+        std::array<int, 2> m_number; // mesh index | triangle index
         OcclusionStatus m_visible = OcclusionStatus::EXPOSED;
         Eigen::AlignedBox3d m_box3d;
         Eigen::AlignedBox2d m_box2d;
@@ -145,7 +143,7 @@ namespace eigen
         //std::vector<std::array<int, 2>> m_intersect;
         //std::vector<std::array<int, 2>> m_shielded;
         std::vector<long long> m_shielded;
-        std::vector<std::vector<Eigen::Vector2d>> m_contour;
+        std::vector<std::vector<Eigen::Vector2d>> m_contour; //the profile of this trigon after clipper
     };
 
     struct ContourPart
@@ -159,7 +157,7 @@ namespace eigen
         std::vector<std::vector<Eigen::Vector2d>> m_contour; //contour of mesh
         std::vector<std::vector<Eigen::Vector2d>> m_profile; //fillArea, the bool result
         std::vector<TrigonPart> m_trigons; //to judge front
-
+        // for contour calculate method
         bool isEmpty() const
         {
             return m_contour.empty();
@@ -172,6 +170,5 @@ namespace eigen
         double m_area;
 #endif
     };
+
 }
-//#endif //USING_MATRIX_LIBRARY_EIGEN
-//#pragma pop (pop)
