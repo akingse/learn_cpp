@@ -475,7 +475,7 @@ static void test4() //C++数学函数
 }
 
 //数学特殊数字
-static void _test5()
+static void test5()
 {
     ///double NaN = 0.0 / 0.0;
 //puts(NaN);
@@ -528,13 +528,16 @@ static void _test5()
     double infm = 1 / zero;
     cout << "inf 1/0=" << infm << endl;
 
-
     double constexpr nanValue = std::numeric_limits<double>::quiet_NaN();
     double constexpr infValue = std::numeric_limits<double>::infinity();
     bool is1 = isnan(nanValue);
     bool is2 = isnan(infValue);
     bool is3 = isinf(nanValue);
     bool is4 = isinf(infValue);
+
+    static const int64_t MAX_COORD = INT64_MAX >> 2;
+    double maxCoord = 1e12;// DBL_MAX;// 480104;// 151657;
+    int maxAccur = std::floor(std::log10(MAX_COORD / (maxCoord * maxCoord)));
 
 
     return;
@@ -545,7 +548,8 @@ static int enrol = []()->int
     //test0();
     //test1();
     //test2(); //for funciton
-    test3();
+    //test3();
+    test5();
     cout << "test_math finished.\n" << endl;
     return 0;
 }();

@@ -190,7 +190,7 @@ static void test3()
 		Vector2d(2, 0),
 		Vector2d(1, 1)	};
 
-	Eigen::Matrix4d mat = getMatrixFromThreePoints(triangle);
+	std::array<Eigen::Matrix4d, 2> mat = getMatrixFromThreePoints(triangle);
 	return;
 }
 

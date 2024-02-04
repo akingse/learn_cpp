@@ -142,6 +142,7 @@ namespace games
 		}
 	};
 
+#define USING_POINTER_VERION
 	struct HeMesh
 	{
 #ifdef USING_POINTER_VERION

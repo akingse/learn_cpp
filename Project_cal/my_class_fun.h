@@ -173,6 +173,17 @@ namespace eigen
         return T;
     }
 
+    inline Eigen::Matrix4d scale(double x)
+    {
+        Eigen::Matrix4d T;
+        T << 
+            x, 0, 0, 0,
+            0, x, 0, 0,
+            0, 0, x, 0,
+            0, 0, 0, 1;
+        return T;
+    }
+    
     inline Eigen::Matrix4d scale(double x, double y, double z = 1.0)
     {
         Eigen::Matrix4d T;
@@ -283,13 +294,16 @@ namespace eigen
         return triangle;
     }
 
-    inline std::array<Eigen::Vector3d, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector2d, 3>& trigon)
+    inline std::array<Eigen::Vector2d, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector2d, 3>& trigon)
     {
-        std::array<Eigen::Vector3d, 3> triangle = {
-            (mat * Eigen::Vector4d(trigon[0][0],trigon[0][1],0,1)).hnormalized(),
-            (mat * Eigen::Vector4d(trigon[1][0],trigon[1][1],0,1)).hnormalized(),
-            (mat * Eigen::Vector4d(trigon[2][0],trigon[2][1],0,1)).hnormalized() };
-        return triangle;
+        std::array<Eigen::Vector4d, 3> triangle = {
+            mat * Eigen::Vector4d(trigon[0][0],trigon[0][1],0,1),
+            mat * Eigen::Vector4d(trigon[1][0],trigon[1][1],0,1),
+            mat * Eigen::Vector4d(trigon[2][0],trigon[2][1],0,1) };
+        return {
+            Eigen::Vector2d(triangle[0][0],triangle[0][1]),
+            Eigen::Vector2d(triangle[1][0],triangle[1][1]),
+            Eigen::Vector2d(triangle[2][0],triangle[2][1]) };
     }
 
     inline bool isPointInTriangleTolerance(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon, double tole = 0.0) // 2D
