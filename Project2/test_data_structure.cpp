@@ -11,48 +11,6 @@ using namespace games;
 
 //AVL平衡树，平衡因子<=1，左旋、右旋、LR双旋、RL双旋,
 
-template<class T>
-class Heap
-{
-public:
-	vector<T> tree;
-
-	inline int& Heap::_get(int node) {
-		if (!isValid(node))
-			throw "无效节点";
-		return tree[node - 1];
-	}
-
-	bool Heap::isValid(int node)
-	{
-		return node >= 1 && node <= size();
-	}
-
-	void Heap::shiftUp(int node) { //传入要调整的节点编号
-		while (node > 1 && _get(node >> 1) < _get(node)) { //如果不是根节点而且父节点小于自己就交换自己和父节点
-			std::swap(_get(node >> 1), _get(node));
-			node >>= 1;
-		}
-	}
-
-	void Heap::shiftDown(int node) {
-		while ((node << 1 | 1) <= size())
-		{ //如果有两个孩子
-			int max_chd = _get(node << 1) > _get(node << 1 | 1) ? node << 1 : node << 1 | 1; //取较大的孩子
-			if (_get(max_chd) > _get(node)) {
-				std::swap(_get(max_chd), _get(node));
-				node = max_chd;
-			}
-			else
-				break;
-		}
-		if (node << 1 == size() && _get(node << 1) > _get(node)) { //最后可能出现只有一个子节点的情况，单独判断
-			std::swap(_get(node << 1), _get(node));
-		}
-	}
-
-};
-
 
 template<class K, class V>
 struct AVLTreeNode

@@ -230,10 +230,10 @@ static int _test_chatgpt_1()
 }
 
 
-static int _enrol = []()->int {
-
+static int _enrol = []()->int 
+{
 	//test_list();
-	_test_chatgpt_1();
+	//_test_chatgpt_1();
 	cout << "test_vector finished.\n" << endl;
 	return 0;
 }();

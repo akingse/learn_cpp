@@ -245,7 +245,7 @@ static int enrol = []()->int
 	//test1();
 	//test2();
 	//test3();
-	test4();
+	//test4();
 	cout << "test_geometry finished.\n" << endl;
 	return 0;
 }();

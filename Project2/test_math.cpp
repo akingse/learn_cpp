@@ -536,7 +536,7 @@ static void test5()
     bool is4 = isinf(infValue);
 
     static const int64_t MAX_COORD = INT64_MAX >> 2;
-    double maxCoord = 1e12;// DBL_MAX;// 480104;// 151657;
+    double maxCoord = 100;// 1e12;// DBL_MAX;// 480104;// 151657;
     int maxAccur = std::floor(std::log10(MAX_COORD / (maxCoord * maxCoord)));
 
 
@@ -549,7 +549,7 @@ static int enrol = []()->int
     //test1();
     //test2(); //for funciton
     //test3();
-    test5();
+    //test5();
     cout << "test_math finished.\n" << endl;
     return 0;
 }();

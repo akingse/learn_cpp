@@ -65,7 +65,7 @@ int test1()
 
 static int enrol = []()->int
 {
-    test0();
+    //test0();
     cout << "test test_omp finish" << endl;
     return 0;
 }();

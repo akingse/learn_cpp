@@ -462,7 +462,7 @@ static int enrol = []()->int
 	//_test7();
 	//_test8();
 	//_test9();
-	_test10();
+	//_test10();
 	cout << "test_triangle_intersect finished.\n" << endl;
 	return 0;
 }();

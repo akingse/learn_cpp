@@ -249,59 +249,6 @@ static int main1()
 	return 0;
 }
 
-#include<afx.h> // <cstring>
-static std::string getAppRoad()
-{
-	CString cerem;
-	TCHAR buff[MAX_PATH];
-	GetModuleFileNameW(NULL, buff, MAX_PATH); //获取程序目录存在path变量中
-	cerem = buff;
-	cerem = cerem.Left(cerem.ReverseFind('\\')); //处理获得的字符串把"\××.exe"从字符串中去掉
-	std::string pathStr= (CStringA)cerem;
-	return pathStr;
-	//-------
-	char chpath[MAX_PATH];//用于存放获取的路径信息。
-	GetModuleFileName(NULL, (LPWSTR)chpath, MAX_PATH);//第一个参数为句柄，NULL则指向当前程序。第二个参数用于存放地址的指针，第三个参数，系统自带的宏定义。不用管。
-	CString str = chpath;//将buff存放的路径赋给字符串str,此时buff值如：“E:\MyTest\Debug\****.exe”
-	int pos = str.ReverseFind('\\');//查找倒数最后一个“\\”符号
-	str = str.Left(pos + 1);
-	//-------
-
-	//char chpath[MAX_PATH];
-	//GetModuleFileName(NULL, (LPWSTR)chpath, sizeof(chpath));
-	//return string(chpath);
-	//-------
-
-	//wstring wstr;
-	//unsigned long size = GetCurrentDirectory(0, NULL);
-	//wchar_t* path = new wchar_t[size];
-	//if (GetCurrentDirectory(size, path) != 0)
-	//{
-	//	wstr = path;
-	//}
-	//delete[] path;
-	//-------
-
-	//wchar_t exePath[MAX_PATH];
-	//GetModuleFileNameW(nullptr, exePath, MAX_PATH);
-	//std::wstring wexePath = exePath;
-	//size_t pos = wexePath.rfind(L"\\");
-	//std::wstring fileRoad = wexePath.substr(0, pos + 1);
-	////WstringToString
-	//std::string result;
-	//int len = WideCharToMultiByte(CP_ACP, 0, fileRoad.c_str(), fileRoad.size(), NULL, 0, NULL, NULL);
-	//if (len <= 0)
-	//	return result;
-	//char* buffer = new char[len + 1];
-	//if (buffer == NULL)
-	//	return result;
-	//WideCharToMultiByte(CP_ACP, 0, fileRoad.c_str(), fileRoad.size(), buffer, len, NULL, NULL);
-	//buffer[len] = '\0';
-	//result.append(buffer);
-	//delete[] buffer;
-	//return result;
-}
-
 static int enrol = []()->int
 {
 	//main1(); //deque crash

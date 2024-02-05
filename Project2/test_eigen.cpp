@@ -191,6 +191,9 @@ static void test3()
 		Vector2d(1, 1)	};
 
 	std::array<Eigen::Matrix4d, 2> mat = getMatrixFromThreePoints(triangle);
+
+	Vector3d tst = {};
+    cout << "Vector3d inital=" << tst;
 	return;
 }
 
@@ -198,7 +201,7 @@ static int enrol = []()->int
 	{
 		//test0();
 		//test2();
-		test3();
+		//test3();
 		cout << "test_eigen finished.\n" << endl;
 		return 0;
 	}();
