@@ -708,7 +708,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 	const set<size_t>& faceSetA, const set<size_t>& faceSetB, const vector<size_t>& vertexVectA, const vector<size_t>& vertexVectB)
 {
 	if (faceSetA.empty() && faceSetB.empty())
-		return { gVecZero, {ULLONG_MAX, ULLONG_MAX} };
+        return { Vector3d::Zero(), {ULLONG_MAX, ULLONG_MAX} };
 	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
 	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
 	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
@@ -878,7 +878,7 @@ Eigen::Vector3d getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA, const
 	const std::set<size_t>& vboSetA, const std::set<size_t>& vboSetB)
 {
 	if (axesSepa.empty() || vboSetA.empty() || vboSetB.empty())
-		return gVecZero;
+		return Vector3d::Zero();
 	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
 	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
 	//const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
@@ -1176,7 +1176,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 		std::array<Eigen::Vector3d, 2> pInter;
 		std::array<Eigen::Vector3d, 3> edgesA, edgesB;
 		Eigen::Vector3d normalA, normalB;
-		std::array<Eigen::Vector3d, 17> axesPoten;
+		std::array<Eigen::Vector3d, 11> axesPoten; //remove 6 edge normal
 #ifdef STATISTIC_DATA_RECORD
 		for (const auto& i : indexAB[0]) //for test
 		{
@@ -1247,12 +1247,6 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 				axesPoten = { {
 					normalA,
 					normalB,
-					normalA.cross(edgesA[0]),
-					normalA.cross(edgesA[1]),
-					normalA.cross(edgesA[2]),
-					normalB.cross(edgesB[0]),
-					normalB.cross(edgesB[1]),
-					normalB.cross(edgesB[2]),
 					edgesA[0].cross(edgesB[0]),
 					edgesA[0].cross(edgesB[1]),
 					edgesA[0].cross(edgesB[2]),
@@ -1264,12 +1258,12 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 					edgesA[2].cross(edgesB[2]) } };
 				for (auto& axis : axesPoten) // revise zero vector
 				{
-					if (axis.isZero()) // clean data
+					if (axis.isZero(eps)) // clean data
 						axis = Vector3d(1, 0, 0);
 				}
-				bool isExist = false; //to remove repeat
 				for (const auto& axis : axesPoten)
 				{
+                    bool isExist = false; //to remove repeat
 					for (const auto& iter : axesSepa)
 					{
 						if (iter.cross(axis).isZero(eps))
@@ -1439,9 +1433,9 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 	}
 	if (isContact)
 	{
-		return { RelationOfTwoMesh::CONTACT_OUTER, gVecZero };
+		return { RelationOfTwoMesh::CONTACT_OUTER, Vector3d::Zero() };
 	}
-	return { RelationOfTwoMesh::SEPARATE, gVecZero };
+	return { RelationOfTwoMesh::SEPARATE, Vector3d::Zero() };
 }
 
 // ClashSoft // return index of mesh_a and mesh_b ibo
