@@ -163,17 +163,26 @@ namespace games
 			for (size_t i = 0; i != m_vertexes.size(); ++i)
 			{
 				if (m_vertexes[i])
+				{
 					delete m_vertexes[i];
+					m_vertexes[i] = nullptr;
+				}
 			}
 			for (size_t i = 0; i != m_edges.size(); ++i)
 			{
 				if (m_edges[i])
+				{
 					delete m_edges[i];
+					m_edges[i] = nullptr;
+				}
 			}
 			for (size_t i = 0; i != m_faces.size(); ++i)
 			{
 				if (m_faces[i])
+				{
 					delete m_faces[i];
+					m_faces[i] = nullptr;
+				}
 			}
 			m_vertexes.clear();
 			m_edges.clear();
@@ -187,15 +196,14 @@ namespace games
 		HeMesh(const ModelMesh& mesh); //fromTriangleMesh
 		operator ModelMesh() const; //toTriangleMesh
 
-		//Retrieve/CRUD
-		std::vector<HeEdge*> findEdges(const HeVertex*) const;
-		std::vector<HeEdge*> findEdges(const HeFace*) const;
-		std::vector<HeFace*> findFaces(const HeEdge*) const;
-
-		//function
-		void update();
-		void rearrangeFaceIncEdge();
-		std::vector<int> findConnectedFaces(size_t fid);
+		////Retrieve/CRUD
+		//std::vector<HeEdge*> findEdges(const HeVertex*) const;
+		//std::vector<HeEdge*> findEdges(const HeFace*) const;
+		//std::vector<HeFace*> findFaces(const HeEdge*) const;
+		////function
+		//void update();
+		//void rearrangeFaceIncEdge();
+		//std::vector<int> findConnectedFaces(size_t fid);
 
 	};
 
