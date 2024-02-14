@@ -1531,6 +1531,74 @@ double getMoveDistanceOfAssignedDirection(const ModelMesh& meshA, const ModelMes
 {
 }
 
+// interconversion
+HeMesh::HeMesh(const ModelMesh& mesh)
+{
+	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
+	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
+	HeMesh heMesh;
+	for (int i = 0; i < mesh.vbo_.size(); ++i)
+	{
+		HeVertex* heVertex = new HeVertex(mesh.vbo_[i]);
+		heVertex->m_index = i;
+		heMesh.m_vertexes.push_back(heVertex);
+	}
+	int countEdge = 0;
+	map<array<int, 2>, int> uniqueEdge;
+	for (int i = 0; i < mesh.ibo_.size(); ++i)
+	{
+		HeFace* heFace = new HeFace;
+		heFace->m_index = i;
+		//heFace->m_normal = (v1 - v0).cross(v2 - v1); // with normalized
+		heFace->m_normal = (vbo[ibo[i][1]] - vbo[ibo[i][0]]).cross(vbo[ibo[i][2]] - vbo[ibo[i][1]]);
+		int firstEdge = countEdge;
+		for (int j = 0; j < 3; ++j) //create 3 edges from 1 face
+		{
+			HeEdge* heEdge = new HeEdge;
+			heEdge->m_index = countEdge;
+			heEdge->m_incFace = heFace;
+			heEdge->m_oriVertex = m_vertexes[ibo[i][j]];
+			m_edges.push_back(heEdge);
+			countEdge++;
+		}
+		array<int, 4> face = { ibo[i][0], ibo[i][1], ibo[i][2], ibo[i][0] };
+		for (int j = 0; j < 3; ++j) // add adjacent relation after create edges
+		{
+			//m_prevEdge
+			int prev = j - 1 < 0 ? 2 : j - 1;
+			m_edges[firstEdge + j]->m_prevEdge = m_edges[firstEdge + prev];
+			//m_nextEdge
+			int next = j + 1 > 2 ? 0 : j + 1;
+			m_edges[firstEdge + j]->m_nextEdge = m_edges[firstEdge + next];
+			//m_twinEdge
+			array<int, 2> edge = (face[j] < face[j + 1]) ?
+				array<int, 2>{face[j], face[j + 1]} :
+				array<int, 2>{face[j + 1], face[j]};
+			if (uniqueEdge.find(edge) == uniqueEdge.end())
+				uniqueEdge.emplace(edge, firstEdge + j);
+			else //means twinEdge added
+			{
+				m_edges[firstEdge + j]->m_twinEdge = m_edges[uniqueEdge[edge]];
+				m_edges[uniqueEdge[edge]]->m_twinEdge = m_edges[firstEdge + j];
+			}
+		}
+		heFace->m_incEdge = m_edges[firstEdge];
+		m_faces.push_back(heFace);
+	}
+}
+
+HeMesh::operator ModelMesh() const
+{
+	ModelMesh mesh;
+	std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
+	std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
+	for (const auto& v : m_vertexes)
+		vbo.push_back(v->m_coord);
+	for (const auto& iter : m_faces)
+		ibo.push_back(iter->ibo());
+	return mesh;
+}
+
 // the diagonal vertex of face | the surround vertex of vertex
 tuple<vector<std::array<int, 3>>, vector<set<int>>> _getMeshVertexLinkedInfo(const ModelMesh& mesh)
 {
@@ -1727,150 +1795,145 @@ HeMesh games::meshLoopSubdivision(const HeMesh& mesh)
 //	return mesh;
 //}
 
-//edge collapsing
-ModelMesh games::meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, size_t collapseEdgeCount /*= 0*/) //edge collapse and quadirc error metrics
-{
-	if (collapseEdgeCount == 0)
-		collapseEdgeCount = mesh.ibo_.size() / 2;
-	if (collapseEdgeCount >= mesh.ibo_.size())
-		return {};
-	//get edge
-	set<array<int, 2>> uniqueEdge;
-	for (const auto& iter : mesh.ibo_)
-	{
-		array<int, 4> tri = { iter[0], iter[1], iter[2], iter[0] };
-		for (int i = 0; i < 3; i++)
-		{
-			array<int, 2> edge = (tri[i] < tri[i + 1]) ?
-				array<int, 2>{tri[i], tri[i + 1]} : 
-				array<int, 2>{tri[i + 1], tri[i]};
-			uniqueEdge.insert(edge);
-		}
-	}
-	map<array<int, 2>, array<vector<int>, 2>> edgeNeighborFace; // edge vertex index | two vertex NeighborFace index
-	map<array<int, 2>, array<int, 2>> edgeOnFace; // edge vertex index | two faces index
-	for (const auto& edge : uniqueEdge)
-	{
-		//get edgeNeighborFace
-		vector<int> edge0, edge1;
-		for (int i = 0; i < mesh.ibo_.size(); i++)
-		{
-			const array<int, 3>& face = mesh.ibo_[i];
-			if (face[0] == edge[0] || face[1] == edge[0] || face[2] == edge[0])
-				edge0.push_back(i);
-			if (face[0] == edge[1] || face[1] == edge[1] || face[2] == edge[1])
-				edge1.push_back(i);
-		}
-		edgeNeighborFace.insert({ edge, { edge0, edge1 } });
-		// get edgeOnFace
-		array<int, 2> faceTwo;
-		int find = 0;
-		for (int i = 0; i < mesh.ibo_.size(); i++)
-		{
-			int coin = 0;
-			const array<int, 3>& face = mesh.ibo_[i];
-			for (const int& vt : face) //find two common vertex
-			{
-				if (vt == edge[0] || vt == edge[1])
-					coin++;
-			}
-			if (coin == 2) //means common edge
-			{
-				faceTwo[find] = i;
-				find++;
-			}
-			if (find == 2)
-			{
-				edgeOnFace.insert({ edge, faceTwo });
-				break;
-			}
-		}
-	}
-	//process come on
-	ModelMesh meshNew = mesh;//copy
-	std::vector<Eigen::Vector3d>& vbo = meshNew.vbo_;
-	std::vector<std::array<int, 3>>& ibo = meshNew.ibo_;
-	auto _computeEdgeError = [&](const Vector3d& v, const array<vector<int>, 2>& neighbor)->double
-		{
-			double totalError = 0.0;
-			for (const auto& faces : neighbor) //two vertex neighbor face
-			{
-				for (const int& iter : faces)
-				{
-					Vector3d v0 = vbo[ibo[iter][0]];
-					Vector3d v1 = vbo[ibo[iter][1]];
-					Vector3d v2 = vbo[ibo[iter][2]];
-					Vector3d n = (v1 - v0).cross(v2 - v1);
-					totalError += (v0 - v).dot(n) * ((v0 - v).dot(n)) / n.dot(n);
-				}
-			}
-			return totalError;
-		};
-	std::priority_queue<QEMEdge> collapseEdgeQueue;
-	auto _updateCollapseEdgeQueue = [&]()->void
-		{
-			for (const auto& iter : uniqueEdge)
-			{
-				QEMEdge edge;
-				edge.m_edge = iter;
-				edge.m_vertex = 0.5 * (vbo[iter[0]] + vbo[iter[1]]);
-				edge.m_error = _computeEdgeError(edge.m_vertex, edgeNeighborFace[iter]);
-				collapseEdgeQueue.push(edge);
-			}
-		};
-	_updateCollapseEdgeQueue();
-	//contract edge
-	size_t collaCout = 0;
-	while (collaCout < collapseEdgeCount)
-	{
-		QEMEdge edge = collapseEdgeQueue.top();
-		collapseEdgeQueue.pop(); //delete edge
-		uniqueEdge.erase(edge.m_edge);
-		//ibo.erase(ibo.begin() + edgeOnFace[edge.m_edge][0]); //delete face
-		//(edgeOnFace[edge.m_edge][0] < edgeOnFace[edge.m_edge][1]) ? // the index change because vector size changed
-		//	ibo.erase(ibo.begin() + edgeOnFace[edge.m_edge][1] - 1) : ibo.erase(ibo.begin() + edgeOnFace[edge.m_edge][1]);
-		//vbo[edge.m_edge[0]] = edge.m_vertex;
-		//vbo.erase(vbo.begin() + edge.m_edge[1]); //delete vertex
-		ibo[edgeOnFace[edge.m_edge][0]] = { -1,-1,-1 };
-		ibo[edgeOnFace[edge.m_edge][1]] = { -1,-1,-1 };
-		vbo[edge.m_edge[0]] = edge.m_vertex;
-		vbo[edge.m_edge[1]] = gVecNaN;
-		// change record map
-		for (auto& face : ibo)
-		{
-			for (int i = 0; i < 3; i++)
-			{
-				//if (face[i] == edge.m_edge[0]) continue;
-				if (face[i] == edge.m_edge[1])
-					face[i] = edge.m_edge[0];
-			}
-		}
-		_updateCollapseEdgeQueue();
-		collaCout++;
-	}
-	ModelMesh meshSim;
-	//map<int, int> indexMap;
-	vector<int> indexMap;
-	int j = 0;
-	for (int i = 0; i < vbo.size(); i++)
-	{
-		indexMap.push_back(j);
-		if (!isnan(vbo[i][0]))
-		{
-			meshSim.vbo_.push_back(vbo[i]);
-			j++;
-		}
-	}
-	for (const auto& iter : ibo)
-	{
-		if (iter[0] != -1) //valid
-		{
-			std::array<int, 3> face = { indexMap[iter[0]], indexMap[iter[1]], indexMap[iter[2]] };
-			meshSim.ibo_.push_back(face);
-		}
-	}
-	return meshSim;
-}
+////without update
+//ModelMesh meshQuadricErrorMetricsSimplification(const ModelMesh& mesh, size_t collapseEdgeCount /*= 0*/) //edge collapse and quadirc error metrics
+//{
+//	if (collapseEdgeCount == 0)
+//		collapseEdgeCount = mesh.ibo_.size() / 2;
+//	if (collapseEdgeCount >= mesh.ibo_.size())
+//		return {};
+//	//get edge
+//	set<array<int, 2>> uniqueEdge;
+//	for (const auto& iter : mesh.ibo_)
+//	{
+//		array<int, 4> tri = { iter[0], iter[1], iter[2], iter[0] };
+//		for (int i = 0; i < 3; i++)
+//		{
+//			array<int, 2> edge = (tri[i] < tri[i + 1]) ?
+//				array<int, 2>{tri[i], tri[i + 1]} : 
+//				array<int, 2>{tri[i + 1], tri[i]};
+//			uniqueEdge.insert(edge);
+//		}
+//	}
+//	map<array<int, 2>, array<vector<int>, 2>> edgeNeighborFace; // edge vertex index | two vertex NeighborFace index
+//	map<array<int, 2>, array<int, 2>> edgeOnFace; // edge vertex index | two faces index
+//	for (const auto& edge : uniqueEdge)
+//	{
+//		//get edgeNeighborFace
+//		vector<int> edge0, edge1;
+//		for (int i = 0; i < mesh.ibo_.size(); i++)
+//		{
+//			const array<int, 3>& face = mesh.ibo_[i];
+//			if (face[0] == edge[0] || face[1] == edge[0] || face[2] == edge[0])
+//				edge0.push_back(i);
+//			if (face[0] == edge[1] || face[1] == edge[1] || face[2] == edge[1])
+//				edge1.push_back(i);
+//		}
+//		edgeNeighborFace.insert({ edge, { edge0, edge1 } });
+//		// get edgeOnFace
+//		array<int, 2> faceTwo;
+//		int find = 0;
+//		for (int i = 0; i < mesh.ibo_.size(); i++)
+//		{
+//			int coin = 0;
+//			const array<int, 3>& face = mesh.ibo_[i];
+//			for (const int& vt : face) //find two common vertex
+//			{
+//				if (vt == edge[0] || vt == edge[1])
+//					coin++;
+//			}
+//			if (coin == 2) //means common edge
+//			{
+//				faceTwo[find] = i;
+//				find++;
+//			}
+//			if (find == 2)
+//			{
+//				edgeOnFace.insert({ edge, faceTwo });
+//				break;
+//			}
+//		}
+//	}
+//	//process come on
+//	ModelMesh meshNew = mesh;//copy
+//	std::vector<Eigen::Vector3d>& vbo = meshNew.vbo_;
+//	std::vector<std::array<int, 3>>& ibo = meshNew.ibo_;
+//	auto _computeEdgeError = [&](const Vector3d& v, const array<vector<int>, 2>& neighbor)->double
+//		{
+//			double totalError = 0.0;
+//			for (const auto& faces : neighbor) //two vertex neighbor face
+//			{
+//				for (const int& iter : faces)
+//				{
+//					Vector3d v0 = vbo[ibo[iter][0]];
+//					Vector3d v1 = vbo[ibo[iter][1]];
+//					Vector3d v2 = vbo[ibo[iter][2]];
+//					Vector3d n = (v1 - v0).cross(v2 - v1);
+//					totalError += (v0 - v).dot(n) * ((v0 - v).dot(n)) / n.dot(n);
+//				}
+//			}
+//			return totalError;
+//		};
+//	std::priority_queue<QEMEdge> collapseEdgeQueue;
+//	auto _updateCollapseEdgeQueue = [&]()->void
+//		{
+//			for (const auto& iter : uniqueEdge)
+//			{
+//				QEMEdge edge;
+//				edge.m_edge = iter;
+//				edge.m_vertex = 0.5 * (vbo[iter[0]] + vbo[iter[1]]);
+//				edge.m_error = _computeEdgeError(edge.m_vertex, edgeNeighborFace[iter]);
+//				collapseEdgeQueue.push(edge);
+//			}
+//		};
+//	_updateCollapseEdgeQueue();
+//	//contract edge
+//	size_t collaCout = 0;
+//	while (collaCout < collapseEdgeCount)
+//	{
+//		QEMEdge edge = collapseEdgeQueue.top();
+//		collapseEdgeQueue.pop(); //delete edge
+//		uniqueEdge.erase(edge.m_edge);
+//		ibo[edgeOnFace[edge.m_edge][0]] = { -1,-1,-1 };
+//		ibo[edgeOnFace[edge.m_edge][1]] = { -1,-1,-1 };
+//		vbo[edge.m_edge[0]] = edge.m_vertex;
+//		vbo[edge.m_edge[1]] = gVecNaN;
+//		// change record map
+//		for (auto& face : ibo)
+//		{
+//			for (int i = 0; i < 3; i++)
+//			{
+//				//if (face[i] == edge.m_edge[0]) continue;
+//				if (face[i] == edge.m_edge[1])
+//					face[i] = edge.m_edge[0];
+//			}
+//		}
+//		_updateCollapseEdgeQueue();
+//		collaCout++;
+//	}
+//	ModelMesh meshSim;
+//	//map<int, int> indexMap;
+//	vector<int> indexMap;
+//	int j = 0;
+//	for (int i = 0; i < vbo.size(); i++)
+//	{
+//		indexMap.push_back(j);
+//		if (!isnan(vbo[i][0]))
+//		{
+//			meshSim.vbo_.push_back(vbo[i]);
+//			j++;
+//		}
+//	}
+//	for (const auto& iter : ibo)
+//	{
+//		if (iter[0] != -1) //valid
+//		{
+//			std::array<int, 3> face = { indexMap[iter[0]], indexMap[iter[1]], indexMap[iter[2]] };
+//			meshSim.ibo_.push_back(face);
+//		}
+//	}
+//	return meshSim;
+//}
 
 // all function of QEM
 inline void _getPlaneCoefficient(const array<Vector3d,3>& trigon, double& a, double& b, double& c, double& d)
@@ -1965,7 +2028,7 @@ inline QEMEdge _getCostAndVbarOfEdge(const std::vector<Matrix4d>& Qs, const HeEd
 }
 
 //#ifndef USING_HALFEDGE_STRUCTURE
-ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collapseEdgeCount /*= 0*/)
+ModelMesh games::meshQEMSimplification(const ModelMesh& mesh, size_t collapseEdgeCount /*= 0*/)
 {
 	//get edge
 	set<array<int, 2>> uniqueEdge;
@@ -2007,7 +2070,7 @@ ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collaps
 		}
 	}
 	std::vector<Eigen::Matrix4d> Qs;
-	for (int i = 0; i < mesh.vbo_.size(); i++)
+	for (int i = 0; i < mesh.vbo_.size(); ++i)
 	{
 		Qs.push_back(_getQMatrixOfVertex(mesh.ibo_, mesh.vbo_, i));
 	}
@@ -2110,79 +2173,12 @@ ModelMesh games::meshQuadricSimpIification(const ModelMesh& mesh, size_t collaps
 }
 //#endif
 
-HeMesh::HeMesh(const ModelMesh& mesh)
-{
-	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
-	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
-	HeMesh heMesh;
-	for (int i = 0; i < mesh.vbo_.size(); ++i)
-	{
-		HeVertex* heVertex = new HeVertex(mesh.vbo_[i]);
-		heVertex->m_index = i;
-		heMesh.m_vertexes.push_back(heVertex);
-	}
-	int countEdge = 0;
-	map<array<int, 2>, int> uniqueEdge;
-	for (int i = 0; i < mesh.ibo_.size(); ++i)
-	{
-		HeFace* heFace = new HeFace;
-		heFace->m_index = i;
-		//heFace->m_normal = (v1 - v0).cross(v2 - v1); // with normalized
-		heFace->m_normal = (vbo[ibo[i][1]] - vbo[ibo[i][0]]).cross(vbo[ibo[i][2]] - vbo[ibo[i][1]]);
-		int firstEdge = countEdge;
-		for (int j = 0; j < 3; ++j) //create 3 edges from 1 face
-		{
-			HeEdge* heEdge = new HeEdge;
-			heEdge->m_index = countEdge;
-			heEdge->m_incFace = heFace;
-			heEdge->m_oriVertex = m_vertexes[ibo[i][j]];
-			m_edges.push_back(heEdge);
-			countEdge++;
-		}
-		array<int, 4> face = { ibo[i][0], ibo[i][1], ibo[i][2], ibo[i][0] };
-		for (int j = 0; j < 3; ++j) // add adjacent relation after create edges
-		{
-			//m_prevEdge
-			int prev = j - 1 < 0 ? 2 : j - 1;
-			m_edges[firstEdge + j]->m_prevEdge = m_edges[firstEdge + prev];
-			//m_nextEdge
-			int next = j + 1 > 2 ? 0 : j + 1;
-			m_edges[firstEdge + j]->m_nextEdge = m_edges[firstEdge + next];
-			//m_twinEdge
-			array<int, 2> edge = (face[j] < face[j + 1]) ?
-				array<int, 2>{face[j], face[j + 1]} :
-				array<int, 2>{face[j + 1], face[j]};
-			if (uniqueEdge.find(edge) == uniqueEdge.end())
-				uniqueEdge.emplace(edge, firstEdge + j);
-			else //means twinEdge added
-			{
-				m_edges[firstEdge + j]->m_twinEdge = m_edges[uniqueEdge[edge]];
-				m_edges[uniqueEdge[edge]]->m_twinEdge = m_edges[firstEdge + j];
-			}
-		}
-		heFace->m_incEdge = m_edges[firstEdge];
-		m_faces.push_back(heFace);
-	}
-}
-
-HeMesh::operator ModelMesh() const
-{
-	ModelMesh mesh;
-	std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
-	std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
-	for (const auto& v : m_vertexes)
-		vbo.push_back(v->m_coord);
-	for (const auto& iter : m_faces)
-		ibo.push_back(iter->ibo());
-	return mesh;
-}
-
 // mesh operation with halfedge
 #ifdef USING_HALFEDGE_STRUCTURE
-HeMesh games::meshQuadricSimpIification(const HeMesh& mesh, size_t edgeCollapseTarget /*= 0*/)
+HeMesh games::meshQEMSimplification(const HeMesh& mesh, size_t edgeCollapseTarget /*= 0*/)
 {
 	std::vector<Eigen::Matrix4d> Qs;
-	for (int i = 0; i < mesh.m_vertexes.size(); i++)
+	for (int i = 0; i < mesh.m_vertexes.size(); ++i)
 	{
 		Qs.push_back(_getQMatrixOfVertex(mesh, i));
 	}

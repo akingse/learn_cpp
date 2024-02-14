@@ -210,9 +210,8 @@ namespace games
 	//utility
 	ModelMesh meshLoopSubdivision(const ModelMesh& mesh);
 	HeMesh meshLoopSubdivision(const HeMesh& mesh);
-	ModelMesh meshQuadricSimpIification(const ModelMesh& mesh, size_t collapseEdgeCount = 0);
-	ModelMesh meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, size_t collapseEdgeCount = 0);
-	//halfedge
-	HeMesh meshQuadricSimpIification(const HeMesh& mesh, size_t edgeCollapseTarget = 0);
+	//ModelMesh meshQuadricErrorMetricsSimplification(const ModelMesh& mesh, size_t collapseEdgeCount = 0);
+	ModelMesh meshQEMSimplification(const ModelMesh& mesh, size_t collapseEdgeCount = 0);
+	HeMesh meshQEMSimplification(const HeMesh& mesh, size_t edgeCollapseTarget = 0);
 
 }
