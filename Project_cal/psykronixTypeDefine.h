@@ -15,7 +15,7 @@ namespace psykronix
     static const Triangle gSegNaN = { gVecNaN, gVecNaN };
     static const Triangle gTirNaN = { gVecNaN, gVecNaN, gVecNaN };
     static const PosVec3d gPVNaN = { gVecNaN ,gVecNaN };
-    static const Eigen::Vector3d gVecZero = Eigen::Vector3d::Zero();// Vector3d(0, 0, 0);
+    //static const Eigen::Vector3d gVecZero = Eigen::Vector3d::Zero();// Vector3d(0, 0, 0);
     //static const Eigen::Vector3d gVecAxisX(1, 0, 0); //Eigen::Vector3d::UnitX()
     //static const Eigen::Vector3d gVecAxisY(0, 1, 0); //Eigen::Vector3d::UnitY()
     //static const Eigen::Vector3d gVecAxisZ(0, 0, 1); //Eigen::Vector3d::UnitZ()

@@ -419,5 +419,35 @@ Windows powershell
 
 
 
+关omp，box缩小，
+
+| create time:         | Fri_Feb__2_10_52_54 |
+| -------------------- | ------------------- |
+| countP_graphic       | 665                 |
+| countP_mesh          | 11101               |
+| countP_triangle      | 271820              |
+| countP_vertex        | 156849              |
+| countP_trigon        | 72015               |
+| count_inside_judge   | 46845               |
+| count_tri_inter_pre  | 18085718            |
+| count_tri_inter_ed   | 1928213             |
+| count_front_judge    | 36079               |
+| count_bool_diff      | 1798406             |
+| count_bool_union     | 1802                |
+| count_hidden_jump    | 1575373             |
+| count_union_empty    | 211                 |
+| count_tri_degen      | 0                   |
+| count_trigon_empty   | 0                   |
+| count_trigon_hidden  | 59281               |
+| count_tole_angle     | 1598                |
+| count_trigon_area0   | 775                 |
+| count_contour_area0  | 0                   |
+| time_mesh            | 0.097000s           |
+| time_assembly_trigon | 0.022000s           |
+| time_kdtree          | 0.179000s           |
+| time_frontJudge      | 0.534000s           |
+| time_difference      | 1.982000s           |
+| time_union           | 0.496000s           |
+| time_all             | 3.225000s           |
 
 

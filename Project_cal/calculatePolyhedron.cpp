@@ -708,7 +708,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 	const set<size_t>& faceSetA, const set<size_t>& faceSetB, const vector<size_t>& vertexVectA, const vector<size_t>& vertexVectB)
 {
 	if (faceSetA.empty() && faceSetB.empty())
-		return { gVecZero, {ULLONG_MAX, ULLONG_MAX} };
+        return { Vector3d::Zero(), {ULLONG_MAX, ULLONG_MAX} };
 	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
 	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
 	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
@@ -878,7 +878,7 @@ Eigen::Vector3d getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA, const
 	const std::set<size_t>& vboSetA, const std::set<size_t>& vboSetB)
 {
 	if (axesSepa.empty() || vboSetA.empty() || vboSetB.empty())
-		return gVecZero;
+		return Vector3d::Zero();
 	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
 	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
 	//const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
@@ -1176,7 +1176,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 		std::array<Eigen::Vector3d, 2> pInter;
 		std::array<Eigen::Vector3d, 3> edgesA, edgesB;
 		Eigen::Vector3d normalA, normalB;
-		std::array<Eigen::Vector3d, 17> axesPoten;
+		std::array<Eigen::Vector3d, 11> axesPoten; //remove 6 edge normal
 #ifdef STATISTIC_DATA_RECORD
 		for (const auto& i : indexAB[0]) //for test
 		{
@@ -1247,12 +1247,6 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 				axesPoten = { {
 					normalA,
 					normalB,
-					normalA.cross(edgesA[0]),
-					normalA.cross(edgesA[1]),
-					normalA.cross(edgesA[2]),
-					normalB.cross(edgesB[0]),
-					normalB.cross(edgesB[1]),
-					normalB.cross(edgesB[2]),
 					edgesA[0].cross(edgesB[0]),
 					edgesA[0].cross(edgesB[1]),
 					edgesA[0].cross(edgesB[2]),
@@ -1264,12 +1258,12 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 					edgesA[2].cross(edgesB[2]) } };
 				for (auto& axis : axesPoten) // revise zero vector
 				{
-					if (axis.isZero()) // clean data
+					if (axis.isZero(eps)) // clean data
 						axis = Vector3d(1, 0, 0);
 				}
-				bool isExist = false; //to remove repeat
 				for (const auto& axis : axesPoten)
 				{
+                    bool isExist = false; //to remove repeat
 					for (const auto& iter : axesSepa)
 					{
 						if (iter.cross(axis).isZero(eps))
@@ -1439,9 +1433,9 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 	}
 	if (isContact)
 	{
-		return { RelationOfTwoMesh::CONTACT_OUTER, gVecZero };
+		return { RelationOfTwoMesh::CONTACT_OUTER, Vector3d::Zero() };
 	}
-	return { RelationOfTwoMesh::SEPARATE, gVecZero };
+	return { RelationOfTwoMesh::SEPARATE, Vector3d::Zero() };
 }
 
 // ClashSoft // return index of mesh_a and mesh_b ibo
@@ -1499,7 +1493,7 @@ std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const
 //  penetration depth
 //---------------------------------------------------------------------------
 
-#ifdef USING_DISCARD_FUNCTION
+//#ifdef USING_DISCARD_FUNCTION
 // only for convex polytope 
 bool isTwoMeshsIntersectGJK(const ModelMesh& meshA, const ModelMesh& meshB)
 {
@@ -1537,51 +1531,7 @@ double getMoveDistanceOfAssignedDirection(const ModelMesh& meshA, const ModelMes
 {
 }
 
-static void sort3(std::array<int, 3>& face)
-{
-	//small to large
-	if (face[0] <= face[1] && face[1] <= face[2])
-		return;
-	else if (face[0] <= face[2] && face[2] < face[1])
-	{
-		int tmp = face[1];
-		face[1] = face[2];
-		face[2] = tmp;
-		return;
-	}
-	else if (face[1] <= face[0] && face[0] <= face[2])
-	{
-		int tmp = face[1];
-		face[1] = face[0];
-		face[0] = tmp;
-		return;
-	}
-	else if (face[1] <= face[2] && face[2] <= face[0])
-	{
-		int tmp = face[2];
-		face[2] = face[0];
-		face[0] = face[1];
-		face[1] = tmp;
-		return;
-	}
-	else if (face[2] <= face[0] && face[0] <= face[1])
-	{
-		int tmp = face[0];
-		face[0] = face[2];
-		face[1] = face[0];
-		face[2] = tmp;
-		return;
-	}
-	else//(face[2] <= face[1] <= face[0])
-	{
-		int tmp = face[2];
-		face[2] = face[0];
-		face[0] = tmp;
-		return;
-	}
-}
-#endif
-
+// the diagonal vertex of face | the surround vertex of vertex
 tuple<vector<std::array<int, 3>>, vector<set<int>>> _getMeshVertexLinkedInfo(const ModelMesh& mesh)
 {
 	//get diagonal vertex index of each face-edge
@@ -1589,27 +1539,19 @@ tuple<vector<std::array<int, 3>>, vector<set<int>>> _getMeshVertexLinkedInfo(con
 	// generate new middle vertex
 	for (int i = 0; i < mesh.ibo_.size(); ++i)
 	{
-		if ((edgeDiag[i][0] != -1 && edgeDiag[i][1] != -1 && edgeDiag[i][2] != -1))
-		{
-#ifdef DEBUG_POLYHEDRON_MESH
-			count_edgediag_full++; //not empty
-#endif // DEBUG_POLYHEDRON_MESH
+		if (edgeDiag[i][0] != -1 && edgeDiag[i][1] != -1 && edgeDiag[i][2] != -1) //has been assemble
 			continue;
-		}
 		std::array<int, 3> faceA = mesh.ibo_[i]; //copy
-		//std::sort(faceA.begin(), faceA.end()); //cost alot of time
+		std::sort(faceA.begin(), faceA.end());
 		int find = 0;
 		for (int j = 0; j < mesh.ibo_.size(); ++j)
 		{
 			if (i >= j) //edgeDiag[j] been revised
 				continue;
 			std::array<int, 3> faceB = mesh.ibo_[j]; //copy
-			//std::sort(faceB.begin(), faceB.end());
-			//if (faceB[2] < faceA[0] || faceB[0] > faceA[2]) //1d bound box
-			//	continue;
-			//if (std::max(std::max(faceA[0], faceA[1]), faceA[2]) < std::min(std::min(faceB[0], faceB[1]), faceB[2]) ||
-			//	std::max(std::max(faceB[0], faceB[1]), faceB[2]) < std::min(std::min(faceA[0], faceA[1]), faceA[2]))
-			//	continue;
+			std::sort(faceB.begin(), faceB.end());
+			if (faceB[2] < faceA[0] || faceB[0]> faceA[2]) //bound box
+				continue;
 			int coin = 0;
 			for (const int vtB : faceB) //find two common vertex
 			{
@@ -1657,10 +1599,10 @@ tuple<vector<std::array<int, 3>>, vector<set<int>>> _getMeshVertexLinkedInfo(con
 	vector<set<int>> roundVct(mesh.vbo_.size());
 	for (int i = 0; i < mesh.vbo_.size(); ++i)
 	{
-		set<int> round; ;// vector<Vector3d> round;
+		set<int> round;// vector<Vector3d> round;
 		for (const auto& face : mesh.ibo_)
 		{
-			if (face[0] != i && face[1] != i && face[2] == i)
+			if (face[0] != i && face[1] != i && face[2] != i)
 				continue;
 			for (int j = 0; j < 3; j++)
 			{
@@ -1677,12 +1619,12 @@ tuple<vector<std::array<int, 3>>, vector<set<int>>> _getMeshVertexLinkedInfo(con
 ModelMesh games::meshLoopSubdivision(const ModelMesh& mesh)
 {
 	//every new vertes
-	auto _getNewVertex = [](const Vector3d& A, const Vector3d& B, const Vector3d& C, const Vector3d& D)->Vector3d// 3/8*(A+B)+1/8*(A+D)
+	auto _getNewVertex = [](const Vector3d& A, const Vector3d& B, const Vector3d& C, const Vector3d& D)->Vector3d
 		{
-			return 0.375 * (A + B) + 0.125 * (C + D);
+			return 0.375 * (A + B) + 0.125 * (C + D);// 3/8*(A+B)+1/8*(A+D)
 		};
 	// update old
-	auto _updateOldVertex = [](const Vector3d& origin, const vector<Vector3d>& round)->Vector3d// 3/8*(A+B)+1/8*(A+D)
+	auto _updateOldVertex = [](const Vector3d& origin, const vector<Vector3d>& round)->Vector3d
 		{
 			size_t n = round.size(); //vertex degree
 			double u = (n == 3) ? 0.1875 : 3.0 / (8 * n); //double
@@ -1702,7 +1644,7 @@ ModelMesh games::meshLoopSubdivision(const ModelMesh& mesh)
 	for (int i = 0; i < mesh.ibo_.size(); ++i)
 	{
 		const std::array<int, 3>& face = mesh.ibo_[i];
-		int mid01, mid12, mid20;
+		int mid01, mid12, mid20; //the new vertex index of edge middle
 		//the unique edge, small->large
 		array<int, 2> edge01 = (face[0] < face[1]) ? array<int, 2>{ face[0], face[1] } : array<int, 2>{face[1], face[0] };
 		if (uniqueEdge.find(edge01) != uniqueEdge.end())
@@ -1754,6 +1696,29 @@ ModelMesh games::meshLoopSubdivision(const ModelMesh& mesh)
 		vboNew[i] = _updateOldVertex(mesh.vbo_[i], round);
 	}
 	meshNew.ibo_ = iboNew;
+	return meshNew;
+}
+
+HeMesh games::meshLoopSubdivision(const HeMesh& mesh)
+{
+	auto _getNewVertex = [](const Vector3d& A, const Vector3d& B, const Vector3d& C, const Vector3d& D)->Vector3d
+	{
+		return 0.375 * (A + B) + 0.125 * (C + D);// 3/8*(A+B)+1/8*(A+D)
+	};
+	auto _updateOldVertex = [](const Vector3d& origin, const vector<Vector3d>& round)->Vector3d
+	{
+		size_t n = round.size(); //vertex degree
+		double u = (n == 3) ? 0.1875 : 3.0 / (8 * n); // 3/16
+		Vector3d sum = Vector3d::Zero(); //neighbor position sum
+		for (const auto& iter : round)
+			sum += iter;
+		return (1 - n * u) * origin + u * sum;
+	};
+	HeMesh meshNew = mesh; //copy
+	for (const auto& iter : mesh.m_faces)
+	{
+
+	}
 	return meshNew;
 }
 

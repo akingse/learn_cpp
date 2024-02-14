@@ -209,6 +209,7 @@ namespace games
 
 	//utility
 	ModelMesh meshLoopSubdivision(const ModelMesh& mesh);
+	HeMesh meshLoopSubdivision(const HeMesh& mesh);
 	ModelMesh meshQuadricSimpIification(const ModelMesh& mesh, size_t collapseEdgeCount = 0);
 	ModelMesh meshQuadricErrorMetricsSimpIification(const ModelMesh& mesh, size_t collapseEdgeCount = 0);
 	//halfedge

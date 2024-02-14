@@ -306,31 +306,17 @@ namespace eigen
             Eigen::Vector2d(triangle[2][0],triangle[2][1]) };
     }
 
-    inline bool isPointInTriangleTolerance(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon, double tole = 0.0) // 2D
-    {
-        // been exlude vector parallel
-        Eigen::Vector2d v1 = trigon[1] - trigon[0];
-        Eigen::Vector2d v2 = trigon[2] - trigon[1];
-        Eigen::Vector2d v0 = trigon[0] - trigon[2];
-        // (p1-p0).cross(p2-p1)
-        double axisz = v1[0] * v2[1] - v1[1] * v2[0];
-        return //tole>0 less judge, tole<0 more judge
-            tole < axisz * (v1[0] * (point[1] - trigon[0][1]) - v1[1] * (point[0] - trigon[0][0])) &&
-            tole < axisz * (v2[0] * (point[1] - trigon[1][1]) - v2[1] * (point[0] - trigon[1][0])) &&
-            tole < axisz * (v0[0] * (point[1] - trigon[2][1]) - v0[1] * (point[0] - trigon[2][0]));
-    }
-
     inline std::array<Eigen::Matrix4d, 2> getMatrixFromThreePoints(const std::array<Eigen::Vector3d, 3>& triangle)
     {
         // legal triangle
         Eigen::Vector3d axisx = (triangle[1] - triangle[0]).normalized();
-        if (axisx.isZero()) //safe check
+        if (axisx.isZero(psykronix::eps)) //safe check
             axisx = Eigen::Vector3d(1, 0, 0);
         Eigen::Vector3d axisy = (triangle[2] - triangle[1]);
-        if (axisy.isZero())
+        if (axisy.isZero(psykronix::eps))
             axisy = Eigen::Vector3d(0, 1, 0);
         Eigen::Vector3d axisz = axisx.cross(axisy).normalized();
-        if (axisz.isZero())
+        if (axisz.isZero(psykronix::eps))
             axisz = Eigen::Vector3d(0, 0, 1);
         axisy = axisz.cross(axisx);
         Eigen::Matrix4d matFor, matInv;
@@ -354,6 +340,5 @@ namespace eigen
             to_vec3(triangle[1]), 
             to_vec3(triangle[2]) });
     }
-
 
 }
