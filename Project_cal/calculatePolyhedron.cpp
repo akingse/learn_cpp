@@ -1683,29 +1683,31 @@ tuple<vector<std::array<int, 3>>, vector<set<int>>> _getMeshVertexLinkedInfo(con
 	return { edgeDiag, roundVct };
 }
 
+// every new vertex
+Vector3d _getNewVertex(const Vector3d& A, const Vector3d& B, const Vector3d& C, const Vector3d& D)
+{
+	// AB on edge, CD is diagonal
+	return 0.375 * (A + B) + 0.125 * (C + D);// 3/8*(A+B)+1/8*(A+D)
+}
+
+// update old vertex
+Vector3d _updateOldVertex(const Vector3d& origin, const vector<Vector3d>& round)
+{
+	size_t n = round.size(); //vertex degree
+	double u = (n == 3) ? 0.1875 : 3.0 / (8 * n); //double
+	Vector3d sum = Vector3d::Zero(); //neighbor position sum
+	for (const auto& iter : round)
+		sum += iter;
+	return (1 - n * u) * origin + u * sum;
+}
+
 // practice of games101
 ModelMesh games::meshLoopSubdivision(const ModelMesh& mesh)
 {
-	//every new vertes
-	auto _getNewVertex = [](const Vector3d& A, const Vector3d& B, const Vector3d& C, const Vector3d& D)->Vector3d
-		{
-			return 0.375 * (A + B) + 0.125 * (C + D);// 3/8*(A+B)+1/8*(A+D)
-		};
-	// update old
-	auto _updateOldVertex = [](const Vector3d& origin, const vector<Vector3d>& round)->Vector3d
-		{
-			size_t n = round.size(); //vertex degree
-			double u = (n == 3) ? 0.1875 : 3.0 / (8 * n); //double
-			Vector3d sum = Vector3d::Zero(); //neighbor position sum
-			for (const auto& iter : round)
-				sum += iter;
-			return (1 - n * u) * origin + u * sum;
-		};
 	// invent wheel and optimize wheel
 	ModelMesh meshNew = mesh; //copy
 	std::vector<Eigen::Vector3d>& vboNew = meshNew.vbo_;
 	std::vector<std::array<int, 3>> iboNew;// reload
-	//vector<tuple<array<int, 2>, array<int,2>>> edgeCommon;
 	tuple<vector<std::array<int, 3>>, vector<set<int>>> info = _getMeshVertexLinkedInfo(mesh);
 	const vector<std::array<int, 3>>& edgeDiag = get<0>(info);
 	map<array<int, 2>, int> uniqueEdge;
@@ -1769,23 +1771,191 @@ ModelMesh games::meshLoopSubdivision(const ModelMesh& mesh)
 
 HeMesh games::meshLoopSubdivision(const HeMesh& mesh)
 {
-	auto _getNewVertex = [](const Vector3d& A, const Vector3d& B, const Vector3d& C, const Vector3d& D)->Vector3d
-	{
-		return 0.375 * (A + B) + 0.125 * (C + D);// 3/8*(A+B)+1/8*(A+D)
-	};
-	auto _updateOldVertex = [](const Vector3d& origin, const vector<Vector3d>& round)->Vector3d
-	{
-		size_t n = round.size(); //vertex degree
-		double u = (n == 3) ? 0.1875 : 3.0 / (8 * n); // 3/16
-		Vector3d sum = Vector3d::Zero(); //neighbor position sum
-		for (const auto& iter : round)
-			sum += iter;
-		return (1 - n * u) * origin + u * sum;
-	};
-	HeMesh meshNew = mesh; //copy
+	HeMesh meshNew; //create new empty HeMesh
+	int indexFace = 0;// mesh.m_faces.size();
+	int indexVertex = 0;//mesh.m_vertexes.size();
+	int indexEdge = 0;//mesh.m_edges.size();
+	std::map<int, int> new2oldEdge; // the new outer edge | incident origin edge(two edge use one index)
+	std::map<int, int> old2newEdge; // old origin edge index | two new statr and end edge (index-1, index)
 	for (const auto& iter : mesh.m_faces)
 	{
-
+		// the face's index0 vertex
+		HeVertex* vtFace0 = new HeVertex; 
+		vtFace0->m_index = indexVertex++;
+		vtFace0->m_coord = iter->m_incEdge->m_oriVertex->m_coord;
+		meshNew.m_vertexes.push_back(vtFace0);
+		HeEdge* edgeFaceS0 = new HeEdge; // 1/2 start
+		edgeFaceS0->m_index = indexEdge++;
+		edgeFaceS0->m_oriVertex = vtFace0;
+		vtFace0->m_incEdge = edgeFaceS0;
+		meshNew.m_edges.push_back(edgeFaceS0);
+		HeVertex* vtMiddle0 = new HeVertex;;
+		vtMiddle0->m_index = indexVertex++;
+		vtMiddle0->m_coord = _getNewVertex(
+			iter->m_incEdge->m_oriVertex->m_coord, 
+			iter->m_incEdge->m_nextEdge->m_oriVertex->m_coord,
+			iter->m_incEdge->m_prevEdge->m_oriVertex->m_coord, 
+			iter->m_incEdge->m_twinEdge->m_prevEdge->m_oriVertex->m_coord);
+		meshNew.m_vertexes.push_back(vtMiddle0);
+		HeEdge* edgeFaceE0 = new HeEdge; // 2/2 end
+		edgeFaceE0->m_index = indexEdge++;
+		edgeFaceE0->m_oriVertex = vtMiddle0;
+		meshNew.m_edges.push_back(edgeFaceE0);
+		vtMiddle0->m_incEdge = edgeFaceE0;
+		new2oldEdge.emplace(indexEdge, iter->m_incEdge->m_index);
+		old2newEdge.emplace(iter->m_incEdge->m_index, indexEdge);
+		// the face's index1 vertex
+		HeVertex* vtFace1 = new HeVertex; 
+		vtFace1->m_index = indexVertex++;
+		vtFace1->m_coord = iter->m_incEdge->m_nextEdge->m_oriVertex->m_coord;
+		meshNew.m_vertexes.push_back(vtFace1);
+		HeEdge* edgeFaceS1 = new HeEdge; // 1/2 start
+		edgeFaceS1->m_index = indexEdge++;
+		edgeFaceS1->m_oriVertex = vtFace1;
+		vtFace1->m_incEdge = edgeFaceS1;
+		meshNew.m_edges.push_back(edgeFaceS1);
+		HeVertex* vtMiddle1 = new HeVertex;;
+		vtMiddle1->m_index = indexVertex++;
+		vtMiddle1->m_coord = _getNewVertex(
+			iter->m_incEdge->m_nextEdge->m_oriVertex->m_coord,
+			iter->m_incEdge->m_prevEdge->m_oriVertex->m_coord,
+			iter->m_incEdge->m_oriVertex->m_coord,
+			iter->m_incEdge->m_nextEdge->m_twinEdge->m_prevEdge->m_oriVertex->m_coord);
+		meshNew.m_vertexes.push_back(vtMiddle1);
+		HeEdge* edgeFaceE1 = new HeEdge; // 2/2 end
+		edgeFaceE1->m_index = indexEdge++;
+		edgeFaceE1->m_oriVertex = vtMiddle1;
+		meshNew.m_edges.push_back(edgeFaceE1);
+		vtMiddle1->m_incEdge = edgeFaceE1;
+		new2oldEdge.emplace(indexEdge, iter->m_incEdge->m_nextEdge->m_index);
+		old2newEdge.emplace(iter->m_incEdge->m_nextEdge->m_index, indexEdge);
+		// the face's index2 vertex
+		HeVertex* vtFace2 = new HeVertex; 
+		vtFace2->m_index = indexVertex++;
+		vtFace2->m_coord = iter->m_incEdge->m_nextEdge->m_oriVertex->m_coord;
+		edgeFaceS1->m_oriVertex = vtFace2;
+		meshNew.m_vertexes.push_back(vtFace2);
+		HeEdge* edgeFaceS2 = new HeEdge; // 1/2 start
+		edgeFaceS2->m_index = indexEdge++;
+		edgeFaceS2->m_oriVertex = vtFace2;
+		vtFace2->m_incEdge = edgeFaceS2;
+		meshNew.m_edges.push_back(edgeFaceS2);
+		HeVertex* vtMiddle2 = new HeVertex;;
+		vtMiddle2->m_index = indexVertex++;
+		vtMiddle2->m_coord = _getNewVertex(
+			iter->m_incEdge->m_prevEdge->m_oriVertex->m_coord,
+			iter->m_incEdge->m_oriVertex->m_coord,
+			iter->m_incEdge->m_nextEdge->m_oriVertex->m_coord,
+			iter->m_incEdge->m_prevEdge->m_twinEdge->m_prevEdge->m_oriVertex->m_coord);
+		meshNew.m_vertexes.push_back(vtMiddle2);
+		HeEdge* edgeFaceE2 = new HeEdge; // 2/2 end
+		edgeFaceE2->m_index = indexEdge++;
+		edgeFaceE2->m_oriVertex = vtMiddle2;
+		meshNew.m_edges.push_back(edgeFaceE2);
+		vtMiddle2->m_incEdge = edgeFaceE2;
+		new2oldEdge.emplace(indexEdge, iter->m_incEdge->m_prevEdge->m_index);
+		old2newEdge.emplace(iter->m_incEdge->m_prevEdge->m_index, indexEdge);
+		// create 4 triangles of half-edge
+		// new triangle-0
+		HeEdge* edgeMidO0 = new HeEdge; //outer
+		HeEdge* edgeMidI0 = new HeEdge; //inner
+		edgeMidO0->m_index = indexEdge++;
+		edgeMidI0->m_index = indexEdge++;
+		edgeMidO0->m_twinEdge = edgeMidI0;
+		edgeMidI0->m_twinEdge = edgeMidO0;
+		edgeMidO0->m_oriVertex = vtMiddle0;
+		edgeMidI0->m_oriVertex = vtMiddle2;
+		edgeMidO0->m_prevEdge = edgeFaceS0;
+		edgeMidO0->m_nextEdge = edgeFaceE2;
+		meshNew.m_edges.push_back(edgeMidO0);
+		meshNew.m_edges.push_back(edgeMidI0);
+		HeFace* face0 = new HeFace;
+		face0->m_index = indexFace++;
+		face0->m_normal = (vtMiddle0->m_coord - vtFace0->m_coord).cross(vtMiddle2->m_coord - vtFace0->m_coord);
+		face0->m_incEdge = edgeMidO0;
+		meshNew.m_faces.push_back(face0);
+		edgeMidO0->m_incFace = face0;
+		edgeFaceS0->m_incFace = face0;
+		edgeFaceE2->m_incFace = face0;
+		// new triangle-1
+		HeEdge* edgeMidO1 = new HeEdge; //outer
+		HeEdge* edgeMidI1 = new HeEdge; //inner
+		edgeMidO1->m_index = indexEdge++;
+		edgeMidI1->m_index = indexEdge++;
+		edgeMidO1->m_twinEdge = edgeMidI1;
+		edgeMidI1->m_twinEdge = edgeMidO1;
+		edgeMidO1->m_oriVertex = vtMiddle1;
+		edgeMidI1->m_oriVertex = vtMiddle0;
+		edgeMidO1->m_prevEdge = edgeFaceS1;
+		edgeMidO1->m_nextEdge = edgeFaceE0;
+		meshNew.m_edges.push_back(edgeMidO1);
+		meshNew.m_edges.push_back(edgeMidI1);
+		HeFace* face1 = new HeFace;
+		face1->m_index = indexFace++;
+		face1->m_normal = (vtMiddle1->m_coord - vtFace1->m_coord).cross(vtMiddle0->m_coord - vtFace1->m_coord);
+		face1->m_incEdge = edgeMidO1;
+		meshNew.m_faces.push_back(face1);
+		edgeMidO1->m_incFace = face1;
+		edgeFaceS1->m_incFace = face1;
+		edgeFaceE0->m_incFace = face1;
+		// new triangle-2
+		HeEdge* edgeMidO2 = new HeEdge; //outer
+		HeEdge* edgeMidI2 = new HeEdge; //inner
+		edgeMidO2->m_index = indexEdge++;
+		edgeMidI2->m_index = indexEdge++;
+		edgeMidO2->m_twinEdge = edgeMidI2;
+		edgeMidI2->m_twinEdge = edgeMidO2;
+		edgeMidO2->m_oriVertex = vtMiddle2;
+		edgeMidI2->m_oriVertex = vtMiddle1;
+		edgeMidO2->m_prevEdge = edgeFaceS2;
+		edgeMidO2->m_nextEdge = edgeFaceE1;
+		meshNew.m_edges.push_back(edgeMidO2);
+		meshNew.m_edges.push_back(edgeMidI2);
+		HeFace* face2 = new HeFace;
+		face2->m_index = indexFace++;
+		face2->m_normal = (vtMiddle2->m_coord - vtFace2->m_coord).cross(vtMiddle1->m_coord - vtFace2->m_coord);
+		face2->m_incEdge = edgeMidO0;
+		meshNew.m_faces.push_back(face2);
+		edgeMidO2->m_incFace = face2;
+		edgeFaceS2->m_incFace = face2;
+		edgeFaceE1->m_incFace = face2;
+		// new triangle-inner
+		HeFace* faceIn = new HeFace;
+		faceIn->m_index = indexFace++;
+		faceIn->m_normal = (vtMiddle1->m_coord - vtMiddle0->m_coord).cross(vtMiddle2->m_coord - vtMiddle2->m_coord);
+		faceIn->m_incEdge = edgeMidI0;
+		meshNew.m_faces.push_back(faceIn);
+		//relation of inner triangle's edge
+		edgeMidI0->m_prevEdge = edgeMidI2;
+		edgeMidI0->m_nextEdge = edgeMidI1;
+		edgeMidI0->m_incFace = faceIn;
+		edgeMidI1->m_prevEdge = edgeMidI0;
+		edgeMidI1->m_nextEdge = edgeMidI2;
+		edgeMidI1->m_incFace = faceIn;
+		edgeMidI2->m_prevEdge = edgeMidI1;
+		edgeMidI2->m_nextEdge = edgeMidI0;
+		edgeMidI2->m_incFace = faceIn;
+		//relation of origin face triangle's edge
+		edgeFaceS0->m_prevEdge = edgeFaceE2;
+		edgeFaceS0->m_nextEdge = edgeMidO0;
+		edgeFaceE0->m_prevEdge = edgeMidO1;
+		edgeFaceE0->m_nextEdge = edgeFaceS1;
+		edgeFaceS1->m_prevEdge = edgeFaceE0;
+		edgeFaceS1->m_nextEdge = edgeMidO1;
+		edgeFaceE1->m_prevEdge = edgeMidO2;
+		edgeFaceE1->m_nextEdge = edgeFaceS2;
+		edgeFaceS2->m_prevEdge = edgeFaceE1;
+		edgeFaceS2->m_nextEdge = edgeMidO2;
+		edgeFaceE2->m_prevEdge = edgeMidO0;
+		edgeFaceE2->m_nextEdge = edgeFaceS0;
+	}
+	for (const auto& edge : new2oldEdge) // edge pair
+	{
+		HeEdge* edgeS = meshNew.m_edges[edge.first - 1];
+		HeEdge* edgeE = meshNew.m_edges[edge.first];
+		edgeS->m_twinEdge = meshNew.m_edges[old2newEdge[edge.second]];
+		edgeE->m_twinEdge = meshNew.m_edges[old2newEdge[edge.second - 1]];
+		// not using double assign
 	}
 	return meshNew;
 }
@@ -2197,7 +2367,7 @@ HeMesh games::meshQEMSimplification(const HeMesh& mesh, size_t edgeCollapseTarge
 	}
 	size_t edgeCollapseCurrent = 0;
 	HeMesh meshC = mesh;//copy
-	auto _updateCollapseEdgeHeap = [&](const HeVertex* vbar) ->void
+	auto _updateCollapseEdgeHeap = [&](const HeVertex* vbar)->void
 	{
 		//update neibor vertex qme-value
 		set<int> adjacentVertex;

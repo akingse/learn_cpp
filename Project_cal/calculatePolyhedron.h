@@ -100,14 +100,13 @@ namespace games
 	{
 		HeEdge() = default;
 		//HeEdge(HeVertex* v0, HeVertex* v1) :m_oriVertex(v0), m_desVertex(v1) {}
-		HeVertex* m_oriVertex = nullptr; //start origin vertex
 		//HeVertex* m_desVertex = nullptr; //end destination vertex, get by nextEdge
+		HeVertex* m_oriVertex = nullptr; //start origin vertex
 		HeEdge* m_twinEdge = nullptr; //means pair opposite halfedge, get by index
 		HeEdge* m_prevEdge = nullptr;
 		HeEdge* m_nextEdge = nullptr;
 		HeFace* m_incFace = nullptr; //incident face
 		int m_index = -1;
-		//int m_edge; //the unique edge index
 	};
 
 	struct HeFace
