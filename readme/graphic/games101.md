@@ -378,17 +378,23 @@ mesh简化，二次误差度量
 
 ![image-20240103003924110](../../../../../AppData/Roaming/Typora/typora-user-images/image-20240103003924110.png)
 
-
-
 mesh正则化
 
+- 【13】：光线追踪（基本原理）GAMES101_Lecture_13
+
+ 光栅化无法解决全局效果 global effects  （软阴影，glossy反射，间接光照）
+
+光线追踪，非常慢，适合离线渲染；
+
+光线三公理：1光沿直线传播，2光线不会碰撞collide，3从光源出发到相机过程光路可逆 reciprocity
 
 
 
 
-- 【13】：光线追踪（基本原理）
 
- 
+
+
+
 
 - 【14】：光线追踪（加速结构）
 
