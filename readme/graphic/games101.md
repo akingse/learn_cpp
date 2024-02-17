@@ -376,7 +376,7 @@ loop subdivision 路普细分
 
 mesh简化，二次误差度量
 
-![image-20240103003924110](../../../../../AppData/Roaming/Typora/typora-user-images/image-20240103003924110.png)
+
 
 mesh正则化
 
@@ -388,11 +388,21 @@ mesh正则化
 
 光线三公理：1光沿直线传播，2光线不会碰撞collide，3从光源出发到相机过程光路可逆 reciprocity
 
+pinhole小孔相机模型
 
+设定：eye是一个点；光源是点光源；光线完美折射和反射；
 
+做法：从像素投射光线，与场景相交得到交点，交点和光源连线，判定可见性和可见度，计算着色写回像素值；
 
+![image-20240216234359150](../../../../../AppData/Roaming/Typora/typora-user-images/image-20240216234359150.png)
 
+whitted风格
 
+primary ray  主射光线，secondary rays  弹射光线，shadow rays  投影光线
+
+渲染：visible判断
+
+几何：inside判断
 
 
 

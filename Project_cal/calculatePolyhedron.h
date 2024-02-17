@@ -90,8 +90,8 @@ namespace games
 	struct HeVertex
 	{
 		HeVertex() = default;
-		HeVertex(const Eigen::Vector3d& v) :m_coord(v) {}
-		Eigen::Vector3d m_coord;// start vertex coordinate of HalfEdge
+		//HeVertex(const Eigen::Vector3d& v) :m_coord(v) {}
+		Eigen::Vector3d m_coord = Eigen::Vector3d(std::nan("0"), 0, 0);// start vertex coordinate of HalfEdge
 		HeEdge* m_incEdge = nullptr; //incident edge, the start of edge
 		int m_index = -1;
 	};
@@ -112,9 +112,9 @@ namespace games
 	struct HeFace
 	{
 		HeFace() = default;
-		HeFace(HeEdge* edge) : m_incEdge(edge) {}
-		HeEdge* m_incEdge = nullptr; //any one of edges
-		Eigen::Vector3d m_normal;
+		//HeFace(HeEdge* edge) : m_incEdge(edge) {}
+		HeEdge* m_incEdge = nullptr; //any one of three edges
+		Eigen::Vector3d m_normal = Eigen::Vector3d::Zero();
 		int m_index = -1;
 		inline std::array<int, 3> ibo() const
 		{
@@ -194,6 +194,31 @@ namespace games
 		//convert
 		HeMesh(const ModelMesh& mesh); //fromTriangleMesh
 		operator ModelMesh() const; //toTriangleMesh
+		bool isValid() const //is mainfold mesh
+		{
+			// without nullptr
+			for (const auto& iter : m_vertexes)
+			{
+				if (iter->m_index == -1 || iter->m_incEdge == nullptr || std::isnan(iter->m_coord[0]))
+					return false;
+			}
+			for (const auto& iter : m_edges)
+			{
+				if (iter->m_index == -1 || !iter->m_oriVertex || !iter->m_twinEdge || !iter->m_prevEdge || !iter->m_nextEdge || !iter->m_incFace)
+					return false;
+				if (iter->m_twinEdge->m_oriVertex != iter->m_nextEdge->m_oriVertex ||
+					iter->m_twinEdge->m_nextEdge->m_oriVertex != iter->m_oriVertex)
+					return false;
+			}
+			for (const auto& iter : m_faces)
+			{
+				if (iter->m_index == -1 || iter->m_incEdge == nullptr || iter->m_normal.isZero())
+					return false;
+				// other methods
+			}
+
+			return true;
+		}
 
 		////Retrieve/CRUD
 		//std::vector<HeEdge*> findEdges(const HeVertex*) const;

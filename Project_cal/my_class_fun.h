@@ -1,28 +1,5 @@
 #pragma once
 
-#ifndef CLASH_DETECTION_SOLUTION
-struct InterTriInfo
-{
-    std::array<std::array<Eigen::Vector3d, 3>, 2> trianglePair;
-    std::array<unsigned long long, 2> entityPair;
-    double distance;
-};
-
-struct ModelMesh
-{
-    std::vector<Eigen::Vector3d> vbo_;
-    std::vector<std::array<int, 3>> ibo_;
-    std::vector<Eigen::Vector3d> fno_; //Face Normal
-    Eigen::AlignedBox3d bounding_;
-    Eigen::Affine3d pose_; // Eigen::Affine3d::Identity()
-    bool convex_; // isConvex default true
-    int genus_ = 0; //number of genus, default 0
-    std::vector<int> iboRaw_; //for test debug
-    uint64_t entityid_;
-    //uint64_t instanceid_;
-};
-#endif
-
 namespace psykronix
 {
     static constexpr size_t N_10E_3 = (size_t)1e3;
@@ -31,6 +8,15 @@ namespace psykronix
     static constexpr size_t N_10E_6 = (size_t)1e6;
     static constexpr size_t N_10E_7 = (size_t)1e7;
     static constexpr size_t N_10E_8 = (size_t)1e8;
+
+#ifndef CLASH_DETECTION_SOLUTION
+    struct InterTriInfo
+    {
+        std::array<std::array<Eigen::Vector3d, 3>, 2> trianglePair;
+        std::array<unsigned long long, 2> entityPair;
+        double distance;
+    };
+#endif
 
     class Vertex3d
     {

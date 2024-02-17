@@ -1529,6 +1529,7 @@ Eigen::Vector3d getPenetrationDepthOfTwoMeshs(const ModelMesh& meshA, const Mode
 
 double getMoveDistanceOfAssignedDirection(const ModelMesh& meshA, const ModelMesh& meshB, const Eigen::Vector3d& direction)
 {
+	return 0;
 }
 
 // interconversion
@@ -1539,8 +1540,9 @@ HeMesh::HeMesh(const ModelMesh& mesh)
 	HeMesh heMesh;
 	for (int i = 0; i < mesh.vbo_.size(); ++i)
 	{
-		HeVertex* heVertex = new HeVertex(mesh.vbo_[i]);
+		HeVertex* heVertex = new HeVertex;
 		heVertex->m_index = i;
+		heVertex->m_coord= mesh.vbo_[i];
 		heMesh.m_vertexes.push_back(heVertex);
 	}
 	int countEdge = 0;
