@@ -10,7 +10,6 @@
 
 namespace psykronix
 {
-	int isRayLineCrossTriangleMTA(const Eigen::Vector3d& origin, const Eigen::Vector3d& direction, const Triangle& trigon);
 	// polyhedron
 	bool isMeshConvexPolyhedron(const ModelMesh& mesh);
 	int getMeshGenusNumber(const ModelMesh& mesh);
@@ -132,7 +131,7 @@ namespace games
 				m_incEdge->m_prevEdge->m_oriVertex->m_coord };
 			return face;
 		}
-		inline bool include(const HeVertex* vt) const
+		inline bool isinclude(const HeVertex* vt) const
 		{
 			return //using pointer judge
 				vt == m_incEdge->m_oriVertex ||
@@ -156,37 +155,7 @@ namespace games
 		bool isManifold = true;
 		//std::vector<bool> is_border;
 		HeMesh() = default;
-		void clear()
-		{
-			//Reset();
-			for (size_t i = 0; i != m_vertexes.size(); ++i)
-			{
-				if (m_vertexes[i])
-				{
-					delete m_vertexes[i];
-					m_vertexes[i] = nullptr;
-				}
-			}
-			for (size_t i = 0; i != m_edges.size(); ++i)
-			{
-				if (m_edges[i])
-				{
-					delete m_edges[i];
-					m_edges[i] = nullptr;
-				}
-			}
-			for (size_t i = 0; i != m_faces.size(); ++i)
-			{
-				if (m_faces[i])
-				{
-					delete m_faces[i];
-					m_faces[i] = nullptr;
-				}
-			}
-			m_vertexes.clear();
-			m_edges.clear();
-			m_faces.clear();
-		}
+		void clear();
 		~HeMesh()
 		{
 			clear();
@@ -194,31 +163,7 @@ namespace games
 		//convert
 		HeMesh(const ModelMesh& mesh); //fromTriangleMesh
 		operator ModelMesh() const; //toTriangleMesh
-		bool isValid() const //is mainfold mesh
-		{
-			// without nullptr
-			for (const auto& iter : m_vertexes)
-			{
-				if (iter->m_index == -1 || iter->m_incEdge == nullptr || std::isnan(iter->m_coord[0]))
-					return false;
-			}
-			for (const auto& iter : m_edges)
-			{
-				if (iter->m_index == -1 || !iter->m_oriVertex || !iter->m_twinEdge || !iter->m_prevEdge || !iter->m_nextEdge || !iter->m_incFace)
-					return false;
-				if (iter->m_twinEdge->m_oriVertex != iter->m_nextEdge->m_oriVertex ||
-					iter->m_twinEdge->m_nextEdge->m_oriVertex != iter->m_oriVertex)
-					return false;
-			}
-			for (const auto& iter : m_faces)
-			{
-				if (iter->m_index == -1 || iter->m_incEdge == nullptr || iter->m_normal.isZero())
-					return false;
-				// other methods
-			}
-
-			return true;
-		}
+		bool isValid() const; //is mainfold mesh
 
 		////Retrieve/CRUD
 		//std::vector<HeEdge*> findEdges(const HeVertex*) const;

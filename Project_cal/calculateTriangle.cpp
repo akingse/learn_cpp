@@ -110,6 +110,7 @@ bool isPointInTriangleBC(const Vector2d& point, const std::array<Vector2d, 3>& t
 	double d20 = v2.dot(v0);
 	double d21 = v2.dot(v1);
 	double denom = d00 * d11 - d01 * d01;
+	//if (denom==0) //willnot happen, unless triangle degeneracy
 	double a = (d11 * d20 - d01 * d21) / denom;
 	double b = (d00 * d21 - d01 * d20) / denom;
 	double c = 1.0 - a - b;
@@ -169,7 +170,7 @@ bool psykronix::isPointInTriangle(const Vector3d& point, const std::array<Vector
 	return
 		0.0 <= (trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) && //bool isLeftA
 		0.0 <= (trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) && //bool isLeftB
-		0.0 <= (trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal);	//bool isLeftC
+		0.0 <= (trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal);   //bool isLeftC
 #endif //USING_THRESHOLD_GEOMETRIC
 	//+-*x< 0,5,1.5,2.5,1.5
 	//if (((trigon[1] - trigon[0]).cross(point - trigon[0])).dot(normal) < _eps) //bool isLeftA
@@ -183,6 +184,11 @@ bool psykronix::isPointInTriangle(const Vector3d& point, const std::array<Vector
 	//double dot1 = normal.dot((trigon[1] - trigon[0]).cross(point - trigon[0]));
 	//double dot2 = normal.dot((point - trigon[0]).cross(trigon[2] - trigon[0]));
 	//return 0.0 <= dot1 && 0.0 <= dot2 && dot1 + dot2 <= normal.dot(normal);
+}
+
+bool isPointOnPlane(const Eigen::Vector3d& point, const psykronix::Plane3d& plane)
+{
+	return isPerpendi(point - plane.m_origin, plane.m_normal);
 }
 
 bool isPointOnTriangleSurface(const Vector3d& point, const std::array<Vector3d, 3>& trigon)
@@ -1041,6 +1047,41 @@ bool isPointRayAcrossTriangleSAT(const Eigen::Vector3d& point, const std::array<
 	// another method, judge 2D point in triangle, point under plane
 }
 
+//Moller Trumbore Algorithm
+int isRayLineCrossTriangleMTA(const Eigen::Vector3d& origin, const Eigen::Vector3d& direction, const Triangle& trigon)
+{
+	//(Cost = 0 div, 27 mul, 17 add)
+	Vector3d E1 = trigon[1] - trigon[0];
+	Vector3d E2 = trigon[2] - trigon[0];
+	Vector3d S = origin - trigon[0];
+	Vector3d S1 = direction.cross(E2);
+	Vector3d S2 = S.cross(E1);
+	double k = S1.dot(E1);
+	if (fabs(k) < eps)// ray parallel with trigon plane (include through, both illegal)
+	{
+		// through edge, should change ray
+		Vector3d normal = E1.cross(E2);
+		if (fabs(normal.dot(S)) < eps && (
+			(0 <= (trigon[0] - origin).cross(direction).dot((direction).cross(trigon[1] - origin)) && 0 <= (trigon[0] - origin).cross(trigon[1] - trigon[0]).dot(normal) / direction.cross(trigon[1] - trigon[0]).dot(normal)) ||
+			(0 <= (trigon[1] - origin).cross(direction).dot((direction).cross(trigon[2] - origin)) && 0 <= (trigon[1] - origin).cross(trigon[2] - trigon[1]).dot(normal) / direction.cross(trigon[2] - trigon[1]).dot(normal)) ||
+			(0 <= (trigon[2] - origin).cross(direction).dot((direction).cross(trigon[0] - origin)) && 0 <= (trigon[2] - origin).cross(trigon[0] - trigon[2]).dot(normal) / direction.cross(trigon[0] - trigon[2]).dot(normal))))
+			return -4;
+		return -3;
+	}
+	k = 1.0 / k;
+	double t = k * S2.dot(E2);
+	if (t < 0) //check 0 <= t < oo, exclude nan
+		return -2;// negative direction
+	double b1 = k * S1.dot(S); //b1, b2 are barycentric coordinates
+	double b2 = k * S2.dot(direction);
+	double b3 = 1.0 - b1 - b2;
+	if (b1 < 0 || b2 < 0 || b3 < 0)
+		return -1;//false, out of triangle
+	if (t == 0 || b1 == 0 || b2 == 0 || b3 == 0)
+		return 0;// intersect point on plane | intersect point on edge
+	return 1;
+}
+
 //// for soft clash
 //Vector3d getIntersectOfPointAndLine(const Vector3d& point, const std::array<Vector3d, 2>& segm)
 //{
@@ -1804,15 +1845,9 @@ std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<E
 	auto _getIntersectOfSegmentAndPlaneINF = [&vecSeg, &normal](const std::array<Vector3d, 2>& segment, const std::array<Eigen::Vector3d, 3>& plane)->double
 	{
 		vecSeg = segment[1] - segment[0];
-#ifdef USING_ACCURATE_NORMALIZED
-		normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]).normalized(); // plane's normal isnot Zero
-		if (fabs(vecSeg.normalized().dot(normal)) < eps)// line parallel to plane, not always coplanar
-			return (fabs((segment[0] - plane[0]).normalized().dot(normal)) < eps) ? DBL_MAX : -DBL_MAX; // positive infinity means separate
-#else
-		normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);// normalized();
+		normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]).normalized(); //avoid over threshold
 		if (fabs(vecSeg.dot(normal)) < eps)
-			return (fabs((segment[0] - plane[0]).dot(normal)) < eps) ? DBL_MAX : -DBL_MAX;
-#endif // USING_ACCURATE_NORMALIZED
+			return (fabs((segment[0] - plane[0]).dot(normal)) < eps) ? DBL_MAX : -DBL_MAX; // positive infinity means separate
 		return (plane[0] - segment[0]).dot(normal) / vecSeg.dot(normal); //k
 		//return segment[0] + k * vecSeg; // intersect point
 	};
@@ -1822,6 +1857,7 @@ std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<E
 		if (normal.isZero(eps)) // intersect cause collinear
 			return DBL_MAX;
 		return (segmA[0] - segmB[0]).cross(segmA[0] - segmB[1]).norm() / normal.norm(); //k
+		//return (segmB[0] - segmA[0]).cross(vecSeg).dot(normal) / normal.squaredNorm();
 		//return segmA[0] + k * vecSeg;
 	};
 	auto _getEndPointsOfTwoCollinearSegments = [&res](const std::array<Vector3d, 2>& edgeA, const std::array<Eigen::Vector3d, 2>& edgeB)

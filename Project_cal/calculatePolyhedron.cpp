@@ -96,28 +96,6 @@ int psykronix::getMeshGenusNumber(const ModelMesh& mesh)
 	return int(1 - (V - E + F) / 2); //V - E + F = 2(1-g)
 }
 
-int psykronix::isRayLineCrossTriangleMTA(const Eigen::Vector3d& origin, const Eigen::Vector3d& direction, const Triangle& trigon)
-{
-	//Moller Trumbore Algorithm (Cost = 0 div, 27 mul, 17 add)
-	Vector3d E1 = trigon[1] - trigon[0];
-	Vector3d E2 = trigon[2] - trigon[0];
-	Vector3d S = origin - trigon[0];
-	Vector3d S1 = direction.cross(E2);
-	Vector3d S2 = S.cross(E1);
-	double k = 1.0 / S1.dot(E1);
-	double t = k * S2.dot(E2);
-	if (t < 0)
-		return 0;//false
-	double b1 = k * S1.dot(S);
-	double b2 = k * S2.dot(direction);
-	double b3 = 1.0 - b1 - b2;
-	if (b1 < 0 || b2 < 0 || b3 < 0)
-		return 0;//false, out of triangle
-	if (t == 0 || b1 == 0 || b2 == 0 || b3 == 0)
-		return -1;// intersect point on triangle || intersect point on edge
-	return 1;
-}
-
 vector<Vector3d> psykronix::getNormalVectorOfMeshFace(const ModelMesh& mesh) //using ray method
 {
 	vector<Vector3d> fno; //res
@@ -1601,6 +1579,64 @@ HeMesh::operator ModelMesh() const
 	return mesh;
 }
 
+void HeMesh::clear()
+{
+	//Reset();
+	for (size_t i = 0; i != m_vertexes.size(); ++i)
+	{
+		if (m_vertexes[i])
+		{
+			delete m_vertexes[i];
+			m_vertexes[i] = nullptr;
+		}
+	}
+	for (size_t i = 0; i != m_edges.size(); ++i)
+	{
+		if (m_edges[i])
+		{
+			delete m_edges[i];
+			m_edges[i] = nullptr;
+		}
+	}
+	for (size_t i = 0; i != m_faces.size(); ++i)
+	{
+		if (m_faces[i])
+		{
+			delete m_faces[i];
+			m_faces[i] = nullptr;
+		}
+	}
+	m_vertexes.clear();
+	m_edges.clear();
+	m_faces.clear();
+}
+
+bool HeMesh::isValid() const //is mainfold mesh
+{
+	// without nullptr
+	for (const auto& iter : m_vertexes)
+	{
+		if (iter->m_index == -1 || iter->m_incEdge == nullptr || std::isnan(iter->m_coord[0]))
+			return false;
+	}
+	for (const auto& iter : m_edges)
+	{
+		if (iter->m_index == -1 || !iter->m_oriVertex || !iter->m_twinEdge || !iter->m_prevEdge || !iter->m_nextEdge || !iter->m_incFace)
+			return false;
+		if (iter->m_twinEdge->m_oriVertex != iter->m_nextEdge->m_oriVertex ||
+			iter->m_twinEdge->m_nextEdge->m_oriVertex != iter->m_oriVertex)
+			return false;
+	}
+	for (const auto& iter : m_faces)
+	{
+		if (iter->m_index == -1 || iter->m_incEdge == nullptr || iter->m_normal.isZero())
+			return false;
+		// other methods
+	}
+
+	return true;
+}
+
 // the diagonal vertex of face | the surround vertex of vertex
 tuple<vector<std::array<int, 3>>, vector<set<int>>> _getMeshVertexLinkedInfo(const ModelMesh& mesh)
 {
@@ -2147,7 +2183,7 @@ inline Matrix4d _getQMatrixOfVertex(const HeMesh& mesh, int i)
 	Matrix4d Q = Eigen::Matrix4d::Zero();
 	for (const auto& face : mesh.m_faces)
 	{
-		if (!face->include(mesh.m_vertexes[i]))
+		if (!face->isinclude(mesh.m_vertexes[i]))
 			continue;
 		double a, b, c, d;
 		_getPlaneCoefficient(face->ibo_v(), a, b, c, d);
@@ -2375,7 +2411,7 @@ HeMesh games::meshQEMSimplification(const HeMesh& mesh, size_t edgeCollapseTarge
 		set<int> adjacentVertex;
 		for (const auto iter : meshC.m_faces)
 		{
-			if (iter->include(vbar))
+			if (iter->isinclude(vbar))
 			{
 				const std::array<int, 3>& ibo = iter->ibo();
 				for (const auto i : ibo)
