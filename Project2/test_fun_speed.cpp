@@ -3,7 +3,7 @@
 using namespace std;
 using namespace para;
 using namespace Eigen;
-using namespace psykronix;
+using namespace clash;
 #undef max //AlignedBox3d mem-fun
 #undef min
 //¾«¶È

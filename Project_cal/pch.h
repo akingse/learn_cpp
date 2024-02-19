@@ -20,7 +20,7 @@
 #define USING_HALFEDGE_STRUCTURE
 #define USING_POINTER_VERION
 
-#include "psykronixTypeDefine.h"		
+#include "clashTypeDefine.h"		
 #include "my_class_fun.h"		
 #include "calculateTriangle.h"	
 #include "calculateDataTree.h"

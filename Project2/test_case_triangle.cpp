@@ -1,7 +1,7 @@
 #include "pch.h"
 using namespace std;
 using namespace Eigen;
-using namespace psykronix;
+using namespace clash;
 //三角面片求交，测试案例
 
 static void EXPECT_TRUE(bool fun)

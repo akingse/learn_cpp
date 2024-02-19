@@ -11,7 +11,7 @@
 #define USING_AUTO_CLOSE
 #define RESERVE_USING_POLYGON2D
 
-namespace psykronix
+namespace clash
 {
 	class RectBase2d
 	{
@@ -66,7 +66,7 @@ namespace psykronix
 			{
 				for (size_t j = i; i < m_polygon.size() - 1; ++j)
 				{
-					if (psykronix::isTwoSegmentsIntersect(std::array<Eigen::Vector2d, 2>{m_polygon[i], m_polygon[i + 1]},
+					if (clash::isTwoSegmentsIntersect(std::array<Eigen::Vector2d, 2>{m_polygon[i], m_polygon[i + 1]},
 						std::array<Eigen::Vector2d, 2>{m_polygon[i], m_polygon[i + 1]}))
 						return false;
 				}
@@ -127,17 +127,17 @@ class KdTree2d
 {
 private:
 	std::shared_ptr<KdTreeNode2d> m_kdTree;
-	//static std::shared_ptr<KdTreeNode2d> createKdTree(const std::vector<psykronix::Polygon2d>& polygons);
+	//static std::shared_ptr<KdTreeNode2d> createKdTree(const std::vector<clash::Polygon2d>& polygons);
 public:
 	KdTree2d() = delete;
-	KdTree2d(const std::vector<psykronix::Polygon2d>& polygons);
+	KdTree2d(const std::vector<clash::Polygon2d>& polygons);
 	KdTree2d(const std::vector<eigen::TrigonPart>& triangles);
 	KdTree2d(const std::vector<eigen::ContourPart>& profiles);
 	std::shared_ptr<KdTreeNode2d> get() const
 	{
 		return m_kdTree;
 	}
-	std::vector<size_t> findIntersect(const psykronix::Polygon2d& polygon); //searchFromKdTree
+	std::vector<size_t> findIntersect(const clash::Polygon2d& polygon); //searchFromKdTree
 	std::vector<size_t> findIntersect(const eigen::ContourPart& profile);
 	std::vector<size_t> findIntersectOpLess(const eigen::TrigonPart& trigon);
 	std::vector<size_t> findIntersectOp(const eigen::TrigonPart& trigon); //operate
@@ -158,7 +158,7 @@ struct KdTreeNode3d
 	std::array<int, 2> m_index2 = { -1,-1 }; //for TrigonPart
 	size_t m_dimension = 0; // also means m_depth
 	KdTreeNode3d() = default;
-	KdTreeNode3d(const psykronix::Polyface3d& polyface, size_t dimension)
+	KdTreeNode3d(const clash::Polyface3d& polyface, size_t dimension)
 	{
 		m_dimension = dimension;
 		m_bound = polyface.m_bound;
@@ -189,12 +189,12 @@ private:
 	size_t m_depth = 0; //the max depth
 #endif
 	//mutable double m_tolerance = 0;
-	mutable Eigen::Vector3d m_tolerance = Eigen::Vector3d(psykronix::eps, psykronix::eps, psykronix::eps); //default with threshold eps
+	mutable Eigen::Vector3d m_tolerance = Eigen::Vector3d(clash::eps, clash::eps, clash::eps); //default with threshold eps
 
 public:
-	//static std::shared_ptr<KdTreeNode3d> createKdTree(std::vector<psykronix::Polyface3d>& PolyfaceVct);
+	//static std::shared_ptr<KdTreeNode3d> createKdTree(std::vector<clash::Polyface3d>& PolyfaceVct);
 	KdTree3d() = delete;
-	KdTree3d(const std::vector<psykronix::Polyface3d>& polyfaceVct); // using origin bound-box
+	KdTree3d(const std::vector<clash::Polyface3d>& polyfaceVct); // using origin bound-box
 	KdTree3d(const std::vector<eigen::TrigonPart>& triangles);
 	void setTolerance(double tolerance)
 	{
@@ -210,14 +210,14 @@ public:
 		return m_kdTree;
 	}
 	// CRUD
-	bool insert(const psykronix::Polyface3d& polyface); //only insert the not exsit index
+	bool insert(const clash::Polyface3d& polyface); //only insert the not exsit index
 	//bool remove(size_t index);
-	bool remove(const psykronix::Polyface3d& polyface); //find by polyface index
-	bool update(const psykronix::Polyface3d& polyface); //using polyface self index
-	std::vector<size_t> findIntersect(const psykronix::Polyface3d& polyface, double tolerance = 0.0) const; //searchFromKdTree
+	bool remove(const clash::Polyface3d& polyface); //find by polyface index
+	bool update(const clash::Polyface3d& polyface); //using polyface self index
+	std::vector<size_t> findIntersect(const clash::Polyface3d& polyface, double tolerance = 0.0) const; //searchFromKdTree
 	std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon);
-	std::vector<std::tuple<size_t, bool>> findIntersectClash(const psykronix::Polyface3d& polyface) const; // bool means soft-clash
-	std::vector<std::tuple<size_t, bool>> findIntersectClash(const psykronix::Polyface3d& polyface, double tolerance) const; //custom tolerance
+	std::vector<std::tuple<size_t, bool>> findIntersectClash(const clash::Polyface3d& polyface) const; // bool means soft-clash
+	std::vector<std::tuple<size_t, bool>> findIntersectClash(const clash::Polyface3d& polyface, double tolerance) const; //custom tolerance
 };
 
 class RTree3d

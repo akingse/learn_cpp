@@ -3,7 +3,7 @@
 #include <iomanip>
 using namespace std;
 using namespace Eigen;
-using namespace psykronix;
+using namespace clash;
 #undef max
 #undef min
 

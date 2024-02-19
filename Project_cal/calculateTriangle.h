@@ -8,7 +8,7 @@
 * License   :  MIT									                           *
 *******************************************************************************/
 
-namespace psykronix
+namespace clash
 {
 	// vector
 	//inline bool isNaN(const Eigen::Vector3d& vec)
@@ -53,17 +53,17 @@ namespace psykronix
 }
 
 //simplify global
-DLLEXPORT_CAL bool isPointOnPlane(const Eigen::Vector3d& point, const psykronix::Plane3d& plane);
+DLLEXPORT_CAL bool isPointOnPlane(const Eigen::Vector3d& point, const clash::Plane3d& plane);
 DLLEXPORT_CAL bool isPointOnTriangleSurface(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon);
 DLLEXPORT_CAL bool isSegmentAndTriangleIntersctSAT(const std::array<Eigen::Vector3d, 2>& segment, const std::array<Eigen::Vector3d, 3>& trigon);
 DLLEXPORT_CAL bool isPointRayAcrossTriangleSAT(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon);
-DLLEXPORT_CAL int isRayLineCrossTriangleMTA(const Eigen::Vector3d& origin, const Eigen::Vector3d& direction, const psykronix::Triangle& trigon);
+DLLEXPORT_CAL int isRayLineCrossTriangleMTA(const Eigen::Vector3d& origin, const Eigen::Vector3d& direction, const clash::Triangle& trigon);
 //triangle about
 DLLEXPORT_CAL bool isTwoTrianglesBoundingBoxIntersect(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance = 0.0);
 DLLEXPORT_CAL bool isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box);
 DLLEXPORT_CAL bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
-DLLEXPORT_CAL bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB, double tolerance = psykronix::eps);
-DLLEXPORT_CAL bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance = psykronix::eps);
+DLLEXPORT_CAL bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB, double tolerance = clash::eps);
+DLLEXPORT_CAL bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance = clash::eps);
 DLLEXPORT_CAL double getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
 DLLEXPORT_CAL std::array<Eigen::Vector3d, 2> getTwoTrianglesNearestPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
 DLLEXPORT_CAL std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
@@ -76,7 +76,7 @@ DLLEXPORT_CAL bool isTwoPolygonsIntersectSAT(const std::vector<Eigen::Vector2d>&
 
 // generate matrix
 DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
-DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const psykronix::Plane3d& plane);
+DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const clash::Plane3d& plane);
 DLLEXPORT_CAL std::array<Eigen::Matrix4d,2> getRelativeMatrixByProjectionPlane(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
-DLLEXPORT_CAL std::array<Eigen::Matrix4d,2> getRelativeMatrixByProjectionPlane(const psykronix::Plane3d& plane);
+DLLEXPORT_CAL std::array<Eigen::Matrix4d,2> getRelativeMatrixByProjectionPlane(const clash::Plane3d& plane);
 

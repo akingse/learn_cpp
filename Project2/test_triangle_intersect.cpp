@@ -4,7 +4,7 @@ using namespace std;
 using namespace para;
 using namespace Eigen;
 using namespace eigen;
-using namespace psykronix;
+using namespace clash;
 #undef max
 #undef min
 
@@ -135,8 +135,8 @@ static void _test1()
 	float b = 3;
 	double c = a - b;
 	double d = max(a, c);
-	//psykronix::Vertex vec(1, 1, 1);
-	//psykronix::Vertex vec2 = vec;
+	//clash::Vertex vec(1, 1, 1);
+	//clash::Vertex vec2 = vec;
 
 	double num = 1.123456789012345;
 

@@ -2,7 +2,7 @@
 #include <random> //C++11 rand library
 #include "my_file_read_write.h"
 using namespace std;
-using namespace psykronix;
+using namespace clash;
 #undef min
 #undef max
 static std::string randNumName = "bin_file/random_1e8.bin";

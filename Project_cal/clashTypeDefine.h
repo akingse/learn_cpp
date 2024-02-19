@@ -9,12 +9,15 @@ struct ModelMesh
     Eigen::Affine3d pose_; // Eigen::Affine3d::Identity()
     bool convex_; // isConvex default true
     int genus_ = 0; //number of genus, default 0
+#ifdef CLASH_DETECTION_DEBUG_TEMP
     std::vector<int> iboRaw_; //for test debug
-    uint64_t entityid_;
-    //uint64_t instanceid_;
+    uint64_t entityid_ = ULLONG_MAX; // record belong to same polyface
+    //uint64_t instanceid = 0; //0 means not instance
+#endif
 };
+static const ModelMesh gMeshEmpty = {};
 
-namespace psykronix
+namespace clash //collide //psykronix
 {
     // global type and variable define 
     typedef std::array<Eigen::Vector3d, 2> Segment;

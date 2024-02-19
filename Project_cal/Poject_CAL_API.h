@@ -5,7 +5,7 @@
 #define DLLEXPORT_CAL __declspec(dllimport)
 #endif
 
-#include "psykronixTypeDefine.h"		
+#include "clashTypeDefine.h"		
 #include "my_class_fun.h"		
 #include "calculateTriangle.h"
 #include "calculateDataTree.h"

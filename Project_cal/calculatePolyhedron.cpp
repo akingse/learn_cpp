@@ -3,7 +3,7 @@
 using namespace std;
 using namespace Eigen;
 using namespace games;
-using namespace psykronix;
+using namespace clash;
 //static constexpr double eps_d = 10 * DBL_EPSILON; // double
 static const Triangle gTriXOY = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(1,0,0), Eigen::Vector3d(0,1,0) };
 static const Triangle gTriXOZ = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(1,0,0), Eigen::Vector3d(0,0,1) };
@@ -45,8 +45,8 @@ extern std::vector<Vector3d> triVertexVctA, triVertexVctB;
 extern std::vector<InterTriInfo> interTriInfoList;
 #endif // STATISTIC_DATA_RECORD
 
-bool psykronix::isMeshConvexPolyhedron(const ModelMesh& mesh)
-//bool psykronix::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
+bool clash::isMeshConvexPolyhedron(const ModelMesh& mesh)
+//bool clash::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
 {
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
 	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
@@ -77,7 +77,7 @@ bool psykronix::isMeshConvexPolyhedron(const ModelMesh& mesh)
 	return true;
 }
 
-int psykronix::getMeshGenusNumber(const ModelMesh& mesh)
+int clash::getMeshGenusNumber(const ModelMesh& mesh)
 {
 	set<array<int, 2>> uniqueEdge;
 	for (const auto& iter : mesh.ibo_)
@@ -96,7 +96,7 @@ int psykronix::getMeshGenusNumber(const ModelMesh& mesh)
 	return int(1 - (V - E + F) / 2); //V - E + F = 2(1-g)
 }
 
-vector<Vector3d> psykronix::getNormalVectorOfMeshFace(const ModelMesh& mesh) //using ray method
+vector<Vector3d> clash::getNormalVectorOfMeshFace(const ModelMesh& mesh) //using ray method
 {
 	vector<Vector3d> fno; //res
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
@@ -142,7 +142,7 @@ vector<Vector3d> psykronix::getNormalVectorOfMeshFace(const ModelMesh& mesh) //u
 	return fno;
 }
 
-vector<Eigen::Vector3d> psykronix::getProfileOutOfMesh(const ModelMesh& mesh, const Plane3d& plane)
+vector<Eigen::Vector3d> clash::getProfileOutOfMesh(const ModelMesh& mesh, const Plane3d& plane)
 {
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
 	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
@@ -195,7 +195,7 @@ vector<Eigen::Vector3d> psykronix::getProfileOutOfMesh(const ModelMesh& mesh, co
 	return profilePoints;
 }
 
-bool psykronix::isPointInsidePolyhedronMTA(const Eigen::Vector3d& point, const ModelMesh& mesh)
+bool clash::isPointInsidePolyhedronMTA(const Eigen::Vector3d& point, const ModelMesh& mesh)
 {
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
 	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
@@ -226,7 +226,7 @@ bool psykronix::isPointInsidePolyhedronMTA(const Eigen::Vector3d& point, const M
 }
 
 // exclude point on face, ray is rotate random
-RelationOfPointAndMesh psykronix::isPointInsidePolyhedronROT(const Eigen::Vector3d& _point, const ModelMesh& mesh)
+RelationOfPointAndMesh clash::isPointInsidePolyhedronROT(const Eigen::Vector3d& _point, const ModelMesh& mesh)
 {
 	Eigen::Vector3d point = mesh.pose_.inverse() * _point; // to relative coordinate
 	if (!mesh.bounding_.contains(point))
@@ -1567,7 +1567,7 @@ HeMesh::HeMesh(const ModelMesh& mesh)
 	}
 }
 
-HeMesh::operator ModelMesh() const
+ModelMesh HeMesh::toMesh() const
 {
 	ModelMesh mesh;
 	std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
@@ -1577,6 +1577,11 @@ HeMesh::operator ModelMesh() const
 	for (const auto& iter : m_faces)
 		ibo.push_back(iter->ibo());
 	return mesh;
+}
+
+HeMesh::operator ModelMesh() const
+{
+	return toMesh();
 }
 
 void HeMesh::clear()

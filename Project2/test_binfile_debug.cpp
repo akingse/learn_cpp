@@ -3,7 +3,7 @@
 using namespace std;
 using namespace para;
 using namespace Eigen;
-using namespace psykronix;
+using namespace clash;
 
 static constexpr unsigned long long ULL_MAX1 = 18446744073709551615; // 
 static constexpr unsigned long long ULL_MAX2 = 2 ^ 64 - 1; //
@@ -48,8 +48,8 @@ bool isEqualTrigon(const Triangle& triA, const Triangle& triB)
 
 	//double d = 1;
 	//Vector3d point0(1.1, 0, 0);
-	//Vector3d point1 = psykronix::translate(2.2, 0) * psykronix::roty(M_PI) *= point0;
-	//Vector3d point2 = psykronix::rotz(2*M_PI) *= point0;
+	//Vector3d point1 = clash::translate(2.2, 0) * clash::roty(M_PI) *= point0;
+	//Vector3d point2 = clash::rotz(2*M_PI) *= point0;
 
 	//if (point0 == point1) //二进制判相等，无视精度
 	//	d = 0;
@@ -126,7 +126,7 @@ static void _test1()
 	//triB_1 = Vector3d(5, 5, 5);
 	//triB_2 = Vector3d(15, 5, 0);
 
-	//psykronix::roty(M_PI / 2) * std::array<Eigen::Vector3d, 3>
+	//clash::roty(M_PI / 2) * std::array<Eigen::Vector3d, 3>
 	Triangle triA = { triA_0, triA_1, triA_2 };
 	Triangle triB = { triB_0, triB_1, triB_2 };
 	bool int1 = isTwoTrianglesIntersectSAT(triA, triB);

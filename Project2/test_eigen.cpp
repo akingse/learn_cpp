@@ -7,7 +7,7 @@ using namespace std;
 using namespace para;
 using namespace Eigen;
 using namespace eigen;
-using namespace psykronix;
+using namespace clash;
 #undef max
 #undef min
 

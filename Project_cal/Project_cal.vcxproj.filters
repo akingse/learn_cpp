@@ -53,10 +53,10 @@
     <ClInclude Include="my_triangle_intersect.h">
       <Filter>algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="psykronixTypeDefine.h">
-      <Filter>algorithm</Filter>
-    </ClInclude>
     <ClInclude Include="Poject_CAL_API.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="clashTypeDefine.h">
       <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,7 +2,7 @@
 #include "calculateTriangle.h"
 using namespace std;
 using namespace Eigen;
-using namespace psykronix;
+using namespace clash;
 #ifdef max
 #undef max 
 #endif // max
@@ -19,7 +19,8 @@ using namespace psykronix;
 //--------------------------------------------------------------------------------------------------
 
 #ifdef STATISTIC_DATA_COUNT
-std::atomic<size_t> count_isTwoTrisInter = 0, count_getTrisDistance = 0, count_isTrisBoundBoxInter = 0, count_isTrisAndBoxInter = 0,
+std::atomic<size_t> 
+count_isTwoTrisInter = 0, count_getTrisDistance = 0, count_isTrisBoundBoxInter = 0, count_isTrisAndBoxInter = 0,
 count_pointInTri = 0, count_err_degen_tri = 0,
 count_err_inputbox = 0, count_err_inter_dist = 0, count_err_repeat_tri = 0,
 count_err_tris_sepa = 0, count_err_tris_inter = 0;
@@ -29,40 +30,40 @@ extern std::atomic<size_t> count_err_degen_tri, count_trigon_coplanar;
 extern std::atomic<size_t> count_gRTT;
 #endif
 
-bool psykronix::isParallel(const Vector2d& vecA, const Vector2d& vecB/*, double tole = 0*/)
+bool clash::isParallel(const Vector2d& vecA, const Vector2d& vecB/*, double tole = 0*/)
 {
 	// dynamic accuracy
 	double tole = DBL_EPSILON * std::max(vecA.squaredNorm(), vecB.squaredNorm() + 1.0);
 	return fabs(vecA[0] * vecB[1] - vecA[1] * vecB[0]) < tole;
 }
-bool psykronix::isParallel(const Vector3d& vecA, const Vector3d& vecB/*, double tole = 0*/)
+bool clash::isParallel(const Vector3d& vecA, const Vector3d& vecB/*, double tole = 0*/)
 {
 	// dynamic accuracy
 	double tole = DBL_EPSILON * std::max(vecA.squaredNorm(), vecB.squaredNorm() + 1.0);
 	return vecA.cross(vecB).isZero(tole);
 }
 
-bool psykronix::isPerpendi(const Vector2d& vecA, const Vector2d& vecB/*, double tole = 0*/)
+bool clash::isPerpendi(const Vector2d& vecA, const Vector2d& vecB/*, double tole = 0*/)
 {
 	// dynamic accuracy
 	double tole = DBL_EPSILON * std::max(vecA.squaredNorm(), vecB.squaredNorm() + 1.0); //avoid all zero
 	return vecA.dot(vecB) < tole;
 }
-bool psykronix::isPerpendi(const Vector3d& vecA, const Vector3d& vecB/*, double tole = 0*/)
+bool clash::isPerpendi(const Vector3d& vecA, const Vector3d& vecB/*, double tole = 0*/)
 {
 	// dynamic accuracy
 	double tole = DBL_EPSILON * std::max(vecA.squaredNorm(), vecB.squaredNorm() + 1.0); //avoid all zero
 	return vecA.dot(vecB) < tole;
 }
 
-double psykronix::computeTriangleArea(const std::array<Vector2d, 3>& triangle)
+double clash::computeTriangleArea(const std::array<Vector2d, 3>& triangle)
 {
 	Vector2d a = triangle[1] - triangle[0];
 	Vector2d b = triangle[2] - triangle[0];
 	return 0.5 * fabs(a[0] * b[1] - a[1] * b[0]); //cross value
 }
 
-double psykronix::computeTriangleArea(const std::array<Vector3d, 3>& triangle, bool is2D /*= true*/) //is2D means OnXoY
+double clash::computeTriangleArea(const std::array<Vector3d, 3>& triangle, bool is2D /*= true*/) //is2D means OnXoY
 {
 	Vector3d AB = triangle[1] - triangle[0];
 	Vector3d AC = triangle[2] - triangle[0];
@@ -75,7 +76,7 @@ double psykronix::computeTriangleArea(const std::array<Vector3d, 3>& triangle, b
 }
 
 //isPointInTriangle2D
-bool psykronix::isPointInTriangle(const Vector2d& point, const std::array<Vector2d, 3>& trigon) // 2D
+bool clash::isPointInTriangle(const Vector2d& point, const std::array<Vector2d, 3>& trigon) // 2D
 {
 	// using isLeft test
 	const Vector2d& p0 = trigon[0];
@@ -142,7 +143,7 @@ bool isPointInTriangleSAT(const Vector2d& point, const std::array<Vector2d, 3>& 
 }
 
 //must coplanar
-bool psykronix::isPointInTriangle(const Vector3d& point, const std::array<Vector3d, 3>& trigon) //3D
+bool clash::isPointInTriangle(const Vector3d& point, const std::array<Vector3d, 3>& trigon) //3D
 {
 #ifdef STATISTIC_DATA_COUNT
 	count_pointInTri++;
@@ -186,7 +187,7 @@ bool psykronix::isPointInTriangle(const Vector3d& point, const std::array<Vector
 	//return 0.0 <= dot1 && 0.0 <= dot2 && dot1 + dot2 <= normal.dot(normal);
 }
 
-bool isPointOnPlane(const Eigen::Vector3d& point, const psykronix::Plane3d& plane)
+bool isPointOnPlane(const Eigen::Vector3d& point, const clash::Plane3d& plane)
 {
 	return isPerpendi(point - plane.m_origin, plane.m_normal);
 }
@@ -221,7 +222,7 @@ bool isPointOnTriangleSurface(const Vector3d& point, const std::array<Vector3d, 
 }
 
 //isTwoSegmentsIntersect2D
-bool psykronix::isTwoSegmentsIntersect(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB)
+bool clash::isTwoSegmentsIntersect(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB)
 {
 	// segmA's two point on both sides of segmB
 	// (segmB[0] - segmA[0])x(segmA[1] - segmA[0])*(segmA[1] - segmA[0])x(segmB[1] - segmA[0])>=0
@@ -247,7 +248,7 @@ bool psykronix::isTwoSegmentsIntersect(const std::array<Vector2d, 2>& segmA, con
 }
 
 //double straddling test, must coplanar
-bool psykronix::isTwoSegmentsIntersect(const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)
+bool clash::isTwoSegmentsIntersect(const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)
 {
 	// quick reject box
   //if (std::max(segmA[0].x(), segmA[1].x()) < std::min(segmB[0].x(), segmB[1].x()) ||
@@ -274,7 +275,7 @@ bool psykronix::isTwoSegmentsIntersect(const std::array<Vector3d, 2>& segmA, con
 #endif
 }
 
-Eigen::Vector2d psykronix::getTwoSegmentsIntersectPoint(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB)
+Eigen::Vector2d clash::getTwoSegmentsIntersectPoint(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB)
 {
 	if (!isTwoSegmentsIntersect(segmA, segmB))
 		return Vector2d(std::nan("0"), std::nan("0"));
@@ -291,7 +292,7 @@ Eigen::Vector2d psykronix::getTwoSegmentsIntersectPoint(const std::array<Vector2
 	//return B1 + kB * (B2 - B1);
 }
 
-Eigen::Vector3d psykronix::getTwoSegmentsIntersectPoint(const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)
+Eigen::Vector3d clash::getTwoSegmentsIntersectPoint(const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)
 {
 	if (!isTwoSegmentsIntersect(segmA, segmB))
 		return gVecNaN;
@@ -303,7 +304,7 @@ Eigen::Vector3d psykronix::getTwoSegmentsIntersectPoint(const std::array<Vector3
 	return segmA[0] + k * vecSeg;
 }
 
-bool psykronix::isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector2d, 2>& segment, const Eigen::AlignedBox2d& box)
+bool clash::isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector2d, 2>& segment, const Eigen::AlignedBox2d& box)
 {
 	if (box.contains(segment[0]) || box.contains(segment[1]))
 		return true;
@@ -348,7 +349,7 @@ bool psykronix::isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vect
 	return true;
 }
 
-bool psykronix::isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 2>& segment, const Eigen::AlignedBox3d& box)
+bool clash::isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 2>& segment, const Eigen::AlignedBox3d& box)
 {
 	//whlie segment with tolerance, using large box
 	if (box.contains(segment[0]) || box.contains(segment[1]))
@@ -407,7 +408,7 @@ bool psykronix::isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vect
 }
 
 //must coplanar
-bool psykronix::isSegmentCrossTriangle(const std::array<Vector3d, 2>& segment, const std::array<Vector3d, 3>& trigon) // must coplanar
+bool clash::isSegmentCrossTriangle(const std::array<Vector3d, 2>& segment, const std::array<Vector3d, 3>& trigon) // must coplanar
 {
 	//judge box
 	//Eigen::AlignedBox3d boxSeg(segment[0], segment[1]);
@@ -453,8 +454,8 @@ bool psykronix::isSegmentCrossTriangle(const std::array<Vector3d, 2>& segment, c
 	//return false;
 }
 
-// segment must through trigon inner plane
-bool psykronix::isSegmentCrossTriangleSurface(const std::array<Vector3d, 2>& segment, const std::array<Vector3d, 3>& trigon) //start point outof plane
+// segment must through trigon inner plane //start point outof plane
+bool clash::isSegmentCrossTriangleSurface(const std::array<Vector3d, 2>& segment, const std::array<Vector3d, 3>& trigon)
 {
 	// compare angle of normal-vector
 	Vector3d vecSeg = segment[1] - segment[0];
@@ -465,7 +466,7 @@ bool psykronix::isSegmentCrossTriangleSurface(const std::array<Vector3d, 2>& seg
 }
 
 // Method: judge intersect point in triangle
-bool psykronix::isTwoTrianglesIntersectPIT(const std::array<Vector3d, 3>& triL, const std::array<Vector3d, 3>& triR)
+bool clash::isTwoTrianglesIntersectPIT(const std::array<Vector3d, 3>& triL, const std::array<Vector3d, 3>& triR)
 {
 	//#ifdef STATISTIC_DATA_COUNT
 	//	isTwoTrianglesInter++;
@@ -585,7 +586,7 @@ bool psykronix::isTwoTrianglesIntersectPIT(const std::array<Vector3d, 3>& triL, 
 }
 
 // Method: edge in tetra-hedron
-bool psykronix::isTwoTrianglesIntersectEIT(const std::array<Vector3d, 3>& triL, const std::array<Vector3d, 3>& triR)
+bool clash::isTwoTrianglesIntersectEIT(const std::array<Vector3d, 3>& triL, const std::array<Vector3d, 3>& triR)
 {
 	Vector3d veczL = (triL[1] - triL[0]).cross(triL[2] - triL[1]); // triL close face triangle
 	bool acrossR2L_A = (veczL.dot(triR[0] - triL[0])) * (veczL.dot(triR[1] - triL[0])) < eps; //include point-on-plane
@@ -727,7 +728,7 @@ bool psykronix::isTwoTrianglesIntersectEIT(const std::array<Vector3d, 3>& triL, 
 }
 
 //must intersect after SAT, using threshold
-RelationOfTwoTriangles psykronix::getRelationOfTwoTrianglesSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
+RelationOfTwoTriangles clash::getRelationOfTwoTrianglesSAT(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB)
 {
 #ifdef STATISTIC_DATA_TESTFOR
 	count_gRTT++;
@@ -740,7 +741,7 @@ RelationOfTwoTriangles psykronix::getRelationOfTwoTrianglesSAT(const std::array<
 		triB[1] - triB[0],
 		triB[2] - triB[1],
 		triB[0] - triB[2] } };
-	if (edgesA[0].cross(edgesA[1]).cross(edgesB[0].cross(edgesB[1])).isZero(eps))// && fabs(normalA.dot(triB[1] - triA[1])) < eps) //using approx
+	if (edgesA[0].cross(edgesA[1]).cross(edgesB[0].cross(edgesB[1])).isZero(eps))//&& fabs(normalA.dot(triB[1] - triA[1])) < eps)
 	{
 		//Eigen::Vector3d normalA = edgesA[0].cross(edgesA[1]);
 		//Eigen::Vector3d normalB = edgesB[0].cross(edgesB[1]);
@@ -799,7 +800,7 @@ RelationOfTwoTriangles psykronix::getRelationOfTwoTrianglesSAT(const std::array<
 }
 
 // decompose box to twelve triangles
-//bool psykronix::isTriangleAndBoundingBoxIntersect(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box)
+//bool clash::isTriangleAndBoundingBoxIntersect(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box)
 //{
 //#ifdef STATISTIC_DATA_COUNT
 //	count_isTrisAndBoxInter++;
@@ -842,7 +843,7 @@ RelationOfTwoTriangles psykronix::getRelationOfTwoTrianglesSAT(const std::array<
 //	return false;
 //}
 
-std::tuple<Vector3d, double> psykronix::getTriangleBoundingCircle(const std::array<Vector3d, 3>& trigon) //return center and radius
+std::tuple<Vector3d, double> clash::getTriangleBoundingCircle(const std::array<Vector3d, 3>& trigon) //return center and radius
 {
 	auto _inverse3x3 = [](const Vector3d& v0, const Vector3d& v1, const Vector3d& v2, const Vector3d& B)->Vector3d //set as row
 	{
@@ -1062,9 +1063,12 @@ int isRayLineCrossTriangleMTA(const Eigen::Vector3d& origin, const Eigen::Vector
 		// through edge, should change ray
 		Vector3d normal = E1.cross(E2);
 		if (fabs(normal.dot(S)) < eps && (
-			(0 <= (trigon[0] - origin).cross(direction).dot((direction).cross(trigon[1] - origin)) && 0 <= (trigon[0] - origin).cross(trigon[1] - trigon[0]).dot(normal) / direction.cross(trigon[1] - trigon[0]).dot(normal)) ||
-			(0 <= (trigon[1] - origin).cross(direction).dot((direction).cross(trigon[2] - origin)) && 0 <= (trigon[1] - origin).cross(trigon[2] - trigon[1]).dot(normal) / direction.cross(trigon[2] - trigon[1]).dot(normal)) ||
-			(0 <= (trigon[2] - origin).cross(direction).dot((direction).cross(trigon[0] - origin)) && 0 <= (trigon[2] - origin).cross(trigon[0] - trigon[2]).dot(normal) / direction.cross(trigon[0] - trigon[2]).dot(normal))))
+			(0 <= (trigon[0] - origin).cross(direction).dot((direction).cross(trigon[1] - origin)) && 
+				0 <= (trigon[0] - origin).cross(trigon[1] - trigon[0]).dot(normal) / direction.cross(trigon[1] - trigon[0]).dot(normal)) ||
+			(0 <= (trigon[1] - origin).cross(direction).dot((direction).cross(trigon[2] - origin)) && 
+				0 <= (trigon[1] - origin).cross(trigon[2] - trigon[1]).dot(normal) / direction.cross(trigon[2] - trigon[1]).dot(normal)) ||
+			(0 <= (trigon[2] - origin).cross(direction).dot((direction).cross(trigon[0] - origin)) && 
+				0 <= (trigon[2] - origin).cross(trigon[0] - trigon[2]).dot(normal) / direction.cross(trigon[0] - trigon[2]).dot(normal))))
 			return -4;
 		return -3;
 	}
@@ -1144,7 +1148,7 @@ int isRayLineCrossTriangleMTA(const Eigen::Vector3d& origin, const Eigen::Vector
 //	return {};
 //}
 
-bool isTwoTrianglesBoundingBoxIntersect(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance /*= 0.0*/)
+bool isTwoTrianglesBoundingBoxIntersect(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB, double tolerance /*= 0.0*/)
 {
 #ifdef STATISTIC_DATA_COUNT
 	count_isTrisBoundBoxInter++;
@@ -1528,7 +1532,7 @@ double getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const
 	};
 #define EDGE_PAIR_CREATE_AXIS_OPTMIZE
 #ifdef EDGE_PAIR_CREATE_AXIS_OPTMIZE
-	auto _getNearestAxisOfTwoSegments = [&/*many*/](const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB)// major capture axis
+	auto _getNearestAxisOfTwoSegments = [&](const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)// major capture axis
 	{
 		//enum RelationTwoSegment
 		//{
@@ -1842,7 +1846,7 @@ std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<E
 	//	return res;
 #endif
 	Vector3d vecSeg, normal, local;
-	auto _getIntersectOfSegmentAndPlaneINF = [&vecSeg, &normal](const std::array<Vector3d, 2>& segment, const std::array<Eigen::Vector3d, 3>& plane)->double
+	auto _getIntersectOfSegmentAndPlaneINF = [&vecSeg, &normal](const std::array<Vector3d, 2>& segment, const std::array<Vector3d, 3>& plane)->double
 	{
 		vecSeg = segment[1] - segment[0];
 		normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]).normalized(); //avoid over threshold
@@ -1851,7 +1855,7 @@ std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<E
 		return (plane[0] - segment[0]).dot(normal) / vecSeg.dot(normal); //k
 		//return segment[0] + k * vecSeg; // intersect point
 	};
-	auto _getPointOfTwoIntersectSegments = [&vecSeg, &normal](const std::array<Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB)->double
+	auto _getPointOfTwoIntersectSegments = [&vecSeg, &normal](const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)->double
 	{
 		normal = (segmB[0] - segmB[1]).cross(vecSeg);
 		if (normal.isZero(eps)) // intersect cause collinear
@@ -1982,7 +1986,7 @@ std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<E
 //}
 
 // for profile section
-bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB)
+bool clash::isTwoSegmentsCollinearCoincident(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB)
 {
 	//double operator^(const Vector2d& vec1, const Vector2d& vec2)
 	auto _cross2d = [](const Vector2d& vec1, const Vector2d& vec2)->double
@@ -1996,7 +2000,7 @@ bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Vector2d, 2>& 
 	return fabs(_cross2d(segmA[1] - segmA[0], segmB[1] - segmB[0])) < eps;
 }
 
-//bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)
+//bool clash::isTwoSegmentsCollinearCoincident(const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)
 //{
 //	if (!isTwoSegmentsIntersect(segmA, segmB))
 //		return false;
@@ -2014,7 +2018,7 @@ bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Vector2d, 2>& 
 //};
 
 #define USING_NORMALIZED_VECTOR
-bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB,
+bool clash::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB,
 	double toleAng /*= 0*/, double toleDis /*= 0*/)
 {
 	// |A¡ÁB| <= |A||B|sin¦È, near zero sin¦È approx ¦È
@@ -2085,7 +2089,7 @@ bool psykronix::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3
 	return 1 < interEnd; //interEnd == 2/3/4
 }
 
-std::tuple<bool, array<double, 4>> psykronix::getTwoSegmentsCollinearCoincidentPoints(const array<Vector3d, 2>& segmA, const array<Vector3d, 2>& segmB,
+std::tuple<bool, array<double, 4>> clash::getTwoSegmentsCollinearCoincidentPoints(const array<Vector3d, 2>& segmA, const array<Vector3d, 2>& segmB,
 	double toleAng /*= 0*/, double toleDis /*= 0*/)
 {
 	Vector3d segmVecA = segmA[1] - segmA[0];
@@ -2186,7 +2190,7 @@ std::tuple<bool, array<double, 4>> psykronix::getTwoSegmentsCollinearCoincidentP
 	return { true, { propA0, propA1, propB0, propB1  } }; //
 }
 
-void psykronix::mergeIntersectRegionOfSegment(std::vector<double>& _range, const std::array<double, 2>& prop)//->void
+void clash::mergeIntersectRegionOfSegment(std::vector<double>& _range, const std::array<double, 2>& prop)//->void
 {
 	//if (range.empty())
 	//	range = { { prop[0], prop[1] } };
@@ -2373,7 +2377,7 @@ Eigen::Matrix4d getProjectionMatrixByPlane(const Eigen::Vector3d& point, const E
 		axisx[1], axisy[1], axisz[1], origin[1],
 		axisx[2], axisy[2], axisz[2], origin[2],
 		0, 0, 0, 1;
-	Matrix4d invPro; // projection
+	Matrix4d invPro; //inverse projection
 	invPro << // shadow_xoy * inverse
 		axisx[0], axisx[1], axisx[2], 0,
 		axisy[0], axisy[1], axisy[2], 0,

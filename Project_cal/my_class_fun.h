@@ -1,6 +1,6 @@
 #pragma once
 
-namespace psykronix
+namespace clash
 {
     static constexpr size_t N_10E_3 = (size_t)1e3;
     static constexpr size_t N_10E_4 = (size_t)1e4;
@@ -296,13 +296,13 @@ namespace eigen
     {
         // legal triangle
         Eigen::Vector3d axisx = (triangle[1] - triangle[0]).normalized();
-        if (axisx.isZero(psykronix::eps)) //safe check
+        if (axisx.isZero(clash::eps)) //safe check
             axisx = Eigen::Vector3d(1, 0, 0);
         Eigen::Vector3d axisy = (triangle[2] - triangle[1]);
-        if (axisy.isZero(psykronix::eps))
+        if (axisy.isZero(clash::eps))
             axisy = Eigen::Vector3d(0, 1, 0);
         Eigen::Vector3d axisz = axisx.cross(axisy).normalized();
-        if (axisz.isZero(psykronix::eps))
+        if (axisz.isZero(clash::eps))
             axisz = Eigen::Vector3d(0, 0, 1);
         axisy = axisz.cross(axisx);
         Eigen::Matrix4d matFor, matInv;

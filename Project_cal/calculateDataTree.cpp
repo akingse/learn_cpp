@@ -2,7 +2,7 @@
 #include "calculateDataTree.h"
 
 using namespace std;
-using namespace psykronix;
+using namespace clash;
 using namespace Eigen;
 using namespace eigen;
 
@@ -41,7 +41,8 @@ std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<Polygon2d>& polygons, 
 	std::shared_ptr<KdTreeNode2d> currentNode = std::make_shared<KdTreeNode2d>();
 	//copy polygons
 	//std::vector<Polygon2d> polySort = polygons;
-	//std::sort(polygons.begin(), polygons.end(), [](const Polygon2d& a, const Polygon2d& b) { return a.boungding().min()[0] < b.boungding().min()[0]; });
+	//std::sort(polygons.begin(), polygons.end(), [](const Polygon2d& a, const Polygon2d& b) 
+	//	{ return a.boungding().min()[0] < b.boungding().min()[0]; });
 	if (polygons.size() != 1) //middle node
 	{
 		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);  
@@ -272,7 +273,7 @@ std::vector<size_t> KdTree2d::findIntersect(const ContourPart& profile)
 //  K-dimensional Tree 3d
 //--------------------------------------------------------------------------------------------------
 
-bool KdTree3d::insert(const psykronix::Polyface3d& polyface)
+bool KdTree3d::insert(const clash::Polyface3d& polyface)
 {
 	//must be new index of polyface
 	std::function<bool(const shared_ptr<KdTreeNode3d>&)> _findIndex = [&](const shared_ptr<KdTreeNode3d>& node)->bool
@@ -325,7 +326,7 @@ bool KdTree3d::insert(const psykronix::Polyface3d& polyface)
 }
 
 //bool KdTree3d::remove(size_t index)
-bool KdTree3d::remove(const psykronix::Polyface3d& polyface)
+bool KdTree3d::remove(const clash::Polyface3d& polyface)
 {
 	//retrieve first
 	//bool isFind = false;
@@ -375,9 +376,9 @@ bool KdTree3d::remove(const psykronix::Polyface3d& polyface)
 	return std::get<0>(_searchKdTree(m_kdTree));
 }
 
-bool KdTree3d::update(const psykronix::Polyface3d& polyface)
+bool KdTree3d::update(const clash::Polyface3d& polyface)
 {
-	std::function<tuple<bool, AlignedBox3d>(shared_ptr<KdTreeNode3d>&)> _searchKdTree = [&](shared_ptr<KdTreeNode3d>& node)//->bool
+	std::function<tuple<bool, AlignedBox3d>(shared_ptr<KdTreeNode3d>&)> _searchKdTree = [&](shared_ptr<KdTreeNode3d>& node)
 	{
 		//using recursion
 		if (node->m_index == -1) // isnot leaf node
@@ -427,8 +428,8 @@ std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<Polyface3d>& polyfaces
 	if (polyfaces.size() != 1) //middle node
 	{
 		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);
-		std::sort(polyfaces.begin(), polyfaces.end(),
-			[=](const Polyface3d& a, const Polyface3d& b) { return a.m_bound.min()[direction] < b.m_bound.min()[direction]; }); // index of Vector3d
+		std::sort(polyfaces.begin(), polyfaces.end(),[=](const Polyface3d& a, const Polyface3d& b)
+			 { return a.m_bound.min()[direction] < b.m_bound.min()[direction]; }); // index of Vector3d
 		//splitPolygons(/*polygons, leftPolygons, rightPolygons */ dimension, splitValue);
 		size_t dichotomy = polyfaces.size() / 2; // less | more
 		vector<Polyface3d> leftPolygons(polyfaces.begin(), polyfaces.begin() + dichotomy); //for new child node
@@ -471,8 +472,8 @@ std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<Polyface3d>& polyfaces
 	if (polyfaces.size() != 1) //middle node
 	{
 		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);
-		std::sort(polyfaces.begin(), polyfaces.end(),
-			[=](const Polyface3d& a, const Polyface3d& b) { return a.m_bound.min()[direction] < b.m_bound.min()[direction]; }); // index of Vector3d
+		std::sort(polyfaces.begin(), polyfaces.end(),[=](const Polyface3d& a, const Polyface3d& b)
+			 { return a.m_bound.min()[direction] < b.m_bound.min()[direction]; }); // index of Vector3d
 		size_t dichotomy = polyfaces.size() / 2; // less | more
 		vector<Polyface3d> leftPolygons(polyfaces.begin(), polyfaces.begin() + dichotomy); //for new child node
 		vector<Polyface3d> rightPolygons(polyfaces.begin() + dichotomy, polyfaces.end());
@@ -525,8 +526,8 @@ std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<TrigonPart>& triangles
 	if (triangles.size() != 1) //middle node
 	{
 		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);
-		std::sort(triangles.begin(), triangles.end(),
-			[=](const TrigonPart& a, const TrigonPart& b) { return a.m_box3d.min()[direction] < b.m_box3d.min()[direction]; }); // index of Vector3d
+		std::sort(triangles.begin(), triangles.end(), [=](const TrigonPart& a, const TrigonPart& b) 
+			{ return a.m_box3d.min()[direction] < b.m_box3d.min()[direction]; }); // index of Vector3d
 		//splitPolygons(/*polygons, leftPolygons, rightPolygons */ dimension, splitValue);
 		size_t dichotomy = triangles.size() / 2; // less | more
 		vector<TrigonPart> leftPolygons(triangles.begin(), triangles.begin() + dichotomy); //for new child node

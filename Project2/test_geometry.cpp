@@ -1,6 +1,6 @@
 #include "pch.h"
 using namespace std;
-using namespace psykronix;
+using namespace clash;
 using namespace Eigen;
 using namespace std::chrono;
 #ifdef min
@@ -12,7 +12,7 @@ using namespace std::chrono;
 //#define USING_RELATIVE_MATRIX
 
 
-namespace psykronix
+namespace clash
 {
 	//两平面求交
 	PosVec3d getIntersectLineOfTwoPlane(const Plane3d& planeA, const Plane3d& planeB)

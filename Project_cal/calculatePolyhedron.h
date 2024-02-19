@@ -8,7 +8,7 @@
 * License   :  MIT									                           *
 *******************************************************************************/
 
-namespace psykronix
+namespace clash
 {
 	// polyhedron
 	bool isMeshConvexPolyhedron(const ModelMesh& mesh);
@@ -23,6 +23,7 @@ namespace psykronix
 	//bool isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const ModelMesh& mesh);
 	//bool isPointInsidePolyhedronCL(const Eigen::Vector3d& point, const ModelMesh& mesh);
 	//bool isPointInsidePolyhedronFL(const Eigen::Vector3d& point, const ModelMesh& mesh);
+	
 	//mesh
 	std::vector<Eigen::Vector3d> getNormalVectorOfMeshFace(const ModelMesh& mesh); //using ray method
 	std::vector<Eigen::Vector3d> getProfileOutOfMesh(const ModelMesh& mesh, const Plane3d& plane);
@@ -40,7 +41,7 @@ namespace psykronix
 bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB);
 Eigen::Vector3d getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA, const ModelMesh& meshB, const std::vector<Eigen::Vector3d>& axesSepa,
 	const std::set<size_t>& vboSetA, const std::set<size_t>& vboSetB);
-std::tuple<psykronix::RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(const ModelMesh& meshA, const ModelMesh& meshB);
+std::tuple<clash::RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(const ModelMesh& meshA, const ModelMesh& meshB);
 std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance);
 
 namespace games
@@ -162,10 +163,11 @@ namespace games
 		}
 		//convert
 		HeMesh(const ModelMesh& mesh); //fromTriangleMesh
+		ModelMesh toMesh() const;
 		operator ModelMesh() const; //toTriangleMesh
 		bool isValid() const; //is mainfold mesh
 
-		////Retrieve/CRUD
+		//CRUD
 		//std::vector<HeEdge*> findEdges(const HeVertex*) const;
 		//std::vector<HeEdge*> findEdges(const HeFace*) const;
 		//std::vector<HeFace*> findFaces(const HeEdge*) const;

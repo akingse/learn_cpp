@@ -1,6 +1,6 @@
 #include "pch.h"
 using namespace std;
-using namespace psykronix;
+using namespace clash;
 using namespace Eigen;
 using namespace std::chrono;
 

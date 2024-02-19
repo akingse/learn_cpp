@@ -4,7 +4,7 @@
 #include "windows.h"
 
 using namespace std;
-using namespace psykronix;
+using namespace clash;
 using namespace Eigen;
 
 /*
@@ -30,12 +30,12 @@ bool BooleanOpIntersect(Polygon2d& polyA, Polygon2d& polyB)
 	{
 		// pre-intersect
 		segmentB = { polygonB[iB], polygonB[iB + 1] };
-		if (!psykronix::isSegmentAndBoundingBoxIntersectSAT(segmentB, polyA.bounding()))
+		if (!clash::isSegmentAndBoundingBoxIntersectSAT(segmentB, polyA.bounding()))
 			continue;
 		for (size_t iA = 0; iA < polygonA.size() - 1; ++iA)
 		{
 			segmentA = { polygonA[iA], polygonA[iA + 1] };
-			if (psykronix::isTwoSegmentsCollinearCoincident(segmentA, segmentB))
+			if (clash::isTwoSegmentsCollinearCoincident(segmentA, segmentB))
 			{
 				polyA.intersection().push_back({iA,0,0});
 				polyB.intersection().push_back({iB,0,0});
@@ -97,7 +97,7 @@ void BooleanOpIntersect(std::vector<Polygon2d>& polyVctA, std::vector<Polygon2d>
 //--------------------------------------------------------------------------------------------------
 //  test
 //--------------------------------------------------------------------------------------------------
-using namespace psykronix;
+using namespace clash;
 
 static void test0()
 {
