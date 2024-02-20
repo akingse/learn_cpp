@@ -6,7 +6,7 @@
 #endif
 
 #include "clashTypeDefine.h"		
-#include "my_class_fun.h"		
+#include "calculateVertorMatrix.h"		
 #include "calculateTriangle.h"
 #include "calculateDataTree.h"
 #include "calculatePolyhedron.h"

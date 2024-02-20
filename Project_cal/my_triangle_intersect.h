@@ -1,6 +1,75 @@
 #pragma once
 #include <afx.h>
 
+namespace clash
+{
+	static constexpr size_t N_10E_3 = (size_t)1e3;
+	static constexpr size_t N_10E_4 = (size_t)1e4;
+	static constexpr size_t N_10E_5 = (size_t)1e5;
+	static constexpr size_t N_10E_6 = (size_t)1e6;
+	static constexpr size_t N_10E_7 = (size_t)1e7;
+	static constexpr size_t N_10E_8 = (size_t)1e8;
+
+#ifndef CLASH_DETECTION_SOLUTION
+	struct InterTriInfo
+	{
+		std::array<std::array<Eigen::Vector3d, 3>, 2> trianglePair;
+		std::array<unsigned long long, 2> entityPair;
+		double distance;
+	};
+#endif
+
+	class Vertex3d
+	{
+	public:
+		double x = 0.0;
+		double y = 0.0;
+		double z = 0.0;
+		Vertex3d() {}
+		Vertex3d(double x_, double y_, double z_ = 0.0) :
+			x(x_),
+			y(y_),
+			z(z_)
+		{
+		}
+		inline bool operator==(const Vertex3d& rhs) const
+		{
+			return memcmp(this, &rhs, sizeof(Vertex3d)) == 0;
+		}
+		inline bool operator<(const Vertex3d& rhs) const
+		{
+			return memcmp(this, &rhs, sizeof(Vertex3d)) < 0;
+		}
+#ifdef EIGEN_WORLD_VERSION
+		Vertex3d(const Eigen::Vector3d& vec) :
+			x(vec.x()),
+			y(vec.y()),
+			z(vec.z())
+		{
+		}
+		Vertex3d(const Eigen::Vector3f& vec) :
+			x(vec.x()),
+			y(vec.y()),
+			z(vec.z())
+		{
+		}
+		operator Eigen::Vector3d() const
+		{
+			return Eigen::Vector3d(x, y, z);
+		}
+		operator Eigen::Vector3f() const
+		{
+			return Eigen::Vector3f((float)x, (float)y, (float)z);
+		}
+		//auto operator[](int i)
+		//{
+		//    if (i == 0)
+		//        return x;
+		//}
+#endif
+	};
+}
+
 class Vec3d
 {
 public:

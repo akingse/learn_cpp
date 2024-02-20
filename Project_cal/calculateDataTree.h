@@ -189,7 +189,7 @@ private:
 	size_t m_depth = 0; //the max depth
 #endif
 	//mutable double m_tolerance = 0;
-	mutable Eigen::Vector3d m_tolerance = Eigen::Vector3d(clash::eps, clash::eps, clash::eps); //default with threshold eps
+	mutable Eigen::Vector3d m_tolerance = Eigen::Vector3d(clash::epsF, clash::epsF, clash::epsF); //default with threshold eps
 
 public:
 	//static std::shared_ptr<KdTreeNode3d> createKdTree(std::vector<clash::Polyface3d>& PolyfaceVct);

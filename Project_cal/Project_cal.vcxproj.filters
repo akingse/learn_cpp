@@ -27,10 +27,13 @@
     <ClCompile Include="calculateTriangle.cpp">
       <Filter>algorithm</Filter>
     </ClCompile>
-    <ClCompile Include="my_class_fun.cpp">
+    <ClCompile Include="calculateVertorMatrix.cpp">
       <Filter>algorithm</Filter>
     </ClCompile>
     <ClCompile Include="my_triangle_intersect.cpp">
+      <Filter>algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="calculateDynamicAccuracy.cpp">
       <Filter>algorithm</Filter>
     </ClCompile>
   </ItemGroup>
@@ -47,7 +50,7 @@
     <ClInclude Include="calculateTriangle.h">
       <Filter>algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="my_class_fun.h">
+    <ClInclude Include="calculateVertorMatrix.h">
       <Filter>algorithm</Filter>
     </ClInclude>
     <ClInclude Include="my_triangle_intersect.h">
@@ -56,8 +59,11 @@
     <ClInclude Include="Poject_CAL_API.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="calculateDynamicAccuracy.h">
+      <Filter>algorithm</Filter>
+    </ClInclude>
     <ClInclude Include="clashTypeDefine.h">
-      <Filter>common</Filter>
+      <Filter>algorithm</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

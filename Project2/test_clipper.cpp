@@ -259,7 +259,7 @@ static void test3()
 
 
 //overload
-std::vector<double> mergeIntersectRegionOfSegment(std::vector<pair<double, double>>& range, const std::array<double, 2>& prop)//->void
+std::vector<double> mergeIntersectIntervalOfSegment(std::vector<pair<double, double>>& range, const std::array<double, 2>& prop)//->void
 {
 	std::vector<double> mergeRes;
 	for (const auto& iter : range)
@@ -267,7 +267,7 @@ std::vector<double> mergeIntersectRegionOfSegment(std::vector<pair<double, doubl
 		mergeRes.push_back(iter.first);
 		mergeRes.push_back(iter.second);
 	}
-	mergeIntersectRegionOfSegment(mergeRes, prop);
+	mergeIntersectIntervalOfSegment(mergeRes, prop);
 	range.clear();
 	for (size_t i = 0; i < mergeRes.size() / 2; ++i)
 		range.push_back({ mergeRes[2 * i], mergeRes[2 * i + 1] });
@@ -300,7 +300,7 @@ static void test4()
 	prop = { 0.5, 1.5 };
 	//prop = { 1.5, 7 };
 	//prop = { 1.5, 9.6 };
-	std::vector<double> mergeRes = mergeIntersectRegionOfSegment(range, prop);
+	std::vector<double> mergeRes = mergeIntersectIntervalOfSegment(range, prop);
 	return;
 }
 

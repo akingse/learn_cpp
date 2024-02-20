@@ -2,6 +2,7 @@
 using namespace std;
 using namespace clash;
 using namespace Eigen;
+using namespace eigen;
 using namespace std::chrono;
 #ifdef min
 #undef min
@@ -92,8 +93,8 @@ PosVec3d intersectWithTwoPlanes(const Plane3d& planeA, const Plane3d& planeB)
 	// old
 	Vector3d normalA = planeA.normal().normalized();
 	Vector3d normalB = planeB.normal().normalized();
-	if (fabs(normalA.dot(normalA) - 1 > eps) ||
-		fabs(normalB.dot(normalB) - 1 > eps))
+	if (fabs(normalA.dot(normalA) - 1 > epsF) ||
+		fabs(normalB.dot(normalB) - 1 > epsF))
 		return gPVNaN;
 	Vector3d normalC = normalA.cross(normalB);
 	if (normalC.squaredNorm() < DBL_EPSILON)
@@ -102,9 +103,9 @@ PosVec3d intersectWithTwoPlanes(const Plane3d& planeA, const Plane3d& planeB)
 	Vector3d midlle = 0.5 * (planeA.origin() + planeB.origin());
 	// intersectThreePlanes
 	Vector3d origin;
-	if (fabs(normalA.dot(normalA) - 1 > eps) ||
-		fabs(normalB.dot(normalB) - 1 > eps) ||
-		fabs(normalC.dot(normalC) - 1 > eps))
+	if (fabs(normalA.dot(normalA) - 1 > epsF) ||
+		fabs(normalB.dot(normalB) - 1 > epsF) ||
+		fabs(normalC.dot(normalC) - 1 > epsF))
 		return gPVNaN;
 	auto _determinant3vectors = [](const Vector3d& v1, const Vector3d& v2, const Vector3d& v3)->double
 	{
@@ -114,7 +115,7 @@ PosVec3d intersectWithTwoPlanes(const Plane3d& planeA, const Plane3d& planeB)
 		return det;
 	};
 	double det = _determinant3vectors(normalA, normalB, normalC);
-	if (fabs(det) < eps)
+	if (fabs(det) < epsF)
 		return gPVNaN;
 	Vector3d work = normalA.dot(normalA) * normalB.cross(normalC) +
 					normalB.dot(normalB) * normalC.cross(normalA) +
@@ -221,7 +222,6 @@ static void test3() //测试getIntersectLineOfTwoPlane
 	return;
 }
 
-
 static void test4()
 {
 	//Eigen::Vector2d point(1-1e-8,0);// (0, 0);
@@ -240,12 +240,33 @@ static void test4()
 	return;
 }
 
+//测试精度问题
+static void test5()
+{
+	//相对坐标系的影响 //精度系数的影响
+	Segment segmA = { Vector3d(300,0,0), Vector3d(0,101,0) };
+	Segment segmB = { Vector3d(0,0,0), Vector3d(100,102,0) };
+	//segmA = eigen::translate(12345678, 12345678, 0) * segmA;
+	//segmB = eigen::translate(12345678, 12345678, 0) * segmB;
+	Eigen::Vector3d inter = clash::getTwoSegmentsIntersectPoint(segmA, segmB);
+	Vector3d error = (inter - segmA[0]).cross(inter - segmA[1]);
+	//9.0949470177292824e-13
+	//-1.4156103134155273e-07
+
+	Vector3d v1(100, -1000, 200);
+	double m1 = v1.maxCoeff();
+	//v1.cwiseMax(v2) //merge two vector, to new one
+
+	return;
+}
+
 static int enrol = []()->int
 {
 	//test1();
 	//test2();
 	//test3();
 	//test4();
+	test5();
 	cout << "test_geometry finished.\n" << endl;
 	return 0;
 }();

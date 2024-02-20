@@ -141,9 +141,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="calculateDataTree.cpp" />
+    <ClCompile Include="calculateDynamicAccuracy.cpp" />
     <ClCompile Include="calculatePolyhedron.cpp" />
     <ClCompile Include="calculateTriangle.cpp" />
-    <ClCompile Include="my_class_fun.cpp" />
+    <ClCompile Include="calculateVertorMatrix.cpp" />
     <ClCompile Include="my_triangle_intersect.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -152,9 +153,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="calculateDataTree.h" />
+    <ClInclude Include="calculateDynamicAccuracy.h" />
     <ClInclude Include="calculatePolyhedron.h" />
     <ClInclude Include="calculateTriangle.h" />
-    <ClInclude Include="my_class_fun.h" />
+    <ClInclude Include="calculateVertorMatrix.h" />
     <ClInclude Include="my_triangle_intersect.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Poject_CAL_API.h" />

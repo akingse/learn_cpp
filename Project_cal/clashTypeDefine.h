@@ -1,50 +1,5 @@
 #pragma once
 
-static constexpr int MAX_DECIMAL_PRECISION = 8;
-static const int64_t MAX_COORD = INT64_MAX >> 2; //clipper parameter
-//using dynamic accuracy
-class GlobalAccuracy //singleton
-{
-public:
-    static GlobalAccuracy& getInstance()
-    {
-        static GlobalAccuracy instance;
-        return instance;
-    }
-    Eigen::AlignedBox3d m_modelBox3d; // in relative coordinate
-    double m_precision = 0; //current precision
-    inline int getDynamicPrecision() const
-    {
-        if (m_modelBox3d.isEmpty())
-            return MAX_DECIMAL_PRECISION; //the max precision
-        if (m_precision != 0)
-            return m_precision;
-        double maxCoord = 0;
-        for (int i = 0; i < 3; ++i)
-        {
-            maxCoord = std::max(std::max(fabs(m_modelBox3d.min()[i]), fabs(m_modelBox3d.max()[i])), maxCoord);
-        }
-        //double maxAccur = std::sqrt(MAX_COORD / std::pow(10, MAX_DECIMAL_PRECISION));
-        int maxPrec = std::floor(std::log10(MAX_COORD / (maxCoord * maxCoord)));
-        return std::min(maxPrec, MAX_DECIMAL_PRECISION);
-    }
-    inline double eps() const
-    {
-        int precision = getDynamicPrecision();
-        return std::pow(10, -precision);
-    }
-    inline double epsArea() const //for area
-    {
-        int precision = getDynamicPrecision();
-        return std::pow(10, -precision + 2);
-    }
-
-private:
-    GlobalAccuracy() = default;
-    GlobalAccuracy(const GlobalAccuracy&) = delete;
-    GlobalAccuracy operator=(const GlobalAccuracy&) = delete;
-};
-
 struct ModelMesh
 {
     std::vector<Eigen::Vector3d> vbo_;
@@ -54,11 +9,11 @@ struct ModelMesh
     Eigen::Affine3d pose_; // Eigen::Affine3d::Identity()
     bool convex_; // isConvex default true
     int genus_ = 0; //number of genus, default 0
-#ifdef CLASH_DETECTION_DEBUG_TEMP
+//#ifdef CLASH_DETECTION_DEBUG_TEMP
     std::vector<int> iboRaw_; //for test debug
     uint64_t entityid_ = ULLONG_MAX; // record belong to same polyface
     //uint64_t instanceid = 0; //0 means not instance
-#endif
+//#endif
 };
 static const ModelMesh gMeshEmpty = {};
 
@@ -82,9 +37,9 @@ namespace clash //collide //psykronix
     //static const Eigen::Vector3d gVecAxisX(1, 0, 0); //Eigen::Vector3d::UnitX()
     //static const Eigen::Vector3d gVecAxisY(0, 1, 0); //Eigen::Vector3d::UnitY()
     //static const Eigen::Vector3d gVecAxisZ(0, 0, 1); //Eigen::Vector3d::UnitZ()
-    static constexpr double eps = FLT_EPSILON; //1e-7
-    static constexpr double _eps = -FLT_EPSILON;
-    static constexpr double epsA = 1e-6;
+    static constexpr double epsF = FLT_EPSILON; //1e-7
+    static constexpr double _epsF = -FLT_EPSILON;
+    //static constexpr double epsA = 1e-6;
     //static constexpr unsigned long long ULL_MAX = 18446744073709551615; // 2 ^ 64 - 1 //ULLONG_MAX
 
     class Plane3d
@@ -105,14 +60,17 @@ namespace clash //collide //psykronix
         //get the plane origin through world coordinate origin
         Eigen::Vector3d origin() const
         {
-            double o_n = m_origin.dot(m_normal);
-			return (fabs(o_n) < eps) ? m_origin : o_n / m_normal.squaredNorm() * m_normal;
+            double o_n = m_origin.dot(normal());
+            double maxCoor = 0;
+            for (int i = 0; i < 3; ++i)
+                maxCoor = std::max(fabs(m_origin[i]), maxCoor); // maxCoeff
+            return (fabs(o_n) < epsF * maxCoor) ? m_origin : o_n / m_normal.squaredNorm() * m_normal;
         }
         //get normalized vector
         Eigen::Vector3d normal() const
         {
-			if (fabs(m_normal.squaredNorm() - 1) < eps)
-                return m_normal;
+			//if (fabs(m_normal.squaredNorm() - 1) < epsF)
+   //             return m_normal;
             return m_normal.normalized();
         }
 
@@ -232,7 +190,7 @@ namespace eigen
         Eigen::AlignedBox2d m_box2d; // contained in box3d
         std::vector<long long> m_shielded;
         std::vector<std::vector<Eigen::Vector2d>> m_contour; //contour of mesh
-        std::vector<std::vector<Eigen::Vector2d>> m_profile; //fillArea, the bool result
+        std::vector<std::vector<Eigen::Vector2d>> m_profile; //fillArea, the boolean result
         std::vector<TrigonPart> m_trigons; //to judge front
         OcclusionStatus m_visible = OcclusionStatus::EXPOSED;
         // for contour calculate method
@@ -250,6 +208,8 @@ namespace eigen
         }
         const std::vector<Eigen::Vector2d>& getOuter() const
         {
+            if (m_contour.empty())
+                return {};
             return m_contour[0];
         }
     };

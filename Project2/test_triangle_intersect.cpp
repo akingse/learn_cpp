@@ -98,7 +98,7 @@ static bool _isPointInMesh(const Vector3d& point, const std::vector<Eigen::Vecto
 		//Ë³Ê±ÕëÈÆÐÐ·¨
 		//Triangle trigon = { vbo[iter[0]], vbo[iter[1]], vbo[iter[2]] };
 		double croPro = (vbo[iter[1]] - vbo[iter[0]]).cross(vbo[iter[2]] - vbo[iter[1]]).dot(point - vbo[iter[0]]);
-		if (fabs(croPro) < eps)
+		if (fabs(croPro) < epsF)
 			return true; //point on the face
 		temp = croPro < 0;
 		if (isFirst)
@@ -294,7 +294,7 @@ static void _test7()
 			//d0 = getTrianglesDistance(P, Q, triA, triB);
 			d1 = getTrianglesDistanceSAT(triA, triB);
 			//cout << d0-d1 << endl;
-			if (fabs(d0 - d1) > eps)
+			if (fabs(d0 - d1) > epsF)
 				countDiff++;
 		}
 		if (isInter)
@@ -363,9 +363,9 @@ static void _test8()
 			array<Vector3d, 2> pn2 = getTwoTrianglesNearestPoints(triA, triB);
 			d2 = (pn2[1] - pn2[0]).norm();
 			//cout << d0-d1 << endl;
-			if (fabs(d0 - d1) > eps)
+			if (fabs(d0 - d1) > epsF)
 				countDiff1++;
-			if (fabs(d0 - d2) > eps)
+			if (fabs(d0 - d2) > epsF)
 				countDiff2++;
 		}
 	}

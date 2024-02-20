@@ -21,7 +21,9 @@
 #define USING_POINTER_VERION
 
 #include "clashTypeDefine.h"		
-#include "my_class_fun.h"		
+#include "calculateVertorMatrix.h" // namespace eigen
+#include "my_triangle_intersect.h"		
 #include "calculateTriangle.h"	
 #include "calculateDataTree.h"
 #include "calculatePolyhedron.h"
+#include "calculateDynamicAccuracy.h" //namespace accura

@@ -63,6 +63,7 @@
 #include "Poject_CAL_API.h"
 #include "my_geometry.h"			//export
 #include "test_serialize.h"
+#include "calculateVertorMatrix.h" //matrix trandform
 #include "my_triangle_intersect.h"
 #ifdef PROJECT_2_DLLEXPORT_DEFINE
 #define DLLEXPORT __declspec(dllimport)

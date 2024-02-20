@@ -1,74 +1,5 @@
 #pragma once
 
-namespace clash
-{
-    static constexpr size_t N_10E_3 = (size_t)1e3;
-    static constexpr size_t N_10E_4 = (size_t)1e4;
-    static constexpr size_t N_10E_5 = (size_t)1e5;
-    static constexpr size_t N_10E_6 = (size_t)1e6;
-    static constexpr size_t N_10E_7 = (size_t)1e7;
-    static constexpr size_t N_10E_8 = (size_t)1e8;
-
-#ifndef CLASH_DETECTION_SOLUTION
-    struct InterTriInfo
-    {
-        std::array<std::array<Eigen::Vector3d, 3>, 2> trianglePair;
-        std::array<unsigned long long, 2> entityPair;
-        double distance;
-    };
-#endif
-
-    class Vertex3d
-    {
-    public:
-        double x = 0.0;
-        double y = 0.0;
-        double z = 0.0;
-        Vertex3d() {}
-        Vertex3d(double x_, double y_, double z_ = 0.0) :
-            x(x_),
-            y(y_),
-            z(z_)
-        {
-        }
-        inline bool operator==(const Vertex3d& rhs) const
-        {
-            return memcmp(this, &rhs, sizeof(Vertex3d)) == 0;
-        }
-        inline bool operator<(const Vertex3d& rhs) const
-        {
-            return memcmp(this, &rhs, sizeof(Vertex3d)) < 0;
-        }
-#ifdef EIGEN_WORLD_VERSION
-        Vertex3d(const Eigen::Vector3d& vec) :
-            x(vec.x()),
-            y(vec.y()),
-            z(vec.z())
-        {
-        }
-        Vertex3d(const Eigen::Vector3f& vec) :
-            x(vec.x()),
-            y(vec.y()),
-            z(vec.z())
-        {
-        }
-        operator Eigen::Vector3d() const
-        {
-            return Eigen::Vector3d(x, y, z);
-        }
-        operator Eigen::Vector3f() const
-        {
-            return Eigen::Vector3f((float)x, (float)y, (float)z);
-        }
-        //auto operator[](int i)
-        //{
-        //    if (i == 0)
-        //        return x;
-        //}
-#endif
-    };
-}
-
 namespace eigen
 {
     // inline function
@@ -214,23 +145,96 @@ namespace eigen
         return T;
     }
 
-    inline Eigen::Vector3d operator*=(const Eigen::Matrix4d& mat, const Eigen::Vector3d& vec) //operator* been occupied
+    //operator overload
+    inline std::array<Eigen::Vector3d, 2> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 2>& line)
     {
-        Eigen::Vector4d res = mat * vec.homogeneous();
-        return res.hnormalized();
+        std::array<Eigen::Vector3d, 2> segment = {
+            (mat * line[0].homogeneous()).hnormalized(),
+            (mat * line[1].homogeneous()).hnormalized() };
+        return segment;
     }
 
-    inline std::array<Eigen::Vector3d, 2> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 2>& seg)
+    inline std::array<Eigen::Vector3d, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 3>& trigon)
     {
-        std::array<Eigen::Vector3d, 2> res;
-        for (int i = 0; i < 2; i++)
-        {
-            Eigen::Vector4d vec4 = mat * (seg[i].homogeneous());
-            res[i] = vec4.hnormalized();
-        }
-        return res;
+        std::array<Eigen::Vector3d, 3> triangle = {
+            (mat * trigon[0].homogeneous()).hnormalized(),
+            (mat * trigon[1].homogeneous()).hnormalized(),
+            (mat * trigon[2].homogeneous()).hnormalized() };
+        return triangle;
     }
 
+    inline std::array<Eigen::Vector2d, 2> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector2d, 2>& line)
+    {
+        std::array<Eigen::Vector4d, 2> segment = {
+            mat * Eigen::Vector4d(line[0][0],line[0][1],0,1),
+            mat * Eigen::Vector4d(line[1][0],line[1][1],0,1) };
+        return {
+            Eigen::Vector2d(segment[0][0],segment[0][1]),
+            Eigen::Vector2d(segment[1][0],segment[1][1]) };
+    }
+
+    inline std::array<Eigen::Vector2d, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector2d, 3>& trigon)
+    {
+        std::array<Eigen::Vector4d, 3> triangle = {
+            mat * Eigen::Vector4d(trigon[0][0],trigon[0][1],0,1),
+            mat * Eigen::Vector4d(trigon[1][0],trigon[1][1],0,1),
+            mat * Eigen::Vector4d(trigon[2][0],trigon[2][1],0,1) };
+        return {
+            Eigen::Vector2d(triangle[0][0],triangle[0][1]),
+            Eigen::Vector2d(triangle[1][0],triangle[1][1]),
+            Eigen::Vector2d(triangle[2][0],triangle[2][1]) };
+    }
+
+    inline std::array<Eigen::Matrix4d, 2> getMatrixFromThreePoints(const std::array<Eigen::Vector3d, 3>& triangle)
+    {
+        // legal triangle
+        Eigen::Vector3d axisx = (triangle[1] - triangle[0]).normalized();
+        if (axisx.isZero(clash::epsF)) //safe check
+            axisx = Eigen::Vector3d(1, 0, 0);
+        Eigen::Vector3d axisy = (triangle[2] - triangle[1]);
+        if (axisy.isZero(clash::epsF))
+            axisy = Eigen::Vector3d(0, 1, 0);
+        Eigen::Vector3d axisz = axisx.cross(axisy).normalized();
+        if (axisz.isZero(clash::epsF))
+            axisz = Eigen::Vector3d(0, 0, 1);
+        axisy = axisz.cross(axisx);
+        Eigen::Matrix4d matFor, matInv;
+        matFor << //forword matrix
+            axisx[0], axisy[0], axisz[0], triangle[0][0],
+            axisx[1], axisy[1], axisz[1], triangle[0][1],
+            axisx[2], axisy[2], axisz[2], triangle[0][2],
+            0, 0, 0, 1;
+        matInv << //inverse matrix, transpose and negation
+            axisx[0], axisx[1], axisx[2], -triangle[0][0],
+            axisy[0], axisy[1], axisy[2], -triangle[0][1],
+            axisz[0], axisz[1], axisz[2], -triangle[0][2],
+            0, 0, 0, 1;
+        return { matFor,matInv };
+    }
+
+    inline std::array<Eigen::Matrix4d, 2> getMatrixFromThreePoints(const std::array<Eigen::Vector2d, 3>& triangle)
+    {
+        return getMatrixFromThreePoints(std::array<Eigen::Vector3d, 3>{
+            to_vec3(triangle[0]),
+                to_vec3(triangle[1]),
+                to_vec3(triangle[2]) });
+    }
+
+    //inline Eigen::Vector3d operator*=(const Eigen::Matrix4d& mat, const Eigen::Vector3d& vec) //operator* been occupied
+    //{
+    //    Eigen::Vector4d res = mat * vec.homogeneous();
+    //    return res.hnormalized();
+    //}
+    //inline std::array<Eigen::Vector3d, 2> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 2>& seg)
+    //{
+    //    std::array<Eigen::Vector3d, 2> res;
+    //    for (int i = 0; i < 2; i++)
+    //    {
+    //        Eigen::Vector4d vec4 = mat * (seg[i].homogeneous());
+    //        res[i] = vec4.hnormalized();
+    //    }
+    //    return res;
+    //}
     //inline std::array<Eigen::Vector3d, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 3>& tri)
     //{
     //    std::array<Eigen::Vector3d, 3> res;
@@ -241,7 +245,6 @@ namespace eigen
     //    }
     //    return res;
     //}
-
     //inline std::array<Eigen::Vector3f, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3f, 3>& tri)
     //{
     //    std::array<Eigen::Vector3f, 3> res;
@@ -269,62 +272,6 @@ namespace eigen
         std::cout << "(" << T2[0].x() << ", " << T2[0].y() << ", " << T2[0].z() << ")" << std::endl;
         std::cout << "(" << T2[1].x() << ", " << T2[1].y() << ", " << T2[1].z() << ")" << std::endl;
         std::cout << "(" << T2[2].x() << ", " << T2[2].y() << ", " << T2[2].z() << ")" << std::endl;
-    }
-
-    inline std::array<Eigen::Vector3d, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 3>& trigon)
-    {
-        std::array<Eigen::Vector3d, 3> triangle = {
-            (mat * trigon[0].homogeneous()).hnormalized(),
-            (mat * trigon[1].homogeneous()).hnormalized(),
-            (mat * trigon[2].homogeneous()).hnormalized() };
-        return triangle;
-    }
-
-    inline std::array<Eigen::Vector2d, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector2d, 3>& trigon)
-    {
-        std::array<Eigen::Vector4d, 3> triangle = {
-            mat * Eigen::Vector4d(trigon[0][0],trigon[0][1],0,1),
-            mat * Eigen::Vector4d(trigon[1][0],trigon[1][1],0,1),
-            mat * Eigen::Vector4d(trigon[2][0],trigon[2][1],0,1) };
-        return {
-            Eigen::Vector2d(triangle[0][0],triangle[0][1]),
-            Eigen::Vector2d(triangle[1][0],triangle[1][1]),
-            Eigen::Vector2d(triangle[2][0],triangle[2][1]) };
-    }
-
-    inline std::array<Eigen::Matrix4d, 2> getMatrixFromThreePoints(const std::array<Eigen::Vector3d, 3>& triangle)
-    {
-        // legal triangle
-        Eigen::Vector3d axisx = (triangle[1] - triangle[0]).normalized();
-        if (axisx.isZero(clash::eps)) //safe check
-            axisx = Eigen::Vector3d(1, 0, 0);
-        Eigen::Vector3d axisy = (triangle[2] - triangle[1]);
-        if (axisy.isZero(clash::eps))
-            axisy = Eigen::Vector3d(0, 1, 0);
-        Eigen::Vector3d axisz = axisx.cross(axisy).normalized();
-        if (axisz.isZero(clash::eps))
-            axisz = Eigen::Vector3d(0, 0, 1);
-        axisy = axisz.cross(axisx);
-        Eigen::Matrix4d matFor, matInv;
-        matFor << //forword matrix
-            axisx[0], axisy[0], axisz[0], triangle[0][0],
-            axisx[1], axisy[1], axisz[1], triangle[0][1],
-            axisx[2], axisy[2], axisz[2], triangle[0][2],
-            0, 0, 0, 1;
-        matInv << //inverse matrix, transpose and negation
-            axisx[0], axisx[1], axisx[2], -triangle[0][0],
-            axisy[0], axisy[1], axisy[2], -triangle[0][1],
-            axisz[0], axisz[1], axisz[2], -triangle[0][2],
-            0, 0, 0, 1;
-        return { matFor,matInv };
-    }
-
-    inline std::array<Eigen::Matrix4d, 2> getMatrixFromThreePoints(const std::array<Eigen::Vector2d, 3>& triangle)
-    {
-        return getMatrixFromThreePoints(std::array<Eigen::Vector3d, 3>{ 
-            to_vec3(triangle[0]), 
-            to_vec3(triangle[1]), 
-            to_vec3(triangle[2]) });
     }
 
 }

@@ -776,7 +776,6 @@ static void _test6()
 //”≈ªØ≤‚ ‘
 static void _test7()
 {
-
 	Vector3d triA_0 = Vector3d(4936998.2332053846, -383787.17924958991, 6015.6846000000369);
 	Vector3d triA_1 = Vector3d(4937024.8494758252, -383779.28694613208, 6070.1700860465535);
 	Vector3d triA_2 = Vector3d(4937029.5225078566, -383777.90129043174, 6060.6040417688109);
@@ -787,7 +786,6 @@ static void _test7()
 	Triangle triA = { triA_0, triA_1, triA_2 };
 	Triangle triB = { triB_0, triB_1, triB_2 };
 	bool issat = isTwoTrianglesIntersectSAT(triA, triB);
-
 
 	std::vector<ModelMesh> cvtMeshVct_con = read_ModelMesh(binFilePath + "cvtMeshVct_con.bin"); //all mesh
 	std::vector<InterTriInfo> triInfo4034 = read_InterTriInfo(binFilePath + "interTriInfo_4034.bin");

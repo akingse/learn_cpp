@@ -54,7 +54,7 @@ bool clash::isMeshConvexPolyhedron(const ModelMesh& mesh)
 	for (const auto& face : ibo)
 	{
 		Vector3d normal = (vbo[face[1]] - vbo[face[0]]).cross(vbo[face[2]] - vbo[face[1]]);// .normalized();
-		double d_eps = normal.squaredNorm() * eps; // wide threshold
+		double d_eps = normal.squaredNorm() * epsF; // wide threshold
 		bool isFirst = true;
 		for (size_t i = 0; i < vbo.size(); ++i)
 		{
@@ -256,7 +256,7 @@ RelationOfPointAndMesh clash::isPointInsidePolyhedronROT(const Eigen::Vector3d& 
 #endif
 	auto _isRayAndTriangleIntersectParallel = [&point, &normal, &rayLine](std::array<Eigen::Vector3d, 3 >& trigon)->bool
 		{
-			//if (fabs((point - trigon[0]).dot(normal)) > eps) // not coplanar
+			//if (fabs((point - trigon[0]).dot(normal)) > epsF) // not coplanar
 			if ((point - trigon[0]).dot(normal) != 0.0) // not coplanar
 				return false;
 			// negetive direction ray cause cross product result opposite
@@ -283,7 +283,7 @@ RelationOfPointAndMesh clash::isPointInsidePolyhedronROT(const Eigen::Vector3d& 
 				return RelationOfPointAndMesh::SURFACE; // ray across is false
 			normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[1]);
 			double deno = rayLine.dot(normal); //ray.direction
-			if (deno == 0.0)// (fabs(deno) < eps) //ray direction is parallel, redo circulation
+			if (deno == 0.0)// (fabs(deno) < epsF) //ray direction is parallel, redo circulation
 			{
 				if (_isRayAndTriangleIntersectParallel(trigon)) //coplanar
 				{
@@ -299,12 +299,12 @@ RelationOfPointAndMesh clash::isPointInsidePolyhedronROT(const Eigen::Vector3d& 
 			Vector3d local = point + k * rayLine;
 			if (!isPointInTriangle(local, trigon))
 				continue;
-			if ((local - trigon[0]).isZero(eps) ||
-				(local - trigon[1]).isZero(eps) ||
-				(local - trigon[2]).isZero(eps) ||
-				(local - trigon[0]).cross(local - trigon[1]).isZero(eps) ||
-				(local - trigon[1]).cross(local - trigon[2]).isZero(eps) ||
-				(local - trigon[2]).cross(local - trigon[0]).isZero(eps)) //singularity
+			if ((local - trigon[0]).isZero(epsF) ||
+				(local - trigon[1]).isZero(epsF) ||
+				(local - trigon[2]).isZero(epsF) ||
+				(local - trigon[0]).cross(local - trigon[1]).isZero(epsF) ||
+				(local - trigon[1]).cross(local - trigon[2]).isZero(epsF) ||
+				(local - trigon[2]).cross(local - trigon[0]).isZero(epsF)) //singularity
 			{
 				_correctRayLine();
 				isNew = true;
@@ -357,7 +357,7 @@ bool isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const ModelMesh& me
 			bool isFirst = true, isLeft = false, temp /*= false*/;
 			for (size_t i = 0; i < vbo.size(); ++i)
 			{
-				if (i == trigon[0] || i == trigon[1] || i == trigon[2] || fabs(normal.dot((vbo[i] - vbo[trigon[0]]).normalized())) < eps) // self and coplanar
+				if (i == trigon[0] || i == trigon[1] || i == trigon[2] || fabs(normal.dot((vbo[i] - vbo[trigon[0]]).normalized())) < epsF) // self and coplanar
 					continue;
 				temp = normal.dot(vbo[i] - vbo[trigon[0]]) < 0.0;
 				if (isFirst)
@@ -457,7 +457,7 @@ bool isPointInsidePolyhedronCL(const Eigen::Vector3d& _point, const ModelMesh& m
 				point.x() < std::min(std::min(p0[0], p1[0]), p2[0]) ||
 				point.y() > std::max(std::max(p0[1], p1[1]), p2[1]) ||
 				point.y() < std::min(std::min(p0[1], p1[1]), p2[1]) ||
-				point.z() > std::max(std::max(p0[2], p1[2]), p2[2]) + eps) //include z
+				point.z() > std::max(std::max(p0[2], p1[2]), p2[2]) + epsF) //include z
 				return false;
 			double az = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
 			return //when vertical, az==0, always true
@@ -513,7 +513,7 @@ bool isPointInsidePolyhedronFL(const Eigen::Vector3d& _point, const ModelMesh& m
 				point.x() < std::min(std::min(p0[0], p1[0]), p2[0]) ||
 				point.y() > std::max(std::max(p0[1], p1[1]), p2[1]) ||
 				point.y() < std::min(std::min(p0[1], p1[1]), p2[1]) ||
-				point.z() > std::max(std::max(p0[2], p1[2]), p2[2]) + eps) // isPointOnSurface with threshold
+				point.z() > std::max(std::max(p0[2], p1[2]), p2[2]) + epsF) // isPointOnSurface with threshold
 				return false;
 			double az = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
 			return //when vertical, az==0, always true
@@ -550,7 +550,7 @@ bool isPointInsidePolyhedronFL(const Eigen::Vector3d& _point, const ModelMesh& m
 			continue;
 		}
 		double projection = normal.dot(point - p0);
-		if (fabs(projection) < normal.squaredNorm() * eps) //isPointOnTriangleSurface exclude
+		if (fabs(projection) < normal.squaredNorm() * epsF) //isPointOnTriangleSurface exclude
 			return false;
 		if (projection * normal.z() < 0.0) // point under plane
 			count++;
@@ -1003,7 +1003,7 @@ std::array<std::vector<size_t>, 2> _getReducedIntersectTrianglesOfMesh(const Mod
 {
 	//Eigen::AlignedBox3d boxMag(box.min() - 0.5 * Vector3d(tolerance, tolerance, tolerance), box.max() + 0.5 * Vector3d(tolerance, tolerance, tolerance));
 	Eigen::AlignedBox3d box = meshA.bounding_.intersection(meshB.bounding_);
-	//Vector3d toleSize = Vector3d(tolerance + eps, tolerance + eps, tolerance + eps);
+	//Vector3d toleSize = Vector3d(tolerance + epsF, tolerance + epsF, tolerance + epsF);
 	Vector3d toleSize = Vector3d(tolerance, tolerance, tolerance);
 	Eigen::AlignedBox3d boxMag(box.min() - toleSize, box.max() + toleSize);
 	std::vector<size_t> triA_Index; // using index of mesh IBO
@@ -1193,7 +1193,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 					continue;
 				isContact = true; //isIntersect// maybe intrusive or atleast contact
 				//intersect
-				//if ((triA[1] - triA[0]).cross(triA[2] - triA[1]).cross((triB[1] - triB[0]).cross(triB[2] - triB[1])).isZero(eps)) // intersect-coplanar judge
+				//if ((triA[1] - triA[0]).cross(triA[2] - triA[1]).cross((triB[1] - triB[0]).cross(triB[2] - triB[1])).isZero(epsF)) // intersect-coplanar judge
 				//{
 				//	continue;
 				//}
@@ -1236,7 +1236,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 					edgesA[2].cross(edgesB[2]) } };
 				for (auto& axis : axesPoten) // revise zero vector
 				{
-					if (axis.isZero(eps)) // clean data
+					if (axis.isZero(epsF)) // clean data
 						axis = Vector3d(1, 0, 0);
 				}
 				for (const auto& axis : axesPoten)
@@ -1244,7 +1244,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
                     bool isExist = false; //to remove repeat
 					for (const auto& iter : axesSepa)
 					{
-						if (iter.cross(axis).isZero(eps))
+						if (iter.cross(axis).isZero(epsF))
 						{
 #ifdef STATISTIC_DATA_COUNT
 							count_repeat_sepa_axis++;
@@ -1270,7 +1270,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 					count_triB_nan++;
 #endif  
 				// only intrusive triangle insert, exclude contact triangle
-				if (!isnan(pInter[0][0]) && !isnan(pInter[1][0]) && !(pInter[1] - pInter[0]).isZero(eps) && // also using eps
+				if (!isnan(pInter[0][0]) && !isnan(pInter[1][0]) && !(pInter[1] - pInter[0]).isZero(epsF) && // also using epsF
 					((pInter[0] != triA[0] && pInter[0] != triA[1] && pInter[0] != triA[2] && pInter[0] != triB[0] && pInter[0] != triB[1] && pInter[0] != triB[2]) ||
 						(pInter[1] != triA[0] && pInter[1] != triA[1] && pInter[1] != triA[2] && pInter[1] != triB[0] && pInter[1] != triB[1] && pInter[1] != triB[2])))
 				{
