@@ -1057,8 +1057,10 @@ int isRayLineCrossTriangleMTA(const Eigen::Vector3d& origin, const Eigen::Vector
 	if (fabs(k) < epsF)// ray parallel with trigon plane (include through, both illegal)
 	{
 		// through edge, should change ray
+#ifdef RAY_METHOD_INSIDE_JUDGE
 		Vector3d normal = E1.cross(E2);
-		if (fabs(normal.dot(S)) < epsF && (
+		if (fabs(normal.dot(S)) < epsF && ( // point on plane
+			// single straddle test && intersect point t<=0
 			(0 <= (trigon[0] - origin).cross(direction).dot((direction).cross(trigon[1] - origin)) && 
 				0 <= (trigon[0] - origin).cross(trigon[1] - trigon[0]).dot(normal) / direction.cross(trigon[1] - trigon[0]).dot(normal)) ||
 			(0 <= (trigon[1] - origin).cross(direction).dot((direction).cross(trigon[2] - origin)) && 
@@ -1066,6 +1068,7 @@ int isRayLineCrossTriangleMTA(const Eigen::Vector3d& origin, const Eigen::Vector
 			(0 <= (trigon[2] - origin).cross(direction).dot((direction).cross(trigon[0] - origin)) && 
 				0 <= (trigon[2] - origin).cross(trigon[0] - trigon[2]).dot(normal) / direction.cross(trigon[0] - trigon[2]).dot(normal))))
 			return -4;
+#endif
 		return -3;
 	}
 	k = 1.0 / k;
