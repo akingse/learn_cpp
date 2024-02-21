@@ -1,6 +1,4 @@
 #pragma once
-#include <afx.h>
-
 namespace clash
 {
 	static constexpr size_t N_10E_3 = (size_t)1e3;
@@ -9,15 +7,6 @@ namespace clash
 	static constexpr size_t N_10E_6 = (size_t)1e6;
 	static constexpr size_t N_10E_7 = (size_t)1e7;
 	static constexpr size_t N_10E_8 = (size_t)1e8;
-
-#ifndef CLASH_DETECTION_SOLUTION
-	struct InterTriInfo
-	{
-		std::array<std::array<Eigen::Vector3d, 3>, 2> trianglePair;
-		std::array<unsigned long long, 2> entityPair;
-		double distance;
-	};
-#endif
 
 	class Vertex3d
 	{
@@ -111,7 +100,7 @@ public:
 	//compare
 	bool operator==(const Vec3d& vec) const
 	{
-		//return abs(vec.x - x) + abs(vec.y - y) + abs(vec.z - z) < eps;
+		//return abs(vec.x - x) + abs(vec.y - y) + abs(vec.z - z) < epsF;
 		return memcmp(this, &vec, sizeof(Vec3d)) == 0;
 	}
 	bool operator<(const Vec3d& vec) const
@@ -121,7 +110,7 @@ public:
 	}
 	//operator bool() const
 	//{
-	//	return (abs(x) + abs(y) + abs(z) < eps);
+	//	return (abs(x) + abs(y) + abs(z) < epsF);
 	//}
 	virtual ~Vec3d()
 	{
@@ -166,7 +155,7 @@ std::vector<std::tuple<BPEntityId, BPEntityId, bool>> BoundingClashDetectionLL(c
 	}
 	Eigen::Vector3d box_tolerance(tolerance, tolerance, tolerance);
 	if (tolerance == 0.0) //using extra threshold
-		box_tolerance = Vector3d(eps, eps, eps);
+		box_tolerance = Vector3d(epsF, epsF, epsF);
 	Eigen::Vector3d tolerance_double = (box_tolerance.cwiseQuotient(world_size)) * (MAXINT64 / 4);
 	//Eigen::Vector<long long, 3> tolerance_longlong(tolerance_double[0], tolerance_double[1], tolerance_double[2]);
 	Eigen::Vector<long long, 3> tolerance_longlong(tolerance_double.x(), tolerance_double.y(), tolerance_double.z());

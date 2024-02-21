@@ -3,6 +3,7 @@ using namespace std;
 using namespace clash;
 using namespace Eigen;
 using namespace eigen;
+using namespace accura;
 using namespace std::chrono;
 #ifdef min
 #undef min
@@ -18,10 +19,10 @@ namespace clash
 	//两平面求交
 	PosVec3d getIntersectLineOfTwoPlane(const Plane3d& planeA, const Plane3d& planeB)
 	{
-		if (isParallel(planeA.normal(), planeB.normal()))
+		if (isParallel3d(planeA.normal(), planeB.normal()))
 		{
 			//is_point_on_plane
-			if (isPerpendi(planeA.normal(), planeB.origin() - planeA.origin()))
+			if (isPerpendi3d(planeA.normal(), planeB.origin() - planeA.origin()))
 			{
 				if (planeA.normal().isApprox(Vector3d(0, 0, 1)))
 					return { planeA.origin(), Vector3d(1, 0, 0) }; //xoy plane
@@ -79,10 +80,10 @@ namespace clash
 //inner-core version
 PosVec3d intersectWithTwoPlanes(const Plane3d& planeA, const Plane3d& planeB)
 {
-	if (isParallel(planeA.normal(), planeB.normal()))
+	if (isParallel3d(planeA.normal(), planeB.normal()))
 	{
 		//is_point_on_plane
-		if (isPerpendi(planeA.normal(), planeB.origin() - planeA.origin()))
+		if (isPerpendi3d(planeA.normal(), planeB.origin() - planeA.origin()))
 		{
 			if (planeA.normal().isApprox(Vector3d(0, 0, 1)))
 				return { planeA.origin(), Vector3d(1, 0, 0) }; //xoy plane
@@ -110,8 +111,8 @@ PosVec3d intersectWithTwoPlanes(const Plane3d& planeA, const Plane3d& planeB)
 	auto _determinant3vectors = [](const Vector3d& v1, const Vector3d& v2, const Vector3d& v3)->double
 	{
 		double det = v1.x() * v2.y() * v3.z() - v1.x() * v2.z() * v3.y();
-				det -= v1.y() * v2.x() * v3.z() - v1.y() * v2.z() * v3.x();
-				det += v1.z() * v2.x() * v3.y() - v1.z() * v2.y() * v3.x();
+		det -= v1.y() * v2.x() * v3.z() - v1.y() * v2.z() * v3.x();
+		det += v1.z() * v2.x() * v3.y() - v1.z() * v2.y() * v3.x();
 		return det;
 	};
 	double det = _determinant3vectors(normalA, normalB, normalC);
@@ -237,6 +238,12 @@ static void test4()
 	Matrix4d mat = getProjectionMatrixByPlane(plane);
 	cout << mat << endl;
 
+	//点在三角形内部
+	array<Eigen::Vector2d, 3> trigon = { Vector2d(-10, -10), Vector2d(30, 0), Vector2d(1, 10) };
+	trigon = { Vector2d(-10, -10), Vector2d(1, 10), Vector2d(30, 0) };
+
+    bool inter_ = isPointInTriangleTolerance(Vector2d(0, 0) + Vector2d(1000, 1000), translate(1000, 1000) * trigon, 0);
+
 	return;
 }
 
@@ -265,8 +272,8 @@ static int enrol = []()->int
 	//test1();
 	//test2();
 	//test3();
-	//test4();
-	test5();
+	test4();
+	//test5();
 	cout << "test_geometry finished.\n" << endl;
 	return 0;
 }();

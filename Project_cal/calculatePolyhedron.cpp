@@ -1473,42 +1473,41 @@ std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const
 
 //#ifdef USING_DISCARD_FUNCTION
 // only for convex polytope 
-bool isTwoMeshsIntersectGJK(const ModelMesh& meshA, const ModelMesh& meshB)
-{
-	return false;
-}
-
-// only for convex polytope
-double getTwoMeshsPenetrationDepthEPA(const ModelMesh& meshA, const ModelMesh& meshB)
-{
-	return 0.0;
-}
-
-//manual body boolean
-vector<Polyhedron> _getBooleanIntersectOfTwoMesh(const ModelMesh& meshA, const ModelMesh& meshB)
-{
-	vector<Polyhedron> interBodys;
-
-	return {};
-}
-
-Eigen::Vector3d _getPartialDepthtOfTwoConcave(const ModelMesh& meshA, const ModelMesh& meshB)
-{
-	return {};
-}
-
-// fixed mehsB, move distance of meshA
-Eigen::Vector3d getPenetrationDepthOfTwoMeshs(const ModelMesh& meshA, const ModelMesh& meshB)
-{
-	//must intersect
-	Eigen::Vector3d direction = gVecNaN;
-	return direction;
-}
-
-double getMoveDistanceOfAssignedDirection(const ModelMesh& meshA, const ModelMesh& meshB, const Eigen::Vector3d& direction)
-{
-	return 0;
-}
+//bool isTwoMeshsIntersectGJK(const ModelMesh& meshA, const ModelMesh& meshB)
+//{
+//	return false;
+//}
+//
+//// only for convex polytope
+//double getTwoMeshsPenetrationDepthEPA(const ModelMesh& meshA, const ModelMesh& meshB)
+//{
+//	return 0.0;
+//}
+//
+////manual body boolean
+//vector<Polyhedron> _getBooleanIntersectOfTwoMesh(const ModelMesh& meshA, const ModelMesh& meshB)
+//{
+//	vector<Polyhedron> interBodys;
+//	return {};
+//}
+//
+//Eigen::Vector3d _getPartialDepthtOfTwoConcave(const ModelMesh& meshA, const ModelMesh& meshB)
+//{
+//	return {};
+//}
+//
+//// fixed mehsB, move distance of meshA
+//Eigen::Vector3d getPenetrationDepthOfTwoMeshs(const ModelMesh& meshA, const ModelMesh& meshB)
+//{
+//	//must intersect
+//	Eigen::Vector3d direction = gVecNaN;
+//	return direction;
+//}
+//
+//double getMoveDistanceOfAssignedDirection(const ModelMesh& meshA, const ModelMesh& meshB, const Eigen::Vector3d& direction)
+//{
+//	return 0;
+//}
 
 // interconversion
 HeMesh::HeMesh(const ModelMesh& mesh)

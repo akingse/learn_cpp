@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "my_triangle_intersect.h"
+//#include <afx.h> //define min-max macro
 #include <iomanip>
 using namespace std;
 using namespace Eigen;

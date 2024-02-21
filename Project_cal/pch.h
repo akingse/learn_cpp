@@ -20,7 +20,7 @@
 #define USING_HALFEDGE_STRUCTURE
 #define USING_POINTER_VERION
 
-#include "clashTypeDefine.h"		
+#include "clashTypeDefine.h" //only header
 #include "calculateVertorMatrix.h" // namespace eigen
 #include "my_triangle_intersect.h"		
 #include "calculateTriangle.h"	
