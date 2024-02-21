@@ -139,8 +139,8 @@ public:
 	}
 	std::vector<size_t> findIntersect(const clash::Polygon2d& polygon); //searchFromKdTree
 	std::vector<size_t> findIntersect(const eigen::ContourPart& profile);
-	std::vector<size_t> findIntersectOpLess(const eigen::TrigonPart& trigon);
-	std::vector<size_t> findIntersectOp(const eigen::TrigonPart& trigon); //operate
+	std::vector<size_t> findIntersectOpLess(const eigen::TrigonPart& trigon);//operator less
+	std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon); 
 };
 
 //----------------------------------------------------------------------------------------------------------------
@@ -189,7 +189,7 @@ private:
 	size_t m_depth = 0; //the max depth
 #endif
 	//mutable double m_tolerance = 0;
-	mutable Eigen::Vector3d m_tolerance = Eigen::Vector3d(clash::epsF, clash::epsF, clash::epsF); //default with threshold eps
+	mutable Eigen::Vector3d m_tolerance = Eigen::Vector3d(clash::epsF, clash::epsF, clash::epsF); //default with threshold epsF
 
 public:
 	//static std::shared_ptr<KdTreeNode3d> createKdTree(std::vector<clash::Polyface3d>& PolyfaceVct);
@@ -198,7 +198,7 @@ public:
 	KdTree3d(const std::vector<eigen::TrigonPart>& triangles);
 	void setTolerance(double tolerance)
 	{
-		//Vector3d tole = (m_tolerance == 0.0) ? Vector3d(eps, eps, eps) : Vector3d(m_tolerance, m_tolerance, m_tolerance);
+		//Vector3d tole = (m_tolerance == 0.0) ? Vector3d(epsF, epsF, epsF) : Vector3d(m_tolerance, m_tolerance, m_tolerance);
 		m_tolerance = Eigen::Vector3d(tolerance, tolerance, tolerance);
 	}
 	std::shared_ptr<KdTreeNode3d> getTree() const

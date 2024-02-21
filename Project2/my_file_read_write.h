@@ -11,6 +11,15 @@
 //    return strw;
 //}
 
+#ifndef CLASH_DETECTION_SOLUTION
+struct InterTriInfo
+{
+    std::array<std::array<Eigen::Vector3d, 3>, 2> trianglePair;
+    std::array<unsigned long long, 2> entityPair;
+    double distance;
+};
+#endif
+
 inline std::wstring transfer_string_to_wstring(const std::string& str)
 {
     std::wstring strw;
@@ -69,9 +78,9 @@ int _wirteNumberFile(size_t n, double* _array, const std::string& filename); // 
 double* _readNumberFile(size_t n, const std::string& filename);
 
 // flatbuffers serialization
-void write_InterTriInfo(const std::vector<clash::InterTriInfo>& infos, const std::string& fileName);
+void write_InterTriInfo(const std::vector<InterTriInfo>& infos, const std::string& fileName);
 void write_ModelMesh(const std::vector<ModelMesh>& meshs, const std::string& fileName);
-std::vector<clash::InterTriInfo> read_InterTriInfo(const std::string& fileName);
+std::vector<InterTriInfo> read_InterTriInfo(const std::string& fileName);
 std::vector<ModelMesh> read_ModelMesh(const std::string& fileName);
 
 // the AlignedBox data
@@ -96,7 +105,7 @@ inline std::array<para::BPParaVec, 3> _get_rand3v()
     //srand((int)time(0));
     //Sleep(100);
     return std::array<para::BPParaVec, 3> {
-        para::BPParaVec(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
+            para::BPParaVec(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
             para::BPParaVec(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
             para::BPParaVec(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff) };
 }
@@ -104,17 +113,17 @@ inline std::array<Eigen::Vector3d, 3> _get_rand3(int i = 0)
 {
     if (i == 0)
         return std::array<Eigen::Vector3d, 3> {
-        Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
+            Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
             Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
             Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff) };
     if (i == 1)
         return std::array<Eigen::Vector3d, 3> {
-        Eigen::Vector3d(rand(), rand(), rand()),
+            Eigen::Vector3d(rand(), rand(), rand()),
             Eigen::Vector3d(rand(), rand(), rand()),
             Eigen::Vector3d(rand(), rand(), rand()) };
     if (i == -1)
         return std::array<Eigen::Vector3d, 3> {
-        Eigen::Vector3d(rand() - 0x7fff, rand() - 0x7fff, rand() - 0x7fff),
+            Eigen::Vector3d(rand() - 0x7fff, rand() - 0x7fff, rand() - 0x7fff),
             Eigen::Vector3d(rand() - 0x7fff, rand() - 0x7fff, rand() - 0x7fff),
             Eigen::Vector3d(rand() - 0x7fff, rand() - 0x7fff, rand() - 0x7fff) };
 }
@@ -123,6 +132,6 @@ inline std::array<Eigen::Vector3d, 2> _get_rand2()
 {
     return std::array<Eigen::Vector3d, 2> {
         Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff),
-            Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff) };
+        Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff) };
 }
 #endif

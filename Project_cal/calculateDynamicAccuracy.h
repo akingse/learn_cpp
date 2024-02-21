@@ -1,10 +1,4 @@
 #pragma once
-#ifdef max
-#undef max 
-#endif 
-#ifdef min
-#undef min 
-#endif
 
 namespace accura
 {
@@ -21,6 +15,7 @@ namespace accura
         }
         Eigen::AlignedBox3d m_modelBox3d; // in relative coordinate
         int m_precision = 0; //current precision
+        Eigen::Vector3d m_relaOrigin = Eigen::Vector3d(0, 0, 0); //relative origin point
         inline int getDynamicPrecision()
         {
             if (m_modelBox3d.isEmpty())
@@ -40,12 +35,12 @@ namespace accura
         inline double eps() //const
         {
             int precision = getDynamicPrecision();
-            return std::pow(10, -precision);
+            return std::pow(10.0, -precision + 1);
         }
         inline double epsArea() //const //for area
         {
             int precision = getDynamicPrecision();
-            return std::pow(10, -precision + 2);
+            return std::pow(10.0, -precision + 3);
         }
 
     private:
@@ -53,4 +48,10 @@ namespace accura
         GlobalAccuracy(const GlobalAccuracy&) = delete;
         GlobalAccuracy operator=(const GlobalAccuracy&) = delete;
     };
+
+    // DynamicAccuracy function, same name
+    bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB, double tolerance);
+    bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance);
+
+
 }

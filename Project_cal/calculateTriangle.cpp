@@ -2,13 +2,8 @@
 #include "calculateTriangle.h"
 using namespace std;
 using namespace Eigen;
+using namespace eigen;
 using namespace clash;
-#ifdef max
-#undef max 
-#endif // max
-#ifdef min
-#undef min 
-#endif // min
 #define USING_METHOD_SAT
 //#define USING_THRESHOLD_CUSTOMIZE
 //#define USING_ACCURATE_NORMALIZED
@@ -29,32 +24,6 @@ extern std::atomic<size_t> count_err_degen_tri, count_trigon_coplanar;
 #ifdef STATISTIC_DATA_TESTFOR
 extern std::atomic<size_t> count_gRTT;
 #endif
-
-bool clash::isParallel(const Vector2d& vecA, const Vector2d& vecB/*, double tole = 0*/)
-{
-	// dynamic accuracy
-	double tole = DBL_EPSILON * std::max(vecA.squaredNorm(), vecB.squaredNorm() + 1.0);
-	return fabs(vecA[0] * vecB[1] - vecA[1] * vecB[0]) < tole;
-}
-bool clash::isParallel(const Vector3d& vecA, const Vector3d& vecB/*, double tole = 0*/)
-{
-	// dynamic accuracy
-	double tole = DBL_EPSILON * std::max(vecA.squaredNorm(), vecB.squaredNorm() + 1.0);
-	return vecA.cross(vecB).isZero(tole);
-}
-
-bool clash::isPerpendi(const Vector2d& vecA, const Vector2d& vecB/*, double tole = 0*/)
-{
-	// dynamic accuracy
-	double tole = DBL_EPSILON * std::max(vecA.squaredNorm(), vecB.squaredNorm() + 1.0); //avoid all zero
-	return vecA.dot(vecB) < tole;
-}
-bool clash::isPerpendi(const Vector3d& vecA, const Vector3d& vecB/*, double tole = 0*/)
-{
-	// dynamic accuracy
-	double tole = DBL_EPSILON * std::max(vecA.squaredNorm(), vecB.squaredNorm() + 1.0); //avoid all zero
-	return vecA.dot(vecB) < tole;
-}
 
 double clash::computeTriangleArea(const std::array<Vector2d, 3>& triangle)
 {
@@ -84,7 +53,9 @@ bool clash::isPointInTriangle(const Vector2d& point, const std::array<Vector2d, 
 	const Vector2d& p2 = trigon[2];
 	// compare z-value
 #ifdef USING_THRESHOLD_GEOMETRIC
+	axisz = (0.0 < axisz) ? 1.0 : -1.0;
 	double axisz = (p1.x() - p0.x()) * (p2.y() - p0.y()) - (p2.x() - p0.x()) * (p1.y() - p0.y());
+	axisz = (0.0 < axisz) ? 1.0 : -1.0;
 	return !(
 		axisz * ((p1.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p1.y() - p0.y()) < _epsF) || //bool isLeftA
 		axisz * ((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y()) < _epsF) || //bool isLeftB
@@ -92,10 +63,11 @@ bool clash::isPointInTriangle(const Vector2d& point, const std::array<Vector2d, 
 #else
 	// (p1-p0).cross(p2-p1)
 	double axisz = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
+	axisz = (0.0 < axisz) ? 1.0 : -1.0;
 	return
-		0.0 < axisz * ((p1[0] - p0[0]) * (point[1] - p0[1]) - (point[0] - p0[0]) * (p1[1] - p0[1])) &&
-		0.0 < axisz * ((p2[0] - p1[0]) * (point[1] - p1[1]) - (point[0] - p1[0]) * (p2[1] - p1[1])) &&
-		0.0 < axisz * ((p0[0] - p2[0]) * (point[1] - p2[1]) - (point[0] - p2[0]) * (p0[1] - p2[1]));
+		0.0 <= axisz * ((p1[0] - p0[0]) * (point[1] - p0[1]) - (point[0] - p0[0]) * (p1[1] - p0[1])) &&
+		0.0 <= axisz * ((p2[0] - p1[0]) * (point[1] - p1[1]) - (point[0] - p1[0]) * (p2[1] - p1[1])) &&
+		0.0 <= axisz * ((p0[0] - p2[0]) * (point[1] - p2[1]) - (point[0] - p2[0]) * (p0[1] - p2[1]));
 #endif
 }
 
@@ -234,15 +206,24 @@ bool clash::isTwoSegmentsIntersect(const std::array<Vector2d, 2>& segmA, const s
 		((segmB[1] - segmB[0]).x() * (segmA[1] - segmB[0]).y() - (segmA[1] - segmB[0]).x() * (segmB[1] - segmB[0]).y()) > _epsF;
 	return isBetweenB && isBetweenA;
 #else
+	//Vector2d vecA = segmA[1] - segmA[0];
+	//Vector2d AB_0 = segmB[0] - segmA[0];
+	//Vector2d AB_1 = segmB[1] - segmA[0];
+	//Vector2d vecB = segmB[1] - segmB[0];
+	//Vector2d BA_0 = segmA[0] - segmB[0];
+	//Vector2d BA_1 = segmA[1] - segmB[0];
+	//return
+	//	(AB_0[0] * vecA[1] - AB_0[1] * vecA[0]) * (AB_1[0] * vecA[1] - AB_1[1] * vecA[0]) <= 0.0 &&
+	//	(BA_0[0] * vecB[1] - BA_0[1] * vecB[0]) * (BA_1[0] * vecB[1] - BA_1[1] * vecB[0]) <= 0.0;
 	return // double point on line judge
-		((segmB[0] - segmA[0]).x() * (segmA[1] - segmA[0]).y() - (segmA[1] - segmA[0]).x() * (segmB[0] - segmA[0]).y()) *
-		((segmA[1] - segmA[0]).x() * (segmB[1] - segmA[0]).y() - (segmB[1] - segmA[0]).x() * (segmA[1] - segmA[0]).y()) >= 0.0 &&
-		((segmA[0] - segmB[0]).x() * (segmB[1] - segmB[0]).y() - (segmB[1] - segmB[0]).x() * (segmA[0] - segmB[0]).y()) *
-		((segmB[1] - segmB[0]).x() * (segmA[1] - segmB[0]).y() - (segmA[1] - segmB[0]).x() * (segmB[1] - segmB[0]).y()) >= 0.0;
+		((segmB[0] - segmA[0])[0] * (segmA[1] - segmA[0])[1] - (segmA[1] - segmA[0])[0] * (segmB[0] - segmA[0])[1]) *
+		((segmA[1] - segmA[0])[0] * (segmB[1] - segmA[0])[1] - (segmB[1] - segmA[0])[0] * (segmA[1] - segmA[0])[1]) >= 0.0 &&
+		((segmA[0] - segmB[0])[0] * (segmB[1] - segmB[0])[1] - (segmB[1] - segmB[0])[0] * (segmA[0] - segmB[0])[1]) *
+		((segmB[1] - segmB[0])[0] * (segmA[1] - segmB[0])[1] - (segmA[1] - segmB[0])[0] * (segmB[1] - segmB[0])[1]) >= 0.0;
 #endif
 }
 
-//double straddling test, must coplanar
+// must coplanar
 bool clash::isTwoSegmentsIntersect(const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)
 {
 	// quick reject box
@@ -264,7 +245,7 @@ bool clash::isTwoSegmentsIntersect(const std::array<Vector3d, 2>& segmA, const s
 		(segmB[0] - segmA[0]).cross(segmA[1] - segmA[0]).dot((segmA[1] - segmA[0]).cross(segmB[1] - segmA[0])) < _epsF || //double separate
 		(segmA[0] - segmB[0]).cross(segmB[1] - segmB[0]).dot((segmB[1] - segmB[0]).cross(segmA[1] - segmB[0])) < _epsF);
 #else
-	return 
+	return //double straddling test
 		0.0 <= (segmB[0] - segmA[0]).cross(segmA[1] - segmA[0]).dot((segmA[1] - segmA[0]).cross(segmB[1] - segmA[0])) &&
 		0.0 <= (segmA[0] - segmB[0]).cross(segmB[1] - segmB[0]).dot((segmB[1] - segmB[0]).cross(segmA[1] - segmB[0]));
 #endif
@@ -1386,13 +1367,8 @@ bool isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, const std
 		triB[1] - triB[0],
 		triB[2] - triB[1],
 		triB[0] - triB[2] };
-	double k = 0;
 	for (auto& iter : edgesAB)
-	{
-		k = std::max(k, std::max(iter[0], iter[1]));// iter.squaredNorm());
 		iter = Vector2d(-iter[1], iter[0]); //rotz(pi/2)
-	}
-	tolerance = k * tolerance;
 	double minA, maxA, minB, maxB, projection;
 	for (const auto& axis : edgesAB)
 	{
@@ -1446,12 +1422,6 @@ bool isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, const std
 		edgesA[2].cross(edgesB[0]),
 		edgesA[2].cross(edgesB[1]),
 		edgesA[2].cross(edgesB[2]) } };
-	double k = 0;
-	for (const auto& iter : edgesA)
-		k = std::max(k, iter.squaredNorm());
-	for (const auto& iter : edgesB)
-		k = std::max(k, iter.squaredNorm());
-	tolerance = k * tolerance;
 	double minA, maxA, minB, maxB, projection;
 	for (const auto& axis : axes) 
 	{

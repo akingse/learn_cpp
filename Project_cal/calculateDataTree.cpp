@@ -95,8 +95,8 @@ std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<TrigonPart>& triangles
 			fullBox.extend(iter.m_box2d.min());
 			fullBox.extend(iter.m_box2d.max());
 		}
-		//fullBox.min() += Vector2d(eps, eps, eps);
-		//fullBox.max() -= Vector2d(eps, eps, eps);
+		//fullBox.min() += Vector2d(epsF, epsF, epsF);
+		//fullBox.max() -= Vector2d(epsF, epsF, epsF);
 		return fullBox;
 	};
 	if (triangles.empty()) //no chance
@@ -180,7 +180,7 @@ std::vector<size_t> KdTree2d::findIntersect(const Polygon2d& polygon)
 	return indexes;
 }
 
-std::vector<size_t> KdTree2d::findIntersectOp(const TrigonPart& trigon)
+std::vector<size_t> KdTree2d::findIntersect(const TrigonPart& trigon)
 {
 	if (m_kdTree == nullptr)
 		return {}; //test whether is working
@@ -562,7 +562,7 @@ std::vector<size_t> KdTree3d::findIntersect(const Polyface3d& polygon, double to
 		return {};
 	std::vector<size_t> indexes;
 	Eigen::AlignedBox3d curBox = polygon.m_bound;
-	if (tolerance != 0.0) // not using default eps
+	if (tolerance != 0.0) // not using default epsF
 	{
 		Vector3d tole(tolerance, tolerance, tolerance);
 		curBox.min() -= tole;
@@ -635,8 +635,8 @@ std::vector<std::tuple<size_t, bool>> KdTree3d::findIntersectClash(const Polyfac
 	if (m_kdTree.get() == nullptr || polygon.m_index == -1) // cannot be external polyface
 		return {};
 	std::vector<std::tuple<size_t, bool>> indexes;
-	Eigen::AlignedBox3d toleBox = polygon.m_bound; //using extra eps
-	//Vector3d tole = (m_tolerance == 0.0) ? Vector3d(eps, eps, eps) : Vector3d(m_tolerance, m_tolerance, m_tolerance);
+	Eigen::AlignedBox3d toleBox = polygon.m_bound; //using extra epsF
+	//Vector3d tole = (m_tolerance == 0.0) ? Vector3d(epsF, epsF, epsF) : Vector3d(m_tolerance, m_tolerance, m_tolerance);
 	toleBox.min() -= m_tolerance;
 	toleBox.max() += m_tolerance;
 	std::function<void(const shared_ptr<KdTreeNode3d>&)> _searchKdTree = [&](const shared_ptr<KdTreeNode3d>& node)->void

@@ -3,6 +3,13 @@
 namespace eigen
 {
     // inline function
+    inline int math_sign(double num)
+    {
+        if (num == 0)
+            return 0;
+        return (0.0 < num) ? 1 : -1;
+    }
+
     inline Eigen::Vector2d to_vec2(const Eigen::Vector3d& vec3)
     {
         return Eigen::Vector2d(vec3[0], vec3[1]); // to replace shadow matrix of relative coordinate
@@ -13,14 +20,66 @@ namespace eigen
         return Eigen::Vector3d(vec2[0], vec2[1], 0.0);
     }
 
-    inline Eigen::Vector3d cross(const Eigen::Vector2d& v1, const Eigen::Vector2d& v2)
+    inline Eigen::Vector3d cross(const Eigen::Vector2d& v0, const Eigen::Vector2d& v1)
     {
-        return Eigen::Vector3d(0, 0, v1[0] * v2[1] - v1[1] * v2[0]);
+        return Eigen::Vector3d(0, 0, v0[0] * v1[1] - v0[1] * v1[0]);
     }
 
-    inline double cross2d(const Eigen::Vector2d& v1, const Eigen::Vector2d& v2)
+    inline double cross2d(const Eigen::Vector2d& v0, const Eigen::Vector2d& v1)
     {
-        return v1[0] * v2[1] - v1[1] * v2[0];
+        return v0[0] * v1[1] - v0[1] * v1[0];
+    }
+
+    inline bool isParallel(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB, double tole = FLT_EPSILON)// input accuracy
+    {
+        return fabs(vecA[0] * vecB[1] - vecA[1] * vecB[0]) <= tole;
+    }
+
+    inline bool isParallel(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB, double tole = FLT_EPSILON)// input accuracy
+    {
+        return vecA.cross(vecB).isZero(tole);
+    }
+
+    inline bool isPerpendi(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB, double tole = FLT_EPSILON)// input accuracy
+    {
+        return vecA.dot(vecB) <= tole;
+    }
+
+    inline bool isPerpendi(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB, double tole = FLT_EPSILON)// input accuracy
+    {
+        return vecA.dot(vecB) <= tole;
+    }
+
+    inline bool isParallelDA(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB, double tole = FLT_EPSILON)// dynamic accuracy
+    {
+        double k = 0;
+        for (int i = 0; i < 2; ++i)
+            k = std::max(std::max(fabs(vecA[i]), fabs(vecB[i])), k);
+        return fabs(vecA[0] * vecB[1] - vecA[1] * vecB[0]) <= k * tole;// support both zero
+    }
+
+    inline bool isParallelDA(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB, double tole = FLT_EPSILON)// dynamic accuracy
+    {
+        double k = 0;
+        for (int i = 0; i < 3; ++i)
+            k = std::max(std::max(fabs(vecA[i]), fabs(vecB[i])), k);
+        return vecA.cross(vecB).isZero(k * tole);
+    }
+
+    inline bool isPerpendiDA(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB, double tole = FLT_EPSILON)// dynamic accuracy
+    {
+        double k = 0;
+        for (int i = 0; i < 2; ++i)
+            k = std::max(std::max(fabs(vecA[i]), fabs(vecB[i])), k); 
+        return vecA.dot(vecB) <= k * tole;// support both zero
+    }
+    
+    inline bool isPerpendiDA(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB, double tole = FLT_EPSILON)// dynamic accuracy
+    {
+        double k = 0;
+        for (int i = 0; i < 3; ++i)
+            k = std::max(std::max(fabs(vecA[i]), fabs(vecB[i])), k); 
+        return vecA.dot(vecB) <= k * tole;// support both zero
     }
 
     //overload
