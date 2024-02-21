@@ -1,5 +1,5 @@
 #pragma once
-
+#include<afx.h>
 //inline std::wstring transfer_string_to_wstring(const std::string& str) //ANSIToUnicode
 //{
 //	int lengthW = MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, NULL, NULL);

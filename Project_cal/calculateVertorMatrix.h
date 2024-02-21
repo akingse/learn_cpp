@@ -30,22 +30,28 @@ namespace eigen
         return v0[0] * v1[1] - v0[1] * v1[0];
     }
 
-    inline bool isParallel(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB, double tole = FLT_EPSILON)// input accuracy
+    // dynamic accuracy
+    //bool isParallel(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB);
+    //bool isParallel(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB);
+    //bool isPerpendi(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB);
+    //bool isPerpendi(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB);
+
+    inline bool isParallel2d(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB, double tole = FLT_EPSILON)// input accuracy
     {
         return fabs(vecA[0] * vecB[1] - vecA[1] * vecB[0]) <= tole;
     }
 
-    inline bool isParallel(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB, double tole = FLT_EPSILON)// input accuracy
+    inline bool isParallel3d(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB, double tole = FLT_EPSILON)// input accuracy
     {
         return vecA.cross(vecB).isZero(tole);
     }
 
-    inline bool isPerpendi(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB, double tole = FLT_EPSILON)// input accuracy
+    inline bool isPerpendi2d(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB, double tole = FLT_EPSILON)// input accuracy
     {
         return vecA.dot(vecB) <= tole;
     }
 
-    inline bool isPerpendi(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB, double tole = FLT_EPSILON)// input accuracy
+    inline bool isPerpendi3d(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB, double tole = FLT_EPSILON)// input accuracy
     {
         return vecA.dot(vecB) <= tole;
     }
@@ -145,6 +151,17 @@ namespace eigen
             1, 0, 0, vec.x(),
             0, 1, 0, vec.y(),
             0, 0, 1, vec.z(),
+            0, 0, 0, 1;
+        return T;
+    }
+
+    inline Eigen::Matrix4d translate(const Eigen::Vector2d& vec)
+    {
+        Eigen::Matrix4d T;
+        T <<
+            1, 0, 0, vec.x(),
+            0, 1, 0, vec.y(),
+            0, 0, 1, 0,
             0, 0, 0, 1;
         return T;
     }

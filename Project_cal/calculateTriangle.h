@@ -15,11 +15,6 @@ namespace clash
 	//{
 	//	return std::isnan(vec[0]) || std::isnan(vec[1]) || std::isnan(vec[2]);
 	//}
-	// dynamic accuracy
-	DLLEXPORT_CAL bool isParallel(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB);
-	DLLEXPORT_CAL bool isParallel(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB); 
-	DLLEXPORT_CAL bool isPerpendi(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB);
-	DLLEXPORT_CAL bool isPerpendi(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB);
 	double computeTriangleArea(const std::array<Eigen::Vector2d, 3>& triangle);
 	double computeTriangleArea(const std::array<Eigen::Vector3d, 3>& triangle, bool is2D = true);
 
@@ -52,13 +47,13 @@ namespace clash
 	DLLEXPORT_CAL void mergeIntersectIntervalOfSegment(std::vector<double>& _range, const std::array<double, 2>& prop);
 
 	//inline in common use
-	inline bool isPointOnPlane(const Eigen::Vector3d& point, const clash::Plane3d& plane)
-	{
-		return isPerpendi(point - plane.m_origin, plane.m_normal);
-	}
 	inline bool isPointOnLine(const Eigen::Vector3d& point, const Segment& line)
 	{
-		return isParallel((Eigen::Vector3d)(point - line[0]), (Eigen::Vector3d)(point - line[1])); //overload type
+		return eigen::isParallel3d(point - line[0], point - line[1]);
+	}
+	inline bool isPointOnPlane(const Eigen::Vector3d& point, const Plane3d& plane)
+	{
+		return eigen::isPerpendi3d(point - plane.m_origin, plane.m_normal);
 	}
 }
 

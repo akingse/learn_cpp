@@ -5,7 +5,7 @@ namespace accura
     static constexpr int MAX_DECIMAL_PRECISION = 8;
     static const int64_t MAX_COORD = INT64_MAX >> 2; //clipper parameter
     //using dynamic accuracy
-    class GlobalAccuracy //singleton
+    DLLEXPORT_CAL class GlobalAccuracy //singleton
     {
     public:
         static GlobalAccuracy& getInstance()
@@ -28,7 +28,7 @@ namespace accura
                 maxCoord = std::max(std::max(fabs(m_modelBox3d.min()[i]), fabs(m_modelBox3d.max()[i])), maxCoord);
             }
             //double maxAccur = std::sqrt(MAX_COORD / std::pow(10, MAX_DECIMAL_PRECISION));
-            int maxPrec = std::floor(std::log10(MAX_COORD / (maxCoord * maxCoord)));
+            int maxPrec = (int)std::floor(std::log10(MAX_COORD / (maxCoord * maxCoord)));
             m_precision = std::min(maxPrec, MAX_DECIMAL_PRECISION);
             return m_precision;
         }
@@ -50,8 +50,8 @@ namespace accura
     };
 
     // DynamicAccuracy function, same name
-    bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB, double tolerance);
-    bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance);
-
+    DLLEXPORT_CAL bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB, double tolerance);
+    DLLEXPORT_CAL bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance);
+    DLLEXPORT_CAL bool isPointInTriangleTolerance(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon, double tolerance); // 2D
 
 }

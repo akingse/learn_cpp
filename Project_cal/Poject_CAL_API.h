@@ -10,3 +10,4 @@
 #include "calculateTriangle.h"
 #include "calculateDataTree.h"
 #include "calculatePolyhedron.h"
+#include "calculateDynamicAccuracy.h"
