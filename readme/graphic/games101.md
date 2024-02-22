@@ -404,7 +404,14 @@ primary ray  主射光线，secondary rays  弹射光线，shadow rays  投影�
 
 几何：inside判断
 
+DLSS深度学习超采样
 
+RTXGI 实时全局光照ray tracing execute
+
+Uniform grids 网格化 
+Spatial partitions  空间划分
+
+Basic radiometry (辐射度量学)  
 
 
 

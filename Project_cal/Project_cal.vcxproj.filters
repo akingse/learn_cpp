@@ -27,7 +27,7 @@
     <ClCompile Include="calculateTriangle.cpp">
       <Filter>algorithm</Filter>
     </ClCompile>
-    <ClCompile Include="calculateVertorMatrix.cpp">
+    <ClCompile Include="calculateVectorMatrix.cpp">
       <Filter>algorithm</Filter>
     </ClCompile>
     <ClCompile Include="my_triangle_intersect.cpp">
@@ -50,7 +50,7 @@
     <ClInclude Include="calculateTriangle.h">
       <Filter>algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="calculateVertorMatrix.h">
+    <ClInclude Include="calculateVectorMatrix.h">
       <Filter>algorithm</Filter>
     </ClInclude>
     <ClInclude Include="my_triangle_intersect.h">
