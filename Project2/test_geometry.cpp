@@ -13,7 +13,6 @@ using namespace std::chrono;
 #endif // 
 //#define USING_RELATIVE_MATRIX
 
-
 namespace clash
 {
 	//两平面求交
@@ -242,7 +241,7 @@ static void test4()
 	array<Eigen::Vector2d, 3> trigon = { Vector2d(-10, -10), Vector2d(30, 0), Vector2d(1, 10) };
 	trigon = { Vector2d(-10, -10), Vector2d(1, 10), Vector2d(30, 0) };
 
-    bool inter = isPointInTriangleTolerance(Vector2d(0, 0) + Vector2d(1000, 1000), translate(1000, 1000) * trigon, 0);
+    bool inter = isPointInTriangleTolerance(Vector2d(0, 0) + Vector2d(1000, 1000), to_vec2(translate(1000, 1000) * trigon), 0);
 	//tole和边缘
 	trigon = { Vector2d(-10, 0), Vector2d(1, 10), Vector2d(30, 0) };
 	inter = isPointInTriangleTolerance(point, trigon, epsF);

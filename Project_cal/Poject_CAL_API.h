@@ -6,8 +6,9 @@
 #endif
 
 #include "clashTypeDefine.h"		
-#include "calculateVertorMatrix.h"		
+#include "calculateVectorMatrix.h"		
 #include "calculateTriangle.h"
-#include "calculateDataTree.h"
 #include "calculatePolyhedron.h"
+#include "calculateDataStructure.h"
 #include "calculateDynamicAccuracy.h"
+#include "my_triangle_intersect.h" //origin
