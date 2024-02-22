@@ -23,7 +23,7 @@
 #include "clashTypeDefine.h" //only header
 #include "calculateVertorMatrix.h" // namespace eigen
 #include "my_triangle_intersect.h"		
-#include "calculateTriangle.h"	
-#include "calculateDataTree.h"
-#include "calculatePolyhedron.h"
+#include "calculateTriangle.h"	 // namespace clash
+#include "calculatePolyhedron.h"  // namespace clash
+#include "calculateDataStructure.h" //spatial partition tree
 #include "calculateDynamicAccuracy.h" //namespace accura

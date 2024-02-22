@@ -5,7 +5,7 @@ namespace accura
     static constexpr int MAX_DECIMAL_PRECISION = 8;
     static const int64_t MAX_COORD = INT64_MAX >> 2; //clipper parameter
     //using dynamic accuracy
-    DLLEXPORT_CAL class GlobalAccuracy //singleton
+    class GlobalAccuracy //singleton
     {
     public:
         static GlobalAccuracy& getInstance()
