@@ -53,7 +53,6 @@ bool clash::isPointInTriangle(const Vector2d& point, const std::array<Vector2d, 
 	const Vector2d& p2 = trigon[2];
 	// compare z-value
 #ifdef USING_THRESHOLD_GEOMETRIC
-	axisz = (0.0 < axisz) ? 1.0 : -1.0;
 	double axisz = (p1.x() - p0.x()) * (p2.y() - p0.y()) - (p2.x() - p0.x()) * (p1.y() - p0.y());
 	axisz = (0.0 < axisz) ? 1.0 : -1.0;
 	return !(
@@ -1355,7 +1354,7 @@ bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, cons
 }
 
 // intersect and penetration judge
-bool isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, const std::array<Vector2d, 3>& triB, double tolerance /*= epsF*/)
+bool isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, const std::array<Vector2d, 3>& triB)
 {
 	// bound box been judged
 	//if (std::max(std::max(triA[0][0], triA[1][0]), triA[2][0]) <= std::min(std::min(triB[0][0], triB[1][0]), triB[2][0]) ||
@@ -1393,14 +1392,14 @@ bool isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, const std
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
-		if (maxA < minB + tolerance || maxB < minA + tolerance)
+		if (maxA < minB + epsF || maxB < minA + epsF)
 			return false; //without normlized
 	}
 	return true;
 }
 
 //must intersect
-bool isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB, double tolerance /*= epsF*/)
+bool isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB)
 {
 	std::array<Eigen::Vector3d, 3> edgesA = { 
 		triA[1] - triA[0],
@@ -1446,7 +1445,7 @@ bool isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, const std
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
-		if (maxA < minB + tolerance || maxB < minA + tolerance)
+		if (maxA < minB + epsF || maxB < minA + epsF)
 			return false; //without normlized
 	}
 	return true;

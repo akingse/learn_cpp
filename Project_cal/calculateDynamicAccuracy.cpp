@@ -147,7 +147,7 @@ bool accura::isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, c
 	return true;
 }
 
-bool accura::isPointInTriangleTolerance(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon, double tolerance) // 2D
+bool accura::isPointInTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon, double tolerance) // 2D
 {
 	//tole>0 less judge, tole<0 more judge
 	std::array<Eigen::Vector2d, 3> trigonR; // is origin inside trigonR
