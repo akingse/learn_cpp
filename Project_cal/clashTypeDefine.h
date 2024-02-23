@@ -144,7 +144,8 @@ enum class OcclusionStatus :int //means cover
     EXPOSED = 0,
     HIDDEN,
     SHIELDED, //shielded by other triangle
-    INTERSECT,
+    COPLANAR, //COPLANAR with other-triangle
+    INTERSECT, //ignore
     OCCLUSION, //shielded+intersect
     DEGENERACY, // become segment
 };
