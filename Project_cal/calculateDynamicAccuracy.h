@@ -7,6 +7,13 @@ namespace accura
     //using dynamic accuracy
     class GlobalAccuracy //singleton
     {
+        enum class DataUnit
+        {
+            MILLIMETER, //mm
+            DECIMETER, //dm
+            METER, //m
+            KILOMETRE, //km
+        };
     public:
         static GlobalAccuracy& getInstance()
         {
@@ -16,6 +23,8 @@ namespace accura
         Eigen::AlignedBox3d m_modelBox3d; // in relative coordinate
         int m_precision = 0; //current precision
         Eigen::Vector3d m_relaOrigin = Eigen::Vector3d(0, 0, 0); //relative origin point
+        double m_toleAngle = M_PI / 1080; //0.003
+        double m_toleDistance = 0.001;
         inline int getDynamicPrecision()
         {
             if (m_modelBox3d.isEmpty())

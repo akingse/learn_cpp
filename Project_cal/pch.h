@@ -19,6 +19,7 @@
 #endif
 #define USING_HALFEDGE_STRUCTURE
 #define USING_POINTER_VERION
+#define TEST_CALCULATION_DEBUG
 
 #include "clashTypeDefine.h" //only header
 #include "calculateVectorMatrix.h" // namespace eigen

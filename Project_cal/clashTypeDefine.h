@@ -11,7 +11,7 @@ struct ModelMesh
     int genus_ = 0; //number of genus, default 0
 //#ifdef CLASH_DETECTION_DEBUG_TEMP
     std::vector<int> iboRaw_; //for test debug
-    uint64_t entityid_ = ULLONG_MAX; // record belong to same polyface
+    uint64_t index_ = ULLONG_MAX; // record belong to same polyface
     //uint64_t instanceid = 0; //0 means not instance
 //#endif
 };
@@ -207,7 +207,7 @@ namespace eigen
         {
             return m_contour.empty();
         }
-        const std::vector<Eigen::Vector2d>& getOuter() const
+        std::vector<Eigen::Vector2d> getOuter() const
         {
             if (m_contour.empty())
                 return {};

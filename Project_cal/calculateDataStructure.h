@@ -15,10 +15,19 @@ namespace clash
 {
 	class RectBase2d
 	{
+	public:
 		Eigen::AlignedBox2d m_bound;
 		long long m_index = -1;
 		RectBase2d() = default;
 		virtual ~RectBase2d() {};
+	};
+	class RectBase3d
+	{
+	public:
+		Eigen::AlignedBox3d m_bound;
+		long long m_index = -1;
+		RectBase3d() = default;
+		virtual ~RectBase3d() {};
 	};
 
 #ifdef RESERVE_USING_POLYGON2D
@@ -110,10 +119,12 @@ struct KdTreeNode2d
 	Eigen::AlignedBox2d m_bound;  // 
 	std::shared_ptr<KdTreeNode2d> m_left;	//KdTreeNode* m_left;  
 	std::shared_ptr<KdTreeNode2d> m_right; //KdTreeNode* m_right; 
-	// other data
 	long long m_index = -1; // the middle node's index
+#ifdef TEST_CALCULATION_DEBUG
+	// other data
 	//std::array<int, 2> m_index2 = { -1,-1 }; //for TrigonPart
 	size_t m_dimension = 0; // also means m_depth
+#endif
 	//KdTreeNode() : m_box(), m_left(nullptr), m_right(nullptr) {}
 	//KdTreeNode(const Polygon2d& poly) : m_box(poly.boungding()), m_left(nullptr), m_right(nullptr) {}
 	bool isValid() const
@@ -209,7 +220,7 @@ public:
 	{
 		return m_kdTree;
 	}
-	// CRUD
+	// the kd-tree crud create read update delete
 	bool insert(const clash::Polyface3d& polyface); //only insert the not exsit index
 	//bool remove(size_t index);
 	bool remove(const clash::Polyface3d& polyface); //find by polyface index
@@ -220,7 +231,93 @@ public:
 	std::vector<std::tuple<size_t, bool>> findIntersectClash(const clash::Polyface3d& polyface, double tolerance) const; //custom tolerance
 };
 
-class RTree3d
-{
+//--------------------------------------------------------------------------------------------------
+//  spatial
+//--------------------------------------------------------------------------------------------------
 
-};
+namespace spatial
+{
+	//template<class T>
+	struct QuadtreeNode 
+	{
+		//Eigen::AlignedBox2d data; //T data;
+		//QuadtreeNode* children[2][2]; //std::shared_ptr<QuadtreeNode>
+		//int divide;  //
+		Eigen::Vector2d position;  
+		double size;    
+		std::vector<int> points;  
+		std::array<QuadtreeNode*, 4> children; 
+
+		QuadtreeNode(const Eigen::Vector2d& pos, double sz) : position(pos), size(sz)
+		{
+			for (int i = 0; i < 4; ++i) 
+				children[i] = nullptr;
+		}
+		~QuadtreeNode() 
+		{
+			for (int i = 0; i < 4; ++i) 
+				delete children[i];
+		}
+	};
+
+	class Quadtree //4
+	{
+	public:
+		QuadtreeNode* m_tree;
+		int m_depth;
+		//void build(const std::vector<clash::RectBase2d>& rect)
+		//{
+		//	auto _quadCreate = []()
+		//	{
+		//	};
+		//}
+		QuadtreeNode* createQuadtreeNode(const Eigen::Vector2d& position, double size);
+		std::vector<int> intersectSearch(const QuadtreeNode* node, const Eigen::AlignedBox2d& box);
+
+	};
+	
+	template<class T>
+	struct OctreeNode
+	{
+		T data;
+		OctreeNode* children[2][2][2]; //std::shared_ptr<OctreeNode>
+		int divide;  //
+	};
+
+	class Octree //8
+	{
+
+	};
+
+
+	class RTree3d
+	{
+
+	};
+
+	struct KDTreeNode 
+	{
+		Eigen::AlignedBox3d bounds; 
+		int index = -1;
+		std::shared_ptr<KDTreeNode> left = nullptr;
+		std::shared_ptr<KDTreeNode> right = nullptr;
+		//KDTreeNode() = default;
+		//KDTreeNode(const KDTreeNode&) = default;
+		//KDTreeNode(KDTreeNode&&) = default;
+		//KDTreeNode& operator=(const KDTreeNode&) = default;
+		//KDTreeNode& operator=(KDTreeNode&&) = default;
+	};
+
+	//typedef std::vector<KdTreeNode, Eigen::aligned_allocator<KdTreeNode>> NodeVector;
+	typedef std::vector<KDTreeNode> NodeVector;
+
+	class KDTree
+	{
+	public:
+		std::shared_ptr<KDTreeNode> m_tree;
+		KDTree(const std::vector<clash::RectBase3d>& data);
+		void searchIntersect(const Eigen::AlignedBox3d& queryBox, std::vector<int>& results) const;
+
+	};
+
+}
