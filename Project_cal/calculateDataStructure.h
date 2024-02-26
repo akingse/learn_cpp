@@ -4,7 +4,7 @@
 * Date      :  from November 2023											   *
 * Website   :  https://github.com/akingse                                      *
 * Copyright :  All rights reserved											   *
-* Purpose   :  Some common and simple k-dimensional tree methods			   *
+* Purpose   :  Some common and simple tree data structure methods			   *
 * License   :  MIT									                           *
 *******************************************************************************/
 
@@ -114,19 +114,20 @@ namespace clash
 //  2d
 //----------------------------------------------------------------------------------------------------------------
 
-struct KdTreeNode2d
+//Bounding Volum Hierarchy
+struct BVHNode2d
 {
 	Eigen::AlignedBox2d m_bound;  // 
-	std::shared_ptr<KdTreeNode2d> m_left;	//KdTreeNode* m_left;  
-	std::shared_ptr<KdTreeNode2d> m_right; //KdTreeNode* m_right; 
+	std::shared_ptr<BVHNode2d> m_left;	//BVHNode2d* m_left;  
+	std::shared_ptr<BVHNode2d> m_right; //BVHNode2d* m_right; 
 	long long m_index = -1; // the middle node's index
 #ifdef TEST_CALCULATION_DEBUG
 	// other data
 	//std::array<int, 2> m_index2 = { -1,-1 }; //for TrigonPart
 	size_t m_dimension = 0; // also means m_depth
 #endif
-	//KdTreeNode() : m_box(), m_left(nullptr), m_right(nullptr) {}
-	//KdTreeNode(const Polygon2d& poly) : m_box(poly.boungding()), m_left(nullptr), m_right(nullptr) {}
+	//BVHNode2d() : m_box(), m_left(nullptr), m_right(nullptr) {}
+	//BVHNode2d(const Polygon2d& poly) : m_box(poly.boungding()), m_left(nullptr), m_right(nullptr) {}
 	bool isValid() const
 	{
 		return m_bound.isEmpty();
@@ -134,21 +135,20 @@ struct KdTreeNode2d
 
 };
 
-class KdTree2d
+class BVHTree2d
 {
 private:
-	std::shared_ptr<KdTreeNode2d> m_kdTree;
-	//static std::shared_ptr<KdTreeNode2d> createKdTree(const std::vector<clash::Polygon2d>& polygons);
+	std::shared_ptr<BVHNode2d> m_tree;
 public:
-	KdTree2d() = delete;
-	KdTree2d(const std::vector<clash::Polygon2d>& polygons);
-	KdTree2d(const std::vector<eigen::TrigonPart>& triangles);
-	KdTree2d(const std::vector<eigen::ContourPart>& profiles);
-	std::shared_ptr<KdTreeNode2d> get() const
+	BVHTree2d() = delete;
+	BVHTree2d(const std::vector<clash::Polygon2d>& polygons);
+	BVHTree2d(const std::vector<eigen::TrigonPart>& triangles);
+	BVHTree2d(const std::vector<eigen::ContourPart>& profiles);
+	std::shared_ptr<BVHNode2d> get() const
 	{
-		return m_kdTree;
+		return m_tree;
 	}
-	std::vector<size_t> findIntersect(const clash::Polygon2d& polygon); //searchFromKdTree
+	std::vector<size_t> findIntersect(const clash::Polygon2d& polygon); //searchFromTree
 	std::vector<size_t> findIntersect(const eigen::ContourPart& profile);
 	std::vector<size_t> findIntersectOpLess(const eigen::TrigonPart& trigon);//operator less
 	std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon); 
@@ -158,74 +158,71 @@ public:
 //  3d
 //----------------------------------------------------------------------------------------------------------------
 
-// the k-dimensional tree
-struct KdTreeNode3d
+struct BVHNode3d
 {
 	Eigen::AlignedBox3d m_bound;  // the extend bounding box
-	std::shared_ptr<KdTreeNode3d> m_left;	//KdTreeNode* m_left;  
-	std::shared_ptr<KdTreeNode3d> m_right;  //KdTreeNode* m_right; 
+	std::shared_ptr<BVHNode3d> m_left;	//BVHNode3d* m_left;  
+	std::shared_ptr<BVHNode3d> m_right;  //BVHNode3d* m_right; 
 	// other data
 	long long m_index = -1; // the middle node's index
-	std::array<int, 2> m_index2 = { -1,-1 }; //for TrigonPart
+	//std::array<int, 2> m_index2 = { -1,-1 }; //for TrigonPart
 	size_t m_dimension = 0; // also means m_depth
-	KdTreeNode3d() = default;
-	KdTreeNode3d(const clash::Polyface3d& polyface, size_t dimension)
+	BVHNode3d() = default;
+	BVHNode3d(const clash::Polyface3d& polyface, size_t dimension)
 	{
 		m_dimension = dimension;
 		m_bound = polyface.m_bound;
 		m_index = polyface.m_index;
 		//m_left = nullptr; m_right = nullptr;
 	}
-	bool isLeaf1() const
-	{
-		return m_index != -1;
-	}
-	bool isLeaf2() const
-	{
-		return m_index2 != std::array<int, 2>{ -1, -1 };
-	}
 	bool single() const
 	{
 		return m_left != nullptr && m_right == nullptr;
 	}
+	//bool isLeaf1() const
+	//{
+	//	return m_index != -1;
+	//}
+	//bool isLeaf2() const
+	//{
+	//	return m_index2 != std::array<int, 2>{ -1, -1 };
+	//}
 };
 
-// the k-dimensional tree of 3d polyface, only build kd-tree when construct, only include research function
-class KdTree3d
+// the BVH tree of 3d polyface
+class BVHTree3d
 {
 private:
-	std::shared_ptr<KdTreeNode3d> m_kdTree;
+	std::shared_ptr<BVHNode3d> m_tree;
 #ifdef CLASH_DETECTION_DEBUG_TEMP //for debug
 	size_t m_count = 0; //count total leafs
 	size_t m_depth = 0; //the max depth
 #endif
 	//mutable double m_tolerance = 0;
 	mutable Eigen::Vector3d m_tolerance = Eigen::Vector3d(clash::epsF, clash::epsF, clash::epsF); //default with threshold epsF
-
 public:
-	//static std::shared_ptr<KdTreeNode3d> createKdTree(std::vector<clash::Polyface3d>& PolyfaceVct);
-	KdTree3d() = delete;
-	KdTree3d(const std::vector<clash::Polyface3d>& polyfaceVct); // using origin bound-box
-	KdTree3d(const std::vector<eigen::TrigonPart>& triangles);
+	BVHTree3d() = delete;
+	BVHTree3d(const std::vector<clash::Polyface3d>& polyfaceVct); // using origin bound-box
+	BVHTree3d(const std::vector<eigen::TrigonPart>& triangles);
 	void setTolerance(double tolerance)
 	{
 		//Vector3d tole = (m_tolerance == 0.0) ? Vector3d(epsF, epsF, epsF) : Vector3d(m_tolerance, m_tolerance, m_tolerance);
 		m_tolerance = Eigen::Vector3d(tolerance, tolerance, tolerance);
 	}
-	std::shared_ptr<KdTreeNode3d> getTree() const
+	std::shared_ptr<BVHNode3d> getTree() const
 	{
-		return m_kdTree;
+		return m_tree;
 	}
-	std::shared_ptr<KdTreeNode3d>& getTree()
+	std::shared_ptr<BVHNode3d>& getTree()
 	{
-		return m_kdTree;
+		return m_tree;
 	}
-	// the kd-tree crud create read update delete
+	// the tree crud create read update delete
 	bool insert(const clash::Polyface3d& polyface); //only insert the not exsit index
 	//bool remove(size_t index);
 	bool remove(const clash::Polyface3d& polyface); //find by polyface index
 	bool update(const clash::Polyface3d& polyface); //using polyface self index
-	std::vector<size_t> findIntersect(const clash::Polyface3d& polyface, double tolerance = 0.0) const; //searchFromKdTree
+	std::vector<size_t> findIntersect(const clash::Polyface3d& polyface, double tolerance = 0.0) const; //searchFromTree
 	std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon);
 	std::vector<std::tuple<size_t, bool>> findIntersectClash(const clash::Polyface3d& polyface) const; // bool means soft-clash
 	std::vector<std::tuple<size_t, bool>> findIntersectClash(const clash::Polyface3d& polyface, double tolerance) const; //custom tolerance
@@ -284,14 +281,25 @@ namespace spatial
 		int divide;  //
 	};
 
+	template<class T>
 	class Octree //8
 	{
+	public:
+		OctreeNode<T>* m_tree;
 
 	};
 
+	struct RTreeNode
+	{
+		int m_index; 
+		Eigen::AlignedBox3d m_bound; //Minimum Bounding Rectangles
+		std::vector<std::shared_ptr<RTreeNode>> m_child;
+	};
 
 	class RTree3d
 	{
+	public:
+		std::vector<std::shared_ptr<RTreeNode>> m_tree;
 
 	};
 

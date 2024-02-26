@@ -153,7 +153,7 @@ static void test1()
 	{
 		start = clock();
 #ifdef USING_KDTREE_METHOD
-		KdTree2d kdtree(polygons);
+		BVHTree2d kdtree(polygons);
 		for (auto& iter : polygons)
 		{
 			std::vector<size_t> indexes = kdtree.findIntersect(iter);
@@ -189,8 +189,8 @@ static void test2()
 	polyVct.emplace_back(Polygon2d({ Vector2d(3,3), Vector2d(3,3) + Vector2d(2,2) }));
 	polyVct.emplace_back(Polygon2d({ Vector2d(4,4), Vector2d(4,4) + Vector2d(2,2) }));
 	//std::shared_ptr<KdTreeNode> kdTree = KdTree::createKdTree(polyVct);
-	KdTree2d kdtree(polyVct);
-	std::shared_ptr<KdTreeNode2d> tree = kdtree.get();
+	BVHTree2d kdtree(polyVct);
+	std::shared_ptr<BVHNode2d> tree = kdtree.get();
 	//int a = sizeof(tree); //double pointor ==16
 	Polygon2d target({ Vector2d(3,1), Vector2d(5,3) });
 	std::vector<size_t> indexes = kdtree.findIntersect(target);

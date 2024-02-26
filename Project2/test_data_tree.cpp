@@ -73,7 +73,7 @@ static void test0()
 #ifdef USING_KDTREE_METHOD
 		start = std::chrono::high_resolution_clock::now();
 		// time of build tree
-		KdTree3d kdtree(polyface3dVct); //时间几乎线性增长
+		BVHTree3d kdtree(polyface3dVct); //时间几乎线性增长
 		kdtree.setTolerance(g_tolerance);
 		end = std::chrono::high_resolution_clock::now();
 		duration = std::chrono::duration_cast<microseconds>(end - start);
@@ -208,8 +208,8 @@ static void test2() //测试拆分kdtree
 	}
 	std::vector<std::tuple<size_t, bool>> findIndexClash;
 	start = std::chrono::high_resolution_clock::now();
-	KdTree3d kdtree0(polyface3dVct[0]);
-	KdTree3d kdtree1(polyface3dVct[1]);
+	BVHTree3d kdtree0(polyface3dVct[0]);
+	BVHTree3d kdtree1(polyface3dVct[1]);
 	for (size_t i = 0; i < polyface3dVct[0].size(); ++i)
 	{
 		vector<std::tuple<size_t, bool>> temp0 = kdtree0.findIntersectClash(polyface3dVct[0][i]);
