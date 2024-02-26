@@ -411,9 +411,45 @@ RTXGI 实时全局光照ray tracing execute
 Uniform grids 网格化 
 Spatial partitions  空间划分
 
-Basic radiometry (辐射度量学)  
+空间划分：Oct-tree，KD-tree，BSP-tree
+
+KD-tree的问题，1同一个mesh可能会被多个node包含，2三角形与包围盒相交判断较难；
+
+Bounding Volume Hierarchy (BVH)  层次包围体，主流做法
+
+原来我之前写的kd-tree就是BVH，尴了个尬；
+
+优化：选择最长的轴进行二分，查找中位数（快速选择算法，o(n)）
+
+**Basic radiometry** (辐射度量学)  
+
+Radiant flux辐射通量, 单位时间内的光量，lm流明
+$$
+Q[J=Joule] \\
+\phi=dQ/dt \quad [W=watt]
+$$
+
+Radiant intensity光强, 光源向各个方向辐射能量，方向性的能量
+
+能量每单位立体角 solid angle
+$$
+I(\omega)=d\phi/d\omega \\
+[W/sr] [lm/sr=cd=candela]
+$$
+irradiance辐射照度, 物体表面接收到的能量；
 
 
+
+radiance  辐射亮度，光线在传播中如何度量能量；
+
+
+
+why因为
+
+what是什么
+
+
+how如何使用
 
 
 
