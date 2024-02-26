@@ -28,7 +28,7 @@ bool accura::isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, c
 	double minA, maxA, minB, maxB, projection;
 	for (const auto& axis : edgesAB)
 	{
-		if (axis.isZero(tolerance))
+		if (axis.isZero(tolerance)) //degeneracy triangle
 			continue;
 		minA = DBL_MAX;
 		maxA = -DBL_MAX;
@@ -147,7 +147,7 @@ bool accura::isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, c
 	return true;
 }
 
-bool accura::isPointInTriangleTolerance(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon, double tolerance) // 2D
+bool accura::isPointInTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon, double tolerance) // 2D
 {
 	//tole>0 less judge, tole<0 more judge
 	std::array<Eigen::Vector2d, 3> trigonR; // is origin inside trigonR
@@ -174,5 +174,24 @@ bool accura::isPointInTriangleTolerance(const Eigen::Vector2d& point, const std:
 		precision < axisz * (v1[1] * trigonR[0][0] - v1[0] * trigonR[0][1]) &&
 		precision < axisz * (v2[1] * trigonR[1][0] - v2[0] * trigonR[1][1]) &&
 		precision < axisz * (v0[1] * trigonR[2][0] - v0[0] * trigonR[2][1]); // = decide whether include point on edge
+}
+
+bool accura::isTwoSegmentsIntersect(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB, double tolerance)
+{
+	//tole<0 less judge, tole>0 more judge
+	if (std::max(segmA[0][0], segmA[1][0]) < std::min(segmB[0][0], segmB[1][0]) ||
+		std::min(segmA[0][0], segmA[1][0]) > std::max(segmB[0][0], segmB[1][0]) ||
+		std::max(segmA[0][1], segmA[1][1]) < std::min(segmB[0][1], segmB[1][1]) ||
+		std::min(segmA[0][1], segmA[1][1]) > std::max(segmB[0][1], segmB[1][1]))
+		return false;
+    Vector2d vecA = segmA[1] - segmA[0];
+    Vector2d AB_0 = segmB[0] - segmA[0];
+    Vector2d AB_1 = segmB[1] - segmA[0];
+    Vector2d vecB = segmB[1] - segmB[0];
+    Vector2d BA_0 = segmA[0] - segmB[0];
+    Vector2d BA_1 = segmA[1] - segmB[0];
+    return //double straddle test, cross2d opposite direction
+        (AB_0[0] * vecA[1] - AB_0[1] * vecA[0]) * (AB_1[0] * vecA[1] - AB_1[1] * vecA[0]) < tolerance &&
+        (BA_0[0] * vecB[1] - BA_0[1] * vecB[0]) * (BA_1[0] * vecB[1] - BA_1[1] * vecB[0]) < tolerance;
 }
 

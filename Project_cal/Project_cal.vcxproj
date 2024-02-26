@@ -140,7 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="calculateDataTree.cpp" />
+    <ClCompile Include="calculateDataStructure.cpp" />
     <ClCompile Include="calculateDynamicAccuracy.cpp" />
     <ClCompile Include="calculatePolyhedron.cpp" />
     <ClCompile Include="calculateTriangle.cpp" />
@@ -152,7 +152,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="calculateDataTree.h" />
+    <ClInclude Include="calculateDataStructure.h" />
     <ClInclude Include="calculateDynamicAccuracy.h" />
     <ClInclude Include="calculatePolyhedron.h" />
     <ClInclude Include="calculateTriangle.h" />

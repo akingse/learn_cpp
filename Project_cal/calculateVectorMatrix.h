@@ -15,9 +15,25 @@ namespace eigen
         return Eigen::Vector2d(vec3[0], vec3[1]); // to replace shadow matrix of relative coordinate
     }
 
+    inline std::array<Eigen::Vector2d, 3> to_vec2(const std::array<Eigen::Vector3d, 3>& vec3s)
+    {
+        std::array<Eigen::Vector2d, 3> vec2s;
+        for (int i = 0; i < 3; ++i)
+            vec2s[i] = to_vec2(vec3s[i]);
+        return vec2s;
+    }
+
     inline Eigen::Vector3d to_vec3(const Eigen::Vector2d& vec2)
     {
         return Eigen::Vector3d(vec2[0], vec2[1], 0.0);
+    }
+
+    inline std::array<Eigen::Vector3d, 3> to_vec3(const std::array<Eigen::Vector2d, 3>& vec2s)
+    {
+        std::array<Eigen::Vector3d, 3> vec3s;
+        for (int i = 0; i < 3; ++i)
+            vec3s[i] = to_vec3(vec2s[i]);
+        return vec3s;
     }
 
     inline Eigen::Vector3d cross(const Eigen::Vector2d& v0, const Eigen::Vector2d& v1)
@@ -249,16 +265,16 @@ namespace eigen
             Eigen::Vector2d(segment[1][0],segment[1][1]) };
     }
 
-    inline std::array<Eigen::Vector2d, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector2d, 3>& trigon)
+    inline std::array<Eigen::Vector3d, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector2d, 3>& trigon)
     {
         std::array<Eigen::Vector4d, 3> triangle = {
             mat * Eigen::Vector4d(trigon[0][0],trigon[0][1],0,1),
             mat * Eigen::Vector4d(trigon[1][0],trigon[1][1],0,1),
             mat * Eigen::Vector4d(trigon[2][0],trigon[2][1],0,1) };
         return {
-            Eigen::Vector2d(triangle[0][0],triangle[0][1]),
-            Eigen::Vector2d(triangle[1][0],triangle[1][1]),
-            Eigen::Vector2d(triangle[2][0],triangle[2][1]) };
+            triangle[0].hnormalized(),
+            triangle[1].hnormalized(),
+            triangle[2].hnormalized() };
     }
 
     inline std::array<Eigen::Matrix4d, 2> getMatrixFromThreePoints(const std::array<Eigen::Vector3d, 3>& triangle)

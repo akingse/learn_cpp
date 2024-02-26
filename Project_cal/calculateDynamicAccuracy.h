@@ -5,8 +5,15 @@ namespace accura
     static constexpr int MAX_DECIMAL_PRECISION = 8;
     static const int64_t MAX_COORD = INT64_MAX >> 2; //clipper parameter
     //using dynamic accuracy
-    DLLEXPORT_CAL class GlobalAccuracy //singleton
+    class GlobalAccuracy //singleton
     {
+        enum class DataUnit
+        {
+            MILLIMETER, //mm
+            DECIMETER, //dm
+            METER, //m
+            KILOMETRE, //km
+        };
     public:
         static GlobalAccuracy& getInstance()
         {
@@ -16,6 +23,8 @@ namespace accura
         Eigen::AlignedBox3d m_modelBox3d; // in relative coordinate
         int m_precision = 0; //current precision
         Eigen::Vector3d m_relaOrigin = Eigen::Vector3d(0, 0, 0); //relative origin point
+        double m_toleAngle = M_PI / 1080; //0.003
+        double m_toleDistance = 0.001;
         inline int getDynamicPrecision()
         {
             if (m_modelBox3d.isEmpty())
@@ -52,6 +61,7 @@ namespace accura
     // DynamicAccuracy function, same name
     DLLEXPORT_CAL bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB, double tolerance);
     DLLEXPORT_CAL bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance);
-    DLLEXPORT_CAL bool isPointInTriangleTolerance(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon, double tolerance); // 2D
+    DLLEXPORT_CAL bool isPointInTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon, double tolerance); // 2D
+    DLLEXPORT_CAL bool isTwoSegmentsIntersect(const std::array<Eigen::Vector2d, 2>& segmA, const std::array<Eigen::Vector2d, 2>& segmB, double tolerance);
 
 }

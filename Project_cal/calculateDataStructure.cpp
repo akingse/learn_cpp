@@ -1,17 +1,48 @@
 #include "pch.h"
-#include "calculateDataTree.h"
-
 using namespace std;
 using namespace clash;
 using namespace Eigen;
 using namespace eigen;
+using namespace spatial;
 
-#ifdef min
-#undef min
-#endif // 
-#ifdef max
-#undef max
-#endif // 
+// Standard partition process of QuickSort(). //https://www.geeksforgeeks.org/quickselect-algorithm/
+// It considers the last element as pivot and moves all smaller element to left of it and greater elements to right 
+int partition(int arr[], int l, int r)
+{
+	int x = arr[r], i = l;
+	for (int j = l; j <= r - 1; j++) 
+	{
+		if (arr[j] <= x) 
+		{
+			swap(arr[i], arr[j]);
+			i++;
+		}
+	}
+	swap(arr[i], arr[r]);
+	return i;
+}
+
+// This function returns k'th smallest element in arr[l..r] using QuickSort  
+// based method.  ASSUMPTION: ALL ELEMENTS IN ARR[] ARE DISTINCT 
+int kthSmallest(int arr[], int l, int r, int k)
+{
+	// If k is smaller than number of elements in array 
+	if (k > 0 && k <= r - l + 1) 
+	{
+		// Partition the array around last element and get position of pivot element in sorted array  
+		int index = partition(arr, l, r);
+		// If position is same as k 
+		if (index - l == k - 1)
+			return arr[index];
+		// If position is more, recur for left subarray  
+		if (index - l > k - 1)
+			return kthSmallest(arr, l, index - 1, k);
+		// Else recur for right subarray 
+		return kthSmallest(arr, index + 1, r, k - index + l - 1);
+	}
+	// If k is more than number of elements in array 
+	return INT_MAX;
+}
 
 //--------------------------------------------------------------------------------------------------
 //  K-dimensional Tree 2d
@@ -22,7 +53,6 @@ using namespace eigen;
 //sort the input polygons
 std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<Polygon2d>& polygons, int dimension = 0)
 {
-	// the kd-tree crud create read update delete
 	auto _getTotalBounding = [&polygons](/*const std::vector<Polygon2d>& polygons*/)->Eigen::AlignedBox2d
 	{
 		AlignedBox2d fullBox;
@@ -74,11 +104,6 @@ std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<Polygon2d>& polygons, 
 
 KdTree2d::KdTree2d(const std::vector<Polygon2d>& _polygons/*, int depth = 0*/)
 {
-	//std::vector<std::pair<size_t, Polygon2d>> polygons;
-	//for (size_t i = 0; i < _polygons.size(); ++i)//(const auto& iter : _polygons)
-	//{
-	//	polygons.emplace_back(std::pair<size_t, Polygon2d>{ i, _polygons[i] });
-	//}
 	std::vector<Polygon2d> polygons = _polygons; //copy
 	m_kdTree = _createKdTree2d(polygons);
 }
@@ -86,7 +111,11 @@ KdTree2d::KdTree2d(const std::vector<Polygon2d>& _polygons/*, int depth = 0*/)
 //template<class T>
 std::shared_ptr<KdTreeNode2d> _createKdTree2d(std::vector<TrigonPart>& triangles, int dimension = 0)
 {
-	// the kd-tree crud create read update delete
+	auto _getLongest = [](const AlignedBox2d& box)->int
+	{
+		Vector2d size = box.sizes();
+		return (size[0] < size[1]) ? 1 : 0;
+	};
 	auto _getTotalBounding = [&triangles](/*const std::vector<TrigonPart>& polygons*/)->Eigen::AlignedBox2d
 	{
 		AlignedBox2d fullBox;
@@ -410,7 +439,13 @@ bool KdTree3d::update(const clash::Polyface3d& polyface)
 //sort the input polygons // Polyface3d self include index,
 std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<Polyface3d>& polyfaces, int dimension = 0)
 {
-	// the kd-tree crud create read update delete
+	auto _getLongest = [](const AlignedBox3d& box)->int
+	{
+		Vector3d size = box.sizes();
+		if (size[1] < size[0] && size[2] < size[0])
+			return 0;//AXIS_X
+		return (size[1] < size[2]) ? 2 : 1; //AXIS_Z:AXIS_Y
+	};
 	auto _getTotalBounding = [&](/*const std::vector<Polygon2d>& polygons*/)->Eigen::AlignedBox3d
 	{
 		AlignedBox3d fullBox;
@@ -453,7 +488,6 @@ std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<Polyface3d>& polyfaces
 // record count and depth
 std::shared_ptr<KdTreeNode3d> _createKdTree3d(std::vector<Polyface3d>& polyfaces, size_t& count, size_t& depth, int dimension = 0)
 {
-	// the kd-tree crud create read update delete
 	auto _getTotalBounding = [&polyfaces](/*const std::vector<Polygon2d>& polygons*/)->Eigen::AlignedBox3d
 	{
 		AlignedBox3d fullBox;
@@ -660,5 +694,112 @@ std::vector<std::tuple<size_t, bool>> KdTree3d::findIntersectClash(const Polyfac
 	};
 	_searchKdTree(m_kdTree);
 	return indexes;
+}
+
+//--------------------------------------------------------------------------------------------------
+//  spatial
+//--------------------------------------------------------------------------------------------------
+
+QuadtreeNode* Quadtree::createQuadtreeNode(const Eigen::Vector2d& position, double size)
+{
+	QuadtreeNode* root = new QuadtreeNode(position, size);
+	for (int i = 0; i < 4; ++i)
+	{
+		Eigen::Vector2d pos = root->position;
+		double sz = root->size / 2.0;
+		pos.x() += (i % 2) * sz;
+		pos.y() += (i / 2) * sz;
+		root->children[i] = createQuadtreeNode(pos, size);
+	}
+	return root;
+}
+
+std::vector<int> Quadtree::intersectSearch(const QuadtreeNode* node, const Eigen::AlignedBox2d& box)
+{
+	if (node == nullptr)
+		return {};
+	std::vector<int> result;
+	Eigen::AlignedBox2d nodeBox(node->position - Eigen::Vector2d(node->size / 2.0, node->size / 2.0),
+		node->position + Eigen::Vector2d(node->size / 2.0, node->size / 2.0));
+	if (!nodeBox.intersects(box))
+		return {};
+	if (node->children[0] == nullptr)
+		result.insert(result.end(), node->points.begin(), node->points.end());
+	else
+	{
+		for (int i = 0; i < 4; ++i)
+		{
+			std::vector<int> temp = intersectSearch(node->children[i], box);
+			result.insert(result.end(), temp.begin(), temp.end());
+		}
+	}
+	return result;
+}
+
+//QuadtreeNode* findNode(double x, double y, QuadtreeNode* root)
+//{
+//	if (!root)
+//		return nullptr;
+//	QuadtreeNode* node = root;
+//	for (int i = 0; i < m_depth; ++i)
+//	{
+//		// 通过diliver来将x,y归纳为0或1的值，从而索引到对应的子节点。
+//		int divide = node->divide;
+//		int divideX = x / divide;
+//		int divideY = y / divide;
+//		QuadtreeNode* temp = node->children[divideX][divideY];
+//		if (!temp)  
+//			break;
+//		node = temp;
+//		x -= (divideX == 1 ? divide : 0);
+//		y -= (divideY == 1 ? divide : 0);
+//	}
+//	return node;
+//}
+
+//writt by chatgpt4
+std::shared_ptr<KDTreeNode> buildKdTree(NodeVector data, int depth = 0) //copy data to change
+{
+	if (data.empty())
+		return nullptr;
+	int axis = depth % 3;
+	auto middle = data.begin() + data.size() / 2;
+	std::nth_element(data.begin(), middle, data.end(), [axis](const KDTreeNode& a, const KDTreeNode& b) 
+		{ return a.bounds.center()[axis] < b.bounds.center()[axis]; });
+	std::shared_ptr<KDTreeNode> node = std::make_shared<KDTreeNode>();
+	node->bounds = middle->bounds;
+	node->index = middle->index;
+	node->left = buildKdTree(NodeVector(data.begin(), middle), depth + 1);
+	node->right = buildKdTree(NodeVector(middle + 1, data.end()), depth + 1);
+	return node;
+	return nullptr;
+}
+
+void searchIntersectingNodes(const std::shared_ptr<KDTreeNode>& node, const Eigen::AlignedBox3d& queryBox, std::vector<int>& results)
+{
+	if (!node)
+		return;
+	if (node->bounds.intersects(queryBox))
+		results.push_back(node->index);
+	searchIntersectingNodes(node->left, queryBox, results);
+	searchIntersectingNodes(node->right, queryBox, results);
+}
+
+KDTree::KDTree(const std::vector<RectBase3d>& data)
+{
+	NodeVector nodeVector;
+    for (int i = 0; i < data.size(); ++i)
+	{
+		KDTreeNode node;
+		node.bounds = data[i].m_bound;
+		node.index = i;
+		nodeVector.push_back(node);
+	}
+	m_tree = buildKdTree(nodeVector, 0);
+}
+
+void KDTree::searchIntersect(const Eigen::AlignedBox3d& queryBox, std::vector<int>& results) const
+{
+	return searchIntersectingNodes(m_tree, queryBox, results);
 }
 

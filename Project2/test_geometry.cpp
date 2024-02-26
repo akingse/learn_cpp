@@ -13,7 +13,6 @@ using namespace std::chrono;
 #endif // 
 //#define USING_RELATIVE_MATRIX
 
-
 namespace clash
 {
 	//两平面求交
@@ -242,7 +241,11 @@ static void test4()
 	array<Eigen::Vector2d, 3> trigon = { Vector2d(-10, -10), Vector2d(30, 0), Vector2d(1, 10) };
 	trigon = { Vector2d(-10, -10), Vector2d(1, 10), Vector2d(30, 0) };
 
-    bool inter_ = isPointInTriangleTolerance(Vector2d(0, 0) + Vector2d(1000, 1000), translate(1000, 1000) * trigon, 0);
+    bool inter = isPointInTriangle(Vector2d(0, 0) + Vector2d(1000, 1000), to_vec2(translate(1000, 1000) * trigon), 0);
+	//tole和边缘
+	trigon = { Vector2d(-10, 0), Vector2d(1, 10), Vector2d(30, 0) };
+	inter = isPointInTriangle(point, trigon, epsF);
+	inter = isPointInTriangle(point, trigon, -epsF);
 
 	return;
 }
@@ -264,6 +267,10 @@ static void test5()
 	double m1 = v1.maxCoeff();
 	//v1.cwiseMax(v2) //merge two vector, to new one
 
+	Segment2d segm2A = { Vector2d(0,0), Vector2d(100,0) };
+	Segment2d segm2B = { Vector2d(50,0), Vector2d(0,50) };
+	bool isinter = isTwoSegmentsIntersect(segm2A, segm2B, epsF);
+
 	return;
 }
 
@@ -272,8 +279,8 @@ static int enrol = []()->int
 	//test1();
 	//test2();
 	//test3();
-	test4();
-	//test5();
+	//test4();
+	test5();
 	cout << "test_geometry finished.\n" << endl;
 	return 0;
 }();

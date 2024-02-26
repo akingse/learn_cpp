@@ -317,7 +317,7 @@ void write_ModelMesh(const std::vector<ModelMesh>& meshs, const std::string& fil
 		auto _min = CreatePoint3D(builder, iter.bounding_.min().x(), iter.bounding_.min().y(), iter.bounding_.min().z());
 		auto _max = CreatePoint3D(builder, iter.bounding_.max().x(), iter.bounding_.max().y(), iter.bounding_.max().z());
 #ifdef CLASH_DETECTION_DEBUG_TEMP
-		auto mesh = CreateConvertToMesh(builder, _vbos, _ibos, _fnos, _min, _max, _ibos_raw, iter.convex_, iter.genus_, iter.entityid_); //order and content
+		auto mesh = CreateConvertToMesh(builder, _vbos, _ibos, _fnos, _min, _max, _ibos_raw, iter.convex_, iter.genus_, iter.index_); //order and content
 		meshVct.push_back(mesh);
 #else
 #endif
