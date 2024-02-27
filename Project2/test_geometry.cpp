@@ -244,8 +244,11 @@ static void test4()
     bool inter = isPointInTriangle(Vector2d(0, 0) + Vector2d(1000, 1000), to_vec2(translate(1000, 1000) * trigon), 0);
 	//toleºÍ±ßÔµ
 	trigon = { Vector2d(-10, 0), Vector2d(1, 10), Vector2d(30, 0) };
-	inter = isPointInTriangle(point, trigon, epsF);
-	inter = isPointInTriangle(point, trigon, -epsF);
+	trigon = { Vector2d(0, 0), Vector2d(10, 0), Vector2d(0, 10) };
+	//tole < 0 more judge
+	bool inter0 = isPointInTriangle(point, trigon, 0);
+	bool interLess = isPointInTriangle(point, trigon, epsF);
+	bool interMore = isPointInTriangle(point, trigon, -epsF);
 
 	return;
 }
@@ -268,8 +271,9 @@ static void test5()
 	//v1.cwiseMax(v2) //merge two vector, to new one
 
 	Segment2d segm2A = { Vector2d(0,0), Vector2d(100,0) };
-	Segment2d segm2B = { Vector2d(50,0), Vector2d(0,50) };
-	bool isinter = isTwoSegmentsIntersect(segm2A, segm2B, epsF);
+	//Segment2d segm2B = { Vector2d(50,0), Vector2d(0,50) };
+	Segment2d segm2B = { Vector2d(100-epsF,0), Vector2d(200,0) }; //test tole
+	bool isinter = isTwoSegmentsIntersect(segm2A, segm2B, 0); //tole>0 more judge
 
 	return;
 }
@@ -279,7 +283,7 @@ static int enrol = []()->int
 	//test1();
 	//test2();
 	//test3();
-	//test4();
+	test4();
 	test5();
 	cout << "test_geometry finished.\n" << endl;
 	return 0;

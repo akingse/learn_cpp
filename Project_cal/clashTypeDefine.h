@@ -154,12 +154,10 @@ namespace eigen
 {
     struct TrigonPart
     {
-#ifdef CLASH_DETECTION_DEBUG_TEMP
-        double m_area = -1;
-#endif
         long long m_index;
-        std::array<int, 3> m_number; // mesh index | triangle index | graphic index
         OcclusionStatus m_visible = OcclusionStatus::EXPOSED;
+        double m_area = -1;
+        std::array<int, 3> m_number; // mesh index | triangle index | graphic index
         Eigen::AlignedBox3d m_box3d;
         Eigen::AlignedBox2d m_box2d;
         Eigen::Vector3d m_normal; //normal of m_triangle3d, always upward
@@ -172,28 +170,25 @@ namespace eigen
         std::vector<std::vector<Eigen::Vector2d>> m_contour; //the profile of this trigon after clipper
         bool operator<(const TrigonPart& rhs) const
         {
-#ifdef CLASH_DETECTION_DEBUG_TEMP
-            return m_area < rhs.m_area;
-#else
             return m_index < rhs.m_index;
+#ifdef CLASH_DETECTION_DEBUG_TEMP
+            //return m_area < rhs.m_area;
 #endif
         }
     };
 
     struct ContourPart
     {
-#ifdef CLASH_DETECTION_DEBUG_TEMP
-        double m_area = -1;
-#endif
+        std::vector<std::vector<Eigen::Vector2d>> m_profile; //fillArea, the boolean result
         long long m_index; // mesh index
 		//uint64_t m_entityid = -2; // record belong to same polyface
+        OcclusionStatus m_visible = OcclusionStatus::EXPOSED;
         Eigen::AlignedBox3d m_box3d; //to judge front
         Eigen::AlignedBox2d m_box2d; // contained in box3d
+        double m_area = -1;
         std::vector<long long> m_shielded;
         std::vector<std::vector<Eigen::Vector2d>> m_contour; //contour of mesh
-        std::vector<std::vector<Eigen::Vector2d>> m_profile; //fillArea, the boolean result
         std::vector<TrigonPart> m_trigons; //to judge front
-        OcclusionStatus m_visible = OcclusionStatus::EXPOSED;
         // for contour calculate method
         bool operator<(const ContourPart& rhs) const
         {
