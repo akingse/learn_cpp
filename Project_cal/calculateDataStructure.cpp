@@ -50,6 +50,58 @@ int kthSmallest(int arr[], int l, int r, int k)
 
 #ifdef RESERVE_USING_POLYGON2D
 //size_t Polygon2d::m_id = 0;
+std::shared_ptr<BVHNode2d> _createTree2d(std::vector<RectBase2d>& rectVct, int dimension)
+{
+	auto _getTotalBounding = [&rectVct]()->Eigen::AlignedBox2d
+	{
+		AlignedBox2d fullBox;
+		for (const auto& iter : rectVct)
+			fullBox.extend(iter.m_bound);
+		return fullBox;
+	};
+	auto _getLongest = [](const AlignedBox2d& box)->int
+	{
+		Vector2d size = box.sizes();
+		return (size[0] < size[1]) ? 1 : 0;
+	};
+	if (rectVct.empty()) //no chance
+		return nullptr;
+	//int direction = dimension % 2;  // the direction of xy, x=0/y=1
+	std::shared_ptr<BVHNode2d> currentNode = std::make_shared<BVHNode2d>();
+	if (rectVct.size() != 1) //middle node
+	{
+		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);  
+		//std::sort(rectVct.begin(), rectVct.end(), [axis](const RectBase2d& a, const RectBase2d& b)
+		//	{ return a.m_bound.min()[axis] < b.m_bound.min()[axis]; }); 
+		if (_getLongest(currentNode->m_bound) == 0)//min fast than center
+			std::sort(rectVct.begin(), rectVct.end(), [](const RectBase2d& a, const RectBase2d& b)
+				{ return a.m_bound.min()[0] < b.m_bound.min()[0]; });//x
+		else
+			std::sort(rectVct.begin(), rectVct.end(), [](const RectBase2d& a, const RectBase2d& b)
+				{ return a.m_bound.min()[1] < b.m_bound.min()[1]; });//y
+		size_t dichotomy = rectVct.size() / 2; // less | more
+		vector<RectBase2d> leftParts(rectVct.begin(), rectVct.begin() + dichotomy); //for new child node
+		vector<RectBase2d> rightParts(rectVct.begin() + dichotomy, rectVct.end());
+		// using recursion
+		currentNode->m_left = _createTree2d(leftParts, dimension + 1);
+		currentNode->m_right = _createTree2d(rightParts, dimension + 1);
+		currentNode->m_index = -1; //not leaf node
+	}
+	else // end leaf node
+	{
+		currentNode->m_index = rectVct[0].m_index;
+		currentNode->m_bound = rectVct[0].m_bound;
+		currentNode->m_left = nullptr;
+		currentNode->m_right = nullptr;
+	}
+	return currentNode;
+}
+BVHTree2d::BVHTree2d(const std::vector<RectBase2d>& _rectVct)
+{
+	std::vector<RectBase2d> rectVct = _rectVct; //copy
+    m_tree = _createTree2d(rectVct, 0);
+}
+
 //sort the input polygons
 std::shared_ptr<BVHNode2d> _createTree2d(std::vector<Polygon2d>& polygons, int dimension = 0)
 {
@@ -76,13 +128,12 @@ std::shared_ptr<BVHNode2d> _createTree2d(std::vector<Polygon2d>& polygons, int d
 		else
 			std::sort(polygons.begin(), polygons.end(), [](const Polygon2d& a, const Polygon2d& b)
 				{ return a.bounding().min()[1] < b.bounding().min()[1]; }); //y
-		//splitPolygons(/*polygons, leftPolygons, rightPolygons */ dimension, splitValue);
 		size_t dichotomy = polygons.size() / 2; // less | more
-		vector<Polygon2d> leftPolygons(polygons.begin(), polygons.begin() + dichotomy); //for new child node
-		vector<Polygon2d> rightPolygons(polygons.begin() + dichotomy, polygons.end());
+		vector<Polygon2d> leftParts(polygons.begin(), polygons.begin() + dichotomy); //for new child node
+		vector<Polygon2d> rightParts(polygons.begin() + dichotomy, polygons.end());
 		// using recursion
-		currentNode->m_left = _createTree2d(leftPolygons, dimension + 1);
-		currentNode->m_right = _createTree2d(rightPolygons, dimension + 1);
+		currentNode->m_left = _createTree2d(leftParts, dimension + 1);
+		currentNode->m_right = _createTree2d(rightParts, dimension + 1);
 		currentNode->m_index = -1; //not leaf node
 	}
 	else // end leaf node
@@ -105,11 +156,6 @@ BVHTree2d::BVHTree2d(const std::vector<Polygon2d>& _polygons/*, int depth = 0*/)
 //template<class T>
 std::shared_ptr<BVHNode2d> _createTree2d(std::vector<TrigonPart>& triangles, int dimension = 0)
 {
-	auto _getLongest = [](const AlignedBox2d& box)->int
-	{
-		Vector2d size = box.sizes();
-		return (size[0] < size[1]) ? 1 : 0;
-	};
 	auto _getTotalBounding = [&triangles](/*const std::vector<TrigonPart>& polygons*/)->Eigen::AlignedBox2d
 	{
 		AlignedBox2d fullBox;
@@ -128,7 +174,7 @@ std::shared_ptr<BVHNode2d> _createTree2d(std::vector<TrigonPart>& triangles, int
 	std::shared_ptr<BVHNode2d> currentNode = std::make_shared<BVHNode2d>();
 	if (triangles.size() != 1) //middle node
 	{
-		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);  
+		currentNode->m_bound = _getTotalBounding();
 		if (direction % 2 == 0)
 			std::sort(triangles.begin(), triangles.end(), [](const TrigonPart& a, const TrigonPart& b)
 				{ return a.m_box2d.min()[0] < b.m_box2d.min()[0]; }); //x
@@ -136,11 +182,11 @@ std::shared_ptr<BVHNode2d> _createTree2d(std::vector<TrigonPart>& triangles, int
 			std::sort(triangles.begin(), triangles.end(), [](const TrigonPart& a, const TrigonPart& b)
 				{ return a.m_box2d.min()[1] < b.m_box2d.min()[1]; }); //y
 		size_t dichotomy = triangles.size() / 2; // less | more
-		vector<TrigonPart> leftPolygons(triangles.begin(), triangles.begin() + dichotomy); //for new child node
-		vector<TrigonPart> rightPolygons(triangles.begin() + dichotomy, triangles.end());
+		vector<TrigonPart> leftParts(triangles.begin(), triangles.begin() + dichotomy); //for new child node
+		vector<TrigonPart> rightParts(triangles.begin() + dichotomy, triangles.end());
 		// using recursion
-		currentNode->m_left = _createTree2d(leftPolygons, dimension + 1);
-		currentNode->m_right = _createTree2d(rightPolygons, dimension + 1);
+		currentNode->m_left = _createTree2d(leftParts, dimension + 1);
+		currentNode->m_right = _createTree2d(rightParts, dimension + 1);
 		//currentNode->m_index = -1; //not leaf node
 	}
 	else // end leaf node
@@ -174,6 +220,33 @@ BVHTree2d::BVHTree2d(const std::vector<ContourPart>& profiles)
 		polygons.push_back(polygon);
 	}
 	m_tree = _createTree2d(polygons);
+}
+
+std::vector<size_t> BVHTree2d::findIntersect(const RectBase2d& rect)
+{
+	//if (m_tree == nullptr)
+	//	return {}; //test whether is working
+	std::vector<size_t> indexes;
+	std::function<void(const shared_ptr<BVHNode2d>&)> _searchTree = [&](const shared_ptr<BVHNode2d>& node)->void
+	{
+		//using recursion
+		if (node->m_bound.intersects(rect.m_bound))
+		{
+			if (node->m_index != -1)
+			{
+				if (rect.m_index != node->m_index)
+					indexes.push_back(node->m_index);
+			}
+			else // isnot leaf node
+			{
+				_searchTree(node->m_left);
+				_searchTree(node->m_right);
+			}
+			return;
+		}
+	};
+	_searchTree(m_tree);
+	return indexes;
 }
 
 std::vector<size_t> BVHTree2d::findIntersect(const Polygon2d& polygon)
@@ -456,16 +529,15 @@ std::shared_ptr<BVHNode3d> _createTree3d(std::vector<Polyface3d>& polyfaces, int
 	std::shared_ptr<BVHNode3d> currentNode = std::make_shared<BVHNode3d>();
 	if (polyfaces.size() != 1) //middle node
 	{
-		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);
+		currentNode->m_bound = _getTotalBounding();
 		std::sort(polyfaces.begin(), polyfaces.end(),[=](const Polyface3d& a, const Polyface3d& b)
 			 { return a.m_bound.min()[direction] < b.m_bound.min()[direction]; }); // index of Vector3d
-		//splitPolygons(/*polygons, leftPolygons, rightPolygons */ dimension, splitValue);
 		size_t dichotomy = polyfaces.size() / 2; // less | more
-		vector<Polyface3d> leftPolygons(polyfaces.begin(), polyfaces.begin() + dichotomy); //for new child node
-		vector<Polyface3d> rightPolygons(polyfaces.begin() + dichotomy, polyfaces.end());
+		vector<Polyface3d> leftParts(polyfaces.begin(), polyfaces.begin() + dichotomy); //for new child node
+		vector<Polyface3d> rightParts(polyfaces.begin() + dichotomy, polyfaces.end());
 		// using recursion
-		currentNode->m_left = _createTree3d(leftPolygons, dimension + 1);
-		currentNode->m_right = _createTree3d(rightPolygons, dimension + 1);
+		currentNode->m_left = _createTree3d(leftParts, dimension + 1);
+		currentNode->m_right = _createTree3d(rightParts, dimension + 1);
 		currentNode->m_index = -1; //not leaf node
 	}
 	else // end leaf node
@@ -499,15 +571,15 @@ std::shared_ptr<BVHNode3d> _createTree3d(std::vector<Polyface3d>& polyfaces, siz
 	std::shared_ptr<BVHNode3d> currentNode = std::make_shared<BVHNode3d>();
 	if (polyfaces.size() != 1) //middle node
 	{
-		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);
+		currentNode->m_bound = _getTotalBounding();
 		std::sort(polyfaces.begin(), polyfaces.end(),[=](const Polyface3d& a, const Polyface3d& b)
 			 { return a.m_bound.min()[direction] < b.m_bound.min()[direction]; }); // index of Vector3d
 		size_t dichotomy = polyfaces.size() / 2; // less | more
-		vector<Polyface3d> leftPolygons(polyfaces.begin(), polyfaces.begin() + dichotomy); //for new child node
-		vector<Polyface3d> rightPolygons(polyfaces.begin() + dichotomy, polyfaces.end());
+		vector<Polyface3d> leftParts(polyfaces.begin(), polyfaces.begin() + dichotomy); //for new child node
+		vector<Polyface3d> rightParts(polyfaces.begin() + dichotomy, polyfaces.end());
 		// using recursion
-		currentNode->m_left = _createTree3d(leftPolygons, count, depth, dimension + 1);// using recursion
-		currentNode->m_right = _createTree3d(rightPolygons, count, depth, dimension + 1);
+		currentNode->m_left = _createTree3d(leftParts, count, depth, dimension + 1);// using recursion
+		currentNode->m_right = _createTree3d(rightParts, count, depth, dimension + 1);
 		currentNode->m_index = -1; //not leaf node
 	}
 	else // end leaf node
@@ -555,13 +627,13 @@ std::shared_ptr<BVHNode3d> _createTree3d(std::vector<TrigonPart>& triangles, int
 		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);
 		std::sort(triangles.begin(), triangles.end(), [=](const TrigonPart& a, const TrigonPart& b) 
 			{ return a.m_box3d.min()[direction] < b.m_box3d.min()[direction]; }); // index of Vector3d
-		//splitPolygons(/*polygons, leftPolygons, rightPolygons */ dimension, splitValue);
+		//splitPolygons(/*polygons, leftParts, rightParts */ dimension, splitValue);
 		size_t dichotomy = triangles.size() / 2; // less | more
-		vector<TrigonPart> leftPolygons(triangles.begin(), triangles.begin() + dichotomy); //for new child node
-		vector<TrigonPart> rightPolygons(triangles.begin() + dichotomy, triangles.end());
+		vector<TrigonPart> leftParts(triangles.begin(), triangles.begin() + dichotomy); //for new child node
+		vector<TrigonPart> rightParts(triangles.begin() + dichotomy, triangles.end());
 		// using recursion
-		currentNode->m_left = _createTree3d(leftPolygons, dimension + 1);
-		currentNode->m_right = _createTree3d(rightPolygons, dimension + 1);
+		currentNode->m_left = _createTree3d(leftParts, dimension + 1);
+		currentNode->m_right = _createTree3d(rightParts, dimension + 1);
 		//currentNode->m_index = -1; //not leaf node
 	}
 	else // end leaf node
@@ -752,7 +824,7 @@ std::vector<int> Quadtree::intersectSearch(const QuadtreeNode* node, const Eigen
 //	return node;
 //}
 
-//writt by chatgpt4
+//write by chatgpt4
 std::shared_ptr<KDTreeNode> buildKdTree(NodeVector data, int depth = 0) //copy data to change
 {
 	if (data.empty())

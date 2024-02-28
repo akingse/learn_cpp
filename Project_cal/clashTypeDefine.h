@@ -150,6 +150,16 @@ enum class OcclusionStatus :int //means cover
     DEGENERACY, // become segment
 };
 
+enum class FrontState :int
+{
+    // state of 3d trigon, all 2d projection penetration
+    COPLANAR = 0, //and intersect
+    A_FRONTOF,
+    B_FRONTOF,
+    INTERSECT, //3d intersect
+    UNKNOWN,
+};
+
 namespace eigen
 {
     struct TrigonPart
@@ -181,6 +191,7 @@ namespace eigen
     {
         std::vector<std::vector<Eigen::Vector2d>> m_profile; //fillArea, the boolean result
         long long m_index; // mesh index
+        int m_number; // graphic index
 		//uint64_t m_entityid = -2; // record belong to same polyface
         OcclusionStatus m_visible = OcclusionStatus::EXPOSED;
         Eigen::AlignedBox3d m_box3d; //to judge front
