@@ -24,7 +24,9 @@ namespace accura
         int m_precision = 0; //current precision
         Eigen::Vector3d m_relaOrigin = Eigen::Vector3d(0, 0, 0); //relative origin point
         double m_toleAngle = M_PI / 1080; //0.003
-        double m_toleDistance = 0.001;
+        double m_toleDist = 1e-5;
+        double m_toleArea = 1e-4;
+        double m_toleFixed = 1e-8;
         inline int getDynamicPrecision()
         {
             if (m_modelBox3d.isEmpty())
@@ -59,11 +61,11 @@ namespace accura
     };
 
     // DynamicAccuracy function, same name
-    DLLEXPORT_CAL bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB, double tolerance);
-    DLLEXPORT_CAL bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance);
+    DLLEXPORT_CAL bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB, double toleDist, double toleAngle);
+    DLLEXPORT_CAL bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double toleDist, double toleAngle);
     DLLEXPORT_CAL bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB,
-        const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB, double tolerance);
-    DLLEXPORT_CAL bool isPointInTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon, double tolerance); // 2D
-    DLLEXPORT_CAL bool isTwoSegmentsIntersect(const std::array<Eigen::Vector2d, 2>& segmA, const std::array<Eigen::Vector2d, 2>& segmB, double tolerance);
+        const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB, double toleDist, double toleAngle);
+    DLLEXPORT_CAL bool isPointInTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon, double toleDist); // 2D
+    DLLEXPORT_CAL bool isTwoSegmentsIntersect(const std::array<Eigen::Vector2d, 2>& segmA, const std::array<Eigen::Vector2d, 2>& segmB, double toleDist);
 
 }

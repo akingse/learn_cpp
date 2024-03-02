@@ -38,6 +38,7 @@ namespace clash //collide //psykronix
     //static const Eigen::Vector3d gVecAxisY(0, 1, 0); //Eigen::Vector3d::UnitY()
     //static const Eigen::Vector3d gVecAxisZ(0, 0, 1); //Eigen::Vector3d::UnitZ()
     static constexpr double epsF = FLT_EPSILON; //1e-7
+    static constexpr double epsA = 100 * FLT_EPSILON;
     static constexpr double _epsF = -FLT_EPSILON;
     //static constexpr double epsA = 1e-6;
     //static constexpr unsigned long long ULL_MAX = 18446744073709551615; // 2 ^ 64 - 1 //ULLONG_MAX
@@ -162,6 +163,7 @@ enum class FrontState :int
 
 namespace eigen
 {
+    typedef std::vector<std::vector<Eigen::Vector2d>> ContourProfile;
     struct TrigonPart
     {
         long long m_index;
@@ -189,7 +191,6 @@ namespace eigen
 
     struct ContourPart
     {
-        std::vector<std::vector<Eigen::Vector2d>> m_profile; //fillArea, the boolean result
         long long m_index; // mesh index
         int m_number; // graphic index
 		//uint64_t m_entityid = -2; // record belong to same polyface
@@ -198,6 +199,7 @@ namespace eigen
         Eigen::AlignedBox2d m_box2d; // contained in box3d
         double m_area = -1;
         std::vector<long long> m_shielded;
+        std::vector<std::vector<Eigen::Vector2d>> m_profile; //fillArea, the boolean result
         std::vector<std::vector<Eigen::Vector2d>> m_contour; //contour of mesh
         std::vector<TrigonPart> m_trigons; //to judge front
         // for contour calculate method

@@ -3,7 +3,7 @@ using namespace std;
 using namespace Eigen;
 using namespace accura;
 
-bool accura::isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, const std::array<Vector2d, 3>& triB, double tolerance)
+bool accura::isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, const std::array<Vector2d, 3>& triB, double toleDist, double toleAngle)
 {
 	// bounding-box been judged
 	std::array<Eigen::Vector2d, 6> edgesAB = {
@@ -22,13 +22,13 @@ bool accura::isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, c
 		precision = std::max(std::max(fabs(triA_R[i][0]), fabs(triA_R[i][1])), precision);
 		precision = std::max(std::max(fabs(triB_R[i][0]), fabs(triB_R[i][1])), precision);
 	}
-	precision = precision * tolerance;
+	precision = precision * toleDist;
 	for (auto& iter : edgesAB)
 		iter = Vector2d(-iter[1], iter[0]); //rotz(pi/2)
 	double minA, maxA, minB, maxB, projection;
 	for (const auto& axis : edgesAB)
 	{
-		if (axis.isZero(tolerance)) //degeneracy triangle
+		if (axis.isZero(toleAngle)) //degeneracy triangle
 			continue;
 		minA = DBL_MAX;
 		maxA = -DBL_MAX;
@@ -54,11 +54,11 @@ bool accura::isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, c
 
 //#define USING_COMPLETE_SEPARATION_AXIS
 bool accura::isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB, 
-	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB, double tolerance)
+	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB, double toleDist, double toleAngle)
 {
 	// bounding-box been judged
 	std::array<Eigen::Vector3d, 3> edgesA = {
-        (triA[1] - triA[0]).normalized(),
+		(triA[1] - triA[0]).normalized(),
 		(triA[2] - triA[1]).normalized(),
 		(triA[0] - triA[2]).normalized() };
 	std::array<Eigen::Vector3d, 3> edgesB = {
@@ -74,11 +74,11 @@ bool accura::isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, c
 		for (int j = 0; j < 3; ++j)
 			precision = std::max(std::max(fabs(triA_R[i][j]), fabs(triB_R[i][j])), precision);
 	}
-	precision = precision * tolerance;
+	precision = precision * toleDist;
 	double minA, maxA, minB, maxB, projection;
 	//Eigen::Vector3d normalA = edgesA[0].cross(edgesA[1]).normalized();
 	//Eigen::Vector3d normalB = edgesB[0].cross(edgesB[1]).normalized();
-	if (normalA.cross(normalB).isZero(tolerance)) //is parallel
+	if (normalA.cross(normalB).isZero(toleAngle)) //is parallel
 	{
 #ifdef USING_COMPLETE_SEPARATION_AXIS 
         if (!fabs(normalA.dot(triB_R[0])) < precision) //not coplanar
@@ -127,7 +127,7 @@ bool accura::isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, c
         edgesA[2].cross(edgesB[2]) } };
 	for (const auto& axis : axes)
 	{
-		if (axis.isZero(tolerance))
+		if (axis.isZero(toleAngle))
 			continue;
 		minA = DBL_MAX;
 		maxA = -DBL_MAX;
@@ -151,11 +151,11 @@ bool accura::isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, c
 	return true;
 }
 
-bool accura::isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB, double tolerance)
+bool accura::isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB, double toleDist, double toleAngle)
 {
     Eigen::Vector3d normalA = (triA[1] - triA[0]).cross(triA[2] - triA[1]).normalized();
     Eigen::Vector3d normalB = (triB[1] - triB[0]).cross(triB[2] - triB[1]).normalized();
-	return isTwoTrianglesPenetrationSAT(triA, triB, normalA, normalB, tolerance);
+	return isTwoTrianglesPenetrationSAT(triA, triB, normalA, normalB, toleDist, toleAngle);
 }
 
 bool accura::isPointInTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon, double tolerance) // 2D
