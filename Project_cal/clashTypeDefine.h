@@ -139,8 +139,7 @@ namespace clash //collide //psykronix
 
 }
 
-//for Hidden-line removal
-enum class OcclusionStatus :int //means cover
+enum class OcclusionState :int //means cover
 {
     EXPOSED = 0,
     HIDDEN,
@@ -149,6 +148,7 @@ enum class OcclusionStatus :int //means cover
     INTERSECT, //ignore
     OCCLUSION, //shielded+intersect
     DEGENERACY, // become segment
+    UNKNOWN,
 };
 
 enum class FrontState :int
@@ -167,7 +167,7 @@ namespace eigen
     struct TrigonPart
     {
         long long m_index;
-        OcclusionStatus m_visible = OcclusionStatus::EXPOSED;
+        OcclusionState m_visible = OcclusionState::EXPOSED;
         double m_area = -1;
         std::array<int, 3> m_number; // mesh index | triangle index | graphic index
         Eigen::AlignedBox3d m_box3d;
@@ -194,7 +194,7 @@ namespace eigen
         long long m_index; // mesh index
         int m_number; // graphic index
 		//uint64_t m_entityid = -2; // record belong to same polyface
-        OcclusionStatus m_visible = OcclusionStatus::EXPOSED;
+        OcclusionState m_visible = OcclusionState::EXPOSED;
         Eigen::AlignedBox3d m_box3d; //to judge front
         Eigen::AlignedBox2d m_box2d; // contained in box3d
         double m_area = -1;
