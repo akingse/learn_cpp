@@ -36,6 +36,18 @@ $\qquad$ 2m
 $\!$ -3/18em
 ```
 
+### 空格
+
+| 格式         | 代码           | 样例                                                         | 说明          |
+| ------------ | -------------- | ------------------------------------------------------------ | ------------- |
+| 两个quad空格 | `$a \qquad b$` | ![a \qquad b](https://math.jianshu.com/math?formula=a%20%5Cqquad%20b) | 两个*m*的宽度 |
+| 一个quad空格 | `$a \quad b$`  | ![a \quad b](https://math.jianshu.com/math?formula=a%20%5Cquad%20b) | 一个*m*的宽度 |
+| 大空格       | `$ a\ b$`      | ![a\ b](https://math.jianshu.com/math?formula=a%5C%20b)      | 1/3m宽度      |
+| 中等空格     | `$ a\;b$`      | ![a\;b](https://math.jianshu.com/math?formula=a%5C%3Bb)      | 2/7m宽度      |
+| 小空格       | `$a\,b$`       | ![a\,b](https://math.jianshu.com/math?formula=a%5C%2Cb)      | 1/6m宽度      |
+| 没有空格     | `$ab$`         | ![ab](https://math.jianshu.com/math?formula=ab)              | 1/3m宽度      |
+| 紧帖         | `$a\!b$`       | ![a\!b](https://math.jianshu.com/math?formula=a%5C!b)        | 缩进1/6m宽度  |
+
 
 
 ```
