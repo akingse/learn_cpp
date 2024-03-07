@@ -38,6 +38,7 @@ namespace clash //collide //psykronix
     //static const Eigen::Vector3d gVecAxisY(0, 1, 0); //Eigen::Vector3d::UnitY()
     //static const Eigen::Vector3d gVecAxisZ(0, 0, 1); //Eigen::Vector3d::UnitZ()
     static constexpr double epsF = FLT_EPSILON; //1e-7
+    static constexpr double epsA = 100 * FLT_EPSILON;
     static constexpr double _epsF = -FLT_EPSILON;
     //static constexpr double epsA = 1e-6;
     //static constexpr unsigned long long ULL_MAX = 18446744073709551615; // 2 ^ 64 - 1 //ULLONG_MAX
@@ -138,8 +139,7 @@ namespace clash //collide //psykronix
 
 }
 
-//for Hidden-line removal
-enum class OcclusionStatus :int //means cover
+enum class OcclusionState :int //means cover
 {
     EXPOSED = 0,
     HIDDEN,
@@ -148,18 +148,28 @@ enum class OcclusionStatus :int //means cover
     INTERSECT, //ignore
     OCCLUSION, //shielded+intersect
     DEGENERACY, // become segment
+    UNKNOWN,
+};
+
+enum class FrontState :int
+{
+    // state of 3d trigon, all 2d projection penetration
+    COPLANAR = 0, //and intersect
+    A_FRONTOF,
+    B_FRONTOF,
+    INTERSECT, //3d intersect
+    UNKNOWN,
 };
 
 namespace eigen
 {
+    typedef std::vector<std::vector<Eigen::Vector2d>> ContourProfile;
     struct TrigonPart
     {
-#ifdef CLASH_DETECTION_DEBUG_TEMP
-        double m_area = -1;
-#endif
         long long m_index;
+        OcclusionState m_visible = OcclusionState::EXPOSED;
+        double m_area = -1;
         std::array<int, 3> m_number; // mesh index | triangle index | graphic index
-        OcclusionStatus m_visible = OcclusionStatus::EXPOSED;
         Eigen::AlignedBox3d m_box3d;
         Eigen::AlignedBox2d m_box2d;
         Eigen::Vector3d m_normal; //normal of m_triangle3d, always upward
@@ -172,28 +182,26 @@ namespace eigen
         std::vector<std::vector<Eigen::Vector2d>> m_contour; //the profile of this trigon after clipper
         bool operator<(const TrigonPart& rhs) const
         {
-#ifdef CLASH_DETECTION_DEBUG_TEMP
-            return m_area < rhs.m_area;
-#else
             return m_index < rhs.m_index;
+#ifdef CLASH_DETECTION_DEBUG_TEMP
+            //return m_area < rhs.m_area;
 #endif
         }
     };
 
     struct ContourPart
     {
-#ifdef CLASH_DETECTION_DEBUG_TEMP
-        double m_area = -1;
-#endif
         long long m_index; // mesh index
+        int m_number; // graphic index
 		//uint64_t m_entityid = -2; // record belong to same polyface
+        OcclusionState m_visible = OcclusionState::EXPOSED;
         Eigen::AlignedBox3d m_box3d; //to judge front
         Eigen::AlignedBox2d m_box2d; // contained in box3d
+        double m_area = -1;
         std::vector<long long> m_shielded;
-        std::vector<std::vector<Eigen::Vector2d>> m_contour; //contour of mesh
         std::vector<std::vector<Eigen::Vector2d>> m_profile; //fillArea, the boolean result
+        std::vector<std::vector<Eigen::Vector2d>> m_contour; //contour of mesh
         std::vector<TrigonPart> m_trigons; //to judge front
-        OcclusionStatus m_visible = OcclusionStatus::EXPOSED;
         // for contour calculate method
         bool operator<(const ContourPart& rhs) const
         {

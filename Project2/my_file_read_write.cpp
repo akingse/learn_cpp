@@ -397,6 +397,37 @@ std::vector<ModelMesh> read_ModelMesh(const std::string& fileName)
 	return res;
 }
 
+//apply relative matrix
+std::vector<ModelMesh> read_ModelMesh(const std::vector<ModelMesh>& meshVct, const Eigen::Matrix4d& matRela)
+{
+	vector<ModelMesh> meshRes(meshVct.size());
+	Eigen::Matrix4d matFor = matRela.inverse();
+	for (int i = 0; i < meshVct.size(); ++i)
+	{
+		ModelMesh mesh = meshVct[i];
+		mesh.fno_.clear();
+		mesh.vbo_.clear();
+		const std::vector<Eigen::Vector3d>& vbo = meshVct[i].vbo_;
+		Eigen::AlignedBox3d boxMesh;
+		for (int j = 0; j < vbo.size(); ++j)
+		{
+			Eigen::Vector3d vec(vbo[j][0], vbo[j][1], vbo[j][2]);
+			vec = (matRela * vec.homogeneous()).hnormalized();
+			mesh.vbo_.push_back(vec);
+			boxMesh.extend(vec);
+		}
+		for (int i = 0; i < mesh.ibo_.size(); ++i)
+		{
+			Eigen::Vector3d normal = (mesh.vbo_[mesh.ibo_[i][2]] - mesh.vbo_[mesh.ibo_[i][1]]).cross(mesh.vbo_[mesh.ibo_[i][0]] - mesh.vbo_[mesh.ibo_[i][1]]).normalized();//cost much time
+			mesh.fno_.push_back(normal);
+		}
+		mesh.bounding_ = boxMesh;
+		mesh.pose_ = matFor;
+		meshRes[i] = mesh;
+	}
+	return meshRes;
+}
+
 #include "D:/Alluser/akingse/repos/bimbase/Include/fbs/inter_triangels_info_generated.h" //change path
 //commented out struct Point3D; about
 void write_InterTriInfo(const std::vector<InterTriInfo>& infos, const std::string& fileName)

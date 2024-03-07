@@ -16,10 +16,18 @@ namespace clash
 	class RectBase2d
 	{
 	public:
-		Eigen::AlignedBox2d m_bound;
 		long long m_index = -1;
+		Eigen::AlignedBox2d m_bound;
 		RectBase2d() = default;
-		virtual ~RectBase2d() {};
+		RectBase2d(long long index, const Eigen::AlignedBox2d& bound) :m_index(index), m_bound(bound) {}
+		bool operator<(const RectBase2d& rhs) const //usually custom in build tree sort
+		{
+			Eigen::AlignedBox2d bound = m_bound; //merge bound box
+			bound.extend(rhs.m_bound);
+			int axis = (bound.sizes()[0] < bound.sizes()[1]) ? 1 : 0;
+			return m_bound.center()[axis] < rhs.m_bound.center()[axis];
+		}
+		//virtual ~RectBase2d() {};
 	};
 	class RectBase3d
 	{
@@ -141,6 +149,7 @@ private:
 	std::shared_ptr<BVHNode2d> m_tree;
 public:
 	BVHTree2d() = delete;
+	BVHTree2d(const std::vector<clash::RectBase2d>& rectVct);
 	BVHTree2d(const std::vector<clash::Polygon2d>& polygons);
 	BVHTree2d(const std::vector<eigen::TrigonPart>& triangles);
 	BVHTree2d(const std::vector<eigen::ContourPart>& profiles);
@@ -148,6 +157,7 @@ public:
 	{
 		return m_tree;
 	}
+	std::vector<size_t> findIntersect(const clash::RectBase2d& rect); // for RectBase2d
 	std::vector<size_t> findIntersect(const clash::Polygon2d& polygon); //searchFromTree
 	std::vector<size_t> findIntersect(const eigen::ContourPart& profile);
 	std::vector<size_t> findIntersectOpLess(const eigen::TrigonPart& trigon);//operator less
