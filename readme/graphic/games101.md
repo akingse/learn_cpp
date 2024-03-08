@@ -398,7 +398,9 @@ pinhole小孔相机模型
 
 whitted风格
 
-primary ray  主射光线，secondary rays  弹射光线，shadow rays  投影光线
+- primary ray  主射光线，
+- secondary rays  弹射光线，
+- shadow rays  投影光线
 
 渲染：visible判断
 
@@ -408,8 +410,9 @@ DLSS深度学习超采样
 
 RTXGI 实时全局光照ray tracing execute
 
-Uniform grids 网格化 
-Spatial partitions  空间划分
+**Uniform grids 网格化** 
+
+**Spatial partitions  空间划分**
 
 空间划分：Oct-tree，KD-tree，BSP-tree
 
@@ -431,25 +434,98 @@ $$
 
 Radiant intensity光强, 光源向各个方向辐射能量，方向性的能量
 
-能量每单位立体角 solid angle
+intersity单位立体角上的能量；= 能量每单位立体角 solid angle
 $$
-I(\omega)=d\phi/d\omega \\
-[W/sr] [lm/sr=cd=candela]
+I(\omega)=d\Phi/d\omega \\
+[W/sr] [lm/sr=cd=candela] \\
+\Omega=A/r^2
 $$
+![image-20240226231228772](../../../../../AppData/Roaming/Typora/typora-user-images/image-20240226231228772.png)
+
 irradiance辐射照度, 物体表面接收到的能量；
 
+irradiance是单位面积的能量，垂直方向投影；cos(theta)
 
-
+能量衰减，E=phi/4pi，E'=E/r^2，光源在传播过程中，intersity不变，irradiance在衰减；
+$$
+E(x)=d\Phi(x)/dA \\
+[W/m^2]\quad [lm/m^2=lux]
+$$
 radiance  辐射亮度，光线在传播中如何度量能量；
 
+能量-单位立体角，单位面积；
+$$
+L(p,\omega)=d^2\Phi(p,\omega)/d\omega dAcos\theta \\
+[W/sr \  m^2]\quad [cd/m^2=lm/sr\ m^2=nit]
+$$
+
+- 
+  incident radiance 入射
+
+- exiting radiance 出射
 
 
-why因为
+E=irradiance：dA区域收到的全部能量（integral积分，energy能量）
 
-what是什么
+L=radiance：dA区域在dw方向接受的能量(light)
+
+**BRDF 双向反射分布函数**
+
+反射（漫/镜面）现象：光线发出，打到物体上，被反射出去，这个过程的函数（物理量）描述；
+
+假设已知入射光和受光点 求反射光分布的函数 反之亦然 所以叫双向分布函数；
+
+物体表面一个点在接收一束光照射之后会将这束光反射到空间半球中的任何一个可能的方向（取决于物体表面材质），BRDF描述的就是向某一个方向反射出去的光的“量”与这束入射光总的“量”的比值；
+
+$$
+f_r(\omega_i \rightarrow \omega_r)=dL_r(\omega_r)/dE_i(\omega_i)
+$$
+
+递归方程：物体表面不仅被光源照亮，还被其他物体的反射光线照亮；
+
+渲染方程 RenderEquation，现代图形学的基础
+
+![image-20240303224050126](../../../../../AppData/Roaming/Typora/typora-user-images/image-20240303224050126.png)
+$$
+L_o(p,\omega_o)= \\
+L_e：自发光，e=Emission 发光体 \\
+\Omega^+=H^2,表示半球，平面上的点只接收半球范围内的radiance \\
+cos\theta=n\cdot \omega_i \\
+
+L_i=Light \  incident
+$$
+
+解渲染方程，L = E + KL  算子分解
+
+![image-20240306225245053](../../../../../AppData/Roaming/Typora/typora-user-images/image-20240306225245053.png)
+
+发光体+直接光源+间接光照+二次反射
+
+路径追踪， resolve render equation
+
+概率论回顾
+
+- X随机变量
+- X~p(x) 概率分布
+- 数学期望：E(X)=Σxipi
+- 连续函数：E(X)=∫xp(x)dx 概率密度函数 PDF
+- 随机变量函数的，数学期望 E(Y)=F[fx]=∫f(x)p(x)dx
+
+通过概率的方法，去解渲染方程；
+
+**蒙特卡洛积分**
+
+积分域(a,b)内N等分
+
+![image-20240304231859541](../../../../../AppData/Roaming/Typora/typora-user-images/image-20240304231859541.png)
+
+**路径追踪 path tracing**
+
+- diffuse漫反射
+- glossy 哑光
+- specular 镜面反射
 
 
-how如何使用
 
 
 
