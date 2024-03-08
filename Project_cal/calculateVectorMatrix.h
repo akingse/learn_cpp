@@ -308,8 +308,8 @@ namespace eigen
     {
         return getMatrixFromThreePoints(std::array<Eigen::Vector3d, 3>{
             to_vec3(triangle[0]),
-                to_vec3(triangle[1]),
-                to_vec3(triangle[2]) });
+            to_vec3(triangle[1]),
+            to_vec3(triangle[2]) });
     }
 
     //inline Eigen::Vector3d operator*=(const Eigen::Matrix4d& mat, const Eigen::Vector3d& vec) //operator* been occupied

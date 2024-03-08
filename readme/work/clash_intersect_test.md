@@ -562,3 +562,124 @@ Windows powershell
 | time_difference        | 1.271000s           |
 | time_union             | 0.287000s           |
 | time_all               | 2.440000s           |
+
+test
+
+| create time:           | floor11   |
+| ---------------------- | --------- |
+| countP_graphic         | 1987      |
+| countP_mesh            | 13255     |
+| countP_triangle        | 251552    |
+| countP_vertex          | 148122    |
+| countP_trigon          | 62673     |
+| countP_contour         | 6741      |
+| count_tri_invisible    | 182119    |
+| count_tri_degene_area  | 1920      |
+| count_tri_degene_angle | 4840      |
+| count_tri_inter_pre    | 1423996   |
+| count_hidden_jump      | 63183     |
+| count_boxA_front       | 486481    |
+| count_tri_inter_sat    | 621537    |
+| count_tri_sat_sepa     | 208800    |
+| count_front_judge      | 412737    |
+| count_tri_coplanar     | 2414      |
+| count_triB_front       | 386147    |
+| count_trigon_inside    | 25513     |
+| count_front_unknown    | 0         |
+| count_bidirect_shield  | 64        |
+| count_front_ambiguous  | 0         |
+| count_tri_inter_3d     | 0         |
+| count_bool_diff        | 352013    |
+| count_bool_union       | 23702     |
+| count_union_empty      | 0         |
+| count_trigon_hidden    | 38971     |
+| count_trigon_area0     | 0         |
+| count_contour_area0    | 0         |
+| time_mesh_convert      | 0.088000s |
+| time_assembly_trigon   | 0.025000s |
+| time_bvhtree           | 0.038000s |
+| time_frontJudge        | 0.310000s |
+| time_difference        | 1.038000s |
+| time_union             | 0.120000s |
+| time_all               | 1.534000s |
+
+| create time:           | 象屿奉贤  |
+| ---------------------- | --------- |
+| countP_graphic         | 2236      |
+| countP_mesh            | 15644     |
+| countP_triangle        | 319076    |
+| countP_vertex          | 183328    |
+| countP_trigon          | 53510     |
+| countP_contour         | 7658      |
+| count_tri_invisible    | 265566    |
+| count_tri_degene_area  | 0         |
+| count_tri_degene_angle | 0         |
+| count_tri_inter_pre    | 1314588   |
+| count_hidden_jump      | 37650     |
+| count_boxA_front       | 538615    |
+| count_tri_inter_sat    | 643566    |
+| count_tri_sat_sepa     | 182950    |
+| count_front_judge      | 460616    |
+| count_tri_coplanar     | 19758     |
+| count_triB_front       | 440844    |
+| count_trigon_inside    | 10740     |
+| count_front_unknown    | 0         |
+| count_bidirect_shield  | 0         |
+| count_front_ambiguous  | 0         |
+| count_tri_inter_3d     | 0         |
+| count_bool_diff        | 424071    |
+| count_bool_union       | 26648     |
+| count_union_empty      | 0         |
+| count_trigon_hidden    | 26862     |
+| count_trigon_area0     | 0         |
+| count_contour_area0    | 0         |
+| time_mesh_convert      | 0.111000s |
+| time_assembly_trigon   | 0.017000s |
+| time_bvhtree           | 0.033000s |
+| time_frontJudge        | 0.302000s |
+| time_difference        | 1.399000s |
+| time_union             | 0.119000s |
+| time_all               | 1.874000s |
+
+
+
+
+
+| create time:           | Thu_Feb_29_18_20_45 |
+| ---------------------- | ------------------- |
+| countP_graphic         | 689                 |
+| countP_mesh            | 11101               |
+| countP_triangle        | 271820              |
+| countP_vertex          | 156849              |
+| countP_trigon          | 63518               |
+| countP_contour         | 1276                |
+| count_tri_invisible    | 204361              |
+| count_tri_degene_area  | 2615                |
+| count_tri_degene_angle | 0                   |
+| count_tri_degene_dist  | 1326                |
+| count_tri_inter_pre    | 15374550            |
+| count_hidden_jump      | 1199832             |
+| count_boxA_front       | 2788766             |
+| count_tri_inter_sat    | 2286891             |
+| count_tri_sat_sepa     | 483466              |
+| count_front_judge      | 1803425             |
+| count_tri_coplanar     | 1606                |
+| count_triB_front       | 1784039             |
+| count_trigon_inside    | 43413               |
+| count_front_unknown    | 0                   |
+| count_bidirect_shield  | 0                   |
+| count_front_ambiguous  | 0                   |
+| count_tri_inter_3d     | 0                   |
+| count_bool_diff        | 1580760             |
+| count_bool_union       | 8348                |
+| count_union_empty      | 0                   |
+| count_trigon_hidden    | 55170               |
+| count_trigon_area0     | 0                   |
+| count_contour_area0    | 0                   |
+| time_mesh_convert      | 0.098000s           |
+| time_assembly_trigon   | 0.023000s           |
+| time_bvhtree           | 0.029000s           |
+| time_frontJudge        | 1.252000s           |
+| time_difference        | 2.104000s           |
+| time_union             | 0.464000s           |
+| time_all               | 3.873000s           |
