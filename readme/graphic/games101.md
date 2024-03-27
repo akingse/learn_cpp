@@ -424,6 +424,12 @@ Bounding Volume Hierarchy (BVH)  层次包围体，主流做法
 
 优化：选择最长的轴进行二分，查找中位数（快速选择算法，o(n)）
 
+
+
+- ## 【14】：光线追踪（加速结构）
+
+ 
+
 **Basic radiometry** (辐射度量学)  
 
 Radiant flux辐射通量, 单位时间内的光量，lm流明
@@ -525,13 +531,32 @@ $$
 - glossy 哑光
 - specular 镜面反射
 
+幂级数问题，N=1的蒙特卡洛积分，叫路径追踪；（N!=1分布式光线追踪）
+
+无限递归问题，俄罗斯轮盘赌概率停递归止，
+
+**光源采样**
+
+改变积分域，dw->dA
+
+![image-20240312230852870](../../../../../AppData/Roaming/Typora/typora-user-images/image-20240312230852870.png)
+
+- 1，对于光源部分，直接积分
+- 2，其他反射，间接RR轮盘赌
+
+Side Notes 旁注
+
+路径追踪 indeed difficult
+
+Blinn-Phong 光栅化
+
+ray tracing==whitted style的光线追踪
+
+path tracing
+
+敬畏科学，这仅仅是个入门介绍；
 
 
-
-
-- 【14】：光线追踪（加速结构）
-
- 
 
 - 【15】：路径追踪与光的传播理论
 
@@ -541,16 +566,123 @@ $$
 
  
 
-- 【17】：相机、透镜与光场
+- ## 【17】：材质和外观
+
+ 散热现象
+
+Material==BRDF
+
+glossy 哑光
+
+镜面反射（入射角=出射角）Perfect Specular Reflection  
+
+折射，（玻璃）refraction
+
+折射定律，不同介质有不同的折射率
+$$
+\eta_i sin\theta_i=\eta_t sin\theta_t
+$$
+全反射现象，Total internal reflection，从大eta到小eta，可见视角变小；
+
+URDF+UTDF=USDF 散射scattering（Transmit折射）
+
+菲涅尔项 Fresnel Reflection  Term
+
+简化近似公式，schlick appro
+
+微表面 microfacet
+
+法向分布-> 
+
+- Concentrated <==> glossy  
+- Spread <==> diffuse  
+
+表面方向性
+
+- 各向同性 Isotropic  
+- 各向异性 Anisotropic  拉丝金属
+
+性质
+
+- Non-negativity  非负
+- Linearity  线性
+- Reciprocity principle  可逆性
+- Energy conservation  能量守恒
+- Isotropic vs. anisotropic  异同
+
+测量 BRDF
+
+
+
+### 18 先进渲染
+
+高级光线传播
+
+Unbiased light transport methods 无偏
+
+- Bidirectional path tracing (BDPT)双向路径追踪，较单向更耗时
+- Metropolis light transport (MLT) 人名，适合复杂场景，难以估计收敛
+
+
+
+Biased light transport methods
+- Photon mapping 光子映射（有偏）适合渲染caustics，光线聚集形成的亮点
+- Vertex connection and merging (VCM)
+
+
+
+Instant radiosity (VPL / many light methods) 实时辐射度
+
+外观建模
+
+• Non-surface models
+
+- Participating media 云雾 散射函数
+- Hair / fur / fiber (BCSDF) 头发，marschner模型
+- Granular material 颗粒材质
+
+• Surface models
+
+- Translucent material (BSSRDF) 半透明，透射材质，dipole appro（皮肤，玉石）次表面反射； 
+- Cloth 布料，常用的三种方法
+- Detailed material (non-statistical BRDF) 微观领域，波动光学（相对几何光学），
+
+• Procedural appearance  程序化生成，noise三维函数
+
+
+
+
+
+### 19 相机 镜头 光场
+
+成像=合成+捕捉
+
+Field of View (FOV)  视场
+
+可视角 FOV=2*arctan(h/2*f)
+
+相机镜头，通常使用标准传感器36*24，计算出等效焦距；
+
+Expose 曝光
+
+H=T*E，time\*irradiance
+
+aperture光圈，f-number，光圈越小越接近小孔成像，没有景深；f是直径的倒数；
+
+shuterr speed快门时间，导致运动模糊，
+
+iso gain感光度，像素乘一个数，会放大噪声；
+
+Thin Lens Approximation  等效焦距
+
+
+
+### 【20】：颜色与感知
 
  
 
-- 【18】：颜色与感知
+### 【21】：动画与模拟（基本概念、逆运动学、质点弹簧系统）
 
  
 
-- 【19】：动画与模拟（基本概念、逆运动学、质点弹簧系统）
-
- 
-
-- 【20】：物质点法（前沿动态）
+### 【21】：物质点法（前沿动态）
