@@ -163,7 +163,7 @@ enum class FrontState :int
 
 namespace eigen
 {
-    typedef std::vector<std::vector<Eigen::Vector2d>> ContourProfile;
+    typedef std::vector<std::vector<Eigen::Vector2d>> PathsEigen; //ContourProfile
     struct TrigonPart
     {
         long long m_index;
