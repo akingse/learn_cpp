@@ -17,6 +17,7 @@ namespace clash
 	//}
 	double computeTriangleArea(const std::array<Eigen::Vector2d, 3>& triangle);
 	double computeTriangleArea(const std::array<Eigen::Vector3d, 3>& triangle, bool is2D = true);
+	DLLEXPORT_CAL double calculatePolygonArea(const std::vector<Eigen::Vector2d>& polygon); //using Shoelace(Gauss) method
 
 	// intersect of triangle
 	DLLEXPORT_CAL bool isPointInTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon);
@@ -77,10 +78,3 @@ DLLEXPORT_CAL bool isPointInPolygon2D(const Eigen::Vector2d& point, const std::v
 DLLEXPORT_CAL bool isPointInPolygon2D(const Eigen::Vector3d& point, const std::vector<Eigen::Vector3d>& polygon);
 //for convex polygon
 DLLEXPORT_CAL bool isTwoPolygonsIntersectSAT(const std::vector<Eigen::Vector2d>& polygonA, const std::vector<Eigen::Vector2d>& polygonB);
-
-// generate matrix
-DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
-DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const clash::Plane3d& plane);
-DLLEXPORT_CAL std::array<Eigen::Matrix4d,2> getRelativeMatrixByProjectionPlane(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
-DLLEXPORT_CAL std::array<Eigen::Matrix4d,2> getRelativeMatrixByProjectionPlane(const clash::Plane3d& plane);
-

@@ -182,7 +182,7 @@ namespace eigen
         Eigen::Matrix3d R = q.toRotationMatrix();
         Eigen::Matrix4d mat4d = Eigen::Matrix4d::Identity();
         mat4d.block<3, 3>(0, 0) = R; //block<rows,cols>(row_index,col_index) <>is child size, () is begin index
-		return translate(-position) * mat4d * translate(position);
+		return eigen::translate(-position) * mat4d * translate(position);
     }
 
     inline Eigen::Matrix4d translate(const Eigen::Vector2d& vec)
@@ -400,4 +400,12 @@ namespace eigen
         std::cout << "(" << T2[2].x() << ", " << T2[2].y() << ", " << T2[2].z() << ")" << std::endl;
     }
 
+    // generate matrix
+    DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
+    DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const clash::Plane3d& plane);
+    DLLEXPORT_CAL std::array<Eigen::Matrix4d, 2> getRelativeMatrixByProjectionPlane(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
+    DLLEXPORT_CAL std::array<Eigen::Matrix4d, 2> getRelativeMatrixByProjectionPlane(const clash::Plane3d& plane);
+    Eigen::Matrix4d inverseOrth(const Eigen::Matrix4d& mat);
 }
+
+

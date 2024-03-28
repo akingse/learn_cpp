@@ -11,7 +11,7 @@ struct ModelMesh
     int genus_ = 0; //number of genus, default 0
 //#ifdef FILL_PROFILE_DEBUG_TEMP
     std::vector<int> iboRaw_; //for test debug
-    uint64_t index_ = ULLONG_MAX; // record belong to same polyface
+    uint64_t index_ = UINT64_MAX;// ULLONG_MAX; // record belong to same polyface
     //uint64_t instanceid = 0; //0 means not instance
 //#endif
 };
