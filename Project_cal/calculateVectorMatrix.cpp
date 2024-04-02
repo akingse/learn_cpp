@@ -70,3 +70,14 @@ std::array<Eigen::Matrix4d, 2> eigen::getRelativeMatrixByProjectionPlane(const P
 {
 	return getRelativeMatrixByProjectionPlane(plane.m_origin, plane.m_normal);
 }
+
+Eigen::Matrix4d eigen::inverseOrth(const Eigen::Matrix4d& mat)
+{
+	Matrix4d matInv;
+	matInv<<
+		mat(0, 0), mat(1, 0), mat(2, 0), -mat(0, 3),
+		mat(0, 1), mat(1, 1), mat(2, 1), -mat(1, 3),
+		mat(0, 2), mat(1, 2), mat(2, 2), -mat(2, 3),
+		0, 0, 0, 1;
+	return matInv;
+}

@@ -405,7 +405,7 @@ namespace eigen
     DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const clash::Plane3d& plane);
     DLLEXPORT_CAL std::array<Eigen::Matrix4d, 2> getRelativeMatrixByProjectionPlane(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
     DLLEXPORT_CAL std::array<Eigen::Matrix4d, 2> getRelativeMatrixByProjectionPlane(const clash::Plane3d& plane);
-    Eigen::Matrix4d inverseOrth(const Eigen::Matrix4d& mat);
+    DLLEXPORT_CAL Eigen::Matrix4d inverseOrth(const Eigen::Matrix4d& mat);
 }
 
 

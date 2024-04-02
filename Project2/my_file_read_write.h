@@ -32,6 +32,32 @@ inline std::wstring transfer_string_to_wstring(const std::string& str)
     return strw;
 }
 
+inline std::wstring string2wstring(const char* str)
+{
+    int nLen = MultiByteToWideChar(CP_ACP, 0, str, -1, NULL, NULL);
+    if (nLen == 0)
+        return {};
+    wchar_t* pChar = new wchar_t[nLen];
+    MultiByteToWideChar(CP_ACP, 0, str, -1, pChar, nLen);
+    std::wstring wstr(pChar);
+    delete[] pChar;
+    pChar = nullptr;
+    return wstr;
+}
+
+inline std::string wstring2string(const wchar_t* wstr)
+{
+    int nLen = WideCharToMultiByte(CP_ACP, 0, wstr, -1, NULL, 0, NULL, NULL);
+    if (nLen == 0)
+        return {};
+    char* pChar = new char[nLen];
+    WideCharToMultiByte(CP_ACP, 0, wstr, -1, pChar, nLen, NULL, NULL);
+    std::string str(pChar);
+    delete[] pChar;
+    pChar = nullptr;
+    return str;
+}
+
 inline std::string getExePath() // include<afx.h>
 {
     TCHAR buff[MAX_PATH];
