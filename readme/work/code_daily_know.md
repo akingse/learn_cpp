@@ -1,3 +1,5 @@
+copy from HWY
+
 ### 点乘
 
 点积在数学中，又称数量积（dot product; scalar product），是指接受在实数R上的两个向量并返回一个实数值标量的二元运算。它是欧几里得空间的标准内积。

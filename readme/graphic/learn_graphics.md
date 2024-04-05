@@ -93,9 +93,7 @@ Shader代码是用来控制图形处理单元（GPU）的程序，通过它可�
 
 ![图1](https://bkimg.cdn.bcebos.com/pic/e850352ac65c10387059cd72ba119313b07e895e?x-bce-process=image/resize,m_lfit,w_1280,limit_1)
 
-学习Shader之前，了解计算机图形学的基础知识是必须的，如果没有图形学的基础，直接学习写Shader就好比建一座空中阁楼。
 
-主流的Shader语言（HLSL和GLSL）
 
 关于图形图像研究的学科很多，主要分为计算几何（computer geometry）、计算机图形学(computer graphy)、计算机视觉(computer vision)、数字图像处理(digital image processing)，各自关系如下
 
@@ -114,6 +112,8 @@ Shader代码是用来控制图形处理单元（GPU）的程序，通过它可�
 一边书学习基本概念（顶点、索引、空间变换、纹理映射、基本光照模型、GPU架构等），一边学习图形渲染API（OpenGL or DirectX）
 
 《OpenGL编程指南》（俗称OpenGL红宝书）
+
+主流的Shader语言（HLSL和GLSL）
 
 
 

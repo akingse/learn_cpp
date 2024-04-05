@@ -143,5 +143,3 @@ git config --global --unset https.proxy
 
 ![image-20231210142420393](C:/Users/Aking/AppData/Roaming/Typora/typora-user-images/image-20231210142420393.png)
 
-绿色：注释
-

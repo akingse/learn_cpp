@@ -2009,7 +2009,7 @@ bool clash::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2
 #ifndef USING_NORMALIZED_VECTOR
 	Vector3d segmVecA = (segmA[1] - segmA[0]).normalized();
 	Vector3d segmVecB = (segmB[1] - segmB[0]).normalized();
-	if (!segmVecA.cross(segmVecB).isZero(toleAng)) //cross product max component is toleAng
+	if (!segmVecA.cross(segmVecB).isZero(toleAng)) //cross product max component is toleAngle
 		return false;
 #else
 	Vector3d segmVecA = segmA[1] - segmA[0];
@@ -2024,12 +2024,12 @@ bool clash::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2
 	{
 		segmVecA = segmB[0] - endA; // re-using variable name
 		segmVecB = segmB[1] - endA;
-		if (segmVecA.norm() <= toleDis || segmVecB.norm() <= toleDis) // point concident
+		if (segmVecA.norm() <= toleDis || segmVecB.norm() <= toleDis) // point coincident
 		{
 			interEnd++;
 			continue;
 		}
-		// point on segment, opposite direction //using triangles area to judge toleDis
+		// point on segment, opposite direction //using triangles area to judge toleDist
 		if (segmVecA.dot(segmVecB) < 0 && segmVecA.cross(segmVecB).norm() <= toleDis * (segmVecA - segmVecB).norm()) //norm fast than squaredNorm
 			interEnd++;
 	}
@@ -2037,12 +2037,12 @@ bool clash::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2
 	{
 		segmVecA = segmA[0] - endB;
 		segmVecB = segmA[1] - endB;
-		if (segmVecA.norm() <= toleDis || segmVecB.norm() <= toleDis) // point concident
+		if (segmVecA.norm() <= toleDis || segmVecB.norm() <= toleDis) // point conicident
 		{
 			interEnd++;
 			continue;
 		}
-		// point on segment, opposite direction //using triangles area to judge toleDis
+		// point on segment, opposite direction //using triangles area to judge toleDist
 		if (segmVecA.dot(segmVecB) < 0 && segmVecA.cross(segmVecB).norm() <= toleDis * (segmVecA - segmVecB).norm())
 			interEnd++;
 	}
@@ -2088,13 +2088,13 @@ std::tuple<bool, array<double, 4>> clash::getTwoSegmentsCollinearCoincidentPoint
 	{
 		segmVecA = endA - segmB[0]; // re-using variable name
 		segmVecB = endA - segmB[1];
-		if (segmVecA.norm() <= toleDis) // point concident
+		if (segmVecA.norm() <= toleDis) // point coincident
 		{
 			endInter++; // same as segmentB 
 			propB0 = 0.0;
 			continue;
 		}
-		if (segmVecB.norm() <= toleDis) // point concident
+		if (segmVecB.norm() <= toleDis) // point coincident
 		{
 			endInter++;
 			propB1 = 1.0;
@@ -2124,17 +2124,17 @@ std::tuple<bool, array<double, 4>> clash::getTwoSegmentsCollinearCoincidentPoint
 	{
 		segmVecA = endB - segmA[0];
 		segmVecB = endB - segmA[1];
-		if (segmVecA.norm() <= toleDis) // point concident
+		if (segmVecA.norm() <= toleDis) // point coincident
 		{
 			propA0 = 0.0;
 			continue;
 		}
-		if (segmVecB.norm() <= toleDis) // point concident
+		if (segmVecB.norm() <= toleDis) // point coincident
 		{
 			propA1 = 1.0;
 			continue;
 		}
-		// point on segment, opposite direction //using triangles area to judge toleDis
+		// point on segment, opposite direction //using triangles area to judge toleDist
 		if (segmVecA.dot(segmVecB) < 0 && segmVecA.cross(segmVecB).norm() <= toleDis * (segmVecA - segmVecB).norm())
 		{
 			midInter = true;
