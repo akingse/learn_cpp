@@ -278,13 +278,60 @@ static void test5()
 	return;
 }
 
+
+inline bool GetIntersectPoint(const Vector2i& ln1a, const Vector2i& ln1b,
+	const Vector2i& ln2a, const Vector2i& ln2b, Vector2i& ip) //intersect point
+{
+	// https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
+	double dx1 = double(ln1b.x() - ln1a.x());
+	double dy1 = double(ln1b.y() - ln1a.y());
+	double dx2 = double(ln2b.x() - ln2a.x());
+	double dy2 = double(ln2b.y() - ln2a.y());
+	double det = dy1 * dx2 - dy2 * dx1;
+	if (det == 0.0) 
+		return false;
+	double t = ((ln1a.x() - ln2a.x()) * dy2 - (ln1a.y() - ln2a.y()) * dx2) / det;
+	if (t <= 0.0) 
+		ip = ln1a;        // ?? check further (see also #568)
+	else if (t >= 1.0) 
+		ip = ln1b;   // ?? check further
+	else
+	{
+		ip.x() = int64_t(ln1a.x() + t * dx1);
+		ip.y() = int64_t(ln1a.y() + t * dy1);
+	}
+	return true;
+}
+
+static void test6()
+{
+	//ÕûĞÎ
+	vector<vector<Eigen::Vector2i>> poly0 = { {
+		Vector2i(0,0),
+		Vector2i(10,5),
+		Vector2i(0,10),
+		} };
+	vector<vector<Eigen::Vector2i>> poly1 = { {
+		Vector2i(5,0),
+		Vector2i(5,10),
+		//Vector2i(-5,5),
+		Vector2i(-5,-1), //without intersect
+		} };
+
+	Vector2i ip;
+	bool isinter = GetIntersectPoint(poly0[0][0], poly0[0][1], poly1[0][0], poly1[0][2], ip);
+
+	return;
+}
+
 static int enrol = []()->int
 {
 	//test1();
 	//test2();
 	//test3();
-	test4();
-	test5();
+	//test4();
+	//test5();
+	test6();
 	cout << "test_geometry finished.\n" << endl;
 	return 0;
 }();

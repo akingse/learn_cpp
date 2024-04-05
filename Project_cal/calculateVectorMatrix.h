@@ -36,6 +36,11 @@ namespace eigen
         return vec3s;
     }
 
+    inline Eigen::Vector4d to_vec4(const Eigen::Vector2d& vec2)
+    {
+        return Eigen::Vector4d(vec2[0], vec2[1], 0.0, 1.0);
+    }
+
     inline Eigen::Vector3d cross(const Eigen::Vector2d& v0, const Eigen::Vector2d& v1)
     {
         return Eigen::Vector3d(0, 0, v0[0] * v1[1] - v0[1] * v1[0]);
@@ -177,7 +182,7 @@ namespace eigen
         Eigen::Matrix3d R = q.toRotationMatrix();
         Eigen::Matrix4d mat4d = Eigen::Matrix4d::Identity();
         mat4d.block<3, 3>(0, 0) = R; //block<rows,cols>(row_index,col_index) <>is child size, () is begin index
-		return translate(-position) * mat4d * translate(position);
+		return eigen::translate(-position) * mat4d * translate(position);
     }
 
     inline Eigen::Matrix4d translate(const Eigen::Vector2d& vec)
@@ -317,8 +322,28 @@ namespace eigen
     {
         return getMatrixFromThreePoints(std::array<Eigen::Vector3d, 3>{
             to_vec3(triangle[0]),
-                to_vec3(triangle[1]),
-                to_vec3(triangle[2]) });
+            to_vec3(triangle[1]),
+            to_vec3(triangle[2]) });
+    }
+
+    //direciton is axis-x
+    inline Eigen::Matrix4d getMatrixFromTwoPoints(const Eigen::Vector3d& p0, const Eigen::Vector3d& p1)
+    {
+        Eigen::Vector3d axisx = (p1 - p0).normalized();
+        if (axisx.isZero(clash::epsF)) //safe check
+            axisx = Eigen::Vector3d(1, 0, 0);
+        Eigen::Vector3d axisz(0, 0, 1);
+        Eigen::Vector3d axisy = axisz.cross(axisx).normalized();
+        if (axisy.isZero(clash::epsF))
+            axisy = Eigen::Vector3d(0, 1, 0);
+        axisz = axisx.cross(axisy).normalized();
+        Eigen::Matrix4d matFor, matInv;
+        matFor << //forword matrix
+            axisx[0], axisy[0], axisz[0], p0[0],
+            axisx[1], axisy[1], axisz[1], p0[1],
+            axisx[2], axisy[2], axisz[2], p0[2],
+            0, 0, 0, 1;
+        return matFor;
     }
 
     //inline Eigen::Vector3d operator*=(const Eigen::Matrix4d& mat, const Eigen::Vector3d& vec) //operator* been occupied
@@ -375,4 +400,12 @@ namespace eigen
         std::cout << "(" << T2[2].x() << ", " << T2[2].y() << ", " << T2[2].z() << ")" << std::endl;
     }
 
+    // generate matrix
+    DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
+    DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const clash::Plane3d& plane);
+    DLLEXPORT_CAL std::array<Eigen::Matrix4d, 2> getRelativeMatrixByProjectionPlane(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
+    DLLEXPORT_CAL std::array<Eigen::Matrix4d, 2> getRelativeMatrixByProjectionPlane(const clash::Plane3d& plane);
+    DLLEXPORT_CAL Eigen::Matrix4d inverseOrth(const Eigen::Matrix4d& mat);
 }
+
+

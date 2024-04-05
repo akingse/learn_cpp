@@ -9,9 +9,9 @@ struct ModelMesh
     Eigen::Affine3d pose_; // Eigen::Affine3d::Identity()
     bool convex_; // isConvex default true
     int genus_ = 0; //number of genus, default 0
-//#ifdef CLASH_DETECTION_DEBUG_TEMP
+//#ifdef FILL_PROFILE_DEBUG_TEMP
     std::vector<int> iboRaw_; //for test debug
-    uint64_t index_ = ULLONG_MAX; // record belong to same polyface
+    uint64_t index_ = UINT64_MAX;// ULLONG_MAX; // record belong to same polyface
     //uint64_t instanceid = 0; //0 means not instance
 //#endif
 };
@@ -163,7 +163,7 @@ enum class FrontState :int
 
 namespace eigen
 {
-    typedef std::vector<std::vector<Eigen::Vector2d>> ContourProfile;
+    typedef std::vector<std::vector<Eigen::Vector2d>> PathsEigen; //ContourProfile
     struct TrigonPart
     {
         long long m_index;
@@ -183,7 +183,7 @@ namespace eigen
         bool operator<(const TrigonPart& rhs) const
         {
             return m_index < rhs.m_index;
-#ifdef CLASH_DETECTION_DEBUG_TEMP
+#ifdef FILL_PROFILE_DEBUG_TEMP
             //return m_area < rhs.m_area;
 #endif
         }
@@ -205,7 +205,7 @@ namespace eigen
         // for contour calculate method
         bool operator<(const ContourPart& rhs) const
         {
-#ifdef CLASH_DETECTION_DEBUG_TEMP
+#ifdef FILL_PROFILE_DEBUG_TEMP
             return m_area < rhs.m_area;
 #else
             return m_index < rhs.m_index;

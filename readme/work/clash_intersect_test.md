@@ -486,14 +486,6 @@ Windows powershell
 
 
 
-| count_front_unknown | 8 |
-
-1-6,1-7,2-6,2-7,
-
-19018-19010, 18438-18430, 18726-18720-18681-18728
-
-
-
 | create time:         | Sat_Feb_24_08_21_11 |
 | -------------------- | ------------------- |
 | countP_graphic       | 665                 |
@@ -562,3 +554,49 @@ Windows powershell
 | time_difference        | 1.271000s           |
 | time_union             | 0.287000s           |
 | time_all               | 2.440000s           |
+
+test
+
+
+
+| create time:           | Tue_Mar_26_17_23_05 |
+| ---------------------- | ------------------- |
+| countP_graphic         | 689                 |
+| countP_mesh            | 11101               |
+| countP_triangle        | 271820              |
+| countP_vertex          | 156849              |
+| countP_trigon          | 65302               |
+| countP_contour         | 1244                |
+| count_tri_invisible    | 204361              |
+| count_tri_degene_area  | 831                 |
+| count_tri_degene_angle | 0                   |
+| count_tri_degene_dist  | 1326                |
+| count_tri_inter_pre    | 15876560            |
+| count_hidden_jump      | 1301414             |
+| count_boxA_front       | 2898387             |
+| count_tri_inter_sat    | 2333809             |
+| count_tri_sat_sepa     | 493835              |
+| count_front_judge      | 1839974             |
+| count_tri_coplanar     | 1615                |
+| count_triB_front       | 1820396             |
+| count_trigon_inside    | 44845               |
+| count_front_unknown    | 0                   |
+| count_bidirect_shield  | 0                   |
+| count_front_ambiguous  | 0                   |
+| count_tri_inter_3d     | 0                   |
+| count_bool_diff        | 1599725             |
+| count_bool_union       | 8369                |
+| count_union_empty      | 0                   |
+| count_trigon_hidden    | 56933               |
+| count_trigon_area0     | 0                   |
+| count_contour_area0    | 0                   |
+| time_mesh_convert      | 0.082000s           |
+| time_assembly_trigon   | 0.020000s           |
+| time_bvhtree           | 0.032000s           |
+| time_frontJudge        | 1.292000s           |
+| time_difference        | 2.221000s           |
+| time_union             | 0.453000s           |
+| time_all               | 4.020000s           |
+
+
+

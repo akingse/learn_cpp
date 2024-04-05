@@ -149,6 +149,7 @@ private:
 	std::shared_ptr<BVHNode2d> m_tree;
 public:
 	BVHTree2d() = delete;
+	BVHTree2d(const BVHTree2d&) = delete;
 	BVHTree2d(const std::vector<clash::RectBase2d>& rectVct);
 	BVHTree2d(const std::vector<clash::Polygon2d>& polygons);
 	BVHTree2d(const std::vector<eigen::TrigonPart>& triangles);
