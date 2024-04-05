@@ -456,6 +456,22 @@ static void _test10()
 	return;
 }
 
+static void _test11()
+{
+	//Vector3d triA_0 = Vector3d(0, 0, 0);
+	//Vector3d triA_1 = Vector3d(10, 0, 0);
+	//Vector3d triA_2 = Vector3d(0, 10, 0);
+	//Triangle triA = { triA_0, triA_1, triA_2 };
+	Vector2d triA_0 = Vector2d(0, 0);
+	Vector2d triA_1 = Vector2d(10, 0);
+	Vector2d triA_2 = Vector2d(0, 10);
+	Triangle2d triA = { triA_0, triA_1, triA_2 };
+
+	double distance = getDistanceOfPointAndTriangle(Vector2d(10, 10), triA);
+
+	return;
+}
+
 static int enrol = []()->int
 {
 	//_test2();
@@ -463,6 +479,7 @@ static int enrol = []()->int
 	//_test8();
 	//_test9();
 	//_test10();
+	_test11();
 	cout << "test_triangle_intersect finished.\n" << endl;
 	return 0;
 }();
