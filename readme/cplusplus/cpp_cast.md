@@ -1,8 +1,6 @@
 # C++四种cast操作符
 
-[cast](https://blog.csdn.net/starryheavens/article/details/4617637
-
-)
+[cast](https://blog.csdn.net/starryheavens/article/details/4617637)
 
 C++标准定义了四个新的转换符：reinterpret_cast, static_cast, dynamic_cast和const_cast，目的在于控制类(class)之间的类型转换。
 

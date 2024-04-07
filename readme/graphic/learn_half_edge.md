@@ -49,7 +49,11 @@ Edge 全边
 	开始半边 halfedge*
 
 实体 SolidMesh
+
+```
     std::vector<MHalfedge *> half_edges_;
     std::vector<MVert *> vertices_;
     std::vector<MEdge *> edges_;
     std::vector<MPolyFace *> polygons_;
+```
+

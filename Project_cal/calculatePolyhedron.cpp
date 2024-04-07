@@ -189,7 +189,7 @@ vector<Eigen::Vector3d> clash::getProfileOutOfMesh(const ModelMesh& mesh, const 
 	vector<Vector3d> profilePoints;
 	for (const int& i : profileIndex)
 		profilePoints.push_back(vbo[i]);
-	Matrix4d matSha = getProjectionMatrixByPlane(plane);
+	Matrix4d matSha = eigen::getProjectionMatrixByPlane(plane);
 	for (auto& iter : profilePoints)
 		iter = (matSha * iter.homogeneous()).hnormalized();
 	return profilePoints;

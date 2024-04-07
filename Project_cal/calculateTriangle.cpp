@@ -1466,6 +1466,56 @@ bool isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, const std
 	return true;
 }
 
+double getDistanceOfPointAndTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon)
+{
+	//https://www.bilibili.com/video/BV1MF4m1V7e3/
+	if (isPointInTriangle(point, trigon))
+		return -1;
+	double distance = DBL_MAX;
+	//for (const auto& vertex : trigon)
+	for (int i = 0; i < 3; ++i)
+	{
+		distance = std::min((trigon[i] - point).norm(), distance);
+		int j = (i + 1) % 3;
+		Vector2d direction = trigon[j] - trigon[i];
+		if (0.0 < direction.dot(point - trigon[i]) && direction.dot(point - trigon[j]) < 0.0) //relative and projection
+		{
+			//double h = (point - trigon[i]).cross(direction).norm() / direction.norm();
+			//double h = (trigon[i] - point + direction.dot(point - trigon[i]) / direction.dot(direction) * direction).norm();
+			distance = std::min(cross2d(point - trigon[i], direction) / direction.norm(), distance);
+		}
+	}
+	return distance;
+}
+
+double getDistanceOfPointAndTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon)
+{
+	bool isInTri;
+    auto _getDistanceOfPointAndPlane = [&isInTri](const Vector3d& vertex, const std::array<Vector3d, 3>& plane)->double
+    {
+        Vector3d normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);
+        double k = (plane[0] - vertex).dot(normal) / normal.dot(normal);
+        //_getProjectionOfPointAndPlane
+		Vector3d local = vertex + k * normal; // reference closure
+		isInTri = isPointInTriangle(local, plane);
+        return (k * normal).norm(); 
+    };
+	double perpendi = _getDistanceOfPointAndPlane(point, trigon);
+	if (isInTri)
+		return perpendi;
+	// distance of point to frame line
+	double distance = DBL_MAX;
+	for (int i = 0; i < 3; ++i)
+	{
+		distance = std::min((trigon[i] - point).norm(), distance);
+		int j = (i + 1) % 3;
+		Vector3d direction = trigon[j] - trigon[i];
+		if (0.0 < direction.dot(point - trigon[i]) && direction.dot(point - trigon[j]) < 0.0) //relative and projection
+			distance = std::min((point - trigon[i]).cross(direction).norm() / direction.norm(), distance);
+	}
+	return distance;
+}
+
 // must separate
 double getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {
@@ -2009,7 +2059,7 @@ bool clash::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2
 #ifndef USING_NORMALIZED_VECTOR
 	Vector3d segmVecA = (segmA[1] - segmA[0]).normalized();
 	Vector3d segmVecB = (segmB[1] - segmB[0]).normalized();
-	if (!segmVecA.cross(segmVecB).isZero(toleAng)) //cross product max component is toleAng
+	if (!segmVecA.cross(segmVecB).isZero(toleAng)) //cross product max component is toleAngle
 		return false;
 #else
 	Vector3d segmVecA = segmA[1] - segmA[0];
@@ -2024,12 +2074,12 @@ bool clash::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2
 	{
 		segmVecA = segmB[0] - endA; // re-using variable name
 		segmVecB = segmB[1] - endA;
-		if (segmVecA.norm() <= toleDis || segmVecB.norm() <= toleDis) // point concident
+		if (segmVecA.norm() <= toleDis || segmVecB.norm() <= toleDis) // point coincident
 		{
 			interEnd++;
 			continue;
 		}
-		// point on segment, opposite direction //using triangles area to judge toleDis
+		// point on segment, opposite direction //using triangles area to judge toleDist
 		if (segmVecA.dot(segmVecB) < 0 && segmVecA.cross(segmVecB).norm() <= toleDis * (segmVecA - segmVecB).norm()) //norm fast than squaredNorm
 			interEnd++;
 	}
@@ -2037,12 +2087,12 @@ bool clash::isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2
 	{
 		segmVecA = segmA[0] - endB;
 		segmVecB = segmA[1] - endB;
-		if (segmVecA.norm() <= toleDis || segmVecB.norm() <= toleDis) // point concident
+		if (segmVecA.norm() <= toleDis || segmVecB.norm() <= toleDis) // point conicident
 		{
 			interEnd++;
 			continue;
 		}
-		// point on segment, opposite direction //using triangles area to judge toleDis
+		// point on segment, opposite direction //using triangles area to judge toleDist
 		if (segmVecA.dot(segmVecB) < 0 && segmVecA.cross(segmVecB).norm() <= toleDis * (segmVecA - segmVecB).norm())
 			interEnd++;
 	}
@@ -2088,13 +2138,13 @@ std::tuple<bool, array<double, 4>> clash::getTwoSegmentsCollinearCoincidentPoint
 	{
 		segmVecA = endA - segmB[0]; // re-using variable name
 		segmVecB = endA - segmB[1];
-		if (segmVecA.norm() <= toleDis) // point concident
+		if (segmVecA.norm() <= toleDis) // point coincident
 		{
 			endInter++; // same as segmentB 
 			propB0 = 0.0;
 			continue;
 		}
-		if (segmVecB.norm() <= toleDis) // point concident
+		if (segmVecB.norm() <= toleDis) // point coincident
 		{
 			endInter++;
 			propB1 = 1.0;
@@ -2124,17 +2174,17 @@ std::tuple<bool, array<double, 4>> clash::getTwoSegmentsCollinearCoincidentPoint
 	{
 		segmVecA = endB - segmA[0];
 		segmVecB = endB - segmA[1];
-		if (segmVecA.norm() <= toleDis) // point concident
+		if (segmVecA.norm() <= toleDis) // point coincident
 		{
 			propA0 = 0.0;
 			continue;
 		}
-		if (segmVecB.norm() <= toleDis) // point concident
+		if (segmVecB.norm() <= toleDis) // point coincident
 		{
 			propA1 = 1.0;
 			continue;
 		}
-		// point on segment, opposite direction //using triangles area to judge toleDis
+		// point on segment, opposite direction //using triangles area to judge toleDist
 		if (segmVecA.dot(segmVecB) < 0 && segmVecA.cross(segmVecB).norm() <= toleDis * (segmVecA - segmVecB).norm())
 		{
 			midInter = true;
