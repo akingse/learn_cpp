@@ -45,7 +45,7 @@ int kthSmallest(int arr[], int l, int r, int k)
 }
 
 //--------------------------------------------------------------------------------------------------
-//  K-dimensional Tree 2d
+//  BVH Tree 2d
 //--------------------------------------------------------------------------------------------------
 
 #ifdef RESERVE_USING_POLYGON2D
@@ -366,7 +366,7 @@ std::vector<size_t> BVHTree2d::findIntersect(const ContourPart& profile)
 
 #endif RESERVE_USING_POLYGON2D
 //--------------------------------------------------------------------------------------------------
-//  K-dimensional Tree 3d
+//  BVH Tree 3d
 //--------------------------------------------------------------------------------------------------
 
 //#define RESERVE_USING_BOUNDBOX_3D
