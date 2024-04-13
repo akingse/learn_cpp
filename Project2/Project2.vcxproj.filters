@@ -38,6 +38,9 @@
     <Filter Include="test_pattern">
       <UniqueIdentifier>{bc964f22-f8dc-4621-a47d-f5eebd3d32d8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="test_geo">
+      <UniqueIdentifier>{dcdbed48-48dc-468b-9a20-d913423e5a9e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -145,14 +148,8 @@
     <ClCompile Include="my_file_read_write.cpp">
       <Filter>test_bin</Filter>
     </ClCompile>
-    <ClCompile Include="test_geometry.cpp">
-      <Filter>test_math</Filter>
-    </ClCompile>
     <ClCompile Include="test_fun_speed.cpp">
       <Filter>test_case</Filter>
-    </ClCompile>
-    <ClCompile Include="my_geometry.cpp">
-      <Filter>test_math</Filter>
     </ClCompile>
     <ClCompile Include="test_boost.cpp">
       <Filter>test_gram</Filter>
@@ -214,14 +211,23 @@
     <ClCompile Include="test_data_structure.cpp">
       <Filter>test_dsa</Filter>
     </ClCompile>
-    <ClCompile Include="my_cal_geo.cpp">
-      <Filter>test_math</Filter>
-    </ClCompile>
     <ClCompile Include="test_singleton.cpp">
       <Filter>test_pattern</Filter>
     </ClCompile>
     <ClCompile Include="test_singleton2.cpp">
       <Filter>test_pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="test_geometry.cpp">
+      <Filter>test_geo</Filter>
+    </ClCompile>
+    <ClCompile Include="my_geometry.cpp">
+      <Filter>test_geo</Filter>
+    </ClCompile>
+    <ClCompile Include="my_cal_geo.cpp">
+      <Filter>test_geo</Filter>
+    </ClCompile>
+    <ClCompile Include="test_geo.cpp">
+      <Filter>test_geo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -234,12 +240,6 @@
     <ClInclude Include="my_file_read_write.h">
       <Filter>test_bin</Filter>
     </ClInclude>
-    <ClInclude Include="my_geometry.h">
-      <Filter>test_math</Filter>
-    </ClInclude>
-    <ClInclude Include="my_cal_geo.h">
-      <Filter>test_math</Filter>
-    </ClInclude>
     <ClInclude Include="test_singleton.h">
       <Filter>test_pattern</Filter>
     </ClInclude>
@@ -248,6 +248,12 @@
     </ClInclude>
     <ClInclude Include="..\auto_include\Project2_API.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="my_geometry.h">
+      <Filter>test_geo</Filter>
+    </ClInclude>
+    <ClInclude Include="my_cal_geo.h">
+      <Filter>test_geo</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
