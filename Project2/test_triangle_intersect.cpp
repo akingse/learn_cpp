@@ -456,6 +456,17 @@ static void _test10()
 	return;
 }
 
+//class Trigon
+//{
+//public:
+//	array<Vector2d, 3> m_tri;
+//	Trigon()
+//	{
+//        memset(this, 0, 2 * 3 * sizeof(double));
+//	}
+//
+//};
+
 static void _test11()
 {
 	//Vector3d triA_0 = Vector3d(0, 0, 0);
@@ -466,11 +477,12 @@ static void _test11()
 	Vector2d triA_1 = Vector2d(10, 0);
 	Vector2d triA_2 = Vector2d(0, 10);
 	Triangle2d triA = { triA_0, triA_1, triA_2 };
-
 	double distance = getDistanceOfPointAndTriangle(Vector2d(10, 10), triA);
-
+	//int res=maxSubArray(vector<int>{ -2,1,-3,4,-1,2,1,-5,4 });
+	
 	return;
 }
+
 
 static int enrol = []()->int
 {

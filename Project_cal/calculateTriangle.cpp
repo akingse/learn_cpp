@@ -48,7 +48,7 @@ double clash::computeTriangleArea(const std::array<Vector3d, 3>& triangle, bool 
 double clash::calculatePolygonArea(const std::vector<Eigen::Vector2d>& polygon) //using Shoelace-Gauss method
 {
 	double area = 0.0;
-	int n = polygon.size();
+	size_t n = polygon.size();
 	for (int i = 0; i < n; ++i)
 	{
 		int j = (i + 1) % n; //avoid over bound

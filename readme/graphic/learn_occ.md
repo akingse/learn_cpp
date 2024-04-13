@@ -86,3 +86,39 @@ OpenCascade提供二维和三维几何体的生成、显示和分析。
 
 ---
 
+使用教程
+
+下载occ7.8.0+vs2022+qt6.4.2
+
+qt5.12 [官网](https://www.qt.io/offline-installers) [安装包](https://download.qt.io/archive/qt/5.12/5.12.12/qt-opensource-windows-x86-5.12.12.exe)
+
+[occ](https://dev.opencascade.org/release) 下载7.6.0历史版本，GitHub授权登录
+
+VS管理扩展安装Qt插件后，在Qt版本里设置依赖路径；
+
+![image-20240406190201643](C:/Users/Aking/AppData/Roaming/Typora/typora-user-images/image-20240406190201643.png)
+
+学习研究OCC
+
+occ文档有html版本，chm版本，pdf版本；
+
+### 文件目录
+
+- **adm** This folder contains administration files, which allow rebuilding OCCT;
+- **adm/cmake** This folder contains files of CMake building procedure;
+- **adm/msvc** This folder contains Visual Studio projects for Visual C++ 2010, 2012, 2013, 2015, 2017 and 2019 which allow rebuilding OCCT under Windows platform in 32 and 64-bit mode;
+- **adm/scripts** This folder contains auxiliary scripts for semi-automated building and packaging of OCCT for different platforms;
+- **data** This folder contains CAD files in different formats, which can be used to test the OCCT functionality;
+- **doc** This folder contains OCCT documentation in HTML and PDF format;
+- **dox** This folder contains sources of OCCT documentation in plain text (MarkDown) format;
+- **inc** This folder contains copies of all OCCT header files;
+- **samples** This folder contains sample applications.
+- **src** This folder contains OCCT source files. They are organized in folders, one per development unit;
+- **tests** This folder contains scripts for OCCT testing.
+- **tools** This folder contains sources of Inspector tool.
+- **win64/vc10** This folder contains executable and library files built in optimize mode for Windows platform by Visual C++ 2010;
+
+
+
+
+
