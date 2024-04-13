@@ -81,13 +81,13 @@
     <LinkIncremental>true</LinkIncremental>
     <IntDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\compile</IntDir>
     <TargetName>$(ProjectName)</TargetName>
-    <IncludePath>
-    </IncludePath>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\link</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\Aking\source\repos\test01;C:\Users\Aking\source\repos\test01\test01</IncludePath>
+    <IncludePath>
+    </IncludePath>
     <OutDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\link</OutDir>
     <IntDir>$(SolutionDir)build\$(ProjectName)\$(ConfigurationName)\$(PlatformTarget)\compile</IntDir>
   </PropertyGroup>
@@ -134,7 +134,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreLinkEvent>
-      <Command>$(SolutionDir)tools\python3-embed\python.exe $(SolutionDir)tools\export_header.py  $(ProjectName)</Command>
+      <Command>
+      </Command>
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -157,7 +158,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreLinkEvent>
-      <Command>$(SolutionDir)tools\python3-embed\python.exe $(SolutionDir)tools\export_header.py  $(ProjectName)</Command>
+      <Command>
+      </Command>
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -246,5 +246,8 @@
     <ClInclude Include="test_singleton2.h">
       <Filter>test_pattern</Filter>
     </ClInclude>
+    <ClInclude Include="..\auto_include\Project2_API.h">
+      <Filter>common</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

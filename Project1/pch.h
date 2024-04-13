@@ -62,3 +62,8 @@
 #include "geometry/ParaGeometryClass.h"              // public
 #include "geometry/ParaGeometryCalculate.h"
 #include "geometry/ParaGeometryRelation.h"         	// public
+
+//delete python tool generate export API
+//$(SolutionDir)tools\python3-embed\python.exe $(SolutionDir)tools\export_header.py  $(ProjectName)
+// add head include
+//$(ProjectDir)

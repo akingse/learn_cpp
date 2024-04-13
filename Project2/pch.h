@@ -59,7 +59,7 @@
 //#include <CGAL/>
 //#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 
-#include "Project1_API.h"
+#include "Project1_API.h" //add head include: $(SolutionDir)Project1
 #include "Poject_CAL_API.h"
 #include "my_geometry.h" //export
 #include "test_serialize.h"

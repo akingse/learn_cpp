@@ -152,6 +152,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\auto_include\Project1_API.h" />
     <ClInclude Include="calculateDataStructure.h" />
     <ClInclude Include="calculateDynamicAccuracy.h" />
     <ClInclude Include="calculatePolyhedron.h" />
