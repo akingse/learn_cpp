@@ -110,6 +110,29 @@ namespace eigen
     }
 
     //overload
+
+    inline Eigen::Matrix4d translate(double x, double y, double z = 0.0)
+    {
+        Eigen::Matrix4d T;
+        T <<
+            1, 0, 0, x,
+            0, 1, 0, y,
+            0, 0, 1, z,
+            0, 0, 0, 1;
+        return T;
+    }
+
+    inline Eigen::Matrix4d translate(const Eigen::Vector3d& vec)
+    {
+        Eigen::Matrix4d T;
+        T <<
+            1, 0, 0, vec[0],
+            0, 1, 0, vec[1],
+            0, 0, 1, vec[2],
+            0, 0, 0, 1;
+        return T;
+    }
+
     inline Eigen::Matrix4d rotx(double theta)
     {
         Eigen::Matrix4d R;
@@ -152,28 +175,6 @@ namespace eigen
         //mat4d.block<1, 3>(3, 0) << 0, 0, 0; 
         //mat4d(3, 3) = 1; 
         return mat4d;
-    }
-
-    inline Eigen::Matrix4d translate(double x, double y, double z = 0.0)
-    {
-        Eigen::Matrix4d T;
-        T << 
-            1, 0, 0, x,
-            0, 1, 0, y,
-            0, 0, 1, z,
-            0, 0, 0, 1;
-        return T;
-    }
-
-    inline Eigen::Matrix4d translate(const Eigen::Vector3d& vec)
-    {
-        Eigen::Matrix4d T;
-        T <<
-            1, 0, 0, vec.x(),
-            0, 1, 0, vec.y(),
-            0, 0, 1, vec.z(),
-            0, 0, 0, 1;
-        return T;
     }
 
     inline Eigen::Matrix4d rotate(const Eigen::Vector3d& position, const Eigen::Vector3d& axis, double theta = 0.0)
