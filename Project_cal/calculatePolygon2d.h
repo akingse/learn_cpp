@@ -2,6 +2,7 @@
 
 namespace clash
 {
+	// pnpoly
 	inline bool isPointInPolygon2D(const Eigen::Vector2d& point, const std::vector<Eigen::Vector2d>& polygon)// pnpoly
 	{
 		Eigen::AlignedBox2d box;

@@ -149,7 +149,7 @@ namespace clash
 		return gVecNaN;// DBL_MAX; // nearest point outof segments
 	}
 	
-	inline Vector3d getIntersectOfPointAndPlane(const Vector3d& point, const std::array<Vector3d, 3>& plane);
+	Vector3d getIntersectOfPointAndPlane(const Vector3d& point, const std::array<Vector3d, 3>& plane);
 
 	//inline Eigen::Vector3d getIntersectPointOfLineAndPlane(const Segment& line, const Plane3d& plane)
 	//{
@@ -182,12 +182,124 @@ namespace clash
 		Vector3d iV = (iB - p).normalized();
 	}
 
+	inline bool isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector2d, 2>& segment, const Eigen::AlignedBox2d& box)
+	{
+		if (box.contains(segment[0]) || box.contains(segment[1]))
+			return true;
+		const Vector2d& _min = box.min();
+		const Vector2d& _max = box.max();
+		if (std::max(segment[0].x(), segment[1].x()) < _min.x() ||
+			std::min(segment[0].x(), segment[1].x()) > _max.x() ||
+			std::max(segment[0].y(), segment[1].y()) < _min.y() ||
+			std::min(segment[0].y(), segment[1].y()) > _max.y())
+			return false;
+		std::array<Eigen::Vector2d, 3> axes = { {
+			Vector2d(1,0),
+			Vector2d(0,1),
+			Vector2d(-(segment[1] - segment[0]).y(),(segment[1] - segment[0]).x())} }; //canbe zero
+		std::array<Eigen::Vector2d, 4> boxVtx = { {
+			box.min(),
+			Vector2d(box.max().x(),box.min().y()),
+			box.max(),
+			Vector2d(box.min().x(),box.max().y())} };
+		double minA, maxA, minB, maxB, projection;
+		for (const auto& axis : axes) //fast than index
+		{
+			minA = DBL_MAX;
+			maxA = -DBL_MAX;
+			minB = DBL_MAX;
+			maxB = -DBL_MAX;
+			for (const auto& vertex : boxVtx) //fast than list
+			{
+				projection = axis.dot(vertex);
+				minA = std::min(minA, projection);
+				maxA = std::max(maxA, projection);
+			}
+			for (const auto& vertex : segment)
+			{
+				projection = axis.dot(vertex);
+				minB = std::min(minB, projection);
+				maxB = std::max(maxB, projection);
+			}
+			if (maxA < minB || maxB < minA) // absolute zero
+				return false;
+		}
+		return true;
+	}
+
+	inline bool isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 2>& segment, const Eigen::AlignedBox3d& box)
+	{
+		//whlie segment with tolerance, using large box
+		if (box.contains(segment[0]) || box.contains(segment[1]))
+			return true;
+		const Vector3d& _min = box.min();
+		const Vector3d& _max = box.max();
+		if (std::max(segment[0].x(), segment[1].x()) < _min.x() ||
+			std::min(segment[0].x(), segment[1].x()) > _max.x() ||
+			std::max(segment[0].y(), segment[1].y()) < _min.y() ||
+			std::min(segment[0].y(), segment[1].y()) > _max.y() ||
+			std::max(segment[0].z(), segment[1].z()) < _min.z() ||
+			std::min(segment[0].z(), segment[1].z()) > _max.z())
+			return false;
+		Vector3d vecSeg = segment[1] - segment[0];//segment direction
+		std::array<Eigen::Vector3d, 7> axes = { {
+			vecSeg, //maybe not work
+			Vector3d(1,0,0),
+			Vector3d(0,1,0),
+			Vector3d(0,0,1),
+			vecSeg.cross(Vector3d(1,0,0)),
+			vecSeg.cross(Vector3d(0,1,0)),
+			vecSeg.cross(Vector3d(0,0,1)) } };
+		Vector3d vecBox = box.max() - box.min();
+		std::array<Eigen::Vector3d, 8> boxVtx = { { //box.min() is origin
+			Vector3d(0,0,0),
+			Vector3d(vecBox[0],0,0),
+			Vector3d(vecBox[0],vecBox[1],0),
+			Vector3d(0,vecBox[1],0),
+			Vector3d(0,0,vecBox[2]),
+			Vector3d(vecBox[0],0,vecBox[2]),
+			vecBox, //Vector3d(vecBox[0],vecBox[1],vecBox[2])
+			Vector3d(0,vecBox[1],vecBox[2]) } };
+		double minA, maxA, minB, maxB, projection;
+		for (const auto& axis : axes) //fast than index
+		{
+			minA = DBL_MAX;
+			maxA = -DBL_MAX;
+			minB = DBL_MAX;
+			maxB = -DBL_MAX;
+			for (const auto& vertex : boxVtx) //fast than list
+			{
+				projection = axis.dot(vertex);
+				minA = std::min(minA, projection);
+				maxA = std::max(maxA, projection);
+			}
+			for (const auto& vertex : segment) //only two point
+			{
+				projection = axis.dot(vertex - box.min());
+				minB = std::min(minB, projection);
+				maxB = std::max(maxB, projection);
+			}
+			if (maxA < minB || maxB < minA) // absolute zero
+				return false;
+		}
+		return true;
+	}
+
 
 }
 
 //plane
 namespace clash
 {
+	// distance
+	//DLLEXPORT double getDistanceOfPointAndSegmentINF(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 2>& segm);
+	//DLLEXPORT double getDistanceOfTwoSegmentsINF(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB);
+	//DLLEXPORT double getDistanceOfPointAndPlaneINF(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& plane);
+	// for profile fusion
+	DLLEXPORT_CAL bool isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector2d, 2>& segmA, const std::array<Eigen::Vector2d, 2>& segmB);
+	DLLEXPORT_CAL bool isTwoSegmentsCollinearCoincident(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB, double toleAng = 0, double toleDis = 0);
+	DLLEXPORT_CAL std::tuple<bool, std::array<double, 4>> getTwoSegmentsCollinearCoincidentPoints(const Segment& segmA, const Segment& segmB, double toleAng = 0, double toleDis = 0);
+	DLLEXPORT_CAL void mergeIntersectIntervalOfSegment(std::vector<double>& _range, const std::array<double, 2>& prop);
 
 }
 
