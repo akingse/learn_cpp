@@ -229,6 +229,9 @@
     <ClCompile Include="test_geo.cpp">
       <Filter>test_geo</Filter>
     </ClCompile>
+    <ClCompile Include="test_interview.cpp">
+      <Filter>test_gram</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">

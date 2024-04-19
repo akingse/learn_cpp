@@ -36,6 +36,12 @@
     <ClCompile Include="calculateDynamicAccuracy.cpp">
       <Filter>algorithm</Filter>
     </ClCompile>
+    <ClCompile Include="calculatePointLinePlane.cpp">
+      <Filter>algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="calculatePolygon2d.cpp">
+      <Filter>algorithm</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -66,6 +72,12 @@
       <Filter>algorithm</Filter>
     </ClInclude>
     <ClInclude Include="..\auto_include\Project1_API.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="calculatePointLinePlane.h">
+      <Filter>algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="calculatePolygon2d.h">
       <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>

@@ -27,6 +27,7 @@ namespace clash //collide //psykronix
     typedef std::array<Eigen::Vector2d, 3> Triangle2d;
     typedef std::array<Eigen::Vector3d, 3> Triangle3d;
     typedef std::array<Eigen::Vector3d, 2> PosVec3d;
+    typedef std::array<Eigen::Vector3d, 2> RayLine;
     typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>> Polyhedron;
     //global constexpr
     static const Eigen::Vector3d gVecNaN(std::nan("0"), std::nan("0"), std::nan("0"));
