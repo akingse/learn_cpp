@@ -142,6 +142,7 @@
   <ItemGroup>
     <ClCompile Include="calculateDataStructure.cpp" />
     <ClCompile Include="calculateDynamicAccuracy.cpp" />
+    <ClCompile Include="calculateMeshTopology.cpp" />
     <ClCompile Include="calculatePointLinePlane.cpp" />
     <ClCompile Include="calculatePolygon2d.cpp" />
     <ClCompile Include="calculatePolyhedron.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="..\auto_include\Project1_API.h" />
     <ClInclude Include="calculateDataStructure.h" />
     <ClInclude Include="calculateDynamicAccuracy.h" />
+    <ClInclude Include="calculateMeshTopology.h" />
     <ClInclude Include="calculatePointLinePlane.h" />
     <ClInclude Include="calculatePolygon2d.h" />
     <ClInclude Include="calculatePolyhedron.h" />

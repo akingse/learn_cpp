@@ -28,6 +28,7 @@
 #include "calculatePolygon2d.h"
 #include "calculateTriangle.h"	 // namespace clash
 #include "calculatePolyhedron.h"  // namespace clash
+#include "calculateMeshTopology.h"
 #include "calculateDataStructure.h" //spatial partition tree
 #include "calculateDynamicAccuracy.h" //namespace accura
 #include "my_triangle_intersect.h"		

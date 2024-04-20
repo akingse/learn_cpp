@@ -288,7 +288,7 @@ namespace clash
 
 }
 
-//plane
+//merge
 namespace clash
 {
 	// distance

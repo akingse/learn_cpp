@@ -88,5 +88,7 @@ namespace clash
 		}
 		return true;
 	}
+	
+	DLLEXPORT_CAL double calculatePolygonArea(const std::vector<Eigen::Vector2d>& polygon); //using Shoelace(Gauss) method
 
 }
