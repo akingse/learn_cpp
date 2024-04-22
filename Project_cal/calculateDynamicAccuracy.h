@@ -1,4 +1,6 @@
 #pragma once
+#ifndef CALCULATE_DYNAMICACCURACY_H
+#define CALCULATE_DYNAMICACCURACY_H
 
 namespace accura
 {
@@ -69,3 +71,4 @@ namespace accura
     DLLEXPORT_CAL bool isTwoSegmentsIntersect(const std::array<Eigen::Vector2d, 2>& segmA, const std::array<Eigen::Vector2d, 2>& segmB, double toleDist);
 
 }
+#endif// CALCULATE_DYNAMICACCURACY_H

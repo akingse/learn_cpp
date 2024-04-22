@@ -7,7 +7,8 @@
 * Purpose   :  Some common and simple triangle calculation methods			   *
 * License   :  MIT									                           *
 *******************************************************************************/
-
+#ifndef CALCULATE_TRIANGLE_H
+#define CALCULATE_TRIANGLE_H
 namespace clash
 {
 	double computeTriangleArea(const std::array<Eigen::Vector2d, 3>& triangle);
@@ -43,3 +44,4 @@ DLLEXPORT_CAL std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(cons
 DLLEXPORT_CAL double getDistanceOfPointAndTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon);
 DLLEXPORT_CAL double getDistanceOfPointAndTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon);
 
+#endif// CALCULATE_TRIANGLE_H

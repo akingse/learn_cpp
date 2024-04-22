@@ -7,7 +7,8 @@
 * Purpose   :  Some common and simple polyhedron calculation methods		   *
 * License   :  MIT									                           *
 *******************************************************************************/
-
+#ifndef CALCULATE_POLYHEDRON_H
+#define CALCULATE_POLYHEDRON_H
 namespace clash
 {
 	// polyhedron
@@ -43,3 +44,4 @@ Eigen::Vector3d getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA, const
 std::tuple<clash::RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(const ModelMesh& meshA, const ModelMesh& meshB);
 std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance);
 
+#endif// CALCULATE_POLYHEDRON_H

@@ -1,4 +1,6 @@
 #pragma once
+#ifndef CALCULATE_POINTLINEPLANE_H
+#define CALCULATE_POINTLINEPLANE_H
 
 namespace clash
 {
@@ -302,4 +304,5 @@ namespace clash
 	DLLEXPORT_CAL void mergeIntersectIntervalOfSegment(std::vector<double>& _range, const std::array<double, 2>& prop);
 
 }
+#endif// CALCULATE_POINTLINEPLANE_H
 

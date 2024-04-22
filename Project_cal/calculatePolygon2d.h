@@ -1,5 +1,6 @@
 #pragma once
-
+#ifndef CALCULATE_POLYGON2D_H
+#define CALCULATE_POLYGON2D_H
 namespace clash
 {
 	// pnpoly
@@ -92,3 +93,4 @@ namespace clash
 	DLLEXPORT_CAL double calculatePolygonArea(const std::vector<Eigen::Vector2d>& polygon); //using Shoelace(Gauss) method
 
 }
+#endif// CALCULATE_POLYGON2D_H

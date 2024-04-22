@@ -1,4 +1,7 @@
 #pragma once
+#ifndef CALCULATE_MESHTOPOLOGY_H
+#define CALCULATE_MESHTOPOLOGY_H
+
 namespace games
 {
 	struct QEMVertex
@@ -141,3 +144,4 @@ namespace games
 	HeMesh meshQEMSimplification(const HeMesh& mesh, size_t edgeCollapseTarget = 0);
 
 }
+#endif// CALCULATE_MESHTOPOLOGY_H

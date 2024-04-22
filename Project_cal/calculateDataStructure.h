@@ -8,6 +8,9 @@
 * License   :  MIT									                           *
 *******************************************************************************/
 
+#ifndef CALCULATE_DATASTRUCTURE_H
+#define CALCULATE_DATASTRUCTURE_H
+
 #define USING_AUTO_CLOSE
 #define RESERVE_USING_POLYGON2D
 
@@ -340,3 +343,4 @@ namespace spatial
 	};
 
 }
+#endif// CALCULATE_DATASTRUCTURE_H

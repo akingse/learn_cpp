@@ -1,5 +1,6 @@
 #pragma once
-
+#ifndef CALCULATE_VECTORMATRIX_H
+#define CALCULATE_VECTORMATRIX_H
 namespace eigen
 {
     // inline function
@@ -346,61 +347,6 @@ namespace eigen
             0, 0, 0, 1;
         return matFor;
     }
-
-    //inline Eigen::Vector3d operator*=(const Eigen::Matrix4d& mat, const Eigen::Vector3d& vec) //operator* been occupied
-    //{
-    //    Eigen::Vector4d res = mat * vec.homogeneous();
-    //    return res.hnormalized();
-    //}
-    //inline std::array<Eigen::Vector3d, 2> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 2>& seg)
-    //{
-    //    std::array<Eigen::Vector3d, 2> res;
-    //    for (int i = 0; i < 2; i++)
-    //    {
-    //        Eigen::Vector4d vec4 = mat * (seg[i].homogeneous());
-    //        res[i] = vec4.hnormalized();
-    //    }
-    //    return res;
-    //}
-    //inline std::array<Eigen::Vector3d, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 3>& tri)
-    //{
-    //    std::array<Eigen::Vector3d, 3> res;
-    //    for (int i = 0; i < 3; i++)
-    //    {
-    //        Eigen::Vector4d vec4 = mat * (tri[i].homogeneous()); //Vector4d(tri[i].x(), tri[i].y(), tri[i].z(), 1);
-    //        res[i] = vec4.hnormalized(); // Vector3d(vec4.x(), vec4.y(), vec4.z());
-    //    }
-    //    return res;
-    //}
-    //inline std::array<Eigen::Vector3f, 3> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3f, 3>& tri)
-    //{
-    //    std::array<Eigen::Vector3f, 3> res;
-    //    Eigen::Matrix4f mat_float = mat.cast<float>();
-    //    for (int i = 0; i < 3; i++)
-    //    {
-    //        Eigen::Vector4f vec4 = mat_float * (tri[i].homogeneous()); //Vector4d(tri[i].x(), tri[i].y(), tri[i].z(), 1);
-    //        res[i] = vec4.hnormalized(); //Vector3f(vec4.x(), vec4.y(), vec4.z()); //
-    //    }
-    //    return res;
-    //}
-
-    inline void print_triangle(const std::array<Eigen::Vector3d, 3>& T1) //not accurate
-    {
-        std::cout << "trigon= " << std::endl << "(" << T1[0].x() << ", " << T1[0].y() << ", " << T1[0].z() << ")" << std::endl;
-        std::cout << "(" << T1[1].x() << ", " << T1[1].y() << ", " << T1[1].z() << ")" << std::endl;
-        std::cout << "(" << T1[2].x() << ", " << T1[2].y() << ", " << T1[2].z() << ")" << std::endl;
-    }
-
-    inline void print_triangle(const std::array<Eigen::Vector3d, 3>& T1, const std::array<Eigen::Vector3d, 3>& T2)
-    {
-        std::cout << "triPair=" << std::endl << "(" << T1[0].x() << ", " << T1[0].y() << ", " << T1[0].z() << ")" << std::endl;
-        std::cout << "(" << T1[1].x() << ", " << T1[1].y() << ", " << T1[1].z() << ")" << std::endl;
-        std::cout << "(" << T1[2].x() << ", " << T1[2].y() << ", " << T1[2].z() << ")" << std::endl;
-        std::cout << "(" << T2[0].x() << ", " << T2[0].y() << ", " << T2[0].z() << ")" << std::endl;
-        std::cout << "(" << T2[1].x() << ", " << T2[1].y() << ", " << T2[1].z() << ")" << std::endl;
-        std::cout << "(" << T2[2].x() << ", " << T2[2].y() << ", " << T2[2].z() << ")" << std::endl;
-    }
-
     // generate matrix
     DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
     DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const clash::Plane3d& plane);
@@ -409,4 +355,4 @@ namespace eigen
     DLLEXPORT_CAL Eigen::Matrix4d inverseOrth(const Eigen::Matrix4d& mat);
 }
 
-
+#endif// CALCULATE_VECTORMATRIX_H

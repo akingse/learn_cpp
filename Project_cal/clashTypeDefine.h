@@ -1,5 +1,6 @@
 #pragma once
-
+#ifndef CALCULATE_TYPEDEFINE_H
+#define CALCULATE_TYPEDEFINE_H
 struct ModelMesh
 {
     std::vector<Eigen::Vector3d> vbo_;
@@ -226,3 +227,4 @@ namespace eigen
     };
 
 }
+#endif// CALCULATE_TYPEDEFINE_H
