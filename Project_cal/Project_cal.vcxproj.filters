@@ -42,6 +42,9 @@
     <ClCompile Include="calculatePolygon2d.cpp">
       <Filter>algorithm</Filter>
     </ClCompile>
+    <ClCompile Include="calculateMeshTopology.cpp">
+      <Filter>algorithm</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -78,7 +81,10 @@
       <Filter>algorithm</Filter>
     </ClInclude>
     <ClInclude Include="calculatePolygon2d.h">
-      <Filter>common</Filter>
+      <Filter>algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="calculateMeshTopology.h">
+      <Filter>algorithm</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
