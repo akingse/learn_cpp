@@ -312,9 +312,9 @@ namespace eigen
             axisx[2], axisy[2], axisz[2], triangle[0][2],
             0, 0, 0, 1;
         matInv << //inverse matrix, transpose and negation
-            axisx[0], axisx[1], axisx[2], -triangle[0][0],
-            axisy[0], axisy[1], axisy[2], -triangle[0][1],
-            axisz[0], axisz[1], axisz[2], -triangle[0][2],
+            axisx[0], axisx[1], axisx[2], -axisx.dot(triangle[0]),
+            axisy[0], axisy[1], axisy[2], -axisy.dot(triangle[0]),
+            axisz[0], axisz[1], axisz[2], -axisz.dot(triangle[0]),
             0, 0, 0, 1;
         return { matFor,matInv };
     }

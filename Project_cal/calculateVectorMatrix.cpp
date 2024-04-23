@@ -53,15 +53,15 @@ std::array<Eigen::Matrix4d, 2> eigen::getRelativeMatrixByProjectionPlane(const E
 	Vector3d axisy = axisz.cross(axisx);
 	Matrix4d matFor, matInv;// = Eigen::Affine3d::Identity();
 	//mat.setByOriginAndVectors();
-	matFor << //forword matrix
+	matFor << //forword matrix = T*R
 		axisx[0], axisy[0], axisz[0], origin[0],
 		axisx[1], axisy[1], axisz[1], origin[1],
 		axisx[2], axisy[2], axisz[2], origin[2],
 		0, 0, 0, 1;
-	matInv << //inverse matrix, transpose and negation
-		axisx[0], axisx[1], axisx[2], -origin[0],
-		axisy[0], axisy[1], axisy[2], -origin[1],
-		axisz[0], axisz[1], axisz[2], -origin[2],
+	matInv << // R^-1 * T^-1
+		axisx[0], axisx[1], axisx[2], -axisx.dot(origin),
+		axisy[0], axisy[1], axisy[2], -axisy.dot(origin),
+		axisz[0], axisz[1], axisz[2], -axisz.dot(origin),
 		0, 0, 0, 1;
 	return { matFor,matInv };
 }
@@ -74,10 +74,14 @@ std::array<Eigen::Matrix4d, 2> eigen::getRelativeMatrixByProjectionPlane(const P
 Eigen::Matrix4d eigen::inverseOrth(const Eigen::Matrix4d& mat)
 {
 	Matrix4d matInv;
+    Vector4d n = mat.col(0);
+    Vector4d o = mat.col(1);
+    Vector4d a = mat.col(2);
+    Vector4d p = mat.col(3);
 	matInv<<
-		mat(0, 0), mat(1, 0), mat(2, 0), -mat(0, 3),
-		mat(0, 1), mat(1, 1), mat(2, 1), -mat(1, 3),
-		mat(0, 2), mat(1, 2), mat(2, 2), -mat(2, 3),
+		mat(0, 0), mat(1, 0), mat(2, 0), -n.dot(p),
+		mat(0, 1), mat(1, 1), mat(2, 1), -o.dot(p),
+		mat(0, 2), mat(1, 2), mat(2, 2), -a.dot(p),
 		0, 0, 0, 1;
 	return matInv;
 }
