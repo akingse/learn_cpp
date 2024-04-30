@@ -1010,6 +1010,46 @@ bool isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& 
 	return true;
 }
 
+//for shield record, 
+bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB)
+{
+	std::array<Eigen::Vector2d, 6> edgesAB = {
+		triA[1] - triA[0],
+		triA[2] - triA[1],
+		triA[0] - triA[2],
+		triB[1] - triB[0],
+		triB[2] - triB[1],
+		triB[0] - triB[2], };
+	for (auto& axis : edgesAB)
+		axis = Vector2d(-axis[1], axis[0]); //rotz(pi/2)
+	// Check for overlap along each axis
+	double minA, maxA, minB, maxB, projection;
+	for (const auto& axis : edgesAB) //fast than index
+	{
+		//if (axis.isZero()) //degeneracy triangle, regard as not shield
+		//	continue;
+		minA = DBL_MAX;
+		maxA = -DBL_MAX;
+		minB = DBL_MAX;
+		maxB = -DBL_MAX;
+		for (const auto& vertex : triA) //fast than list
+		{
+			projection = axis.dot(vertex - triA[0]);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
+		}
+		for (const auto& vertex : triB)
+		{
+			projection = axis.dot(vertex- triA[0]);
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		if (maxA <= minB || maxB <= minA) //contact, regard as not shield
+			return false;
+	}
+	return true;
+}
+
 bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {
 	std::array<Eigen::Vector3d, 3> edgesA = { 

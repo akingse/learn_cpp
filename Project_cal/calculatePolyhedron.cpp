@@ -2,7 +2,7 @@
 #include "calculatePolyhedron.h"
 using namespace std;
 using namespace Eigen;
-using namespace games;
+//using namespace games;
 using namespace clash;
 //static constexpr double eps_d = 10 * DBL_EPSILON; // double
 static const Triangle gTriXOY = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(1,0,0), Eigen::Vector3d(0,1,0) };

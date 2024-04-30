@@ -7,12 +7,12 @@ bool accura::isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, c
 {
 	// bounding-box been judged
 	std::array<Eigen::Vector2d, 6> edgesAB = {
-        (triA[1] - triA[0]).normalized(),
-		(triA[2] - triA[1]).normalized(),
-		(triA[0] - triA[2]).normalized(),
-		(triB[1] - triB[0]).normalized(),
-		(triB[2] - triB[1]).normalized(),
-		(triB[0] - triB[2]).normalized() };
+        triA[1] - triA[0],
+		triA[2] - triA[1],
+		triA[0] - triA[2],
+		triB[1] - triB[0],
+		triB[2] - triB[1],
+		triB[0] - triB[2] };
 	std::array<Vector2d, 3> triA_R, triB_R; //using relative coordinate
 	double precision = 0; // using max-coord k as coeff
 	for (int i = 0; i < 3; ++i)
@@ -26,23 +26,24 @@ bool accura::isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, c
 	for (auto& iter : edgesAB)
 		iter = Vector2d(-iter[1], iter[0]); //rotz(pi/2)
 	double minA, maxA, minB, maxB, projection;
-	for (const auto& axis : edgesAB)
+	for (auto& axis : edgesAB)
 	{
 		if (axis.isZero(toleAngle)) //degeneracy triangle
 			continue;
+		axis.normalize();
 		minA = DBL_MAX;
 		maxA = -DBL_MAX;
 		minB = DBL_MAX;
 		maxB = -DBL_MAX;
 		for (const auto& vertex : triA_R)
 		{
-			projection = axis.dot(vertex);
+			projection = axis.dot(vertex - triA[0]);
 			minA = std::min(minA, projection);
 			maxA = std::max(maxA, projection);
 		}
 		for (const auto& vertex : triB_R)
 		{
-			projection = axis.dot(vertex);
+			projection = axis.dot(vertex - triA[0]);
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
@@ -56,7 +57,7 @@ bool accura::isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, c
 bool accura::isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB, 
 	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB, double toleDist, double toleAngle)
 {
-	// bounding-box been judged
+	// bounding-box been judged, both triangle is legal
 	std::array<Eigen::Vector3d, 3> edgesA = {
 		(triA[1] - triA[0]).normalized(),
 		(triA[2] - triA[1]).normalized(),
@@ -174,7 +175,7 @@ bool accura::isPointInTriangle(const Eigen::Vector2d& point, const std::array<Ei
 		-precision < std::min(std::min(trigonR[0][1], trigonR[1][1]), trigonR[2][1]) ||
 		precision > std::max(std::max(trigonR[0][1], trigonR[1][1]), trigonR[2][1])) //box judge
 		return false;
-	// been exlude vector parallel
+	// been legal judge, no zero vector
 	Eigen::Vector2d v0 = (trigon[1] - trigon[0]).normalized();
 	Eigen::Vector2d v1 = (trigon[2] - trigon[1]).normalized();
 	Eigen::Vector2d v2 = (trigon[0] - trigon[2]).normalized();

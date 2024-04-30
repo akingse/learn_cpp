@@ -194,7 +194,7 @@ namespace eigen
 
     struct ContourPart
     {
-        long long m_index; // mesh index
+        long long m_index; // mesh index, global unique
         int m_number; // graphic index
 		//uint64_t m_entityid = -2; // record belong to same polyface
         OcclusionState m_visible = OcclusionState::EXPOSED;
