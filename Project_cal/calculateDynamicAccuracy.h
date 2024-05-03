@@ -25,10 +25,11 @@ namespace accura
         Eigen::AlignedBox3d m_modelBox3d; // in relative coordinate
         int m_precision = 0; //current precision
         Eigen::Vector3d m_relaOrigin = Eigen::Vector3d(0, 0, 0); //relative origin point
-        double m_toleAngle = M_PI / 1080; //0.003
-        double m_toleDist = 1e-5;
-        double m_toleArea = 1e-4;
-        double m_toleFixed = 1e-8;
+        const double m_toleAngle = M_PI / 1080; //0.003
+        const double m_toleDist = 1e-5;
+        const double m_toleArea = 1e-4;
+        const double m_toleFixed = 1e-8;
+        double m_toleMerge2 = 0.0; //record square
         inline int getDynamicPrecision()
         {
             if (m_modelBox3d.isEmpty())
@@ -45,17 +46,20 @@ namespace accura
             m_precision = std::min(maxPrec, MAX_DECIMAL_PRECISION);
             return m_precision;
         }
-        inline double eps() //const
+        //inline double eps() //const
+        //{
+        //    int precision = getDynamicPrecision();
+        //    return std::pow(10.0, -precision + 1);
+        //}
+        //inline double epsArea() //const //for area
+        //{
+        //    int precision = getDynamicPrecision();
+        //    return std::pow(10.0, -precision + 3);
+        //}
+        inline void setMergeTolerance(const double toleMerge) //to merge duplicate points
         {
-            int precision = getDynamicPrecision();
-            return std::pow(10.0, -precision + 1);
+            m_toleMerge2 = toleMerge * toleMerge;
         }
-        inline double epsArea() //const //for area
-        {
-            int precision = getDynamicPrecision();
-            return std::pow(10.0, -precision + 3);
-        }
-
     private:
         GlobalAccuracy() = default;
         GlobalAccuracy(const GlobalAccuracy&) = delete;
