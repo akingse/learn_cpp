@@ -16,7 +16,7 @@ using namespace std::chrono;
 namespace clash
 {
 	//两平面求交
-	PosVec3d getIntersectLineOfTwoPlane(const Plane3d& planeA, const Plane3d& planeB)
+	PosVec3d _getIntersectLineOfTwoPlane(const Plane3d& planeA, const Plane3d& planeB)
 	{
 		if (isParallel3d(planeA.normal(), planeB.normal()))
 		{

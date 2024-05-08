@@ -82,11 +82,22 @@ static int _test2()
     return 0;
 }
 
+int fun()
+{
+    static int num = 16; 
+    return num--;
+}
+int _test3() {
+    for (fun(); fun(); fun())
+        printf("%d", fun()); //14 11 8 5 2
+    return 0;
+}
+
 
 static int enrol = []()->int
     {
-        _test2();
-
+        //_test2();
+        _test3();
         cout << "test_interview finished.\n" << endl;
         return 0;
     }();

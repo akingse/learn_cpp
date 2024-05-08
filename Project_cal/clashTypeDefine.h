@@ -190,6 +190,9 @@ namespace eigen
             //return m_area < rhs.m_area;
 #endif
         }
+#ifdef FILL_PROFILE_DEBUG_TEMP
+        double min_angle = 1.0; //rad
+#endif
     };
 
     struct ContourPart
