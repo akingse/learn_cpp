@@ -84,6 +84,7 @@ static int _test2()
 
 int fun()
 {
+    int i = (1, 2, 0);
     static int num = 16; 
     return num--;
 }
@@ -93,11 +94,53 @@ int _test3() {
     return 0;
 }
 
+#include <iostream>
+#include <iomanip>
+
+int _test4() {
+    int n;
+    std::cout << "请输入一个整数 n：";
+    std::cin >> n;
+    for (int i = 1; i <= n; ++i) 
+    {
+        for (int j = 1; j <= n; ++j) 
+        {
+            if (j <= n - i) {
+                std::cout << ".";
+            }
+            else {
+                std::cout << "*";
+            }
+        }
+        std::cout << std::endl;
+    }
+    return 0;
+}
+
+struct Node {
+    int value;
+    int parent;
+    std::vector<int> children;
+};
+
+int getOddSum(const std::unordered_map<int, Node>& nodes, int node) 
+{
+    int sum = 0;
+    for (int child : nodes.at(node).children) 
+        sum += getOddSum(nodes, child);
+    
+    if (nodes.at(node).value % 2 != 0) 
+        sum += nodes.at(node).value;
+    
+    return sum;
+}
+
 
 static int enrol = []()->int
     {
         //_test2();
-        _test3();
+        //_test3();
+        _test4();
         cout << "test_interview finished.\n" << endl;
         return 0;
     }();

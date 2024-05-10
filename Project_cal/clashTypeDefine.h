@@ -183,6 +183,7 @@ namespace eigen
         //std::vector<std::array<int, 2>> m_shielded;
         std::vector<long long> m_shielded;
         std::vector<std::vector<Eigen::Vector2d>> m_contour; //the profile of this trigon after clipper
+        std::vector<size_t> m_findInter;
         bool operator<(const TrigonPart& rhs) const
         {
             return m_index < rhs.m_index;

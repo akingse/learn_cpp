@@ -222,7 +222,7 @@ BVHTree2d::BVHTree2d(const std::vector<ContourPart>& profiles)
 	m_tree = _createTree2d(polygons);
 }
 
-std::vector<size_t> BVHTree2d::findIntersect(const RectBase2d& rect)
+std::vector<size_t> BVHTree2d::findIntersect(const RectBase2d& rect) const
 {
 	//if (m_tree == nullptr)
 	//	return {}; //test whether is working
@@ -249,7 +249,7 @@ std::vector<size_t> BVHTree2d::findIntersect(const RectBase2d& rect)
 	return indexes;
 }
 
-std::vector<size_t> BVHTree2d::findIntersect(const Polygon2d& polygon)
+std::vector<size_t> BVHTree2d::findIntersect(const Polygon2d& polygon) const
 {
 	if (m_tree == nullptr || !polygon.isValid())
 		return {}; //test whether is working
@@ -276,7 +276,7 @@ std::vector<size_t> BVHTree2d::findIntersect(const Polygon2d& polygon)
 	return indexes;
 }
 
-std::vector<size_t> BVHTree2d::findIntersect(const TrigonPart& trigon)
+std::vector<size_t> BVHTree2d::findIntersect(const TrigonPart& trigon) const
 {
 	if (m_tree == nullptr)
 		return {}; //test whether is working
@@ -305,7 +305,7 @@ std::vector<size_t> BVHTree2d::findIntersect(const TrigonPart& trigon)
 	return indexes;
 }
 
-std::vector<size_t> BVHTree2d::findIntersectOpLess(const TrigonPart& trigon)
+std::vector<size_t> BVHTree2d::findIntersectOpLess(const TrigonPart& trigon) const
 {
 	if (m_tree == nullptr)
 		return {}; //test whether is working
@@ -334,7 +334,7 @@ std::vector<size_t> BVHTree2d::findIntersectOpLess(const TrigonPart& trigon)
 	return indexes;
 }
 
-std::vector<size_t> BVHTree2d::findIntersect(const ContourPart& profile)
+std::vector<size_t> BVHTree2d::findIntersect(const ContourPart& profile) const
 {
 	if (m_tree == nullptr || profile.isEmpty())
 		return {}; //test whether is working

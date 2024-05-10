@@ -161,11 +161,11 @@ public:
 	{
 		return m_tree;
 	}
-	std::vector<size_t> findIntersect(const clash::RectBase2d& rect); // for RectBase2d
-	std::vector<size_t> findIntersect(const clash::Polygon2d& polygon); //searchFromTree
-	std::vector<size_t> findIntersect(const eigen::ContourPart& profile);
-	std::vector<size_t> findIntersectOpLess(const eigen::TrigonPart& trigon);//operator less
-	std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon); 
+	std::vector<size_t> findIntersect(const clash::RectBase2d& rect) const; // for RectBase2d
+	std::vector<size_t> findIntersect(const clash::Polygon2d& polygon) const; //searchFromTree
+	std::vector<size_t> findIntersect(const eigen::ContourPart& profile) const;
+	std::vector<size_t> findIntersectOpLess(const eigen::TrigonPart& trigon) const;//operator less
+	std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon) const;
 };
 
 //----------------------------------------------------------------------------------------------------------------
@@ -237,7 +237,7 @@ public:
 	bool remove(const clash::Polyface3d& polyface); //find by polyface index
 	bool update(const clash::Polyface3d& polyface); //using polyface self index
 	std::vector<size_t> findIntersect(const clash::Polyface3d& polyface, double tolerance = 0.0) const; //searchFromTree
-	std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon);
+	std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon) const;
 	std::vector<std::tuple<size_t, bool>> findIntersectClash(const clash::Polyface3d& polyface) const; // bool means soft-clash
 	std::vector<std::tuple<size_t, bool>> findIntersectClash(const clash::Polyface3d& polyface, double tolerance) const; //custom tolerance
 };
