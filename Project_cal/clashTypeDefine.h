@@ -165,11 +165,11 @@ enum class FrontState :int
 
 namespace eigen
 {
-    typedef std::array<Eigen::Vector2d, 3> TrigonEigen;
+    //typedef std::array<Eigen::Vector2d, 3> TrigonEigen;
     typedef std::vector<std::vector<Eigen::Vector2d>> PathsEigen; //ContourProfile
     struct TrigonPart
     {
-        long long m_index;
+        int m_index;
         OcclusionState m_visible = OcclusionState::EXPOSED;
         double m_area = -1;
         std::array<int, 3> m_number; // mesh index | triangle index | graphic index
@@ -181,9 +181,9 @@ namespace eigen
         // profile boolean operation
         //std::vector<std::array<int, 2>> m_intersect;
         //std::vector<std::array<int, 2>> m_shielded;
-        std::vector<long long> m_shielded;
+        std::vector<int> m_shielded;
         std::vector<std::vector<Eigen::Vector2d>> m_contour; //the profile of this trigon after clipper
-        std::vector<size_t> m_findInter;
+        std::vector<int> m_preInter;
         bool operator<(const TrigonPart& rhs) const
         {
             return m_index < rhs.m_index;
@@ -198,14 +198,14 @@ namespace eigen
 
     struct ContourPart
     {
-        long long m_index; // mesh index, global unique
+        int m_index; // mesh index, global unique
         int m_number; // graphic index
 		//uint64_t m_entityid = -2; // record belong to same polyface
         OcclusionState m_visible = OcclusionState::EXPOSED;
         Eigen::AlignedBox3d m_box3d; //to judge front
         Eigen::AlignedBox2d m_box2d; // contained in box3d
         double m_area = -1;
-        std::vector<long long> m_shielded;
+        std::vector<int> m_shielded;
         std::vector<std::vector<Eigen::Vector2d>> m_profile; //fillArea, the boolean result
         std::vector<std::vector<Eigen::Vector2d>> m_contour; //contour of mesh
         std::vector<TrigonPart> m_trigons; //to judge front

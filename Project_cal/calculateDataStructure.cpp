@@ -222,11 +222,11 @@ BVHTree2d::BVHTree2d(const std::vector<ContourPart>& profiles)
 	m_tree = _createTree2d(polygons);
 }
 
-std::vector<size_t> BVHTree2d::findIntersect(const RectBase2d& rect) const
+std::vector<int> BVHTree2d::findIntersect(const RectBase2d& rect) const
 {
 	//if (m_tree == nullptr)
 	//	return {}; //test whether is working
-	std::vector<size_t> indexes;
+	std::vector<int> indexes;
 	std::function<void(const shared_ptr<BVHNode2d>&)> _searchTree = [&](const shared_ptr<BVHNode2d>& node)->void
 	{
 		//using recursion

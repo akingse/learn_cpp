@@ -100,7 +100,7 @@ int _test3() {
 int _test4() {
     int n;
     std::cout << "请输入一个整数 n：";
-    std::cin >> n;
+    //std::cin >> n;
     for (int i = 1; i <= n; ++i) 
     {
         for (int j = 1; j <= n; ++j) 
@@ -135,12 +135,18 @@ int getOddSum(const std::unordered_map<int, Node>& nodes, int node)
     return sum;
 }
 
+int _test5()
+{
+    vector<int> a;
+    int* pa = a.data(); //null
+    return 0;
+}
 
 static int enrol = []()->int
     {
         //_test2();
         //_test3();
-        _test4();
+        _test5();
         cout << "test_interview finished.\n" << endl;
         return 0;
     }();

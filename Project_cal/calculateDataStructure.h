@@ -131,7 +131,7 @@ struct BVHNode2d
 	Eigen::AlignedBox2d m_bound;  // 
 	std::shared_ptr<BVHNode2d> m_left;	//BVHNode2d* m_left;  
 	std::shared_ptr<BVHNode2d> m_right; //BVHNode2d* m_right; 
-	long long m_index = -1; // the middle node's index
+	int m_index = -1; // the middle node's index
 #ifdef TEST_CALCULATION_DEBUG
 	// other data
 	//std::array<int, 2> m_index2 = { -1,-1 }; //for TrigonPart
@@ -161,7 +161,7 @@ public:
 	{
 		return m_tree;
 	}
-	std::vector<size_t> findIntersect(const clash::RectBase2d& rect) const; // for RectBase2d
+	std::vector<int> findIntersect(const clash::RectBase2d& rect) const; // for RectBase2d
 	std::vector<size_t> findIntersect(const clash::Polygon2d& polygon) const; //searchFromTree
 	std::vector<size_t> findIntersect(const eigen::ContourPart& profile) const;
 	std::vector<size_t> findIntersectOpLess(const eigen::TrigonPart& trigon) const;//operator less
