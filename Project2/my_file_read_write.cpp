@@ -361,6 +361,7 @@ std::vector<ModelMesh> read_ModelMesh(const std::string& fileName)
 			auto _min = Eigen::Vector3d(mesh->aabb_min()->x(), mesh->aabb_min()->y(), mesh->aabb_min()->z());
 			auto _max = Eigen::Vector3d(mesh->aabb_max()->x(), mesh->aabb_max()->y(), mesh->aabb_max()->z());
 			std::vector<Eigen::Vector3d> vbo_;
+			std::vector<Eigen::Vector2d> vbo2_;
 			std::vector<Eigen::Vector3d> fno_;
 			std::vector<std::array<int, 3>> ibo_;
 			for (int i = 0; i < vbo->vbos()->size(); i++)
@@ -387,7 +388,7 @@ std::vector<ModelMesh> read_ModelMesh(const std::string& fileName)
 			bool convex = mesh->convex();
 			int genus = mesh->genus();
 #ifdef CLASH_DETECTION_DEBUG_TEMP
-			res.push_back(ModelMesh{ vbo_, ibo_, fno_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(), convex, genus, _iboRaw, mesh->entityid() });
+			res.push_back(ModelMesh{ vbo_, vbo2_, ibo_, fno_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(), convex, genus, _iboRaw, mesh->entityid() });
 #else
 			//res.push_back(ModelMesh{ vbo_, ibo_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(),mesh->convex()});
 #endif

@@ -50,7 +50,7 @@ int kthSmallest(int arr[], int l, int r, int k)
 
 #ifdef RESERVE_USING_POLYGON2D
 //size_t Polygon2d::m_id = 0;
-std::shared_ptr<BVHNode2d> _createTree2d(std::vector<RectBase2d>& rectVct, int dimension)
+std::unique_ptr<BVHNode2d> _createTree2d(std::vector<RectBase2d>& rectVct, int dimension)
 {
 	auto _getTotalBounding = [&rectVct]()->Eigen::AlignedBox2d
 	{
@@ -67,7 +67,7 @@ std::shared_ptr<BVHNode2d> _createTree2d(std::vector<RectBase2d>& rectVct, int d
 	if (rectVct.empty()) //no chance
 		return nullptr;
 	//int direction = dimension % 2;  // the direction of xy, x=0/y=1
-	std::shared_ptr<BVHNode2d> currentNode = std::make_shared<BVHNode2d>();
+	std::unique_ptr<BVHNode2d> currentNode = std::make_unique<BVHNode2d>();
 	if (rectVct.size() != 1) //middle node
 	{
 		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);  
@@ -103,7 +103,7 @@ BVHTree2d::BVHTree2d(const std::vector<RectBase2d>& _rectVct)
 }
 
 //sort the input polygons
-std::shared_ptr<BVHNode2d> _createTree2d(std::vector<Polygon2d>& polygons, int dimension = 0)
+std::unique_ptr<BVHNode2d> _createTree2d(std::vector<Polygon2d>& polygons, int dimension = 0)
 {
 	auto _getTotalBounding = [&polygons](/*const std::vector<Polygon2d>& polygons*/)->Eigen::AlignedBox2d
 	{
@@ -118,7 +118,7 @@ std::shared_ptr<BVHNode2d> _createTree2d(std::vector<Polygon2d>& polygons, int d
 	if (polygons.empty()) //no chance
 		return nullptr;
 	int direction = dimension % 2;  // the direction of xy, x=0/y=1
-	std::shared_ptr<BVHNode2d> currentNode = std::make_shared<BVHNode2d>();
+	std::unique_ptr<BVHNode2d> currentNode = std::make_unique<BVHNode2d>();
 	if (polygons.size() != 1) //middle node
 	{
 		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);  
@@ -143,7 +143,9 @@ std::shared_ptr<BVHNode2d> _createTree2d(std::vector<Polygon2d>& polygons, int d
 		currentNode->m_right = nullptr;
 		currentNode->m_index = polygons[0].m_index;
 	}
+#ifdef TEST_BVHNODE_DIMENSION_DEBUG
 	currentNode->m_dimension = direction; //record the xy direciton, alse canbe depth, then use depth % 2
+#endif
 	return currentNode;
 }
 
@@ -154,7 +156,7 @@ BVHTree2d::BVHTree2d(const std::vector<Polygon2d>& _polygons/*, int depth = 0*/)
 }
 
 //template<class T>
-std::shared_ptr<BVHNode2d> _createTree2d(std::vector<TrigonPart>& triangles, int dimension = 0)
+std::unique_ptr<BVHNode2d> _createTree2d(std::vector<TrigonPart>& triangles, int dimension = 0)
 {
 	auto _getTotalBounding = [&triangles](/*const std::vector<TrigonPart>& polygons*/)->Eigen::AlignedBox2d
 	{
@@ -171,7 +173,7 @@ std::shared_ptr<BVHNode2d> _createTree2d(std::vector<TrigonPart>& triangles, int
 	if (triangles.empty()) //no chance
 		return nullptr;
 	int direction = dimension % 2;  // the direction of xy, x=0/y=1
-	std::shared_ptr<BVHNode2d> currentNode = std::make_shared<BVHNode2d>();
+	std::unique_ptr<BVHNode2d> currentNode = std::make_unique<BVHNode2d>();
 	if (triangles.size() != 1) //middle node
 	{
 		currentNode->m_bound = _getTotalBounding();
@@ -197,7 +199,9 @@ std::shared_ptr<BVHNode2d> _createTree2d(std::vector<TrigonPart>& triangles, int
 		currentNode->m_right = nullptr;
 		currentNode->m_index = triangles[0].m_index;
 	}
+#ifdef TEST_BVHNODE_DIMENSION_DEBUG
 	currentNode->m_dimension = direction; //record the xy direciton, alse canbe depth, then use depth % 2
+#endif
 	return currentNode;
 }
 
@@ -227,7 +231,7 @@ std::vector<int> BVHTree2d::findIntersect(const RectBase2d& rect) const
 	//if (m_tree == nullptr)
 	//	return {}; //test whether is working
 	std::vector<int> indexes;
-	std::function<void(const shared_ptr<BVHNode2d>&)> _searchTree = [&](const shared_ptr<BVHNode2d>& node)->void
+	std::function<void(const unique_ptr<BVHNode2d>&)> _searchTree = [&](const unique_ptr<BVHNode2d>& node)->void
 	{
 		//using recursion
 		if (node->m_bound.intersects(rect.m_bound))
@@ -249,12 +253,60 @@ std::vector<int> BVHTree2d::findIntersect(const RectBase2d& rect) const
 	return indexes;
 }
 
+std::vector<int> BVHTree2d::findIntersect(const AlignedBox2d& box) const
+{
+	std::vector<int> indexes;
+	std::function<void(const unique_ptr<BVHNode2d>&)> _searchTree = [&](const unique_ptr<BVHNode2d>& node)->void
+		{
+			//using recursion
+			if (node->m_bound.intersects(box))
+			{
+				if (node->m_index != -1)
+				{
+					indexes.push_back(node->m_index);
+				}
+				else // isnot leaf node
+				{
+					_searchTree(node->m_left);
+					_searchTree(node->m_right);
+				}
+				return;
+			}
+		};
+	_searchTree(m_tree);
+	return indexes;
+}
+
+std::vector<int> BVHTree2d::findIntersect(const Eigen::Vector2d& point) const
+{
+	std::vector<int> indexes;
+	std::function<void(const unique_ptr<BVHNode2d>&)> _searchTree = [&](const unique_ptr<BVHNode2d>& node)->void
+	{
+		//using recursion
+		if (node->m_bound.contains(point))
+		{
+			if (node->m_index != -1)
+			{
+				indexes.push_back(node->m_index);
+			}
+			else // isnot leaf node
+			{
+				_searchTree(node->m_left);
+				_searchTree(node->m_right);
+			}
+			return;
+		}
+	};
+	_searchTree(m_tree);
+	return indexes;
+}
+
 std::vector<size_t> BVHTree2d::findIntersect(const Polygon2d& polygon) const
 {
 	if (m_tree == nullptr || !polygon.isValid())
 		return {}; //test whether is working
 	std::vector<size_t> indexes;
-	std::function<void(const shared_ptr<BVHNode2d>&)> _searchTree = [&](const shared_ptr<BVHNode2d>& node)->void
+	std::function<void(const unique_ptr<BVHNode2d>&)> _searchTree = [&](const unique_ptr<BVHNode2d>& node)->void
 	{
 		//using recursion
 		if (node->m_bound.intersects(polygon.bounding()))
@@ -281,7 +333,7 @@ std::vector<size_t> BVHTree2d::findIntersect(const TrigonPart& trigon) const
 	if (m_tree == nullptr)
 		return {}; //test whether is working
 	std::vector<size_t> indexes;
-	std::function<void(const shared_ptr<BVHNode2d>&)> _searchTree = [&](const shared_ptr<BVHNode2d>& node)->void
+	std::function<void(const unique_ptr<BVHNode2d>&)> _searchTree = [&](const unique_ptr<BVHNode2d>& node)->void
 	{
 		//using recursion
 		if (node->m_bound.intersects(trigon.m_box2d))
@@ -310,7 +362,7 @@ std::vector<size_t> BVHTree2d::findIntersectOpLess(const TrigonPart& trigon) con
 	if (m_tree == nullptr)
 		return {}; //test whether is working
 	std::vector<size_t> indexes;
-	std::function<void(const shared_ptr<BVHNode2d>&)> _searchTree = [&](const shared_ptr<BVHNode2d>& node)->void
+	std::function<void(const unique_ptr<BVHNode2d>&)> _searchTree = [&](const unique_ptr<BVHNode2d>& node)->void
 	{
 		//using recursion
 		if (node->m_bound.intersects(trigon.m_box2d))
@@ -342,7 +394,7 @@ std::vector<size_t> BVHTree2d::findIntersect(const ContourPart& profile) const
 	//const Vector3d& min = profile.m_box3d.min();
 	//const Vector3d& max = profile.m_box3d.max();
 	//AlignedBox2d bound = AlignedBox2d(Vector2d(min[0], min[1]), Vector2d(max[0], max[1]));
-	std::function<void(const shared_ptr<BVHNode2d>&)> _searchTree = [&](const shared_ptr<BVHNode2d>& node)->void
+	std::function<void(const unique_ptr<BVHNode2d>&)> _searchTree = [&](const unique_ptr<BVHNode2d>& node)->void
 	{
 		//using recursion
 		if (node->m_bound.intersects(profile.m_box2d))

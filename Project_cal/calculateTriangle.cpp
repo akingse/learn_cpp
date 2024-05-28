@@ -69,6 +69,18 @@ bool clash::isPointInTriangle(const Vector2d& point, const std::array<Vector2d, 
 #endif
 }
 
+bool clash::isPointInTriangleCCW(const Vector2d& point, const std::array<Vector2d, 3>& trigon) // 2D
+{
+	// using isLeft test
+	const Vector2d& p0 = trigon[0];
+	const Vector2d& p1 = trigon[1];
+	const Vector2d& p2 = trigon[2];
+	return
+		0.0 <= ((p1[0] - p0[0]) * (point[1] - p0[1]) - (point[0] - p0[0]) * (p1[1] - p0[1])) &&
+		0.0 <= ((p2[0] - p1[0]) * (point[1] - p1[1]) - (point[0] - p1[0]) * (p2[1] - p1[1])) &&
+		0.0 <= ((p0[0] - p2[0]) * (point[1] - p2[1]) - (point[0] - p2[0]) * (p0[1] - p2[1]));
+}
+
 // using Barycentric Coordinates
 bool isPointInTriangleBC(const Vector2d& point, const std::array<Vector2d, 3>& triangle)
 {

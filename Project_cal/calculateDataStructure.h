@@ -116,7 +116,7 @@ namespace clash
 		long long m_index = -1; // the index in the vector container
 		Eigen::AlignedBox3d m_bound;  // current polyface bounding box
 #ifdef CLASH_DETECTION_DEBUG_TEMP
-		UnifiedIdentify m_identify; // extra information
+		//UnifiedIdentify m_identify; // extra information
 #endif
 	};
 
@@ -129,10 +129,10 @@ namespace clash
 struct BVHNode2d
 {
 	Eigen::AlignedBox2d m_bound;  // 
-	std::shared_ptr<BVHNode2d> m_left;	//BVHNode2d* m_left;  
-	std::shared_ptr<BVHNode2d> m_right; //BVHNode2d* m_right; 
+	std::unique_ptr<BVHNode2d> m_left;	//BVHNode2d* m_left;  
+	std::unique_ptr<BVHNode2d> m_right; //BVHNode2d* m_right; 
 	int m_index = -1; // the middle node's index
-#ifdef TEST_CALCULATION_DEBUG
+#ifdef TEST_BVHNODE_DIMENSION_DEBUG
 	// other data
 	//std::array<int, 2> m_index2 = { -1,-1 }; //for TrigonPart
 	size_t m_dimension = 0; // also means m_depth
@@ -149,7 +149,7 @@ struct BVHNode2d
 class BVHTree2d
 {
 private:
-	std::shared_ptr<BVHNode2d> m_tree;
+	std::unique_ptr<BVHNode2d> m_tree;
 public:
 	BVHTree2d() = delete;
 	BVHTree2d(const BVHTree2d&) = delete;
@@ -157,15 +157,19 @@ public:
 	BVHTree2d(const std::vector<clash::Polygon2d>& polygons);
 	BVHTree2d(const std::vector<eigen::TrigonPart>& triangles);
 	BVHTree2d(const std::vector<eigen::ContourPart>& profiles);
-	std::shared_ptr<BVHNode2d> get() const
-	{
-		return m_tree;
-	}
+	//std::unique_ptr<BVHNode2d> get() const
+	//{
+	//	return m_tree;
+	//}
 	std::vector<int> findIntersect(const clash::RectBase2d& rect) const; // for RectBase2d
 	std::vector<size_t> findIntersect(const clash::Polygon2d& polygon) const; //searchFromTree
 	std::vector<size_t> findIntersect(const eigen::ContourPart& profile) const;
 	std::vector<size_t> findIntersectOpLess(const eigen::TrigonPart& trigon) const;//operator less
 	std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon) const;
+	//for grid ray only
+	std::vector<int> findIntersect(const Eigen::Vector2d& point) const;
+	std::vector<int> findIntersect(const Eigen::AlignedBox2d& box) const;
+
 };
 
 //----------------------------------------------------------------------------------------------------------------
@@ -240,6 +244,7 @@ public:
 	std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon) const;
 	std::vector<std::tuple<size_t, bool>> findIntersectClash(const clash::Polyface3d& polyface) const; // bool means soft-clash
 	std::vector<std::tuple<size_t, bool>> findIntersectClash(const clash::Polyface3d& polyface, double tolerance) const; //custom tolerance
+	//for grid ray only
 };
 
 //--------------------------------------------------------------------------------------------------

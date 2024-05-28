@@ -4,6 +4,7 @@
 struct ModelMesh
 {
     std::vector<Eigen::Vector3d> vbo_;
+    std::vector<Eigen::Vector2d> vbo2_;
     std::vector<std::array<int, 3>> ibo_;
     std::vector<Eigen::Vector3d> fno_; //Face Normal
     Eigen::AlignedBox3d bounding_;
@@ -15,6 +16,13 @@ struct ModelMesh
     uint64_t index_ = UINT64_MAX;// ULLONG_MAX; // record belong to same polyface
     //uint64_t instanceid = 0; //0 means not instance
 //#endif
+    inline void to2d()
+    {
+        vbo2_.resize(vbo_.size());
+#pragma omp parallel for schedule(dynamic)
+        for (int i = 0; i < vbo2_.size(); ++i)
+            vbo2_[i] = Eigen::Vector2d(vbo_[i][0], vbo_[i][1]);
+    }
 };
 static const ModelMesh gMeshEmpty = {};
 
@@ -151,6 +159,7 @@ enum class OcclusionState :int //means cover
     OCCLUSION, //shielded+intersect
     DEGENERACY, // become segment
     UNKNOWN,
+    USING_CUDA,
 };
 
 enum class FrontState :int
@@ -172,7 +181,7 @@ namespace eigen
         int m_index;
         OcclusionState m_visible = OcclusionState::EXPOSED;
         double m_area = -1;
-        std::array<int, 3> m_number; // mesh index | triangle index | graphic index
+        std::array<int, 4> m_number; // mesh index | triangle index | graphic index | polyface index
         Eigen::AlignedBox3d m_box3d;
         Eigen::AlignedBox2d m_box2d;
         Eigen::Vector3d m_normal; //normal of m_triangle3d, always upward
