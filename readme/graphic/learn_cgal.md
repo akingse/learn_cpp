@@ -175,10 +175,14 @@ set(Qt5_DIR "C:/Qt/5.15.2/msvc2019_64/lib/cmake/Qt5")
 ### 使用vcpkg源码安装第三方库
 
 ```shell
+指定路径 D:\Alluser\akingse\TPL
+克隆 git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg
 编译vcpkg
-bootstrap-vcpkg.bat
+.\bootstrap-vcpkg.bat
 集成到全局
-vcpkg integrate install
+.\vcpkg integrate install
+.\vcpkg.exe integrate install 
 安装各种库
 .\vcpkg.exe install sophus:x64-windows
 .\vcpkg.exe install g2o:x64-windows --x-use-aria2

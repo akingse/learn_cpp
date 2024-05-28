@@ -10,8 +10,8 @@ int main_geo()
 	Cone cone4(0, 4);
 	cone4.set_h(0);
 	double h = cone3.get_h();
-	ToGeCone::sm_coneMap;
-	ToGeCone::sm_totalCount;
+	//ToGeCone::sm_coneMap;
+	//ToGeCone::sm_totalCount;
 	Vec3d vec;
 
 	//test 局部变量析构
