@@ -416,6 +416,64 @@ std::vector<size_t> BVHTree2d::findIntersect(const ContourPart& profile) const
 	return indexes;
 }
 
+std::unique_ptr<BVHNode2dM> _createTree2dM(std::vector<RectBase2d>& rectVct)
+{
+	auto _getTotalBounding = [&rectVct]()->Eigen::AlignedBox2d
+		{
+			AlignedBox2d fullBox;
+			for (const auto& iter : rectVct)
+				fullBox.extend(iter.m_bound);
+			return fullBox;
+		};
+	auto _getLongest = [](const AlignedBox2d& box)->int
+		{
+			Vector2d size = box.sizes();
+			return (size[0] < size[1]) ? 1 : 0;
+		};
+	if (rectVct.empty()) //no chance
+		return nullptr;
+	//int direction = dimension % 2;  // the direction of xy, x=0/y=1
+	std::unique_ptr<BVHNode2dM> currentNode = std::make_unique<BVHNode2dM>();
+	currentNode->m_bound = _getTotalBounding();
+	if (_getLongest(currentNode->m_bound) == 0)//min fast than center
+		std::sort(rectVct.begin(), rectVct.end(), [](const RectBase2d& a, const RectBase2d& b)
+			{ return a.m_bound.min()[0] < b.m_bound.min()[0]; });//x
+	else
+		std::sort(rectVct.begin(), rectVct.end(), [](const RectBase2d& a, const RectBase2d& b)
+			{ return a.m_bound.min()[1] < b.m_bound.min()[1]; });//y
+
+	if (NodeSize < rectVct.size()) //middle node
+	{
+		int len = rectVct.size() / NodeSize + 1;
+		for (int i = 0; i < NodeSize; ++i)
+		{
+			vector<RectBase2d> parts(rectVct.begin() + i * NodeSize, rectVct.begin() + (i + 1) * NodeSize); 
+			currentNode->m_nodes[i] = _createTree2dM(parts);
+		}
+	}
+	else // end leaf node
+	{
+		for (int i = 0; i < rectVct.size(); ++i)
+		{
+			std::unique_ptr<BVHNode2dM> leafNode = std::make_unique<BVHNode2dM>();
+			leafNode->m_bound = rectVct[i].m_bound;
+			leafNode->m_index = rectVct[i].m_index;
+			currentNode->m_nodes[i] = std::move(leafNode);
+		}
+	}
+	return currentNode;
+}
+BVHTree2dM::BVHTree2dM(const std::vector<clash::RectBase2d>& _rectVct)
+{
+	std::vector<RectBase2d> rectVct = _rectVct; //copy
+	m_tree = _createTree2dM(rectVct);
+}
+
+std::vector<int> BVHTree2dM::findIntersect(const Eigen::Vector2d& point) const
+{
+	return std::vector<int>();
+}
+
 #endif RESERVE_USING_POLYGON2D
 //--------------------------------------------------------------------------------------------------
 //  BVH Tree 3d
