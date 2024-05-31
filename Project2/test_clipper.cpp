@@ -6,6 +6,8 @@
 using namespace std;
 using namespace clash;
 using namespace Eigen;
+using namespace eigen;
+using namespace spatial;
 
 /*
 二维多边形算法，Sutherland-Hodgman算法，仅处理多边形为 凸多边形 ；将一个多边形作为被裁剪多边形（subject polygon），另一个多边形作为裁剪多边形（clip polygon）；
@@ -190,7 +192,7 @@ static void test2()
 	polyVct.emplace_back(Polygon2d({ Vector2d(4,4), Vector2d(4,4) + Vector2d(2,2) }));
 	//std::shared_ptr<KdTreeNode> kdTree = KdTree::createKdTree(polyVct);
 	BVHTree2d kdtree(polyVct);
-	std::shared_ptr<BVHNode2d> tree = kdtree.get();
+	//std::shared_ptr<BVHNode2d> tree = kdtree.get();
 	//int a = sizeof(tree); //double pointor ==16
 	Polygon2d target({ Vector2d(3,1), Vector2d(5,3) });
 	std::vector<size_t> indexes = kdtree.findIntersect(target);
@@ -304,7 +306,20 @@ static void test4()
 	return;
 }
 
-
+static void test5()
+{
+	std::vector<RectBase2d> rectVct;
+	for (int i = 0; i < 17; i++)
+	{
+		RectBase2d rect;
+		rect.m_index = i;
+		rect.m_bound = { Vector2d(i,i), Vector2d(i,i) + Vector2d(1,1) };
+		rectVct.push_back(rect);
+	}
+	BVHTree2dM tree(rectVct);
+	std::vector<int> indexes = tree.findIntersect(Vector2d(2, 2));
+	return;
+}
 
 static int enrol = []()->int
 {
@@ -312,7 +327,7 @@ static int enrol = []()->int
 	//test1();
 	//test2(); //for funciton
 	//test3();
-	//test4();
+	test5();
 	cout << "test_clipper finished.\n" << endl;
 	return 0;
 }();

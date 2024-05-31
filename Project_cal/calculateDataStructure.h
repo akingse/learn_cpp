@@ -172,6 +172,25 @@ public:
 
 };
 
+//multi-way tree
+constexpr int NodeSize = 8;
+
+struct BVHNode2dM
+{
+	Eigen::AlignedBox2d m_bound;
+	std::array<std::unique_ptr<BVHNode2dM>, NodeSize> m_nodes;
+	int m_index = -1; //middle node
+};
+
+class BVHTree2dM
+{
+private:
+	std::unique_ptr<BVHNode2dM> m_tree;
+public:
+	DLLEXPORT_CAL BVHTree2dM(const std::vector<clash::RectBase2d>& rectVct);
+	DLLEXPORT_CAL std::vector<int> findIntersect(const Eigen::Vector2d& point) const;
+};
+
 //----------------------------------------------------------------------------------------------------------------
 //  3d
 //----------------------------------------------------------------------------------------------------------------
@@ -245,24 +264,6 @@ public:
 	std::vector<std::tuple<size_t, bool>> findIntersectClash(const clash::Polyface3d& polyface) const; // bool means soft-clash
 	std::vector<std::tuple<size_t, bool>> findIntersectClash(const clash::Polyface3d& polyface, double tolerance) const; //custom tolerance
 	//for grid ray only
-};
-
-//multi-way tree
-constexpr int NodeSize = 8;
-struct BVHNode2dM
-{
-	Eigen::AlignedBox2d m_bound;
-	std::array<std::unique_ptr<BVHNode2dM>, NodeSize> m_nodes;
-	int m_index = -1; //middle node
-
-};
-class BVHTree2dM
-{
-private:
-	std::unique_ptr<BVHNode2dM> m_tree;
-public:
-	BVHTree2dM(const std::vector<clash::RectBase2d>& rectVct);
-	std::vector<int> findIntersect(const Eigen::Vector2d& point) const;
 };
 
 //--------------------------------------------------------------------------------------------------

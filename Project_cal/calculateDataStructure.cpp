@@ -416,6 +416,7 @@ std::vector<size_t> BVHTree2d::findIntersect(const ContourPart& profile) const
 	return indexes;
 }
 
+//multi-way tree
 std::unique_ptr<BVHNode2dM> _createTree2dM(std::vector<RectBase2d>& rectVct)
 {
 	auto _getTotalBounding = [&rectVct]()->Eigen::AlignedBox2d
@@ -432,7 +433,6 @@ std::unique_ptr<BVHNode2dM> _createTree2dM(std::vector<RectBase2d>& rectVct)
 		};
 	if (rectVct.empty()) //no chance
 		return nullptr;
-	//int direction = dimension % 2;  // the direction of xy, x=0/y=1
 	std::unique_ptr<BVHNode2dM> currentNode = std::make_unique<BVHNode2dM>();
 	currentNode->m_bound = _getTotalBounding();
 	if (_getLongest(currentNode->m_bound) == 0)//min fast than center
@@ -441,14 +441,22 @@ std::unique_ptr<BVHNode2dM> _createTree2dM(std::vector<RectBase2d>& rectVct)
 	else
 		std::sort(rectVct.begin(), rectVct.end(), [](const RectBase2d& a, const RectBase2d& b)
 			{ return a.m_bound.min()[1] < b.m_bound.min()[1]; });//y
-
 	if (NodeSize < rectVct.size()) //middle node
 	{
-		int len = rectVct.size() / NodeSize + 1;
-		for (int i = 0; i < NodeSize; ++i)
+        int size = ceil(rectVct.size() / (float)NodeSize);
+        for (int i = 0; i < NodeSize; ++i)
 		{
-			vector<RectBase2d> parts(rectVct.begin() + i * NodeSize, rectVct.begin() + (i + 1) * NodeSize); 
-			currentNode->m_nodes[i] = _createTree2dM(parts);
+			if ((i + 1) * size < rectVct.size())
+			{
+				vector<RectBase2d> parts(rectVct.begin() + i * size, rectVct.begin() + (i + 1) * size);
+				currentNode->m_nodes[i] = _createTree2dM(parts);
+			}
+			else
+			{
+                vector<RectBase2d> parts(rectVct.begin() + i * size, rectVct.end());
+                currentNode->m_nodes[i] = _createTree2dM(parts);
+				break;
+			}
 		}
 	}
 	else // end leaf node
@@ -463,6 +471,7 @@ std::unique_ptr<BVHNode2dM> _createTree2dM(std::vector<RectBase2d>& rectVct)
 	}
 	return currentNode;
 }
+
 BVHTree2dM::BVHTree2dM(const std::vector<clash::RectBase2d>& _rectVct)
 {
 	std::vector<RectBase2d> rectVct = _rectVct; //copy
@@ -471,10 +480,30 @@ BVHTree2dM::BVHTree2dM(const std::vector<clash::RectBase2d>& _rectVct)
 
 std::vector<int> BVHTree2dM::findIntersect(const Eigen::Vector2d& point) const
 {
-	return std::vector<int>();
+	std::vector<int> indexes;
+	std::function<void(const unique_ptr<BVHNode2dM>&)> _searchTree = [&](const unique_ptr<BVHNode2dM>& node)->void
+		{
+            if (node == nullptr)
+				return;
+			if (node->m_bound.contains(point))
+			{
+				if (node->m_index != -1)
+				{
+					indexes.push_back(node->m_index);
+				}
+				else // isnot leaf node
+				{
+					for (int i = 0; i < NodeSize; ++i)
+						_searchTree(node->m_nodes[i]);
+				}
+				return;
+			}
+		};
+	_searchTree(m_tree);
+	return indexes;
 }
-
 #endif RESERVE_USING_POLYGON2D
+
 //--------------------------------------------------------------------------------------------------
 //  BVH Tree 3d
 //--------------------------------------------------------------------------------------------------

@@ -272,7 +272,7 @@ std::vector<std::array<uint64_t, 2>> _readEntityIDFile(const std::string& fileNa
 	return tris;
 }
 
-#undef USING_FLATBUFFERS_SERIALIZATION
+//#undef USING_FLATBUFFERS_SERIALIZATION
 #ifdef USING_FLATBUFFERS_SERIALIZATION 
 #include "flatbuffers/flatbuffers.h"
 using namespace flatbuffers;
