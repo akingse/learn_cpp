@@ -4,11 +4,13 @@
 struct ModelMesh
 {
     std::vector<Eigen::Vector3d> vbo_;
-    std::vector<Eigen::Vector2d> vbo2_;
+#ifdef STORAGE_VERTEX_DATA_2D
+    std::vector<Eigen::Vector2d> vbo2_; //using for 2d
+#endif
     std::vector<std::array<int, 3>> ibo_;
     std::vector<Eigen::Vector3d> fno_; //Face Normal
     Eigen::AlignedBox3d bounding_;
-    Eigen::Affine3d pose_; // Eigen::Affine3d::Identity()
+    Eigen::Affine3d pose_ = Eigen::Affine3d::Identity();
     bool convex_; // isConvex default true
     int genus_ = 0; //number of genus, default 0
 //#ifdef FILL_PROFILE_DEBUG_TEMP
@@ -16,6 +18,7 @@ struct ModelMesh
     uint64_t index_ = UINT64_MAX;// ULLONG_MAX; // record belong to same polyface
     //uint64_t instanceid = 0; //0 means not instance
 //#endif
+#ifdef STORAGE_VERTEX_DATA_2D
     inline void to2d()
     {
         vbo2_.resize(vbo_.size());
@@ -23,6 +26,7 @@ struct ModelMesh
         for (int i = 0; i < vbo2_.size(); ++i)
             vbo2_[i] = Eigen::Vector2d(vbo_[i][0], vbo_[i][1]);
     }
+#endif
 };
 static const ModelMesh gMeshEmpty = {};
 
@@ -38,6 +42,10 @@ namespace clash //collide //psykronix
     typedef std::array<Eigen::Vector3d, 2> PosVec3d;
     typedef std::array<Eigen::Vector3d, 2> RayLine;
     typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>> Polyhedron;
+    //typedef std::array<Eigen::Vector2d, 3> TrigonEigen; same as Triangle2d
+    typedef std::vector<std::vector<Eigen::Vector2d>> PathsEigen; //ContourProfile
+    typedef std::vector<std::vector<Eigen::Vector3d>> PathsEigen3d;
+
     //global constexpr
     static const Eigen::Vector3d gVecNaN(std::nan("0"), std::nan("0"), std::nan("0"));
     static const Triangle gSegNaN = { gVecNaN, gVecNaN };
@@ -174,8 +182,6 @@ enum class FrontState :int
 
 namespace eigen
 {
-    //typedef std::array<Eigen::Vector2d, 3> TrigonEigen;
-    typedef std::vector<std::vector<Eigen::Vector2d>> PathsEigen; //ContourProfile
     struct TrigonPart
     {
         int m_index;
@@ -192,7 +198,7 @@ namespace eigen
         //std::vector<std::array<int, 2>> m_shielded;
         std::vector<int> m_shielded;
         std::vector<std::vector<Eigen::Vector2d>> m_contour; //the profile of this trigon after clipper
-        std::vector<int> m_preInter;
+        std::vector<int> m_preInter; //for cuda calculate
         bool operator<(const TrigonPart& rhs) const
         {
             return m_index < rhs.m_index;

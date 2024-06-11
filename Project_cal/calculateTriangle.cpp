@@ -1148,7 +1148,7 @@ bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, cons
 }
 
 // intersect and penetration judge
-bool isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, const std::array<Vector2d, 3>& triB)
+bool isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, const std::array<Vector2d, 3>& triB, double tolerance /*= 0.0*/)
 {
 	// bound box been judged
 	//if (std::max(std::max(triA[0][0], triA[1][0]), triA[2][0]) <= std::min(std::min(triB[0][0], triB[1][0]), triB[2][0]) ||
@@ -1168,8 +1168,8 @@ bool isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, const std
 	double minA, maxA, minB, maxB, projection;
 	for (const auto& axis : edgesAB)
 	{
-		if (axis.isZero())
-			continue;
+		//if (axis.isZero()) //zero vector cause misjudgment, but preproccessed
+		//	continue;
 		minA = DBL_MAX;
 		maxA = -DBL_MAX;
 		minB = DBL_MAX;
@@ -1186,14 +1186,14 @@ bool isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, const std
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
-		if (maxA < minB + epsF || maxB < minA + epsF)
+		if (maxA < minB + tolerance || maxB < minA + tolerance) //tolerance>0 means less
 			return false; //without normlized
 	}
 	return true;
 }
 
 //must intersect
-bool isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB)
+bool isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB, double tolerance /*= 0.0*/)
 {
 	std::array<Eigen::Vector3d, 3> edgesA = { 
 		triA[1] - triA[0],
@@ -1205,7 +1205,7 @@ bool isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, const std
 		triB[0] - triB[2] };
 	Eigen::Vector3d normalA = edgesA[0].cross(edgesA[1]);
 	Eigen::Vector3d normalB = edgesB[0].cross(edgesB[1]);
-	if (normalA.cross(normalB).isZero(epsF)) //is parallel
+	if (normalA.cross(normalB).isZero(tolerance)) //is parallel
 		return false;//exclude coplanar
 	std::array<Eigen::Vector3d, 9> axes = { { 
 		// only cross edge pair
@@ -1239,7 +1239,7 @@ bool isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, const std
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
-		if (maxA < minB + epsF || maxB < minA + epsF)
+		if (maxA < minB + tolerance || maxB < minA + tolerance)
 			return false; //without normlized
 	}
 	return true;
@@ -1797,4 +1797,49 @@ std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<E
 //	}
 //	return std::sqrt(disSquare);
 //}
+
+bool isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector2d, 3>& tri, const Eigen::AlignedBox2d& box)
+{
+	std::array<Eigen::Vector2d, 6> edges = {
+		tri[1] - tri[0],
+		tri[2] - tri[1],
+		tri[0] - tri[2],};
+	for (auto& axis : edges)
+		axis = Vector2d(-axis[1], axis[0]);
+	std::array<Eigen::Vector2d, 4> vertexes = {
+		box.min(),
+		box.max(),
+        box.min() + Vector2d(box.sizes().x(), 0),
+        box.min() + Vector2d(0, box.sizes().y()) };
+	std::array<Eigen::Vector2d, 5> axes = { {
+		Vector2d(1,0),
+		Vector2d(0,1),
+		edges[0],
+		edges[1],
+		edges[2],
+	} };
+	double minA, maxA, minB, maxB, projection;
+	for (const auto& axis : axes) //fast than index
+	{
+		minA = DBL_MAX;
+		maxA = -DBL_MAX;
+		minB = DBL_MAX;
+		maxB = -DBL_MAX;
+		for (const auto& iter : tri)
+		{
+			projection = iter.dot(axis);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
+		}
+		for (const auto& iter : vertexes)
+		{
+			projection = iter.dot(axis);
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		if (maxA < minB || maxB < minA) // absolute zero
+			return false;
+	}
+	return true;
+}
 

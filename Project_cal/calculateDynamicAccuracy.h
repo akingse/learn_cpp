@@ -24,6 +24,7 @@ namespace accura
         }
         Eigen::AlignedBox3d m_modelBox3d; // in relative coordinate
         int m_precision = 0; //current precision
+        int m_meshAngleTole = 8; // 36;
         Eigen::Vector3d m_relaOrigin = Eigen::Vector3d(0, 0, 0); //relative origin point
         const double m_toleAngle = M_PI / 1080; //0.003
         const double m_toleDist = 1e-5;

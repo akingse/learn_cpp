@@ -389,7 +389,7 @@ std::vector<ModelMesh> read_ModelMesh(const std::string& fileName)
 			bool convex = mesh->convex();
 			int genus = mesh->genus();
 #ifdef CLASH_DETECTION_DEBUG_TEMP
-			res.push_back(ModelMesh{ vbo_, vbo2_, ibo_, fno_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(), convex, genus, _iboRaw, mesh->entityid() });
+			res.push_back(ModelMesh{ vbo_, ibo_, fno_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(), convex, genus, _iboRaw, mesh->entityid() });
 #else
 			//res.push_back(ModelMesh{ vbo_, ibo_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(),mesh->convex()});
 #endif

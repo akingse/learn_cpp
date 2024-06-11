@@ -256,6 +256,8 @@ std::vector<int> BVHTree2d::findIntersect(const RectBase2d& rect) const
 std::vector<int> BVHTree2d::findIntersect(const AlignedBox2d& box) const
 {
 	std::vector<int> indexes;
+	if (m_tree == nullptr)
+		return {};
 	std::function<void(const unique_ptr<BVHNode2d>&)> _searchTree = [&](const unique_ptr<BVHNode2d>& node)->void
 		{
 			//using recursion
@@ -443,7 +445,7 @@ std::unique_ptr<BVHNode2dM> _createTree2dM(std::vector<RectBase2d>& rectVct)
 			{ return a.m_bound.min()[1] < b.m_bound.min()[1]; });//y
 	if (NodeSize < rectVct.size()) //middle node
 	{
-        int size = ceil(rectVct.size() / (float)NodeSize);
+        int size = (int)ceil(rectVct.size() / (float)NodeSize);
         for (int i = 0; i < NodeSize; ++i)
 		{
 			if ((i + 1) * size < rectVct.size())

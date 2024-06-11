@@ -19,10 +19,10 @@ namespace clash
 	class RectBase2d
 	{
 	public:
-		long long m_index = -1;
+		int m_index = -1;
 		Eigen::AlignedBox2d m_bound;
 		RectBase2d() = default;
-		RectBase2d(long long index, const Eigen::AlignedBox2d& bound) :m_index(index), m_bound(bound) {}
+		RectBase2d(int index, const Eigen::AlignedBox2d& bound) :m_index(index), m_bound(bound) {}
 		bool operator<(const RectBase2d& rhs) const //usually custom in build tree sort
 		{
 			Eigen::AlignedBox2d bound = m_bound; //merge bound box
@@ -36,7 +36,7 @@ namespace clash
 	{
 	public:
 		Eigen::AlignedBox3d m_bound;
-		long long m_index = -1;
+		int m_index = -1;
 		RectBase3d() = default;
 		virtual ~RectBase3d() {};
 	};
@@ -47,7 +47,7 @@ namespace clash
 	public:
 		std::vector<Eigen::Vector2d> m_polygon;
 		Eigen::AlignedBox2d m_bound;
-		long long m_index = -1; // the index in the vector container
+		int m_index = -1; // the index in the vector container
 		//record the number of polygon's segment, and the proportion of intersect point, and the number of other polygon
 		std::vector<std::tuple<size_t, double, size_t>> m_intersect;
 		//static size_t m_id;
