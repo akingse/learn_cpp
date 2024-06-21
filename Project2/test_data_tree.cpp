@@ -1,5 +1,6 @@
 #include "pch.h"
 using namespace std;
+using namespace bvh;
 using namespace clash;
 using namespace Eigen;
 using namespace std::chrono;

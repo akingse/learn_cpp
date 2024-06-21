@@ -3,6 +3,7 @@
 using namespace std;
 using namespace para;
 using namespace Eigen;
+using namespace eigen;
 using namespace clash;
 
 static constexpr unsigned long long ULL_MAX1 = 18446744073709551615; // 
