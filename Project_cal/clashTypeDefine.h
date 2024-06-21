@@ -1,34 +1,38 @@
 #pragma once
 #ifndef CALCULATE_TYPEDEFINE_H
 #define CALCULATE_TYPEDEFINE_H
-struct ModelMesh
+
+namespace clash
 {
-    std::vector<Eigen::Vector3d> vbo_;
-#ifdef STORAGE_VERTEX_DATA_2D
-    std::vector<Eigen::Vector2d> vbo2_; //using for 2d
-#endif
-    std::vector<std::array<int, 3>> ibo_;
-    std::vector<Eigen::Vector3d> fno_; //Face Normal
-    Eigen::AlignedBox3d bounding_;
-    Eigen::Affine3d pose_ = Eigen::Affine3d::Identity();
-    bool convex_; // isConvex default true
-    int genus_ = 0; //number of genus, default 0
-//#ifdef FILL_PROFILE_DEBUG_TEMP
-    std::vector<int> iboRaw_; //for test debug
-    uint64_t index_ = UINT64_MAX;// ULLONG_MAX; // record belong to same polyface
-    //uint64_t instanceid = 0; //0 means not instance
-//#endif
-#ifdef STORAGE_VERTEX_DATA_2D
-    inline void to2d()
+    struct ModelMesh
     {
-        vbo2_.resize(vbo_.size());
-#pragma omp parallel for schedule(dynamic)
-        for (int i = 0; i < vbo2_.size(); ++i)
-            vbo2_[i] = Eigen::Vector2d(vbo_[i][0], vbo_[i][1]);
-    }
+        std::vector<Eigen::Vector3d> vbo_;
+#ifdef STORAGE_VERTEX_DATA_2D
+        std::vector<Eigen::Vector2d> vbo2_; //using for 2d
 #endif
-};
-static const ModelMesh gMeshEmpty = {};
+        std::vector<std::array<int, 3>> ibo_;
+        std::vector<Eigen::Vector3d> fno_; //Face Normal
+        Eigen::AlignedBox3d bounding_;
+        Eigen::Affine3d pose_ = Eigen::Affine3d::Identity();
+        bool convex_; // isConvex default true
+        int genus_ = 0; //number of genus, default 0
+        //#ifdef FILL_PROFILE_DEBUG_TEMP
+        std::vector<int> iboRaw_; //for test debug
+        uint64_t index_ = UINT64_MAX;// ULLONG_MAX; // record belong to same polyface
+        //uint64_t instanceid = 0; //0 means not instance
+    //#endif
+#ifdef STORAGE_VERTEX_DATA_2D
+        inline void to2d()
+        {
+            vbo2_.resize(vbo_.size());
+#pragma omp parallel for schedule(dynamic)
+            for (int i = 0; i < vbo2_.size(); ++i)
+                vbo2_[i] = Eigen::Vector2d(vbo_[i][0], vbo_[i][1]);
+        }
+#endif
+    };
+    //static const ModelMesh gMeshEmpty = {};
+}
 
 namespace clash //collide //psykronix
 {
@@ -157,31 +161,32 @@ namespace clash //collide //psykronix
 
 }
 
-enum class OcclusionState :int //means cover
-{
-    EXPOSED = 0,
-    HIDDEN,
-    SHIELDED, //shielded by other triangle
-    COPLANAR, //COPLANAR with other-triangle
-    INTERSECT, //ignore
-    OCCLUSION, //shielded+intersect
-    DEGENERACY, // become segment
-    UNKNOWN,
-    USING_CUDA,
-};
-
-enum class FrontState :int
-{
-    // state of 3d trigon, all 2d projection penetration
-    COPLANAR = 0, //and intersect
-    A_FRONTOF,
-    B_FRONTOF,
-    INTERSECT, //3d intersect
-    UNKNOWN,
-};
-
 namespace eigen
 {
+    //fill profile alg
+    enum class OcclusionState :int //means cover
+    {
+        EXPOSED = 0,
+        HIDDEN,
+        SHIELDED, //shielded by other triangle
+        COPLANAR, //COPLANAR with other-triangle
+        INTERSECT, //ignore
+        OCCLUSION, //shielded+intersect
+        DEGENERACY, // become segment
+        UNKNOWN,
+        USING_CUDA,
+    };
+
+    enum class FrontState :int
+    {
+        // state of 3d trigon, all 2d projection penetration
+        COPLANAR = 0, //and intersect
+        A_FRONTOF,
+        B_FRONTOF,
+        INTERSECT, //3d intersect
+        UNKNOWN,
+    };
+
     struct TrigonPart
     {
         int m_index;

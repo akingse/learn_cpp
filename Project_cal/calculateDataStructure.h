@@ -125,147 +125,149 @@ namespace clash
 //  2d
 //----------------------------------------------------------------------------------------------------------------
 
-//Bounding Volum Hierarchy
-struct BVHNode2d
+namespace bvh
 {
-	Eigen::AlignedBox2d m_bound;  // 
-	std::unique_ptr<BVHNode2d> m_left;	//BVHNode2d* m_left;  
-	std::unique_ptr<BVHNode2d> m_right; //BVHNode2d* m_right; 
-	int m_index = -1; // the middle node's index
+	//Bounding Volum Hierarchy
+	struct BVHNode2d
+	{
+		Eigen::AlignedBox2d m_bound;  // 
+		std::unique_ptr<BVHNode2d> m_left;	//BVHNode2d* m_left;  
+		std::unique_ptr<BVHNode2d> m_right; //BVHNode2d* m_right; 
+		int m_index = -1; // the middle node's index
 #ifdef TEST_BVHNODE_DIMENSION_DEBUG
-	// other data
-	//std::array<int, 2> m_index2 = { -1,-1 }; //for TrigonPart
-	size_t m_dimension = 0; // also means m_depth
+		// other data
+		//std::array<int, 2> m_index2 = { -1,-1 }; //for TrigonPart
+		size_t m_dimension = 0; // also means m_depth
 #endif
-	//BVHNode2d() : m_box(), m_left(nullptr), m_right(nullptr) {}
-	//BVHNode2d(const Polygon2d& poly) : m_box(poly.boungding()), m_left(nullptr), m_right(nullptr) {}
-	bool isValid() const
+		//BVHNode2d() : m_box(), m_left(nullptr), m_right(nullptr) {}
+		//BVHNode2d(const Polygon2d& poly) : m_box(poly.boungding()), m_left(nullptr), m_right(nullptr) {}
+		bool isValid() const
+		{
+			return m_bound.isEmpty();
+		}
+
+	};
+
+	class BVHTree2d
 	{
-		return m_bound.isEmpty();
-	}
+	private:
+		std::unique_ptr<BVHNode2d> m_tree;
+	public:
+		BVHTree2d() = delete;
+		BVHTree2d(const BVHTree2d&) = delete;
+		BVHTree2d(const std::vector<clash::RectBase2d>& rectVct);
+		BVHTree2d(const std::vector<clash::Polygon2d>& polygons);
+		BVHTree2d(const std::vector<eigen::TrigonPart>& triangles);
+		BVHTree2d(const std::vector<eigen::ContourPart>& profiles);
+		//std::unique_ptr<BVHNode2d> get() const
+		//{
+		//	return m_tree;
+		//}
+		std::vector<int> findIntersect(const clash::RectBase2d& rect) const; // for RectBase2d
+		std::vector<size_t> findIntersect(const clash::Polygon2d& polygon) const; //searchFromTree
+		std::vector<size_t> findIntersect(const eigen::ContourPart& profile) const;
+		std::vector<size_t> findIntersectOpLess(const eigen::TrigonPart& trigon) const;//operator less
+		std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon) const;
+		//for grid ray only
+		std::vector<int> findIntersect(const Eigen::Vector2d& point) const;
+		std::vector<int> findIntersect(const Eigen::AlignedBox2d& box) const;
 
-};
+	};
 
-class BVHTree2d
-{
-private:
-	std::unique_ptr<BVHNode2d> m_tree;
-public:
-	BVHTree2d() = delete;
-	BVHTree2d(const BVHTree2d&) = delete;
-	BVHTree2d(const std::vector<clash::RectBase2d>& rectVct);
-	BVHTree2d(const std::vector<clash::Polygon2d>& polygons);
-	BVHTree2d(const std::vector<eigen::TrigonPart>& triangles);
-	BVHTree2d(const std::vector<eigen::ContourPart>& profiles);
-	//std::unique_ptr<BVHNode2d> get() const
-	//{
-	//	return m_tree;
-	//}
-	std::vector<int> findIntersect(const clash::RectBase2d& rect) const; // for RectBase2d
-	std::vector<size_t> findIntersect(const clash::Polygon2d& polygon) const; //searchFromTree
-	std::vector<size_t> findIntersect(const eigen::ContourPart& profile) const;
-	std::vector<size_t> findIntersectOpLess(const eigen::TrigonPart& trigon) const;//operator less
-	std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon) const;
-	//for grid ray only
-	std::vector<int> findIntersect(const Eigen::Vector2d& point) const;
-	std::vector<int> findIntersect(const Eigen::AlignedBox2d& box) const;
+	//multi-way tree
+	constexpr int NodeSize = 8;
 
-};
-
-//multi-way tree
-constexpr int NodeSize = 8;
-
-struct BVHNode2dM
-{
-	Eigen::AlignedBox2d m_bound;
-	std::array<std::unique_ptr<BVHNode2dM>, NodeSize> m_nodes;
-	int m_index = -1; //middle node
-};
-
-class BVHTree2dM
-{
-private:
-	std::unique_ptr<BVHNode2dM> m_tree;
-public:
-	DLLEXPORT_CAL BVHTree2dM(const std::vector<clash::RectBase2d>& rectVct);
-	DLLEXPORT_CAL std::vector<int> findIntersect(const Eigen::Vector2d& point) const;
-};
-
-//----------------------------------------------------------------------------------------------------------------
-//  3d
-//----------------------------------------------------------------------------------------------------------------
-
-struct BVHNode3d
-{
-	Eigen::AlignedBox3d m_bound;  // the extend bounding box
-	std::shared_ptr<BVHNode3d> m_left;	//BVHNode3d* m_left;  
-	std::shared_ptr<BVHNode3d> m_right;  //BVHNode3d* m_right; 
-	// other data
-	long long m_index = -1; // the middle node's index
-	//std::array<int, 2> m_index2 = { -1,-1 }; //for TrigonPart
-	size_t m_dimension = 0; // also means m_depth
-	BVHNode3d() = default;
-	BVHNode3d(const clash::Polyface3d& polyface, size_t dimension)
+	struct BVHNode2dM
 	{
-		m_dimension = dimension;
-		m_bound = polyface.m_bound;
-		m_index = polyface.m_index;
-		//m_left = nullptr; m_right = nullptr;
-	}
-	bool single() const
-	{
-		return m_left != nullptr && m_right == nullptr;
-	}
-	//bool isLeaf1() const
-	//{
-	//	return m_index != -1;
-	//}
-	//bool isLeaf2() const
-	//{
-	//	return m_index2 != std::array<int, 2>{ -1, -1 };
-	//}
-};
+		Eigen::AlignedBox2d m_bound;
+		std::array<std::unique_ptr<BVHNode2dM>, NodeSize> m_nodes;
+		int m_index = -1; //middle node
+	};
 
-// the BVH tree of 3d polyface
-class BVHTree3d
-{
-private:
-	std::shared_ptr<BVHNode3d> m_tree;
+	class BVHTree2dM
+	{
+	private:
+		std::unique_ptr<BVHNode2dM> m_tree;
+	public:
+		DLLEXPORT_CAL BVHTree2dM(const std::vector<clash::RectBase2d>& rectVct);
+		DLLEXPORT_CAL std::vector<int> findIntersect(const Eigen::Vector2d& point) const;
+	};
+
+	//----------------------------------------------------------------------------------------------------------------
+	//  3d
+	//----------------------------------------------------------------------------------------------------------------
+
+	struct BVHNode3d
+	{
+		Eigen::AlignedBox3d m_bound;  // the extend bounding box
+		std::shared_ptr<BVHNode3d> m_left;	//BVHNode3d* m_left;  
+		std::shared_ptr<BVHNode3d> m_right;  //BVHNode3d* m_right; 
+		// other data
+		long long m_index = -1; // the middle node's index
+		//std::array<int, 2> m_index2 = { -1,-1 }; //for TrigonPart
+		size_t m_dimension = 0; // also means m_depth
+		BVHNode3d() = default;
+		BVHNode3d(const clash::Polyface3d& polyface, size_t dimension)
+		{
+			m_dimension = dimension;
+			m_bound = polyface.m_bound;
+			m_index = polyface.m_index;
+			//m_left = nullptr; m_right = nullptr;
+		}
+		bool single() const
+		{
+			return m_left != nullptr && m_right == nullptr;
+		}
+		//bool isLeaf1() const
+		//{
+		//	return m_index != -1;
+		//}
+		//bool isLeaf2() const
+		//{
+		//	return m_index2 != std::array<int, 2>{ -1, -1 };
+		//}
+	};
+
+	// the BVH tree of 3d polyface
+	class BVHTree3d
+	{
+	private:
+		std::shared_ptr<BVHNode3d> m_tree;
 #ifdef CLASH_DETECTION_DEBUG_TEMP //for debug
-	size_t m_count = 0; //count total leafs
-	size_t m_depth = 0; //the max depth
+		size_t m_count = 0; //count total leafs
+		size_t m_depth = 0; //the max depth
 #endif
-	//mutable double m_tolerance = 0;
-	mutable Eigen::Vector3d m_tolerance = Eigen::Vector3d(clash::epsF, clash::epsF, clash::epsF); //default with threshold epsF
-public:
-	BVHTree3d() = delete;
-	BVHTree3d(const std::vector<clash::Polyface3d>& polyfaceVct); // using origin bound-box
-	BVHTree3d(const std::vector<eigen::TrigonPart>& triangles);
-	void setTolerance(double tolerance)
-	{
-		//Vector3d tole = (m_tolerance == 0.0) ? Vector3d(epsF, epsF, epsF) : Vector3d(m_tolerance, m_tolerance, m_tolerance);
-		m_tolerance = Eigen::Vector3d(tolerance, tolerance, tolerance);
-	}
-	std::shared_ptr<BVHNode3d> getTree() const
-	{
-		return m_tree;
-	}
-	std::shared_ptr<BVHNode3d>& getTree()
-	{
-		return m_tree;
-	}
-	// the tree crud create read update delete
-	bool insert(const clash::Polyface3d& polyface); //only insert the not exsit index
-	//bool remove(size_t index);
-	bool remove(const clash::Polyface3d& polyface); //find by polyface index
-	bool update(const clash::Polyface3d& polyface); //using polyface self index
-	std::vector<size_t> findIntersect(const clash::Polyface3d& polyface, double tolerance = 0.0) const; //searchFromTree
-	std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon) const;
-	std::vector<std::tuple<size_t, bool>> findIntersectClash(const clash::Polyface3d& polyface) const; // bool means soft-clash
-	std::vector<std::tuple<size_t, bool>> findIntersectClash(const clash::Polyface3d& polyface, double tolerance) const; //custom tolerance
-	//for grid ray only
-};
-
+		//mutable double m_tolerance = 0;
+		mutable Eigen::Vector3d m_tolerance = Eigen::Vector3d(clash::epsF, clash::epsF, clash::epsF); //default with threshold epsF
+	public:
+		BVHTree3d() = delete;
+		BVHTree3d(const std::vector<clash::Polyface3d>& polyfaceVct); // using origin bound-box
+		BVHTree3d(const std::vector<eigen::TrigonPart>& triangles);
+		void setTolerance(double tolerance)
+		{
+			//Vector3d tole = (m_tolerance == 0.0) ? Vector3d(epsF, epsF, epsF) : Vector3d(m_tolerance, m_tolerance, m_tolerance);
+			m_tolerance = Eigen::Vector3d(tolerance, tolerance, tolerance);
+		}
+		std::shared_ptr<BVHNode3d> getTree() const
+		{
+			return m_tree;
+		}
+		std::shared_ptr<BVHNode3d>& getTree()
+		{
+			return m_tree;
+		}
+		// the tree crud create read update delete
+		bool insert(const clash::Polyface3d& polyface); //only insert the not exsit index
+		//bool remove(size_t index);
+		bool remove(const clash::Polyface3d& polyface); //find by polyface index
+		bool update(const clash::Polyface3d& polyface); //using polyface self index
+		std::vector<size_t> findIntersect(const clash::Polyface3d& polyface, double tolerance = 0.0) const; //searchFromTree
+		std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon) const;
+		std::vector<std::tuple<size_t, bool>> findIntersectClash(const clash::Polyface3d& polyface) const; // bool means soft-clash
+		std::vector<std::tuple<size_t, bool>> findIntersectClash(const clash::Polyface3d& polyface, double tolerance) const; //custom tolerance
+		//for grid ray only
+	};
+}
 //--------------------------------------------------------------------------------------------------
 //  spatial
 //--------------------------------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 #include "pch.h"
 using namespace std;
 using namespace clash;
+using namespace bvh;
 using namespace Eigen;
 using namespace eigen;
 using namespace spatial;

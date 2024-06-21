@@ -127,9 +127,9 @@ namespace games
 			clear();
 		}
 		//convert
-		HeMesh(const ModelMesh& mesh); //fromTriangleMesh
-		ModelMesh toMesh() const;
-		operator ModelMesh() const; //toTriangleMesh
+		HeMesh(const clash::ModelMesh& mesh); //fromTriangleMesh
+		clash::ModelMesh toMesh() const;
+		operator clash::ModelMesh() const; //toTriangleMesh
 		bool isValid() const; //is mainfold mesh
 
 		//CRUD
@@ -144,10 +144,10 @@ namespace games
 	};
 
 	//utility
-	ModelMesh meshLoopSubdivision(const ModelMesh& mesh);
+	clash::ModelMesh meshLoopSubdivision(const clash::ModelMesh& mesh);
 	HeMesh meshLoopSubdivision(const HeMesh& mesh);
 	//ModelMesh meshQuadricErrorMetricsSimplification(const ModelMesh& mesh, size_t collapseEdgeCount = 0);
-	ModelMesh meshQEMSimplification(const ModelMesh& mesh, size_t collapseEdgeCount = 0);
+	clash::ModelMesh meshQEMSimplification(const clash::ModelMesh& mesh, size_t collapseEdgeCount = 0);
 	HeMesh meshQEMSimplification(const HeMesh& mesh, size_t edgeCollapseTarget = 0);
 
 }
