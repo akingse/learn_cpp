@@ -1,0 +1,152 @@
+{
+  "main": {
+    "id": "d48878bcb75e963f",
+    "type": "split",
+    "children": [
+      {
+        "id": "4226ca746667ab79",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "0d4165d6e3904a64",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "f489a7bb4811ffe8",
+    "type": "split",
+    "children": [
+      {
+        "id": "91543e6e6d79d9a7",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "41ed69913b57bfec",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "259ac21e0c71bb45",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "9fb86ac33a9d81d7",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "3e60401703e8fa39",
+    "type": "split",
+    "children": [
+      {
+        "id": "b53e9af6fcef5937",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "1d3731edc297c130",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "aa2e8c8017bafc18",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "962e8d079583c0f7",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "a55b2a8936a033e7",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false
+    }
+  },
+  "active": "0d4165d6e3904a64",
+  "lastOpenFiles": [
+    "readme.md",
+    "cplusplus/cpp_serial.md",
+    "cplusplus/cpp_project.md",
+    "cplusplus/cpp_runoob.md",
+    "cplusplus/cpp_function.md",
+    "cplusplus/cpp_container.md",
+    "cplusplus/cpp_cast.md",
+    "cplusplus/cpp_class.md"
+  ]
+}

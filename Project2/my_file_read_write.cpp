@@ -277,8 +277,8 @@ std::vector<std::array<uint64_t, 2>> _readEntityIDFile(const std::string& fileNa
 #include "flatbuffers/flatbuffers.h"
 using namespace flatbuffers;
 
-//#include "C:/Users/Aking/source/repos/bimbase/Include/fbs/convert_to_mesh_generated.h"
-#include "D:/Alluser/akingse/repos/bimbase/Include/fbs/convert_to_mesh_generated.h"
+#include "C:/Users/Aking/source/repos/bimbase/Include/fbs/convert_to_mesh_generated.h"
+//#include "D:/Alluser/akingse/repos/bimbase/Include/fbs/convert_to_mesh_generated.h"
 
 void write_ModelMesh(const std::vector<ModelMesh>& meshs, const std::string& fileName)
 {
@@ -430,7 +430,8 @@ std::vector<ModelMesh> read_ModelMesh(const std::vector<ModelMesh>& meshVct, con
 	return meshRes;
 }
 
-#include "D:/Alluser/akingse/repos/bimbase/Include/fbs/inter_triangels_info_generated.h" //change path
+//#include "D:/Alluser/akingse/repos/bimbase/Include/fbs/inter_triangels_info_generated.h" //change path
+ #include "C:/Users/Aking/source/repos/bimbase/Include/fbs/inter_triangels_info_generated.h" 
 //commented out struct Point3D; about
 void write_InterTriInfo(const std::vector<InterTriInfo>& infos, const std::string& fileName)
 {
