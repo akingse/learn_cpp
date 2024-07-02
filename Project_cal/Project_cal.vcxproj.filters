@@ -30,9 +30,6 @@
     <ClCompile Include="calculateVectorMatrix.cpp">
       <Filter>algorithm</Filter>
     </ClCompile>
-    <ClCompile Include="my_triangle_intersect.cpp">
-      <Filter>algorithm</Filter>
-    </ClCompile>
     <ClCompile Include="calculateDynamicAccuracy.cpp">
       <Filter>algorithm</Filter>
     </ClCompile>
@@ -60,9 +57,6 @@
       <Filter>algorithm</Filter>
     </ClInclude>
     <ClInclude Include="calculateVectorMatrix.h">
-      <Filter>algorithm</Filter>
-    </ClInclude>
-    <ClInclude Include="my_triangle_intersect.h">
       <Filter>algorithm</Filter>
     </ClInclude>
     <ClInclude Include="Poject_CAL_API.h">

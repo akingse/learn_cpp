@@ -4,6 +4,7 @@ using namespace std;
 using namespace Eigen;
 //using namespace games;
 using namespace clash;
+using namespace eigen;
 //static constexpr double eps_d = 10 * DBL_EPSILON; // double
 static const Triangle gTriXOY = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(1,0,0), Eigen::Vector3d(0,1,0) };
 static const Triangle gTriXOZ = { Eigen::Vector3d(0,0,0), Eigen::Vector3d(1,0,0), Eigen::Vector3d(0,0,1) };
@@ -31,12 +32,9 @@ count_point_inside_mesh, count_facesetA, count_facesetB, count_triAB_nan, count_
 count_meshs_isContact, count_meshs_isIntrusive, count_err_inter_mesh_sepa, count_repeat_sepa_axis,
 count_cal_sepa_axis;
 #endif //STATISTIC_DATA_COUNT
-
 #ifdef DEBUG_POLYHEDRON_MESH
-static int count_edgediag_full = 0;
+//static int count_edgediag_full = 0;
 #endif // DEBUG_POLYHEDRON_MESH
-
-
 #ifdef STATISTIC_DATA_RECORD
 //container
 extern std::vector<std::array<Triangle, 2>> triPairList, triRecordHard; //std::array<Eigen::Vector3d, 3>
@@ -852,7 +850,7 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 }
 
 // calculate depth self with tiny errors
-Eigen::Vector3d getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA, const ModelMesh& meshB, const std::vector<Vector3d>& axesSepa,
+Eigen::Vector3d clash::getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA, const ModelMesh& meshB, const std::vector<Vector3d>& axesSepa,
 	const std::set<size_t>& vboSetA, const std::set<size_t>& vboSetB)
 {
 	if (axesSepa.empty() || vboSetA.empty() || vboSetB.empty())
@@ -1058,7 +1056,7 @@ std::array<std::vector<size_t>, 2> _getReducedIntersectTrianglesOfMesh(const Mod
 }
 
 // ClashHard
-bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
+bool clash::isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 {
 	//Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
 	Eigen::Affine3d relative_matrix = meshB.pose_.inverse() * meshA.pose_; //without revise
@@ -1133,7 +1131,7 @@ bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
 
 // clash judge include penetration depth
 #define USING_ALL_SEPARATE_AXES_FOR_DEPTH
-std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(const ModelMesh& meshA, const ModelMesh& meshB)
+std::tuple<RelationOfTwoMesh, Eigen::Vector3d> clash::getTwoMeshsIntersectRelation(const ModelMesh& meshA, const ModelMesh& meshB)
 {
 	//Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
 	Eigen::Affine3d relative_matrix = meshB.pose_.inverse() * meshA.pose_;
@@ -1417,7 +1415,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(cons
 }
 
 // ClashSoft // return index of mesh_a and mesh_b ibo
-std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance)
+std::tuple<double, std::array<size_t, 2>> clash::getTwoMeshsSeparationDistanceSAT(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance)
 {
 #ifdef STATISTIC_DATA_RECORD
 	std::array<std::array<Eigen::Vector3d, 3>, 2> triDistPair;

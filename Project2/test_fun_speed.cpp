@@ -3,6 +3,7 @@
 using namespace std;
 using namespace para;
 using namespace Eigen;
+using namespace eigen;
 using namespace clash;
 #undef max //AlignedBox3d mem-fun
 #undef min

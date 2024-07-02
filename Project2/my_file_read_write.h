@@ -105,10 +105,10 @@ double* _readNumberFile(size_t n, const std::string& filename);
 
 // flatbuffers serialization
 void write_InterTriInfo(const std::vector<InterTriInfo>& infos, const std::string& fileName);
-void write_ModelMesh(const std::vector<ModelMesh>& meshs, const std::string& fileName);
+void write_ModelMesh(const std::vector<clash::ModelMesh>& meshs, const std::string& fileName);
 std::vector<InterTriInfo> read_InterTriInfo(const std::string& fileName);
-std::vector<ModelMesh> read_ModelMesh(const std::string& fileName);
-std::vector<ModelMesh> read_ModelMesh(const std::vector<ModelMesh>& meshVct, const Eigen::Matrix4d& matRela);
+std::vector<clash::ModelMesh> read_ModelMesh(const std::string& fileName);
+std::vector<clash::ModelMesh> read_ModelMesh(const std::vector<clash::ModelMesh>& meshVct, const Eigen::Matrix4d& matRela);
 
 // the AlignedBox data
 int _writeBinFileAlignedBox(size_t N);

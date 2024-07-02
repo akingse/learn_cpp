@@ -16,8 +16,8 @@
                 "file": "readme.md",
                 "mode": "source",
                 "source": false
-              }
             }
+          }
           },
           {
             "id": "13475c5492265fd3",
@@ -28,10 +28,10 @@
                 "file": "fasbridge/三维几何内核CAD.md",
                 "mode": "source",
                 "source": false
-              }
+      }
             }
           }
-        ],
+    ],
         "currentTab": 1
       }
     ],
