@@ -13,11 +13,11 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "readme.md",
+                "file": "fasbridge/三维几何内核和CAD.md",
                 "mode": "source",
                 "source": false
+              }
             }
-          }
           },
           {
             "id": "13475c5492265fd3",
@@ -25,14 +25,25 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "fasbridge/三维几何内核CAD.md",
+                "file": "fasbridge/目录.md",
                 "mode": "source",
                 "source": false
-      }
+              }
+            }
+          },
+          {
+            "id": "f5f7955f12217888",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "fasbridge/三维几何内核和CAD.md",
+                "mode": "source",
+                "source": false
+              }
             }
           }
-    ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -98,7 +109,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "fasbridge/三维几何内核CAD.md",
+                "file": "fasbridge/三维几何内核和CAD.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -115,7 +126,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "fasbridge/三维几何内核CAD.md",
+                "file": "fasbridge/三维几何内核和CAD.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -138,7 +149,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "fasbridge/三维几何内核CAD.md"
+                "file": "fasbridge/三维几何内核和CAD.md"
               }
             }
           }
@@ -159,10 +170,13 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "e672e4cf6ce9668d",
+  "active": "47456a3480c46d88",
   "lastOpenFiles": [
+    "Pasted image 20240703231956.png",
+    "Pasted image 20240703231931.png",
+    "fasbridge/目录.md",
+    "fasbridge/三维几何内核和CAD.md",
     "readme.md",
-    "fasbridge/三维几何内核CAD.md",
     "fasbridge"
   ]
 }
