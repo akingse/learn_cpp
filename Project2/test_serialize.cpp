@@ -30,47 +30,46 @@ BPGeometricPrimitiveSer deserialize(const std::vector<unsigned char>& infor)
 	return res;
 }
 
-template< typename T >
-struct tree_node
-{
-	T t;
-	std::vector<tree_node> children;
-	void walk_depth_first() const;
-};
-//简单的遍历将使用递归…
-template< typename T >
-void tree_node<T>::walk_depth_first() const
-{
-	cout << t;
-	for (auto& n : children) 
-		n.walk_depth_first();
-}
-
-template <typename T>
-struct TreeNode
-{
-	T* DATA; // data of type T to be stored at this TreeNode
-
-	vector< TreeNode<T>* > children;
-
-	// insertion logic for if an insert is asked of me.
-	// may append to children, or may pass off to one of the child nodes
-	void insert(T* newData);
-
-};
-
-template <typename T>
-struct Tree
-{
-	TreeNode<T>* root;
-
-	// TREE LEVEL functions
-	void clear() { delete root; root = 0; }
-
-	void insert(T* data) { if (root)root->insert(data); }
-};
-
-//class Vec3 {};
+//
+//template< typename T >
+//struct tree_node
+//{
+//	T t;
+//	std::vector<tree_node> children;
+//	void walk_depth_first() const;
+//};
+////简单的遍历将使用递归…
+//template< typename T >
+//void tree_node<T>::walk_depth_first() const
+//{
+//	cout << t;
+//	for (auto& n : children) 
+//		n.walk_depth_first();
+//}
+//
+//template <typename T>
+//struct TreeNode
+//{
+//	T* DATA; // data of type T to be stored at this TreeNode
+//
+//	vector< TreeNode<T>* > children;
+//
+//	// insertion logic for if an insert is asked of me.
+//	// may append to children, or may pass off to one of the child nodes
+//	void insert(T* newData);
+//
+//};
+//
+//template <typename T>
+//struct Tree
+//{
+//	TreeNode<T>* root;
+//
+//	// TREE LEVEL functions
+//	void clear() { delete root; root = 0; }
+//
+//	void insert(T* data) { if (root)root->insert(data); }
+//};
 
 int main_ser()
 {
@@ -154,16 +153,6 @@ int main_ser()
 	//long long n = inform.size();
 	//std::vector<char> remark2 = std::vector<char>(n,(char)ptr2);
 
-	/*
-	C++树结构
-	C++ STL不提供任何“树”容器
-	需要考虑的一些问题:
--节点的子节点数是固定的还是可变的?
--每个节点的开销是多少?-你需要父指针、兄弟指针等吗?
--提供什么算法?-不同的迭代器、搜索算法等。
-	
-	*/
-
 	
     /*
     非嵌套类序列化
@@ -195,3 +184,73 @@ int main_ser()
 
 
     */
+
+// 序列化-二叉树
+
+struct TreeNode {
+	int val;
+	TreeNode* left;
+	TreeNode* right;
+
+	TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+};
+
+// 序列化二叉树为字符串
+std::string serialize(TreeNode* root) {
+	if (root == nullptr) {
+		return "nullptr";
+	}
+
+	std::string serialized = std::to_string(root->val);
+	serialized += " " + serialize(root->left);
+	serialized += " " + serialize(root->right);
+
+	return serialized;
+}
+
+// 反序列化字符串为二叉树
+TreeNode* deserialize(std::istringstream& iss) {
+	std::string token;
+	iss >> token;//默认情况下，istringstream空格（空白字符）被视为分隔符，逐个遍历；
+
+	if (token == "nullptr") {
+		return nullptr;
+	}
+	TreeNode* root = new TreeNode(std::stoi(token));
+	root->left = deserialize(iss);
+	root->right = deserialize(iss);
+	return root;
+}
+
+// 反序列化字符串为二叉树（辅助函数）
+TreeNode* deserialize(const std::string& data) {
+	//从序列化的字符串中按照特定规则提取数据，例如按空格分隔节点的值。字符串流提供了方便的方法来完成这个任务。
+	//在反序列化过程中，我们需要将字符串表示的节点值转换为整数或其他类型。字符串流可以将字符串解析为适当的数据类型，如std::stoi用于将字符串转换为整数。
+	std::istringstream iss(data);
+	return deserialize(iss);
+}
+
+// 测试函数
+void testSerialization() {
+	// 构建一个二叉树
+	TreeNode* root = new TreeNode(1);
+	root->left = new TreeNode(2);
+	root->right = new TreeNode(3);
+	root->left->left = new TreeNode(4);
+	root->left->right = new TreeNode(5);
+
+	// 序列化
+	std::string serialized = serialize(root);
+	std::cout << "Serialized: " << serialized << std::endl;
+
+	// 反序列化
+	TreeNode* deserialized = deserialize(serialized);
+	std::cout << "Deserialized: " << deserialized->val << std::endl;
+}
+
+static int enrol = []()->int
+	{
+		testSerialization();
+		cout << "test_serialize finished.\n" << endl;
+		return 0;
+	}();

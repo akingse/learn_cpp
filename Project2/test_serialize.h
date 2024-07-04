@@ -1,11 +1,12 @@
 #pragma once
 
+//测试 序列化和反序列化
 class BPGeometricPrimitiveSer
 {
 public:
 	bool m_hollow = false;
-	size_t m_identification;
-	std::string m_remark;
+	size_t m_identification = 0;
+	std::string m_remark = "";
 	BPGeometricPrimitiveSer() = default;
 	BPGeometricPrimitiveSer(bool hollow, size_t identification, const std::string& remark)
 	{
