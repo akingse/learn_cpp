@@ -1,18 +1,46 @@
 {
   "main": {
-    "id": "d48878bcb75e963f",
+    "id": "a603ee5c656f26d9",
     "type": "split",
     "children": [
       {
-        "id": "4226ca746667ab79",
+        "id": "4b43bb90cd3182db",
         "type": "tabs",
         "children": [
           {
-            "id": "0d4165d6e3904a64",
+            "id": "47456a3480c46d88",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {}
+              "type": "markdown",
+              "state": {
+                "file": "fasbridge/三维几何内核和CAD.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "13475c5492265fd3",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "fasbridge/目录.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "f5f7955f12217888",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "fasbridge/三维几何内核和CAD.md",
+                "mode": "source",
+                "source": false
+              }
             }
           }
         ]
@@ -21,15 +49,15 @@
     "direction": "vertical"
   },
   "left": {
-    "id": "f489a7bb4811ffe8",
+    "id": "ec962d52c0e3f906",
     "type": "split",
     "children": [
       {
-        "id": "91543e6e6d79d9a7",
+        "id": "d30f73cc736a4e20",
         "type": "tabs",
         "children": [
           {
-            "id": "41ed69913b57bfec",
+            "id": "e672e4cf6ce9668d",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
@@ -39,7 +67,7 @@
             }
           },
           {
-            "id": "259ac21e0c71bb45",
+            "id": "c7d57b3d541f6b8a",
             "type": "leaf",
             "state": {
               "type": "search",
@@ -54,7 +82,7 @@
             }
           },
           {
-            "id": "9fb86ac33a9d81d7",
+            "id": "acfd7526b12e8d97",
             "type": "leaf",
             "state": {
               "type": "bookmarks",
@@ -68,19 +96,20 @@
     "width": 300
   },
   "right": {
-    "id": "3e60401703e8fa39",
+    "id": "b9f829fa7165c995",
     "type": "split",
     "children": [
       {
-        "id": "b53e9af6fcef5937",
+        "id": "1a2e974d777dc45d",
         "type": "tabs",
         "children": [
           {
-            "id": "1d3731edc297c130",
+            "id": "7d01d64590adb403",
             "type": "leaf",
             "state": {
               "type": "backlink",
               "state": {
+                "file": "fasbridge/三维几何内核和CAD.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -92,18 +121,19 @@
             }
           },
           {
-            "id": "aa2e8c8017bafc18",
+            "id": "b781a7f4760f47ec",
             "type": "leaf",
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "fasbridge/三维几何内核和CAD.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
             }
           },
           {
-            "id": "962e8d079583c0f7",
+            "id": "b53275ecf9ad9d92",
             "type": "leaf",
             "state": {
               "type": "tag",
@@ -114,11 +144,13 @@
             }
           },
           {
-            "id": "a55b2a8936a033e7",
+            "id": "5496c79221e98b1b",
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {}
+              "state": {
+                "file": "fasbridge/三维几何内核和CAD.md"
+              }
             }
           }
         ]
@@ -138,15 +170,13 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "0d4165d6e3904a64",
+  "active": "47456a3480c46d88",
   "lastOpenFiles": [
+    "Pasted image 20240703231956.png",
+    "Pasted image 20240703231931.png",
+    "fasbridge/目录.md",
+    "fasbridge/三维几何内核和CAD.md",
     "readme.md",
-    "cplusplus/cpp_serial.md",
-    "cplusplus/cpp_project.md",
-    "cplusplus/cpp_runoob.md",
-    "cplusplus/cpp_function.md",
-    "cplusplus/cpp_container.md",
-    "cplusplus/cpp_cast.md",
-    "cplusplus/cpp_class.md"
+    "fasbridge"
   ]
 }
