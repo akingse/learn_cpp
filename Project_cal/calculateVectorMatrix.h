@@ -1,4 +1,12 @@
 #pragma once
+/*******************************************************************************
+* Editor    :  akingse		                                                   *
+* Date      :  from June 2023												   *
+* Website   :  https://github.com/akingse                                      *
+* Copyright :  All rights reserved											   *
+* Purpose   :  Some common vector and matrix calculation methods			   *
+* License   :  MIT									                           *
+*******************************************************************************/
 #ifndef CALCULATE_VECTORMATRIX_H
 #define CALCULATE_VECTORMATRIX_H
 namespace eigen
@@ -6,7 +14,7 @@ namespace eigen
     // inline function
     inline int math_sign(double num)
     {
-        if (num == 0)
+        if (num == 0.0)
             return 0;
         return (0.0 < num) ? 1 : -1;
     }

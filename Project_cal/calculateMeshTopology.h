@@ -1,4 +1,12 @@
 #pragma once
+/*******************************************************************************
+* Author    :  akingse		                                                   *
+* Date      :  from June 2023												   *
+* Website   :  https://github.com/akingse                                      *
+* Copyright :  All rights reserved											   *
+* Purpose   :  Some common mesh topology calculation methods				   *
+* License   :  MIT									                           *
+*******************************************************************************/
 #ifndef CALCULATE_MESHTOPOLOGY_H
 #define CALCULATE_MESHTOPOLOGY_H
 

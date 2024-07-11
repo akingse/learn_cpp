@@ -1,4 +1,12 @@
 #pragma once
+/*******************************************************************************
+* Editor    :  akingse		                                                   *
+* Date      :  from June 2023												   *
+* Website   :  https://github.com/akingse                                      *
+* Copyright :  All rights reserved											   *
+* Purpose   :  Some geometry class and relation enum type define               *
+* License   :  MIT									                           *
+*******************************************************************************/
 #ifndef CALCULATE_TYPEDEFINE_H
 #define CALCULATE_TYPEDEFINE_H
 

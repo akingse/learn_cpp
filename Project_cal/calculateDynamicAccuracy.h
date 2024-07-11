@@ -1,4 +1,12 @@
 #pragma once
+/*******************************************************************************
+* Author    :  akingse		                                                   *
+* Date      :  from June 2023												   *
+* Website   :  https://github.com/akingse                                      *
+* Copyright :  All rights reserved											   *
+* Purpose   :  Some common calculation methods using dynamic accuracy 		   *
+* License   :  MIT									                           *
+*******************************************************************************/
 #ifndef CALCULATE_DYNAMICACCURACY_H
 #define CALCULATE_DYNAMICACCURACY_H
 

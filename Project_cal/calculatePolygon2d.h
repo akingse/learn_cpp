@@ -1,4 +1,12 @@
 #pragma once
+/*******************************************************************************
+* Author    :  akingse		                                                   *
+* Date      :  from June 2023												   *
+* Website   :  https://github.com/akingse                                      *
+* Copyright :  All rights reserved											   *
+* Purpose   :  Some common and simple 2d polygon methods					   *
+* License   :  MIT									                           *
+*******************************************************************************/
 #ifndef CALCULATE_POLYGON2D_H
 #define CALCULATE_POLYGON2D_H
 namespace clash

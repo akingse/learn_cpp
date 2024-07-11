@@ -1,4 +1,12 @@
 #pragma once
+/*******************************************************************************
+* Author    :  akingse		                                                   *
+* Date      :  from June 2023												   *
+* Website   :  https://github.com/akingse                                      *
+* Copyright :  All rights reserved											   *
+* Purpose   :  Some common point and line and plane calculation methods		   *
+* License   :  MIT									                           *
+*******************************************************************************/
 #ifndef CALCULATE_POINTLINEPLANE_H
 #define CALCULATE_POINTLINEPLANE_H
 
