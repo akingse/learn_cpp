@@ -299,10 +299,58 @@ void testSerialization() {
 	std::cout << "Deserialized: " << deserialized->val << std::endl;
 }
 
+//注册反射
+
+
+//memcpy拷贝覆盖
+class IGemetry
+{
+
+};
+
+class ICsgTree
+{
+public:
+	//int id = 0; //默认无对齐，各占8byte
+	virtual ~ICsgTree() = 0;
+};
+
+//min(n in #pragma pack(n),结构体中的最长类型)
+#pragma pack(1)
+class GeCsgTree :public ICsgTree
+{
+private:
+	int tolerance;
+	int oparation;
+	vector<shared_ptr<ICsgTree>> m_leftNodes;
+	vector<shared_ptr<ICsgTree>> m_rightNodes;
+public:
+	virtual ~GeCsgTree() override {};
+};
+#pragma pack() //end
+
+struct CsgTreeData
+{
+	vector<shared_ptr<ICsgTree>> m_leftNodes;
+	vector<shared_ptr<ICsgTree>> m_rightNodes;
+	//bool isLeft;
+};
+
+static void _test1()
+{
+	int sz0 = sizeof(ICsgTree);
+	int sz1 = sizeof(GeCsgTree);
+	int sz2 = sizeof(CsgTreeData);
+	int sz3 = sizeof(vector<shared_ptr<ICsgTree>>);
+	CsgTreeData data;
+	return;
+}
+
 static int enrol = []()->int
 	{
 		testSerialization();
 		testSerialization1();
+		_test1();
 		cout << "test_serialize finished.\n" << endl;
 		return 0;
 	}();
