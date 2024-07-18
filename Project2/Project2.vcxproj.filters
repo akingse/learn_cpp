@@ -32,14 +32,14 @@
     <Filter Include="test_thread">
       <UniqueIdentifier>{36f8d27e-e62a-4a23-9ae7-7eae5efe27d4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="test_bin">
-      <UniqueIdentifier>{d1dda523-7d2c-4073-9e11-04735d696ee9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="test_pattern">
       <UniqueIdentifier>{bc964f22-f8dc-4621-a47d-f5eebd3d32d8}</UniqueIdentifier>
     </Filter>
     <Filter Include="test_geo">
       <UniqueIdentifier>{dcdbed48-48dc-468b-9a20-d913423e5a9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test_serialize">
+      <UniqueIdentifier>{d1dda523-7d2c-4073-9e11-04735d696ee9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -146,7 +146,7 @@
       <Filter>test_case</Filter>
     </ClCompile>
     <ClCompile Include="my_file_read_write.cpp">
-      <Filter>test_bin</Filter>
+      <Filter>test_serialize</Filter>
     </ClCompile>
     <ClCompile Include="test_fun_speed.cpp">
       <Filter>test_case</Filter>
@@ -159,9 +159,6 @@
     </ClCompile>
     <ClCompile Include="test_rtti.cpp">
       <Filter>test_gram</Filter>
-    </ClCompile>
-    <ClCompile Include="test_binfile_debug.cpp">
-      <Filter>test_case</Filter>
     </ClCompile>
     <ClCompile Include="test_cache.cpp">
       <Filter>test_pattern</Filter>
@@ -232,16 +229,19 @@
     <ClCompile Include="test_interview.cpp">
       <Filter>test_gram</Filter>
     </ClCompile>
+    <ClCompile Include="test_binfile_debug.cpp">
+      <Filter>test_serialize</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="test_serialize.h">
-      <Filter>test_bin</Filter>
+      <Filter>test_serialize</Filter>
     </ClInclude>
     <ClInclude Include="my_file_read_write.h">
-      <Filter>test_bin</Filter>
+      <Filter>test_serialize</Filter>
     </ClInclude>
     <ClInclude Include="test_singleton.h">
       <Filter>test_pattern</Filter>

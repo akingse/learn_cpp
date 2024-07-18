@@ -75,8 +75,10 @@ void test_map()
 		string ns = typeid(iter).name();
 	}
 
-
+	amap.erase(1);
+	amap.erase(4);
 	
+	return;
 }
 
 
@@ -87,6 +89,7 @@ static int enrol = []()->int
 	void (*trigger)() = nullptr;
 	//º¯ÊıÖ¸Õë
 	//trigger = test_map;
-	//test_map();
+	test_map();
+	cout << "test_map finished.\n" << endl;
 	return 0;
 }();
