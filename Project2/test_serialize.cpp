@@ -354,8 +354,17 @@ static void _test1()
 	std::string uuidStr = boost::uuids::to_string(uuid);
 
 	// 输出GUID
-	std::cout << "Generated GUID: " << uuidStr << std::endl;
+	std::cout << "Generated GUID: " << uuidStr << std::endl;//Generated GUID: 57186994-bef7-4134-832b-fc3aa6866063
+	/*
+	UUID（Universally Unique Identifier）的标准表示形式是一个包含32个十六进制（hexadecimal）字符的字符串，
+	分为五个部分，用连字符分隔，形如："xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"。
 
+	前8个字符表示UUID的32位数据的前32位。
+	第9至12个字符表示UUID的32位数据的接下来的16位。
+	第13至16个字符表示UUID的32位数据的接下来的16位。
+	第17至20个字符表示UUID的32位数据的接下来的16位。
+	最后12个字符表示UUID的32位数据的接下来的48位。
+	*/
 
 	return;
 }
