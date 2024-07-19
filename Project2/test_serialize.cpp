@@ -329,6 +329,9 @@ public:
 };
 #pragma pack() //end
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 struct CsgTreeData
 {
 	vector<shared_ptr<ICsgTree>> m_leftNodes;
@@ -343,6 +346,17 @@ static void _test1()
 	int sz2 = sizeof(CsgTreeData);
 	int sz3 = sizeof(vector<shared_ptr<ICsgTree>>);
 	CsgTreeData data;
+	// 生成GUID
+	boost::uuids::random_generator generator;
+	boost::uuids::uuid uuid = generator();
+
+	// 将GUID转换为字符串
+	std::string uuidStr = boost::uuids::to_string(uuid);
+
+	// 输出GUID
+	std::cout << "Generated GUID: " << uuidStr << std::endl;
+
+
 	return;
 }
 
