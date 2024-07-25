@@ -187,41 +187,61 @@ int main_ser()
 
 // 序列化-二叉树
 
-struct TreeNode {
-	int val;
+struct TreeNode 
+{
+	int m_nodeIndex;
+	std::vector<int> m_geomIndexes;
+	TreeNode* father;
 	TreeNode* left;
 	TreeNode* right;
 
-	TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+	TreeNode() : m_nodeIndex(-1), father(nullptr), left(nullptr), right(nullptr) {}
+	TreeNode(int x) : m_nodeIndex(x), father(nullptr), left(nullptr), right(nullptr) {}
 };
 
 // 序列化二叉树为字符串
 std::string serialize(TreeNode* root) {
-	if (root == nullptr) {
-		return "nullptr";
-	}
+	if (root == nullptr) 
+		return "$";
+    std::vector<unsigned char> temp(sizeof(int) + sizeof(int) * root->m_geomIndexes.size() + sizeof(int));
+    unsigned char* ptr = temp.data();
+    int count = root->m_geomIndexes.size();
+    memcpy(ptr, &count, sizeof(int)); ptr += sizeof(int);
+    memcpy(ptr, root->m_geomIndexes.data(), sizeof(int) * root->m_geomIndexes.size()); ptr += sizeof(int) * root->m_geomIndexes.size();
+    memcpy(ptr, &root->m_nodeIndex, sizeof(int)); ptr += sizeof(int);
+    //data.insert(data.end(), temp.begin(), temp.end());
 
-	std::string serialized = std::to_string(root->val);
+	//std::string serialized = std::to_string(root->m_nodeIndex);
+	std::string serialized(temp.begin(), temp.end());
 	serialized += " " + serialize(root->left);
 	serialized += " " + serialize(root->right);
 
 	return serialized;
 }
-
 // 反序列化字符串为二叉树
 TreeNode* deserialize(std::istringstream& iss) {
 	std::string token;
 	iss >> token;//默认情况下，istringstream空格（空白字符）被视为分隔符，逐个遍历；
 
-	if (token == "nullptr") {
+	if (token == "$") 
 		return nullptr;
-	}
-	TreeNode* root = new TreeNode(std::stoi(token));
+	
+	int count;
+	int nodeIndex;
+	const char* ptr = token.data();
+	memcpy(&count, ptr, sizeof(int)); ptr += sizeof(int);
+	std::vector<int> geomIndexes(count);
+	memcpy(geomIndexes.data(), ptr, sizeof(int) * geomIndexes.size()); ptr += sizeof(int) * geomIndexes.size();
+	memcpy(&nodeIndex, ptr, sizeof(int)); ptr += sizeof(int);
+
+	//TreeNode* root = new TreeNode(std::stoi(token));
+	TreeNode* root = new TreeNode;
+	root->m_geomIndexes = geomIndexes;
+	root->m_nodeIndex = nodeIndex;
 	root->left = deserialize(iss);
 	root->right = deserialize(iss);
 	return root;
 }
-
 // 反序列化字符串为二叉树（辅助函数）
 TreeNode* deserialize(const std::string& data) {
 	//从序列化的字符串中按照特定规则提取数据，例如按空格分隔节点的值。字符串流提供了方便的方法来完成这个任务。
@@ -230,14 +250,134 @@ TreeNode* deserialize(const std::string& data) {
 	return deserialize(iss);
 }
 
-static void test_point_(byte* const data)
+// 将int值序列化为std::string
+std::string serializeInt(int value) {
+	std::stringstream ss;
+	ss << value;
+	return ss.str();
+}
+
+// 将bool值序列化为std::string
+std::string serializeBool(bool value) {
+	return value ? "true" : "false";
+}
+
+// 测试序列化函数
+void testSerialization0() {
+	// 构建一个二叉树
+	TreeNode* root = new TreeNode(1);
+	root->left = new TreeNode(2);
+	root->left->m_geomIndexes = { 2,22,222 };
+	root->right = new TreeNode(3);
+	root->left->left = new TreeNode(4);
+	root->left->left->m_geomIndexes = { 4,44 };
+	root->left->right = new TreeNode(5);
+
+	// 序列化
+	std::string serialized = serialize(root);
+	std::cout << "Serialized: " << serialized << std::endl;
+
+	// 反序列化
+	TreeNode* deserialized = deserialize(serialized);
+	std::cout << "Deserialized: " << deserialized->m_nodeIndex << std::endl;
+
+	int intValue = -42;
+	bool boolValue = true;
+
+	std::vector<unsigned char> charVector(sizeof(int));
+	memcpy(charVector.data(), &intValue, sizeof(int));
+	std::string str(charVector.begin(), charVector.end());
+	int intDeser;
+	memcpy(&intDeser, str.data(), sizeof(int));
+
+	std::istringstream iss(str);
+	std::string token;
+	iss >> token;
+	std::stoi(token);
+
+	std::string serializedInt = serializeInt(intValue);
+	std::string serializedBool = serializeBool(boolValue);
+
+	std::cout << "Serialized int value: " << serializedInt << std::endl;
+	std::cout << "Serialized bool value: " << serializedBool << std::endl;
+}
+
+//FatherLeftRight
+void serialize(TreeNode* root, std::vector<unsigned char>& data) 
+{
+	if (root == nullptr) {
+		data.push_back('$'); // 用特殊字符表示空节点
+		return;
+	}
+	//// 将节点值转换为字节并添加到data中
+	//std::vector<unsigned char> temp(sizeof(int) + sizeof(int) * root->m_geomIndexes.size() + sizeof(int));
+	//unsigned char* ptr = temp.data();
+	//int count = root->m_geomIndexes.size();
+	//memcpy(ptr, &count, sizeof(int)); ptr += sizeof(int);
+	//memcpy(ptr, root->m_geomIndexes.data(), sizeof(int) * root->m_geomIndexes.size()); ptr += sizeof(int) * root->m_geomIndexes.size();
+	//memcpy(ptr, &root->m_nodeIndex, sizeof(int)); ptr += sizeof(int);
+	//data.insert(data.end(),temp.begin(),temp.end());
+
+
+	// 将节点值转换为字节并添加到data中
+	data.push_back(static_cast<char>(root->m_nodeIndex));
+	// 递归序列化左子树和右子树
+	serialize(root->left, data);
+	serialize(root->right, data);
+}
+
+// 反序列化字节流为二叉树
+TreeNode* deserialize(std::vector<unsigned char>& data, int& index, TreeNode* father) 
+{
+	if (index >= data.size() || data[index] == '$') {
+		index++;
+		return nullptr;
+	}
+	// 从data中读取节点值并创建节点
+	TreeNode* node = new TreeNode(static_cast<int>(data[index]));
+	node->father = father; // 设置父指针
+
+	// 递归反序列化左子树和右子树
+	index++;
+	node->left = deserialize(data, index, node);
+	index++;
+	node->right = deserialize(data, index, node);
+
+	return node;
+}
+
+void testSerialization2()
+{
+	TreeNode* root = new TreeNode(1);
+	root->left = new TreeNode(2);
+	root->right = new TreeNode(3);
+	root->left->father = root;
+	root->right->father = root;
+	root->left->m_geomIndexes = { 1, 2, 3 }; // 示例 vector<int> 的赋值
+
+	std::vector<unsigned char> serializedData;
+	serialize(root, serializedData);
+
+	// 输出序列化后的字节流
+	std::cout << "Serialized data: ";
+	for (char byte : serializedData)
+		std::cout << byte << " ";
+	std::cout << std::endl;
+
+	int index = 0;
+	TreeNode* deserializedRoot = deserialize(serializedData, index, nullptr);
+
+	return;
+}
+
+static void test_pointer_(byte* const data)
 {
 	//data += 4;
 	*data = 'c';
 	cout << *data << endl;
 }
 
-static void test_point(byte* data)
+static void test_pointer(byte* data)
 {
 	data += 4;
 	*data = 'c';
@@ -245,7 +385,7 @@ static void test_point(byte* data)
 }
 
 //函数接收到的是指针 data 的一个副本。在函数内部，对 data 的偏移操作只会修改函数内部的副本，不会影响原始指针的值。
-static void test_point_c(const byte* data)
+static void test_pointer_c(const byte* data)
 {
 	data += 4;
 	//*data = 'c';
@@ -253,18 +393,19 @@ static void test_point_c(const byte* data)
 }
 
 //函数接收到的是指针 data 的引用。在函数内部，对 data 的偏移操作会直接修改原始指针的值，因为函数内部操作的是原始指针的引用。
-static void test_point_r(byte*& data)
+static void test_pointer_r(byte*& data)
 {
 	data += 4;
 	cout << *data << endl;
 }
 
-static void test_point_pp(byte** data)
+static void test_pointer_pp(byte** data)
 {
 	*data += 4;
 	cout << *data << endl;
 }
 
+//测试指针改值
 void testSerialization1()
 {
 	string str = "12345";
@@ -276,31 +417,10 @@ void testSerialization1()
 	//test_point(data);
 	//cout << *data << endl;
 	//test_point_r(data);
-	test_point_pp(&data);
+	test_pointer_pp(&data);
 	cout << *data << endl;
 	return;
 }
-
-// 测试函数
-void testSerialization() {
-	// 构建一个二叉树
-	TreeNode* root = new TreeNode(1);
-	root->left = new TreeNode(2);
-	root->right = new TreeNode(3);
-	root->left->left = new TreeNode(4);
-	root->left->right = new TreeNode(5);
-
-	// 序列化
-	std::string serialized = serialize(root);
-	std::cout << "Serialized: " << serialized << std::endl;
-
-	// 反序列化
-	TreeNode* deserialized = deserialize(serialized);
-	std::cout << "Deserialized: " << deserialized->val << std::endl;
-}
-
-//注册反射
-
 
 //memcpy拷贝覆盖
 class IGemetry
@@ -371,8 +491,9 @@ static void _test1()
 
 static int enrol = []()->int
 	{
-		testSerialization();
-		testSerialization1();
+		testSerialization0();
+		//testSerialization1();
+		testSerialization2();
 		_test1();
 		cout << "test_serialize finished.\n" << endl;
 		return 0;
