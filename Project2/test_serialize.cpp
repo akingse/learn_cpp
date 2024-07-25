@@ -191,12 +191,12 @@ struct TreeNode
 {
 	int m_nodeIndex;
 	std::vector<int> m_geomIndexes;
-	TreeNode* father;
-	TreeNode* left;
-	TreeNode* right;
+	TreeNode* m_father;
+	TreeNode* m_left;
+	TreeNode* m_right;
 
-	TreeNode() : m_nodeIndex(-1), father(nullptr), left(nullptr), right(nullptr) {}
-	TreeNode(int x) : m_nodeIndex(x), father(nullptr), left(nullptr), right(nullptr) {}
+	TreeNode() : m_nodeIndex(-1), m_father(nullptr), m_left(nullptr), m_right(nullptr) {}
+	TreeNode(int x) : m_nodeIndex(x), m_father(nullptr), m_left(nullptr), m_right(nullptr) {}
 };
 
 // 序列化二叉树为字符串
@@ -213,19 +213,17 @@ std::string serialize(TreeNode* root) {
 
 	//std::string serialized = std::to_string(root->m_nodeIndex);
 	std::string serialized(temp.begin(), temp.end());
-	serialized += " " + serialize(root->left);
-	serialized += " " + serialize(root->right);
+	serialized += " " + serialize(root->m_left);
+	serialized += " " + serialize(root->m_right);
 
 	return serialized;
 }
 // 反序列化字符串为二叉树
-TreeNode* deserialize(std::istringstream& iss) {
+TreeNode* deserialize_istring(std::istringstream& iss, TreeNode* father = nullptr) {
 	std::string token;
 	iss >> token;//默认情况下，istringstream空格（空白字符）被视为分隔符，逐个遍历；
-
 	if (token == "$") 
 		return nullptr;
-	
 	int count;
 	int nodeIndex;
 	const char* ptr = token.data();
@@ -236,10 +234,11 @@ TreeNode* deserialize(std::istringstream& iss) {
 
 	//TreeNode* root = new TreeNode(std::stoi(token));
 	TreeNode* root = new TreeNode;
+	root->m_father = father;	father = root;
 	root->m_geomIndexes = geomIndexes;
 	root->m_nodeIndex = nodeIndex;
-	root->left = deserialize(iss);
-	root->right = deserialize(iss);
+	root->m_left = deserialize_istring(iss, father);
+	root->m_right = deserialize_istring(iss, father);
 	return root;
 }
 // 反序列化字符串为二叉树（辅助函数）
@@ -247,7 +246,7 @@ TreeNode* deserialize(const std::string& data) {
 	//从序列化的字符串中按照特定规则提取数据，例如按空格分隔节点的值。字符串流提供了方便的方法来完成这个任务。
 	//在反序列化过程中，我们需要将字符串表示的节点值转换为整数或其他类型。字符串流可以将字符串解析为适当的数据类型，如std::stoi用于将字符串转换为整数。
 	std::istringstream iss(data);
-	return deserialize(iss);
+	return deserialize_istring(iss);
 }
 
 // 将int值序列化为std::string
@@ -266,12 +265,12 @@ std::string serializeBool(bool value) {
 void testSerialization0() {
 	// 构建一个二叉树
 	TreeNode* root = new TreeNode(1);
-	root->left = new TreeNode(2);
-	root->left->m_geomIndexes = { 2,22,222 };
-	root->right = new TreeNode(3);
-	root->left->left = new TreeNode(4);
-	root->left->left->m_geomIndexes = { 4,44 };
-	root->left->right = new TreeNode(5);
+	root->m_left = new TreeNode(2);
+	root->m_left->m_geomIndexes = { 2,22,222 };
+	root->m_right = new TreeNode(3);
+	root->m_left->m_left = new TreeNode(4);
+	root->m_left->m_left->m_geomIndexes = { 4,44 };
+	root->m_left->m_right = new TreeNode(5);
 
 	// 序列化
 	std::string serialized = serialize(root);
@@ -322,12 +321,12 @@ void serialize(TreeNode* root, std::vector<unsigned char>& data)
 	// 将节点值转换为字节并添加到data中
 	data.push_back(static_cast<char>(root->m_nodeIndex));
 	// 递归序列化左子树和右子树
-	serialize(root->left, data);
-	serialize(root->right, data);
+	serialize(root->m_left, data);
+	serialize(root->m_right, data);
 }
 
 // 反序列化字节流为二叉树
-TreeNode* deserialize(std::vector<unsigned char>& data, int& index, TreeNode* father) 
+TreeNode* deserialize(std::vector<unsigned char>& data, int& index, TreeNode* m_father) 
 {
 	if (index >= data.size() || data[index] == '$') {
 		index++;
@@ -335,13 +334,13 @@ TreeNode* deserialize(std::vector<unsigned char>& data, int& index, TreeNode* fa
 	}
 	// 从data中读取节点值并创建节点
 	TreeNode* node = new TreeNode(static_cast<int>(data[index]));
-	node->father = father; // 设置父指针
+	node->m_father = m_father; // 设置父指针
 
 	// 递归反序列化左子树和右子树
 	index++;
-	node->left = deserialize(data, index, node);
+	node->m_left = deserialize(data, index, node);
 	index++;
-	node->right = deserialize(data, index, node);
+	node->m_right = deserialize(data, index, node);
 
 	return node;
 }
@@ -349,11 +348,11 @@ TreeNode* deserialize(std::vector<unsigned char>& data, int& index, TreeNode* fa
 void testSerialization2()
 {
 	TreeNode* root = new TreeNode(1);
-	root->left = new TreeNode(2);
-	root->right = new TreeNode(3);
-	root->left->father = root;
-	root->right->father = root;
-	root->left->m_geomIndexes = { 1, 2, 3 }; // 示例 vector<int> 的赋值
+	root->m_left = new TreeNode(2);
+	root->m_right = new TreeNode(3);
+	root->m_left->m_father = root;
+	root->m_right->m_father = root;
+	root->m_left->m_geomIndexes = { 1, 2, 3 }; // 示例 vector<int> 的赋值
 
 	std::vector<unsigned char> serializedData;
 	serialize(root, serializedData);
