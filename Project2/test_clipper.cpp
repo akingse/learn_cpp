@@ -322,6 +322,22 @@ static void test5()
 	return;
 }
 
+static void test6()
+{
+	std::vector<RectBase2d> rectVct;
+	for (int i = 0; i < 15; i++)
+	{
+		RectBase2d rect;
+		rect.m_index = i;
+		rect.m_bound = { Vector2d(i,i), Vector2d(i,i) + Vector2d(1,1) };
+		rectVct.push_back(rect);
+
+	}
+	BVHTree2dM tree(rectVct);
+
+	return;
+}
+
 static int enrol = []()->int
 {
 	//test0();

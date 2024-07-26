@@ -276,23 +276,29 @@ void testSerialization0() {
 	std::string serialized = serialize(root);
 	std::cout << "Serialized: " << serialized << std::endl;
 
+	//const std::vector<unsigned char>* charVector = reinterpret_cast<const vector<unsigned char>*>(serialized.data());
+	//const std::string* strVector = reinterpret_cast<const string*>(charVector->data());
+	std::vector<unsigned char> charVector(serialized.size());
+	memcpy(charVector.data(), serialized.data(), serialized.size());
+	std::string strVector(charVector.begin(), charVector.end());
+
 	// ∑¥–Ú¡–ªØ
 	TreeNode* deserialized = deserialize(serialized);
+	TreeNode* deserialized1 = deserialize(strVector);
 	std::cout << "Deserialized: " << deserialized->m_nodeIndex << std::endl;
 
 	int intValue = -42;
 	bool boolValue = true;
 
-	std::vector<unsigned char> charVector(sizeof(int));
-	memcpy(charVector.data(), &intValue, sizeof(int));
-	std::string str(charVector.begin(), charVector.end());
-	int intDeser;
-	memcpy(&intDeser, str.data(), sizeof(int));
-
-	std::istringstream iss(str);
-	std::string token;
-	iss >> token;
-	std::stoi(token);
+	//std::vector<unsigned char> charVector(sizeof(int));
+	//memcpy(charVector.data(), &intValue, sizeof(int));
+	//std::string str(charVector.begin(), charVector.end());
+	//int intDeser;
+	//memcpy(&intDeser, str.data(), sizeof(int));
+	//std::istringstream iss(str);
+	//std::string token;
+	//iss >> token;
+	//std::stoi(token);
 
 	std::string serializedInt = serializeInt(intValue);
 	std::string serializedBool = serializeBool(boolValue);
