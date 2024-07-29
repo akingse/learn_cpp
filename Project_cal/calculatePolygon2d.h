@@ -156,6 +156,8 @@ namespace clash
 		{
 			PathsPart& partI = pathsPartVct[i];
 			// ymin -> ymax
+			if (partI.m_index == -1) //not support inner nest inner
+				continue;
 			double ymax = partI.m_box2d.max()[1];
 			for (int j = i + 1; j < pathsPartVct.size(); ++j)
 			{
@@ -163,14 +165,12 @@ namespace clash
 				if (ymax < partJ.m_ymin)
 					break;
 				//boundbox separate -> must separate
-				if (partI.m_box2d.intersects(partJ.m_box2d))
-					//boundbox intersect -> not always intersect
+                //boundbox intersect -> not always intersect
+				if (partI.m_box2d.intersects(partJ.m_box2d) &&
+					isPointInPolygon2D(profile[partJ.m_index][0], profile[partI.m_index]))
 				{
-					if (isPointInPolygon2D(profile[partJ.m_index][0], profile[partI.m_index]))
-					{
-						partI.m_parity.push_back(partJ.m_index);
-						partJ.m_index = -1; //means inner
-					}
+					partI.m_parity.push_back(partJ.m_index);
+					partJ.m_index = -1; //means inner
 				}
 			}
 		}
