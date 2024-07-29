@@ -151,6 +151,7 @@ namespace clash
 	inline std::vector<std::vector<int>> getPathsClassify(const std::vector<std::vector<Eigen::Vector2d>>& profile)
 	{
 		std::vector<PathsPart> pathsPartVct = _createPathsPartVct(profile);
+		//calculate profile whether inside
 		for (int i = 0; i < pathsPartVct.size(); ++i)
 		{
 			PathsPart& partI = pathsPartVct[i];
@@ -173,6 +174,7 @@ namespace clash
 				}
 			}
 		}
+		// process index according sign
 		std::vector<std::vector<int>> unionVct;
 		for (int i = 0; i < pathsPartVct.size(); ++i)
 		{
