@@ -203,15 +203,16 @@ struct TreeNode
 std::string serialize(TreeNode* root) {
 	if (root == nullptr) 
 		return "$";
-    std::vector<unsigned char> temp(sizeof(int) + sizeof(int) * root->m_geomIndexes.size() + sizeof(int));
+    std::vector<unsigned char> temp(
+		sizeof(int) + 
+        sizeof(int) * (1 + root->m_geomIndexes.size()));
     unsigned char* ptr = temp.data();
+	//vector
     int count = root->m_geomIndexes.size();
     memcpy(ptr, &count, sizeof(int)); ptr += sizeof(int);
     memcpy(ptr, root->m_geomIndexes.data(), sizeof(int) * root->m_geomIndexes.size()); ptr += sizeof(int) * root->m_geomIndexes.size();
-    memcpy(ptr, &root->m_nodeIndex, sizeof(int)); ptr += sizeof(int);
-    //data.insert(data.end(), temp.begin(), temp.end());
-
-	//std::string serialized = std::to_string(root->m_nodeIndex);
+	//member
+	memcpy(ptr, &root->m_nodeIndex, sizeof(int)); ptr += sizeof(int);
 	std::string serialized(temp.begin(), temp.end());
 	serialized += " " + serialize(root->m_left);
 	serialized += " " + serialize(root->m_right);
@@ -287,24 +288,6 @@ void testSerialization0() {
 	TreeNode* deserialized1 = deserialize(strVector);
 	std::cout << "Deserialized: " << deserialized->m_nodeIndex << std::endl;
 
-	int intValue = -42;
-	bool boolValue = true;
-
-	//std::vector<unsigned char> charVector(sizeof(int));
-	//memcpy(charVector.data(), &intValue, sizeof(int));
-	//std::string str(charVector.begin(), charVector.end());
-	//int intDeser;
-	//memcpy(&intDeser, str.data(), sizeof(int));
-	//std::istringstream iss(str);
-	//std::string token;
-	//iss >> token;
-	//std::stoi(token);
-
-	std::string serializedInt = serializeInt(intValue);
-	std::string serializedBool = serializeBool(boolValue);
-
-	std::cout << "Serialized int value: " << serializedInt << std::endl;
-	std::cout << "Serialized bool value: " << serializedBool << std::endl;
 }
 
 //FatherLeftRight
