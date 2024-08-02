@@ -365,24 +365,24 @@ std::vector<ModelMesh> read_ModelMesh(const std::string& fileName)
 			std::vector<Eigen::Vector2d> vbo2_;
 			std::vector<Eigen::Vector3d> fno_;
 			std::vector<std::array<int, 3>> ibo_;
-			for (int i = 0; i < vbo->vbos()->size(); i++)
+			for (int i = 0; i < (int)vbo->vbos()->size(); i++)
 			{
 				auto pt = vbo->vbos()->Get(i);
 				vbo_.push_back(Eigen::Vector3d(pt->x(), pt->y(), pt->z()));
 			}
-			for (int i = 0; i < fno->fnos()->size(); i++)
+			for (int i = 0; i < (int)fno->fnos()->size(); i++)
 			{
 				auto pt = fno->fnos()->Get(i);
 				fno_.push_back(Eigen::Vector3d(pt->x(), pt->y(), pt->z()));
 			}
-			for (int i = 0; i < ibo->ibos()->size(); i++)
+			for (int i = 0; i < (int)ibo->ibos()->size(); i++)
 			{
 				auto id = ibo->ibos()->Get(i);
 				ibo_.push_back(std::array<int, 3>{id->id0(), id->id1(), id->id2()});
 			}
 			std::vector<int> _iboRaw;
 			auto iboRaw = mesh->ibo_raw();
-			for (int i = 0; i < iboRaw->size(); i++)
+			for (int i = 0; i < (int)iboRaw->size(); i++)
 			{
 				_iboRaw.push_back(iboRaw->Get(i));
 			}

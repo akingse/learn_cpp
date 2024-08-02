@@ -111,8 +111,7 @@ namespace clash
 		return 0.5 * std::fabs(area);
 	}
 
-
-	//for curvearray Classify
+	//for curvearray classify
 	struct PathsPart
 	{
 		int m_index;
