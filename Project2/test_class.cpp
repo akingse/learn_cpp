@@ -482,3 +482,44 @@ int main_class()
 
 	return 0;
 }
+
+//test union
+struct MyVector3d
+{
+	double x;
+	double y;
+	double z;
+};
+
+union MyUnion {
+	int i;
+	float f;
+	double d;
+	char* str;// [20] ;
+	MyVector3d vec3;
+	//vector<int> vec; //不可使用
+};
+
+static void _test1()
+{
+	int sz1 = sizeof(MyUnion); //最大成员；
+	MyUnion u;
+	u.i = 10; // 现在u存储的是int类型的数据  
+	sz1 = sizeof(u);
+	u.f = 220.5; 
+	sz1 = sizeof(u);
+	u.d = 123.1;
+	sz1 = sizeof(u);
+	string str = "hello world";
+	u.str = const_cast<char*>(str.c_str());
+	sz1 = sizeof(u);
+
+	return;
+}
+
+static int enrol = []()->int
+	{
+		_test1();
+		cout << "test_class finished.\n" << endl;
+		return 0;
+	}();
