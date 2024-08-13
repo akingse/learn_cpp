@@ -358,6 +358,29 @@ void testSerialization2()
 	return;
 }
 
+//stringÓëstd::vector<unsigned char>×ª»»
+void testSerialization3()
+{
+	//char -127~128
+	string str;
+	str.push_back(-1);
+	str.push_back(-2);
+	str.insert(0, "hello");
+
+	//std::vector<unsigned char> bin;
+	//bin.push_back(-1);
+	//bin.push_back(-2);
+	//bin.push_back('h');
+	//bin.push_back('e');
+
+	std::vector<unsigned char> bin(str.size());
+	memcpy(bin.data(), str.data(), str.size());
+	string str_de(bin.size(), ' ');
+	memcpy(const_cast<char*>(str_de.data()), bin.data(), bin.size());
+
+	return;
+}
+
 static void test_pointer_(byte* const data)
 {
 	//data += 4;
@@ -482,6 +505,7 @@ static int enrol = []()->int
 		testSerialization0();
 		//testSerialization1();
 		testSerialization2();
+		testSerialization3();
 		_test1();
 		cout << "test_serialize finished.\n" << endl;
 		return 0;
