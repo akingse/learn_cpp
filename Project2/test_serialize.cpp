@@ -203,30 +203,32 @@ struct TreeNode
 std::string serialize(TreeNode* root) {
 	if (root == nullptr) 
 		return "$";
-    std::vector<unsigned char> temp(
+    //std::vector<unsigned char> temp(
+    std::string serialized(
 		sizeof(int) + 
-        sizeof(int) * (1 + root->m_geomIndexes.size()));
-    unsigned char* ptr = temp.data();
+        sizeof(int) * (1 + root->m_geomIndexes.size()), 0);
+    //unsigned char* ptr = temp.data();
+    char* ptr = const_cast<char*>(serialized.data());
 	//vector
     int count = root->m_geomIndexes.size();
     memcpy(ptr, &count, sizeof(int)); ptr += sizeof(int);
     memcpy(ptr, root->m_geomIndexes.data(), sizeof(int) * root->m_geomIndexes.size()); ptr += sizeof(int) * root->m_geomIndexes.size();
 	//member
 	memcpy(ptr, &root->m_nodeIndex, sizeof(int)); ptr += sizeof(int);
-	std::string serialized(temp.begin(), temp.end());
-	serialized += " " + serialize(root->m_left);
-	serialized += " " + serialize(root->m_right);
-
+	//std::string serialized(temp.begin(), temp.end());
+	serialized += char(-128) + serialize(root->m_left);
+	serialized += char(-128) + serialize(root->m_right);
 	return serialized;
 }
+
 // 反序列化字符串为二叉树
 TreeNode* deserialize_istring(std::istringstream& iss, TreeNode* father = nullptr) {
 	std::string token;
-	iss >> token;//默认情况下，istringstream空格（空白字符）被视为分隔符，逐个遍历；
+	//iss >> token;//默认情况下，istringstream空格（空白字符）被视为分隔符，逐个遍历；
+	std::getline(iss, token, char(-128));//
 	if (token == "$") 
 		return nullptr;
-	int count;
-	int nodeIndex;
+	int count, nodeIndex;
 	const char* ptr = token.data();
 	memcpy(&count, ptr, sizeof(int)); ptr += sizeof(int);
 	std::vector<int> geomIndexes(count);
@@ -263,12 +265,13 @@ std::string serializeBool(bool value) {
 }
 
 // 测试序列化函数
-void testSerialization0() {
+void testSerialization0() 
+{
 	// 构建一个二叉树
 	TreeNode* root = new TreeNode(1);
 	root->m_left = new TreeNode(2);
 	root->m_left->m_geomIndexes = { 2,22,222 };
-	root->m_right = new TreeNode(3);
+	root->m_right = new TreeNode(-128);
 	root->m_left->m_left = new TreeNode(4);
 	root->m_left->m_left->m_geomIndexes = { 4,44 };
 	root->m_left->m_right = new TreeNode(5);
@@ -277,17 +280,38 @@ void testSerialization0() {
 	std::string serialized = serialize(root);
 	std::cout << "Serialized: " << serialized << std::endl;
 
-	//const std::vector<unsigned char>* charVector = reinterpret_cast<const vector<unsigned char>*>(serialized.data());
-	//const std::string* strVector = reinterpret_cast<const string*>(charVector->data());
 	std::vector<unsigned char> charVector(serialized.size());
 	memcpy(charVector.data(), serialized.data(), serialized.size());
-	std::string strVector(charVector.begin(), charVector.end());
+	//迭代器构造
+	//std::string strVector(charVector.begin(), charVector.end());
+	//memcpy
+	std::string strVector(charVector.size(), 0);
+	memcpy(const_cast<char*>(strVector.data()), charVector.data(), charVector.size());
 
 	// 反序列化
 	TreeNode* deserialized = deserialize(serialized);
 	TreeNode* deserialized1 = deserialize(strVector);
 	std::cout << "Deserialized: " << deserialized->m_nodeIndex << std::endl;
 
+	// 空列表data为空指针
+	vector<int> vecInt(0);
+    int* ptr = vecInt.data();
+	//iss >> token默认分隔符
+	string str;
+	str.push_back('0');
+	str.push_back('1');
+	str.push_back('0');
+	for (int i = 0; i > -129; i--)
+		str.push_back(i);
+	std::istringstream iss(str);
+	std::string word;
+	vector<string> strRec;
+	while (iss >> word) 
+	{
+		strRec.push_back(word);
+	}
+
+	return;
 }
 
 //FatherLeftRight
@@ -367,20 +391,29 @@ void testSerialization3()
 	str.push_back(-2);
 	str.insert(0, "hello");
 
+	//string token = "$";
+	//auto token = "$";
+	const char token[2] = "$";
+	const char token1 = '$';
+
 	//std::vector<unsigned char> bin;
 	//bin.push_back(-1);
 	//bin.push_back(-2);
 	//bin.push_back('h');
 	//bin.push_back('e');
 
+	//Byte
 	std::vector<unsigned char> bin(str.size());
 	memcpy(bin.data(), str.data(), str.size());
-	string str_de(bin.size(), ' ');
+	string str_de(bin.size(), 0);
 	memcpy(const_cast<char*>(str_de.data()), bin.data(), bin.size());
 
 	return;
 }
 
+//------------------------------------------------------------------------------------------
+
+//指针传值
 static void test_pointer_(byte* const data)
 {
 	//data += 4;
@@ -503,7 +536,7 @@ static void _test1()
 static int enrol = []()->int
 	{
 		testSerialization0();
-		//testSerialization1();
+		testSerialization1();
 		testSerialization2();
 		testSerialization3();
 		_test1();
