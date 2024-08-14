@@ -12,6 +12,7 @@ std::vector<unsigned char> serialize(const BPGeometricPrimitiveSer& primitive)
 	memcpy(ptr, primitive.m_remark.data(), primitive.m_remark.size());  ptr += primitive.m_remark.size();
 	return infor;
 }
+
 BPGeometricPrimitiveSer deserialize(const std::vector<unsigned char>& infor)
 {
 	//反序列化 infor
@@ -142,49 +143,6 @@ int main_ser()
 	return 0;
 }
 
-	//fail
-	//std::vector<char> chars = { 'h', 'e', 'l', 'l', 'o'};
-	//std::vector<unsigned char> inform(chars.size());
-	////using memcpy
-	//unsigned char* ptrs = inform.data();
-	//memcpy(ptrs, chars.data(), chars.size());  ptrs += chars.size();
-	//de
-	//const unsigned char* ptr2 = inform.data();
-	//long long n = inform.size();
-	//std::vector<char> remark2 = std::vector<char>(n,(char)ptr2);
-
-	
-    /*
-    非嵌套类序列化
-
-    //序列化 模板类强转 reinterpret_cast
-    virtual std::vector<unsigned char> _serialize() const override
-    {
-        const unsigned char* ptr = reinterpret_cast<const unsigned char*>(&m_data);
-        return std::vector<unsigned char>(ptr, ptr + sizeof(T));
-    }
-    //反序列化
-    static __Primitive<T>* _deserialize(const std::vector<unsigned char> buf)
-    {
-        T data;
-        memcpy(&data, buf.data(), sizeof(T));
-        return new __Primitive<T>(data);
-    }
-
-    固定格式数据 using memcpy
-    unsigned char* ptr = infor.data();
-    memcpy(ptr, &identification, sizeof(size_t));       ptr += sizeof(size_t);
-    memcpy(ptr, &hollow, sizeof(bool));                 ptr += sizeof(bool);
-
-    ProjectManagerImplementation工程文件序列化
-    std::tuple<BPParaMD5, std::vector<unsigned char>, std::vector<unsigned char>> temp = __PrimitiveInterface::serialize(obj);
-    std::get<2>(temp).resize(std::get<2>(temp).size() + sizeof(BPParaMD5));
-    memcpy(std::get<2>(temp).data() + std::get<2>(temp).size() - sizeof(BPParaMD5), &std::get<0>(temp), sizeof(BPParaMD5));
-    return std::get<2>(temp);
-
-
-    */
-
 // 序列化-二叉树
 
 struct TreeNode 
@@ -271,7 +229,7 @@ void testSerialization0()
 	TreeNode* root = new TreeNode(1);
 	root->m_left = new TreeNode(2);
 	root->m_left->m_geomIndexes = { 2,22,222 };
-	root->m_right = new TreeNode(-128);
+	root->m_right = new TreeNode(-1);
 	root->m_left->m_left = new TreeNode(4);
 	root->m_left->m_left->m_geomIndexes = { 4,44 };
 	root->m_left->m_right = new TreeNode(5);
@@ -411,6 +369,34 @@ void testSerialization3()
 	return;
 }
 
+//int memcpy是否为负
+void testSerialization4()
+{
+	int count = 0;
+	for (int i = 0; i < 1e6; i++)
+	{
+		vector<char> tochar(4);
+		memcpy(tochar.data(), &i, sizeof(int));
+		for (int j = 0; j < 4; j++)
+		{
+			if (tochar[j] < 0)
+				count++; //int 128==char -128
+		}
+
+	}
+	return;
+}
+
+//------------------------------------------------------------------------------------------
+
+//转Json，调用接口
+//C:\Users\Aking\source\repos\TPL\boost-1.81.0\libs\json\include\boost
+//C:\Users\Aking\source\repos\TPL\boost-1.81.0\libs\json\include\boost\json
+//#include <json.hpp>
+//using namespace boost;
+//using namespace boost::json;
+
+
 //------------------------------------------------------------------------------------------
 
 //指针传值
@@ -539,6 +525,7 @@ static int enrol = []()->int
 		testSerialization1();
 		testSerialization2();
 		testSerialization3();
+		testSerialization4();
 		_test1();
 		cout << "test_serialize finished.\n" << endl;
 		return 0;
