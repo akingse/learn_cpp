@@ -272,74 +272,6 @@ void testSerialization0()
 	return;
 }
 
-//FatherLeftRight
-void serialize(TreeNode* root, std::vector<unsigned char>& data) 
-{
-	if (root == nullptr) {
-		data.push_back('$'); // 用特殊字符表示空节点
-		return;
-	}
-	//// 将节点值转换为字节并添加到data中
-	//std::vector<unsigned char> temp(sizeof(int) + sizeof(int) * root->m_geomIndexes.size() + sizeof(int));
-	//unsigned char* ptr = temp.data();
-	//int count = root->m_geomIndexes.size();
-	//memcpy(ptr, &count, sizeof(int)); ptr += sizeof(int);
-	//memcpy(ptr, root->m_geomIndexes.data(), sizeof(int) * root->m_geomIndexes.size()); ptr += sizeof(int) * root->m_geomIndexes.size();
-	//memcpy(ptr, &root->m_nodeIndex, sizeof(int)); ptr += sizeof(int);
-	//data.insert(data.end(),temp.begin(),temp.end());
-
-
-	// 将节点值转换为字节并添加到data中
-	data.push_back(static_cast<char>(root->m_nodeIndex));
-	// 递归序列化左子树和右子树
-	serialize(root->m_left, data);
-	serialize(root->m_right, data);
-}
-
-// 反序列化字节流为二叉树
-TreeNode* deserialize(std::vector<unsigned char>& data, int& index, TreeNode* m_father) 
-{
-	if (index >= data.size() || data[index] == '$') {
-		index++;
-		return nullptr;
-	}
-	// 从data中读取节点值并创建节点
-	TreeNode* node = new TreeNode(static_cast<int>(data[index]));
-	node->m_father = m_father; // 设置父指针
-
-	// 递归反序列化左子树和右子树
-	index++;
-	node->m_left = deserialize(data, index, node);
-	index++;
-	node->m_right = deserialize(data, index, node);
-
-	return node;
-}
-
-void testSerialization2()
-{
-	TreeNode* root = new TreeNode(1);
-	root->m_left = new TreeNode(2);
-	root->m_right = new TreeNode(3);
-	root->m_left->m_father = root;
-	root->m_right->m_father = root;
-	root->m_left->m_geomIndexes = { 1, 2, 3 }; // 示例 vector<int> 的赋值
-
-	std::vector<unsigned char> serializedData;
-	serialize(root, serializedData);
-
-	// 输出序列化后的字节流
-	std::cout << "Serialized data: ";
-	for (char byte : serializedData)
-		std::cout << byte << " ";
-	std::cout << std::endl;
-
-	int index = 0;
-	TreeNode* deserializedRoot = deserialize(serializedData, index, nullptr);
-
-	return;
-}
-
 //string与std::vector<unsigned char>转换
 void testSerialization3()
 {
@@ -372,15 +304,26 @@ void testSerialization3()
 //int memcpy是否为负
 void testSerialization4()
 {
+	int num = 12345;
+	char buffer[20]; // 20 是缓冲区大小，根据实际情况调整
+	itoa(num, buffer, 10);
+	string nums = to_string(num);
+    int numde = std::stoi(buffer);
+    int numde1 = std::stoi(nums);
+
 	int count = 0;
-	for (int i = 0; i < 1e6; i++)
+	for (int i = 1; i < 1e6; i++)
 	{
-		vector<char> tochar(4);
+		vector<byte> tochar(4);
 		memcpy(tochar.data(), &i, sizeof(int));
+        char ci = static_cast<char>(i);
+		
 		for (int j = 0; j < 4; j++)
 		{
 			if (tochar[j] < 0)
 				count++; //int 128==char -128
+			if (tochar[j] == 0)
+				count++;
 		}
 
 	}
@@ -523,7 +466,7 @@ static int enrol = []()->int
 	{
 		testSerialization0();
 		testSerialization1();
-		testSerialization2();
+		//testSerialization2();
 		testSerialization3();
 		testSerialization4();
 		_test1();
