@@ -145,6 +145,7 @@ int main_ser()
 
 // 序列化-二叉树
 
+static atomic<int> s_allnodes_index = 1;
 struct TreeNode 
 {
 	int m_nodeIndex;
@@ -153,8 +154,16 @@ struct TreeNode
 	TreeNode* m_left;
 	TreeNode* m_right;
 
-	TreeNode() : m_nodeIndex(-1), m_father(nullptr), m_left(nullptr), m_right(nullptr) {}
+	TreeNode() : m_nodeIndex(s_allnodes_index++), m_father(nullptr), m_left(nullptr), m_right(nullptr) {}
 	TreeNode(int x) : m_nodeIndex(x), m_father(nullptr), m_left(nullptr), m_right(nullptr) {}
+    static TreeNode* create(TreeNode* left, TreeNode* right, TreeNode* father = nullptr)
+	{
+		TreeNode* ptr = new TreeNode;
+		ptr->m_father = father;
+		ptr->m_left = left;
+		ptr->m_right = right;
+		return ptr;
+	}
 };
 
 // 序列化二叉树为字符串
@@ -330,6 +339,37 @@ void testSerialization4()
 	return;
 }
 
+//生成随机二叉树
+TreeNode* generateRandomTree(int maxDepth, int currentDepth = 1)
+{
+	// 如果当前层级超过最大层级，返回空指针
+	if (currentDepth > maxDepth) 
+		return nullptr;
+	// 随机生成节点值
+	//int nodeValue = rand() % 100; // 生成随机值（0-99）
+	TreeNode* node = new TreeNode;//
+	// 随机决定是否创建左子树和右子树
+	if (rand() % 2 == 0) 
+	{ // 50% 的概率创建左子树
+        node->m_left = generateRandomTree(maxDepth, currentDepth + 1);
+        node->m_right = generateRandomTree(maxDepth, currentDepth + 1);
+	}
+	return node;
+}
+
+void testSerialization5()
+{
+	srand(int(time(0))); // 设置随机种子
+	// 随机选择层级在 2 到 10 之间
+	int maxDepth = 4;// +rand() % 9; // 最大深度（从 2 到 10）
+	std::cout << "Generating a random binary tree with up to " << maxDepth << " levels." << std::endl;
+
+	// 生成随机二叉树
+	TreeNode* root = generateRandomTree(maxDepth);
+
+	return;
+}
+
 //------------------------------------------------------------------------------------------
 
 //转Json，调用接口
@@ -469,6 +509,7 @@ static int enrol = []()->int
 		//testSerialization2();
 		testSerialization3();
 		testSerialization4();
+		testSerialization5();
 		_test1();
 		cout << "test_serialize finished.\n" << endl;
 		return 0;
