@@ -1,7 +1,7 @@
 #include "pch.h"
 using namespace std;
 
-std::vector<unsigned char> serialize(const BPGeometricPrimitiveSer& primitive)
+std::vector<unsigned char> _bp_serialize(const BPGeometricPrimitiveSer& primitive)
 {
 	//序列化 infor
 	std::vector<unsigned char> infor(sizeof(bool) + sizeof(size_t) + primitive.m_remark.size()); //vector<bool> a(10);//指定size
@@ -13,7 +13,7 @@ std::vector<unsigned char> serialize(const BPGeometricPrimitiveSer& primitive)
 	return infor;
 }
 
-BPGeometricPrimitiveSer deserialize(const std::vector<unsigned char>& infor)
+BPGeometricPrimitiveSer _bp_deserialize(const std::vector<unsigned char>& infor)
 {
 	//反序列化 infor
 	bool hollow;
@@ -21,7 +21,7 @@ BPGeometricPrimitiveSer deserialize(const std::vector<unsigned char>& infor)
 	const unsigned char* ptr = infor.data();
 	memcpy(&hollow, ptr, sizeof(bool));					ptr += sizeof(bool);
 	memcpy(&identification, ptr, sizeof(size_t));		ptr += sizeof(size_t);
-	long long n = infor.size()-(ptr - infor.data()); //计算string字长
+    long long n = infor.size() - (ptr - infor.data()); //计算string字长
 	string remark = std::string((const char*)ptr, n);
 	// cons
 	BPGeometricPrimitiveSer res;
@@ -31,47 +31,6 @@ BPGeometricPrimitiveSer deserialize(const std::vector<unsigned char>& infor)
 	return res;
 }
 
-//
-//template< typename T >
-//struct tree_node
-//{
-//	T t;
-//	std::vector<tree_node> children;
-//	void walk_depth_first() const;
-//};
-////简单的遍历将使用递归…
-//template< typename T >
-//void tree_node<T>::walk_depth_first() const
-//{
-//	cout << t;
-//	for (auto& n : children) 
-//		n.walk_depth_first();
-//}
-//
-//template <typename T>
-//struct TreeNode
-//{
-//	T* DATA; // data of type T to be stored at this TreeNode
-//
-//	vector< TreeNode<T>* > children;
-//
-//	// insertion logic for if an insert is asked of me.
-//	// may append to children, or may pass off to one of the child nodes
-//	void insert(T* newData);
-//
-//};
-//
-//template <typename T>
-//struct Tree
-//{
-//	TreeNode<T>* root;
-//
-//	// TREE LEVEL functions
-//	void clear() { delete root; root = 0; }
-//
-//	void insert(T* data) { if (root)root->insert(data); }
-//};
-
 int main_ser()
 {
 
@@ -79,8 +38,8 @@ int main_ser()
 	size_t identification = 1234567890;
 	string remark = "string";
 	BPGeometricPrimitiveSer bp(hollow, identification, remark);
-	std::vector<unsigned char> data= serialize(bp);
-	BPGeometricPrimitiveSer de = deserialize(data);
+	std::vector<unsigned char> data= _bp_serialize(bp);
+	BPGeometricPrimitiveSer de = _bp_deserialize(data);
 
 	// vector 整型构造
 	//std::vector<unsigned char> infor1(remark.size()); //byte 6
@@ -143,7 +102,78 @@ int main_ser()
 	return 0;
 }
 
+//------------------------------------------------------------------------------------------
+
+//memcpy拷贝覆盖
+class IGemetry
+{
+};
+
+class ICsgTree
+{
+public:
+	//int id = 0; //默认无对齐，各占8byte
+	virtual ~ICsgTree() = 0;
+};
+
+//min(n in #pragma pack(n),结构体中的最长类型)
+#pragma pack(1)
+class GeCsgTree :public ICsgTree
+{
+private:
+	int tolerance;
+	int oparation;
+	vector<shared_ptr<ICsgTree>> m_leftNodes;
+	vector<shared_ptr<ICsgTree>> m_rightNodes;
+public:
+	virtual ~GeCsgTree() override {};
+};
+#pragma pack() //end
+
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+struct CsgTreeData
+{
+	vector<shared_ptr<ICsgTree>> m_leftNodes;
+	vector<shared_ptr<ICsgTree>> m_rightNodes;
+	//bool isLeft;
+};
+
+static void testSerialization1()
+{
+	int sz0 = sizeof(ICsgTree);
+	int sz1 = sizeof(GeCsgTree);
+	int sz2 = sizeof(CsgTreeData);
+	int sz3 = sizeof(vector<shared_ptr<ICsgTree>>);
+	CsgTreeData data;
+	// 生成GUID
+	boost::uuids::random_generator generator;
+	boost::uuids::uuid uuid = generator();
+
+	// 将GUID转换为字符串
+	std::string uuidStr = boost::uuids::to_string(uuid);
+
+	// 输出GUID
+	std::cout << "Generated GUID: " << uuidStr << std::endl;//Generated GUID: 57186994-bef7-4134-832b-fc3aa6866063
+	/*
+	UUID（Universally Unique Identifier）的标准表示形式是一个包含32个十六进制（hexadecimal）字符的字符串，
+	分为五个部分，用连字符分隔，形如："xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"。
+
+	前8个字符表示UUID的32位数据的前32位。
+	第9至12个字符表示UUID的32位数据的接下来的16位。
+	第13至16个字符表示UUID的32位数据的接下来的16位。
+	第17至20个字符表示UUID的32位数据的接下来的16位。
+	最后12个字符表示UUID的32位数据的接下来的48位。
+	*/
+
+	return;
+}
+
+
+//----------------------------------------------------------------------------------------------
 // 序列化-二叉树
+//----------------------------------------------------------------------------------------------
 
 static atomic<int> s_allnodes_index = 1;
 struct TreeNode 
@@ -165,6 +195,24 @@ struct TreeNode
 		return ptr;
 	}
 };
+
+//生成随机二叉树
+TreeNode* generateRandomTree(int maxDepth, int currentDepth = 1)
+{
+	// 如果当前层级超过最大层级，返回空指针
+	if (currentDepth > maxDepth)
+		return nullptr;
+	// 随机生成节点值
+	//int nodeValue = rand() % 100; // 生成随机值（0-99）
+	TreeNode* node = new TreeNode;//
+	// 随机决定是否创建左子树和右子树
+	if (rand() % 2 == 0)
+	{ // 50% 的概率创建左子树
+		node->m_left = generateRandomTree(maxDepth, currentDepth + 1);
+		node->m_right = generateRandomTree(maxDepth, currentDepth + 1);
+	}
+	return node;
+}
 
 // 序列化二叉树为字符串
 std::string serialize(TreeNode* root) {
@@ -219,20 +267,8 @@ TreeNode* deserialize(const std::string& data) {
 	return deserialize_istring(iss);
 }
 
-// 将int值序列化为std::string
-std::string serializeInt(int value) {
-	std::stringstream ss;
-	ss << value;
-	return ss.str();
-}
-
-// 将bool值序列化为std::string
-std::string serializeBool(bool value) {
-	return value ? "true" : "false";
-}
-
 // 测试序列化函数
-void testSerialization0() 
+void testSerialization2() 
 {
 	// 构建一个二叉树
 	TreeNode* root = new TreeNode(1);
@@ -339,24 +375,6 @@ void testSerialization4()
 	return;
 }
 
-//生成随机二叉树
-TreeNode* generateRandomTree(int maxDepth, int currentDepth = 1)
-{
-	// 如果当前层级超过最大层级，返回空指针
-	if (currentDepth > maxDepth) 
-		return nullptr;
-	// 随机生成节点值
-	//int nodeValue = rand() % 100; // 生成随机值（0-99）
-	TreeNode* node = new TreeNode;//
-	// 随机决定是否创建左子树和右子树
-	if (rand() % 2 == 0) 
-	{ // 50% 的概率创建左子树
-        node->m_left = generateRandomTree(maxDepth, currentDepth + 1);
-        node->m_right = generateRandomTree(maxDepth, currentDepth + 1);
-	}
-	return node;
-}
-
 void testSerialization5()
 {
 	srand(int(time(0))); // 设置随机种子
@@ -399,10 +417,9 @@ public:
 		TreeNode* node = deserialize(buffer);
 		return shared_ptr<TreeNode>(node);
 	}
-
 };
 
-static void testSerialization11()
+static void testSerialization6()
 {
 	DependencyRegistry& reg = DependencyRegistry::getInstance();
 	Implementation* ptr = reg.get<Implementation>("csg");
@@ -416,149 +433,17 @@ static void testSerialization11()
 	return;
 }
 
-//------------------------------------------------------------------------------------------
-
-//转Json，调用接口
-//C:\Users\Aking\source\repos\TPL\boost-1.81.0\libs\json\include\boost
-//C:\Users\Aking\source\repos\TPL\boost-1.81.0\libs\json\include\boost\json
-//#include <json.hpp>
-//using namespace boost;
-//using namespace boost::json;
-
-
-//------------------------------------------------------------------------------------------
-
-//指针传值
-static void test_pointer_(byte* const data)
-{
-	//data += 4;
-	*data = 'c';
-	cout << *data << endl;
-}
-
-static void test_pointer(byte* data)
-{
-	data += 4;
-	*data = 'c';
-	cout << *data << endl;
-}
-
-//函数接收到的是指针 data 的一个副本。在函数内部，对 data 的偏移操作只会修改函数内部的副本，不会影响原始指针的值。
-static void test_pointer_c(const byte* data)
-{
-	data += 4;
-	//*data = 'c';
-	cout << *data << endl;
-}
-
-//函数接收到的是指针 data 的引用。在函数内部，对 data 的偏移操作会直接修改原始指针的值，因为函数内部操作的是原始指针的引用。
-static void test_pointer_r(byte*& data)
-{
-	data += 4;
-	cout << *data << endl;
-}
-
-static void test_pointer_pp(byte** data)
-{
-	*data += 4;
-	cout << *data << endl;
-}
-
-//测试指针改值
-void testSerialization1()
-{
-	string str = "12345";
-	byte* data = new byte;
-	memcpy(data, str.data(), str.size());
-
-	//test_point_c(data);
-	//cout << *data << endl;
-	//test_point(data);
-	//cout << *data << endl;
-	//test_point_r(data);
-	test_pointer_pp(&data);
-	cout << *data << endl;
-	return;
-}
-
-//memcpy拷贝覆盖
-class IGemetry
-{
-
-};
-
-class ICsgTree
-{
-public:
-	//int id = 0; //默认无对齐，各占8byte
-	virtual ~ICsgTree() = 0;
-};
-
-//min(n in #pragma pack(n),结构体中的最长类型)
-#pragma pack(1)
-class GeCsgTree :public ICsgTree
-{
-private:
-	int tolerance;
-	int oparation;
-	vector<shared_ptr<ICsgTree>> m_leftNodes;
-	vector<shared_ptr<ICsgTree>> m_rightNodes;
-public:
-	virtual ~GeCsgTree() override {};
-};
-#pragma pack() //end
-
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
-struct CsgTreeData
-{
-	vector<shared_ptr<ICsgTree>> m_leftNodes;
-	vector<shared_ptr<ICsgTree>> m_rightNodes;
-	//bool isLeft;
-};
-
-static void testSerialization6()
-{
-	int sz0 = sizeof(ICsgTree);
-	int sz1 = sizeof(GeCsgTree);
-	int sz2 = sizeof(CsgTreeData);
-	int sz3 = sizeof(vector<shared_ptr<ICsgTree>>);
-	CsgTreeData data;
-	// 生成GUID
-	boost::uuids::random_generator generator;
-	boost::uuids::uuid uuid = generator();
-
-	// 将GUID转换为字符串
-	std::string uuidStr = boost::uuids::to_string(uuid);
-
-	// 输出GUID
-	std::cout << "Generated GUID: " << uuidStr << std::endl;//Generated GUID: 57186994-bef7-4134-832b-fc3aa6866063
-	/*
-	UUID（Universally Unique Identifier）的标准表示形式是一个包含32个十六进制（hexadecimal）字符的字符串，
-	分为五个部分，用连字符分隔，形如："xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"。
-
-	前8个字符表示UUID的32位数据的前32位。
-	第9至12个字符表示UUID的32位数据的接下来的16位。
-	第13至16个字符表示UUID的32位数据的接下来的16位。
-	第17至20个字符表示UUID的32位数据的接下来的16位。
-	最后12个字符表示UUID的32位数据的接下来的48位。
-	*/
-
-	return;
-}
 
 static int enrol = []()->int
 	{
 		DependencyRegistry::getInstance().set("csg", new Implementation());
 
-		testSerialization0();
 		testSerialization1();
-		//testSerialization2();
+		testSerialization2();
 		testSerialization3();
 		testSerialization4();
 		testSerialization5();
-		testSerialization11();
+		testSerialization6();
 		cout << "test_serialize finished.\n" << endl;
 		return 0;
 	}();

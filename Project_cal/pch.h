@@ -22,7 +22,7 @@
 #define USING_POINTER_VERION
 #define TEST_CALCULATION_DEBUG
 
-#include "clashTypeDefine.h" //only header
+#include "clashTypeDefine.h" // header only
 #include "calculateVectorMatrix.h" // namespace eigen
 #include "calculatePointLinePlane.h"
 #include "calculatePolygon2d.h"
