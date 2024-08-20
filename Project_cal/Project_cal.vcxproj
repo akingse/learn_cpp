@@ -154,7 +154,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\auto_include\Project1_API.h" />
     <ClInclude Include="calculateDataStructure.h" />
     <ClInclude Include="calculateDynamicAccuracy.h" />
     <ClInclude Include="calculateMeshTopology.h" />
@@ -164,7 +163,7 @@
     <ClInclude Include="calculateTriangle.h" />
     <ClInclude Include="calculateVectorMatrix.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Poject_CAL_API.h" />
+    <ClInclude Include="Project_CAL_API.h" />
     <ClInclude Include="clashTypeDefine.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

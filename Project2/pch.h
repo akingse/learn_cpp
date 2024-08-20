@@ -59,19 +59,23 @@
 //#include <CGAL/>
 //#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 
+//import
+#include "Project_CAL_API.h"
 #include "Project1_API.h" //add head include: $(SolutionDir)Project1
-#include "Poject_CAL_API.h"
-#include "my_geometry.h" //export
-#include "test_serialize.h"
+
+#define PROJECT_2_DLLEXPORT_DEFINE
 #ifdef PROJECT_2_DLLEXPORT_DEFINE
-#define DLLEXPORT __declspec(dllimport)
+#define DLLEXPORT_2 __declspec(dllexport)
 #else
-#define DLLEXPORT __declspec(dllexport)
+#define DLLEXPORT_2 __declspec(dllimport)
 #endif
 #define STATISTIC_DATA_TESTFOR
 #define USING_CONDITIONAL_COMPILE_PROJECT_2
 //#define USING_FLATBUFFERS_SERIALIZATION //only open in ThinkPad
 //#define STATISTIC_DATA_COUNT
+
+#include "my_geometry.h" //export
+#include "test_serialize.h"
 #include "my_file_read_write.h" //file read and wirte
 
 //Eigen

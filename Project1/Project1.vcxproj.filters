@@ -66,6 +66,9 @@
     <ClCompile Include="geometry\ParaNearestCatchIndex.cpp">
       <Filter>geometry</Filter>
     </ClCompile>
+    <ClCompile Include="UtilitySet.cpp">
+      <Filter>component</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="my_gnrc.h">
@@ -109,6 +112,9 @@
     </ClInclude>
     <ClInclude Include="geometry\ParaNearestCatchIndex.h">
       <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="UtilitySet.h">
+      <Filter>component</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

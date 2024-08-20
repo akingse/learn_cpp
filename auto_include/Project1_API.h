@@ -1,8 +1,15 @@
 #pragma once
+#ifdef PROJECT_1_DLLEXPORT_DEFINE
+#define DLLEXPORT_1 __declspec(dllexport)
+#else
+#define DLLEXPORT_1 __declspec(dllimport)
+#endif
+
 //component
 #include "Gnrc.h"					//export
-#include "BPParaVec.h"					//export
-#include "BPParaTransform.h"				//export
+#include "BPParaVec.h"				//export
+#include "BPParaTransform.h"		//export
+#include "UtilitySet.h"				//export
 
 // my custom
 #include "my_gnrc.h"				

@@ -200,6 +200,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="UtilitySet.cpp" />
     <ClInclude Include="..\auto_include\Project1_API.h" />
     <ClInclude Include="BPParaTransform.h" />
     <ClInclude Include="BPParaVec.h" />
@@ -225,6 +226,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClInclude>
+    <ClInclude Include="UtilitySet.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="my_md5.h" />

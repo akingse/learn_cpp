@@ -45,10 +45,18 @@
 #include <functional>
 #include <memory_resource>
 
+#define PROJECT_1_DLLEXPORT_DEFINE //set on pre-processor define
+#ifdef PROJECT_1_DLLEXPORT_DEFINE // define both API and pch
+#define DLLEXPORT_1 __declspec(dllexport)
+#else
+#define DLLEXPORT_1 __declspec(dllimport)
+#endif
+
 //component
 #include "Gnrc.h"					//export
-#include "BPParaVec.h"					//export
-#include "BPParaTransform.h"				//export
+#include "BPParaVec.h"				//export
+#include "BPParaTransform.h"		//export
+#include "UtilitySet.h"
 
 
 // my custom
@@ -59,7 +67,7 @@
 #include "my_handle.h"				//export
 
 //geometry
-#include "geometry/ParaGeometryClass.h"              // public
+#include "geometry/ParaGeometryClass.h"             // public
 #include "geometry/ParaGeometryCalculate.h"
 #include "geometry/ParaGeometryRelation.h"         	// public
 

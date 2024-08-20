@@ -2,9 +2,9 @@
 #include "my_geometry.h" //export
 #include "test_serialize.h"
 #ifdef PROJECT_2_DLLEXPORT_DEFINE
-#define DLLEXPORT __declspec(dllimport)
+#define DLLEXPORT_2 __declspec(dllimport)
 #else
-#define DLLEXPORT __declspec(dllexport)
+#define DLLEXPORT_2 __declspec(dllexport)
 #endif
 #define STATISTIC_DATA_TESTFOR
 #define USING_CONDITIONAL_COMPILE_PROJECT_2

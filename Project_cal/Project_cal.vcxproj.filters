@@ -59,7 +59,7 @@
     <ClInclude Include="calculateVectorMatrix.h">
       <Filter>algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="Poject_CAL_API.h">
+    <ClInclude Include="Project_CAL_API.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="calculateDynamicAccuracy.h">
@@ -67,9 +67,6 @@
     </ClInclude>
     <ClInclude Include="clashTypeDefine.h">
       <Filter>algorithm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\auto_include\Project1_API.h">
-      <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="calculatePointLinePlane.h">
       <Filter>algorithm</Filter>

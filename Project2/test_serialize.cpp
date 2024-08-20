@@ -370,6 +370,52 @@ void testSerialization5()
 	return;
 }
 
+class Implementation : public Interface 
+{
+public:
+	virtual std::shared_ptr<TreeNode> create() override
+	{
+		TreeNode* node = new TreeNode(1);
+		node->m_left= new TreeNode(2);
+		node->m_right= new TreeNode(3);
+		//return make_shared<TreeNode>();
+		return shared_ptr<TreeNode>(node);
+	}
+	virtual std::vector<unsigned char> serial(const std::shared_ptr<TreeNode>& csg) override
+	{
+		if (csg == nullptr)
+			return {};
+		std::string data = serialize(csg.get());
+		std::vector<unsigned char> res(data.size());
+		memcpy(res.data(), data.data(), data.size());
+		return res;
+	}
+	virtual std::shared_ptr<TreeNode> deserial(const std::vector<unsigned char>& data) override
+	{
+		if (data.empty())
+			return nullptr;
+		std::string buffer(data.size(),0);
+		memcpy(const_cast<char*>(buffer.data()), data.data(), data.size());
+		TreeNode* node = deserialize(buffer);
+		return shared_ptr<TreeNode>(node);
+	}
+
+};
+
+static void testSerialization11()
+{
+	DependencyRegistry& reg = DependencyRegistry::getInstance();
+	Implementation* ptr = reg.get<Implementation>("csg");
+	if (ptr == nullptr)
+		return;
+
+	std::shared_ptr<TreeNode> node = ptr->create();
+	std::vector<unsigned char> data = ptr->serial(node);
+	std::shared_ptr<TreeNode> nodeDe = ptr->deserial(data);
+
+	return;
+}
+
 //------------------------------------------------------------------------------------------
 
 //转Json，调用接口
@@ -472,7 +518,7 @@ struct CsgTreeData
 	//bool isLeft;
 };
 
-static void _test1()
+static void testSerialization6()
 {
 	int sz0 = sizeof(ICsgTree);
 	int sz1 = sizeof(GeCsgTree);
@@ -504,13 +550,15 @@ static void _test1()
 
 static int enrol = []()->int
 	{
+		DependencyRegistry::getInstance().set("csg", new Implementation());
+
 		testSerialization0();
 		testSerialization1();
 		//testSerialization2();
 		testSerialization3();
 		testSerialization4();
 		testSerialization5();
-		_test1();
+		testSerialization11();
 		cout << "test_serialize finished.\n" << endl;
 		return 0;
 	}();
