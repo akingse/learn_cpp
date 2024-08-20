@@ -2,22 +2,25 @@
 
 // Registry 类，用于注册和管理实现
 // 
-//singleton
-//class Interface;
-
+//singleton, template, header only
 class DependencyRegistry 
 {
 private:
+    DependencyRegistry() = default;
+    ~DependencyRegistry() = default;
+    DependencyRegistry(const DependencyRegistry&) = delete;
+    DependencyRegistry(DependencyRegistry&&) = delete;
 
+private:
     struct FunctionPointer
     {
         //FunctionPointer() = default;
         void* m_value = nullptr;
         std::type_index m_type = typeid(void);
     };
-
-    //std::vector<Interface*> implementations;
-    DLLEXPORT_1 static std::map<std::string, FunctionPointer> sm_implementations;
+    // not export if using this project only
+    /*DLLEXPORT_1 static */
+    std::map<std::string, FunctionPointer> sm_implementations;
 
 public:
     static DependencyRegistry& getInstance() 
@@ -27,29 +30,28 @@ public:
     }
 
     template<class T> //registerImplementation
-    static void set(const std::string& name, T* impl)
+    bool set(const std::string& name, T* impl)
     {
         if (sm_implementations.find(name) != sm_implementations.end())
-            return;
-        //implementations.push_back(impl);
-        FunctionPointer ptr;// = new FunctionPointer();
+            return false;
+        FunctionPointer ptr; 
         ptr.m_value = impl;
         ptr.m_type = typeid(T);
+        //std::cout << ptr.m_type.name() << std::endl;
         sm_implementations.insert({ name,ptr });
+        return true;
     }
 
     template<class T> //callImplementation
-    static T* get(const std::string& name)
+    T* get(const std::string& name)
     {
         if (sm_implementations.find(name) == sm_implementations.end())
             return nullptr;
         FunctionPointer ptr = sm_implementations.at(name);
-        if (ptr.m_type != typeid(T))
+        if (ptr.m_type != typeid(T) || ptr.m_value == nullptr) //普通函数指针无法和function<>比较
             return nullptr;
         return (T*)ptr.m_value;
     }
-
-
 };
 
 

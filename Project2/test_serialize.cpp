@@ -421,14 +421,42 @@ public:
 
 static void testSerialization6()
 {
-	DependencyRegistry& reg = DependencyRegistry::getInstance();
-	Implementation* ptr = reg.get<Implementation>("csg");
-	if (ptr == nullptr)
-		return;
 
-	std::shared_ptr<TreeNode> node = ptr->create();
-	std::vector<unsigned char> data = ptr->serial(node);
-	std::shared_ptr<TreeNode> nodeDe = ptr->deserial(data);
+	// 定义一个 std::function，指向类型与 normalFunction 匹配的函数指针
+	std::function<void()> func = testSerialization5;
+
+	// 使用 typeid 比较
+	std::cout << "typeid(func).name(): " << typeid(func).name() << std::endl;
+	std::cout << "typeid(&normalFunction).name(): " << typeid(&testSerialization5).name() << std::endl;
+
+	// 比较 std::function 和 普通函数指针的 typeid
+	if (typeid(func) == typeid(&testSerialization5))
+		std::cout << "The types are the same." << std::endl;
+
+	DependencyRegistry& reg = DependencyRegistry::getInstance();
+	Implementation* ptr = reg.get<Implementation>("csg_node_class"); //父子类敏感
+	std::shared_ptr<TreeNode> node;
+	if (ptr == nullptr)
+		node = Implementation().create();
+	else
+	{
+		node = ptr->create();
+		std::vector<unsigned char> data = ptr->serial(node);
+		std::shared_ptr<TreeNode> nodeDe = ptr->deserial(data);
+	}
+
+	//function<std::string(TreeNode*)> serialize_ptr = serialize;
+	//std::string buffer0 = serialize_ptr(node.get());
+	//std::string(*serialize_ptr)(TreeNode*);
+
+	//用法一：std::function
+	function<std::string(TreeNode*)>* serialize_fun = reg.get<function<std::string(TreeNode*)>>("serialize");
+	std::string buffer1 = (*serialize_fun)(node.get());
+
+	//用法二：函数指针
+	std::string buffer = serialize(node.get());
+	auto deserialize_fun = reg.get<TreeNode*(const std::string&)>("deserialize");
+	TreeNode* nodeDe2 = (*deserialize_fun)(buffer);
 
 	return;
 }
@@ -436,7 +464,10 @@ static void testSerialization6()
 
 static int enrol = []()->int
 	{
-		DependencyRegistry::getInstance().set("csg", new Implementation());
+		std::function<std::string(TreeNode*)> function = serialize; //普通函数指针转std::function对象
+		DependencyRegistry::getInstance().set("csg_node_class", new Implementation());
+		DependencyRegistry::getInstance().set("serialize", &function);
+		DependencyRegistry::getInstance().set("deserialize", deserialize);
 
 		testSerialization1();
 		testSerialization2();
