@@ -19,8 +19,7 @@ private:
         std::type_index m_type = typeid(void);
     };
     // not export if using this project only
-    /*DLLEXPORT_1 static */
-    std::map<std::string, FunctionPointer> sm_implementations;
+    DLLEXPORT_1 static std::map<std::string, FunctionPointer> sm_implementations;
 
 public:
     static DependencyRegistry& getInstance() 
@@ -43,7 +42,7 @@ public:
     }
 
     template<class T> //callImplementation
-    T* get(const std::string& name)
+    T* get(const std::string& name) const
     {
         if (sm_implementations.find(name) == sm_implementations.end())
             return nullptr;
@@ -53,7 +52,6 @@ public:
         return (T*)ptr.m_value;
     }
 };
-
 
 class TreeNode;
 // Interface ½Ó¿Ú
@@ -66,3 +64,10 @@ public:
     virtual std::shared_ptr<TreeNode> deserial(const std::vector<unsigned char>& data) = 0;
 };
 
+//python parametric component
+namespace ppc
+{
+    DLLEXPORT_1 std::string serial(const std::shared_ptr<TreeNode>& csg);
+    DLLEXPORT_1 std::shared_ptr<TreeNode> deserial(const std::string& data);
+
+}

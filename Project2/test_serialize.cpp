@@ -396,7 +396,6 @@ public:
 		TreeNode* node = new TreeNode(1);
 		node->m_left= new TreeNode(2);
 		node->m_right= new TreeNode(3);
-		//return make_shared<TreeNode>();
 		return shared_ptr<TreeNode>(node);
 	}
 	virtual std::vector<unsigned char> serial(const std::shared_ptr<TreeNode>& csg) override
@@ -417,6 +416,15 @@ public:
 		TreeNode* node = deserialize(buffer);
 		return shared_ptr<TreeNode>(node);
 	}
+
+	static std::shared_ptr<TreeNode> createNew()
+	{
+		TreeNode* node = new TreeNode(1);
+		node->m_left = new TreeNode(2);
+		node->m_right = new TreeNode(3);
+		return shared_ptr<TreeNode>(node);
+	}
+
 };
 
 static void testSerialization6()
@@ -450,13 +458,20 @@ static void testSerialization6()
 	//std::string(*serialize_ptr)(TreeNode*);
 
 	//用法一：std::function
-	function<std::string(TreeNode*)>* serialize_fun = reg.get<function<std::string(TreeNode*)>>("serialize");
-	std::string buffer1 = (*serialize_fun)(node.get());
+	function<std::string(TreeNode*)>* serialize_fun1 = reg.get<function<std::string(TreeNode*)>>("serialize_fun");
+	std::string buffer1 = (*serialize_fun1)(node.get());
 
 	//用法二：函数指针
 	std::string buffer = serialize(node.get());
+	auto serialize_fun = reg.get<std::string(TreeNode*)>("serialize");
+	std::string data2 = (*serialize_fun)(node.get());
 	auto deserialize_fun = reg.get<TreeNode*(const std::string&)>("deserialize");
 	TreeNode* nodeDe2 = (*deserialize_fun)(buffer);
+
+	//将调用过程在项目1实现，导出封装后的函数
+    std::shared_ptr<TreeNode> node3 = Implementation::createNew();
+	std::string data3 = ppc::serial(node3);
+	std::shared_ptr<TreeNode> nodeDe3 = ppc::deserial(data3);
 
 	return;
 }
@@ -466,7 +481,8 @@ static int enrol = []()->int
 	{
 		std::function<std::string(TreeNode*)> function = serialize; //普通函数指针转std::function对象
 		DependencyRegistry::getInstance().set("csg_node_class", new Implementation());
-		DependencyRegistry::getInstance().set("serialize", &function);
+		DependencyRegistry::getInstance().set("serialize_fun", &function);
+		DependencyRegistry::getInstance().set("serialize", serialize);
 		DependencyRegistry::getInstance().set("deserialize", deserialize);
 
 		testSerialization1();
