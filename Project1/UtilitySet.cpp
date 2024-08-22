@@ -2,24 +2,24 @@
 
 std::map<std::string, DependencyRegistry::FunctionPointer> DependencyRegistry::sm_implementations;
 
-std::string ppc::serial(const std::shared_ptr<TreeNode>& csg)
+std::vector<unsigned char> ppc::serializition(const std::shared_ptr<TreeNodePtr>& node)
 {
     DependencyRegistry& reg = DependencyRegistry::getInstance();
-	auto serialize_fun = reg.get<std::string(TreeNode*)>("serialize");
-	if (serialize_fun == nullptr)
-		return {};
-	std::string data = (*serialize_fun)(csg.get());
+	auto serialize_fun = reg.get<std::vector<unsigned char>(const std::shared_ptr<TreeNodePtr>&)>("serializition");
+	std::vector<byte> data;
+	if (serialize_fun != nullptr)
+		data = (*serialize_fun)(node);
 	return data;
 }
 
-std::shared_ptr<TreeNode> ppc::deserial(const std::string& data)
+std::shared_ptr<TreeNodePtr> ppc::deserializition(const std::vector<unsigned char>& data)
 {
 	DependencyRegistry& reg = DependencyRegistry::getInstance();
-	auto deserialize_fun = reg.get<TreeNode*(const std::string&)>("deserialize");
-	if (deserialize_fun == nullptr)
-		return {};
-	TreeNode* nodeDe = (*deserialize_fun)(data);
-	return std::shared_ptr<TreeNode>(nodeDe);
+	auto deserialize_fun = reg.get<std::shared_ptr<TreeNodePtr>(const std::vector<unsigned char>&)>("deserializition");
+	std::shared_ptr<TreeNodePtr> node;
+	if (deserialize_fun != nullptr)
+		node = (*deserialize_fun)(data);
+	return node;
 }
 
 static void test0()

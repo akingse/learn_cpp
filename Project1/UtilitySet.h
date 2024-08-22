@@ -54,6 +54,7 @@ public:
 };
 
 class TreeNode;
+class TreeNodePtr;
 // Interface 接口
 class Interface 
 {
@@ -67,7 +68,7 @@ public:
 //python parametric component
 namespace ppc
 {
-    DLLEXPORT_1 std::string serial(const std::shared_ptr<TreeNode>& csg);
-    DLLEXPORT_1 std::shared_ptr<TreeNode> deserial(const std::string& data);
-
+    //必须使用智能指针，否则typeid不认为提前声明的class相同
+    DLLEXPORT_1 std::vector<unsigned char> serializition(const std::shared_ptr<TreeNodePtr>& node);
+    DLLEXPORT_1 std::shared_ptr<TreeNodePtr> deserializition(const std::vector<unsigned char>& data);
 }

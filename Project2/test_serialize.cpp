@@ -196,6 +196,17 @@ struct TreeNode
 	}
 };
 
+struct TreeNodePtr
+{
+	int m_nodeIndex;
+	std::vector<int> m_geomIndexes;
+	std::shared_ptr<TreeNodePtr> m_father;
+	std::shared_ptr<TreeNodePtr> m_left;
+	std::shared_ptr<TreeNodePtr> m_right;
+	TreeNodePtr(int x) :m_nodeIndex(x) {}
+
+};
+
 //生成随机二叉树
 TreeNode* generateRandomTree(int maxDepth, int currentDepth = 1)
 {
@@ -265,6 +276,69 @@ TreeNode* deserialize(const std::string& data) {
 	//在反序列化过程中，我们需要将字符串表示的节点值转换为整数或其他类型。字符串流可以将字符串解析为适当的数据类型，如std::stoi用于将字符串转换为整数。
 	std::istringstream iss(data);
 	return deserialize_istring(iss);
+}
+
+//重写序列化，修改序列化逻辑，返回智能指针
+
+std::vector<byte> serializition(const shared_ptr<TreeNodePtr>& root)
+{
+	if (root == nullptr)
+		return {};
+	std::vector<byte> serialized(
+		sizeof(int) +
+		sizeof(int) * (1 + root->m_geomIndexes.size()));
+	unsigned char* ptr = serialized.data();
+	//vector
+	int count = (int)root->m_geomIndexes.size();
+	memcpy(ptr, &count, sizeof(int)); ptr += sizeof(int);
+	memcpy(ptr, root->m_geomIndexes.data(), sizeof(int) * root->m_geomIndexes.size()); ptr += sizeof(int) * root->m_geomIndexes.size();
+	//member
+	memcpy(ptr, &root->m_nodeIndex, sizeof(int)); ptr += sizeof(int);
+	//leftNode
+	std::vector<byte> bufferLeft = serializition(root->m_left);
+	count = (int)bufferLeft.size();
+	std::vector<byte> sizeLeft(sizeof(int));
+	memcpy(sizeLeft.data(), &count, sizeof(int));
+	serialized.insert(serialized.end(), sizeLeft.begin(), sizeLeft.end());
+	serialized.insert(serialized.end(), bufferLeft.begin(), bufferLeft.end());
+	//rightNode
+	std::vector<byte> bufferRight = serializition(root->m_right);
+	count = (int)bufferRight.size();
+	std::vector<byte> sizeRight(sizeof(int));
+	memcpy(sizeRight.data(), &count, sizeof(int));
+	serialized.insert(serialized.end(), sizeRight.begin(), sizeRight.end());
+	serialized.insert(serialized.end(), bufferRight.begin(), bufferRight.end());
+	return serialized;
+}
+
+shared_ptr<TreeNodePtr> deserializition(const std::vector<byte>& data)
+{
+	if (data.empty())
+		return nullptr;
+	int count, nodeIndex;
+	const unsigned char* ptr = data.data();
+	memcpy(&count, ptr, sizeof(int)); ptr += sizeof(int);
+	std::vector<int> geomIndexes(count);
+	memcpy(geomIndexes.data(), ptr, sizeof(int) * geomIndexes.size()); ptr += sizeof(int) * geomIndexes.size();
+	memcpy(&nodeIndex, ptr, sizeof(int)); ptr += sizeof(int);
+	//pointer
+	shared_ptr<TreeNodePtr> root = make_shared<TreeNodePtr>(-1);
+	//root->m_father = father;	father = root;
+	root->m_geomIndexes = geomIndexes;
+	root->m_nodeIndex = nodeIndex;
+	//if (ptr - data.data() == data.size())
+	//	return shared_ptr<TreeNode>(root);
+	//leftNode
+	memcpy(&count, ptr, sizeof(int)); ptr += sizeof(int);
+	std::vector<byte> bufferLeft(count);
+	memcpy(bufferLeft.data(), ptr, count); ptr += count;
+	root->m_left = deserializition(bufferLeft);
+	//rightNode
+	memcpy(&count, ptr, sizeof(int)); ptr += sizeof(int);
+	std::vector<byte> bufferRight(count);
+	memcpy(bufferRight.data(), ptr, count); ptr += count;
+	root->m_right = deserializition(bufferRight);
+	return root;
 }
 
 // 测试序列化函数
@@ -416,27 +490,36 @@ public:
 		TreeNode* node = deserialize(buffer);
 		return shared_ptr<TreeNode>(node);
 	}
-
+	//static
 	static std::shared_ptr<TreeNode> createNew()
 	{
 		TreeNode* node = new TreeNode(1);
 		node->m_left = new TreeNode(2);
+		node->m_left->m_geomIndexes = { 22,222 };
 		node->m_right = new TreeNode(3);
+		node->m_left->m_left = new TreeNode(4);
+		node->m_left->m_right = new TreeNode(5);
 		return shared_ptr<TreeNode>(node);
+	}
+	static std::shared_ptr<TreeNodePtr> createNewPtr()
+	{
+		shared_ptr<TreeNodePtr> node = make_shared<TreeNodePtr>(1);
+		node->m_left = make_shared<TreeNodePtr>(2);
+		node->m_left->m_geomIndexes = { 22,222 };
+		node->m_right = make_shared<TreeNodePtr>(3);
+		node->m_left->m_left = make_shared<TreeNodePtr>(4);
+		node->m_left->m_right = make_shared<TreeNodePtr>(5);
+		return node;
 	}
 
 };
 
 static void testSerialization6()
 {
-
 	// 定义一个 std::function，指向类型与 normalFunction 匹配的函数指针
 	std::function<void()> func = testSerialization5;
-
-	// 使用 typeid 比较
-	std::cout << "typeid(func).name(): " << typeid(func).name() << std::endl;
-	std::cout << "typeid(&normalFunction).name(): " << typeid(&testSerialization5).name() << std::endl;
-
+	//std::cout << "typeid(func).name(): " << typeid(func).name() << std::endl;
+	//std::cout << "typeid(&normalFunction).name(): " << typeid(&testSerialization5).name() << std::endl;
 	// 比较 std::function 和 普通函数指针的 typeid
 	if (typeid(func) == typeid(&testSerialization5))
 		std::cout << "The types are the same." << std::endl;
@@ -470,12 +553,33 @@ static void testSerialization6()
 
 	//将调用过程在项目1实现，导出封装后的函数
     std::shared_ptr<TreeNode> node3 = Implementation::createNew();
-	std::string data3 = ppc::serial(node3);
-	std::shared_ptr<TreeNode> nodeDe3 = ppc::deserial(data3);
+	//std::string data3 = ppc::serial(node3);
+	//std::shared_ptr<TreeNode> nodeDe3 = ppc::deserial(data3);
 
 	return;
 }
 
+static void testSerialization7()
+{
+	std::shared_ptr<TreeNodePtr> node1 = Implementation::createNewPtr();
+	std::vector<byte> buffer1 = serializition(node1);
+	std::shared_ptr<TreeNodePtr> nodeDe1 = deserializition(buffer1);
+	//depend
+	DependencyRegistry& reg = DependencyRegistry::getInstance();
+	auto serialize_fun = reg.get<std::vector<byte>(const shared_ptr<TreeNodePtr>&)>("serializition");
+	std::vector<byte> buffer2;
+	if (serialize_fun!=nullptr)
+		buffer2 = (*serialize_fun)(node1);
+	auto deserialize_fun = reg.get<shared_ptr<TreeNodePtr>(const std::vector<byte>&)>("deserializition");
+	shared_ptr<TreeNodePtr> nodeDe2;
+	if (deserialize_fun != nullptr)
+		nodeDe2 = (*deserialize_fun)(buffer2);
+	//depinv
+	std::vector<byte> buffer3= ppc::serializition(node1);
+	std::shared_ptr<TreeNodePtr> nodeDe3 = ppc::deserializition(buffer3);
+
+	return;
+}
 
 static int enrol = []()->int
 	{
@@ -484,6 +588,8 @@ static int enrol = []()->int
 		DependencyRegistry::getInstance().set("serialize_fun", &function);
 		DependencyRegistry::getInstance().set("serialize", serialize);
 		DependencyRegistry::getInstance().set("deserialize", deserialize);
+		DependencyRegistry::getInstance().set("serializition", serializition);
+		DependencyRegistry::getInstance().set("deserializition", deserializition);
 
 		testSerialization1();
 		testSerialization2();
@@ -491,6 +597,7 @@ static int enrol = []()->int
 		testSerialization4();
 		testSerialization5();
 		testSerialization6();
+		testSerialization7();
 		cout << "test_serialize finished.\n" << endl;
 		return 0;
 	}();
