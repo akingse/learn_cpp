@@ -1,8 +1,7 @@
 #pragma once
+//using namespace ppc;
 
-// Registry 类，用于注册和管理实现
-// 
-//singleton, template, header only
+//singleton, template
 class DependencyRegistry 
 {
 private:
@@ -53,21 +52,21 @@ public:
     }
 };
 
-class TreeNode;
-class TreeNodePtr;
-// Interface 接口
-class Interface 
-{
-public:
-    //virtual void doSomething() = 0;
-    virtual std::shared_ptr<TreeNode> create() = 0;
-    virtual std::vector<unsigned char> serial(const std::shared_ptr<TreeNode>& csg) = 0;
-    virtual std::shared_ptr<TreeNode> deserial(const std::vector<unsigned char>& data) = 0;
-};
-
 //python parametric component
 namespace ppc
 {
+    class TreeNode;
+    class TreeNodePtr;
+    // Interface 接口
+    class Interface 
+    {
+    public:
+        //virtual void doSomething() = 0;
+        virtual std::shared_ptr<TreeNode> create() = 0;
+        virtual std::vector<unsigned char> serial(const std::shared_ptr<TreeNode>& csg) = 0;
+        virtual std::shared_ptr<TreeNode> deserial(const std::vector<unsigned char>& data) = 0;
+    };
+
     //必须使用智能指针，否则typeid不认为提前声明的class相同
     DLLEXPORT_1 std::vector<unsigned char> serializition(const std::shared_ptr<TreeNodePtr>& node);
     DLLEXPORT_1 std::shared_ptr<TreeNodePtr> deserializition(const std::vector<unsigned char>& data);

@@ -1,5 +1,6 @@
 #include "pch.h"
 using namespace std;
+using namespace ppc;
 
 std::vector<unsigned char> _bp_serialize(const BPGeometricPrimitiveSer& primitive)
 {
@@ -176,36 +177,40 @@ static void testSerialization1()
 //----------------------------------------------------------------------------------------------
 
 static atomic<int> s_allnodes_index = 1;
-struct TreeNode 
-{
-	int m_nodeIndex;
-	std::vector<int> m_geomIndexes;
-	TreeNode* m_father;
-	TreeNode* m_left;
-	TreeNode* m_right;
 
-	TreeNode() : m_nodeIndex(s_allnodes_index++), m_father(nullptr), m_left(nullptr), m_right(nullptr) {}
-	TreeNode(int x) : m_nodeIndex(x), m_father(nullptr), m_left(nullptr), m_right(nullptr) {}
-    static TreeNode* create(TreeNode* left, TreeNode* right, TreeNode* father = nullptr)
+namespace ppc
+{
+	struct TreeNode
 	{
-		TreeNode* ptr = new TreeNode;
-		ptr->m_father = father;
-		ptr->m_left = left;
-		ptr->m_right = right;
-		return ptr;
-	}
-};
+		int m_nodeIndex;
+		std::vector<int> m_geomIndexes;
+		TreeNode* m_father;
+		TreeNode* m_left;
+		TreeNode* m_right;
 
-struct TreeNodePtr
-{
-	int m_nodeIndex;
-	std::vector<int> m_geomIndexes;
-	std::shared_ptr<TreeNodePtr> m_father;
-	std::shared_ptr<TreeNodePtr> m_left;
-	std::shared_ptr<TreeNodePtr> m_right;
-	TreeNodePtr(int x) :m_nodeIndex(x) {}
+		TreeNode() : m_nodeIndex(s_allnodes_index++), m_father(nullptr), m_left(nullptr), m_right(nullptr) {}
+		TreeNode(int x) : m_nodeIndex(x), m_father(nullptr), m_left(nullptr), m_right(nullptr) {}
+		static TreeNode* create(TreeNode* left, TreeNode* right, TreeNode* father = nullptr)
+		{
+			TreeNode* ptr = new TreeNode;
+			ptr->m_father = father;
+			ptr->m_left = left;
+			ptr->m_right = right;
+			return ptr;
+		}
+	};
 
-};
+	struct TreeNodePtr
+	{
+		int m_nodeIndex;
+		std::vector<int> m_geomIndexes;
+		std::shared_ptr<TreeNodePtr> m_father;
+		std::shared_ptr<TreeNodePtr> m_left;
+		std::shared_ptr<TreeNodePtr> m_right;
+		TreeNodePtr(int x) :m_nodeIndex(x) {}
+
+	};
+}
 
 //生成随机二叉树
 TreeNode* generateRandomTree(int maxDepth, int currentDepth = 1)
@@ -280,65 +285,68 @@ TreeNode* deserialize(const std::string& data) {
 
 //重写序列化，修改序列化逻辑，返回智能指针
 
-std::vector<byte> serializition(const shared_ptr<TreeNodePtr>& root)
+namespace ppc
 {
-	if (root == nullptr)
-		return {};
-	std::vector<byte> serialized(
-		sizeof(int) +
-		sizeof(int) * (1 + root->m_geomIndexes.size()));
-	unsigned char* ptr = serialized.data();
-	//vector
-	int count = (int)root->m_geomIndexes.size();
-	memcpy(ptr, &count, sizeof(int)); ptr += sizeof(int);
-	memcpy(ptr, root->m_geomIndexes.data(), sizeof(int) * root->m_geomIndexes.size()); ptr += sizeof(int) * root->m_geomIndexes.size();
-	//member
-	memcpy(ptr, &root->m_nodeIndex, sizeof(int)); ptr += sizeof(int);
-	//leftNode
-	std::vector<byte> bufferLeft = serializition(root->m_left);
-	count = (int)bufferLeft.size();
-	std::vector<byte> sizeLeft(sizeof(int));
-	memcpy(sizeLeft.data(), &count, sizeof(int));
-	serialized.insert(serialized.end(), sizeLeft.begin(), sizeLeft.end());
-	serialized.insert(serialized.end(), bufferLeft.begin(), bufferLeft.end());
-	//rightNode
-	std::vector<byte> bufferRight = serializition(root->m_right);
-	count = (int)bufferRight.size();
-	std::vector<byte> sizeRight(sizeof(int));
-	memcpy(sizeRight.data(), &count, sizeof(int));
-	serialized.insert(serialized.end(), sizeRight.begin(), sizeRight.end());
-	serialized.insert(serialized.end(), bufferRight.begin(), bufferRight.end());
-	return serialized;
-}
+	std::vector<byte> serializition(const shared_ptr<TreeNodePtr>& root)
+	{
+		if (root == nullptr)
+			return {};
+		std::vector<byte> serialized(
+			sizeof(int) +
+			sizeof(int) * (1 + root->m_geomIndexes.size()));
+		unsigned char* ptr = serialized.data();
+		//vector
+		int count = (int)root->m_geomIndexes.size();
+		memcpy(ptr, &count, sizeof(int)); ptr += sizeof(int);
+		memcpy(ptr, root->m_geomIndexes.data(), sizeof(int) * root->m_geomIndexes.size()); ptr += sizeof(int) * root->m_geomIndexes.size();
+		//member
+		memcpy(ptr, &root->m_nodeIndex, sizeof(int)); ptr += sizeof(int);
+		//leftNode
+		std::vector<byte> bufferLeft = serializition(root->m_left);
+		count = (int)bufferLeft.size();
+		std::vector<byte> sizeLeft(sizeof(int));
+		memcpy(sizeLeft.data(), &count, sizeof(int));
+		serialized.insert(serialized.end(), sizeLeft.begin(), sizeLeft.end());
+		serialized.insert(serialized.end(), bufferLeft.begin(), bufferLeft.end());
+		//rightNode
+		std::vector<byte> bufferRight = serializition(root->m_right);
+		count = (int)bufferRight.size();
+		std::vector<byte> sizeRight(sizeof(int));
+		memcpy(sizeRight.data(), &count, sizeof(int));
+		serialized.insert(serialized.end(), sizeRight.begin(), sizeRight.end());
+		serialized.insert(serialized.end(), bufferRight.begin(), bufferRight.end());
+		return serialized;
+	}
 
-shared_ptr<TreeNodePtr> deserializition(const std::vector<byte>& data)
-{
-	if (data.empty())
-		return nullptr;
-	int count, nodeIndex;
-	const unsigned char* ptr = data.data();
-	memcpy(&count, ptr, sizeof(int)); ptr += sizeof(int);
-	std::vector<int> geomIndexes(count);
-	memcpy(geomIndexes.data(), ptr, sizeof(int) * geomIndexes.size()); ptr += sizeof(int) * geomIndexes.size();
-	memcpy(&nodeIndex, ptr, sizeof(int)); ptr += sizeof(int);
-	//pointer
-	shared_ptr<TreeNodePtr> root = make_shared<TreeNodePtr>(-1);
-	//root->m_father = father;	father = root;
-	root->m_geomIndexes = geomIndexes;
-	root->m_nodeIndex = nodeIndex;
-	//if (ptr - data.data() == data.size())
-	//	return shared_ptr<TreeNode>(root);
-	//leftNode
-	memcpy(&count, ptr, sizeof(int)); ptr += sizeof(int);
-	std::vector<byte> bufferLeft(count);
-	memcpy(bufferLeft.data(), ptr, count); ptr += count;
-	root->m_left = deserializition(bufferLeft);
-	//rightNode
-	memcpy(&count, ptr, sizeof(int)); ptr += sizeof(int);
-	std::vector<byte> bufferRight(count);
-	memcpy(bufferRight.data(), ptr, count); ptr += count;
-	root->m_right = deserializition(bufferRight);
-	return root;
+	shared_ptr<TreeNodePtr> deserializition(const std::vector<byte>& data)
+	{
+		if (data.empty())
+			return nullptr;
+		int count, nodeIndex;
+		const unsigned char* ptr = data.data();
+		memcpy(&count, ptr, sizeof(int)); ptr += sizeof(int);
+		std::vector<int> geomIndexes(count);
+		memcpy(geomIndexes.data(), ptr, sizeof(int) * geomIndexes.size()); ptr += sizeof(int) * geomIndexes.size();
+		memcpy(&nodeIndex, ptr, sizeof(int)); ptr += sizeof(int);
+		//pointer
+		shared_ptr<TreeNodePtr> root = make_shared<TreeNodePtr>(-1);
+		//root->m_father = father;	father = root;
+		root->m_geomIndexes = geomIndexes;
+		root->m_nodeIndex = nodeIndex;
+		//if (ptr - data.data() == data.size())
+		//	return shared_ptr<TreeNode>(root);
+		//leftNode
+		memcpy(&count, ptr, sizeof(int)); ptr += sizeof(int);
+		std::vector<byte> bufferLeft(count);
+		memcpy(bufferLeft.data(), ptr, count); ptr += count;
+		root->m_left = deserializition(bufferLeft);
+		//rightNode
+		memcpy(&count, ptr, sizeof(int)); ptr += sizeof(int);
+		std::vector<byte> bufferRight(count);
+		memcpy(bufferRight.data(), ptr, count); ptr += count;
+		root->m_right = deserializition(bufferRight);
+		return root;
+	}
 }
 
 // 测试序列化函数
