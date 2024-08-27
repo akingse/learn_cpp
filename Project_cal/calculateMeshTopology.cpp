@@ -9,31 +9,34 @@ HeMesh::HeMesh(const ModelMesh& mesh)
 {
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
 	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
-	HeMesh heMesh;
+	m_vertexes.resize(vbo.size());
 	for (int i = 0; i < mesh.vbo_.size(); ++i)
 	{
 		HeVertex* heVertex = new HeVertex;
 		heVertex->m_index = i;
 		heVertex->m_coord = mesh.vbo_[i];
-		heMesh.m_vertexes.push_back(heVertex);
+		m_vertexes[i] = heVertex;
 	}
 	int countEdge = 0;
 	map<array<int, 2>, int> uniqueEdge;
+	m_faces.resize(ibo.size());
+	m_edges.resize(3 * ibo.size());
 	for (int i = 0; i < mesh.ibo_.size(); ++i)
 	{
 		HeFace* heFace = new HeFace;
 		heFace->m_index = i;
-		//heFace->m_normal = (v1 - v0).cross(v2 - v1); // with normalized
-		heFace->m_normal = (vbo[ibo[i][1]] - vbo[ibo[i][0]]).cross(vbo[ibo[i][2]] - vbo[ibo[i][1]]);
+		//heFace->m_normal = (vbo[ibo[i][1]] - vbo[ibo[i][0]]).cross(vbo[ibo[i][2]] - vbo[ibo[i][1]]);// with normalized
+		heFace->m_normal = mesh.fno_[i];
 		int firstEdge = countEdge;
 		for (int j = 0; j < 3; ++j) //create 3 edges from 1 face
 		{
 			HeEdge* heEdge = new HeEdge;
-			heEdge->m_index = countEdge;
+			heEdge->m_index = countEdge++;
 			heEdge->m_incFace = heFace;
 			heEdge->m_oriVertex = m_vertexes[ibo[i][j]];
-			m_edges.push_back(heEdge);
-			countEdge++;
+			m_vertexes[ibo[i][j]]->m_incEdge = heEdge;
+			//m_edges.push_back(heEdge);
+			m_edges[i * 3 + j] = heEdge;
 		}
 		array<int, 4> face = { ibo[i][0], ibo[i][1], ibo[i][2], ibo[i][0] };
 		for (int j = 0; j < 3; ++j) // add adjacent relation after create edges
@@ -57,19 +60,23 @@ HeMesh::HeMesh(const ModelMesh& mesh)
 			}
 		}
 		heFace->m_incEdge = m_edges[firstEdge];
-		m_faces.push_back(heFace);
+		m_faces[i] = heFace;
 	}
 }
 
 ModelMesh HeMesh::toMesh() const
 {
 	ModelMesh mesh;
-	std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
-	std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
-	for (const auto& v : m_vertexes)
-		vbo.push_back(v->m_coord);
-	for (const auto& iter : m_faces)
-		ibo.push_back(iter->ibo());
+	mesh.vbo_.resize(m_vertexes.size());
+	mesh.ibo_.resize(m_faces.size());
+	mesh.fno_.resize(m_faces.size());
+	for (int i = 0; i < m_vertexes.size(); ++i)
+		mesh.vbo_[i] = m_vertexes[i]->m_coord;
+	for (int i = 0; i < m_faces.size(); ++i)
+	{
+		mesh.ibo_[i] = m_faces[i]->ibo();
+		mesh.fno_[i] = m_faces[i]->m_normal;
+	}
 	return mesh;
 }
 
