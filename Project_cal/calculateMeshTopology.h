@@ -64,9 +64,9 @@ namespace games
 	{
 		HeVertex() = default;
 		//HeVertex(const Eigen::Vector3d& v) :m_coord(v) {}
+		int m_index = -1;
 		Eigen::Vector3d m_coord = Eigen::Vector3d(std::nan("0"), 0, 0);// start vertex coordinate of HalfEdge
 		HeEdge* m_incEdge = nullptr; //incident edge, the start of edge
-		int m_index = -1;
 	};
 
 	struct HeEdge //the half edge
@@ -74,21 +74,21 @@ namespace games
 		HeEdge() = default;
 		//HeEdge(HeVertex* v0, HeVertex* v1) :m_oriVertex(v0), m_desVertex(v1) {}
 		//HeVertex* m_desVertex = nullptr; //end destination vertex, get by nextEdge
+		int m_index = -1;
 		HeVertex* m_oriVertex = nullptr; //start origin vertex
 		HeEdge* m_twinEdge = nullptr; //means pair opposite halfedge, get by index
 		HeEdge* m_prevEdge = nullptr;
 		HeEdge* m_nextEdge = nullptr;
 		HeFace* m_incFace = nullptr; //incident face
-		int m_index = -1;
 	};
 
 	struct HeFace
 	{
 		HeFace() = default;
 		//HeFace(HeEdge* edge) : m_incEdge(edge) {}
+		int m_index = -1;
 		HeEdge* m_incEdge = nullptr; //any one of three edges
 		Eigen::Vector3d m_normal = Eigen::Vector3d::Zero();
-		int m_index = -1;
 		inline std::array<int, 3> ibo() const
 		{
 			std::array<int, 3> face = {
