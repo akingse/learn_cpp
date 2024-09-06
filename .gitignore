@@ -367,3 +367,4 @@ FodyWeavers.xsd
 /Project2/entityIdList.bin
 *.bin
 *.off
+/readme/.obsidian/workspace.json
