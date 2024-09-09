@@ -187,9 +187,6 @@
     <ClCompile Include="test_thread_3.cpp">
       <Filter>test_thread</Filter>
     </ClCompile>
-    <ClCompile Include="test_serialize.cpp">
-      <Filter>test_dsa</Filter>
-    </ClCompile>
     <ClCompile Include="test_clipper.cpp">
       <Filter>test_case</Filter>
     </ClCompile>
@@ -230,6 +227,12 @@
       <Filter>test_gram</Filter>
     </ClCompile>
     <ClCompile Include="test_binfile_debug.cpp">
+      <Filter>test_serialize</Filter>
+    </ClCompile>
+    <ClCompile Include="test_guid.cpp">
+      <Filter>test_dsa</Filter>
+    </ClCompile>
+    <ClCompile Include="test_serialize.cpp">
       <Filter>test_serialize</Filter>
     </ClCompile>
   </ItemGroup>

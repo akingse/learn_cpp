@@ -1,12 +1,8 @@
 #include "pch.h"
-#include <iostream>
-#include <windows.h>
-#include <random>
-#include <chrono>
-#include <array>
 #include <iomanip>
 #include <Iphlpapi.h>
 #pragma comment(lib, "Iphlpapi.lib")
+using namespace std;
 //typedef unsigned char byte;
 struct Guid
 {
@@ -70,3 +66,76 @@ int mainguid()
     return 0;
 }
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+static void _test_guid0()
+{
+    // 生成GUID
+    boost::uuids::random_generator generator;
+    boost::uuids::uuid uuid = generator();
+
+    // 将GUID转换为字符串
+    std::string uuidStr = boost::uuids::to_string(uuid);
+
+    // 输出GUID
+    std::cout << "Generated GUID: " << uuidStr << std::endl;//Generated GUID: 57186994-bef7-4134-832b-fc3aa6866063
+    /*
+    UUID（Universally Unique Identifier）的标准表示形式是一个包含32个十六进制（hexadecimal）字符的字符串，
+    分为五个部分，用连字符分隔，形如："xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"。
+
+    前8个字符表示UUID的32位数据的前32位。
+    第9至12个字符表示UUID的32位数据的接下来的16位。
+    第13至16个字符表示UUID的32位数据的接下来的16位。
+    第17至20个字符表示UUID的32位数据的接下来的16位。
+    最后12个字符表示UUID的32位数据的接下来的48位。
+    */
+    return;
+}
+
+
+#include <windows.h>
+#include <objbase.h> // 包含 CoCreateGuid 函数的头文件
+//windows API
+static void _test_guid1()
+{
+    GUID guid = {};
+    // 初始化COM库
+    HRESULT result = CoInitialize(NULL);
+    if (FAILED(result)) {
+        std::cerr << "COM库初始化失败: " << std::hex << result << std::endl;
+        return;
+    }
+    map<GUID, double> gmap;
+
+    // 创建GUID
+    result = CoCreateGuid(&guid);
+    if (FAILED(result)) {
+        std::cerr << "生成GUID失败: " << std::hex << result << std::endl;
+        CoUninitialize();
+        return;
+    }
+
+    // 输出GUID
+    std::cout << "生成的GUID是: {"
+        << std::hex << std::uppercase
+        << guid.Data1 << '-'
+        << guid.Data2 << '-'
+        << guid.Data3 << '-'
+        << static_cast<int>(guid.Data4[0]) << static_cast<int>(guid.Data4[1]) << '-'
+        << static_cast<int>(guid.Data4[2]) << static_cast<int>(guid.Data4[3])
+        << static_cast<int>(guid.Data4[4]) << static_cast<int>(guid.Data4[5])
+        << static_cast<int>(guid.Data4[6]) << static_cast<int>(guid.Data4[7])
+        << "}" << std::endl;
+    int n = sizeof(guid);
+    // 清理COM库
+    CoUninitialize();
+}
+
+static int enrol = []()->int
+    {
+        _test_guid0();
+        _test_guid1();
+        cout << "test_guid finished.\n" << endl;
+        return 0;
+    }();

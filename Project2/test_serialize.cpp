@@ -103,114 +103,9 @@ int main_ser()
 	return 0;
 }
 
-//------------------------------------------------------------------------------------------
-
-//memcpy拷贝覆盖
-class IGemetry
-{
-};
-
-class ICsgTree
-{
-public:
-	//int id = 0; //默认无对齐，各占8byte
-	virtual ~ICsgTree() = 0;
-};
-
-//min(n in #pragma pack(n),结构体中的最长类型)
-#pragma pack(1)
-class GeCsgTree :public ICsgTree
-{
-private:
-	int tolerance;
-	int oparation;
-	vector<shared_ptr<ICsgTree>> m_leftNodes;
-	vector<shared_ptr<ICsgTree>> m_rightNodes;
-public:
-	virtual ~GeCsgTree() override {};
-};
-#pragma pack() //end
-
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
-struct CsgTreeData
-{
-	vector<shared_ptr<ICsgTree>> m_leftNodes;
-	vector<shared_ptr<ICsgTree>> m_rightNodes;
-	//bool isLeft;
-};
-
-static void testSerialization1()
-{
-	int sz0 = sizeof(ICsgTree);
-	int sz1 = sizeof(GeCsgTree);
-	int sz2 = sizeof(CsgTreeData);
-	int sz3 = sizeof(vector<shared_ptr<ICsgTree>>);
-	CsgTreeData data;
-	// 生成GUID
-	boost::uuids::random_generator generator;
-	boost::uuids::uuid uuid = generator();
-
-	// 将GUID转换为字符串
-	std::string uuidStr = boost::uuids::to_string(uuid);
-
-	// 输出GUID
-	std::cout << "Generated GUID: " << uuidStr << std::endl;//Generated GUID: 57186994-bef7-4134-832b-fc3aa6866063
-	/*
-	UUID（Universally Unique Identifier）的标准表示形式是一个包含32个十六进制（hexadecimal）字符的字符串，
-	分为五个部分，用连字符分隔，形如："xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"。
-
-	前8个字符表示UUID的32位数据的前32位。
-	第9至12个字符表示UUID的32位数据的接下来的16位。
-	第13至16个字符表示UUID的32位数据的接下来的16位。
-	第17至20个字符表示UUID的32位数据的接下来的16位。
-	最后12个字符表示UUID的32位数据的接下来的48位。
-	*/
-
-	return;
-}
-
-
 //----------------------------------------------------------------------------------------------
 // 序列化-二叉树
 //----------------------------------------------------------------------------------------------
-
-static atomic<int> s_allnodes_index = 1;
-
-namespace ppc
-{
-	struct TreeNode
-	{
-		int m_nodeIndex;
-		std::vector<int> m_geomIndexes;
-		TreeNode* m_father;
-		TreeNode* m_left;
-		TreeNode* m_right;
-
-		TreeNode() : m_nodeIndex(s_allnodes_index++), m_father(nullptr), m_left(nullptr), m_right(nullptr) {}
-		TreeNode(int x) : m_nodeIndex(x), m_father(nullptr), m_left(nullptr), m_right(nullptr) {}
-		static TreeNode* create(TreeNode* left, TreeNode* right, TreeNode* father = nullptr)
-		{
-			TreeNode* ptr = new TreeNode;
-			ptr->m_father = father;
-			ptr->m_left = left;
-			ptr->m_right = right;
-			return ptr;
-		}
-	};
-
-	struct TreeNodePtr
-	{
-		int m_nodeIndex;
-		std::vector<int> m_geomIndexes;
-		std::shared_ptr<TreeNodePtr> m_father;
-		std::shared_ptr<TreeNodePtr> m_left;
-		std::shared_ptr<TreeNodePtr> m_right;
-		TreeNodePtr(int x) :m_nodeIndex(x) {}
-
-	};
-}
 
 //生成随机二叉树
 TreeNode* generateRandomTree(int maxDepth, int currentDepth = 1)
@@ -230,61 +125,7 @@ TreeNode* generateRandomTree(int maxDepth, int currentDepth = 1)
 	return node;
 }
 
-// 序列化二叉树为字符串
-std::string serialize(TreeNode* root) {
-	if (root == nullptr) 
-		return "$";
-    //std::vector<unsigned char> temp(
-    std::string serialized(
-		sizeof(int) + 
-        sizeof(int) * (1 + root->m_geomIndexes.size()), 0);
-    //unsigned char* ptr = temp.data();
-    char* ptr = const_cast<char*>(serialized.data());
-	//vector
-    int count = root->m_geomIndexes.size();
-    memcpy(ptr, &count, sizeof(int)); ptr += sizeof(int);
-    memcpy(ptr, root->m_geomIndexes.data(), sizeof(int) * root->m_geomIndexes.size()); ptr += sizeof(int) * root->m_geomIndexes.size();
-	//member
-	memcpy(ptr, &root->m_nodeIndex, sizeof(int)); ptr += sizeof(int);
-	//std::string serialized(temp.begin(), temp.end());
-	serialized += char(-128) + serialize(root->m_left);
-	serialized += char(-128) + serialize(root->m_right);
-	return serialized;
-}
-
-// 反序列化字符串为二叉树
-TreeNode* deserialize_istring(std::istringstream& iss, TreeNode* father = nullptr) {
-	std::string token;
-	//iss >> token;//默认情况下，istringstream空格（空白字符）被视为分隔符，逐个遍历；
-	std::getline(iss, token, char(-128));//
-	if (token == "$") 
-		return nullptr;
-	int count, nodeIndex;
-	const char* ptr = token.data();
-	memcpy(&count, ptr, sizeof(int)); ptr += sizeof(int);
-	std::vector<int> geomIndexes(count);
-	memcpy(geomIndexes.data(), ptr, sizeof(int) * geomIndexes.size()); ptr += sizeof(int) * geomIndexes.size();
-	memcpy(&nodeIndex, ptr, sizeof(int)); ptr += sizeof(int);
-
-	//TreeNode* root = new TreeNode(std::stoi(token));
-	TreeNode* root = new TreeNode;
-	root->m_father = father;	father = root;
-	root->m_geomIndexes = geomIndexes;
-	root->m_nodeIndex = nodeIndex;
-	root->m_left = deserialize_istring(iss, father);
-	root->m_right = deserialize_istring(iss, father);
-	return root;
-}
-// 反序列化字符串为二叉树（辅助函数）
-TreeNode* deserialize(const std::string& data) {
-	//从序列化的字符串中按照特定规则提取数据，例如按空格分隔节点的值。字符串流提供了方便的方法来完成这个任务。
-	//在反序列化过程中，我们需要将字符串表示的节点值转换为整数或其他类型。字符串流可以将字符串解析为适当的数据类型，如std::stoi用于将字符串转换为整数。
-	std::istringstream iss(data);
-	return deserialize_istring(iss);
-}
-
 //重写序列化，修改序列化逻辑，返回智能指针
-
 namespace ppc
 {
 	std::vector<byte> serializition(const shared_ptr<TreeNodePtr>& root)
@@ -352,6 +193,11 @@ namespace ppc
 // 测试序列化函数
 void testSerialization2() 
 {
+	int sz0 = sizeof(ICsgTree);
+	int sz1 = sizeof(GeCsgTree);
+	int sz2 = sizeof(CsgTreeData);
+	int sz3 = sizeof(vector<shared_ptr<ICsgTree>>);
+	CsgTreeData data;
 	// 构建一个二叉树
 	TreeNode* root = new TreeNode(1);
 	root->m_left = new TreeNode(2);
@@ -361,22 +207,22 @@ void testSerialization2()
 	root->m_left->m_left->m_geomIndexes = { 4,44 };
 	root->m_left->m_right = new TreeNode(5);
 
-	// 序列化
-	std::string serialized = serialize(root);
-	std::cout << "Serialized: " << serialized << std::endl;
+	//// 序列化
+	//std::string serialized = serialize(root);
+	//std::cout << "Serialized: " << serialized << std::endl;
 
-	std::vector<unsigned char> charVector(serialized.size());
-	memcpy(charVector.data(), serialized.data(), serialized.size());
-	//迭代器构造
-	//std::string strVector(charVector.begin(), charVector.end());
-	//memcpy
-	std::string strVector(charVector.size(), 0);
-	memcpy(const_cast<char*>(strVector.data()), charVector.data(), charVector.size());
+	//std::vector<unsigned char> charVector(serialized.size());
+	//memcpy(charVector.data(), serialized.data(), serialized.size());
+	////迭代器构造
+	////std::string strVector(charVector.begin(), charVector.end());
+	////memcpy
+	//std::string strVector(charVector.size(), 0);
+	//memcpy(const_cast<char*>(strVector.data()), charVector.data(), charVector.size());
 
-	// 反序列化
-	TreeNode* deserialized = deserialize(serialized);
-	TreeNode* deserialized1 = deserialize(strVector);
-	std::cout << "Deserialized: " << deserialized->m_nodeIndex << std::endl;
+	//// 反序列化
+	//TreeNode* deserialized = deserialize(serialized);
+	//TreeNode* deserialized1 = deserialize(strVector);
+	//std::cout << "Deserialized: " << deserialized->m_nodeIndex << std::endl;
 
 	// 空列表data为空指针
 	vector<int> vecInt(0);
@@ -470,58 +316,6 @@ void testSerialization5()
 	return;
 }
 
-class Implementation : public Interface 
-{
-public:
-	virtual std::shared_ptr<TreeNode> create() override
-	{
-		TreeNode* node = new TreeNode(1);
-		node->m_left= new TreeNode(2);
-		node->m_right= new TreeNode(3);
-		return shared_ptr<TreeNode>(node);
-	}
-	virtual std::vector<unsigned char> serial(const std::shared_ptr<TreeNode>& csg) override
-	{
-		if (csg == nullptr)
-			return {};
-		std::string data = serialize(csg.get());
-		std::vector<unsigned char> res(data.size());
-		memcpy(res.data(), data.data(), data.size());
-		return res;
-	}
-	virtual std::shared_ptr<TreeNode> deserial(const std::vector<unsigned char>& data) override
-	{
-		if (data.empty())
-			return nullptr;
-		std::string buffer(data.size(),0);
-		memcpy(const_cast<char*>(buffer.data()), data.data(), data.size());
-		TreeNode* node = deserialize(buffer);
-		return shared_ptr<TreeNode>(node);
-	}
-	//static
-	static std::shared_ptr<TreeNode> createNew()
-	{
-		TreeNode* node = new TreeNode(1);
-		node->m_left = new TreeNode(2);
-		node->m_left->m_geomIndexes = { 22,222 };
-		node->m_right = new TreeNode(3);
-		node->m_left->m_left = new TreeNode(4);
-		node->m_left->m_right = new TreeNode(5);
-		return shared_ptr<TreeNode>(node);
-	}
-	static std::shared_ptr<TreeNodePtr> createNewPtr()
-	{
-		shared_ptr<TreeNodePtr> node = make_shared<TreeNodePtr>(1);
-		node->m_left = make_shared<TreeNodePtr>(2);
-		node->m_left->m_geomIndexes = { 22,222 };
-		node->m_right = make_shared<TreeNodePtr>(3);
-		node->m_left->m_left = make_shared<TreeNodePtr>(4);
-		node->m_left->m_right = make_shared<TreeNodePtr>(5);
-		return node;
-	}
-
-};
-
 static void testSerialization6()
 {
 	// 定义一个 std::function，指向类型与 normalFunction 匹配的函数指针
@@ -553,7 +347,7 @@ static void testSerialization6()
 	std::string buffer1 = (*serialize_fun1)(node.get());
 
 	//用法二：函数指针
-	std::string buffer = serialize(node.get());
+	std::string buffer = Implementation::serialize(node.get());
 	auto serialize_fun = reg.get<std::string(TreeNode*)>("serialize");
 	std::string data2 = (*serialize_fun)(node.get());
 	auto deserialize_fun = reg.get<TreeNode*(const std::string&)>("deserialize");
@@ -591,15 +385,14 @@ static void testSerialization7()
 
 static int enrol = []()->int
 	{
-		std::function<std::string(TreeNode*)> function = serialize; //普通函数指针转std::function对象
+		std::function<std::string(TreeNode*)> function = Implementation::serialize; //普通函数指针转std::function对象
 		DependencyRegistry::getInstance().set("csg_node_class", new Implementation());
 		DependencyRegistry::getInstance().set("serialize_fun", &function);
-		DependencyRegistry::getInstance().set("serialize", serialize);
-		DependencyRegistry::getInstance().set("deserialize", deserialize);
+		DependencyRegistry::getInstance().set("serialize", Implementation::serialize);
+		DependencyRegistry::getInstance().set("deserialize", Implementation::deserialize);
 		DependencyRegistry::getInstance().set("serializition", serializition);
 		DependencyRegistry::getInstance().set("deserializition", deserializition);
 
-		testSerialization1();
 		testSerialization2();
 		testSerialization3();
 		testSerialization4();

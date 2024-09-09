@@ -1,5 +1,5 @@
 #include "pch.h"
-
+using namespace ppc;
 std::map<std::string, DependencyRegistry::FunctionPointer> DependencyRegistry::sm_implementations;
 
 std::vector<unsigned char> ppc::serializition(const std::shared_ptr<TreeNodePtr>& node)

@@ -185,6 +185,7 @@
     <ClCompile Include="test_data_structure.cpp" />
     <ClCompile Include="test_data_tree.cpp" />
     <ClCompile Include="test_geo.cpp" />
+    <ClCompile Include="test_guid.cpp" />
     <ClCompile Include="test_interview.cpp" />
     <ClCompile Include="test_mutex.cpp" />
     <ClCompile Include="test_binfile_debug.cpp" />
