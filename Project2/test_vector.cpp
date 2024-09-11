@@ -4,11 +4,20 @@ using namespace para;
 
 // 重载一下+号运算符
 template <typename T>
-std::vector<T>& operator+(std::vector<T>& vct1, const std::vector<T>& vct2)
+std::vector<T> operator+(const std::vector<T>& vct1, const std::vector<T>& vct2)
+{
+	std::vector<T> res = vct1;
+	res.insert(res.end(), vct2.begin(), vct2.end());
+	return res;
+}
+
+template <typename T>
+void operator+=(std::vector<T>& vct1, const std::vector<T>& vct2)
 {
 	vct1.insert(vct1.end(), vct2.begin(), vct2.end());
-	return vct1;
 }
+
+#pragma region MyRegion
 
 //指针偏移
 //指针偏移获取类的私有成员
@@ -146,6 +155,7 @@ static void test_vector_2()
 	cout << 1;
 }
 
+//测试map
 static void test_vector_3()
 {
 	std::map<BPParaVec, int> amap;
@@ -225,19 +235,40 @@ static int test_vector_4()
 	return 0;
 
 }
+#pragma endregion
 
 //测试删除
 static void test_vector_5()
 {
 	std::vector<int> vec = { 1, 2, 3, 4, 5 };
 	vec.erase(vec.begin() + 1);
+	// vector索引的引用
+	std::vector<int>& change = std::vector<int>();
+	change = vec; //修改原始vec失败
+	for (int i = 0; i < change.size(); i++)
+		change[i] = 2 * change[i];
+	std::vector<int>* change2; // = &std::vector<int>();
+	change2 = &vec; //修改成功
+	for (int i = 0; i < change2->size(); i++)
+		(*change2)[i] = 2 * (*change2)[i];
+
+	return;
+}
+
+//测试operator重载
+static void test_vector_6()
+{
+	std::vector<int> vec1 = { 1, 2, 3, 4, 5 };
+	std::vector<int> vec2 = { 6,7,8,9 };
+	std::vector<int> vec3 = vec1 + vec2;
+	vec3 += vec2;
 
 	return;
 }
 
 static int _enrol = []()->int 
 	{
-		test_vector_5();
+		test_vector_6();
 		cout << "test_vector finished.\n" << endl;
 		return 0;
 	}();
