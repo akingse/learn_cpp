@@ -46,10 +46,7 @@ private:
 };
 #pragma pack() //end memory alignment
 
-
-
-
-int main_vector()
+static int test_vector_1()
 {
 	auto ss1 = sizeof(void*); //8
 	auto ss2 = sizeof(size_t);//8
@@ -110,7 +107,7 @@ int main_vector()
 	return 0;
 }
 
-static void test_list()
+static void test_vector_2()
 {
 
 	bool sign = true;
@@ -149,8 +146,7 @@ static void test_list()
 	cout << 1;
 }
 
-
-void test_vec_compare()
+static void test_vector_3()
 {
 	std::map<BPParaVec, int> amap;
 	amap.insert({ BPParaVec(3, 6), 1 });
@@ -175,7 +171,8 @@ void test_vec_compare()
 
 }
 
-static int _test_chatgpt_1()
+//wrote by chatgpt
+static int test_vector_4()
 {
 	//							 |         |		
 	std::vector<double> vec{ 1.2, 3.4, 3.5, 5.6 };
@@ -229,11 +226,19 @@ static int _test_chatgpt_1()
 
 }
 
+//≤‚ ‘…æ≥˝
+static void test_vector_5()
+{
+	std::vector<int> vec = { 1, 2, 3, 4, 5 };
+	vec.erase(vec.begin() + 1);
+
+	return;
+}
 
 static int _enrol = []()->int 
-{
-	//test_list();
-	//_test_chatgpt_1();
-	cout << "test_vector finished.\n" << endl;
-	return 0;
-}();
+	{
+		test_vector_5();
+		cout << "test_vector finished.\n" << endl;
+		return 0;
+	}();
+
