@@ -14,45 +14,6 @@ using namespace std;
 
 */
 
-class C
-{
-public:
-
-    double* val_指针;
-    std::shared_ptr<std::vector<double>> vla_智能指针;
-    C()
-    {
-        val_指针 = new double(1.3);
-        std::cout << "C()" << std::endl;
-    }
-    C(const C& src)//:
-        //vla_智能指针(new std::vector<double>(*src.vla_智能指针));
-    {
-        const std::vector<double>& vc = *src.vla_智能指针;
-        std::vector<double>* vp = new std::vector<double>(vc);
-        //vla_智能指针.reset(vp);
-        std::cout << "C(const C&)" << std::endl;
-    }
-    ~C()
-    {
-        std::cout << "~C()" << std::endl;
-    }
-};
-int main_ml()
-{
-    //引用计数
-//引用计数是计算机编程语言中的一种内存管理技术，是指将资源（可以是对象、内存或磁盘空间等等）的被引用次数保存起来，当被引用次数变为零时就将其释放的过程。
-    shared_ptr<C> pterA(new C);
-
-
-    C 于檬涵家 = C();
-    //C 于檬涵老家 = 于檬涵家; // 深拷
-    C& 于招财家 = 于檬涵家; // 浅拷
-    C* 于招财家的快递地址 = &于招财家; // 浅拷
-    C* 于檬涵家的快递地址 = &于檬涵家; // 浅拷
-    return 0;
-}
-
 
 int& func()
 {
@@ -71,8 +32,6 @@ public:
 //单例类,只有一个实例的类
 
 //Manage* Manage::s_instance = nullptr;
-
-
 
 //结构体
 struct C_struct
@@ -107,9 +66,59 @@ int main_me()
 	int* p = &a;//浅拷
     //Manager::get_instance().m_id2name[i++] = "name";
 
-
 	return 0;
 }
 
+namespace bin
+{
+    // 二叉树节点结构
+    struct TreeNode {
+        int value;
+        std::shared_ptr<TreeNode> left;
+        std::shared_ptr<TreeNode> right;
 
+        // 构造函数
+        TreeNode(int val) : value(val), left(nullptr), right(nullptr) {}
+    };
 
+    // 二叉树类
+    class BinaryTree {
+    public:
+        std::shared_ptr<TreeNode> root;
+
+        BinaryTree() : root(nullptr) {}
+
+        // 删除当前节点的方法
+        void deleteNode(std::shared_ptr<TreeNode>& node) 
+        {
+            if (node) {
+                // 递归删除左右子树
+                deleteNode(node->left);
+                deleteNode(node->right);
+
+                // 当函数返回时，node的智能指针会在离开作用域时自动释放
+                node.reset();
+            }
+        }
+
+        // 辅助函数 - 清空整个树
+        void clear() {
+            deleteNode(root);
+        }
+    };
+
+}
+
+static void test_sharedptr_1()
+{
+    std::shared_ptr<int> ptr = make_shared<int>(1);
+    ptr.reset(); //shared_ptr释放内存
+    return;
+}
+
+static int enrol = []()->int
+    {
+        test_sharedptr_1();
+        cout << "test_memory_leak finished.\n" << endl;
+        return 0;
+    }();
