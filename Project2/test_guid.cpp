@@ -116,6 +116,14 @@ static void _test_guid1()
         return;
     }
 
+    //StringFromGUID2();
+    wchar_t* pBuf = new wchar_t[48];       //很配存储文字串的空间
+    StringFromGUID2(guid, pBuf, 48);
+
+    string name(48, 0);
+    memcpy(const_cast<char*>(name.data()), pBuf, 48);
+    string name2 = wstring2string(pBuf);
+
     // 输出GUID
     std::cout << "生成的GUID是: {"
         << std::hex << std::uppercase
@@ -128,6 +136,7 @@ static void _test_guid1()
         << static_cast<int>(guid.Data4[6]) << static_cast<int>(guid.Data4[7])
         << "}" << std::endl;
     int n = sizeof(guid);
+    int nGuid = sizeof(long) + 2*sizeof(short) + 8*sizeof(char) ;
     // 清理COM库
     CoUninitialize();
 }
