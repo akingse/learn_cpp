@@ -222,7 +222,7 @@ namespace bin
 	// 二叉树节点结构
 	struct TreeNode
 	{
-		int value = -1;
+		int m_value = -1;
 		BinaryTreePtr m_owner;
 		TreeNodePtr m_father;
 		TreeNodePtr m_left;
@@ -237,6 +237,8 @@ namespace bin
 		//deep copy
 		TreeNode(const BinaryTreePtr& tree, const TreeNodePtr& rhs, const TreeNodePtr& father = nullptr);
 
+		//
+		static TreeNodePtr deepcopy(const BinaryTreePtr& tree, const TreeNodePtr& rhs, const TreeNodePtr& father = nullptr);
 	};
 
 	// 二叉树类

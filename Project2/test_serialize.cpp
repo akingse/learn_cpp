@@ -384,7 +384,7 @@ static void testSerialization7()
 	return;
 }
 
-void exampleFunction(int value)
+void exampleFunction(int m_value)
 {
 	cout << "exampleFunction" << endl;
 }
@@ -413,7 +413,7 @@ static void testSerialization8()
 namespace bin
 {
 	static int s_allnode_index = 0;
-	TreeNode::TreeNode(const BinaryTreePtr& tree) : value(s_allnode_index++), m_left(nullptr), m_right(nullptr)
+	TreeNode::TreeNode(const BinaryTreePtr& tree) : m_value(s_allnode_index++), m_left(nullptr), m_right(nullptr)
 	{
 		m_owner = tree;
 		if (tree->m_root == nullptr)
@@ -422,11 +422,12 @@ namespace bin
 	}
 
 	TreeNode::TreeNode(const BinaryTreePtr& tree, const TreeNodePtr& left, const TreeNodePtr& right, int op):
-		value(s_allnode_index++), m_left(left), m_right(right)
+		m_value(s_allnode_index++), m_left(left), m_right(right)
 	{
 		TreeNodePtr ptr = shared_ptr<TreeNode>(this);
 		m_owner = tree;
-		tree->m_root = ptr;
+		if (tree->m_root == nullptr) //avoid pointer destruct crash
+			tree->m_root = ptr;
 		if (left != nullptr)
 			left->m_father = ptr;
 		if (right != nullptr)
@@ -438,10 +439,11 @@ namespace bin
 		if (tree == nullptr || rhs == nullptr)
 			return;
 		TreeNodePtr ptr = shared_ptr<TreeNode>(this);
-		if (m_father == nullptr)
+        if (father == nullptr && tree->m_root == nullptr)
 			tree->m_root = ptr;
-		value = rhs->value;
+		m_owner = tree;
 		m_father = father;
+		m_value = rhs->m_value;
 		if (rhs->m_left != nullptr)
 		{
 			TreeNode* temp = new TreeNode(tree, rhs->m_left, ptr);
@@ -452,7 +454,27 @@ namespace bin
 			TreeNode* temp = new TreeNode(tree, rhs->m_right, ptr);
 			m_right = shared_ptr<TreeNode>(temp);
 		}
+	}
 
+	TreeNodePtr TreeNode::deepcopy(const BinaryTreePtr& tree, const TreeNodePtr& rhs, const TreeNodePtr& father /*= nullptr*/)
+	{
+		if (tree == nullptr || rhs == nullptr)
+			return nullptr;
+		TreeNodePtr ptr = make_shared<TreeNode>();//construct empty
+		if (father == nullptr)
+			tree->m_root = ptr;
+		ptr->m_owner = tree;
+		ptr->m_father = father;
+		ptr->m_value = rhs->m_value;
+		if (rhs->m_left != nullptr)
+		{
+			ptr->m_left = deepcopy(tree, rhs->m_left, ptr);
+		}
+		if (rhs->m_right != nullptr)
+		{
+			ptr->m_right = deepcopy(tree, rhs->m_right, ptr);
+		}
+		return ptr;
 	}
 
 	static void testSerialization8()
@@ -465,7 +487,10 @@ namespace bin
 		TreeNodePtr node5 = make_shared<TreeNode>(tree, node4, node3, 0);
 
 		BinaryTreePtr tree2 = make_shared<BinaryTree>();
-		TreeNode copy = TreeNode(tree2, node5);
+		TreeNodePtr copy_ptr = TreeNode::deepcopy(tree2, node5);
+
+		BinaryTreePtr tree3 = make_shared<BinaryTree>();
+		TreeNode copy = TreeNode(tree3, node5); //使用递归构造函数，必然崩溃
 
 		return;
 	}
@@ -482,7 +507,7 @@ static int enrol = []()->int
 		DependencyRegistry::getInstance().set("serializition", serializition);
 		DependencyRegistry::getInstance().set("deserializition", deserializition);
 #endif
-		//DependencyInversion::getInstance().set("serializition", serializition);
+		//DependencyInversion::getInstance().set("serializition", serializition); //why release crash
 		//DependencyInversion::getInstance().set("deserializition", deserializition);
 
 		testSerialization2();

@@ -40,53 +40,6 @@ int main0()
 	return 0;
 }
 
-//--------------------------------------------------------------------
-template<bool B> class _Chu;
-template<> class _Chu<false>
-{
-public:
-	template<typename A, typename B>
-	inline static auto _chu(const A& a, const B& b)
-	{
-		return a / b;
-	}
-};
-template<> class _Chu<true>
-{
-public:
-	template<typename A, typename B>
-	inline static auto _chu(const A& a, const B& b)
-	{
-		return a / (double)b;
-	}
-};
-
-template<typename A, typename B>
-auto chu(const A& a, const B& b)
-{
-	return _Chu<std::is_integral<B>::value>::_chu(a, b);
-}
-
-/*
-template<typename A>
-auto chu(const A& a, const int& b) // Æ«ÌØ»¯
-{
-	std::cout << "int" << std::endl;
-	return _Chu<true>::_chu(a, b);
-}
-*/
-int main_t()
-{
-	std::cout << chu(4, 3) << std::endl;
-	std::cout << chu(4, 3ull) << std::endl;
-	std::cout << chu(4, 3ll) << std::endl;
-	std::cout << chu(4, 'j') << std::endl;
-	std::cout << chu(4, 3.0) << std::endl;
-	return 0;
-}
-
-
-
 template<typename T>
 class Func
 {
