@@ -64,7 +64,7 @@
     <ClCompile Include="test_lambda.cpp">
       <Filter>test_eg</Filter>
     </ClCompile>
-    <ClCompile Include="test_memory_leak.cpp">
+    <ClCompile Include="test_memory.cpp">
       <Filter>test_eg</Filter>
     </ClCompile>
     <ClCompile Include="test_recursion.cpp">

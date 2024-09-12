@@ -4,17 +4,17 @@ using namespace para;
 
 // 重载一下+号运算符
 template <typename T>
-std::vector<T> operator+(const std::vector<T>& vct1, const std::vector<T>& vct2)
+std::vector<T> operator+(const std::vector<T>& vctA, const std::vector<T>& vctB)
 {
-	std::vector<T> res = vct1;
-	res.insert(res.end(), vct2.begin(), vct2.end());
+	std::vector<T> res = vctA;
+	res.insert(res.end(), vctB.begin(), vctB.end());
 	return res;
 }
 
 template <typename T>
-void operator+=(std::vector<T>& vct1, const std::vector<T>& vct2)
+void operator+=(std::vector<T>& vctA, const std::vector<T>& vctB)
 {
-	vct1.insert(vct1.end(), vct2.begin(), vct2.end());
+	vctA.insert(vctA.end(), vctB.begin(), vctB.end());
 }
 
 #pragma region MyRegion

@@ -52,6 +52,58 @@ public:
     }
 };
 
+//sharedptr version
+class DependencyInversion
+{
+private:
+    DependencyInversion() = default;
+    ~DependencyInversion() = default;
+    DependencyInversion(const DependencyInversion&) = delete;
+    DependencyInversion(DependencyInversion&&) = delete;
+
+private:
+    template<typename T>
+    struct Holder
+    {
+        T m_value;
+        Holder(T value) : m_value(value) {}
+    };
+
+    // not export if using this project only
+    DLLEXPORT_1 static std::map<std::string, std::shared_ptr<void>> sm_implementations;
+    DLLEXPORT_1 static std::mutex sm_mutex;
+
+public:
+    static DependencyInversion& getInstance()
+    {
+        static DependencyInversion instance;
+        return instance;
+    }
+
+    template<class T> //registerImplementation
+    bool set(const std::string& name, T impl)
+    {
+        std::lock_guard<std::mutex> lock(sm_mutex);
+        if (sm_implementations.find(name) != sm_implementations.end())
+            return false;
+        sm_implementations[name] = std::make_shared<Holder<T>>(impl);
+        return true;// srore holder
+    }
+
+    template<class T> 
+    T* get(const std::string& name)
+    {
+        std::lock_guard<std::mutex> lock(sm_mutex);
+        auto it = sm_implementations.find(name);
+        if (it == sm_implementations.end())
+            return nullptr;
+        auto holder = std::static_pointer_cast<Holder<T>>(it->second);
+        //return holder ? std::make_shared<T>(holder->m_value) : nullptr;
+        return holder ? &holder->m_value : nullptr;
+    }
+
+};
+
 //python parametric component
 namespace ppc
 {

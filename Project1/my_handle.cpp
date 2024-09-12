@@ -28,6 +28,6 @@ void test_handle()
 
 static int enrol = []()->int
 {
-	test_handle();
+	//test_handle();
 	return 0;
 }();

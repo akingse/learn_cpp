@@ -81,12 +81,12 @@ namespace ppc
 
 		TreeNode() : m_nodeIndex(s_allnodes_index++), m_father(nullptr), m_left(nullptr), m_right(nullptr) {}
 		TreeNode(int x) : m_nodeIndex(x), m_father(nullptr), m_left(nullptr), m_right(nullptr) {}
-		static TreeNode* create(TreeNode* left, TreeNode* right, TreeNode* father = nullptr)
+		static TreeNode* create(TreeNode* m_left, TreeNode* m_right, TreeNode* m_father = nullptr)
 		{
 			TreeNode* ptr = new TreeNode;
-			ptr->m_father = father;
-			ptr->m_left = left;
-			ptr->m_right = right;
+			ptr->m_father = m_father;
+			ptr->m_left = m_left;
+			ptr->m_right = m_right;
 			return ptr;
 		}
 	};
@@ -130,7 +130,7 @@ public:
 	}
 
 	// 反序列化字符串为二叉树
-	static TreeNode* deserialize_istring(std::istringstream& iss, TreeNode* father = nullptr) {
+	static TreeNode* deserialize_istring(std::istringstream& iss, TreeNode* m_father = nullptr) {
 		std::string token;
 		//iss >> token;//默认情况下，istringstream空格（空白字符）被视为分隔符，逐个遍历；
 		std::getline(iss, token, char(-128));//
@@ -145,11 +145,11 @@ public:
 
 		//TreeNode* root = new TreeNode(std::stoi(token));
 		TreeNode* root = new TreeNode;
-		root->m_father = father;	father = root;
+		root->m_father = m_father;	m_father = root;
 		root->m_geomIndexes = geomIndexes;
 		root->m_nodeIndex = nodeIndex;
-		root->m_left = deserialize_istring(iss, father);
-		root->m_right = deserialize_istring(iss, father);
+		root->m_left = deserialize_istring(iss, m_father);
+		root->m_right = deserialize_istring(iss, m_father);
 		return root;
 	}
 
@@ -211,3 +211,58 @@ public:
 	}
 
 };
+
+namespace bin
+{
+	class TreeNode;
+	class BinaryTree;
+	typedef std::shared_ptr<TreeNode> TreeNodePtr;
+	typedef std::shared_ptr<BinaryTree> BinaryTreePtr;
+
+	// 二叉树节点结构
+	struct TreeNode
+	{
+		int value = -1;
+		BinaryTreePtr m_owner;
+		TreeNodePtr m_father;
+		TreeNodePtr m_left;
+		TreeNodePtr m_right;
+
+		// 构造函数
+		TreeNode() = default;
+		//create empty
+		TreeNode(const BinaryTreePtr& tree);
+		//create by operation
+		TreeNode(const BinaryTreePtr& tree, const TreeNodePtr& left, const TreeNodePtr& right, int op);
+		//deep copy
+		TreeNode(const BinaryTreePtr& tree, const TreeNodePtr& rhs, const TreeNodePtr& father = nullptr);
+
+	};
+
+	// 二叉树类
+	class BinaryTree {
+	public:
+		TreeNodePtr m_root;
+
+		BinaryTree() : m_root(nullptr) {}
+
+		// 删除当前节点的方法
+		void deleteNode(TreeNodePtr& node)
+		{
+			if (node) {
+				// 递归删除左右子树
+				deleteNode(node->m_left);
+				deleteNode(node->m_right);
+
+				// 当函数返回时，node的智能指针会在离开作用域时自动释放
+				node.reset();
+			}
+		}
+
+		// 辅助函数 - 清空整个树
+		void clear() {
+			deleteNode(m_root);
+		}
+	};
+
+}

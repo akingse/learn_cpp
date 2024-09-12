@@ -224,7 +224,7 @@
     <ClCompile Include="test_pointer.cpp" />
     <ClCompile Include="test_math.cpp" />
     <ClCompile Include="test_matrix.cpp" />
-    <ClCompile Include="test_memory_leak.cpp" />
+    <ClCompile Include="test_memory.cpp" />
     <ClCompile Include="test_object_pool.cpp" />
     <ClCompile Include="test_ope.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>

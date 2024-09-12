@@ -473,7 +473,7 @@ namespace bin
 
 static int enrol = []()->int
 	{
-#if defined( _DEBUG ) && !defined( NDEBUG ) //多条件编译
+#if defined( _DEBUG ) && !defined( NDEBUG )
 		std::function<std::string(TreeNode*)> function = Implementation::serialize; //普通函数指针转std::function对象
 		DependencyRegistry::getInstance().set("csg_node_class", new Implementation());
 		DependencyRegistry::getInstance().set("serialize_fun", &function);

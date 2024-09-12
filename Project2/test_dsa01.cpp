@@ -39,14 +39,14 @@ void merge(int array[], int tmp[], int leftPos, int rightPos, int rightEnd)
 	}
 }
 
-void mergeSort(int array[], int tmp[], int left, int right)
+void mergeSort(int array[], int tmp[], int m_left, int m_right)
 {
-	if (left < right)
+	if (m_left < m_right)
 	{
-		int center = (left + right) / 2;//取数组的中点
-		mergeSort(array, tmp, left, center);//归并排序数组的前半部分
-		mergeSort(array, tmp, center + 1, right);//归并排序数组的后半部分
-		merge(array, tmp, left, center + 1, right);//将数组的前后半部分合并
+		int center = (m_left + m_right) / 2;//取数组的中点
+		mergeSort(array, tmp, m_left, center);//归并排序数组的前半部分
+		mergeSort(array, tmp, center + 1, m_right);//归并排序数组的后半部分
+		merge(array, tmp, m_left, center + 1, m_right);//将数组的前后半部分合并
 	}
 }
 /*
@@ -95,50 +95,50 @@ long long fib3(int n)
 }
 
 //static int* temp;
-void Merge(int arry[], int left, int middle, int right)
+void Merge(int arry[], int m_left, int middle, int m_right)
 //合并arry数组中下标为left到middle,和下标为mi ddle+1到right的两个部分
 {
 	//int temp[right - left + 1];
-	int* temp = new int[right - left + 1];
-	for (int i = left; i <= right; i++) //copy to temp-array
-		temp[i - left] = arry[i];
-	int i = left, j = middle + 1;
-	for (int k = left; k <= right; k++)
+	int* temp = new int[m_right - m_left + 1];
+	for (int i = m_left; i <= m_right; i++) //copy to temp-array
+		temp[i - m_left] = arry[i];
+	int i = m_left, j = middle + 1;
+	for (int k = m_left; k <= m_right; k++)
 	{
-		for (int i = left; i <= right; i++)
+		for (int i = m_left; i <= m_right; i++)
 			cout << arry[i] << " ";
 		cout << "" << endl;
-		if (i > middle && j <= right)
+		if (i > middle && j <= m_right)
 		{
-			arry[k] = temp[j - left]; j++;
+			arry[k] = temp[j - m_left]; j++;
 		}
-		else if (j > right && i <= middle)
+		else if (j > m_right && i <= middle)
 		{
-			arry[k] = temp[i - left]; i++;
+			arry[k] = temp[i - m_left]; i++;
 		}
-		else if (temp[i - left] > temp[j - left]) //comparer
+		else if (temp[i - m_left] > temp[j - m_left]) //comparer
 		{
-			arry[k] = temp[j - left]; j++;
+			arry[k] = temp[j - m_left]; j++;
 		}
-		else if (temp[i - left] <= temp[j - left])
+		else if (temp[i - m_left] <= temp[j - m_left])
 		{
-			arry[k] = temp[i - left]; i++;
+			arry[k] = temp[i - m_left]; i++;
 		}
-		for (int i = left; i <= right; i++)
+		for (int i = m_left; i <= m_right; i++)
 			cout << arry[i] << " ";
 		cout << endl << "---------" << endl;
 	}
 	delete[] temp;
 }
-void Mergesort(int arry[], int left, int right)//对arry数组中下标为left的元素到 下标为right的元素进行排序
+void Mergesort(int arry[], int m_left, int m_right)//对arry数组中下标为left的元素到 下标为right的元素进行排序
 {
 	//形参中不存在数组的概念，即使中括号约定了数组的大小，也无效（传递是是一个地址，是数组的首地址）
-	if (left >= right)
+	if (m_left >= m_right)
 		return;
-	int middle = (right + left) / 2;
-	Mergesort(arry, left, middle);
-	Mergesort(arry, middle + 1, right);
-	Merge(arry, left, middle, right);
+	int middle = (m_right + m_left) / 2;
+	Mergesort(arry, m_left, middle);
+	Mergesort(arry, middle + 1, m_right);
+	Merge(arry, m_left, middle, m_right);
 }
 
 

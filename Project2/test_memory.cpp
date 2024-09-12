@@ -69,52 +69,13 @@ int main_me()
 	return 0;
 }
 
-namespace bin
-{
-    // 二叉树节点结构
-    struct TreeNode {
-        int value;
-        std::shared_ptr<TreeNode> left;
-        std::shared_ptr<TreeNode> right;
-
-        // 构造函数
-        TreeNode(int val) : value(val), left(nullptr), right(nullptr) {}
-    };
-
-    // 二叉树类
-    class BinaryTree {
-    public:
-        std::shared_ptr<TreeNode> root;
-
-        BinaryTree() : root(nullptr) {}
-
-        // 删除当前节点的方法
-        void deleteNode(std::shared_ptr<TreeNode>& node) 
-        {
-            if (node) {
-                // 递归删除左右子树
-                deleteNode(node->left);
-                deleteNode(node->right);
-
-                // 当函数返回时，node的智能指针会在离开作用域时自动释放
-                node.reset();
-            }
-        }
-
-        // 辅助函数 - 清空整个树
-        void clear() {
-            deleteNode(root);
-        }
-    };
-
-}
-
 static void test_sharedptr_1()
 {
     std::shared_ptr<int> ptr = make_shared<int>(1);
     ptr.reset(); //shared_ptr释放内存
     return;
 }
+
 
 static int enrol = []()->int
     {
