@@ -120,6 +120,9 @@ static void _test_guid1()
     wchar_t* pBuf = new wchar_t[48];       //很配存储文字串的空间
     StringFromGUID2(guid, pBuf, 48);
 
+    GUID guid2 = {};
+    HRESULT hr = CLSIDFromString(pBuf, &guid2);
+
     string name(48, 0);
     memcpy(const_cast<char*>(name.data()), pBuf, 48);
     string name2 = wstring2string(pBuf);
