@@ -235,6 +235,9 @@
     <ClCompile Include="test_serialize.cpp">
       <Filter>test_serialize</Filter>
     </ClCompile>
+    <ClCompile Include="test_string.cpp">
+      <Filter>test_stl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">

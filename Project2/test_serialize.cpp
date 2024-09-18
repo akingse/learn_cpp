@@ -416,7 +416,7 @@ namespace bin
 	TreeNode::TreeNode(const BinaryTreePtr& tree) : m_value(s_allnode_index++), m_left(nullptr), m_right(nullptr)
 	{
 		m_owner = tree;
-		if (tree->m_root == nullptr)
+		//if (tree->m_root == nullptr)
             tree->m_root = shared_ptr<TreeNode>(this);
 		//tree->m_root.reset();
 	}
@@ -434,27 +434,29 @@ namespace bin
 			right->m_father = ptr;
 	}
 
-	TreeNode::TreeNode(const BinaryTreePtr& tree, const TreeNodePtr& rhs, const TreeNodePtr& father /*= nullptr*/)
-	{
-		if (tree == nullptr || rhs == nullptr)
-			return;
-		TreeNodePtr ptr = shared_ptr<TreeNode>(this);
-        if (father == nullptr && tree->m_root == nullptr)
-			tree->m_root = ptr;
-		m_owner = tree;
-		m_father = father;
-		m_value = rhs->m_value;
-		if (rhs->m_left != nullptr)
-		{
-			TreeNode* temp = new TreeNode(tree, rhs->m_left, ptr);
-			m_left = shared_ptr<TreeNode>(temp);
-		}
-		if (rhs->m_right != nullptr)
-		{
-			TreeNode* temp = new TreeNode(tree, rhs->m_right, ptr);
-			m_right = shared_ptr<TreeNode>(temp);
-		}
-	}
+	//不可使用递归构造
+	//TreeNode::TreeNode(const BinaryTreePtr& tree, const TreeNodePtr& rhs, const TreeNodePtr& father /*= nullptr*/)
+	//{
+	//	if (tree == nullptr || rhs == nullptr)
+	//		return;
+	//	TreeNodePtr ptr = shared_ptr<TreeNode>(this);
+ //       if (father == nullptr && tree->m_root == nullptr)
+	//		tree->m_root = ptr;
+	//	m_owner = tree;
+	//	m_father = father;
+	//	m_value = rhs->m_value;
+	//	if (rhs->m_left != nullptr)
+	//	{
+	//		TreeNode* temp = new TreeNode(tree, rhs->m_left, ptr);
+	//		m_left = shared_ptr<TreeNode>(temp);
+	//	}
+	//	if (rhs->m_right != nullptr)
+	//	{
+	//		TreeNode* temp = new TreeNode(tree, rhs->m_right, ptr);
+	//		m_right = shared_ptr<TreeNode>(temp);
+	//	}
+	//}
+	
 
 	TreeNodePtr TreeNode::deepcopy(const BinaryTreePtr& tree, const TreeNodePtr& rhs, const TreeNodePtr& father /*= nullptr*/)
 	{
@@ -480,17 +482,17 @@ namespace bin
 	static void testSerialization8()
 	{
 		BinaryTreePtr tree = make_shared<BinaryTree>();
-		TreeNodePtr node1 = make_shared<TreeNode>(tree);
-		TreeNodePtr node2 = make_shared<TreeNode>(tree);
-		TreeNodePtr node3 = make_shared<TreeNode>(tree);
-		TreeNodePtr node4 = make_shared<TreeNode>(tree, node1, node2, 0);
-		TreeNodePtr node5 = make_shared<TreeNode>(tree, node4, node3, 0);
+		//TreeNodePtr node1 = make_shared<TreeNode>(tree);//相互持有的智能指针，会重复析构
+		//TreeNodePtr node2 = make_shared<TreeNode>(tree);
+		//TreeNodePtr node3 = make_shared<TreeNode>(tree);
+		//TreeNodePtr node4 = make_shared<TreeNode>(tree, node1, node2, 0);
+		//TreeNodePtr node5 = make_shared<TreeNode>(tree, node4, node3, 0);
 
 		BinaryTreePtr tree2 = make_shared<BinaryTree>();
-		TreeNodePtr copy_ptr = TreeNode::deepcopy(tree2, node5);
+		//TreeNodePtr copy_ptr = TreeNode::deepcopy(tree2, node5);
 
 		BinaryTreePtr tree3 = make_shared<BinaryTree>();
-		TreeNode copy = TreeNode(tree3, node5); //使用递归构造函数，必然崩溃
+		//TreeNode copy = TreeNode(tree3, node5); //使用递归构造函数，必然崩溃
 
 		return;
 	}

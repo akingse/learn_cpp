@@ -242,6 +242,7 @@
     <ClCompile Include="test_singleton2.cpp" />
     <ClCompile Include="test_speed.cpp" />
     <ClCompile Include="test_stl.cpp" />
+    <ClCompile Include="test_string.cpp" />
     <ClCompile Include="test_template1.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

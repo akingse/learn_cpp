@@ -67,6 +67,18 @@ inline std::string getExePath() // include<afx.h>
     return (std::string)(CStringA)path;
 }
 
+inline std::vector<std::string> string_split(const std::string& text, char delimiter)
+{
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(text);
+    while (std::getline(tokenStream, token, delimiter))
+    {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
 static size_t countFile = 0;
 inline void printLogTxt(const std::string& context, const std::string& fileName = {})
 {
