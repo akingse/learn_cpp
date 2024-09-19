@@ -162,6 +162,7 @@
     <ClInclude Include="calculatePolyhedron.h" />
     <ClInclude Include="calculateTriangle.h" />
     <ClInclude Include="calculateVectorMatrix.h" />
+    <ClInclude Include="clashInterfaceUtility.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Project_CAL_API.h" />
     <ClInclude Include="clashTypeDefine.h" />

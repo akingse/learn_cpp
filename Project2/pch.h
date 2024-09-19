@@ -5,18 +5,11 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm> 
-#include <iostream>
 //time
 #include <chrono>   
 #include <time.h> //clock()
 #include <ctime>  // random seed
 #include <cassert>
-
-//windows
-//#include <windows.h> //min max
-#define _AFXDLL
-//#include <afx.h> // MFC <cstring>
-// 
 //math
 #define _USE_MATH_DEFINES //using M_PI
 #include <cmath>
@@ -52,6 +45,16 @@
 #include <functional>
 #include <memory>
 #include <memory_resource>
+
+//windows
+#define _AFXDLL
+#define WIN32_LEAN_AND_MEAN //avoid _WINSOCKAPI_ warning
+#include <windows.h> //min max
+#include <afx.h> // MFC <cstring>
+#if defined(min) || defined(min)
+#undef min
+#undef max
+#endif
 
 // third party
 #include <omp.h>

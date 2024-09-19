@@ -95,6 +95,7 @@ static int main1() {
 //---------------------------------------------------------------------------------------------------
 // 
 //Boost 线程池位于组件 asio 中，是一种固定大小的线程池。
+#define BOOST_ASIO_NO_WIN32_LEAN_AND_MEAN
 #include <boost/asio.hpp>
 /* 互斥锁 */
 std::mutex mutex_iostream;

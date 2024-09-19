@@ -77,5 +77,8 @@
     <ClInclude Include="calculateMeshTopology.h">
       <Filter>algorithm</Filter>
     </ClInclude>
+    <ClInclude Include="clashInterfaceUtility.h">
+      <Filter>algorithm</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

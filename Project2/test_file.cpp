@@ -1,11 +1,6 @@
 #include "pch.h"
 using namespace std;
-
-static int MyCompare(const void* e1, const void* e2)
-{ //用于qsort的比较函数
-    return *((int*)e1) - *((int*)e2);
-}
-
+using namespace clash;
 
 static int main_file()
 {
@@ -141,9 +136,58 @@ static void _test2()
     return;
 }
 
+std::vector<std::string> getListFiles(const std::string& directory) 
+{
+    std::vector<std::string> filenameRes;
+    std::string searchPath = directory + "\\*";
+    WIN32_FIND_DATA findFileData;
+    HANDLE hFind = FindFirstFileW(string2wstring(searchPath.c_str()).c_str(), &findFileData);
+    if (hFind == INVALID_HANDLE_VALUE) {
+        std::cerr << "FindFirstFile failed (" << GetLastError() << ").\n";
+        return filenameRes;
+    }
+    do 
+    {
+        const std::string fileOrDir = wstring2string(findFileData.cFileName);
+        // Skip current directory (.) and parent directory (..)
+        if (fileOrDir != "." && fileOrDir != "..") 
+        {
+            // Construct the full path
+            std::string fullPath = directory + "\\" + fileOrDir;
+            if (findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) 
+            {
+                // It's a directory, print it and recurse into it
+                //std::cout << "Directory: " << fullPath << std::endl;
+                std::vector<std::string> temp = getListFiles(fullPath); // Recursive call
+                filenameRes.insert(filenameRes.end(), temp.begin(), temp.end());
+            }
+            else 
+            {
+                // It's a file, print it
+                //std::cout << "File: " << fullPath << std::endl;
+                filenameRes.push_back(fullPath);
+            }
+        }
+    } 
+    while (FindNextFileW(hFind, &findFileData) != 0);
+    FindClose(hFind);
+    return filenameRes;
+}
+
+int _test3() 
+{
+    //std::vector<std::string> filenameRes;
+    //std::vector<std::string> temp;
+    //filenameRes.insert(filenameRes.end(), temp.begin(), temp.end());
+
+    std::string folderPath = "D:\\Download\\Quark";
+    std::vector<std::string> filenameRes = getListFiles(folderPath);
+    return 0;
+}
 
 static int enrol = []()->int
 {
     //_test0();
+    _test3();
     return 0;
 }();

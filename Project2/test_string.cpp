@@ -15,7 +15,7 @@ static std::vector<std::string> split(const std::string& text, char delimiter)
 
 static void _test_1()
 {
-    string path = getExePath();
+    string path = clash::getExePath();
     std::vector<std::string> words = split(path, '\\');
     return;
 }

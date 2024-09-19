@@ -125,7 +125,7 @@ static void _test_guid1()
 
     string name(48, 0);
     memcpy(const_cast<char*>(name.data()), pBuf, 48);
-    string name2 = wstring2string(pBuf);
+    string name2 = clash::wstring2string(pBuf);
 
     // 输出GUID
     std::cout << "生成的GUID是: {"

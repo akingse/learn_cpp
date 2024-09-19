@@ -6,6 +6,7 @@
 #endif
 
 #include "clashTypeDefine.h"		
+#include "clashInterfaceUtility.h"		
 #include "calculateVectorMatrix.h"		
 #include "calculatePointLinePlane.h"
 #include "calculateTriangle.h"
