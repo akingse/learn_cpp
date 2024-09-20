@@ -142,7 +142,8 @@ std::vector<std::string> getListFiles(const std::string& directory)
     std::string searchPath = directory + "\\*";
     WIN32_FIND_DATA findFileData;
     HANDLE hFind = FindFirstFileW(string2wstring(searchPath.c_str()).c_str(), &findFileData);
-    if (hFind == INVALID_HANDLE_VALUE) {
+    if (hFind == INVALID_HANDLE_VALUE) 
+    {
         std::cerr << "FindFirstFile failed (" << GetLastError() << ").\n";
         return filenameRes;
     }
@@ -174,6 +175,8 @@ std::vector<std::string> getListFiles(const std::string& directory)
     return filenameRes;
 }
 
+#include <io.h>//corecrt_io
+#include <direct.h>
 int _test3() 
 {
     //std::vector<std::string> filenameRes;
@@ -182,6 +185,12 @@ int _test3()
 
     std::string folderPath = "D:\\Download\\Quark";
     std::vector<std::string> filenameRes = getListFiles(folderPath);
+
+    if (_access(folderPath.c_str(),0)==-1)
+    {
+        _mkdir(folderPath.c_str());
+    }
+
     return 0;
 }
 

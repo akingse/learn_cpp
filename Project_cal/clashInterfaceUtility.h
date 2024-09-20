@@ -17,17 +17,23 @@ namespace clash
         vctA.insert(vctA.end(), vctB.begin(), vctB.end());
     }
 
-    inline std::wstring transfer_string_to_wstring(const std::string& str)
+    template <typename T>
+    void operator+=(std::vector<T>& vctA, const T& elem)
     {
-        std::wstring strw;
-        int lengthW = MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, NULL, NULL);
-        wchar_t* pUnicode = new wchar_t[lengthW + 1];
-        MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, pUnicode, lengthW);
-        pUnicode[lengthW] = L'\0';
-        strw.append(pUnicode);
-        delete[] pUnicode;
-        return strw;
+        vctA.push_back(elem);
     }
+
+    //inline std::wstring transfer_string_to_wstring(const std::string& str)
+    //{
+    //    std::wstring strw;
+    //    int lengthW = MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, NULL, NULL);
+    //    wchar_t* pUnicode = new wchar_t[lengthW + 1];
+    //    MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, pUnicode, lengthW);
+    //    pUnicode[lengthW] = L'\0';
+    //    strw.append(pUnicode);
+    //    delete[] pUnicode;
+    //    return strw;
+    //}
 
     inline std::wstring string2wstring(const char* str)
     {
@@ -42,6 +48,11 @@ namespace clash
         return wstr;
     }
 
+    inline std::wstring string2wstring(const  std::string& str)
+    {
+        return string2wstring(str.c_str());
+    }
+
     inline std::string wstring2string(const wchar_t* wstr)
     {
         int nLen = WideCharToMultiByte(CP_ACP, 0, wstr, -1, NULL, 0, NULL, NULL);
@@ -53,6 +64,11 @@ namespace clash
         delete[] pChar;
         pChar = nullptr;
         return str;
+    }
+
+    inline std::string wstring2string(const std::wstring wstr)
+    {
+        return wstring2string(wstr.c_str());
     }
 
     inline std::string getExePath() // include<afx.h>
