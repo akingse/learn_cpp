@@ -8,7 +8,7 @@ using namespace clash;
 static std::string randNumName = "bin_file/random_1e8.bin";
 static std::string randNumNameSepa = "bin_file/random_1e8_sepa.bin";
 #define USING_CONCRETE_NUMBER
-#define USING_FLATBUFFERS_SERIALIZATION
+//#define USING_FLATBUFFERS_SERIALIZATION
 
 //wirte randnum file
 int _wirteNumberFile(size_t n, const string& filename)

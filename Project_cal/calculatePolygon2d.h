@@ -111,6 +111,41 @@ namespace clash
 		return 0.5 * std::fabs(area);
 	}
 
+	inline bool isPolygonSelfIntersect(const std::vector<Eigen::Vector2d>& polygon)
+	{
+		if (polygon.size() <= 3)
+			return false;
+		std::vector<Segment2d> sortEdges;
+		size_t n = polygon.size();
+		for (int i = 0; i < n; ++i)
+		{
+			int j = (i + 1) % n;
+			if (polygon[i][0] < polygon[j][0])
+				sortEdges.push_back({ polygon[i],polygon[j] });
+			else
+				sortEdges.push_back({ polygon[j],polygon[i] });
+		}
+		//sorted by start coord-x
+		std::sort(sortEdges.begin(), sortEdges.end(),
+			[&](const Segment2d& segA, const Segment2d& segB) {return segA[0][0] < segB[0][0]; });
+		for (int i = 0; i < sortEdges.size() - 1; ++i) //whether judge last 
+		{
+			double edgeXmax = sortEdges[i][1][0];
+			for (int j = i + 1; j < sortEdges.size(); ++j)
+			{
+				if (edgeXmax < sortEdges[j][0][0])
+					continue;
+				//preInter
+				if (std::max(sortEdges[i][0][1], sortEdges[i][0][1]) < std::min(sortEdges[j][0][1], sortEdges[j][0][1]) ||
+					std::max(sortEdges[j][0][1], sortEdges[j][0][1]) < std::min(sortEdges[i][0][1], sortEdges[i][0][1]))
+					continue;
+				if (isTwoSegmentsIntersect(sortEdges[i], sortEdges[i]))
+					return true;
+			}
+		}
+		return false;
+	}
+
 	//for curvearray classify
 	struct PathsPart
 	{
