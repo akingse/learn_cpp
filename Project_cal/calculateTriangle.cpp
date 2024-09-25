@@ -55,9 +55,9 @@ bool clash::isPointInTriangle(const Vector2d& point, const std::array<Vector2d, 
 	double axisz = (p1.x() - p0.x()) * (p2.y() - p0.y()) - (p2.x() - p0.x()) * (p1.y() - p0.y());
 	axisz = (0.0 < axisz) ? 1.0 : -1.0;
 	return !(
-		axisz * ((p1.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p1.y() - p0.y()) < _epsF) || //bool isLeftA
-		axisz * ((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y()) < _epsF) || //bool isLeftB
-		axisz * ((p0.x() - p2.x()) * (point.y() - p2.y()) - (point.x() - p2.x()) * (p0.y() - p2.y()) < _epsF));  //bool isLeftC
+		axisz * ((p1.x() - p0.x()) * (point.y() - p0.y()) - (point.x() - p0.x()) * (p1.y() - p0.y()) < -epsF) || //bool isLeftA
+		axisz * ((p2.x() - p1.x()) * (point.y() - p1.y()) - (point.x() - p1.x()) * (p2.y() - p1.y()) < -epsF) || //bool isLeftB
+		axisz * ((p0.x() - p2.x()) * (point.y() - p2.y()) - (point.x() - p2.x()) * (p0.y() - p2.y()) < -epsF));  //bool isLeftC
 #else
 	// (p1-p0).cross(p2-p1); -:20, *:11
 	double axisz = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
@@ -132,11 +132,11 @@ bool clash::isPointInTriangle(const Vector3d& point, const std::array<Vector3d, 
 	count_pointInTri++;
 #endif
 	// precision problem, cause misjudge without tolerance
-	//if (point.x() < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) /*+ _epsF*/ ||
+	//if (point.x() < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) /*+ -epsF*/ ||
 	//	point.x() > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) /*+ epsF */ ||
-	//	point.y() < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) /*+ _epsF*/ || 
+	//	point.y() < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) /*+ -epsF*/ || 
 	//	point.y() > std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) /*+ epsF */ ||
-	//	point.z() < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) /*+ _epsF*/ || 
+	//	point.z() < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) /*+ -epsF*/ || 
 	//	point.z() > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]) /*+ epsF */ )
 	//	return false; // random data test fast 10% about
 #ifdef USING_ACCURATE_NORMALIZED
@@ -147,9 +147,9 @@ bool clash::isPointInTriangle(const Vector3d& point, const std::array<Vector3d, 
 #ifdef USING_THRESHOLD_GEOMETRIC
 	// 3D triangle, input point must coplanar
 	return !(
-		(trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) < _epsF || //bool isNotLeftA
-		(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) < _epsF || //bool isNotLeftB
-		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal) < _epsF);  //bool isNotLeftC
+		(trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) < -epsF || //bool isNotLeftA
+		(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) < -epsF || //bool isNotLeftB
+		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal) < -epsF);  //bool isNotLeftC
 #else
 	return
 		0.0 <= (trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) && //bool isLeftA
@@ -157,11 +157,11 @@ bool clash::isPointInTriangle(const Vector3d& point, const std::array<Vector3d, 
 		0.0 <= (trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal);   //bool isLeftC
 #endif //USING_THRESHOLD_GEOMETRIC
 	//+-*x< 0,5,1.5,2.5,1.5
-	//if (((trigon[1] - trigon[0]).cross(point - trigon[0])).dot(normal) < _epsF) //bool isLeftA
+	//if (((trigon[1] - trigon[0]).cross(point - trigon[0])).dot(normal) < -epsF) //bool isLeftA
 	//	return false;
 	//if (((trigon[2] - trigon[0]).cross(point - trigon[0])).dot(normal) > epsF) //bool isLeftB
 	//	return false;
-	//if (((trigon[2] - trigon[1]).cross(point - trigon[1])).dot(normal) < _epsF) //bool isLeftC
+	//if (((trigon[2] - trigon[1]).cross(point - trigon[1])).dot(normal) < -epsF) //bool isLeftC
 	//	return false;
 	//return true;
 	// area method
@@ -185,9 +185,9 @@ bool clash::isPointOnTriangleSurface(const Vector3d& point, const std::array<Vec
 	Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[1]);// using isLeft test
 #endif // USING_ACCURATE_NORMALIZED
 #ifdef USING_THRESHOLD_GEOMETRIC
-	if ((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) < _epsF ||
-		(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) < _epsF ||
-		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal) < _epsF)
+	if ((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) < -epsF ||
+		(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) < -epsF ||
+		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal) < -epsF)
 		return false;
 	return fabs(normal.dot(point - trigon[0])) < epsF;
 #else
@@ -223,7 +223,7 @@ bool clash::isSegmentCrossTriangle(const std::array<Vector3d, 2>& segment, const
 	double dot1 = vecX.dot(trigon[1] - segment[0]);
 	double dot2 = vecX.dot(trigon[2] - segment[0]);
 	// triangle sub point is all left // small sat 
-	if ((dot0 > epsF && dot1 > epsF && dot2 > epsF) || (dot0 < _epsF && dot1 < _epsF && dot2 < _epsF))
+	if ((dot0 > epsF && dot1 > epsF && dot2 > epsF) || (dot0 < -epsF && dot1 < -epsF && dot2 < -epsF))
 		return false; //+-*x< 0,6,3,2,4.5
 	// double straddling test x3
 	return 
@@ -254,7 +254,7 @@ bool clash::isSegmentCrossTriangleSurface(const std::array<Vector3d, 2>& segment
 	double dotA = (trigon[0] - segment[0]).cross(trigon[1] - segment[0]).dot(vecSeg);
 	double dotB = (trigon[1] - segment[0]).cross(trigon[2] - segment[0]).dot(vecSeg);
 	double dotC = (trigon[2] - segment[0]).cross(trigon[0] - segment[0]).dot(vecSeg);
-	return (dotA < epsF && dotB < epsF && dotC < epsF) || (dotA > _epsF && dotB > _epsF && dotC > _epsF);
+	return (dotA < epsF && dotB < epsF && dotC < epsF) || (dotA > -epsF && dotB > -epsF && dotC > -epsF);
 }
 
 // Method: judge intersect point in triangle

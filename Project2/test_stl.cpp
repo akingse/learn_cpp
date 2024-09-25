@@ -25,6 +25,7 @@ int test_fun(int a)
 	assert(a ==10);
 	return 0;
 }
+
 void print_number(int* myInt) {
 	assert(myInt != NULL);  //如果myInt!=NULL,程序继续执行，反之程序打印报错信息，程序终止运行
 	//assert(myInt!=NULL && 1==0) //检查多个条件
@@ -32,15 +33,16 @@ void print_number(int* myInt) {
 }
 
 typedef pair<string, int> pair_str;
-bool _cmp_less(pair_str a, pair_str b)
+bool cmp_less(pair_str a, pair_str b)
 {
 	return a.second < b.second;
 }
 
-bool cmp_less(int a, int b)
-{
-	return a < b;
-}
+//bool cmp_less(int a, int b)
+//{
+//	return a < b;
+//}
+
 struct MyStruct
 {
 	int m_i;
@@ -64,7 +66,7 @@ static int mainstl()
 	vector<int> mlist = alist();
 	cout << mlist.at(0) << endl;
 
-	auto name1 = _cmp_less;
+	auto name1 = cmp_less;
 	auto name2 = typeid(name1).name();
 	//auto bl = (*cmp_less)((int)3, (int)2); //函数地址
 
@@ -134,7 +136,7 @@ static int mainstl()
 	{
 		sortVect.push_back(pair_str(iter->first, iter->second));
 	}
-	sort(sortVect.begin(), sortVect.end(), _cmp_less);
+	sort(sortVect.begin(), sortVect.end(), cmp_less);
 
 	//for (mit = mp.begin(); mit != mp.end(); mit++) 
 	//{
@@ -216,4 +218,30 @@ static int mainstl()
 	}
 	return 0;
 }
+
+//测试优先队列 priority_queue
+
+static void _test_stl_0()
+{
+	priority_queue<int> pqueue;//大数在上
+	pqueue.push(1);
+	pqueue.push(3);
+	pqueue.push(2);
+	pqueue.push(4);
+
+	int tp = pqueue.top();
+	pqueue.pop(); //最上面的 弹出
+	pqueue.pop();
+	pqueue.pop();
+	pqueue.pop();
+
+
+}
+
+static int _enrol = []()->int
+	{
+		_test_stl_0();
+		cout << "test_stl finished.\n" << endl;
+		return 0;
+	}();
 

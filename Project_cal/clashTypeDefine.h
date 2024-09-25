@@ -75,9 +75,8 @@ namespace clash //collide //psykronix
     //static const Eigen::Vector3d gVecAxisX(1, 0, 0); //Eigen::Vector3d::UnitX()
     //static const Eigen::Vector3d gVecAxisY(0, 1, 0); //Eigen::Vector3d::UnitY()
     //static const Eigen::Vector3d gVecAxisZ(0, 0, 1); //Eigen::Vector3d::UnitZ()
-    static constexpr double epsF = FLT_EPSILON; //1e-7
-    static constexpr double epsA = 100 * FLT_EPSILON;
-    static constexpr double _epsF = -FLT_EPSILON;
+    static constexpr double epsF = FLT_EPSILON; //epsFloat=1e-7
+    static constexpr double epsArea = 100 * FLT_EPSILON;
     //static constexpr double epsA = 1e-6;
     //static constexpr unsigned long long ULL_MAX = 18446744073709551615; // 2 ^ 64 - 1 //ULLONG_MAX
 
