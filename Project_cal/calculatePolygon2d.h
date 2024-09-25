@@ -130,11 +130,6 @@ namespace clash
 		return false;
 	}
 
-	//inline bool isPolygonSelfIntersect(const std::vector<Eigen::Vector2d>& polygon)//using scanline
-	//{
-	//	return false;
-	//}
-
 	inline bool isPolygonSelfIntersect(const std::vector<Eigen::Vector2d>& polygon)
 	{
 		if (polygon.size() <= 3)
