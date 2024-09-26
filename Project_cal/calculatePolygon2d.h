@@ -9,6 +9,7 @@
 *******************************************************************************/
 #ifndef CALCULATE_POLYGON2D_H
 #define CALCULATE_POLYGON2D_H
+
 namespace clash
 {
 	// pnpoly
