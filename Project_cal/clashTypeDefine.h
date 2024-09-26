@@ -206,8 +206,8 @@ namespace eigen
     {
         int m_index;
         OcclusionState m_visible = OcclusionState::EXPOSED;
-        double m_area = -1;
-        std::array<int, 4> m_number; // mesh index | triangle index | graphic index | polyface index
+        double m_area = -1.0;
+        std::array<int, 4> m_number; // mesh index | triangle index | graphic index | polyface index in graphic container
         Eigen::AlignedBox3d m_box3d;
         Eigen::AlignedBox2d m_box2d;
         Eigen::Vector3d m_normal; //normal of m_triangle3d, always upward
@@ -239,10 +239,10 @@ namespace eigen
         OcclusionState m_visible = OcclusionState::EXPOSED;
         Eigen::AlignedBox3d m_box3d; //to judge front
         Eigen::AlignedBox2d m_box2d; // contained in box3d
-        double m_area = -1;
+        double m_area = -1.0;
         std::vector<int> m_shielded;
         std::vector<std::vector<Eigen::Vector2d>> m_profile; //fillArea, the boolean result
-        std::vector<std::vector<Eigen::Vector2d>> m_contour; //contour of mesh
+        std::vector<std::vector<Eigen::Vector2d>> m_contour; //contour of mesh //current useless
         std::vector<TrigonPart> m_trigons; //to judge front
         // for contour calculate method
         bool operator<(const ContourPart& rhs) const

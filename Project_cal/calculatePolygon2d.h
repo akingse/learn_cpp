@@ -4,7 +4,7 @@
 * Date      :  from June 2023												   *
 * Website   :  https://github.com/akingse                                      *
 * Copyright :  All rights reserved											   *
-* Purpose   :  Some common and simple 2d polygon methods					   *
+* Purpose   :  Some common and simple 2d polygon calculation methods		   *
 * License   :  MIT									                           *
 *******************************************************************************/
 #ifndef CALCULATE_POLYGON2D_H
