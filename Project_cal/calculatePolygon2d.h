@@ -4,7 +4,7 @@
 * Date      :  from June 2023												   *
 * Website   :  https://github.com/akingse                                      *
 * Copyright :  All rights reserved											   *
-* Purpose   :  Some common and simple 2d polygon methods					   *
+* Purpose   :  Some common and simple 2d polygon calculation methods		   *
 * License   :  MIT									                           *
 *******************************************************************************/
 #ifndef CALCULATE_POLYGON2D_H
@@ -105,11 +105,30 @@ namespace clash
 		size_t n = polygon.size();
 		for (int i = 0; i < n; ++i)
 		{
-			int j = (i + 1) % n; //avoid over bound
-			area += (polygon[i][0] + polygon[j][0]) * (polygon[i][1] - polygon[j][1]); //wond
+			int j = (i + 1) % n; //avoid index over bound
+			area += (polygon[i][0] + polygon[j][0]) * (polygon[i][1] - polygon[j][1]);
 			//area += polygon[i][0] * polygon[j][1] - polygon[i][1] * polygon[j][0]; //cross2d
 		}
 		return 0.5 * std::fabs(area);
+	}
+
+	inline bool isPolygonSelfIntersect_doubleLoop(const std::vector<Eigen::Vector2d>& polygon)
+	{
+		if (polygon.size() <= 3)
+			return false;
+        int n = (int)polygon.size(); //even if n==3
+		for (int i = 0; i < n - 2; ++i) //skip adjacent
+		{
+			std::array<Eigen::Vector2d, 2> segmA = { polygon[i], polygon[i + 1] };
+			for (int j = i + 2; j < n; ++j)
+			{
+				//include i(0,1)-j(n-1,0)
+				std::array<Eigen::Vector2d, 2> segmB = { polygon[j], polygon[(j + 1) % n] };
+				if (clash::isTwoSegmentsIntersect(segmA, segmB))
+					return true;
+			}
+		}
+		return false;
 	}
 
 	inline bool isPolygonSelfIntersect(const std::vector<Eigen::Vector2d>& polygon)
