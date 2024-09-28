@@ -247,6 +247,5 @@ namespace clash
 		return unionVct;
 	}
 
-
 }
 #endif// CALCULATE_POLYGON2D_H
