@@ -145,7 +145,7 @@
     <ClCompile Include="test_case_triangle.cpp">
       <Filter>test_case</Filter>
     </ClCompile>
-    <ClCompile Include="my_file_read_write.cpp">
+    <ClCompile Include="commonFileReadWrite.cpp">
       <Filter>test_serialize</Filter>
     </ClCompile>
     <ClCompile Include="test_fun_speed.cpp">
@@ -214,10 +214,7 @@
     <ClCompile Include="test_geometry.cpp">
       <Filter>test_geo</Filter>
     </ClCompile>
-    <ClCompile Include="my_geometry.cpp">
-      <Filter>test_geo</Filter>
-    </ClCompile>
-    <ClCompile Include="my_cal_geo.cpp">
+    <ClCompile Include="test_cpt_geo.cpp">
       <Filter>test_geo</Filter>
     </ClCompile>
     <ClCompile Include="test_geo.cpp">
@@ -246,7 +243,7 @@
     <ClInclude Include="test_serialize.h">
       <Filter>test_serialize</Filter>
     </ClInclude>
-    <ClInclude Include="my_file_read_write.h">
+    <ClInclude Include="commonFileReadWrite.h">
       <Filter>test_serialize</Filter>
     </ClInclude>
     <ClInclude Include="test_singleton.h">
@@ -258,10 +255,7 @@
     <ClInclude Include="..\auto_include\Project2_API.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="my_geometry.h">
-      <Filter>test_geo</Filter>
-    </ClInclude>
-    <ClInclude Include="my_cal_geo.h">
+    <ClInclude Include="test_cpt_geo.h">
       <Filter>test_geo</Filter>
     </ClInclude>
   </ItemGroup>

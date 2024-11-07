@@ -51,7 +51,7 @@
 #define WIN32_LEAN_AND_MEAN //avoid _WINSOCKAPI_ warning
 #include <windows.h> //min max
 #include <afx.h> // MFC <cstring>
-#if defined(min) || defined(min)
+#if defined(min) || defined(max)
 #undef min
 #undef max
 #endif
@@ -76,18 +76,4 @@
 #define USING_CONDITIONAL_COMPILE_PROJECT_2
 //#define USING_FLATBUFFERS_SERIALIZATION //only open in ThinkPad
 //#define STATISTIC_DATA_COUNT
-
-#include "my_geometry.h" //export
-#include "test_serialize.h"
-#include "my_file_read_write.h" //file read and wirte
-
-//Eigen
-//typedef Vector3d Vec3;
-//typedef Matrix4d BPTransfrom;
-//typedef Matrix4d GeTransfrom;
-//using Vec3 = Vector3d;
-//using Eigen::MatrixXd;
-//using Eigen::Matrix4d;
-//using Eigen::VectorXd;
-//using Eigen::Vector2d;
-//using Eigen::Vector3d;
+#include "commonFileReadWrite.h" //file read and wirte

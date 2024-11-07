@@ -1,4 +1,5 @@
 #pragma once
+//computation geometry
 namespace chatgpt
 {
 	// 生成Delaunay三角形Voronoi图

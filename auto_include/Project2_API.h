@@ -1,6 +1,6 @@
 #pragma once
-#include "my_geometry.h" //export
-#include "test_serialize.h"
+//there is no any export, just using source code
+
 #ifdef PROJECT_2_DLLEXPORT_DEFINE
 #define DLLEXPORT_2 __declspec(dllimport)
 #else
@@ -10,4 +10,3 @@
 #define USING_CONDITIONAL_COMPILE_PROJECT_2
 //#define USING_FLATBUFFERS_SERIALIZATION //only open in ThinkPad
 //#define STATISTIC_DATA_COUNT
-#include "my_file_read_write.h" //file read and wirte

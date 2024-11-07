@@ -1,7 +1,5 @@
 #include "pch.h"
-#include "my_cal_geo.h"
-#undef min
-#undef max
+#include "test_cpt_geo.h"
 using namespace std;
 using namespace chatgpt;
 

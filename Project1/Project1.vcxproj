@@ -183,6 +183,7 @@
     </ClCompile>
     <ClCompile Include="Gnrc.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="my_geometry.cpp" />
     <ClCompile Include="my_gnrc.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
@@ -221,6 +222,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Gnrc.h" />
+    <ClInclude Include="my_geometry.h" />
     <ClInclude Include="my_handle.h" />
     <ClInclude Include="my_ref_count.h">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>

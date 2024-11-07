@@ -69,6 +69,9 @@
     <ClCompile Include="UtilitySet.cpp">
       <Filter>component</Filter>
     </ClCompile>
+    <ClCompile Include="my_geometry.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="my_gnrc.h">
@@ -115,6 +118,9 @@
     </ClInclude>
     <ClInclude Include="UtilitySet.h">
       <Filter>component</Filter>
+    </ClInclude>
+    <ClInclude Include="my_geometry.h">
+      <Filter>head</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

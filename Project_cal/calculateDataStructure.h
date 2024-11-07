@@ -21,8 +21,8 @@ namespace clash
 	public:
 		int m_index = -1;
 		Eigen::AlignedBox2d m_bound;
-		RectBase2d() = default;
-		RectBase2d(int index, const Eigen::AlignedBox2d& bound) :m_index(index), m_bound(bound) {}
+		DLLEXPORT_CAL RectBase2d() = default;
+		DLLEXPORT_CAL RectBase2d(int index, const Eigen::AlignedBox2d& bound) :m_index(index), m_bound(bound) {}
 		bool operator<(const RectBase2d& rhs) const //usually custom in build tree sort
 		{
 			Eigen::AlignedBox2d bound = m_bound; //merge bound box
@@ -64,15 +64,15 @@ namespace clash
 				m_polygon.push_back(m_polygon[0]);
 #endif
 		}
-		const std::vector<Eigen::Vector2d>& get() const
+		inline const std::vector<Eigen::Vector2d>& get() const
 		{
 			return m_polygon;
 		}
-		std::vector<std::tuple<size_t, double, size_t>>& intersection()
+		inline std::vector<std::tuple<size_t, double, size_t>>& intersection()
 		{
 			return m_intersect;
 		}
-		Eigen::AlignedBox2d bounding() const
+		inline Eigen::AlignedBox2d bounding() const
 		{
 			return m_bound;
 		}
@@ -141,7 +141,7 @@ namespace bvh
 #endif
 		//BVHNode2d() : m_box(), m_left(nullptr), m_right(nullptr) {}
 		//BVHNode2d(const Polygon2d& poly) : m_box(poly.boungding()), m_left(nullptr), m_right(nullptr) {}
-		bool isValid() const
+		inline bool isValid() const
 		{
 			return m_bound.isEmpty();
 		}

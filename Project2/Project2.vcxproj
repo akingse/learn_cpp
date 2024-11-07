@@ -175,8 +175,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="my_cal_geo.cpp" />
-    <ClCompile Include="my_geometry.cpp" />
+    <ClCompile Include="test_cpt_geo.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -190,7 +189,7 @@
     <ClCompile Include="test_mutex.cpp" />
     <ClCompile Include="test_binfile_debug.cpp" />
     <ClCompile Include="test_case_triangle.cpp" />
-    <ClCompile Include="my_file_read_write.cpp" />
+    <ClCompile Include="commonFileReadWrite.cpp" />
     <ClCompile Include="test_fun_speed.cpp" />
     <ClCompile Include="test_memfn.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -266,10 +265,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\auto_include\Project2_API.h" />
-    <ClInclude Include="my_cal_geo.h" />
-    <ClInclude Include="my_geometry.h" />
+    <ClInclude Include="test_cpt_geo.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="my_file_read_write.h" />
+    <ClInclude Include="commonFileReadWrite.h" />
     <ClInclude Include="test_serialize.h" />
     <ClInclude Include="test_singleton.h" />
     <ClInclude Include="test_singleton2.h" />
