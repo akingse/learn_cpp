@@ -345,6 +345,7 @@ static int enrol = []()->int
 	//test2(); //for funciton
 	//test3();
 	//test5();
+	test6(); //使用eige的natvis，可变量监视
 	cout << "test_clipper finished.\n" << endl;
 	return 0;
 }();

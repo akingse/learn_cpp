@@ -21,7 +21,7 @@ struct InterTriInfo
 #endif
 
 static size_t countFile = 0;
-inline void printLogTxt(const std::string& context, const std::string& fileName = {})
+inline void writeDataContent(const std::string& context, const std::string& fileName = {})
 {
     std::time_t currentTime = std::time(nullptr);
     std::string timeString = std::ctime(&currentTime);
