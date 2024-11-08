@@ -5,8 +5,8 @@
 class DependencyRegistry 
 {
 private:
-    DependencyRegistry() = default;
-    ~DependencyRegistry() = default;
+    DLLEXPORT_1 DependencyRegistry() = default;
+    DLLEXPORT_1 ~DependencyRegistry() = default;
     DependencyRegistry(const DependencyRegistry&) = delete;
     DependencyRegistry(DependencyRegistry&&) = delete;
 
@@ -56,8 +56,8 @@ public:
 class DependencyInversion
 {
 private:
-    DependencyInversion() = default;
-    ~DependencyInversion() = default;
+    DLLEXPORT_1 DependencyInversion() = default;
+    DLLEXPORT_1 ~DependencyInversion() = default;
     DependencyInversion(const DependencyInversion&) = delete;
     DependencyInversion(DependencyInversion&&) = delete;
 

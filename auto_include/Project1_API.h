@@ -17,8 +17,9 @@
 #include "my_md5.h"					//export
 #include "my_ref_count.h"			//export
 #include "my_handle.h"				//export
+#include "my_geometry.h"			//export
 
 //geometry
 #include "geometry/ParaGeometryClass.h"              // public
-#include "geometry/ParaGeometryCalculate.h"
-#include "geometry/ParaGeometryRelation.h"         	// public
+#include "geometry/ParaGeometryCalculate.h"          // public
+#include "geometry/ParaGeometryRelation.h"         	 // public

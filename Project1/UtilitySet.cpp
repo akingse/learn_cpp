@@ -1,9 +1,10 @@
 #include "pch.h"
 using namespace ppc;
+//init
 std::map<std::string, DependencyRegistry::FunctionPointer> DependencyRegistry::sm_implementations;
-//std::map<std::string, DependencyInversion::FunctionPointer> DependencyInversion::sm_implementations;
 std::map<std::string, std::shared_ptr<void>> DependencyInversion::sm_implementations;
 std::mutex DependencyInversion::sm_mutex;
+
 
 std::vector<unsigned char> ppc::serializition(const std::shared_ptr<TreeNodePtr>& node)
 {

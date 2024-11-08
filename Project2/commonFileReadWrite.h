@@ -105,3 +105,22 @@ inline std::array<Eigen::Vector3d, 2> _get_rand2()
         Eigen::Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff) };
 }
 #endif
+
+//判断是否存在目录，如果不存在则创建目录
+//#include <windows.h>
+inline bool DirectoryExists(const std::string& dirPath)
+{
+    DWORD ftyp = GetFileAttributesA(dirPath.c_str());
+    if (ftyp == INVALID_FILE_ATTRIBUTES)
+        return false;
+    return (ftyp & FILE_ATTRIBUTE_DIRECTORY) != 0;
+}
+
+//CreateDirectoryIfNotExists
+inline void createDirectory(const std::string& dirPath)
+{
+    if (DirectoryExists(dirPath))
+        return;
+    if (CreateDirectoryA(dirPath.c_str(), nullptr) || GetLastError() == ERROR_ALREADY_EXISTS)
+        std::cout << "Directory created: " << dirPath << std::endl;
+}

@@ -1,5 +1,4 @@
 #pragma once
-#define _USE_MATH_DEFINES //using M_PI
 
 //stream
 #include <iostream>
@@ -19,6 +18,7 @@
 
 //math
 #include <cmath>
+#define _USE_MATH_DEFINES //using M_PI
 #include <math.h>
 #include <complex>
 
@@ -46,32 +46,8 @@
 #include <functional>
 #include <memory_resource>
 
-#define PROJECT_1_DLLEXPORT_DEFINE //set on pre-processor define
-#ifdef PROJECT_1_DLLEXPORT_DEFINE // define both API and pch
-#define DLLEXPORT_1 __declspec(dllexport)
-#else
-#define DLLEXPORT_1 __declspec(dllimport)
-#endif
-
-//component
-#include "Gnrc.h"					//export
-#include "BPParaVec.h"				//export
-#include "BPParaTransform.h"		//export
-#include "UtilitySet.h"
-
-
-// my custom
-#include "my_gnrc.h"				
-#include "my_vec.h"					//export
-#include "my_md5.h"					//export
-#include "my_ref_count.h"			//export
-#include "my_handle.h"				//export
-#include "my_geometry.h"			//export
-
-//geometry
-#include "geometry/ParaGeometryClass.h"             // public
-#include "geometry/ParaGeometryCalculate.h"
-#include "geometry/ParaGeometryRelation.h"         	// public
+#define PROJECT_1_DLLEXPORT_DEFINE
+#include "auto_include/Project1_API.h"//PublicAPI
 
 //delete python tool generate export API
 //$(SolutionDir)tools\python3-embed\python.exe $(SolutionDir)tools\export_header.py  $(ProjectName)

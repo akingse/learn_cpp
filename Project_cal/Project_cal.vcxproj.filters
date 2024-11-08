@@ -13,6 +13,9 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{ba180929-9a42-41a6-a176-18c9f0202c15}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -42,6 +45,9 @@
     <ClCompile Include="calculateMeshTopology.cpp">
       <Filter>algorithm</Filter>
     </ClCompile>
+    <ClCompile Include="test_triangle_intersect.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -59,13 +65,10 @@
     <ClInclude Include="calculateVectorMatrix.h">
       <Filter>algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="Project_CAL_API.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="calculateDynamicAccuracy.h">
       <Filter>algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="clashTypeDefine.h">
+    <ClInclude Include="clashClashTypeDefine.h">
       <Filter>algorithm</Filter>
     </ClInclude>
     <ClInclude Include="calculatePointLinePlane.h">
@@ -79,6 +82,12 @@
     </ClInclude>
     <ClInclude Include="clashInterfaceUtility.h">
       <Filter>algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="test_triangle_intersect.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\auto_include\Project_CAL_API.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
