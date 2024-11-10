@@ -68,7 +68,7 @@
     <ClInclude Include="calculateDynamicAccuracy.h">
       <Filter>algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="clashClashTypeDefine.h">
+    <ClInclude Include="clashClassTypeDefine.h">
       <Filter>algorithm</Filter>
     </ClInclude>
     <ClInclude Include="calculatePointLinePlane.h">

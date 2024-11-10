@@ -26,4 +26,5 @@
 
 #define CAL_DLLEXPORT_DEFINE //set on pre-processor define
 #include "auto_include/Project_CAL_API.h"  //PublicAPI
+#include "test_triangle_intersect.h" //for test verify
 

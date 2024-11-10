@@ -167,7 +167,7 @@
     <ClInclude Include="calculateVectorMatrix.h" />
     <ClInclude Include="clashInterfaceUtility.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="clashClashTypeDefine.h" />
+    <ClInclude Include="clashClassTypeDefine.h" />
     <ClInclude Include="test_triangle_intersect.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
