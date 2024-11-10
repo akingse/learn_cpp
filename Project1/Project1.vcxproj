@@ -180,7 +180,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Gnrc.cpp" />
+    <ClCompile Include="BPParaGnrc.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="my_geometry.cpp" />
     <ClCompile Include="my_gnrc.cpp">
@@ -200,7 +200,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="UtilitySet.cpp" />
+    <ClCompile Include="BPParaDependency.cpp" />
     <ClInclude Include="..\auto_include\Project1_API.h" />
     <ClInclude Include="BPParaTransform.h" />
     <ClInclude Include="BPParaVec.h" />
@@ -220,14 +220,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="Gnrc.h" />
+    <ClInclude Include="BPParaGnrc.h" />
     <ClInclude Include="my_geometry.h" />
     <ClInclude Include="my_handle.h" />
     <ClInclude Include="my_ref_count.h">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClInclude>
-    <ClInclude Include="UtilitySet.h" />
+    <ClInclude Include="BPParaDependency.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="my_md5.h" />

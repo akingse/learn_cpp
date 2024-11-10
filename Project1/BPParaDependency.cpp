@@ -1,12 +1,12 @@
 #include "pch.h"
-using namespace ppc;
+using namespace para;
 //init
 std::map<std::string, DependencyRegistry::FunctionPointer> DependencyRegistry::sm_implementations;
 std::map<std::string, std::shared_ptr<void>> DependencyInversion::sm_implementations;
 std::mutex DependencyInversion::sm_mutex;
 
 
-std::vector<unsigned char> ppc::serializition(const std::shared_ptr<TreeNodePtr>& node)
+std::vector<unsigned char> para::serializition(const std::shared_ptr<TreeNodePtr>& node)
 {
     DependencyRegistry& reg = DependencyRegistry::getInstance();
 	auto serialize_fun = reg.get<std::vector<unsigned char>(const std::shared_ptr<TreeNodePtr>&)>("serializition");
@@ -16,7 +16,7 @@ std::vector<unsigned char> ppc::serializition(const std::shared_ptr<TreeNodePtr>
 	return data;
 }
 
-std::shared_ptr<TreeNodePtr> ppc::deserializition(const std::vector<unsigned char>& data)
+std::shared_ptr<TreeNodePtr> para::deserializition(const std::vector<unsigned char>& data)
 {
 	DependencyRegistry& reg = DependencyRegistry::getInstance();
 	auto deserialize_fun = reg.get<std::shared_ptr<TreeNodePtr>(const std::vector<unsigned char>&)>("deserializition");

@@ -51,7 +51,7 @@
     <ClCompile Include="BPParaVec.cpp">
       <Filter>component</Filter>
     </ClCompile>
-    <ClCompile Include="Gnrc.cpp">
+    <ClCompile Include="BPParaGnrc.cpp">
       <Filter>component</Filter>
     </ClCompile>
     <ClCompile Include="geometry\ParaGeometryCalculate.cpp">
@@ -66,7 +66,7 @@
     <ClCompile Include="geometry\ParaNearestCatchIndex.cpp">
       <Filter>geometry</Filter>
     </ClCompile>
-    <ClCompile Include="UtilitySet.cpp">
+    <ClCompile Include="BPParaDependency.cpp">
       <Filter>component</Filter>
     </ClCompile>
     <ClCompile Include="my_geometry.cpp">
@@ -101,7 +101,7 @@
     <ClInclude Include="BPParaVec.h">
       <Filter>component</Filter>
     </ClInclude>
-    <ClInclude Include="Gnrc.h">
+    <ClInclude Include="BPParaGnrc.h">
       <Filter>component</Filter>
     </ClInclude>
     <ClInclude Include="geometry\ParaGeometryCalculate.h">
@@ -116,7 +116,7 @@
     <ClInclude Include="geometry\ParaNearestCatchIndex.h">
       <Filter>geometry</Filter>
     </ClInclude>
-    <ClInclude Include="UtilitySet.h">
+    <ClInclude Include="BPParaDependency.h">
       <Filter>component</Filter>
     </ClInclude>
     <ClInclude Include="my_geometry.h">

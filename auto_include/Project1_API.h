@@ -1,4 +1,6 @@
-#pragma once
+#pragma 
+
+// set in unified macro export file
 #ifdef PROJECT_1_DLLEXPORT_DEFINE
 #define DLLEXPORT_1 __declspec(dllexport)
 #else
@@ -6,18 +8,18 @@
 #endif
 
 //component
-#include "Gnrc.h"					//export
-#include "BPParaVec.h"				//export
-#include "BPParaTransform.h"		//export
-#include "UtilitySet.h"				//export
+#include "BPParaGnrc.h"				
+#include "BPParaVec.h"				
+#include "BPParaTransform.h"		
+#include "BPParaDependency.h"		
 
 // my custom
 #include "my_gnrc.h"				
-#include "my_vec.h"					//export
-#include "my_md5.h"					//export
-#include "my_ref_count.h"			//export
-#include "my_handle.h"				//export
-#include "my_geometry.h"			//export
+#include "my_vec.h"					
+#include "my_md5.h"					
+#include "my_ref_count.h"			
+#include "my_handle.h"				
+#include "my_geometry.h"			
 
 //geometry
 #include "geometry/ParaGeometryClass.h"              // public
