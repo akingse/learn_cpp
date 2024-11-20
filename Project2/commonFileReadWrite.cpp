@@ -73,7 +73,7 @@ int _writeBinFileAlignedBox(size_t N)
 		double* arr = new double[n];
 		std::random_device rd;
 		std::mt19937 gen(rd());
-		std::uniform_real_distribution<> r_min(0, N); //double
+		std::uniform_real_distribution<> r_min(0, (int)N); //double
 		std::uniform_real_distribution<> r_size(100, 300);
 		for (int i = 0; i < N; ++i)
 		{
