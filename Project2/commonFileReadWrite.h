@@ -1,7 +1,7 @@
 #pragma once
 #include<afx.h>
 
-#ifdef CLASH_DETECTION_SOLUTION
+#ifndef CLASH_DETECTION_SOLUTION
 struct InterTriInfo
 {
     std::array<std::array<Eigen::Vector3d, 3>, 2> trianglePair;

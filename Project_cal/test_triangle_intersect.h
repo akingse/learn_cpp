@@ -1,13 +1,6 @@
 #pragma once
 namespace clash
 {
-	static constexpr size_t N_10E_3 = (size_t)1e3;
-	static constexpr size_t N_10E_4 = (size_t)1e4;
-	static constexpr size_t N_10E_5 = (size_t)1e5;
-	static constexpr size_t N_10E_6 = (size_t)1e6;
-	static constexpr size_t N_10E_7 = (size_t)1e7;
-	static constexpr size_t N_10E_8 = (size_t)1e8;
-
 	class Vertex3d
 	{
 	public:

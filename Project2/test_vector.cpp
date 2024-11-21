@@ -1,5 +1,6 @@
 #include "pch.h"
 using namespace std;
+using namespace Eigen;
 using namespace para;
 
 // 重载一下+号运算符
@@ -38,7 +39,7 @@ public:
 	virtual void inheriFun2() override {}
 	virtual void inheriFun3() override {}
 
-	void setter(int _a, Vec3d _vec, char _b, double _c) {
+	void setter(int _a, Vec3 _vec, char _b, double _c) {
 		this->a = _a;
 		this->vec = _vec;
 		this->b = _b;
@@ -46,7 +47,7 @@ public:
 	}
 private:
 	int a;
-	Vec3d vec;
+	Vec3 vec;
 	
 	char b;
 	double c;
@@ -61,13 +62,13 @@ static int test_vector_1()
 	auto ss2 = sizeof(size_t);//8
 
 	A insa;
-	insa.setter(1112, Vec3d(1,2,3), 'a', 3.14159);
+	insa.setter(1112, Vec3(1,2,3), 'a', 3.14159);
 	char* pI;
 	pI = (char*)&insa + sizeof(void*); //only one pointor
 
 	//int* p1 = (int*)&insa + 1;
 	int* pInt = (int*)(pI);		pI += sizeof(int); //len(char*)=1byte, as a unit length
-	Vec3d* pVec = (Vec3d*)(pI);	pI += sizeof(Vec3d);
+	Vec3* pVec = (Vec3*)(pI);	pI += sizeof(Vec3);
 	char* pChar = (char*)(pI);	pI += sizeof(char); //&insa + sizeof(Vec3);
 	double* pDouble = (double*)(pI); //&insa + sizeof(char);
 	// (Vec3*)0x00000032f42fed98
@@ -262,6 +263,21 @@ static void test_vector_6()
 	std::vector<int> vec2 = { 6,7,8,9 };
 	std::vector<int> vec3 = vec1 + vec2;
 	vec3 += vec2;
+
+	vector<int> vec = { 1,2 };
+	while (!vec.empty())
+	{
+		auto it = vec.begin() ;  
+		vec.erase(it);
+	}
+
+	//for (auto iter = vec.begin(); iter != vec.end();)
+	//	vec.erase(iter);
+    //vec.erase(std::remove(vec.begin(), vec.end(), 1), vec.end());
+
+	//auto iter = vec.begin();
+	//while (iter != vec.end())
+	//	vec.erase(iter);
 
 	return;
 }

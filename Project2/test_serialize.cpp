@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "test_serialize.h"
 using namespace std;
-using namespace ppc;
+using namespace bin;
+using namespace para;
+//using namespace ppc;
 
 std::vector<unsigned char> _bp_serialize(const BPGeometricPrimitiveSer& primitive)
 {
@@ -50,7 +52,7 @@ int main_ser()
 	std::vector<unsigned char> infor(15);
 
 	//注意容器的 sizeof() 和 .size()
-	size_t sz0 = sizeof(Vec3d); //24
+	size_t sz0 = sizeof(Vec3); //24
 	size_t sz1 = infor.size(); //15
 	size_t sz2 = sizeof(infor); //32
 	size_t sz3 = sizeof(string); //40
@@ -60,11 +62,11 @@ int main_ser()
 	size_t sz7 = sizeof(map<size_t, size_t>); //24
 
 	//类强转二进制
-	Vec3d vec;
+	Vec3 vec;
 	const unsigned char* ptr = reinterpret_cast<const unsigned char*>(&vec);
-	std::vector<unsigned char> res = std::vector<unsigned char>(ptr, ptr + sizeof(Vec3d));
-	Vec3d vecDe;
-	memcpy(&vecDe, res.data(), sizeof(Vec3d));
+	std::vector<unsigned char> res = std::vector<unsigned char>(ptr, ptr + sizeof(Vec3));
+	Vec3 vecDe;
+	memcpy(&vecDe, res.data(), sizeof(Vec3));
 
 	//序列化容器
 	vector<double> ori = { 1,2,4,1,2,4, 1,2,4,1,2,4, 1,2,4,1,2,4};
@@ -144,14 +146,14 @@ namespace ppc
 		//member
 		memcpy(ptr, &root->m_nodeIndex, sizeof(int)); ptr += sizeof(int);
 		//leftNode
-		std::vector<byte> bufferLeft = serializition(root->m_left);
+		std::vector<byte> bufferLeft = ppc::serializition(root->m_left);
 		count = (int)bufferLeft.size();
 		std::vector<byte> sizeLeft(sizeof(int));
 		memcpy(sizeLeft.data(), &count, sizeof(int));
 		serialized.insert(serialized.end(), sizeLeft.begin(), sizeLeft.end());
 		serialized.insert(serialized.end(), bufferLeft.begin(), bufferLeft.end());
 		//rightNode
-		std::vector<byte> bufferRight = serializition(root->m_right);
+		std::vector<byte> bufferRight = ppc::serializition(root->m_right);
 		count = (int)bufferRight.size();
 		std::vector<byte> sizeRight(sizeof(int));
 		memcpy(sizeRight.data(), &count, sizeof(int));
@@ -411,6 +413,7 @@ static void testSerialization8()
 	return;
 }
 
+#if 0
 namespace bin
 {
 	static int s_allnode_index = 0;
@@ -498,6 +501,7 @@ namespace bin
 		return;
 	}
 }
+#endif
 
 static int enrol = []()->int
 	{
@@ -519,8 +523,6 @@ static int enrol = []()->int
 		testSerialization5();
 		//testSerialization6();
 		//testSerialization7();
-		testSerialization8();
-		bin::testSerialization8();
 		cout << "test_serialize finished.\n" << endl;
 		return 0;
 	}();
