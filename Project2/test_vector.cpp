@@ -270,7 +270,9 @@ static void test_vector_6()
 //测试erase
 static void test_vector_7()
 {
-	vector<int> vec = { 1,2 };
+	vector<int> vec = { 1,2,3 };
+	std::for_each(vec.begin(), vec.end(), [](int& iter) {iter *= 2; });
+
 	while (!vec.empty())
 	{
 		auto it = vec.begin();
@@ -294,10 +296,38 @@ static void test_vector_7()
 
 }
 
+
+//<algorithm>函数
+static void test_vector_8()
+{
+	vector<int> vec = { 1,2,3 };
+	std::for_each(vec.begin(), vec.end(), [](int& iter) {iter *= 2; });
+
+	//transform
+	//它的主要功能是对输入范围中的每个元素应用一个指定的操作（操作通常是一个函数或函数对象），并将结果写入到一个输出范围。
+	std::vector<int> numbers = { 1, 2, 3, 4, 5 };
+	std::vector<int> squares(numbers.size());
+
+	// 使用 std::transform 计算平方
+	std::transform(numbers.begin(), numbers.end(), squares.begin(),
+		[](int x) { return x * x; }); // Lambda 表达式
+
+
+	std::vector<int> vec1 = { 1, 2, 3 };
+	std::vector<int> vec2 = { 4, 5, 6 };
+	std::vector<int> sums(vec1.size());
+
+	// 使用 std::transform 计算对应元素的和
+	std::transform(vec1.begin(), vec1.end(), vec2.begin(), sums.begin(),
+		[](int a, int b) { return a + b; }); // Lambda 表达式
+
+}
+
 static int _enrol = []()->int 
 	{
 		test_vector_6();
 		test_vector_7();
+		test_vector_8();
 		cout << "test_vector finished.\n" << endl;
 		return 0;
 	}();
