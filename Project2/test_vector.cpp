@@ -264,27 +264,40 @@ static void test_vector_6()
 	std::vector<int> vec3 = vec1 + vec2;
 	vec3 += vec2;
 
+	return;
+}
+
+//≤‚ ‘erase
+static void test_vector_7()
+{
 	vector<int> vec = { 1,2 };
 	while (!vec.empty())
 	{
-		auto it = vec.begin() ;  
+		auto it = vec.begin();
 		vec.erase(it);
 	}
 
 	//for (auto iter = vec.begin(); iter != vec.end();)
 	//	vec.erase(iter);
-    //vec.erase(std::remove(vec.begin(), vec.end(), 1), vec.end());
+	//vec.erase(std::remove(vec.begin(), vec.end(), 1), vec.end());
 
 	//auto iter = vec.begin();
 	//while (iter != vec.end())
 	//	vec.erase(iter);
 
-	return;
+
+	for (int i = 0; i < vec.size();)
+	{
+		vec.erase(vec.begin());
+
+	}
+
 }
 
 static int _enrol = []()->int 
 	{
 		test_vector_6();
+		test_vector_7();
 		cout << "test_vector finished.\n" << endl;
 		return 0;
 	}();
