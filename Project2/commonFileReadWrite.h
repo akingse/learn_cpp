@@ -1,14 +1,14 @@
 #pragma once
 #include<afx.h>
+#include <commonFileReadWrite.h>
 
-#ifndef CLASH_DETECTION_SOLUTION
+//#ifndef CLASH_DETECTION_SOLUTION
 struct InterTriInfo
 {
     std::array<std::array<Eigen::Vector3d, 3>, 2> trianglePair;
     std::array<unsigned long long, 2> entityPair;
     double distance;
 };
-#endif
 
 static size_t countFile = 0;
 inline void writeDataContent(const std::string& context, const std::string& fileName = {})
