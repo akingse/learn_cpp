@@ -21,7 +21,7 @@
     <ClCompile Include="pch.cpp">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="calculateDataStructure.cpp">
+    <ClCompile Include="calculateSpatialSearchTree.cpp">
       <Filter>algorithm</Filter>
     </ClCompile>
     <ClCompile Include="calculatePolyhedron.cpp">
@@ -53,7 +53,7 @@
     <ClInclude Include="pch.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="calculateDataStructure.h">
+    <ClInclude Include="calculateSpatialSearchTree.h">
       <Filter>algorithm</Filter>
     </ClInclude>
     <ClInclude Include="calculatePolyhedron.h">

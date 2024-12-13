@@ -13,5 +13,5 @@
 #include "calculateTriangle.h"	    // namespace clash
 #include "calculatePolyhedron.h"    // namespace clash
 #include "calculateMeshTopology.h"  //namespace games
-#include "calculateDataStructure.h" // clash //spatial partition tree
+#include "calculateSpatialSearchTree.h" // clash //spatial partition tree
 #include "calculateDynamicAccuracy.h"//namespace accura
