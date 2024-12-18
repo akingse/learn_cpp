@@ -68,9 +68,6 @@
     <ClInclude Include="calculateDynamicAccuracy.h">
       <Filter>algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="clashClassTypeDefine.h">
-      <Filter>algorithm</Filter>
-    </ClInclude>
     <ClInclude Include="calculatePointLinePlane.h">
       <Filter>algorithm</Filter>
     </ClInclude>
@@ -80,14 +77,17 @@
     <ClInclude Include="calculateMeshTopology.h">
       <Filter>algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="clashInterfaceUtility.h">
-      <Filter>algorithm</Filter>
-    </ClInclude>
     <ClInclude Include="test_triangle_intersect.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\auto_include\Project_CAL_API.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="clashClassTypeDefine.h">
+      <Filter>algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="clashInterfaceUtility.h">
+      <Filter>algorithm</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
