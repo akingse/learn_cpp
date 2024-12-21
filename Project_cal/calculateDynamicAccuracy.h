@@ -34,9 +34,9 @@ namespace accura
         int m_precision = 0; //current precision
         int m_meshAngleTole = 8; // 36;
         Eigen::Vector3d m_relaOrigin = Eigen::Vector3d(0, 0, 0); //relative origin point
-        const double m_toleAngle = M_PI / 1080; //0.003
-        const double m_toleDist = 1e-5;
-        const double m_toleArea = 1e-4;
+        double m_toleAngle = M_PI / 1080; //0.003
+        double m_toleDist = 1e-5;
+        double m_toleArea = 1e-4;
         const double m_toleFixed = 1e-8;
         double m_toleMerge2 = 0.0; //record square
         inline int getDynamicPrecision()
@@ -55,6 +55,14 @@ namespace accura
             m_precision = std::min(maxPrec, MAX_DECIMAL_PRECISION);
             return m_precision;
         }
+        inline void reset()
+        {
+            m_modelBox3d = Eigen::AlignedBox3d();
+            m_toleAngle = M_PI / 1080; //0.003
+            m_toleDist = 1e-5;
+            m_toleArea = 1e-4;
+        }
+
         //inline double eps() //const
         //{
         //    int precision = getDynamicPrecision();
