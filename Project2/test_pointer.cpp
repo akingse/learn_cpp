@@ -87,3 +87,19 @@ static void test1()
 	cout << *data << endl;
 	return;
 }
+
+static void test2()
+{
+	Vec3* ptr = nullptr;
+	Vec3** pp = &ptr; //null指针也可以取地址
+    *pp = &Vec3(1, 1);
+	return;
+}
+
+static int enrol = []()->int
+	{
+		test1();
+		test2();
+		cout << "test_pointer finished.\n" << endl;
+		return 0;
+	}();
