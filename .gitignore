@@ -368,3 +368,5 @@ FodyWeavers.xsd
 *.bin
 *.off
 /readme/.obsidian/workspace.json
+/DawnCache
+/GPUCache
