@@ -212,14 +212,44 @@ bool accura::isTwoSegmentsIntersect(const std::array<Vector2d, 2>& segmA, const 
 }
 
 //Precision
+double Precision::sm_toleAngle = 1e-6;
+double Precision::sm_toleConfusion = 1e-7;
 
-bool Precision::isParallel(Eigen::Vector3d& vecA, Eigen::Vector3d& vecB)
+bool Precision::isParallel(Eigen::Vector3d& vecA, Eigen::Vector3d& vecB, double tolerance /*= Angular()*/)
 {
-	double proj = vecA.dot(vecB);
-	double area = vecA.cross(vecB).norm();
+	//double area = vecA.cross(vecB).norm(); // 0=|a|*|b|*sin(theta)
+	Eigen::Vector3d vecAU = vecA.normalized();
+	Eigen::Vector3d vecBU = vecB.normalized();
+    Vector3d croPro = vecAU.cross(vecBU);
+    return croPro.norm() < tolerance;//tobe optimize
+    //double max = std::max(std::max(fabs(croPro[0]), fabs(croPro[1])), fabs(croPro[2]));
+}
 
-	double angle1 = eigen::angle(vecA, vecB, false);
-	double angle2 = eigen::angle(vecA, vecB, true);
+bool Precision::isPerpendi(Eigen::Vector3d& vecA, Eigen::Vector3d& vecB, double tolerance /*= Angular()*/)
+{
+	//double proj = vecA.dot(vecB); // 0=|a|*|b|*cos(theta)
+	Eigen::Vector3d vecAU = vecA.normalized();
+	Eigen::Vector3d vecBU = vecB.normalized();
+	double dotPro = vecAU.dot(vecBU); //scalar products
+	return dotPro < tolerance;
+}
+
+bool Precision::isPointsCoincident(Eigen::Vector3d& pntA, Eigen::Vector3d& pntB, double tolerance /*= 10*Confusion()*/)
+{
+	double distance2 = (pntA - pntB).squaredNorm();
+	return distance2 < tolerance * tolerance;
+}
+
+bool Precision::isPointOnLine(Eigen::Vector3d& point, const clash::Segment3d& line, double tolerance /*= Confusion()*/)
+{
+	
+
+	return false;
+}
+
+bool Precision::isPointOnPlane(Eigen::Vector3d& point, const clash::Plane3d& plane, double tolerance /*= 0.1*Confusion()*/)
+{
+
 
 	return false;
 }

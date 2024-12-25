@@ -1327,8 +1327,6 @@ namespace eigen
 			};
 		auto _getDistanceOfTwoSegmentsINF = [&vectA, &vectB](const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)->double
 			{
-				//Vector3d vectA = segmA[1] - segmA[0];
-				//Vector3d vectB = segmB[1] - segmB[0];
 				double delta1 = (segmB[0] - segmA[0]).dot(vectA);
 				double delta2 = (segmB[0] - segmA[0]).dot(vectB);
 				// 2*2 inverse matrix, 1/|M|*(exchange main diagonal and -1 counter-diagonal)

@@ -11,6 +11,7 @@
 #define CALCULATE_TRIANGLE_H
 namespace clash
 {
+	//bool judge
 	double computeTriangleArea(const std::array<Eigen::Vector2d, 3>& triangle);
 	double computeTriangleArea(const std::array<Eigen::Vector3d, 3>& triangle, bool is2D = true);
 	// intersect of triangle
@@ -47,4 +48,5 @@ namespace eigen
 	DLLEXPORT_CAL double getDistanceOfPointAndTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon);
 	DLLEXPORT_CAL bool isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector2d, 3>& tri, const Eigen::AlignedBox2d& box);
 }
+
 #endif// CALCULATE_TRIANGLE_H

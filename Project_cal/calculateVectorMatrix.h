@@ -60,13 +60,13 @@ namespace eigen
         return v0[0] * v1[1] - v0[1] * v1[0];
     }
 
-    inline double angle(const Eigen::Vector2d& v0, const Eigen::Vector2d& v1)
+    inline double angle_two_vectors(const Eigen::Vector2d& v0, const Eigen::Vector2d& v1)
     {
         double cosRes = v0.dot(v1) / (v0.norm() * v1.norm());
         return std::acos(cosRes);
     }
 
-    inline double angle(const Eigen::Vector3d& v0, const Eigen::Vector3d& v1, bool isNorm)
+    inline double angle_two_vectors(const Eigen::Vector3d& v0, const Eigen::Vector3d& v1, bool isNorm = false)
     {
         Eigen::Vector3d V0 = v0;
         Eigen::Vector3d V1 = v1;

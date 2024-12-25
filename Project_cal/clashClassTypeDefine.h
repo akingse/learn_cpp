@@ -74,6 +74,7 @@ namespace clash //collide //psykronix
     typedef std::vector<std::vector<Eigen::Vector3d>> PathsEigen3d;
 
     //global constexpr
+    static const Eigen::Vector2d gVecNaN2d(std::nan("0"), std::nan("0"));
     static const Eigen::Vector3d gVecNaN(std::nan("0"), std::nan("0"), std::nan("0"));
     static const Triangle gSegNaN = { gVecNaN, gVecNaN };
     static const Triangle gTirNaN = { gVecNaN, gVecNaN, gVecNaN };

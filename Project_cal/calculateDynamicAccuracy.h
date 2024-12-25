@@ -98,18 +98,33 @@ namespace accura
 namespace accura
 {
     //copy from Precision\Precision.hxx
-    class Precision
+    class DLLEXPORT_CAL Precision
     {
         static double sm_toleAngle;
-        static double sm_toleDistance;
+        static double sm_toleConfusion;
 
     public:
-        static constexpr double Angular() { return 1.e-12; }
+        static constexpr void setAngular(const double angle) { sm_toleAngle = angle; }
 
-        static bool isParallel(Eigen::Vector3d& vecA, Eigen::Vector3d& vecB);
+        static constexpr double Angular() { return sm_toleAngle; }
 
-        static bool isPerpendi(Eigen::Vector3d& vecA, Eigen::Vector3d& vecB);
+        static constexpr void setConfusion(const double confu) { sm_toleConfusion = confu; }
 
+        static constexpr double Confusion() { return sm_toleConfusion; }
+
+
+        static bool isParallel(Eigen::Vector3d& vecA, Eigen::Vector3d& vecB, double tolerance = Angular());
+
+        static bool isPerpendi(Eigen::Vector3d& vecA, Eigen::Vector3d& vecB, double tolerance = Angular());//perpendicular
+
+        //point relation
+        static bool isPointsCoincident(Eigen::Vector3d& pntA, Eigen::Vector3d& pntB, double tolerance = 10 * Confusion());
+
+        static bool isPointOnLine(Eigen::Vector3d& point, const clash::Segment3d& line, double tolerance = Confusion());
+
+        static bool isPointOnPlane(Eigen::Vector3d& point, const clash::Plane3d& plane, double tolerance = 0.1 * Confusion());
+
+        //line relation
 
 
     };
