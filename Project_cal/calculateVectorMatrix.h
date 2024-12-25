@@ -177,7 +177,7 @@ namespace eigen
 
     inline Eigen::Matrix4d rotate(const Eigen::Vector3d& axis = { 0, 0, 1 }, double theta = 0.0)
     {
-        Eigen::Quaterniond q = Eigen::Quaterniond(Eigen::AngleAxisd(theta, axis));
+        Eigen::Quaterniond q = Eigen::Quaterniond(Eigen::AngleAxisd(theta, axis.normalized()));
         Eigen::Matrix3d R = q.toRotationMatrix();
         Eigen::Matrix4d mat4d = Eigen::Matrix4d::Identity();
         mat4d.block<3, 3>(0, 0) = R; //block<rows,cols>(row_index,col_index) <>is child size, () is begin index
@@ -188,7 +188,7 @@ namespace eigen
 
     inline Eigen::Matrix4d rotate(const Eigen::Vector3d& position, const Eigen::Vector3d& axis, double theta = 0.0)
     {
-        Eigen::Quaterniond q = Eigen::Quaterniond(Eigen::AngleAxisd(theta, axis));
+        Eigen::Quaterniond q = Eigen::Quaterniond(Eigen::AngleAxisd(theta, axis.normalized()));
         Eigen::Matrix3d R = q.toRotationMatrix();
         Eigen::Matrix4d mat4d = Eigen::Matrix4d::Identity();
         mat4d.block<3, 3>(0, 0) = R; //block<rows,cols>(row_index,col_index) <>is child size, () is begin index
