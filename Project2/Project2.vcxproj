@@ -230,6 +230,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="test_overload.cpp" />
+    <ClCompile Include="test_precision.cpp" />
     <ClCompile Include="test_recursion.cpp" />
     <ClCompile Include="test_refer.cpp" />
     <ClCompile Include="test_regular .cpp" />

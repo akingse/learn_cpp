@@ -60,6 +60,25 @@ namespace eigen
         return v0[0] * v1[1] - v0[1] * v1[0];
     }
 
+    inline double angle(const Eigen::Vector2d& v0, const Eigen::Vector2d& v1)
+    {
+        double cosRes = v0.dot(v1) / (v0.norm() * v1.norm());
+        return std::acos(cosRes);
+    }
+
+    inline double angle(const Eigen::Vector3d& v0, const Eigen::Vector3d& v1, bool isNorm)
+    {
+        Eigen::Vector3d V0 = v0;
+        Eigen::Vector3d V1 = v1;
+        if (isNorm)
+        {
+            V0 = v0.normalized();
+            V1 = v1.normalized();
+        }
+        double cosRes = V0.dot(V1) / (V0.norm() * V1.norm());
+        return std::acos(cosRes);
+    }
+
     // dynamic accuracy
     //bool isParallel(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB);
     //bool isParallel(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB);

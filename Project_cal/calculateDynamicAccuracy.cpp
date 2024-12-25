@@ -211,3 +211,15 @@ bool accura::isTwoSegmentsIntersect(const std::array<Vector2d, 2>& segmA, const 
         (BA_0[0] * vecB[1] - BA_0[1] * vecB[0]) * (BA_1[0] * vecB[1] - BA_1[1] * vecB[0]) <= spec; //not support both near zero
 }
 
+//Precision
+
+bool Precision::isParallel(Eigen::Vector3d& vecA, Eigen::Vector3d& vecB)
+{
+	double proj = vecA.dot(vecB);
+	double area = vecA.cross(vecB).norm();
+
+	double angle1 = eigen::angle(vecA, vecB, false);
+	double angle2 = eigen::angle(vecA, vecB, true);
+
+	return false;
+}

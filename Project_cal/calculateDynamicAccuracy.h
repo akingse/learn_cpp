@@ -93,3 +93,24 @@ namespace accura
 
 }
 #endif// CALCULATE_DYNAMICACCURACY_H
+
+//for MeshGeometry precison
+namespace accura
+{
+    //copy from Precision\Precision.hxx
+    class Precision
+    {
+        static double sm_toleAngle;
+        static double sm_toleDistance;
+
+    public:
+        static constexpr double Angular() { return 1.e-12; }
+
+        static bool isParallel(Eigen::Vector3d& vecA, Eigen::Vector3d& vecB);
+
+        static bool isPerpendi(Eigen::Vector3d& vecA, Eigen::Vector3d& vecB);
+
+
+
+    };
+}

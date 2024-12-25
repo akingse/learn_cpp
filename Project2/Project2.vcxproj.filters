@@ -235,6 +235,9 @@
     <ClCompile Include="commonFileReadWrite.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="test_precision.cpp">
+      <Filter>test_case</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
