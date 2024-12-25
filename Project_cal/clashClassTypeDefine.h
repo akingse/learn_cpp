@@ -12,6 +12,13 @@
 
 namespace clash
 {
+    static constexpr size_t N_10E_3 = (size_t)1e3;
+    static constexpr size_t N_10E_4 = (size_t)1e4;
+    static constexpr size_t N_10E_5 = (size_t)1e5;
+    static constexpr size_t N_10E_6 = (size_t)1e6;
+    static constexpr size_t N_10E_7 = (size_t)1e7;
+    static constexpr size_t N_10E_8 = (size_t)1e8;
+
     struct ModelMesh
     {
         std::vector<Eigen::Vector3d> vbo_;
@@ -67,6 +74,7 @@ namespace clash //collide //psykronix
     typedef std::vector<std::vector<Eigen::Vector3d>> PathsEigen3d;
 
     //global constexpr
+    static const Eigen::Vector2d gVecNaN2d(std::nan("0"), std::nan("0"));
     static const Eigen::Vector3d gVecNaN(std::nan("0"), std::nan("0"), std::nan("0"));
     static const Triangle gSegNaN = { gVecNaN, gVecNaN };
     static const Triangle gTirNaN = { gVecNaN, gVecNaN, gVecNaN };
@@ -94,6 +102,11 @@ namespace clash //collide //psykronix
         {
             m_origin = origin;
             m_normal = (normal.isApprox(Eigen::Vector3d::Zero(), 0)) ? gVecNaN : normal;
+        }
+        Plane3d(const std::array<Eigen::Vector3d, 3>& triangle)
+        {
+            m_origin = triangle[0];
+            m_normal = (triangle[1] - triangle[0]).cross(triangle[2] - triangle[1]);//without normalize
         }
         //get the plane origin through world coordinate origin
         Eigen::Vector3d origin() const

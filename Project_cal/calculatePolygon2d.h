@@ -16,8 +16,8 @@ namespace clash
 	inline bool isPointInPolygon2D(const Eigen::Vector2d& point, const std::vector<Eigen::Vector2d>& polygon)// pnpoly
 	{
 		Eigen::AlignedBox2d box;
-		for (const auto& iter : polygon)
-			box.extend(iter);
+        for (int i = 0; i < polygon.size(); ++i)//(const auto& iter : polygon)
+			box.extend(polygon[i]);
 		if (!box.contains(point))
 			return false;
 		bool isIn = false;
@@ -169,7 +169,7 @@ namespace clash
 	//for curvearray classify
 	struct PathsPart
 	{
-		int m_index;
+		int m_index = -2;//default init
 		double m_ymin = DBL_MAX;
 		//Eigen::Vector2d m_point;
 		Eigen::AlignedBox2d m_box2d;
@@ -189,11 +189,12 @@ namespace clash
 			pathsPart.m_index = i;
 			//pathsPart.m_point = profile[i][0];// profile must no empty
 			Eigen::AlignedBox2d box2d;
-			for (const auto& iter : profile[i])
+			for (int j = 0; j < profile[i].size(); ++j)//(const auto& iter : profile[i])
 			{
-				box2d.extend(iter);
-				if (iter[1] < pathsPart.m_ymin)
-					pathsPart.m_ymin = iter[1];
+				const Vector2d& point = profile[i][j];
+				box2d.extend(point);
+				if (point[1] < pathsPart.m_ymin)
+					pathsPart.m_ymin = point[1];
 			}
 			pathsPart.m_box2d = box2d;
 		}
@@ -216,6 +217,8 @@ namespace clash
 			for (int j = i + 1; j < pathsPartVct.size(); ++j)
 			{
 				PathsPart& partJ = pathsPartVct[j];
+				if (partJ.m_index == -1)
+					continue;
 				if (ymax < partJ.m_ymin)
 					break;
 				//boundbox separate -> must separate

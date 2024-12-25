@@ -45,19 +45,15 @@ static std::string randNumNameSepa = "bin_file/random_1e8_sepa.bin";
 
 static void _test0()
 {
-	auto dir = getExePath();
-	cout << "exepath=" << dir << endl;
 	clock_t start, end;
-
-	Eigen::Vector3d P(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN());
-	Eigen::Vector3d Q(std::nan("0"), std::nan("0"), std::nan("0"));
-	double pi = M_PI;
+	string dir = "C:/Users/Aking/source/repos/learn_cpp/Project2/";//"getExePath();
+	cout << "exepath=" << dir << endl;
 
 #ifdef TEST_SPEED_OF_FUNCTION
 	start = clock();
 	cout << "data number:" << totalNum << ", load start..." << endl;
 	// the data
-	double* readNum = _readNumberFile(size_t(sqrt(totalNum)), randNumName);
+    double* readNum = _readNumberFile(size_t(sqrt(totalNum)), dir + randNumName);
 
 #ifdef TEST_TRIGON3
 	std::array<Vector3d, 3>* randData3 = new std::array<Vector3d, 3>[totalNum];
@@ -113,12 +109,12 @@ static void _test0()
 											{readNum[j + 13],readNum[j + 15],readNum[j + 17]} } };
 #endif
 #ifdef TEST_TRIGON3_TRIGON3
-			randData3[i * length + j] = { { {readNum[j + 0],readNum[j + 2],readNum[j + 4]} ,
-											{readNum[j + 6],readNum[j + 8],readNum[j + 10]} ,
-											{readNum[j + 12],readNum[j + 14],readNum[j + 16]} } };
-			randData3_[i * length + j] = { { {readNum[j + 1],readNum[j + 3],readNum[j + 5]} ,
-											{readNum[j + 7],readNum[j + 9],readNum[j + 11]} ,
-											{readNum[j + 13],readNum[j + 15],readNum[j + 17]} } };
+            randData3[i * length + j] = { { {readNum[j + 0] / 10,readNum[j + 2] / 10,readNum[j + 4] / 10} ,
+											{readNum[j + 6] / 10,readNum[j + 8] / 10,readNum[j + 10] / 10} ,
+											{readNum[j + 12] / 10,readNum[j + 14] / 10,readNum[j + 16] / 10} } };
+			randData3_[i * length + j] = { { {readNum[j + 1] / 10,readNum[j + 3] / 10,readNum[j + 5] / 10} ,
+											{readNum[j + 7] / 10,readNum[j + 9] / 10,readNum[j + 11] / 10} ,
+											{readNum[j + 13] / 10,readNum[j + 15] / 10,readNum[j + 17] / 10} } };
 #endif
 #ifdef TEST_TRIGON2D_TRIGON2D
 			randData2D[i * length + j] = { { {readNum[j + 0],readNum[j + 2]} ,
@@ -173,7 +169,7 @@ static void _test0()
 			//bool res = isTwoSegmentsIntersect(randData2[i], randData2_[i]);
 			// 
 			// 三角形相交测试
-			//bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]);
+			bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]);
 			//bool res = isSegmentCrossTriangleSurface(randData2[i], randData3_[i]);
 			//bool res = TriangularIntersectionTest(randData3[i], randData3_[i]);
 			//包围盒
@@ -191,14 +187,14 @@ static void _test0()
 			// 软碰撞
 			//double d = getTrianglesDistance(P, Q, randData3[i], randData3_[i]);
 			//double d = getTrianglesDistanceSAT(randData3[i], randData3_[i]);
-			array<Vector3d, 2> res = getTwoTrianglesNearestPoints(randData3[i], randData3_[i]);
+			//array<Vector3d, 2> res = getTwoTrianglesNearestPoints(randData3[i], randData3_[i]);
 			//array<Vector3d, 2> res = getTwoTrianglesIntersectPoints(randData3[i], randData3_[i]);
 			//array<Vector3d, 2> res = getTwoTrianglesIntersectPoints(randData3xy[i], randData3_xy[i]);
 			//double d = (res[1] - res[0]).norm(); << endl
 			//测试包围盒 
 			//Eigen::AlignedBox3d res = Eigen::AlignedBox3d(randData2[i][0], randData2[i][1]).intersection(Eigen::AlignedBox3d(randData2_[i][0], randData2_[i][1]));
 
-			//calcul
+			//calculate
 			//double dotPro = (randData3[i][1].dot(randData3[i][2] - randData3_[i][0])) * (randData3[i][1].dot(randData3[i][0] - randData3_[i][0])) < eps;
 			//Vector3d point = randData3[i][0] + (randData3[i][1].dot(randData3[i][0] - randData3_[i][0]) / dotPro) * (randData3[i][1] - randData3[i][0]);
 			//bool res = isPointInTriangle(point, randData3[i]);
@@ -206,7 +202,7 @@ static void _test0()
 		}
 		end = clock();
 		cout << "time = " << double(end - start) / CLOCKS_PER_SEC << "s" << endl;
-		Sleep(1000);
+		Sleep(100); //ms
 
 	}
 
@@ -217,7 +213,7 @@ static void _test0()
 	time(&nowtime); //获取1970年1月1日0点0分0秒到现在经过的秒数
 	tm p;
 	localtime_s(&p, &nowtime); //将秒数转换为本地时间,年从1900算起,需要+1900,月为0-11,所以要+1
-	printf("%04d/%02d/%02d-%02d:%02d:%02d\n", p.tm_year + 1900, p.tm_mon + 1, p.tm_mday, p.tm_hour, p.tm_min, p.tm_sec);
+	printf("%04d/%02d/%02d-%02d:%02d:%02d/n", p.tm_year + 1900, p.tm_mon + 1, p.tm_mday, p.tm_hour, p.tm_min, p.tm_sec);
 	cout << "main over." << endl;
 }
 
@@ -240,13 +236,16 @@ static void _test1()
 
 	//PathsD res = BooleanOp(ClipType::Union, FillRule::EvenOdd, { path1 }, { path2 });
 
+	Eigen::Vector3d P(std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN());
+	Eigen::Vector3d Q(std::nan("0"), std::nan("0"), std::nan("0"));
+
 	return;
 }
 
 static int enrol = []()->int
 {
 	//_test0();
-	_test1();
+	//_test1();
 	return 0;
 }();
 

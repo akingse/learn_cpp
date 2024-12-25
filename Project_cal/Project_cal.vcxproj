@@ -71,10 +71,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)..\TPL\eigen-3.4.0;C:\Users\Aking\source\repos\TPL\eigen-3.4.0;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\TPL\eigen-3.4.0;C:\Users\Aking\source\repos\TPL\eigen-3.4.0;$(ProjectDir)..\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)..\TPL\eigen-3.4.0;C:\Users\Aking\source\repos\TPL\eigen-3.4.0;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\TPL\eigen-3.4.0;C:\Users\Aking\source\repos\TPL\eigen-3.4.0;$(ProjectDir)..\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -141,7 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="calculateDataStructure.cpp" />
+    <ClCompile Include="calculateSpatialSearchTree.cpp" />
     <ClCompile Include="calculateDynamicAccuracy.cpp" />
     <ClCompile Include="calculateMeshTopology.cpp" />
     <ClCompile Include="calculatePointLinePlane.cpp" />
@@ -153,9 +153,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="test_triangle_intersect.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="calculateDataStructure.h" />
+    <ClInclude Include="..\auto_include\Project_CAL_API.h" />
+    <ClInclude Include="calculateSpatialSearchTree.h" />
     <ClInclude Include="calculateDynamicAccuracy.h" />
     <ClInclude Include="calculateMeshTopology.h" />
     <ClInclude Include="calculatePointLinePlane.h" />
@@ -165,8 +167,8 @@
     <ClInclude Include="calculateVectorMatrix.h" />
     <ClInclude Include="clashInterfaceUtility.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Project_CAL_API.h" />
-    <ClInclude Include="clashTypeDefine.h" />
+    <ClInclude Include="clashClassTypeDefine.h" />
+    <ClInclude Include="test_triangle_intersect.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

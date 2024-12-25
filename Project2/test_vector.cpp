@@ -1,5 +1,6 @@
 #include "pch.h"
 using namespace std;
+using namespace Eigen;
 using namespace para;
 
 // 重载一下+号运算符
@@ -38,7 +39,7 @@ public:
 	virtual void inheriFun2() override {}
 	virtual void inheriFun3() override {}
 
-	void setter(int _a, Vec3d _vec, char _b, double _c) {
+	void setter(int _a, Vec3 _vec, char _b, double _c) {
 		this->a = _a;
 		this->vec = _vec;
 		this->b = _b;
@@ -46,7 +47,7 @@ public:
 	}
 private:
 	int a;
-	Vec3d vec;
+	Vec3 vec;
 	
 	char b;
 	double c;
@@ -61,13 +62,13 @@ static int test_vector_1()
 	auto ss2 = sizeof(size_t);//8
 
 	A insa;
-	insa.setter(1112, Vec3d(1,2,3), 'a', 3.14159);
+	insa.setter(1112, Vec3(1,2,3), 'a', 3.14159);
 	char* pI;
 	pI = (char*)&insa + sizeof(void*); //only one pointor
 
 	//int* p1 = (int*)&insa + 1;
 	int* pInt = (int*)(pI);		pI += sizeof(int); //len(char*)=1byte, as a unit length
-	Vec3d* pVec = (Vec3d*)(pI);	pI += sizeof(Vec3d);
+	Vec3* pVec = (Vec3*)(pI);	pI += sizeof(Vec3);
 	char* pChar = (char*)(pI);	pI += sizeof(char); //&insa + sizeof(Vec3);
 	double* pDouble = (double*)(pI); //&insa + sizeof(char);
 	// (Vec3*)0x00000032f42fed98
@@ -266,9 +267,67 @@ static void test_vector_6()
 	return;
 }
 
+//测试erase
+static void test_vector_7()
+{
+	vector<int> vec = { 1,2,3 };
+	std::for_each(vec.begin(), vec.end(), [](int& iter) {iter *= 2; });
+
+	while (!vec.empty())
+	{
+		auto it = vec.begin();
+		vec.erase(it);
+	}
+
+	//for (auto iter = vec.begin(); iter != vec.end();)
+	//	vec.erase(iter);
+	//vec.erase(std::remove(vec.begin(), vec.end(), 1), vec.end());
+
+	//auto iter = vec.begin();
+	//while (iter != vec.end())
+	//	vec.erase(iter);
+
+
+	for (int i = 0; i < vec.size();)
+	{
+		vec.erase(vec.begin());
+
+	}
+
+}
+
+
+//<algorithm>函数
+static void test_vector_8()
+{
+	vector<int> vec = { 1,2,3 };
+	std::for_each(vec.begin(), vec.end(), [](int& iter) {iter *= 2; });
+
+	//transform
+	//它的主要功能是对输入范围中的每个元素应用一个指定的操作（操作通常是一个函数或函数对象），并将结果写入到一个输出范围。
+	std::vector<int> numbers = { 1, 2, 3, 4, 5 };
+	std::vector<int> squares(numbers.size());
+
+	// 使用 std::transform 计算平方
+	std::transform(numbers.begin(), numbers.end(), squares.begin(),
+		[](int x) { return x * x; }); // Lambda 表达式
+
+
+	std::vector<int> vec1 = { 1, 2, 3 };
+	std::vector<int> vec2 = { 4, 5, 6 };
+	std::vector<int> sums(vec1.size());
+
+	// 使用 std::transform 计算对应元素的和
+	std::transform(vec1.begin(), vec1.end(), vec2.begin(), sums.begin(),
+		[](int a, int b) { return a + b; }); // Lambda 表达式
+
+}
+
 static int _enrol = []()->int 
 	{
 		test_vector_6();
+		test_vector_7();
+		test_vector_8();
 		cout << "test_vector finished.\n" << endl;
 		return 0;
 	}();

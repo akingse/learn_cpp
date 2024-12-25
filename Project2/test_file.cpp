@@ -186,6 +186,16 @@ int _test3()
     std::string folderPath = "D:\\Download\\Quark";
     std::vector<std::string> filenameRes = getListFiles(folderPath);
 
+    //returns 0 if the file has the given mode. 
+    // The function returns ¨C1 if the named file does not exist or is not accessible 
+    int res = _access(folderPath.c_str(), 0);
+
+    //ÅÐ¶ÏÄ¿Â¼ÊÇ·ñ´æÔÚ
+
+    fstream _file;
+    _file.open(folderPath, ios::in);
+    bool suc = _file.is_open();
+
     if (_access(folderPath.c_str(),0)==-1)
     {
         _mkdir(folderPath.c_str());

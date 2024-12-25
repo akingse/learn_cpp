@@ -194,7 +194,7 @@ static void test2()
 		for (int j = 0; j < N / 2; j++)
 		{
 			//resSeg.push_back(getIntersectLineOfTwoPlane(planeVct[2 * j], planeVct[2 * j + 1]));
-			res = getIntersectLineOfTwoPlane(planeVct[2 * j], planeVct[2 * j + 1]);
+			res = getIntersectLineOfTwoPlanes(planeVct[2 * j], planeVct[2 * j + 1]);
 			//res = intersectWithTwoPlanes(planeVct[2 * j], planeVct[2 * j + 1]);
 			if (!isnan(res[0][0]))
 				resSeg.push_back(res);
@@ -213,11 +213,11 @@ static void test3() //测试getIntersectLineOfTwoPlane
 {
 	Plane3d plane1(Vector3d(0, 10, 0), Vector3d(-1, 0, 0)); //可以共线
 	Plane3d plane2(Vector3d(0, -10, 0), Vector3d(0, 0, 1));
-	PosVec3d interLine = getIntersectLineOfTwoPlane(plane1, plane2);
+	PosVec3d interLine = getIntersectLineOfTwoPlanes(plane1, plane2);
 
 	plane1 = Plane3d{ Vector3d(10, 20, 3), Vector3d(1, 2, 3) };
 	plane2 = Plane3d{ Vector3d(10, 20, 3), Vector3d(1, 2, 3) };
-	interLine = getIntersectLineOfTwoPlane(plane1, plane2);
+	interLine = getIntersectLineOfTwoPlanes(plane1, plane2);
 
 	return;
 }

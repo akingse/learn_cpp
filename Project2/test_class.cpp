@@ -24,40 +24,38 @@ public:
 	//}
 };
 
-
-
-class Base
-{
-private:
-	virtual void base_fun0() { cout << "private" << endl; }
-public:
-	virtual void base_fun1() { cout << "public" << endl; }
-	int m_imp;
-	void set(int a) { m_imp = a; }
-	virtual void _cout(int i)
-	{
-		cout << "base" << endl;
-	}
-};
-
-class Inhe: public Base
-{
-private:
-	void base_fun1() override { cout << "private" << endl; }
-
-public:
-	void base_fun0() override { cout << "public" << endl; }
-	virtual void _cout(int i) override
-	{
-		if (i == 1)
-		{
-			cout << "inhe" << endl;
-		}
-		else
-			Base::_cout(i);
-	}
-
-};
+//class Base
+//{
+//private:
+//	virtual void base_fun0() { cout << "private" << endl; }
+//public:
+//	virtual void base_fun1() { cout << "public" << endl; }
+//	int m_imp;
+//	void set(int a) { m_imp = a; }
+//	virtual void _cout(int i)
+//	{
+//		cout << "base" << endl;
+//	}
+//};
+//
+//class Inhe: public Base
+//{
+//private:
+//	void base_fun1() override { cout << "private" << endl; }
+//
+//public:
+//	void base_fun0() override { cout << "public" << endl; }
+//	virtual void _cout(int i) override
+//	{
+//		if (i == 1)
+//		{
+//			cout << "inhe" << endl;
+//		}
+//		else
+//			Base::_cout(i);
+//	}
+//
+//};
 
 enum class Test :int
 {
@@ -279,8 +277,6 @@ int main_class()
 	int a2 = 1 << 2;
 	int a3 = 1 << 3;
 	int a4 = 1 << 4;
-	Inhe inhe;
-	inhe._cout(0); //选择性调用父类
 
 	MYEC e1 = MYEC::E1;
 	unsigned int ie1 = (unsigned int)e1;
@@ -478,8 +474,6 @@ int main_class()
 
 	//int a[] = { 1,2,3,4 };
 
-	Inhe in;
-
 	return 0;
 }
 
@@ -517,9 +511,53 @@ static void _test1()
 	return;
 }
 
+class Base {
+public:
+	virtual ~Base() {} // 为了确保多态性，Base类应该有虚析构函数
+};
+
+class DerivedA : public Base {
+public:
+	void info() { std::cout << "I am DerivedA" << std::endl; }
+};
+
+class DerivedB : public Base {
+public:
+	void info() { std::cout << "I am DerivedB" << std::endl; }
+};
+
+void identify(Base* basePtr) {
+	// 使用 dynamic_cast 进行类型判断
+	if (DerivedA* derivedAPtr = dynamic_cast<DerivedA*>(basePtr)) {
+		derivedAPtr->info();
+	}
+	else if (DerivedB* derivedBPtr = dynamic_cast<DerivedB*>(basePtr)) {
+		derivedBPtr->info();
+	}
+	else {
+		std::cout << "Unknown type" << std::endl;
+	}
+}
+
+static void _test2()
+{
+
+	Base* ptr1 = new DerivedA();
+	Base* ptr2 = new DerivedB();
+
+	identify(ptr1); // 应输出 "I am DerivedA"
+	identify(ptr2); // 应输出 "I am DerivedB"
+
+	string name1 = typeid(*ptr1).name();
+	string name2 = typeid(*ptr2).name();
+
+	return;
+}
+
 static int enrol = []()->int
 	{
 		_test1();
+		_test2();
 		cout << "test_class finished.\n" << endl;
 		return 0;
 	}();

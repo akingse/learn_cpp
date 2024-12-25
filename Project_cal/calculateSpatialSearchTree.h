@@ -57,7 +57,7 @@ namespace clash
 		{
 			m_polygon = polyline;
 			//m_id++;
-			for (const auto& iter : m_polygon)
+			for (const auto& iter : m_polygon) //for debug and parallel
 				m_bound.extend(iter);
 #ifdef USING_AUTO_CLOSE
 			if (isValid() && m_polygon[0] != m_polygon[m_polygon.size() - 1]) // !m_polygon.empty(), auto close
