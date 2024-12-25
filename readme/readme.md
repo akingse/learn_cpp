@@ -104,14 +104,26 @@ conf.user.json
 ### github代理问题
 
 ```shell
-#使用代理
+#全局, 代理所有
 git config --global http.proxy http://127.0.0.1:49781
 git config --global https.proxy http://127.0.0.1:49781
-git config --global http.proxy http://127.0.0.1:10809
-git config --global https.proxy http://127.0.0.1:10809
-#取消http代理
+git config --global http.proxy http://127.0.0.1:7897
+git config --global https.proxy http://127.0.0.1:7897
+git config --global http.https://github.com.proxy http://127.0.0.1:49781
+git config --global https.https://github.com.proxy http://127.0.0.1:49781
+
+#查看代理
+git config --global http.proxy
+git config --global https.proxy
+git config --global --get http.https://github.com.proxy
+git config --global --get https.https://github.com.proxy
+#取消代理
 git config --global --unset http.proxy
 git config --global --unset https.proxy
+#手动关闭代理
+git config --global --unset http.https://github.com.proxy
+git config --global --unset https.https://github.com.proxy
+
 ```
 
 同步设备
