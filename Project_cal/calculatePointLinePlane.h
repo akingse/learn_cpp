@@ -27,10 +27,12 @@ namespace eigen
 {
 	DLLEXPORT_CAL double getDistanceOfPointAndLine(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 2>& line); //get nearest point
 	DLLEXPORT_CAL double getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& plane); //get nearest projection point
+	DLLEXPORT_CAL double getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const clash::Plane3d& plane); //overload
 	DLLEXPORT_CAL double getDistanceOfTwoLines(const std::array<Eigen::Vector3d, 2>& lineA, const std::array<Eigen::Vector3d, 2>& lineB); //get two nearest points
 	DLLEXPORT_CAL Eigen::Vector3d getIntersectPointOfLineAndPlane(const std::array<Eigen::Vector3d, 2>& line, const std::array<Eigen::Vector3d, 2>& plane);
 	DLLEXPORT_CAL Eigen::Vector2d getIntersectPointOfTwoLines(const std::array<Eigen::Vector2d, 2>& lineA, const std::array<Eigen::Vector2d, 2>& lineB);
 	DLLEXPORT_CAL clash::Segment3d getIntersectLineOfTwoPlanes(const std::array<Eigen::Vector3d, 3>& planeA, const std::array<Eigen::Vector3d, 3>& planeB);
+	DLLEXPORT_CAL clash::Segment3d getIntersectLineOfTwoPlanes(const clash::Plane3d& planeA, const clash::Plane3d& planeB); //overload
 }
 
 //segment

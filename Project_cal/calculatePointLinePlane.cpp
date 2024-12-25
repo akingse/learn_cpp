@@ -17,14 +17,19 @@ namespace eigen
 		return (line[0] - local).norm();
 	}
 
+	double getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const clash::Plane3d& plane)
+	{
+		const Vector3d& normal = plane.m_normal;
+		if (normal.isZero()) // error triangle plane
+            return (point - plane.m_origin).norm();
+        double k = (point - plane.m_origin).dot(normal) / normal.dot(normal);
+        //Vector3d local = point + k * normal;
+		return fabs(k) * normal.norm(); // (local - point).norm();
+	}
+
 	double getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& plane)
 	{
-		Vector3d normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);
-		if (normal.isZero()) // error triangle plane
-            return getDistanceOfPointAndLine(point, { plane[0], plane[1] });
-		double k = (plane[0] - point).dot(normal) / normal.dot(normal);
-		Vector3d local = point + k * normal;
-		return (k * normal).norm();
+		return getDistanceOfPointAndPlane(point, Plane3d(plane));
 	}
 
 	double getDistanceOfTwoLines(const std::array<Eigen::Vector3d, 2>& lineA, const std::array<Eigen::Vector3d, 2>& lineB)
@@ -64,13 +69,12 @@ namespace eigen
 		return lineA[0] + k * vecA;
 	}
 
-	clash::Segment3d getIntersectLineOfTwoPlanes(const std::array<Eigen::Vector3d, 3>& planeA, const std::array<Eigen::Vector3d, 3>& planeB)
-	//(const clash::Plane3d& planeA, const clash::Plane3d& planeB)
+	clash::Segment3d getIntersectLineOfTwoPlanes(const clash::Plane3d& planeA, const clash::Plane3d& planeB)
 	{
-		const Vector3d& pA = planeA[0];
-		const Vector3d& pB = planeB[0];
-		const Vector3d& nA = (planeA[1] - planeA[0]).cross(planeA[2] - planeA[1]);
-		const Vector3d& nB = (planeB[1] - planeB[0]).cross(planeB[2] - planeB[1]);
+		const Vector3d& pA = planeA.m_origin;
+		const Vector3d& pB = planeB.m_origin;
+		const Vector3d& nA = planeA.m_normal;
+		const Vector3d& nB = planeB.m_normal;
 		Vector3d v = nA.cross(nB).normalized();
 		if (v.isZero())
 			return { gVecNaN, gVecNaN };
@@ -82,6 +86,12 @@ namespace eigen
 		//Vector3d iB = getIntersectPointOfLineAndPlane(PosVec3d{ pA,vx }, planeB);
 		//Vector3d iV = (iB - p).normalized();
 	}
+
+	clash::Segment3d getIntersectLineOfTwoPlanes(const std::array<Eigen::Vector3d, 3>& planeA, const std::array<Eigen::Vector3d, 3>& planeB)
+	{
+		return getIntersectLineOfTwoPlanes(Plane3d(planeA), Plane3d(planeB));
+	}
+
 }
 
 // for profile section

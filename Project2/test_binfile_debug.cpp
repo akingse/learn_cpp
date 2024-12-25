@@ -368,6 +368,16 @@ static void _test3()
 	cout << "return 0" << endl;
 }
 
+//²âÊÔº¯Êı PointLinePlane
+static void _test8()
+{
+	clash::Plane3d plane(Vector3d(1, 2, 0), Vector3d(0, 0, 2));
+	Vector3d point(5, 6, 10);
+	double distance = getDistanceOfPointAndPlane(point, plane);
+
+	return;
+}
+
 //Êı¾İ²âÊÔ
 static void _test0()
 {
@@ -411,7 +421,6 @@ static void _test0()
 
 	//double d0 = getTrianglesDistance(P, Q, triA, triB);
 	double d1 = getTrianglesDistanceSAT(triA, triB);
-	//double d2 = getDistanceOfPointAndPlaneINF(Vector3d(0, 0, 0), triB);
 	double d = std::nan("0");
 	if (0.0 > d) // nan not greater, not less
 		d++;
@@ -871,5 +880,7 @@ static int enrol = []()->int
 	//_test6();
 	//_test7();
 #endif
+	_test8();
+	cout << "test_binfile_debug finished.\n" << endl;
 	return 0;
 }();

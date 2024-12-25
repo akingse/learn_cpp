@@ -103,6 +103,11 @@ namespace clash //collide //psykronix
             m_origin = origin;
             m_normal = (normal.isApprox(Eigen::Vector3d::Zero(), 0)) ? gVecNaN : normal;
         }
+        Plane3d(const std::array<Eigen::Vector3d, 3>& triangle)
+        {
+            m_origin = triangle[0];
+            m_normal = (triangle[1] - triangle[0]).cross(triangle[2] - triangle[1]);//without normalize
+        }
         //get the plane origin through world coordinate origin
         Eigen::Vector3d origin() const
         {

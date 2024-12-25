@@ -11,13 +11,18 @@ static void _test1()
 	//Eigen::Vector3d vecB(2e6,1e6+1,0);
 	double d2 = 2.0 / 180 * M_PI;//0.035
 
-	Eigen::Vector3d vecA(0, 0, 1e8);
+	Eigen::Vector3d vecA(0, 0, 1e6);
 	Eigen::Vector3d vecB(1, 0, 1e6);
 	bool pall = Precision::isParallel(vecA, vecB);
+    double croPro = vecA.cross(vecB).norm() / (vecA.norm() * vecB.norm());
+	Eigen::Vector3d vecAU = vecA.normalized();
+	Eigen::Vector3d vecBU = vecB.normalized();
+	double croProU = vecAU.cross(vecBU).norm();
+	double du = croPro - croProU; //always equal
 
 	double angle1 = eigen::angle_two_vectors(vecA, vecB, false);
 	double angle2 = eigen::angle_two_vectors(vecA, vecB, true);
-	double d = angle1 - angle2;	// =1e-10
+	double d = angle1 - angle2;	// =1e-10 //单位化仅对acos有影响
 	return;
 }
 
@@ -27,11 +32,17 @@ static void _test2()
 	Eigen::Vector3d vecA(2e6, 1e6+1, 0);
 	Eigen::Vector3d vecB(2, 1, 0);
 	bool pall = Precision::isParallel(vecA, vecB);
+	double angle1 = eigen::angle_two_vectors(vecA, vecB, false);
+	double angle2 = eigen::angle_two_vectors(vecA, vecB, true);
+	double d = angle1 - angle2;
 
 	// large-short
 	Eigen::Vector3d vecC(2e6, 1e6, 0);
 	Eigen::Vector3d vecD(2, 1+1e-6, 0);
 	bool pall2 = Precision::isParallel(vecC, vecD);
+	angle1 = eigen::angle_two_vectors(vecA, vecB, false);
+	angle2 = eigen::angle_two_vectors(vecA, vecB, true);
+	d = angle1 - angle2;
 
 	return;
 }
@@ -44,7 +55,7 @@ static void _test3()
 	bool pall = Precision::isParallel(vecA, vecB);
 	double angle1 = eigen::angle_two_vectors(vecA, vecB, false);
 	double angle2 = eigen::angle_two_vectors(vecA, vecB, true);
-	double d = angle1 - angle2;
+	double d = angle1 - angle2;	// =1e-10
 	return;
 }
 
