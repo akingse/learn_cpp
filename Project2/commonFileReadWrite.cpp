@@ -160,7 +160,7 @@ double* _readNumberFile(size_t n, const string& filename)
 	in.read(reinterpret_cast<char*>(&read_n), sizeof(int));
 	if (read_n != n) {
 		cerr << "Incorrect data size read from the input file" << endl;
-		return nullptr;
+		//return nullptr;
 	}
 	double* read_arr = new double[read_n];
 	in.read(reinterpret_cast<char*>(read_arr), read_n * sizeof(double));
