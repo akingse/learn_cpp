@@ -89,9 +89,9 @@ namespace games
 		int m_index = -1;
 		HeEdge* m_incEdge = nullptr; //any one of three edges
 		Eigen::Vector3d m_normal = Eigen::Vector3d::Zero();
-		inline std::array<int, 3> ibo() const
+		inline Eigen::Vector3i ibo() const
 		{
-			std::array<int, 3> face = {
+			Eigen::Vector3i face = {
 				m_incEdge->m_oriVertex->m_index,
 				m_incEdge->m_nextEdge->m_oriVertex->m_index,
 				m_incEdge->m_prevEdge->m_oriVertex->m_index };
