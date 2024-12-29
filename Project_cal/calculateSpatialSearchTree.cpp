@@ -667,11 +667,11 @@ std::shared_ptr<BVHNode3d> _createTree3d(std::vector<Polyface3d>& polyfaces, int
 	};
 	if (polyfaces.empty()) //no chance
 		return nullptr;
-	const int direction = dimension % 3;  // the direction of xyz, x=0/y=1/z=2
 	std::shared_ptr<BVHNode3d> currentNode = std::make_shared<BVHNode3d>();
 	if (polyfaces.size() != 1) //middle node
 	{
 		currentNode->m_bound = _getTotalBounding();
+		const int direction = _getLongest(currentNode->m_bound);// dimension % 3;  // the direction of xyz, x=0/y=1/z=2
 		std::sort(polyfaces.begin(), polyfaces.end(),[=](const Polyface3d& a, const Polyface3d& b)
 			 { return a.m_bound.min()[direction] < b.m_bound.min()[direction]; }); // index of Vector3d
 		size_t dichotomy = polyfaces.size() / 2; // less | more
@@ -689,7 +689,7 @@ std::shared_ptr<BVHNode3d> _createTree3d(std::vector<Polyface3d>& polyfaces, int
 		currentNode->m_right = nullptr;
 		currentNode->m_index = polyfaces.front().m_index;
 	}
-	currentNode->m_dimension = direction; //record the xy direciton, alse canbe depth, then use depth % 2
+	//currentNode->m_dimension = direction; //record the xy direciton, also canbe depth, then use depth % 2
 	return currentNode;
 }
 
