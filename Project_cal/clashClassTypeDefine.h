@@ -25,7 +25,7 @@ namespace clash
 #ifdef STORAGE_VERTEX_DATA_2D
         std::vector<Eigen::Vector2d> vbo2_; //using for 2d
 #endif
-        std::vector<std::array<int, 3>> ibo_; //Eigen::Vector3i
+        std::vector<Eigen::Vector3i> ibo_; //array<int, 3>
         std::vector<Eigen::Vector3d> fno_; //Face Normal
         Eigen::AlignedBox3d bounding_;
         Eigen::Affine3d pose_ = Eigen::Affine3d::Identity();

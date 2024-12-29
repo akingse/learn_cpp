@@ -8,7 +8,7 @@ using namespace clash;
 HeMesh::HeMesh(const ModelMesh& mesh)
 {
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
-	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
+	const std::vector<Eigen::Vector3i>& ibo = mesh.ibo_;
 	m_vertexes.resize(vbo.size());
 	for (int i = 0; i < mesh.vbo_.size(); ++i)
 	{
@@ -144,23 +144,23 @@ bool HeMesh::isValid() const //is mainfold mesh
 }
 
 // the diagonal vertex of face | the surround vertex of vertex
-tuple<vector<std::array<int, 3>>, vector<set<int>>> _getMeshVertexLinkedInfo(const ModelMesh& mesh)
+tuple<vector<Eigen::Vector3i>, vector<set<int>>> _getMeshVertexLinkedInfo(const ModelMesh& mesh)
 {
 	//get diagonal vertex index of each face-edge
-	vector<std::array<int, 3>> edgeDiag(mesh.ibo_.size(), { -1,-1,-1 }); //init
+	vector<Eigen::Vector3i> edgeDiag(mesh.ibo_.size(), { -1,-1,-1 }); //init
 	// generate new middle vertex
 	for (int i = 0; i < mesh.ibo_.size(); ++i)
 	{
 		if (edgeDiag[i][0] != -1 && edgeDiag[i][1] != -1 && edgeDiag[i][2] != -1) //has been assemble
 			continue;
-		std::array<int, 3> faceA = mesh.ibo_[i]; //copy
+		Eigen::Vector3i faceA = mesh.ibo_[i]; //copy
 		std::sort(faceA.begin(), faceA.end());
 		int find = 0;
 		for (int j = 0; j < mesh.ibo_.size(); ++j)
 		{
 			if (i >= j) //edgeDiag[j] been revised
 				continue;
-			std::array<int, 3> faceB = mesh.ibo_[j]; //copy
+			Eigen::Vector3i faceB = mesh.ibo_[j]; //copy
 			std::sort(faceB.begin(), faceB.end());
 			if (faceB[2] < faceA[0] || faceB[0]> faceA[2]) //bound box
 				continue;
@@ -251,13 +251,13 @@ ModelMesh games::meshLoopSubdivision(const ModelMesh& mesh)
 	// invent wheel and optimize wheel
 	ModelMesh meshNew = mesh; //copy
 	std::vector<Eigen::Vector3d>& vboNew = meshNew.vbo_;
-	std::vector<std::array<int, 3>> iboNew;// reload
-	tuple<vector<std::array<int, 3>>, vector<set<int>>> info = _getMeshVertexLinkedInfo(mesh);
-	const vector<std::array<int, 3>>& edgeDiag = get<0>(info);
+	std::vector<Eigen::Vector3i> iboNew;// reload
+	tuple<vector<Eigen::Vector3i>, vector<set<int>>> info = _getMeshVertexLinkedInfo(mesh);
+	const vector<Eigen::Vector3i>& edgeDiag = get<0>(info);
 	map<array<int, 2>, int> uniqueEdge;
 	for (int i = 0; i < mesh.ibo_.size(); ++i)
 	{
-		const std::array<int, 3>& face = mesh.ibo_[i];
+		const Eigen::Vector3i& face = mesh.ibo_[i];
 		int mid01, mid12, mid20; //the new vertex index of edge middle
 		//the unique edge, small->large
 		array<int, 2> edge01 = (face[0] < face[1]) ? array<int, 2>{ face[0], face[1] } : array<int, 2>{face[1], face[0] };
@@ -571,7 +571,7 @@ HeMesh games::meshLoopSubdivision(const HeMesh& mesh)
 //	//process come on
 //	ModelMesh meshNew = mesh;//copy
 //	std::vector<Eigen::Vector3d>& vbo = meshNew.vbo_;
-//	std::vector<std::array<int, 3>>& ibo = meshNew.ibo_;
+//	std::vector<Eigen::Vector3i>& ibo = meshNew.ibo_;
 //	auto _computeEdgeError = [&](const Vector3d& v, const array<vector<int>, 2>& neighbor)->double
 //		{
 //			double totalError = 0.0;
@@ -642,7 +642,7 @@ HeMesh games::meshLoopSubdivision(const HeMesh& mesh)
 //	{
 //		if (iter[0] != -1) //valid
 //		{
-//			std::array<int, 3> face = { indexMap[iter[0]], indexMap[iter[1]], indexMap[iter[2]] };
+//			Eigen::Vector3i face = { indexMap[iter[0]], indexMap[iter[1]], indexMap[iter[2]] };
 //			meshSim.ibo_.push_back(face);
 //		}
 //	}
@@ -669,7 +669,7 @@ inline void _getPlaneCoefficient(const array<Vector3d, 3>& trigon, double& a, do
 }
 
 // calculate Q of every vertex
-inline Matrix4d _getQMatrixOfVertex(const std::vector<std::array<int, 3>>& ibo, const std::vector<Eigen::Vector3d>& vbo, int i)
+inline Matrix4d _getQMatrixOfVertex(const std::vector<Eigen::Vector3i>& ibo, const std::vector<Eigen::Vector3d>& vbo, int i)
 {
 	Matrix4d Q = Eigen::Matrix4d::Zero();
 	for (const auto& face : ibo)
@@ -765,7 +765,7 @@ ModelMesh games::meshQEMSimplification(const ModelMesh& mesh, size_t collapseEdg
 		for (int i = 0; i < mesh.ibo_.size(); i++)
 		{
 			int coin = 0;
-			const array<int, 3>& face = mesh.ibo_[i];
+			const Eigen::Vector3i& face = mesh.ibo_[i];
 			for (const int& vt : face) //find two common vertex
 			{
 				if (vt == edge[0] || vt == edge[1])
@@ -797,7 +797,7 @@ ModelMesh games::meshQEMSimplification(const ModelMesh& mesh, size_t collapseEdg
 	}
 	ModelMesh meshC = mesh;//copy
 	std::vector<Eigen::Vector3d>& vbo = meshC.vbo_;
-	std::vector<std::array<int, 3>>& ibo = meshC.ibo_;
+	std::vector<Eigen::Vector3i>& ibo = meshC.ibo_;
 	auto _updateCollapseEdgeHeap = [&](int i_bar) ->void
 		{
 			set<int> adjacentVertex;
@@ -879,7 +879,7 @@ ModelMesh games::meshQEMSimplification(const ModelMesh& mesh, size_t collapseEdg
 	{
 		if (iter[0] != -1) //valid
 		{
-			std::array<int, 3> face = { indexMap[iter[0]], indexMap[iter[1]], indexMap[iter[2]] };
+			Eigen::Vector3i face = { indexMap[iter[0]], indexMap[iter[1]], indexMap[iter[2]] };
 			meshSim.ibo_.push_back(face);
 		}
 	}
@@ -919,7 +919,7 @@ HeMesh games::meshQEMSimplification(const HeMesh& mesh, size_t edgeCollapseTarge
 			{
 				if (iter->isinclude(vbar))
 				{
-					const std::array<int, 3>& ibo = iter->ibo();
+					const Eigen::Vector3i& ibo = iter->ibo();
 					for (const auto i : ibo)
 						adjacentVertex.insert(i); //include vbar->m_index self
 				}

@@ -44,10 +44,10 @@ extern std::vector<InterTriInfo> interTriInfoList;
 #endif // STATISTIC_DATA_RECORD
 
 bool clash::isMeshConvexPolyhedron(const ModelMesh& mesh)
-//bool clash::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& vbo, const std::vector<std::array<int, 3>>& ibo)
+//bool clash::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& vbo, const std::vector<Eigen::Vector3i>& ibo)
 {
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
-	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
+	const std::vector<Eigen::Vector3i>& ibo = mesh.ibo_;
 	bool isLeft = false;
 	for (const auto& face : ibo)
 	{
@@ -98,7 +98,7 @@ vector<Vector3d> clash::getNormalVectorOfMeshFace(const ModelMesh& mesh) //using
 {
 	vector<Vector3d> fno; //res
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
-	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
+	const std::vector<Eigen::Vector3i>& ibo = mesh.ibo_;
 	Vector3d bary;//barycentric coordinates
 	auto _correctRayLine = [&bary](const Triangle& face)->void
 		{
@@ -143,9 +143,9 @@ vector<Vector3d> clash::getNormalVectorOfMeshFace(const ModelMesh& mesh) //using
 vector<Eigen::Vector3d> clash::getProfileOutOfMesh(const ModelMesh& mesh, const Plane3d& plane)
 {
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
-	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
-	vector<array<int, 3>> faceVisible;
-	vector<Vector3d> fno = getNormalVectorOfMeshFace(mesh); //correct face normal
+	const std::vector<Eigen::Vector3i>& ibo = mesh.ibo_;
+	vector<Eigen::Vector3i> faceVisible;
+	vector<Eigen::Vector3d> fno = getNormalVectorOfMeshFace(mesh); //correct face normal
 	for (int i = 0; i < ibo.size(); ++i) //fno_ size equal
 	{
 		Triangle face = { vbo[ibo[i][0]] ,vbo[ibo[i][1]] ,vbo[ibo[i][2]] };
@@ -196,7 +196,7 @@ vector<Eigen::Vector3d> clash::getProfileOutOfMesh(const ModelMesh& mesh, const 
 bool clash::isPointInsidePolyhedronMTA(const Eigen::Vector3d& point, const ModelMesh& mesh)
 {
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
-	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
+	const std::vector<Eigen::Vector3i>& ibo = mesh.ibo_;
 	Vector3d direction = Vector3d(1.0, 0.0, 0.0);
 	int count = 0;
 	while (true)
@@ -242,7 +242,7 @@ RelationOfPointAndMesh clash::isPointInsidePolyhedronROT(const Eigen::Vector3d& 
 	if (isSurface)
 		return RelationOfPointAndMesh::SURFACE;
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
-	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
+	const std::vector<Eigen::Vector3i>& ibo = mesh.ibo_;
 	//one mesh inside other mesh, the bounding-box must inside other mesh
 	Vector3d rayLine = Vector3d(1.0, 0.0, 0.0);
 	Vector3d normal;
@@ -329,7 +329,7 @@ bool isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const ModelMesh& me
 {
 	//Eigen::Vector3d point = mesh.pose_.inverse() * _point;
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
-	const std::vector<std::array<int, 3>>& ibo = mesh.ibo_;
+	const std::vector<Eigen::Vector3i>& ibo = mesh.ibo_;
 	auto _relationOfPointAndTriangle = [&point](/*const Vector3d& point,*/ const std::array<Vector3d, 3>& trigon)->RelationOfRayAndTrigon // axisZ direction
 		{
 			//if (!isPointRayAcrossTriangle(point, trigon))
@@ -349,7 +349,7 @@ bool isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const ModelMesh& me
 				return RelationOfRayAndTrigon::CROSS_EDGE_20;
 			return RelationOfRayAndTrigon::CROSS_INNER;
 		};
-	auto isLeftAll = [&vbo](const std::array<int, 3>& trigon)->bool // buildin lambda function
+	auto isLeftAll = [&vbo](const Eigen::Vector3i& trigon)->bool // buildin lambda function
 		{
 			Vector3d normal = (vbo[trigon[1]] - vbo[trigon[0]]).cross(vbo[trigon[2]] - vbo[trigon[1]]).normalized(); // for precision
 			bool isFirst = true, isLeft = false, temp /*= false*/;
@@ -571,9 +571,9 @@ bool isPointOnPolyhedronSurface(const Eigen::Vector3d& _point, const ModelMesh& 
 std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConvexALL(const ModelMesh& meshA, const ModelMesh& meshB)
 {
 	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
-	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
+	const std::vector<Eigen::Vector3i>& iboA = meshA.ibo_;
 	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
-	const std::vector<std::array<int, 3>>& iboB = meshB.ibo_;
+	const std::vector<Eigen::Vector3i>& iboB = meshB.ibo_;
 	const Eigen::Affine3d& matA = meshA.pose_;
 	const Eigen::Affine3d& matB = meshB.pose_;
 	Eigen::Affine3d matIAB = matA.inverse() * matB;
@@ -686,9 +686,9 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 	if (faceSetA.empty() && faceSetB.empty())
         return { Vector3d::Zero(), {ULLONG_MAX, ULLONG_MAX} };
 	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
-	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
+	const std::vector<Eigen::Vector3i>& iboA = meshA.ibo_;
 	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
-	const std::vector<std::array<int, 3>>& iboB = meshB.ibo_;
+	const std::vector<Eigen::Vector3i>& iboB = meshB.ibo_;
 	const Eigen::Affine3d& matA = meshA.pose_;
 	const Eigen::Affine3d& matB = meshB.pose_;
 	Eigen::Affine3d matIAB = matA.inverse() * matB;
@@ -857,8 +857,8 @@ Eigen::Vector3d clash::getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA
 		return Vector3d::Zero();
 	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
 	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
-	//const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
-	//const std::vector<std::array<int, 3>>& iboB = meshB.ibo_;
+	//const std::vector<Eigen::Vector3i>& iboA = meshA.ibo_;
+	//const std::vector<Eigen::Vector3i>& iboB = meshB.ibo_;
 	const Eigen::Affine3d& matA = meshA.pose_;
 	const Eigen::Affine3d& matB = meshB.pose_;
 	double dmin = DBL_MAX;// dminB = DBL_MAX;
@@ -903,9 +903,9 @@ Eigen::Vector3d clash::getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA
 //	if ((faceVectA.empty() || vertexVectB.empty()) && (faceVectB.empty() || vertexVectA.empty())) // any empty cause zero
 //		return { gVecZero, { ULLONG_MAX , ULLONG_MAX } }; // or gVecNaN separate
 //	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
-//	const std::vector<std::array<int, 3>>& iboA = meshA.ibo_;
+//	const std::vector<Eigen::Vector3i>& iboA = meshA.ibo_;
 //	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
-//	const std::vector<std::array<int, 3>>& iboB = meshB.ibo_;
+//	const std::vector<Eigen::Vector3i>& iboB = meshB.ibo_;
 //	const Eigen::Affine3d& matA = meshA.pose_;
 //	const Eigen::Affine3d& matB = meshB.pose_;
 //	Eigen::Affine3d matIAB = matA.inverse() * matB;
