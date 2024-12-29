@@ -92,7 +92,6 @@ namespace accura
     DLLEXPORT_CAL bool isTwoSegmentsIntersect(const std::array<Eigen::Vector2d, 2>& segmA, const std::array<Eigen::Vector2d, 2>& segmB, double toleDist);
 
 }
-#endif// CALCULATE_DYNAMICACCURACY_H
 
 //for MeshGeometry precison
 namespace accura
@@ -106,26 +105,85 @@ namespace accura
     public:
         static constexpr void setAngular(const double angle) { sm_toleAngle = angle; }
 
+        //to judge IsParallel, perpendicular
         static constexpr double Angular() { return sm_toleAngle; }
 
-        static constexpr void setConfusion(const double confu) { sm_toleConfusion = confu; }
+        static constexpr void setConfusion(const double confusion) { sm_toleConfusion = confusion; }
 
+        //coincidence of two points, the tolerance of intersection
         static constexpr double Confusion() { return sm_toleConfusion; }
 
+        static constexpr double ConfusionSquare() { return sm_toleConfusion * sm_toleConfusion; }
 
-        static bool isParallel(Eigen::Vector3d& vecA, Eigen::Vector3d& vecB, double tolerance = Angular());
+        static constexpr double Intersection() { return sm_toleConfusion * 0.01; }
 
-        static bool isPerpendi(Eigen::Vector3d& vecA, Eigen::Vector3d& vecB, double tolerance = Angular());//perpendicular
+        static constexpr double Approximation() { return sm_toleConfusion * 10.0; }
+
+
+        static bool isParallel(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB, double tolerance = Angular())
+        {
+            //double area = vecA.cross(vecB).norm(); // 0=|a|*|b|*sin(theta)
+            Eigen::Vector3d vecAU = vecA.normalized();
+            Eigen::Vector3d vecBU = vecB.normalized();
+            Eigen::Vector3d croPro = vecAU.cross(vecBU);
+            return croPro.norm() <= tolerance;//tobe optimize
+        }
+
+        static bool isPerpendi(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB, double tolerance = Angular())//perpendicular
+        {
+            //double proj = vecA.dot(vecB); // 0=|a|*|b|*cos(theta)
+            Eigen::Vector3d vecAU = vecA.normalized();
+            Eigen::Vector3d vecBU = vecB.normalized();
+            double dotPro = vecAU.dot(vecBU); //scalar products
+            return dotPro <= tolerance;
+        }
 
         //point relation
-        static bool isPointsCoincident(Eigen::Vector3d& pntA, Eigen::Vector3d& pntB, double tolerance = 10 * Confusion());
+        static bool isPointsCoincident(const Eigen::Vector3d& pntA, const Eigen::Vector3d& pntB, double tolerance = 10 * Confusion())
+        {
+            double distance2 = (pntA - pntB).squaredNorm();
+            return distance2 <= tolerance * tolerance;
+        }
 
-        static bool isPointOnLine(Eigen::Vector3d& point, const clash::Segment3d& line, double tolerance = Confusion());
+        static bool isPointOnLine(const Eigen::Vector3d& point, const clash::Segment3d& line, double tolerance = Confusion())
+        {
+            double distance = eigen::getDistanceOfPointAndLine(point, line);
+            return distance <= tolerance;
+        }
 
-        static bool isPointOnPlane(Eigen::Vector3d& point, const clash::Plane3d& plane, double tolerance = 0.1 * Confusion());
+        static bool isPointOnPlane(const Eigen::Vector3d& point, const clash::Plane3d& plane, double tolerance = 0.1 * Confusion())
+        {
+            double distance = eigen::getDistanceOfPointAndPlane(point, plane);
+            return distance <= tolerance;
+        }
 
         //line relation
+        static bool isParallelTwoLines(const clash::Segment3d& lineA, const clash::Segment3d& lineB, double tolerance = Angular())
+        {
+            Eigen::Vector3d vecA = lineA[1] - lineA[0];
+            Eigen::Vector3d vecB = lineB[1] - lineB[0];
+            if (vecA.isZero() || vecB.isZero())
+                return true; //error zero vector
+            return isParallel(vecA, vecB, tolerance); //normalize inner
+        }
+        static bool isParallelLineAndPlane(const clash::Segment3d& line, const clash::Plane3d& plane, double tolerance = Angular())
+        {
+            Eigen::Vector3d vecA = line[1] - line[0];
+            const Eigen::Vector3d& vecB = plane.m_normal;
+            if (vecA.isZero() || vecB.isZero())
+                return true; //error zero vector
+            return isPerpendi(vecA, vecB, tolerance); //normalize inner
+        }
+        static bool isParallelTwoPlanes(const clash::Plane3d& planeA, const clash::Plane3d& planeB, double tolerance = Angular())
+        {
+            const Eigen::Vector3d& vecA = planeA.m_normal;
+            const Eigen::Vector3d& vecB = planeB.m_normal;
+            if (vecA.isZero() || vecB.isZero())
+                return true; //error zero vector
+            return isParallel(vecA, vecB, tolerance); //normalize inner
+        }
 
 
     };
 }
+#endif// CALCULATE_DYNAMICACCURACY_H

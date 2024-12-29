@@ -61,6 +61,14 @@ static void _test3()
 
 static void _test4()
 {
+	Eigen::Vector3d vecA(0, 0, 1);
+	Eigen::Vector3d vecB(0, 0, -1);
+	Eigen::Vector3d vecC(0, 0, 0);
+	bool pall = Precision::isParallel(vecA, vecA); //same
+	bool pall2 = Precision::isParallel(vecA, vecB);//reverse
+	bool pall3 = Precision::isParallel(vecA, vecC); //zero
+
+
 	double d = 0;
 	//对于随机数，是否单位化，差在1e-15
 	for (int i = 0; i < 100; i++)

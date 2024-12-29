@@ -62,10 +62,10 @@ namespace clash //collide //psykronix
     // global type and variable define 
     typedef std::array<Eigen::Vector3d, 2> Segment;
     typedef std::array<Eigen::Vector2d, 2> Segment2d;
-    typedef std::array<Eigen::Vector3d, 2> Segment3d;
+    typedef std::array<Eigen::Vector3d, 2> Segment3d; //can be line, two points form
     typedef std::array<Eigen::Vector3d, 3> Triangle;
     typedef std::array<Eigen::Vector2d, 3> Triangle2d;
-    typedef std::array<Eigen::Vector3d, 3> Triangle3d;
+    typedef std::array<Eigen::Vector3d, 3> Triangle3d;//can be plane, three points form
     typedef std::array<Eigen::Vector3d, 2> PosVec3d;
     typedef std::array<Eigen::Vector3d, 2> RayLine;
     typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>> Polyhedron;
