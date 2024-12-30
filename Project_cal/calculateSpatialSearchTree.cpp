@@ -215,7 +215,7 @@ BVHTree2d::BVHTree2d(const std::vector<TrigonPart>& _triangles)
 BVHTree2d::BVHTree2d(const std::vector<ContourPart>& profiles)
 {
 	std::vector<Polygon2d> polygons;
-	for (size_t i = 0; i < profiles.size(); ++i)
+	for (int i = 0; i < profiles.size(); ++i)
 	{
 		Polygon2d polygon;
 		polygon.m_index = i;
@@ -981,7 +981,6 @@ std::shared_ptr<KDTreeNode> buildKdTree(NodeVector data, int depth = 0) //copy d
 	node->left = buildKdTree(NodeVector(data.begin(), middle), depth + 1);
 	node->right = buildKdTree(NodeVector(middle + 1, data.end()), depth + 1);
 	return node;
-	return nullptr;
 }
 
 void searchIntersectingNodes(const std::shared_ptr<KDTreeNode>& node, const Eigen::AlignedBox3d& queryBox, std::vector<int>& results)

@@ -275,6 +275,12 @@ static void test5()
 	Segment2d segm2B = { Vector2d(100-epsF,0), Vector2d(200,0) }; //test tole
 	bool isinter = isTwoSegmentsIntersect(segm2A, segm2B, 0); //tole>0 more judge
 
+	//3D
+	Matrix4d mat = rotate(Vector3d(3.21, 0, 0), Vector3d(2, 1, 0), 1);
+	Segment3d segm3A = { Vector3d(0,0,0), Vector3d(100,100,0) };
+	Segment3d segm3B = { Vector3d(100.21,0,0), Vector3d(0,100.8,0) }; //test tole
+	bool isinter3 = isTwoSegmentsIntersect(mat*segm3A, mat*segm3B); //tole>0 more judge
+
 	return;
 }
 
@@ -330,8 +336,8 @@ static int enrol = []()->int
 	//test2();
 	//test3();
 	//test4();
-	//test5();
-	test6();
+	test5();
+	//test6();
 	cout << "test_geometry finished.\n" << endl;
 	return 0;
 }();
