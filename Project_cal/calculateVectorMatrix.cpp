@@ -47,9 +47,11 @@ Matrix4d eigen::getProjectionMatrixByPlane(const Plane3d& plane)
 std::array<Eigen::Matrix4d, 2> eigen::getRelativeMatrixByProjectionPlane(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal)
 {
 	Vector3d axisz = normal.normalized(); //canbe zero, return zero
+	if (axisz.isZero())
+		axisz = Vector3d(0, 0, 1);
 	Vector3d axisx = Vector3d(0, 0, 1).cross(axisz).normalized();
 	if (axisx.isZero())
-		return { Matrix4d::Identity(), Matrix4d::Identity() };
+		axisx = Vector3d(1, 0, 0);
 	Vector3d axisy = axisz.cross(axisx);
 	Matrix4d matFor, matInv;// = Eigen::Affine3d::Identity();
 	//mat.setByOriginAndVectors();
