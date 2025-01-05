@@ -109,8 +109,8 @@ static int main5()
 	std::promise<int> p;
 	auto futrue_result = p.get_future();
 
-	thread th(func2, std::move(p)); //不能使用重载
-	th.join();
+	//thread th(func2, std::move(p)); //不能使用重载
+	//th.join();
 	cout << futrue_result.get() << endl;
 
 	return 0;
@@ -164,6 +164,6 @@ static int enrol = []()->int
 		//main3();
 		//main4();
 		//main5();
-		main6();
+		//main6();
 		return 0;
 	}();

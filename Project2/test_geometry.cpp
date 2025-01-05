@@ -345,7 +345,7 @@ static void test7()
 static int enrol = []()->int
 {
 	//test1();
-	test2();
+	//test2();
 	//test3();
 	//test4();
 	//test5();

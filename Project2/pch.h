@@ -40,14 +40,17 @@
 #include <typeindex> 
 #include <type_traits>
 #include <utility> 
-#include <any> 
-#include <string_view>
 #include <functional>
 #include <memory>
+//C++17
+#ifdef USING_STANDARD_CPP_17
+#include <any> //C++17
+#include <string_view>
 #include <memory_resource>
+#endif
 
 //windows
-#define _AFXDLL
+//#define _AFXDLL //redefine
 #define WIN32_LEAN_AND_MEAN //avoid _WINSOCKAPI_ warning
 #include <windows.h> //min max
 #include <afx.h> // MFC <cstring>

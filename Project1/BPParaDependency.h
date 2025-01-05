@@ -3,7 +3,7 @@
 namespace para
 {
 
-    //singleton, template
+    //singleton template, copy from BPParametric
     class DependencyRegistry
     {
     private:
@@ -54,7 +54,7 @@ namespace para
         }
     };
 
-    //sharedptr version
+    //sharedptr version, copy from chatgpt
     class DependencyInversion
     {
     private:

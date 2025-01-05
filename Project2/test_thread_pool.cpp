@@ -90,23 +90,14 @@ static int main1() {
 	return 0;
 }
 
+#if 0
 //---------------------------------------------------------------------------------------------------
-// 
+// Boost
 //---------------------------------------------------------------------------------------------------
 // 
 //Boost 线程池位于组件 asio 中，是一种固定大小的线程池。
 #define BOOST_ASIO_NO_WIN32_LEAN_AND_MEAN
 #include <boost/asio.hpp>
-/* 互斥锁 */
-std::mutex mutex_iostream;
-
-void my_task(void)
-{
-	std::lock_guard<std::mutex> lg(mutex_iostream);
-	std::cout.flush();
-	std::cout << "This is my task." << std::endl;
-	std::cout.flush();
-}
 
 static int main2(int argc, const char** argv)
 {
@@ -134,8 +125,16 @@ static int main2(int argc, const char** argv)
 	tp.join();
 	return 0;
 }
+#endif
 
-
+std::mutex mutex_iostream;
+void my_task(void)
+{
+	std::lock_guard<std::mutex> lg(mutex_iostream);
+	std::cout.flush();
+	std::cout << "This is my task." << std::endl;
+	std::cout.flush();
+}
 
 class fixed_thread_pool {
 public:
