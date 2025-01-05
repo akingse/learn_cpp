@@ -3,7 +3,7 @@
 #include<sstream>
 #define _USE_MATH_DEFINES //using M_PI
 #define _AFXDLL
-#define WIN32_LEAN_AND_MEAN
+//#define WIN32_LEAN_AND_MEAN
 //windows API
 #include<windows.h>
 #include <afx.h> //CString

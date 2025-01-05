@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "calculatePointLinePlane.h"
 using namespace std;
 using namespace Eigen;
 using namespace eigen;
@@ -19,12 +20,14 @@ namespace eigen
 
 	double getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const clash::Plane3d& plane)
 	{
-		const Vector3d& normal = plane.m_normal;
-		if (normal.isZero()) // error triangle plane
+		if (plane.m_normal.isZero()) // error triangle plane
             return (point - plane.m_origin).norm();
-        double k = (point - plane.m_origin).dot(normal) / normal.dot(normal);
-        //Vector3d local = point + k * normal;
-		return fabs(k) * normal.norm(); // (local - point).norm();
+		Vector3d normal = plane.m_normal.normalized();
+  //      double k = (point - plane.m_origin).dot(normal) / normal.dot(normal); //normal without normalize
+  //      //Vector3d local = point + k * normal;
+		//return fabs(k) * normal.norm(); // (local - point).norm();
+		double dotPro = (point - plane.m_origin).dot(normal);
+		return fabs(dotPro);
 	}
 
 	double getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& plane)
@@ -85,6 +88,43 @@ namespace eigen
 		//Vector3d vx = nA.cross(Vector3d(0, 1, 0));
 		//Vector3d iB = getIntersectPointOfLineAndPlane(PosVec3d{ pA,vx }, planeB);
 		//Vector3d iV = (iB - p).normalized();
+	}
+
+	Vector3d _intersectThreePlanes(const Plane3d& plane1, const Plane3d& plane2, const Plane3d& plane3)
+	{
+		// all 3 planes normal been normalized
+		const Vector3d& crV1 = plane1.m_normal;
+		const Vector3d& crV2 = plane2.m_normal;
+		const Vector3d& crV3 = plane3.m_normal;
+		//determinant3Vectors(crV1, crV2, crV3);
+		double dDet = crV1.x() * crV2.y() * crV3.z() - crV1.x() * crV2.z() * crV3.y();
+		dDet -= crV1.y() * crV2.x() * crV3.z() - crV1.y() * crV2.z() * crV3.x();
+		dDet += crV1.z() * crV2.x() * crV3.y() - crV1.z() * crV2.y() * crV3.x();
+		if (dDet == 0)
+			return gVecNaN;
+		const Vector3d& crP1 = plane1.m_origin;
+		const Vector3d& crP2 = plane2.m_origin;
+		const Vector3d& crP3 = plane3.m_origin;
+		Vector3d sWork = 
+			(crP1.dot(crV1) * (crV2.cross(crV3))) +
+			(crP2.dot(crV2) * (crV3.cross(crV1))) +
+			(crP3.dot(crV3) * (crV1.cross(crV2)));
+		return sWork / dDet;
+	}
+
+	//copy from P3dGuTsect
+	clash::Segment3d getIntersectLineOfTwoPlanesP3D(const clash::Plane3d& planeA, const clash::Plane3d& planeB)
+	{
+		const Vector3d& P1 = planeA.m_origin;
+		const Vector3d& P2 = planeB.m_origin;
+		const Vector3d& V1 = planeA.m_normal.normalized();
+		const Vector3d& V2 = planeB.m_normal.normalized();
+		Vector3d V3 = V1.cross(V2).normalized();
+		Vector3d P3 = 0.5 * (P1 + P2);
+		if (V3.isZero())
+			return { gVecNaN, gVecNaN };
+		Vector3d O3 = _intersectThreePlanes(planeA, planeB, Plane3d(P3, V3));
+		return { O3,V3 };
 	}
 
 	clash::Segment3d getIntersectLineOfTwoPlanes(const std::array<Eigen::Vector3d, 3>& planeA, const std::array<Eigen::Vector3d, 3>& planeB)

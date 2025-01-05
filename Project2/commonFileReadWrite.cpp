@@ -364,7 +364,7 @@ std::vector<ModelMesh> read_ModelMesh(const std::string& fileName)
 			std::vector<Eigen::Vector3d> vbo_;
 			std::vector<Eigen::Vector2d> vbo2_;
 			std::vector<Eigen::Vector3d> fno_;
-			std::vector<std::array<int, 3>> ibo_;
+			std::vector<Eigen::Vector3i> ibo_; //std::array<int, 3>
 			for (int i = 0; i < (int)vbo->vbos()->size(); i++)
 			{
 				auto pt = vbo->vbos()->Get(i);
@@ -378,7 +378,7 @@ std::vector<ModelMesh> read_ModelMesh(const std::string& fileName)
 			for (int i = 0; i < (int)ibo->ibos()->size(); i++)
 			{
 				auto id = ibo->ibos()->Get(i);
-				ibo_.push_back(std::array<int, 3>{id->id0(), id->id1(), id->id2()});
+				ibo_.push_back(Eigen::Vector3i(id->id0(), id->id1(), id->id2()));
 			}
 			std::vector<int> _iboRaw;
 			auto iboRaw = mesh->ibo_raw();

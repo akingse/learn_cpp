@@ -169,6 +169,7 @@ static void test1()
 
 }
 
+//效率测试
 static void test2()
 {
 	size_t N = N_10E_6;
@@ -187,22 +188,22 @@ static void test2()
 	steady_clock::time_point start, end;
 	microseconds duration;
 	vector<PosVec3d> resSeg;
-	PosVec3d res;
+	Segment3d res;
 	for (int i = 0; i < 3; i++)
 	{
 		start = std::chrono::high_resolution_clock::now();
 		for (int j = 0; j < N / 2; j++)
 		{
-			//resSeg.push_back(getIntersectLineOfTwoPlane(planeVct[2 * j], planeVct[2 * j + 1]));
-			res = getIntersectLineOfTwoPlanes(planeVct[2 * j], planeVct[2 * j + 1]);
 			//res = intersectWithTwoPlanes(planeVct[2 * j], planeVct[2 * j + 1]);
-			if (!isnan(res[0][0]))
-				resSeg.push_back(res);
+			res = getIntersectLineOfTwoPlanes(planeVct[2 * j], planeVct[2 * j + 1]); //29905 faster
+			//res = getIntersectLineOfTwoPlanesP3D(planeVct[2 * j], planeVct[2 * j + 1]); //53539
+			//if (!isnan(res[0][0]))
+			//	resSeg.push_back(res);
 		}
 		end = std::chrono::high_resolution_clock::now();
 		duration = std::chrono::duration_cast<microseconds>(end - start);
-		cout << "pair=" << N / 2 << " cost_time=" << duration.count() << " micro_seconds" << endl;
-		cout << "res_pair=" << resSeg.size() << endl;
+        cout << dec << "pair=" << N / 2 << " cost_time=" << double(duration.count()) << " micro_seconds" << endl;
+		//cout << "res_pair=" << resSeg.size() << endl;
 		resSeg.clear();
 	}
 
@@ -275,9 +276,26 @@ static void test5()
 	Segment2d segm2B = { Vector2d(100-epsF,0), Vector2d(200,0) }; //test tole
 	bool isinter = isTwoSegmentsIntersect(segm2A, segm2B, 0); //tole>0 more judge
 
+	//3D
+	Matrix4d mat = rotate(Vector3d(3.21, 0, 0), Vector3d(2, 1, 0), 1);
+	Segment3d segm3A = { Vector3d(0,0,0), Vector3d(100,100,0) };
+	Segment3d segm3B = { Vector3d(100.21,0,0), Vector3d(0,100.8,0) }; //test tole
+	bool isinter3 = isTwoSegmentsIntersect(mat*segm3A, mat*segm3B); //tole>0 more judge
+
 	return;
 }
 
+//测试 面面交线
+static void test6()
+{
+	clash::Plane3d planeA = Plane3d(Vector3d(0, 0, 0), Vector3d(0, 0, 1));
+	clash::Plane3d planeB = Plane3d(Vector3d(0, 0, 0), Vector3d(1, 1, 0));
+
+	Segment3d interLine1 = getIntersectLineOfTwoPlanes(planeA, planeB);
+	Segment3d interLine2 = getIntersectLineOfTwoPlanesP3D(planeA, planeB);
+
+	return;
+}
 
 inline bool GetIntersectPoint(const Vector2i& ln1a, const Vector2i& ln1b,
 	const Vector2i& ln2a, const Vector2i& ln2b, Vector2i& ip) //intersect point
@@ -303,7 +321,7 @@ inline bool GetIntersectPoint(const Vector2i& ln1a, const Vector2i& ln1b,
 	return true;
 }
 
-static void test6()
+static void test7()
 {
 	//整形
 	vector<vector<Eigen::Vector2i>> poly0 = { {
@@ -327,11 +345,11 @@ static void test6()
 static int enrol = []()->int
 {
 	//test1();
-	//test2();
+	test2();
 	//test3();
 	//test4();
 	//test5();
-	test6();
+	//test6();
 	cout << "test_geometry finished.\n" << endl;
 	return 0;
 }();

@@ -33,6 +33,7 @@ namespace eigen
 	DLLEXPORT_CAL Eigen::Vector2d getIntersectPointOfTwoLines(const std::array<Eigen::Vector2d, 2>& lineA, const std::array<Eigen::Vector2d, 2>& lineB);
 	DLLEXPORT_CAL clash::Segment3d getIntersectLineOfTwoPlanes(const std::array<Eigen::Vector3d, 3>& planeA, const std::array<Eigen::Vector3d, 3>& planeB);
 	DLLEXPORT_CAL clash::Segment3d getIntersectLineOfTwoPlanes(const clash::Plane3d& planeA, const clash::Plane3d& planeB); //overload
+	DLLEXPORT_CAL clash::Segment3d getIntersectLineOfTwoPlanesP3D(const clash::Plane3d& planeA, const clash::Plane3d& planeB); 
 }
 
 //segment
@@ -92,15 +93,16 @@ namespace clash
 			std::max(segmA[0][2], segmA[1][2]) < std::min(segmB[0][2], segmB[1][2]) ||
 			std::min(segmA[0][2], segmA[1][2]) > std::max(segmB[0][2], segmB[1][2])) //index will be fast
 			return false;
-#ifdef USING_THRESHOLD_GEOMETRIC
-		return !(
-			(segmB[0] - segmA[0]).cross(segmA[1] - segmA[0]).dot((segmA[1] - segmA[0]).cross(segmB[1] - segmA[0])) < _epsF || //double separate
-			(segmA[0] - segmB[0]).cross(segmB[1] - segmB[0]).dot((segmB[1] - segmB[0]).cross(segmA[1] - segmB[0])) < _epsF);
-#else
-		return //double straddling test
-			0.0 <= (segmB[0] - segmA[0]).cross(segmA[1] - segmA[0]).dot((segmA[1] - segmA[0]).cross(segmB[1] - segmA[0])) &&
-			0.0 <= (segmA[0] - segmB[0]).cross(segmB[1] - segmB[0]).dot((segmB[1] - segmB[0]).cross(segmA[1] - segmB[0]));
-#endif
+		Eigen::Vector3d vecA = segmA[1] - segmA[0];
+		Eigen::Vector3d vecB = segmB[1] - segmB[0];
+		//judge coplanar first, without tolerance
+		Eigen::Vector3d vecN = vecA.cross(vecB).normalized();
+		//double dotPro = vecN.dot(segmB[0] - segmA[0]);
+        if (!vecN.isZero() && 0 != std::fabs(vecN.dot(segmB[0] - segmA[0])))
+			return false;
+		return  //double straddling test
+			0.0 <= (segmB[0] - segmA[0]).cross(vecA).dot(vecA.cross(segmB[1] - segmA[0])) && //double separate
+			0.0 <= (segmA[0] - segmB[0]).cross(vecB).dot(vecB.cross(segmA[1] - segmB[0]));
 	}
 
 	inline Eigen::Vector2d getTwoSegmentsIntersectPoint(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB)

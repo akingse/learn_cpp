@@ -215,7 +215,7 @@ BVHTree2d::BVHTree2d(const std::vector<TrigonPart>& _triangles)
 BVHTree2d::BVHTree2d(const std::vector<ContourPart>& profiles)
 {
 	std::vector<Polygon2d> polygons;
-	for (size_t i = 0; i < profiles.size(); ++i)
+	for (int i = 0; i < profiles.size(); ++i)
 	{
 		Polygon2d polygon;
 		polygon.m_index = i;
@@ -667,11 +667,11 @@ std::shared_ptr<BVHNode3d> _createTree3d(std::vector<Polyface3d>& polyfaces, int
 	};
 	if (polyfaces.empty()) //no chance
 		return nullptr;
-	const int direction = dimension % 3;  // the direction of xyz, x=0/y=1/z=2
 	std::shared_ptr<BVHNode3d> currentNode = std::make_shared<BVHNode3d>();
 	if (polyfaces.size() != 1) //middle node
 	{
 		currentNode->m_bound = _getTotalBounding();
+		const int direction = _getLongest(currentNode->m_bound);// dimension % 3;  // the direction of xyz, x=0/y=1/z=2
 		std::sort(polyfaces.begin(), polyfaces.end(),[=](const Polyface3d& a, const Polyface3d& b)
 			 { return a.m_bound.min()[direction] < b.m_bound.min()[direction]; }); // index of Vector3d
 		size_t dichotomy = polyfaces.size() / 2; // less | more
@@ -689,7 +689,7 @@ std::shared_ptr<BVHNode3d> _createTree3d(std::vector<Polyface3d>& polyfaces, int
 		currentNode->m_right = nullptr;
 		currentNode->m_index = polyfaces.front().m_index;
 	}
-	currentNode->m_dimension = direction; //record the xy direciton, alse canbe depth, then use depth % 2
+	//currentNode->m_dimension = direction; //record the xy direciton, also canbe depth, then use depth % 2
 	return currentNode;
 }
 
@@ -981,7 +981,6 @@ std::shared_ptr<KDTreeNode> buildKdTree(NodeVector data, int depth = 0) //copy d
 	node->left = buildKdTree(NodeVector(data.begin(), middle), depth + 1);
 	node->right = buildKdTree(NodeVector(middle + 1, data.end()), depth + 1);
 	return node;
-	return nullptr;
 }
 
 void searchIntersectingNodes(const std::shared_ptr<KDTreeNode>& node, const Eigen::AlignedBox3d& queryBox, std::vector<int>& results)
