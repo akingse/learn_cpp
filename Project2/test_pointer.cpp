@@ -96,10 +96,24 @@ static void test2()
 	return;
 }
 
+//局部变量重名
+static void test3()
+{
+	int a = 1;
+	int c = 0;
+	if (true)
+	{
+		int a = 2;//局部不改变外部（同名变量）
+		c = a;
+	}
+	cout << a << endl;
+}
+
 static int enrol = []()->int
 	{
 		test1();
 		test2();
+		test3();
 		cout << "test_pointer finished.\n" << endl;
 		return 0;
 	}();
