@@ -35,7 +35,7 @@ static void test0()
 	bool ill2 = ((box1.intersection(box4)).diagonal().array() < 0).any();
 
 	// 判断两个包围盒是否相交
-	bool isInter = box1.intersects(box4);
+	//bool isInter = box1.intersects(box4);
 	Eigen::AlignedBox3d box11(Eigen::Vector3d(-0.5, -0.5, -0.5), Eigen::Vector3d(0.5, 0.5, 0.5));
 	Eigen::AlignedBox3d box21(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0.3, 0.3, 0.3));
 	Eigen::AlignedBox3d box31(Eigen::Vector3d(0, 0, 0), Eigen::Vector3d(0.5, 0.5, 0.5));
@@ -54,13 +54,13 @@ static void test0()
 	bool isSepa = ((bounding.min() - bounding.max() - tolerance_double).array() > 0).any();
 	box12.min() = box12.min() - tolerance_double;
 	box12.max() = box12.max() + tolerance_double;
-	bool isSepa0 = !box12.intersects(box22);
+	//bool isSepa0 = !box12.intersects(box22);
 
 
 	//Eigen::AlignedBox3d box22(Eigen::Vector3d(.2, .2, .2), Eigen::Vector3d(3, 3, 3));
 	Eigen::AlignedBox3d boxInter = box12.intersection(box22);
 	bool isSepa2 = ((boxInter.min() - boxInter.max()).array() > 0).any();
-	bool isIter2 = box12.intersects(box22);
+	//bool isIter2 = box12.intersects(box22);
 
 	cout << "return 0" << endl;
 }

@@ -244,7 +244,7 @@ static void test_vector_5()
 	std::vector<int> vec = { 1, 2, 3, 4, 5 };
 	vec.erase(vec.begin() + 1);
 	// vector索引的引用
-	std::vector<int>& change = std::vector<int>();
+	std::vector<int>& change = * new std::vector<int>();
 	change = vec; //修改原始vec失败
 	for (int i = 0; i < change.size(); i++)
 		change[i] = 2 * change[i];

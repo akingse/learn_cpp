@@ -220,7 +220,6 @@ namespace bin
 	//class BinaryTree;
 	//typedef std::shared_ptr<TreeNode> TreeNodePtr;
 	//typedef std::shared_ptr<BinaryTree> BinaryTreePtr;
-
 	//// 二叉树节点结构
 	//struct TreeNode
 	//{
@@ -229,7 +228,6 @@ namespace bin
 	//	TreeNodePtr m_father;
 	//	TreeNodePtr m_left;
 	//	TreeNodePtr m_right;
-
 	//	// 构造函数
 	//	TreeNode() = default;
 	//	//create empty
@@ -238,18 +236,14 @@ namespace bin
 	//	TreeNode(const BinaryTreePtr& tree, const TreeNodePtr& left, const TreeNodePtr& right, int op);
 	//	//deep copy
 	//	//TreeNode(const BinaryTreePtr& tree, const TreeNodePtr& rhs, const TreeNodePtr& father = nullptr);
-
 	//	//
 	//	static TreeNodePtr deepcopy(const BinaryTreePtr& tree, const TreeNodePtr& rhs, const TreeNodePtr& father = nullptr);
 	//};
-
 	//// 二叉树类
 	//class BinaryTree {
 	//public:
 	//	TreeNodePtr m_root;
-
 	//	BinaryTree() : m_root(nullptr) {}
-
 	//	// 删除当前节点的方法
 	//	void deleteNode(TreeNodePtr& node)
 	//	{
@@ -257,12 +251,10 @@ namespace bin
 	//			// 递归删除左右子树
 	//			deleteNode(node->m_left);
 	//			deleteNode(node->m_right);
-
 	//			// 当函数返回时，node的智能指针会在离开作用域时自动释放
 	//			node.reset();
 	//		}
 	//	}
-
 	//	// 辅助函数 - 清空整个树
 	//	void clear() {
 	//		deleteNode(m_root);

@@ -121,13 +121,13 @@ void fireworks() {
 
 static int main6()
 {
-	std::thread m_threads[10];
+	//std::thread m_threads[10];
 	// spawn 10 threads:
-	for (int i = 0; i < 10; ++i)
-		m_threads[i] = std::thread(fireworks);
+	//for (int i = 0; i < 10; ++i)
+		//m_threads[i] = std::thread(fireworks);
 
-	for (auto& th : m_threads) 
-		th.join();
+	//for (auto& th : m_threads) 
+	//	th.join();
 
 	return 0;
 }

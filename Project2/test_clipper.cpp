@@ -21,8 +21,8 @@ bool BooleanOpIntersect(Polygon2d& polyA, Polygon2d& polyB);
 
 bool BooleanOpIntersect(Polygon2d& polyA, Polygon2d& polyB)
 {
-	if (!polyA.bounding().intersects(polyB.bounding())) // pre-intersect
-		return false;
+	//if (!polyA.bounding().intersects(polyB.bounding())) // pre-intersect
+		//return false;
 	// using polygonA, iterate polyB
 	const std::vector<Eigen::Vector2d>& polygonA = polyA.get();
 	const std::vector<Eigen::Vector2d>& polygonB = polyB.get();
@@ -324,16 +324,16 @@ static void test5()
 
 static void test6()
 {
-	std::vector<RectBase2d> rectVct;
+	std::vector<clash::RectBase2d> rectVct;
 	for (int i = 0; i < 15; i++)
 	{
-		RectBase2d rect;
+		clash::RectBase2d rect;
 		rect.m_index = i;
 		rect.m_bound = { Vector2d(i,i), Vector2d(i,i) + Vector2d(1,1) };
 		rectVct.push_back(rect);
 
 	}
-	BVHTree2dM tree(rectVct); //debug strange
+	bvh::BVHTree2dM tree(rectVct); //debug strange
 
 	return;
 }
@@ -345,7 +345,7 @@ static int enrol = []()->int
 	//test2(); //for funciton
 	//test3();
 	//test5();
-	//test6(); //使用eige的natvis，可变量监视
+	//test6();
 	cout << "test_clipper finished.\n" << endl;
 	return 0;
 }();

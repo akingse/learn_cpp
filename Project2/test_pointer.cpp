@@ -92,7 +92,7 @@ static void test2()
 {
 	Vec3* ptr = nullptr;
 	Vec3** pp = &ptr; //null指针也可以取地址
-    *pp = &Vec3(1, 1);
+    //*pp = &Vec3(1, 1);
 	return;
 }
 

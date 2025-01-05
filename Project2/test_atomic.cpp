@@ -84,7 +84,7 @@ int main_t1()
 {
     std::vector<std::thread> m_threads;
     std::cout << "spawning 10 threads that count to 1 million...\n";
-    for (int i = 1; i <= 10; ++i) m_threads.push_back(std::thread(count1m, i));
+    //for (int i = 1; i <= 10; ++i) m_threads.push_back(std::thread(count1m, i));
     ready = true;
     for (auto& th : m_threads) 
         th.join();
@@ -124,20 +124,20 @@ int test_atomic()
     bool rhs = 1;
     bool rs = !(lhs ^ rhs); // Òì»ò
 
-    std::list<thread> lstThread;
+    //std::list<thread> lstThread;
     for (int i = 0; i < 2; i++)
     {
-        lstThread.push_back(thread(threadfun1));
+        //lstThread.push_back(thread(threadfun1));
     }
     for (int i = 0; i < 2; i++)
     {
-        lstThread.push_back(thread(threadfun2));
+        //lstThread.push_back(thread(threadfun2));
     }
 
-    for (auto& th : lstThread)
-    {
-        th.join();
-    }
+    //for (auto& th : lstThread)
+    //{
+    //    th.join();
+    //}
 
     printf("finally iCount:%d\r\n",  iCount);
     //int x = iCount.load(memory_order_relaxed);
