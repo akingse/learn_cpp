@@ -215,16 +215,6 @@ int main_temp()
 	*/
 
 
-	bool de = _DEBUG;
-	if (b)
-	{
-
-	}
-	else
-	{
-
-	}
-
 #ifdef NAME
 
 #endif

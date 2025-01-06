@@ -1,7 +1,7 @@
 #include "pch.h"
 using namespace para;
 //init
-std::map<std::string, DependencyRegistry::FunctionPointer> DependencyRegistry::sm_implementations;
+std::map<std::string, DependencyRegistry::FunctionPointer> DependencyRegistry::sm_implementations;// = { {"default",DependencyRegistry::FunctionPointer() } };
 std::map<std::string, std::shared_ptr<void>> DependencyInversion::sm_implementations;
 std::mutex DependencyInversion::sm_mutex;
 

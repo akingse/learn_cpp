@@ -334,7 +334,7 @@ static void test6()
 
 	}
 	bvh::BVHTree2dM tree(rectVct); //debug strange
-
+	cout << tree.findIntersect(Vector2d(0.5, 0.5)).size() << endl;
 	return;
 }
 
@@ -345,7 +345,7 @@ static int enrol = []()->int
 	//test2();
 	//test3();
 	//test5();
-	//test6();
+	test6();
 	cout << "test_clipper finished.\n" << endl;
 	return 0;
 }();

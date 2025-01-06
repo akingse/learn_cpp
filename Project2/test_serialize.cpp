@@ -503,9 +503,11 @@ namespace bin
 }
 #endif
 
+#define _DEBUG
+
 static int enrol = []()->int
 	{
-#if defined( _DEBUG ) //&& !defined( NDEBUG ) //多条件编译
+//#if defined( _DEBUG ) //&& !defined( NDEBUG ) //多条件编译
 		//DependencyRegistry::getInstance().set("csg_node_class", new Implementation());
 		std::function<std::string(TreeNode*)> function = Implementation::serialize; //普通函数指针转std::function对象
 		//DependencyRegistry::getInstance().set("serialize_fun", &function); //debug strange
@@ -514,9 +516,9 @@ static int enrol = []()->int
 		DependencyRegistry::getInstance().set("deserialize", Implementation::deserialize);
 		DependencyRegistry::getInstance().set("serializition", serializition);
 		DependencyRegistry::getInstance().set("deserializition", deserializition);
-#endif
 		//DependencyInversion::getInstance().set("serializition", serializition); //why release crash
 		//DependencyInversion::getInstance().set("deserializition", deserializition);
+//#endif
 
 		testSerialization2();
 		testSerialization3();
