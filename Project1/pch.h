@@ -40,11 +40,15 @@
 #include <typeindex> 
 #include <type_traits>
 #include <utility> 
-#include <any> 
 #include <mutex> 
-#include <string_view>
 #include <functional>
+
+//C++17
+#ifdef USING_STANDARD_CPP_17
+#include <any> 
+#include <string_view>
 #include <memory_resource>
+#endif
 
 #define PROJECT_PPC_DLLEXPORT_DEFINE
 #include "auto_include/ProjectPPC_API.h" //PublicAPI

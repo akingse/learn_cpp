@@ -50,7 +50,7 @@
 #endif
 
 //windows
-//#define _AFXDLL //redefine
+#define _AFXDLL //redefine
 #define WIN32_LEAN_AND_MEAN //avoid _WINSOCKAPI_ warning
 #include <windows.h> //min max
 #include <afx.h> // MFC <cstring>

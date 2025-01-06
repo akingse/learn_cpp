@@ -166,6 +166,7 @@ namespace accura
                 return true; //error zero vector
             return isParallel(vecA, vecB, tolerance); //normalize inner
         }
+
         static bool isParallelLineAndPlane(const clash::Segment3d& line, const clash::Plane3d& plane, double tolerance = Angular())
         {
             Eigen::Vector3d vecA = line[1] - line[0];
@@ -174,6 +175,7 @@ namespace accura
                 return true; //error zero vector
             return isPerpendi(vecA, vecB, tolerance); //normalize inner
         }
+
         static bool isParallelTwoPlanes(const clash::Plane3d& planeA, const clash::Plane3d& planeB, double tolerance = Angular())
         {
             const Eigen::Vector3d& vecA = planeA.m_normal;

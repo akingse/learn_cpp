@@ -1,3 +1,3 @@
 #include "pch.h"
-#pragma comment (lib, "Project1.lib")
-#pragma comment (lib, "Project_cal.lib") //config dll project, using declspec macro
+#pragma comment (lib, "ProjectPPC.lib")
+#pragma comment (lib, "ProjectCAL.lib") //config dll project, using declspec macro
