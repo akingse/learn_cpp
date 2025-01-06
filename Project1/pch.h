@@ -46,8 +46,8 @@
 #include <functional>
 #include <memory_resource>
 
-#define PROJECT_1_DLLEXPORT_DEFINE
-#include "auto_include/Project1_API.h"//PublicAPI
+#define PROJECT_PPC_DLLEXPORT_DEFINE
+#include "auto_include/ProjectPPC_API.h" //PublicAPI
 
 //delete python tool generate export API
 //$(SolutionDir)tools\python3-embed\python.exe $(SolutionDir)tools\export_header.py  $(ProjectName)

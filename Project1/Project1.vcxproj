@@ -24,7 +24,7 @@
     <ProjectGuid>{50861a32-43cc-4fe2-af9a-b4937ff37e04}</ProjectGuid>
     <RootNamespace>test01</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>Project1</ProjectName>
+    <ProjectName>ProjectPPC</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -50,7 +50,7 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -201,7 +201,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="BPParaDependency.cpp" />
-    <ClInclude Include="..\auto_include\Project1_API.h" />
+    <ClInclude Include="..\auto_include\ProjectPPC_API.h" />
     <ClInclude Include="BPParaTransform.h" />
     <ClInclude Include="BPParaVec.h" />
     <ClInclude Include="geometry\ParaGeometryCalculate.h">

@@ -1,10 +1,11 @@
 #pragma 
+//using namespace ppc; //ppc=python parametric component
 
 // set in unified macro export file
-#ifdef PROJECT_1_DLLEXPORT_DEFINE
-#define DLLEXPORT_1 __declspec(dllexport)
+#ifdef PROJECT_PPC_DLLEXPORT_DEFINE
+#define DLLEXPORT_PPC __declspec(dllexport)
 #else
-#define DLLEXPORT_1 __declspec(dllimport)
+#define DLLEXPORT_PPC __declspec(dllimport)
 #endif
 
 //component

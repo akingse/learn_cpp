@@ -342,7 +342,7 @@ static int enrol = []()->int
 {
 	//test0();
 	//test1();
-	//test2(); //for funciton
+	//test2();
 	//test3();
 	//test5();
 	//test6();

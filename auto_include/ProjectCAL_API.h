@@ -1,5 +1,5 @@
 #pragma once
-#ifdef CAL_DLLEXPORT_DEFINE
+#ifdef PROJECT_CAL_DLLEXPORT_DEFINE
 #define DLLEXPORT_CAL __declspec(dllexport)
 #else
 #define DLLEXPORT_CAL __declspec(dllimport)
@@ -15,3 +15,5 @@
 #include "calculateMeshTopology.h"  //namespace games
 #include "calculateSpatialSearchTree.h" // clash //spatial partition tree
 #include "calculateDynamicAccuracy.h"//namespace accura
+
+#include "commonFileReadWrite.h" 

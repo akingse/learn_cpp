@@ -205,9 +205,6 @@
     <ClCompile Include="test_string.cpp">
       <Filter>test_stl</Filter>
     </ClCompile>
-    <ClCompile Include="commonFileReadWrite.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
     <ClCompile Include="test_precision.cpp">
       <Filter>test_case</Filter>
     </ClCompile>
@@ -240,14 +237,8 @@
     <ClInclude Include="test_singleton2.h">
       <Filter>test_pattern</Filter>
     </ClInclude>
-    <ClInclude Include="..\auto_include\Project2_API.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="test_cpt_geo.h">
       <Filter>test_geo</Filter>
-    </ClInclude>
-    <ClInclude Include="commonFileReadWrite.h">
-      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -24,6 +24,7 @@
     <ProjectGuid>{9ce5e9c1-5270-4602-892a-eadff0c7a686}</ProjectGuid>
     <RootNamespace>Project2</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>ProjectTest</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -147,7 +148,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir)auto_include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp14</LanguageStandard>
       <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -187,7 +188,6 @@
     <ClCompile Include="test_interview.cpp" />
     <ClCompile Include="test_binfile_debug.cpp" />
     <ClCompile Include="test_case_triangle.cpp" />
-    <ClCompile Include="commonFileReadWrite.cpp" />
     <ClCompile Include="test_fun_speed.cpp" />
     <ClCompile Include="test_memfn.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -269,10 +269,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\auto_include\Project2_API.h" />
     <ClInclude Include="test_cpt_geo.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="commonFileReadWrite.h" />
     <ClInclude Include="test_serialize.h" />
     <ClInclude Include="test_singleton.h" />
     <ClInclude Include="test_singleton2.h" />

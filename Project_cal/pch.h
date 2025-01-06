@@ -24,7 +24,6 @@
 #define USING_POINTER_VERION
 #define TEST_CALCULATION_DEBUG
 
-#define CAL_DLLEXPORT_DEFINE //set on pre-processor define
-#include "auto_include/Project_CAL_API.h"  //PublicAPI
+#define PROJECT_CAL_DLLEXPORT_DEFINE //set on pre-processor define
+#include "auto_include/ProjectCAL_API.h"  //PublicAPI
 #include "test_triangle_intersect.h" //for test verify
-

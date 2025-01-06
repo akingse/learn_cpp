@@ -1,8 +1,11 @@
 #pragma once
-#include<afx.h>
-#include <commonFileReadWrite.h>
-
+#include <ctime>   
+#include <iostream>
+#include <fstream>
+#include <sstream>
 //#ifndef CLASH_DETECTION_SOLUTION
+#pragma warning(disable: 4996) //ctime
+
 struct InterTriInfo
 {
     std::array<std::array<Eigen::Vector3d, 3>, 2> trianglePair;

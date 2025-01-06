@@ -1,5 +1,4 @@
 #pragma once
-//using namespace ppc; //ppc=python parametric component
 namespace para
 {
 
@@ -7,8 +6,8 @@ namespace para
     class DependencyRegistry
     {
     private:
-        DLLEXPORT_1 DependencyRegistry() = default;
-        DLLEXPORT_1 ~DependencyRegistry() = default;
+        DLLEXPORT_PPC DependencyRegistry() = default;
+        DLLEXPORT_PPC ~DependencyRegistry() = default;
         DependencyRegistry(const DependencyRegistry&) = delete;
         DependencyRegistry(DependencyRegistry&&) = delete;
 
@@ -20,7 +19,7 @@ namespace para
             std::type_index m_type = typeid(void);
         };
         // not export if using this project only
-        DLLEXPORT_1 static std::map<std::string, FunctionPointer> sm_implementations;
+        DLLEXPORT_PPC static std::map<std::string, FunctionPointer> sm_implementations;
 
     public:
         static DependencyRegistry& getInstance()
@@ -58,8 +57,8 @@ namespace para
     class DependencyInversion
     {
     private:
-        DLLEXPORT_1 DependencyInversion() = default;
-        DLLEXPORT_1 ~DependencyInversion() = default;
+        DLLEXPORT_PPC DependencyInversion() = default;
+        DLLEXPORT_PPC ~DependencyInversion() = default;
         DependencyInversion(const DependencyInversion&) = delete;
         DependencyInversion(DependencyInversion&&) = delete;
 
@@ -72,8 +71,8 @@ namespace para
         };
 
         // not export if using this project only
-        DLLEXPORT_1 static std::map<std::string, std::shared_ptr<void>> sm_implementations;
-        DLLEXPORT_1 static std::mutex sm_mutex;
+        DLLEXPORT_PPC static std::map<std::string, std::shared_ptr<void>> sm_implementations;
+        DLLEXPORT_PPC static std::mutex sm_mutex;
 
     public:
         static DependencyInversion& getInstance()
@@ -122,6 +121,6 @@ namespace para
     };
 
     //必须使用智能指针，否则typeid不认为提前声明的class相同
-    DLLEXPORT_1 std::vector<unsigned char> serializition(const std::shared_ptr<TreeNodePtr>& node);
-    DLLEXPORT_1 std::shared_ptr<TreeNodePtr> deserializition(const std::vector<unsigned char>& data);
+    DLLEXPORT_PPC std::vector<unsigned char> serializition(const std::shared_ptr<TreeNodePtr>& node);
+    DLLEXPORT_PPC std::shared_ptr<TreeNodePtr> deserializition(const std::vector<unsigned char>& data);
 }

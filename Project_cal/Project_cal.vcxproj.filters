@@ -48,6 +48,9 @@
     <ClCompile Include="test_triangle_intersect.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="commonFileReadWrite.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -80,7 +83,7 @@
     <ClInclude Include="test_triangle_intersect.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\auto_include\Project_CAL_API.h">
+    <ClInclude Include="..\auto_include\ProjectCAL_API.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="clashClassTypeDefine.h">
@@ -88,6 +91,9 @@
     </ClInclude>
     <ClInclude Include="clashInterfaceUtility.h">
       <Filter>algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="commonFileReadWrite.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

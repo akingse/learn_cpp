@@ -92,7 +92,7 @@
     <ClInclude Include="my_handle.h">
       <Filter>head</Filter>
     </ClInclude>
-    <ClInclude Include="..\auto_include\Project1_API.h">
+    <ClInclude Include="..\auto_include\ProjectPPC_API.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="BPParaTransform.h">
