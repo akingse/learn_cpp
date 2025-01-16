@@ -197,6 +197,7 @@ namespace eigen
         EXPOSED = 0,
         HIDDEN,
         SHIELDED, //shielded by other triangle
+        //not using
         COPLANAR, //COPLANAR with other-triangle
         INTERSECT, //ignore
         OCCLUSION, //shielded+intersect

@@ -15,5 +15,6 @@
 #include "calculateMeshTopology.h"  //namespace games
 #include "calculateSpatialSearchTree.h" // clash //spatial partition tree
 #include "calculateDynamicAccuracy.h"//namespace accura
+#include "calculateClashDetect.h"
 
 #include "commonFileReadWrite.h" 

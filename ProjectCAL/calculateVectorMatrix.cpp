@@ -60,7 +60,7 @@ std::array<Eigen::Matrix4d, 2> eigen::getRelativeMatrixByProjectionPlane(const E
 		axisx[1], axisy[1], axisz[1], origin[1],
 		axisx[2], axisy[2], axisz[2], origin[2],
 		0, 0, 0, 1;
-	matInv << // R^-1 * T^-1
+	matInv << //inverse matrix, R^-1 * T^-1
 		axisx[0], axisx[1], axisx[2], -axisx.dot(origin),
 		axisy[0], axisy[1], axisy[2], -axisy.dot(origin),
 		axisz[0], axisz[1], axisz[2], -axisz.dot(origin),
