@@ -1056,12 +1056,12 @@ std::array<std::vector<size_t>, 2> _getReducedIntersectTrianglesOfMesh(const Mod
 }
 
 // ClashHard
-bool clash::isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB)
+bool clash::isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance /*= 0.0*/)
 {
 	//Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
 	Eigen::Affine3d relative_matrix = meshB.pose_.inverse() * meshA.pose_; //without revise
 	// get the index param of mesh's ibo
-	std::array<std::vector<size_t>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, 0.0);
+	std::array<std::vector<size_t>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, tolerance);
 	if (!indexAB[0].empty() && !indexAB[1].empty())
 	{
 		std::array<Eigen::Vector3d, 3> triA, triB;
