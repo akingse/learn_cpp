@@ -51,7 +51,7 @@
     <ClCompile Include="commonFileReadWrite.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="calculateClashDetect.cpp">
+    <ClCompile Include="calculateClashDetection.cpp">
       <Filter>algorithm</Filter>
     </ClCompile>
   </ItemGroup>
@@ -98,7 +98,7 @@
     <ClInclude Include="commonFileReadWrite.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="calculateClashDetect.h">
+    <ClInclude Include="calculateClashDetection.h">
       <Filter>algorithm</Filter>
     </ClInclude>
   </ItemGroup>

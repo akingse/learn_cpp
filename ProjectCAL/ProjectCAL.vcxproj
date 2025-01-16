@@ -147,7 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="calculateClashDetect.cpp" />
+    <ClCompile Include="calculateClashDetection.cpp" />
     <ClCompile Include="calculateSpatialSearchTree.cpp" />
     <ClCompile Include="calculateDynamicAccuracy.cpp" />
     <ClCompile Include="calculateMeshTopology.cpp" />
@@ -165,7 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\auto_include\ProjectCAL_API.h" />
-    <ClInclude Include="calculateClashDetect.h" />
+    <ClInclude Include="calculateClashDetection.h" />
     <ClInclude Include="calculateSpatialSearchTree.h" />
     <ClInclude Include="calculateDynamicAccuracy.h" />
     <ClInclude Include="calculateMeshTopology.h" />

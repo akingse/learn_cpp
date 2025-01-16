@@ -29,13 +29,13 @@ namespace clash
         std::vector<Eigen::Vector3d> fno_; //Face Normal
         Eigen::AlignedBox3d bounding_;
         Eigen::Affine3d pose_ = Eigen::Affine3d::Identity();
-        bool convex_; // isConvex default true
+        bool convex_ = true; // isConvex default true
         int genus_ = 0; //number of genus, default 0
-        //#ifdef FILL_PROFILE_DEBUG_TEMP
+#ifdef FILL_PROFILE_DEBUG_TEMP
         std::vector<int> iboRaw_; //for test debug
         uint64_t index_ = UINT64_MAX;// ULLONG_MAX; // record belong to same polyface
         //uint64_t instanceid = 0; //0 means not instance
-    //#endif
+#endif
 #ifdef STORAGE_VERTEX_DATA_2D
         inline void to2d()
         {
