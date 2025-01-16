@@ -799,11 +799,11 @@ BVHTree3d::BVHTree3d(const std::vector<TrigonPart>& _triangles)
 #endif
 }
 
-std::vector<size_t> BVHTree3d::findIntersect(const Polyface3d& polygon, double tolerance /*= 0.0*/) const
+std::vector<int> BVHTree3d::findIntersect(const Polyface3d& polygon, double tolerance /*= 0.0*/) const
 {
 	if (m_tree == nullptr) // || polygon.m_index == -1 means cannot be external polyface
 		return {};
-	std::vector<size_t> indexes;
+	std::vector<int> indexes;
 	Eigen::AlignedBox3d curBox = polygon.m_bound;
 	if (tolerance != 0.0) // not using default epsF
 	{
@@ -864,20 +864,20 @@ std::vector<size_t> BVHTree3d::findIntersect(const TrigonPart& trigon)
 #endif
 
 // only for clash, distinguish soft and hard
-std::vector<std::tuple<size_t, bool>> BVHTree3d::findIntersectClash(const Polyface3d& polygon, double tolerance) const
+std::vector<std::tuple<int, bool>> BVHTree3d::findIntersectClash(const Polyface3d& polygon, double tolerance) const
 {
 	Vector3d copy = m_tolerance;
 	m_tolerance = Vector3d(tolerance, tolerance, tolerance);
-	std::vector<std::tuple<size_t, bool>> resInter = findIntersectClash(polygon);
+	std::vector<std::tuple<int, bool>> resInter = findIntersectClash(polygon);
 	m_tolerance = copy;
 	return resInter;
 }
 
-std::vector<std::tuple<size_t, bool>> BVHTree3d::findIntersectClash(const Polyface3d& polygon) const
+std::vector<std::tuple<int, bool>> BVHTree3d::findIntersectClash(const Polyface3d& polygon) const
 {
 	if (m_tree.get() == nullptr || polygon.m_index == -1) // cannot be external polyface
 		return {};
-	std::vector<std::tuple<size_t, bool>> indexes;
+	std::vector<std::tuple<int, bool>> indexes;
 	Eigen::AlignedBox3d toleBox = polygon.m_bound; //using extra epsF
 	//Vector3d tole = (m_tolerance == 0.0) ? Vector3d(epsF, epsF, epsF) : Vector3d(m_tolerance, m_tolerance, m_tolerance);
 	toleBox.min() -= m_tolerance;

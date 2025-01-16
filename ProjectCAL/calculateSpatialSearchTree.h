@@ -113,7 +113,7 @@ namespace clash
 	// for PolyfaceHandlePtr, to fill into k-d tree
 	struct Polyface3d
 	{
-		long long m_index = -1; // the index in the vector container
+		int m_index = -1; // the index in the vector container
 		Eigen::AlignedBox3d m_bound;  // current polyface bounding box
 #ifdef CLASH_DETECTION_DEBUG_TEMP
 		//UnifiedIdentify m_identify; // extra information
@@ -203,7 +203,7 @@ namespace bvh
 		std::shared_ptr<BVHNode3d> m_left;	//BVHNode3d* m_left;  
 		std::shared_ptr<BVHNode3d> m_right;  //BVHNode3d* m_right; 
 		// other data
-		long long m_index = -1; // the middle node's index
+		int m_index = -1; // the middle node's index
 		//std::array<int, 2> m_index2 = { -1,-1 }; //for TrigonPart
 		size_t m_dimension = 0; // also means m_depth
 		BVHNode3d() = default;
@@ -261,10 +261,10 @@ namespace bvh
 		//bool remove(size_t index);
 		bool remove(const clash::Polyface3d& polyface); //find by polyface index
 		bool update(const clash::Polyface3d& polyface); //using polyface self index
-		std::vector<size_t> findIntersect(const clash::Polyface3d& polyface, double tolerance = 0.0) const; //searchFromTree
-		std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon) const;
-		std::vector<std::tuple<size_t, bool>> findIntersectClash(const clash::Polyface3d& polyface) const; // bool means soft-clash
-		std::vector<std::tuple<size_t, bool>> findIntersectClash(const clash::Polyface3d& polyface, double tolerance) const; //custom tolerance
+		std::vector<int> findIntersect(const clash::Polyface3d& polyface, double tolerance = 0.0) const; //searchFromTree
+		std::vector<int> findIntersect(const eigen::TrigonPart& trigon) const;
+		std::vector<std::tuple<int, bool>> findIntersectClash(const clash::Polyface3d& polyface) const; // bool means soft-clash
+		std::vector<std::tuple<int, bool>> findIntersectClash(const clash::Polyface3d& polyface, double tolerance) const; //custom tolerance
 		//for grid ray only
 	};
 }
