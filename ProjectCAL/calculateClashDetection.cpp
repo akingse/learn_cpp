@@ -78,9 +78,9 @@ std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(con
 std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetection(const std::vector<ModelMesh>& meshVct, 
 	const double tolerance /*= 0.0*/, const std::function<bool(float, int)>& callback /*= nullptr*/)
 {
-	sm_meshStore = meshVct;
+	sm_meshStore = meshVct; //copy data
 	std::vector<int> indexes(meshVct.size());
-	for (int i = 0; i < meshVct.size(); ++i)
+	for (int i = 0; i < (int)meshVct.size(); ++i)
 		indexes[i] = i;
 	std::vector<std::pair<int, int>> res = ClashDetection::executeAssignClashDetection(indexes, indexes, tolerance, callback);
 	sm_meshStore.clear();
@@ -90,14 +90,14 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetection(const
 std::vector<std::pair<int, int>> ClashDetection::executePairClashDetection(const std::vector<ModelMesh>& meshsLeft, const std::vector<ModelMesh>& meshsRight,
 	const double tolerance /*= 0.0*/, const std::function<bool(float, int)>& callback /*= nullptr*/)
 {
-	sm_meshStore = meshsLeft;
+	sm_meshStore = meshsLeft; //copy data
 	sm_meshStore.insert(sm_meshStore.end(), meshsRight.begin(), meshsRight.end());
 	std::vector<int> indexesLeft(meshsLeft.size());
-	for (int i = 0; i < meshsLeft.size(); ++i)
+	for (int i = 0; i < (int)meshsLeft.size(); ++i)
 		indexesLeft[i] = i;
 	std::vector<int> indexesRight(meshsRight.size());
 	int begin = (int)indexesLeft.size();
-	for (int i = 0; i < meshsRight.size(); ++i)
+	for (int i = 0; i < (int)meshsRight.size(); ++i)
 		indexesRight[i] = i + begin;
 	std::vector<std::pair<int, int>> res = ClashDetection::executeAssignClashDetection(indexesLeft, indexesRight, tolerance, callback);
 	sm_meshStore.clear();

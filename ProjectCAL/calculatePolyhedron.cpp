@@ -1152,7 +1152,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> clash::getTwoMeshsIntersectRelati
 		Eigen::Vector3d normalA, normalB;
 		std::array<Eigen::Vector3d, 11> axesPoten; //remove 6 edge normal
 #ifdef STATISTIC_DATA_RECORD
-		for (const auto& i : indexAB[0]) //for test
+		for (const int& i : indexAB[0]) //for test
 		{
 			Triangle triIter = {
 				meshA.pose_ * meshA.vbo_[meshA.ibo_[i][0]],
@@ -1160,7 +1160,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> clash::getTwoMeshsIntersectRelati
 				meshA.pose_ * meshA.vbo_[meshA.ibo_[i][2]] };
 			triFaceVctA.push_back(triIter); //world coord
 		}
-		for (const auto& j : indexAB[1])
+		for (const int& j : indexAB[1])
 		{
 			Triangle triIter = {
 				meshB.pose_ * meshB.vbo_[meshB.ibo_[j][0]],
@@ -1408,7 +1408,7 @@ std::tuple<double, std::array<int, 2>> clash::getTwoMeshsSeparationDistanceSAT(c
 	Eigen::Affine3d relative_matrix = meshB.pose_.inverse() * meshA.pose_; //without revise
 	// distance > tolerance, return double-max, to decrease calculate
 	double d = DBL_MAX; // the res
-	std::array<int, 2> index = { INT_MAX, INT_MAX };
+	std::array<int, 2> index = { -1, -1 };//INT_MAX
 	std::array<vector<int>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, tolerance);
 	if (indexAB[0].empty() || indexAB[1].empty())
 		return { d, index };

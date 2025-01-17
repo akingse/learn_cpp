@@ -1097,9 +1097,9 @@ namespace eigen
 		std::array<Eigen::Vector3d, 17> axes = { { // compat zero-vector from parallel edges
 				//normalA,
 				//normalB,
-				normalA,
+				normalA, //normal direction projection
 				normalB,
-				normalA.cross(edgesA[0]),
+				normalA.cross(edgesA[0]), //normal direction projection
 				normalA.cross(edgesA[1]),
 				normalA.cross(edgesA[2]),
 				normalB.cross(edgesB[0]),
@@ -1140,12 +1140,27 @@ namespace eigen
 #else
 			if (maxA < minB || maxB < minA) // absolute zero
 #endif
-				return false;
+				return false; //one axis gap is separate
 		}
 		// special handling degenerate triangle
 		//Eigen::Vector3d croA = edgesA[0].cross(edgesA[1]);
 		//Eigen::Vector3d croB = edgesB[0].cross(edgesB[1]);
 		//return !(edgesA[0].cross(edgesA[1]).isZero() || edgesB[0].cross(edgesB[1]).isZero());
+		return true;
+	}
+
+	bool isTwoTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance /*= 0.0*/)
+	{
+		std::array<Eigen::Vector3d, 3> edgesA = {
+			triA[1] - triA[0],
+			triA[2] - triA[1],
+			triA[0] - triA[2] };
+		std::array<Eigen::Vector3d, 3> edgesB = {
+			triB[1] - triB[0],
+			triB[2] - triB[1],
+			triB[0] - triB[2] };
+		Eigen::Vector3d normalA = edgesA[0].cross(edgesA[1]);
+		Eigen::Vector3d normalB = edgesB[0].cross(edgesB[1]);
 		return true;
 	}
 
