@@ -850,8 +850,8 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 }
 
 // calculate depth self with tiny errors
-Eigen::Vector3d clash::getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA, const ModelMesh& meshB, const std::vector<Vector3d>& axesSepa,
-	const std::set<size_t>& vboSetA, const std::set<size_t>& vboSetB)
+Eigen::Vector3d clash::getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA, const ModelMesh& meshB, const std::vector<Eigen::Vector3d>& axesSepa,
+	const std::set<int>& vboSetA, const std::set<int>& vboSetB)
 {
 	if (axesSepa.empty() || vboSetA.empty() || vboSetB.empty())
 		return Vector3d::Zero();
@@ -997,17 +997,15 @@ Eigen::Affine3d _getRelativeMatrixRectify(const Eigen::Affine3d& matA, const Eig
 }
 
 // get the index number of mesh's ibo
-std::array<std::vector<size_t>, 2> _getReducedIntersectTrianglesOfMesh(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance)
+std::array<std::vector<int>, 2> _getReducedIntersectTrianglesOfMesh(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance)
 {
-	//Eigen::AlignedBox3d boxMag(box.min() - 0.5 * Vector3d(tolerance, tolerance, tolerance), box.max() + 0.5 * Vector3d(tolerance, tolerance, tolerance));
-	Eigen::AlignedBox3d box = meshA.bounding_.intersection(meshB.bounding_);
-	//Vector3d toleSize = Vector3d(tolerance + epsF, tolerance + epsF, tolerance + epsF);
+	Eigen::AlignedBox3d box = meshA.bounding_.intersection(meshB.bounding_); //common box
 	Vector3d toleSize = Vector3d(tolerance, tolerance, tolerance);
-	Eigen::AlignedBox3d boxMag(box.min() - toleSize, box.max() + toleSize);
-	std::vector<size_t> triA_Index; // using index of mesh IBO
+	Eigen::AlignedBox3d boxMag(box.min() - toleSize, box.max() + toleSize); //magnify
+	std::vector<int> triA_Index; // using index of mesh IBO
 	Eigen::AlignedBox3d triA_Box; // iterate to lessen box
 	std::array<Eigen::Vector3d, 3> triIter;
-	for (size_t i = 0; i < meshA.ibo_.size(); ++i)
+	for (int i = 0; i < (int)meshA.ibo_.size(); ++i)
 	{
 		triIter = { // input matrix to avoid repeat calculate
 				meshA.pose_ * meshA.vbo_[meshA.ibo_[i][0]],
@@ -1024,9 +1022,9 @@ std::array<std::vector<size_t>, 2> _getReducedIntersectTrianglesOfMesh(const Mod
 	}
 	if (triA_Index.empty())
 		return {};
-	std::vector<size_t> triB_Index;
+	std::vector<int> triB_Index;
 	Eigen::AlignedBox3d triB_Box;
-	for (size_t j = 0; j < meshB.ibo_.size(); ++j)
+	for (int j = 0; j < (int)meshB.ibo_.size(); ++j)
 	{
 		triIter = { meshB.pose_ * meshB.vbo_[meshB.ibo_[j][0]],
 					meshB.pose_ * meshB.vbo_[meshB.ibo_[j][1]],
@@ -1061,17 +1059,17 @@ bool clash::isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& mesh
 	//Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
 	Eigen::Affine3d relative_matrix = meshB.pose_.inverse() * meshA.pose_; //without revise
 	// get the index param of mesh's ibo
-	std::array<std::vector<size_t>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, tolerance);
+	std::array<std::vector<int>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, tolerance);
 	if (!indexAB[0].empty() && !indexAB[1].empty())
 	{
 		std::array<Eigen::Vector3d, 3> triA, triB;
-		for (const auto& iA : indexAB[0])
+		for (const int& iA : indexAB[0])
 		{
 			triA = { 
 				relative_matrix * meshA.vbo_[meshA.ibo_[iA][0]],
 				relative_matrix * meshA.vbo_[meshA.ibo_[iA][1]],
 				relative_matrix * meshA.vbo_[meshA.ibo_[iA][2]] };
-			for (const auto& iB : indexAB[1])
+			for (const int& iB : indexAB[1])
 			{
 				triB = { 
 					meshB.vbo_[meshB.ibo_[iB][0]],
@@ -1136,7 +1134,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> clash::getTwoMeshsIntersectRelati
 	//Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
 	Eigen::Affine3d relative_matrix = meshB.pose_.inverse() * meshA.pose_;
 	// get the index param of mesh's ibo
-	std::array<std::vector<size_t>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, 0.0);
+	std::array<std::vector<int>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, 0.0);
 	bool isContact = false; // vertex or edge or face contact
 	bool isIntrusive = false;
 #ifndef USING_ALL_SEPARATE_AXES_FOR_DEPTH
@@ -1145,7 +1143,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> clash::getTwoMeshsIntersectRelati
 #endif
 	// all axes version
 	std::vector<Vector3d> axesSepa; // in world coordinate
-	std::set<size_t> vboSetA, vboSetB; // to remove repeat vertex
+	std::set<int> vboSetA, vboSetB; // to remove repeat vertex
 	if (!indexAB[0].empty() && !indexAB[1].empty())
 	{
 		std::array<Eigen::Vector3d, 3> triA, triB;
@@ -1171,13 +1169,13 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> clash::getTwoMeshsIntersectRelati
 			triFaceVctB.push_back(triIter); //world coord
 		}
 #endif
-		for (const auto& iA : indexAB[0]) //faces intersect
+		for (const int& iA : indexAB[0]) //faces intersect
 		{
 			triA = { 
 				relative_matrix * meshA.vbo_[meshA.ibo_[iA][0]],
 				relative_matrix * meshA.vbo_[meshA.ibo_[iA][1]],
 				relative_matrix * meshA.vbo_[meshA.ibo_[iA][2]] };
-			for (const auto& iB : indexAB[1])
+			for (const int& iB : indexAB[1])
 			{
 				triB = { 
 					meshB.vbo_[meshB.ibo_[iB][0]],
@@ -1288,20 +1286,6 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> clash::getTwoMeshsIntersectRelati
 #endif	
 	if (isIntrusive)
 	{
-		//for (const auto& iA : indexAB[0]) //only insert intersect mesh
-		//{
-		//	if (isPointInsidePolyhedronCL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][0]], meshB) ||
-		//		isPointInsidePolyhedronCL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][1]], meshB) ||
-		//		isPointInsidePolyhedronCL(meshA.pose_ * meshA.vbo_[meshA.ibo_[iA][2]], meshB))
-		//		faceSetA.insert(iA);
-		//}
-		//for (const auto& iB : indexAB[1])
-		//{
-		//	if (isPointInsidePolyhedronCL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][0]], meshA) ||
-		//		isPointInsidePolyhedronCL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][1]], meshA) ||
-		//		isPointInsidePolyhedronCL(meshB.pose_ * meshB.vbo_[meshB.ibo_[iB][2]], meshA))
-		//		faceSetA.insert(iB);
-		//}
 		for (size_t i = 0; i < meshA.vbo_.size(); ++i)
 		{
 #ifdef USING_ALL_SEPARATE_AXES_FOR_DEPTH
@@ -1415,7 +1399,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> clash::getTwoMeshsIntersectRelati
 }
 
 // ClashSoft // return index of mesh_a and mesh_b ibo
-std::tuple<double, std::array<size_t, 2>> clash::getTwoMeshsSeparationDistanceSAT(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance)
+std::tuple<double, std::array<int, 2>> clash::getTwoMeshsSeparationDistanceSAT(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance)
 {
 #ifdef STATISTIC_DATA_RECORD
 	std::array<std::array<Eigen::Vector3d, 3>, 2> triDistPair;
@@ -1424,17 +1408,17 @@ std::tuple<double, std::array<size_t, 2>> clash::getTwoMeshsSeparationDistanceSA
 	Eigen::Affine3d relative_matrix = meshB.pose_.inverse() * meshA.pose_; //without revise
 	// distance > tolerance, return double-max, to decrease calculate
 	double d = DBL_MAX; // the res
-	std::array<size_t, 2> index = { ULLONG_MAX, ULLONG_MAX };
-	std::array<vector<size_t>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, tolerance);
+	std::array<int, 2> index = { INT_MAX, INT_MAX };
+	std::array<vector<int>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, tolerance);
 	if (indexAB[0].empty() || indexAB[1].empty())
 		return { d, index };
-	for (const auto& iA : indexAB[0])
+	for (const int& iA : indexAB[0])
 	{
 		std::array<Eigen::Vector3d, 3> triA = {
 			relative_matrix * meshA.vbo_[meshA.ibo_[iA][0]],
 			relative_matrix * meshA.vbo_[meshA.ibo_[iA][1]],
 			relative_matrix * meshA.vbo_[meshA.ibo_[iA][2]] };
-		for (const auto& iB : indexAB[1])
+		for (const int& iB : indexAB[1])
 		{
 			std::array<Eigen::Vector3d, 3> triB = {
 				meshB.vbo_[meshB.ibo_[iB][0]],

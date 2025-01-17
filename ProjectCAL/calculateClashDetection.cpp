@@ -16,32 +16,6 @@ void ClashDetection::clearMeshs()
 	sm_meshStore.clear();
 }
 
-static bool isMeshIntrusionTesting(const ModelMesh& meshA, const ModelMesh& meshB) //getIntersetAndPenetrationDepth
-{
-	// origin double for-loop process
-	Eigen::Vector3d origin = -meshA.vbo_.front();
-	for (size_t i = 0; i < meshA.ibo_.size(); i++)
-	{
-		for (size_t j = 0; j < meshB.ibo_.size(); j++)
-		{
-			std::array<Eigen::Vector3d, 3> triA = {
-				meshA.vbo_[meshA.ibo_[i][0]] + origin,
-				meshA.vbo_[meshA.ibo_[i][1]] + origin,
-				meshA.vbo_[meshA.ibo_[i][2]] + origin };
-			std::array<Eigen::Vector3d, 3> triB = {
-				meshB.vbo_[meshB.ibo_[j][0]] + origin,
-				meshB.vbo_[meshB.ibo_[j][1]] + origin,
-				meshB.vbo_[meshB.ibo_[j][2]] + origin };
-			if (isTwoTrianglesIntersectSAT(triA, triB))
-			{
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-
 // tolerance > 0 is soft clash, include distance < tolerance
 // tolerance <= 0 is hard clash, exclude abs(distance) < abs(tolerance)
 std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(const std::vector<int>& indexesLeft, const std::vector<int>& indexesRight, 
@@ -108,7 +82,9 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetection(const
 	std::vector<int> indexes(meshVct.size());
 	for (int i = 0; i < meshVct.size(); ++i)
 		indexes[i] = i;
-	return ClashDetection::executeAssignClashDetection(indexes, indexes, tolerance, callback);
+	std::vector<std::pair<int, int>> res = ClashDetection::executeAssignClashDetection(indexes, indexes, tolerance, callback);
+	sm_meshStore.clear();
+	return res;
 }
 
 std::vector<std::pair<int, int>> ClashDetection::executePairClashDetection(const std::vector<ModelMesh>& meshsLeft, const std::vector<ModelMesh>& meshsRight,
@@ -123,6 +99,8 @@ std::vector<std::pair<int, int>> ClashDetection::executePairClashDetection(const
 	int begin = (int)indexesLeft.size();
 	for (int i = 0; i < meshsRight.size(); ++i)
 		indexesRight[i] = i + begin;
-	return ClashDetection::executeAssignClashDetection(indexesLeft, indexesRight, tolerance, callback);
+	std::vector<std::pair<int, int>> res = ClashDetection::executeAssignClashDetection(indexesLeft, indexesRight, tolerance, callback);
+	sm_meshStore.clear();
+	return res;
 }
 

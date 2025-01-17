@@ -31,9 +31,9 @@ namespace clash
 
 	//clash using
 	bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance = 0.0);
-	Eigen::Vector3d getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA, const ModelMesh& meshB, const std::vector<Eigen::Vector3d>& axesSepa, const std::set<size_t>& vboSetA, const std::set<size_t>& vboSetB);
+	Eigen::Vector3d getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA, const ModelMesh& meshB, const std::vector<Eigen::Vector3d>& axesSepa, const std::set<int>& vboSetA, const std::set<int>& vboSetB);
 	std::tuple<clash::RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(const ModelMesh& meshA, const ModelMesh& meshB);
-	std::tuple<double, std::array<size_t, 2>> getTwoMeshsSeparationDistanceSAT(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance);
+	std::tuple<double, std::array<int, 2>> getTwoMeshsSeparationDistanceSAT(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance);
 
 }
 
