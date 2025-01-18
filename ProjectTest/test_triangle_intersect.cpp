@@ -456,17 +456,6 @@ static void _test10()
 	return;
 }
 
-//class Trigon
-//{
-//public:
-//	array<Vector2d, 3> m_tri;
-//	Trigon()
-//	{
-//        memset(this, 0, 2 * 3 * sizeof(double));
-//	}
-//
-//};
-
 static void _test11()
 {
 	//Vector3d triA_0 = Vector3d(0, 0, 0);
@@ -483,6 +472,21 @@ static void _test11()
 	return;
 }
 
+//²âÊÔisTwoTrianglesIntrusionSAT
+static void _test12()
+{
+	Triangle3d triA = {
+		Vector3d(0, 0, 0) ,
+		Vector3d(10, 0, 0) ,
+		Vector3d(0, 10, 0) , };
+	Triangle3d triB = {
+		Vector3d(0, 0, 0) ,
+		Vector3d(10, 0, 0) ,
+		Vector3d(0, 0, 10) , };
+	bool isIntr = isTwoTrianglesIntrusionSAT(triA, triB, 0);
+
+	return;
+}
 
 static int enrol = []()->int
 {
@@ -492,6 +496,7 @@ static int enrol = []()->int
 	//_test9();
 	//_test10();
 	//_test11();
+	_test12();
 	cout << "test_triangle_intersect finished.\n" << endl;
 	return 0;
 }();

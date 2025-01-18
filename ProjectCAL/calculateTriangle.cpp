@@ -1118,7 +1118,7 @@ namespace eigen
 		return true;
 	}
 
-	//must intersect
+	//must intersect, negative tolerance to filter tiny intersect
 	bool isTwoTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance /*= 0.0*/)
 	{
 		std::array<Eigen::Vector3d, 3> edgesA = {
@@ -1131,8 +1131,42 @@ namespace eigen
 			triB[0] - triB[2] };
 		Eigen::Vector3d normalA = edgesA[0].cross(edgesA[1]);
 		Eigen::Vector3d normalB = edgesB[0].cross(edgesB[1]);
-
-
+		if (normalA.cross(normalA).isZero())//isParallel3d, means not intrusive
+			return false;
+		std::array<Eigen::Vector3d, 11> axes = { {
+			normalA.normalized(), //normal direction projection
+			normalB.normalized(),
+			edgesA[0].cross(edgesB[0]).normalized(),//cross edge pair to get normal
+			edgesA[0].cross(edgesB[1]).normalized(),
+			edgesA[0].cross(edgesB[2]).normalized(),
+			edgesA[1].cross(edgesB[0]).normalized(),
+			edgesA[1].cross(edgesB[1]).normalized(),
+			edgesA[1].cross(edgesB[2]).normalized(),
+			edgesA[2].cross(edgesB[0]).normalized(),
+			edgesA[2].cross(edgesB[1]).normalized(),
+			edgesA[2].cross(edgesB[2]).normalized() } };
+		double minA, maxA, minB, maxB, projection;
+		for (const auto& axis : axes)
+		{
+			minA = DBL_MAX;
+			maxA = -DBL_MAX;
+			minB = DBL_MAX;
+			maxB = -DBL_MAX;
+			for (const auto& vertex : triA)
+			{
+				projection = axis.dot(vertex);
+				minA = std::min(minA, projection);
+				maxA = std::max(maxA, projection);
+			}
+			for (const auto& vertex : triB)
+			{
+				projection = axis.dot(vertex);
+				minB = std::min(minB, projection);
+				maxB = std::max(maxB, projection);
+			}
+			if (maxA - tolerance < minB || maxB - tolerance < minA)
+				return false; //as long as one axis gap is separate
+		}
 		return true;
 	}
 

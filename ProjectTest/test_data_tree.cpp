@@ -84,7 +84,7 @@ static void test0()
 		for (size_t i = 0; i < N; ++i)
 		{
 #ifdef USING_FINDINTERSECTCLASH
-			vector<std::tuple<size_t, bool>> temp = kdtree.findIntersectClash(polyface3dVct[i]);
+			vector<std::tuple<int, bool>> temp = kdtree.findIntersectClash(polyface3dVct[i]);
 			findIndexClash.insert(findIndexClash.end(), temp.begin(), temp.end());
 #else
 			std::vector<size_t> temp = kdtree.findIntersect(polyface3dVct[i]);
@@ -213,16 +213,16 @@ static void test2() //²âÊÔ²ð·Ökdtree
 	BVHTree3d kdtree1(polyface3dVct[1]);
 	for (size_t i = 0; i < polyface3dVct[0].size(); ++i)
 	{
-		vector<std::tuple<size_t, bool>> temp0 = kdtree0.findIntersectClash(polyface3dVct[0][i]);
+		vector<std::tuple<int, bool>> temp0 = kdtree0.findIntersectClash(polyface3dVct[0][i]);
 		findIndexClash.insert(findIndexClash.end(), temp0.begin(), temp0.end());
-		vector<std::tuple<size_t, bool>> temp1 = kdtree1.findIntersectClash(polyface3dVct[0][i]);
+		vector<std::tuple<int, bool>> temp1 = kdtree1.findIntersectClash(polyface3dVct[0][i]);
 		findIndexClash.insert(findIndexClash.end(), temp1.begin(), temp1.end());
 	}
 	for (size_t i = 0; i < polyface3dVct[1].size(); ++i)
 	{
-		vector<std::tuple<size_t, bool>> temp0 = kdtree0.findIntersectClash(polyface3dVct[1][i]);
+		vector<std::tuple<int, bool>> temp0 = kdtree0.findIntersectClash(polyface3dVct[1][i]);
 		findIndexClash.insert(findIndexClash.end(), temp0.begin(), temp0.end());
-		vector<std::tuple<size_t, bool>> temp1 = kdtree1.findIntersectClash(polyface3dVct[1][i]);
+		vector<std::tuple<int, bool>> temp1 = kdtree1.findIntersectClash(polyface3dVct[1][i]);
 		findIndexClash.insert(findIndexClash.end(), temp1.begin(), temp1.end());
 	}
 	end = std::chrono::high_resolution_clock::now();

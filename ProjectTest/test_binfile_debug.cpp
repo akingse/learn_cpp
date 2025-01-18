@@ -812,9 +812,9 @@ static void _test7()
 	double dtest;
 	for (const auto& iter : cvtMeshVct_con)
 	{
-		if (iter.index_ == idA)
+		if (iter.number_ == idA)
 			meshA = iter;
-		if (iter.index_ == idB)
+		if (iter.number_ == idB)
 			meshB = iter;
 		//bool b1 = isConvex(iter.vbo_, iter.ibo_);
 		//bool b2 = is_convex(iter.vbo_, iter.ibo_);
