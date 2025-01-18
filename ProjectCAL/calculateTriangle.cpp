@@ -896,35 +896,6 @@ namespace eigen
 			std::max(std::max(triA[0][1], triA[1][1]), triA[2][1]) + tolerance < std::min(std::min(triB[0][1], triB[1][1]), triB[2][1]) ||
 			std::max(std::max(triB[0][2], triB[1][2]), triB[2][2]) < std::min(std::min(triA[0][2], triA[1][2]), triA[2][2]) - tolerance ||
 			std::max(std::max(triA[0][2], triA[1][2]), triA[2][2]) + tolerance < std::min(std::min(triB[0][2], triB[1][2]), triB[2][2]));
-		//if (std::max(std::max(triB[0].x(), triB[1].x()), triB[2].x()) < std::min(std::min(triA[0].x(), triA[1].x()), triA[2].x()) - tolerance)
-		//	return false;
-		//if (std::max(std::max(triA[0].x(), triA[1].x()), triA[2].x()) + tolerance < std::min(std::min(triB[0].x(), triB[1].x()), triB[2].x()))
-		//	return false;
-		//if (std::max(std::max(triB[0].y(), triB[1].y()), triB[2].y()) < std::min(std::min(triA[0].y(), triA[1].y()), triA[2].y()) - tolerance)
-		//	return false;
-		//if (std::max(std::max(triA[0].y(), triA[1].y()), triA[2].y()) + tolerance < std::min(std::min(triB[0].y(), triB[1].y()), triB[2].y()))
-		//	return false;
-		//if (std::max(std::max(triB[0].z(), triB[1].z()), triB[2].z()) < std::min(std::min(triA[0].z(), triA[1].z()), triA[2].z()) - tolerance)
-		//	return false;
-		//if (std::max(std::max(triA[0].z(), triA[1].z()), triA[2].z()) + tolerance < std::min(std::min(triB[0].z(), triB[1].z()), triB[2].z()))
-		//	return false;
-		//return true;
-		//double xminA = std::min(std::min(triA[0].x(), triA[1].x()), triA[2].x()) - tolerance;
-		//double xmaxA = std::max(std::max(triA[0].x(), triA[1].x()), triA[2].x()) + tolerance;
-		//double yminA = std::min(std::min(triA[0].y(), triA[1].y()), triA[2].y()) - tolerance;
-		//double ymaxA = std::max(std::max(triA[0].y(), triA[1].y()), triA[2].y()) + tolerance;
-		//double zminA = std::min(std::min(triA[0].z(), triA[1].z()), triA[2].z()) - tolerance;
-		//double zmaxA = std::max(std::max(triA[0].z(), triA[1].z()), triA[2].z()) + tolerance;
-		//double xminB = std::min(std::min(triB[0].x(), triB[1].x()), triB[2].x());
-		//double xmaxB = std::max(std::max(triB[0].x(), triB[1].x()), triB[2].x());
-		//double yminB = std::min(std::min(triB[0].y(), triB[1].y()), triB[2].y());
-		//double ymaxB = std::max(std::max(triB[0].y(), triB[1].y()), triB[2].y());
-		//double zminB = std::min(std::min(triB[0].z(), triB[1].z()), triB[2].z());
-		//double zmaxB = std::max(std::max(triB[0].z(), triB[1].z()), triB[2].z());
-		//return AlignedBox3d(Vector3d(xminA, yminA, zminA), Vector3d(xmaxA, ymaxA, zmaxA)).intersects(
-		//	AlignedBox3d(Vector3d(xminB, yminB, zminB), Vector3d(xmaxB, ymaxB, zmaxB)));
-		//m_min.array()<=(b.max)().array()).all() && ((b.min)().array()<=m_max.array()).all();
-		//return !(xmaxB < xminA || ymaxB < yminA || zmaxB < zminA || xmaxA < xminB || ymaxA < yminB || zmaxA < zminB);
 	}
 
 	bool isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box)
@@ -1095,18 +1066,15 @@ namespace eigen
 		//if ((0.0 < projection0 && 0.0 < projection1 && 0.0 < projection2) || (0.0 > projection0 && 0.0 > projection1 && 0.0 > projection2))
 		//	return false;
 		std::array<Eigen::Vector3d, 17> axes = { { // compat zero-vector from parallel edges
-				//normalA,
-				//normalB,
 				normalA, //normal direction projection
 				normalB,
-				normalA.cross(edgesA[0]), //normal direction projection
+				normalA.cross(edgesA[0]), //perpendi to edge when coplanar
 				normalA.cross(edgesA[1]),
 				normalA.cross(edgesA[2]),
 				normalB.cross(edgesB[0]),
 				normalB.cross(edgesB[1]),
 				normalB.cross(edgesB[2]),
-				//cross edge pair
-				edgesA[0].cross(edgesB[0]),
+				edgesA[0].cross(edgesB[0]),//cross edge pair to get normal
 				edgesA[0].cross(edgesB[1]),
 				edgesA[0].cross(edgesB[2]),
 				edgesA[1].cross(edgesB[0]),
@@ -1136,7 +1104,8 @@ namespace eigen
 				maxB = std::max(maxB, projection);
 			}
 #ifdef USING_THRESHOLD_CUSTOMIZE
-			if (maxA + epsF < minB || maxB + epsF < minA) //only no threshold can avoid edge-pair parallel, that lead to zero vector
+			//only no threshold can avoid edge-pair parallel, that lead to zero vector
+			if (maxA + epsF < minB || maxB + epsF < minA) 
 #else
 			if (maxA < minB || maxB < minA) // absolute zero
 #endif
@@ -1149,6 +1118,7 @@ namespace eigen
 		return true;
 	}
 
+	//must intersect
 	bool isTwoTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance /*= 0.0*/)
 	{
 		std::array<Eigen::Vector3d, 3> edgesA = {
@@ -1161,6 +1131,8 @@ namespace eigen
 			triB[0] - triB[2] };
 		Eigen::Vector3d normalA = edgesA[0].cross(edgesA[1]);
 		Eigen::Vector3d normalB = edgesB[0].cross(edgesB[1]);
+
+
 		return true;
 	}
 
