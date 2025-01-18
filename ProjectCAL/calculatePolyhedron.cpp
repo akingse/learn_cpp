@@ -997,7 +997,7 @@ Eigen::Affine3d _getRelativeMatrixRectify(const Eigen::Affine3d& matA, const Eig
 }
 
 // get the index number of mesh's ibo
-std::array<std::vector<int>, 2> _getReducedIntersectTrianglesOfMesh(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance)
+std::array<std::vector<int>, 2> _triangleAndCommonBoxPreclash(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance)
 {
 	Eigen::AlignedBox3d box = meshA.bounding_.intersection(meshB.bounding_); //common box
 	Vector3d toleSize = Vector3d(tolerance, tolerance, tolerance);
@@ -1046,10 +1046,6 @@ std::array<std::vector<int>, 2> _getReducedIntersectTrianglesOfMesh(const ModelM
 	triB_Box.max() += toleSize;
 	if (!triA_Box.intersects(triB_Box))
 		return {};
-#ifdef STATISTIC_DATA_COUNT
-	count_triA_inter += triA_Index.size();
-	count_triB_inter += triB_Index.size();
-#endif
 	return { triA_Index, triB_Index };
 }
 
@@ -1059,23 +1055,22 @@ bool clash::isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& mesh
 	//Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
 	Eigen::Affine3d relative_matrix = meshB.pose_.inverse() * meshA.pose_; //without revise
 	// get the index param of mesh's ibo
-	std::array<std::vector<int>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, tolerance);
+	std::array<std::vector<int>, 2> indexAB = _triangleAndCommonBoxPreclash(meshA, meshB, tolerance);
 	if (!indexAB[0].empty() && !indexAB[1].empty())
 	{
-		std::array<Eigen::Vector3d, 3> triA, triB;
 		for (const int& iA : indexAB[0])
 		{
-			triA = { 
+			std::array<Eigen::Vector3d, 3> triA = {
 				relative_matrix * meshA.vbo_[meshA.ibo_[iA][0]],
 				relative_matrix * meshA.vbo_[meshA.ibo_[iA][1]],
 				relative_matrix * meshA.vbo_[meshA.ibo_[iA][2]] };
 			for (const int& iB : indexAB[1])
 			{
-				triB = { 
+				std::array<Eigen::Vector3d, 3> triB = {
 					meshB.vbo_[meshB.ibo_[iB][0]],
 					meshB.vbo_[meshB.ibo_[iB][1]],
 					meshB.vbo_[meshB.ibo_[iB][2]] };
-				if (!isTwoTrianglesBoundingBoxIntersect(triA, triB)) // second pre-judge
+				if (!isTwoTrianglesBoundingBoxIntersect(triA, triB, tolerance)) // second pre-judge
 				{
 #ifdef STATISTIC_DATA_COUNT
 					count_tri_box_exclude_pre++;
@@ -1084,10 +1079,6 @@ bool clash::isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& mesh
 				}
 				if (isTwoTrianglesIntersectSAT(triA, triB))
 				{
-#ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
-					triRecordHard.push_back({ triA, triB });
-					interTriInfoList.push_back({ { triA, triB }, {}, std::nan("0") }); // only no-depth call, default distance is nan
-#endif
 					return true;
 				}
 			}
@@ -1134,7 +1125,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> clash::getTwoMeshsIntersectRelati
 	//Eigen::Affine3d relative_matrix = _getRelativeMatrixRectify(meshA.pose_, meshB.pose_);// get relative matrix
 	Eigen::Affine3d relative_matrix = meshB.pose_.inverse() * meshA.pose_;
 	// get the index param of mesh's ibo
-	std::array<std::vector<int>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, 0.0);
+	std::array<std::vector<int>, 2> indexAB = _triangleAndCommonBoxPreclash(meshA, meshB, 0.0);
 	bool isContact = false; // vertex or edge or face contact
 	bool isIntrusive = false;
 #ifndef USING_ALL_SEPARATE_AXES_FOR_DEPTH
@@ -1409,7 +1400,7 @@ std::tuple<double, std::array<int, 2>> clash::getTwoMeshsSeparationDistanceSAT(c
 	// distance > tolerance, return double-max, to decrease calculate
 	double d = DBL_MAX; // the res
 	std::array<int, 2> index = { -1, -1 };//INT_MAX
-	std::array<vector<int>, 2> indexAB = _getReducedIntersectTrianglesOfMesh(meshA, meshB, tolerance);
+	std::array<vector<int>, 2> indexAB = _triangleAndCommonBoxPreclash(meshA, meshB, tolerance);
 	if (indexAB[0].empty() || indexAB[1].empty())
 		return { d, index };
 	for (const int& iA : indexAB[0])

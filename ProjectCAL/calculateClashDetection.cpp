@@ -61,10 +61,8 @@ std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(con
 				signRecord.insert(current);
 			}
 			const ModelMesh& meshR = sm_meshStore[iR];
-			if (meshL.convex_ && meshR.convex_)
-			{
-			}
-			if (isTwoMeshsIntersectSAT(meshL, meshR, tolerance))
+			//if (meshL.convex_ && meshR.convex_)
+			if (!isTwoMeshsIntersectSAT(meshL, meshR, tolerance))
 				continue;
 #pragma omp critical
 			{

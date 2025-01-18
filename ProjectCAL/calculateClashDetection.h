@@ -33,6 +33,4 @@ namespace clash
             const double tolerance = 0.0, const std::function<bool(float, int)>& callback = nullptr);
 
     };
-
-
 }
