@@ -193,6 +193,43 @@ vector<Eigen::Vector3d> clash::getProfileOutOfMesh(const ModelMesh& mesh, const 
 	return profilePoints;
 }
 
+ModelMesh clash::mergeMultiMeshsToOne(const std::vector<ModelMesh>& meshVct)
+{
+	if (meshVct.size() == 0)
+		return {};
+	else if (meshVct.size() == 1)
+		return meshVct[0];
+    ModelMesh mesh = meshVct[0]; //res
+	mesh.convex_ = false;
+	mesh.number_ = -1;//reset
+	if (!mesh.pose_.isApprox(Eigen::Affine3d::Identity()))
+	{
+		for (size_t i = 0; i < mesh.vbo_.size(); ++i)
+			mesh.vbo_[i] = mesh.pose_ * mesh.vbo_[i];
+		for (size_t i = 0; i < mesh.fno_.size(); ++i)
+			mesh.fno_[i] = mesh.pose_ * mesh.fno_[i];
+		mesh.pose_ = Eigen::Affine3d::Identity();
+	}
+	for (size_t i = 1; i < meshVct.size(); ++i)
+	{
+		ModelMesh iter = meshVct[i];//copy
+		mesh.bounding_.extend(iter.bounding_); //bounding box is world
+		if (!iter.pose_.isApprox(Eigen::Affine3d::Identity()))
+		{
+			for (size_t j = 0; j < iter.vbo_.size(); ++j)
+				iter.vbo_[j] = iter.pose_ * iter.vbo_[j];
+			for (size_t j = 0; j < iter.fno_.size(); ++j)
+				iter.fno_[j] = iter.pose_ * iter.fno_[j];
+		}
+		for (size_t j = 0; j < iter.ibo_.size(); ++j)
+			iter.ibo_[j] = iter.ibo_[j] + Vector3i((int)mesh.vbo_.size(), (int)mesh.vbo_.size(), (int)mesh.vbo_.size());
+		mesh.vbo_.insert(mesh.vbo_.end(), iter.vbo_.begin(), iter.vbo_.end());
+		mesh.fno_.insert(mesh.fno_.end(), iter.fno_.begin(), iter.fno_.end());
+		mesh.ibo_.insert(mesh.ibo_.end(), iter.ibo_.begin(), iter.ibo_.end());
+	}
+	return mesh;
+}
+
 bool clash::isPointInsidePolyhedronMTA(const Eigen::Vector3d& point, const ModelMesh& mesh)
 {
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
@@ -1277,7 +1314,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> clash::getTwoMeshsIntersectRelati
 #endif	
 	if (isIntrusive)
 	{
-		for (size_t i = 0; i < meshA.vbo_.size(); ++i)
+		for (int i = 0; i < (int)meshA.vbo_.size(); ++i)
 		{
 #ifdef USING_ALL_SEPARATE_AXES_FOR_DEPTH
 			if (vboSetA.find(i) == vboSetA.end() && RelationOfPointAndMesh::INNER == isPointInsidePolyhedronROT(meshA.pose_ * meshA.vbo_[i], meshB))
@@ -1287,7 +1324,7 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> clash::getTwoMeshsIntersectRelati
 				vertexVectA.push_back(i);
 #endif // USING_ALL_SEPARATE_AXES_FOR_DEPTH
 		}
-		for (size_t i = 0; i < meshB.vbo_.size(); ++i)
+		for (int i = 0; i < (int)meshB.vbo_.size(); ++i)
 		{
 #ifdef USING_ALL_SEPARATE_AXES_FOR_DEPTH
 			if (vboSetB.find(i) == vboSetB.end() && RelationOfPointAndMesh::INNER == isPointInsidePolyhedronROT(meshB.pose_ * meshB.vbo_[i], meshA))

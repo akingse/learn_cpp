@@ -40,7 +40,7 @@ int _wirteNumberFile(const std::vector<double>& _array, const string& filename)
 		cerr << "Error opening file" << endl;
 		return -1;
 	}
-	int n = _array.size();
+	int n = (int)_array.size();
 	out.write(reinterpret_cast<char*>(&n), sizeof(int)); //
 	out.write(reinterpret_cast<const char*>(_array.data()), n * sizeof(double));
 	out.close();
@@ -391,7 +391,7 @@ std::vector<ModelMesh> read_ModelMesh(const std::string& fileName)
 			bool convex = mesh->convex();
 			int genus = mesh->genus();
 #ifdef CLASH_DETECTION_DEBUG_TEMP
-			res.push_back(ModelMesh{ vbo_, ibo_, fno_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(), convex, genus, _iboRaw, mesh->entityid() });
+			res.push_back(ModelMesh{ vbo_, ibo_, fno_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(), convex, genus, -1, _iboRaw, mesh->entityid() });
 #else
 			//res.push_back(ModelMesh{ vbo_, ibo_, Eigen::AlignedBox3d(_min, _max), Eigen::Affine3d::Identity(),mesh->convex()});
 #endif

@@ -25,7 +25,7 @@ std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(con
 #pragma omp parallel for schedule(dynamic)
 	for (int i = 0; i < (int)sm_meshStore.size(); ++i)
 	{
-		polyfaceVct[i].m_index = i;
+		polyfaceVct[i].m_index = i; //keep order
 		polyfaceVct[i].m_bound = sm_meshStore[i].bounding_;
 	}
 	bvh::BVHTree3d bvhtree(polyfaceVct);//create spatial search tree
@@ -66,7 +66,10 @@ std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(con
 				continue;
 #pragma omp critical
 			{
-				clashRes.push_back(current);
+				if (meshL.number_ == -1 || meshR.number_ == -1) //unvalid index
+					clashRes.push_back(current);
+				else
+					clashRes.push_back({ meshL.number_, meshR.number_ });
 			}
 		}
 	}
