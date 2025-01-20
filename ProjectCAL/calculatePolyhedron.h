@@ -26,7 +26,7 @@ namespace clash
 	//mesh
 	std::vector<Eigen::Vector3d> getNormalVectorOfMeshFace(const ModelMesh& mesh); //using ray method
 	std::vector<Eigen::Vector3d> getProfileOutOfMesh(const ModelMesh& mesh, const Plane3d& plane);
-	ModelMesh mergeMultiMeshsToOne(const std::vector<ModelMesh>& meshVct);
+	ModelMesh mergeMultiMeshsToOneMesh(const std::vector<ModelMesh>& meshVct);
 
 	//clash using
 	bool isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance = 0.0);

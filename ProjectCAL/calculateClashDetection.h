@@ -1,15 +1,15 @@
 #pragma once
 namespace clash
 {
-    class ClashDetection
+    class DLLEXPORT_CAL ClashDetection
     {
-        struct ClashInfo
-        {
-            std::pair<int, int> m_indexpair;      
-            Eigen::AlignedBox3d m_boundbox;    
-            double m_distance = 0.0;           
-            std::vector<Eigen::Vector3d> m_points;
-        };
+        //struct ClashInfo
+        //{
+        //    std::pair<int, int> m_indexpair;      
+        //    Eigen::AlignedBox3d m_boundbox;    
+        //    double m_distance = 0.0;           
+        //    std::vector<Eigen::Vector3d> m_points;
+        //};
 
     private:
         static std::vector<ModelMesh> sm_meshStore;
@@ -22,7 +22,7 @@ namespace clash
 
     public:
         /// <summary>
-        /// self whole clash detection
+        /// self full clash detection of whole modelmesh
         /// </summary>
         /// <param name="meshVct"></param>
         /// <param name="tolerance"></param>

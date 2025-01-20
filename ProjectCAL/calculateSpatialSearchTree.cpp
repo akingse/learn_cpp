@@ -894,7 +894,7 @@ std::vector<std::tuple<int, bool>> BVHTree3d::findIntersectClash(const Polyface3
 		}
 		else
 		{
-			if (polygon.m_index >= node->m_index) //vector index, only small to large
+            if (node->m_index <= polygon.m_index) //vector index, only small to large
 				return;
 			bool is_soft = 0.0 < m_tolerance[0] && !node->m_bound.intersects(polygon.m_bound); // origin box not intersect
 			//if (polygon.m_index != node->m_index) //exclude self

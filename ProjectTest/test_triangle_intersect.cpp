@@ -200,7 +200,6 @@ static void _test2()
 	double k = (plane[0] - segment[0]).dot(normal) / vecSeg.dot(normal); //k
 	Vector3d local = segment[0] + k * vecSeg; // intersect point
 
-
 	cout << endl;
 }
 
@@ -484,14 +483,21 @@ static void _test12()
 		//Vector3d(0, 0, 0) ,
 		Vector3d(0, -10, 0) ,
 		Vector3d(0, 0, 10) , };
-	double intrusion = getTrianglesIntrusionSAT(triA, triB);
+	double intrusion = getTrianglesIntrusionSAT(triA, triB); //0.9
 	bool isIntr = isTwoTrianglesIntrusionSAT(triA, triB, 1);
 
 	return;
 }
 
+//²âÊÔ
+static void _test13()
+{
+
+}
+
 static int enrol = []()->int
 {
+	//_test1();
 	//_test2();
 	//_test7();
 	//_test8();

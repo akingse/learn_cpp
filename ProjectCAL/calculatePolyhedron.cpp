@@ -193,7 +193,7 @@ vector<Eigen::Vector3d> clash::getProfileOutOfMesh(const ModelMesh& mesh, const 
 	return profilePoints;
 }
 
-ModelMesh clash::mergeMultiMeshsToOne(const std::vector<ModelMesh>& meshVct)
+ModelMesh clash::mergeMultiMeshsToOneMesh(const std::vector<ModelMesh>& meshVct)
 {
 	if (meshVct.size() == 0)
 		return {};

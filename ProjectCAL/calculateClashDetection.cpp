@@ -37,7 +37,7 @@ std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(con
 #pragma omp critical
 		{
 			if (callback != nullptr)
-				callback(100 * i / (float)indexesLeft.size(), (int)clashRes.size()); // progress bar | result count
+				callback(100.f * i / (float)indexesLeft.size(), (int)clashRes.size()); // progress bar | result count
 		}
 		const int iL = indexesLeft[i];
 		if (iL < 0 || sm_meshStore.size() <= iL) //check
@@ -80,12 +80,42 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetection(const
 	const double tolerance /*= 0.0*/, const std::function<bool(float, int)>& callback /*= nullptr*/)
 {
 	sm_meshStore = meshVct; //copy data
-	std::vector<int> indexes(meshVct.size());
-	for (int i = 0; i < (int)meshVct.size(); ++i)
-		indexes[i] = i;
-	std::vector<std::pair<int, int>> res = ClashDetection::executeAssignClashDetection(indexes, indexes, tolerance, callback);
-	sm_meshStore.clear();
-	return res;
+	std::vector<Polyface3d> polyfaceVct(sm_meshStore.size());// simpified ModelMesh
+#pragma omp parallel for schedule(dynamic)
+	for (int i = 0; i < (int)sm_meshStore.size(); ++i)
+	{
+		polyfaceVct[i].m_index = i; //keep order
+		polyfaceVct[i].m_bound = sm_meshStore[i].bounding_;
+	}
+	bvh::BVHTree3d bvhtree(polyfaceVct);//create spatial search tree
+	std::vector<std::pair<int, int>> clashRes;
+#pragma omp parallel for schedule(dynamic)
+	for (int i = 0; i < (int)sm_meshStore.size(); ++i)
+	{
+#pragma omp critical
+		{
+			if (callback != nullptr)
+				callback(100.f * i / (float)sm_meshStore.size(), (int)clashRes.size()); // progress bar | result count
+		}
+		const std::vector<int> preClash = bvhtree.findIntersect(polyfaceVct[i], tolerance);
+		const ModelMesh& meshL = sm_meshStore[i];
+        for (const int& j : preClash)
+		{
+            if (j <= i) //also canbe exclude in findIntersect;
+				continue;
+			const ModelMesh& meshR = sm_meshStore[j];
+			if (!isTwoMeshsIntersectSAT(meshL, meshR, tolerance))
+				continue;
+#pragma omp critical
+			{
+				if (meshL.number_ == -1 || meshR.number_ == -1) //unvalid index
+                    clashRes.push_back({ i,j });
+				else
+					clashRes.push_back({ meshL.number_, meshR.number_ });
+			}
+		}
+	}
+	return clashRes;
 }
 
 std::vector<std::pair<int, int>> ClashDetection::executePairClashDetection(const std::vector<ModelMesh>& meshsLeft, const std::vector<ModelMesh>& meshsRight,
