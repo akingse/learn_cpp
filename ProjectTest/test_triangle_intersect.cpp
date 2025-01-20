@@ -480,10 +480,12 @@ static void _test12()
 		Vector3d(10, 0, 0) ,
 		Vector3d(0, 10, 0) , };
 	Triangle3d triB = {
-		Vector3d(0, 0, 0) ,
-		Vector3d(10, 0, 0) ,
+		Vector3d(1, 1, -1) ,
+		//Vector3d(0, 0, 0) ,
+		Vector3d(0, -10, 0) ,
 		Vector3d(0, 0, 10) , };
-	bool isIntr = isTwoTrianglesIntrusionSAT(triA, triB, 0);
+	double intrusion = getTrianglesIntrusionSAT(triA, triB);
+	bool isIntr = isTwoTrianglesIntrusionSAT(triA, triB, 1);
 
 	return;
 }

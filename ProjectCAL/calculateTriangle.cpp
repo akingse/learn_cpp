@@ -995,7 +995,7 @@ namespace eigen
 		return true;
 	}
 
-	//for shield record, 
+	//for shield record
 	bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB)
 	{
 		std::array<Eigen::Vector2d, 6> edgesAB = {
@@ -1107,7 +1107,7 @@ namespace eigen
 			//only no threshold can avoid edge-pair parallel, that lead to zero vector
 			if (maxA + epsF < minB || maxB + epsF < minA) 
 #else
-			if (maxA < minB || maxB < minA) // absolute zero
+			if (maxA < minB || maxB < minA) // absolute zero, contact is intersect
 #endif
 				return false; //one axis gap is separate
 		}
@@ -1131,7 +1131,7 @@ namespace eigen
 			triB[0] - triB[2] };
 		Eigen::Vector3d normalA = edgesA[0].cross(edgesA[1]);
 		Eigen::Vector3d normalB = edgesB[0].cross(edgesB[1]);
-		if (normalA.cross(normalA).isZero())//isParallel3d, means not intrusive
+		if (normalA.cross(normalB).isZero())//isParallel3d, means not intrusive
 			return false;
 		std::array<Eigen::Vector3d, 11> axes = { {
 			normalA.normalized(), //normal direction projection
@@ -1164,10 +1164,63 @@ namespace eigen
 				minB = std::min(minB, projection);
 				maxB = std::max(maxB, projection);
 			}
-			if (maxA - tolerance < minB || maxB - tolerance < minA)
+			if (maxA - tolerance <= minB || maxB - tolerance <= minA) //include equal more return
 				return false; //as long as one axis gap is separate
 		}
 		return true;
+	}
+
+	//must intersect before
+	double getTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
+	{
+		std::array<Eigen::Vector3d, 3> edgesA = {
+			triA[1] - triA[0],
+			triA[2] - triA[1],
+			triA[0] - triA[2] };
+		std::array<Eigen::Vector3d, 3> edgesB = {
+			triB[1] - triB[0],
+			triB[2] - triB[1],
+			triB[0] - triB[2] };
+		Eigen::Vector3d normalA = edgesA[0].cross(edgesA[1]);
+		Eigen::Vector3d normalB = edgesB[0].cross(edgesB[1]);
+		if (normalA.cross(normalB).isZero())//isParallel3d, means not intrusive
+			return 0.0;
+		std::array<Eigen::Vector3d, 11> axes = { {
+			normalA.normalized(), //normal direction projection
+			normalB.normalized(),
+			edgesA[0].cross(edgesB[0]).normalized(),//cross edge pair to get normal
+			edgesA[0].cross(edgesB[1]).normalized(),
+			edgesA[0].cross(edgesB[2]).normalized(),
+			edgesA[1].cross(edgesB[0]).normalized(),
+			edgesA[1].cross(edgesB[1]).normalized(),
+			edgesA[1].cross(edgesB[2]).normalized(),
+			edgesA[2].cross(edgesB[0]).normalized(),
+			edgesA[2].cross(edgesB[1]).normalized(),
+			edgesA[2].cross(edgesB[2]).normalized() } };
+		double intrusion = DBL_MAX;
+		double minA, maxA, minB, maxB, projection;
+		for (const auto& axis : axes)
+		{
+			minA = DBL_MAX;
+			maxA = -DBL_MAX;
+			minB = DBL_MAX;
+			maxB = -DBL_MAX;
+			for (const auto& vertex : triA)
+			{
+				projection = axis.dot(vertex);
+				minA = std::min(minA, projection);
+				maxA = std::max(maxA, projection);
+			}
+			for (const auto& vertex : triB)
+			{
+				projection = axis.dot(vertex);
+				minB = std::min(minB, projection);
+				maxB = std::max(maxB, projection);
+			}
+			if (minB < maxA || minA < maxB) //without tolerance
+				intrusion = std::min(std::min(maxA - minB, maxB - minA), intrusion);
+		}
+		return intrusion;
 	}
 
 	// intersect and penetration judge
