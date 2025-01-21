@@ -1082,7 +1082,12 @@ std::array<std::vector<int>, 2> _triangleAndCommonBoxPreclash(const ModelMesh& m
 	triB_Box.min() -= toleSize;
 	triB_Box.max() += toleSize;
 	if (!triA_Box.intersects(triB_Box))
-		return {};
+	{
+#ifdef STATISTIC_DATA_COUNT
+		count_tri_box_exclude_pre++;
+#endif  
+		return {};//exist situation
+	}
 	return { triA_Index, triB_Index };
 }
 

@@ -66,7 +66,7 @@ std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(con
 				continue;
 #pragma omp critical
 			{
-				if (meshL.number_ == -1 || meshR.number_ == -1) //unvalid index
+				if (meshL.number_ == -1 || meshR.number_ == -1) //invalid index
 					clashRes.push_back(current);
 				else
 					clashRes.push_back({ meshL.number_, meshR.number_ });
@@ -97,8 +97,8 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetection(const
 			if (callback != nullptr)
 				callback(100.f * i / (float)sm_meshStore.size(), (int)clashRes.size()); // progress bar | result count
 		}
-		const std::vector<int> preClash = bvhtree.findIntersect(polyfaceVct[i], tolerance);
 		const ModelMesh& meshL = sm_meshStore[i];
+		const std::vector<int> preClash = bvhtree.findIntersect(polyfaceVct[i], tolerance);
         for (const int& j : preClash)
 		{
             if (j <= i) //also canbe exclude in findIntersect;
@@ -108,7 +108,7 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetection(const
 				continue;
 #pragma omp critical
 			{
-				if (meshL.number_ == -1 || meshR.number_ == -1) //unvalid index
+				if (meshL.number_ == -1 || meshR.number_ == -1) //invalid index
                     clashRes.push_back({ i,j });
 				else
 					clashRes.push_back({ meshL.number_, meshR.number_ });

@@ -6,7 +6,7 @@
 //#define WIN32_LEAN_AND_MEAN
 //windows API
 #include<windows.h>
-#include <afx.h> //CString
+//#include <afx.h> //CString
 #if defined(min) || defined(max)
 #undef min
 #undef max
