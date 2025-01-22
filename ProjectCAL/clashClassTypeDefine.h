@@ -19,7 +19,7 @@ namespace clash
     static constexpr size_t N_10E_7 = (size_t)1e7;
     static constexpr size_t N_10E_8 = (size_t)1e8;
 
-    struct ModelMesh
+    struct ModelMesh //TriMesh
     {
         std::vector<Eigen::Vector3d> vbo_;
 #ifdef STORAGE_VERTEX_DATA_2D

@@ -5,8 +5,8 @@
 #define DLLEXPORT_CAL __declspec(dllimport)
 #endif
 
-#include "DataRecordSingleton.h"    //singleton
 #include "clashClassTypeDefine.h"   // header only
+#include "DataRecordSingleton.h"    //singleton
 #include "clashInterfaceUtility.h"  // header only
 #include "calculateVectorMatrix.h"  // namespace eigen
 #include "calculatePointLinePlane.h"// namespace clash

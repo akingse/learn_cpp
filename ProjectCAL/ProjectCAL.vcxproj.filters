@@ -54,6 +54,9 @@
     <ClCompile Include="calculateClashDetection.cpp">
       <Filter>algorithm</Filter>
     </ClCompile>
+    <ClCompile Include="DataRecordSingleton.cpp">
+      <Filter>algorithm</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -99,6 +102,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="calculateClashDetection.h">
+      <Filter>algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="DataRecordSingleton.h">
       <Filter>algorithm</Filter>
     </ClInclude>
   </ItemGroup>

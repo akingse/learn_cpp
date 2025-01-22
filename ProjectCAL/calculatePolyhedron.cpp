@@ -1084,7 +1084,7 @@ std::array<std::vector<int>, 2> _triangleAndCommonBoxPreclash(const ModelMesh& m
 	if (!triA_Box.intersects(triB_Box))
 	{
 #ifdef STATISTIC_DATA_COUNT
-		count_tri_box_exclude_pre++;
+		//count_tris_box_not_inter++;
 #endif  
 		return {};//exist situation
 	}
