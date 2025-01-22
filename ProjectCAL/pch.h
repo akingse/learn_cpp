@@ -23,6 +23,7 @@
 #define USING_HALFEDGE_STRUCTURE
 #define USING_POINTER_VERION
 #define TEST_CALCULATION_DEBUG
+//#define STATISTIC_DATA_COUNT
 
 #define PROJECT_CAL_DLLEXPORT_DEFINE //set on pre-processor define
 #include "auto_include/ProjectCAL_API.h"  //PublicAPI

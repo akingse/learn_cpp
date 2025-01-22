@@ -65,6 +65,15 @@ namespace test
     };
 }
 
+//macro expand
+#define MACRO_EXPANSION_DATA_COUNT(dataName) \
+	std::map<std::string, int>& data = test::DataRecordSingleton::getInstance().getData().m_dataCount;\
+    if (data.find(dataName) == data.end())\
+        data.insert({ dataName,1 });\
+    else\
+        data[dataName]++;\
+
+
 namespace test
 {
     /// <summary>
@@ -109,7 +118,8 @@ namespace test
 
     private:
         //static int sm_index;
-        static std::vector<DataMap> sm_recordData;
+        static DataMap sm_recordData;
+        static std::vector<DataMap> sm_recordDatas;
 
     public:
         static DataRecordSingleton& getInstance()
@@ -117,13 +127,17 @@ namespace test
             static DataRecordSingleton instance;
             return instance;
         }
-        static std::vector<DataMap>& getData()
+        static DataMap& getData()
         {
             return sm_recordData;
         }
+        static std::vector<DataMap>& getDatas()
+        {
+            return sm_recordDatas;
+        }
         static void clear()
         {
-            sm_recordData.clear();
+            sm_recordDatas.clear();
         }
 
         static void writeToCsvInOne(const std::string& filename);

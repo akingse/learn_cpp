@@ -15,24 +15,25 @@ bool DataRecordDashboard::sm_isAverage = false;
 
 double DataRecordSingleton::sm_toleDist = 1e-6;
 double DataRecordSingleton::sm_tolerence = 1e-6;
-std::vector<DataRecordSingleton::DataMap> DataRecordSingleton::sm_recordData;
+DataRecordSingleton::DataMap DataRecordSingleton::sm_recordData;
+std::vector<DataRecordSingleton::DataMap> DataRecordSingleton::sm_recordDatas;
 static const int _invalid_id = -1;
 
 void DataRecordSingleton::writeToCsvInOne(const std::string& fileName)
 {
     //merge into one DataMap
-    if (sm_recordData.empty())
+    if (sm_recordDatas.empty())
         return;
-    DataMap mergeData = sm_recordData[0];//copy
-    const int time = (int)sm_recordData.size();
+    DataMap mergeData = sm_recordDatas[0];//copy
+    const int time = (int)sm_recordDatas.size();
     const int size = (int)mergeData.m_dataTimeVct.size();
-    for (int i = 1; i < sm_recordData.size(); i++)
+    for (int i = 1; i < sm_recordDatas.size(); i++)
     {
         for (int j = 0; j < size; j++) //default same size
         {
-            if (size == sm_recordData[i].m_dataTimeVct.size() &&
-                mergeData.m_dataTimeVct[j].first == sm_recordData[i].m_dataTimeVct[j].first)
-                mergeData.m_dataTimeVct[j].second += sm_recordData[i].m_dataTimeVct[j].second;
+            if (size == sm_recordDatas[i].m_dataTimeVct.size() &&
+                mergeData.m_dataTimeVct[j].first == sm_recordDatas[i].m_dataTimeVct[j].first)
+                mergeData.m_dataTimeVct[j].second += sm_recordDatas[i].m_dataTimeVct[j].second;
         }
     }
     if (DataRecordDashboard::isAverage() && time != 1)

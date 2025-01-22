@@ -5,10 +5,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="algorithm">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
     <Filter Include="common">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
@@ -16,34 +12,38 @@
     <Filter Include="src">
       <UniqueIdentifier>{ba180929-9a42-41a6-a176-18c9f0202c15}</UniqueIdentifier>
     </Filter>
+    <Filter Include="calculate">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="calculateSpatialSearchTree.cpp">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClCompile>
     <ClCompile Include="calculatePolyhedron.cpp">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClCompile>
     <ClCompile Include="calculateTriangle.cpp">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClCompile>
     <ClCompile Include="calculateVectorMatrix.cpp">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClCompile>
     <ClCompile Include="calculateDynamicAccuracy.cpp">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClCompile>
     <ClCompile Include="calculatePointLinePlane.cpp">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClCompile>
     <ClCompile Include="calculatePolygon2d.cpp">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClCompile>
     <ClCompile Include="calculateMeshTopology.cpp">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClCompile>
     <ClCompile Include="test_triangle_intersect.cpp">
       <Filter>src</Filter>
@@ -52,10 +52,10 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="calculateClashDetection.cpp">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClCompile>
     <ClCompile Include="DataRecordSingleton.cpp">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -63,28 +63,28 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="calculateSpatialSearchTree.h">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClInclude>
     <ClInclude Include="calculatePolyhedron.h">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClInclude>
     <ClInclude Include="calculateTriangle.h">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClInclude>
     <ClInclude Include="calculateVectorMatrix.h">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClInclude>
     <ClInclude Include="calculateDynamicAccuracy.h">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClInclude>
     <ClInclude Include="calculatePointLinePlane.h">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClInclude>
     <ClInclude Include="calculatePolygon2d.h">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClInclude>
     <ClInclude Include="calculateMeshTopology.h">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClInclude>
     <ClInclude Include="test_triangle_intersect.h">
       <Filter>src</Filter>
@@ -93,19 +93,19 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="clashClassTypeDefine.h">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClInclude>
     <ClInclude Include="clashInterfaceUtility.h">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClInclude>
     <ClInclude Include="commonFileReadWrite.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="calculateClashDetection.h">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClInclude>
     <ClInclude Include="DataRecordSingleton.h">
-      <Filter>algorithm</Filter>
+      <Filter>calculate</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

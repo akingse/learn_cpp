@@ -1085,6 +1085,11 @@ std::array<std::vector<int>, 2> _triangleAndCommonBoxPreclash(const ModelMesh& m
 	{
 #ifdef STATISTIC_DATA_COUNT
 		//count_tris_box_not_inter++;
+		std::map<std::string, int>& data = test::DataRecordSingleton::getInstance().getData().m_dataCount;
+        if (data.find("count_tris_box_not_inter") == data.end())
+			data.insert({ "count_tris_box_not_inter",1 });
+		else
+			data.at("count_tris_box_not_inter")++;
 #endif  
 		return {};//exist situation
 	}

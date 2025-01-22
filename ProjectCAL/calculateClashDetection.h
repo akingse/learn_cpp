@@ -1,7 +1,7 @@
 #pragma once
 namespace clash
 {
-    class DLLEXPORT_CAL ClashDetection
+    class ClashDetection //DLLEXPORT_CAL
     {
         //struct ClashInfo
         //{

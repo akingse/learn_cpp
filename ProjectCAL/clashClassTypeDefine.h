@@ -19,6 +19,17 @@ namespace clash
     static constexpr size_t N_10E_7 = (size_t)1e7;
     static constexpr size_t N_10E_8 = (size_t)1e8;
 
+    struct TriMesh //trigon mesh, simplified
+    {
+        std::vector<Eigen::Vector3d> vbo_;
+        std::vector<Eigen::Vector3i> ibo_;
+        std::vector<Eigen::Vector3d> fno_; //Face Normal
+        Eigen::AlignedBox3d bounding_;
+        //Eigen::Affine3d pose_ = Eigen::Affine3d::Identity();
+        int index_ = -1; //int type index
+        //bool convex_ = true; // isConvex default true
+    };
+
     struct ModelMesh //TriMesh
     {
         std::vector<Eigen::Vector3d> vbo_;
