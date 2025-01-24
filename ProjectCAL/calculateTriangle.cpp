@@ -110,7 +110,7 @@ bool isPointInTriangleSAT(const Vector2d& point, const std::array<Vector2d, 3>& 
 	for (auto& axis : axes)
 		axis = Vector2d(-axis[1], axis[0]);
 	double min = DBL_MAX, max = -DBL_MAX, projection;
-	for (const auto& axis : axes)
+	for (const auto& axis : axes) //none zero
 	{
 		for (const auto& vertex : triangle)
 		{
@@ -568,6 +568,8 @@ RelationOfTwoTriangles clash::getRelationOfTwoTrianglesSAT(const std::array<Vect
 	double dmin = DBL_MAX, minA, maxA, minB, maxB, projection;
 	for (const auto& axis : axes) //fast than index
 	{
+		if (axis.isZero())
+			continue;
 		minA = DBL_MAX;
 		maxA = -DBL_MAX;
 		minB = DBL_MAX;
@@ -716,6 +718,8 @@ bool clash::isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& segme
 		}
 		for (const auto& axis : axes)
 		{
+			if (axis.isZero())
+				continue;
 			minA = DBL_MAX;
 			maxA = -DBL_MAX;
 			for (const auto& vertex : trigon)
@@ -745,6 +749,8 @@ bool clash::isSegmentAndTriangleIntersctSAT(const std::array<Vector3d, 2>& segme
 		}
 		for (const auto& axis : axes)
 		{
+			if (axis.isZero())
+				continue;
 			minA = DBL_MAX;
 			maxA = -DBL_MAX;
 			for (const auto& vertex : trigon)
@@ -819,6 +825,8 @@ bool clash::isPointRayAcrossTriangleSAT(const Eigen::Vector3d& point, const std:
 	double minTri, maxTri, projection, dotP, dotR;
 	for (const auto& axis : axes) //fast than index
 	{
+		if (axis.isZero())
+			continue;
 		minTri = DBL_MAX;
 		maxTri = -DBL_MAX;
 		for (const auto& vertex : trigon) //fast than list
@@ -911,64 +919,59 @@ namespace eigen
 			return true;
 		const Vector3d& _min = box.min();
 		const Vector3d& _max = box.max();
-		if (std::max(std::max(p0.x(), p1.x()), p2.x()) < _min.x() ||
-			std::min(std::min(p0.x(), p1.x()), p2.x()) > _max.x() ||
-			std::max(std::max(p0.y(), p1.y()), p2.y()) < _min.y() ||
-			std::min(std::min(p0.y(), p1.y()), p2.y()) > _max.y() ||
-			std::max(std::max(p0.z(), p1.z()), p2.z()) < _min.z() ||
-			std::min(std::min(p0.z(), p1.z()), p2.z()) > _max.z())
+		//extreme value filter
+		if (std::max(std::max(p0[0], p1[0]), p2[0]) < _min[0] ||
+			std::min(std::min(p0[0], p1[0]), p2[0]) > _max[0] ||
+			std::max(std::max(p0[1], p1[1]), p2[1]) < _min[1] ||
+			std::min(std::min(p0[1], p1[1]), p2[1]) > _max[1] ||
+			std::max(std::max(p0[2], p1[2]), p2[2]) < _min[2] ||
+			std::min(std::min(p0[2], p1[2]), p2[2]) > _max[2])
 			return false;
-		//if ((p0.x() < min.x() && p1.x() < min.x() && p2.x() < min.x()) ||
-		//	(p0.x() > max.x() && p1.x() > max.x() && p2.x() > max.x()) ||
-		//	(p0.y() < min.y() && p1.y() < min.y() && p2.y() < min.y()) ||
-		//	(p0.y() > max.y() && p1.y() > max.y() && p2.y() > max.y()) ||
-		//	(p0.z() < min.z() && p1.z() < min.z() && p2.z() < min.z()) ||
-		//	(p0.z() > max.z() && p1.z() > max.z() && p2.z() > max.z()))
-		//	return false;
 		// Separating Axis Theorem
-		std::array<Eigen::Vector3d, 3> m_edges = {
+		std::array<Eigen::Vector3d, 3> edges = {
 			trigon[1] - trigon[0],
 			trigon[2] - trigon[1],
 			trigon[0] - trigon[2] };
 		std::array<Eigen::Vector3d, 3> coords = {
-			Vector3d(1,0,0),
-			Vector3d(0,1,0),
-			Vector3d(0,0,1) };
-		std::array<Eigen::Vector3d, 13> axes = { {
-			coords[0],
-			coords[1],
-			coords[2],
-			m_edges[0].cross(m_edges[1]), //normal
-			//normal.cross(edges[]),
-			coords[0].cross(m_edges[0]),
-			coords[0].cross(m_edges[1]),
-			coords[0].cross(m_edges[2]),
-			coords[1].cross(m_edges[0]),
-			coords[1].cross(m_edges[1]),
-			coords[1].cross(m_edges[2]),
-			coords[2].cross(m_edges[0]),
-			coords[2].cross(m_edges[1]),
-			coords[2].cross(m_edges[2]) } };
+			Vector3d(1.,0.,0.),
+			Vector3d(0.,1.,0.),
+			Vector3d(0.,0.,1.) };
+		std::array<Eigen::Vector3d, 10> axes = { {
+			//coords[0], //been excluded by extreme value
+			//coords[1],
+			//coords[2],
+			edges[0].cross(edges[1]), //trigon normal
+			coords[0].cross(edges[0]),
+			coords[0].cross(edges[1]),
+			coords[0].cross(edges[2]),
+			coords[1].cross(edges[0]),
+			coords[1].cross(edges[1]),
+			coords[1].cross(edges[2]),
+			coords[2].cross(edges[0]),
+			coords[2].cross(edges[1]),
+			coords[2].cross(edges[2]) } };
 		//for (auto& axis : axes) // absolute can give up
 		//{
 		//	if (axis.isZero())
 		//		axis = Vector3d(1, 0, 0);
 		//}
 		const Vector3d& origin = box.min();
-		Vector3d vertex = box.sizes();
+		const Vector3d vertex = box.sizes(); //m_max - m_min
 		std::array<Vector3d, 8> vertexes = { {
 			Vector3d(0, 0, 0),
-			Vector3d(vertex.x(), 0, 0),
-			Vector3d(vertex.x(), vertex.y(), 0),
-			Vector3d(0, vertex.y(), 0),
-			Vector3d(0, 0, vertex.z()),
-			Vector3d(vertex.x(), 0, vertex.z()),
-			Vector3d(vertex.x(), vertex.y(), vertex.z()),
-			Vector3d(0, vertex.y(), vertex.z()) } };
+			Vector3d(vertex[0], 0, 0),
+			Vector3d(vertex[0], vertex[1], 0),
+			Vector3d(0, vertex[1], 0),
+			Vector3d(0, 0, vertex[2]),
+			Vector3d(vertex[0], 0, vertex[2]),
+			Vector3d(vertex[0], vertex[1], vertex[2]),
+			Vector3d(0, vertex[1], vertex[2]) } };
 		// iterate
 		double minA, maxA, minB, maxB, projection;
 		for (const auto& axis : axes) //fast than index
 		{
+			if (axis.isZero())
+				continue;
 			minA = DBL_MAX;
 			maxA = -DBL_MAX;
 			minB = DBL_MAX;
@@ -1087,6 +1090,8 @@ namespace eigen
 		double minA, maxA, minB, maxB, projection;
 		for (const auto& axis : axes) //fast than index
 		{
+			if (axis.isZero())
+				continue;
 			minA = DBL_MAX;
 			maxA = -DBL_MAX;
 			minB = DBL_MAX;
@@ -1148,6 +1153,8 @@ namespace eigen
 		double minA, maxA, minB, maxB, projection;
 		for (const auto& axis : axes)
 		{
+			if (axis.isZero())
+				continue;
 			minA = DBL_MAX;
 			maxA = -DBL_MAX;
 			minB = DBL_MAX;
@@ -1201,6 +1208,8 @@ namespace eigen
 		double minA, maxA, minB, maxB, projection;
 		for (const auto& axis : axes)
 		{
+			if (axis.isZero())
+				continue;
 			minA = DBL_MAX;
 			maxA = -DBL_MAX;
 			minB = DBL_MAX;
@@ -1893,7 +1902,7 @@ namespace eigen
 			edges[2],
 		} };
 		double minA, maxA, minB, maxB, projection;
-		for (const auto& axis : axes) //fast than index
+		for (const auto& axis : axes) //none zero
 		{
 			minA = DBL_MAX;
 			maxA = -DBL_MAX;

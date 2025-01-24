@@ -12,11 +12,17 @@ namespace clash
         //};
 
     private:
-        static std::vector<ModelMesh> sm_meshStore;
+        static std::vector<TriMesh> sm_meshStore;
 
     public:
-        static void addMeshs(const std::vector<ModelMesh>& meshVct);
-        static void clearMeshs();
+        static void addMeshs(const std::vector<TriMesh>& meshVct)
+        {
+            sm_meshStore.insert(sm_meshStore.end(), meshVct.begin(), meshVct.end()); //copy data
+        }
+        static void clearMeshs()
+        {
+            sm_meshStore.clear();
+        }
         static std::vector<std::pair<int, int>> executeAssignClashDetection(const std::vector<int>& indexesLeft, const std::vector<int>& indexesRight, 
 			const double tolerance = 0.0, const std::function<bool(float, int)>& callback = nullptr);
 
@@ -27,10 +33,38 @@ namespace clash
         /// <param name="meshVct"></param>
         /// <param name="tolerance"></param>
         /// <returns> the index pair of mesh </returns>
-        static std::vector<std::pair<int, int>> executeFullClashDetection(const std::vector<ModelMesh>& meshVct, 
+        static std::vector<std::pair<int, int>> executeFullClashDetection(const std::vector<TriMesh>& meshVct,
 			const double tolerance = 0.0, const std::function<bool(float, int)>& callback = nullptr);
-        static std::vector<std::pair<int, int>> executePairClashDetection(const std::vector<ModelMesh>& meshsLeft, const std::vector<ModelMesh>& meshsRight, 
+        static std::vector<std::pair<int, int>> executePairClashDetection(const std::vector<TriMesh>& meshsLeft, const std::vector<TriMesh>& meshsRight,
             const double tolerance = 0.0, const std::function<bool(float, int)>& callback = nullptr);
-
+#if 0
+        //overload
+        static void addMeshs(const std::vector<ModelMesh>& meshVct)
+        {
+            std::vector<TriMesh> triMeshVct(meshVct.size());
+            for (int i = 0; i < (int)meshVct.size(); ++i)
+                triMeshVct[i] = meshVct[i].toTriMesh();
+            addMeshs(triMeshVct);
+        }
+        static std::vector<std::pair<int, int>> executeFullClashDetection(const std::vector<ModelMesh>& meshVct,
+            const double tolerance = 0.0, const std::function<bool(float, int)>& callback = nullptr)
+        {
+            std::vector<TriMesh> triMeshVct(meshVct.size());
+            for (int i = 0; i < (int)meshVct.size(); ++i)
+                triMeshVct[i] = meshVct[i].toTriMesh();
+            return executeFullClashDetection(triMeshVct, tolerance, callback);
+        }
+        static std::vector<std::pair<int, int>> executePairClashDetection(const std::vector<ModelMesh>& meshsLeft, const std::vector<ModelMesh>& meshsRight,
+            const double tolerance = 0.0, const std::function<bool(float, int)>& callback = nullptr)
+        {
+            std::vector<TriMesh> triMeshsLeft(meshsLeft.size());
+            for (int i = 0; i < (int)meshsLeft.size(); ++i)
+                triMeshsLeft[i] = meshsLeft[i].toTriMesh();
+            std::vector<TriMesh> triMeshsRight(meshsRight.size());
+            for (int i = 0; i < (int)meshsRight.size(); ++i)
+                triMeshsRight[i] = meshsRight[i].toTriMesh();
+            return executePairClashDetection(triMeshsLeft, triMeshsRight, tolerance, callback);
+        }
+#endif
     };
 }

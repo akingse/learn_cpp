@@ -495,6 +495,28 @@ static void _test13()
 
 }
 
+//isTriangleAndBoundingBoxIntersectSAT
+static void _test14()
+{
+	std::array<Eigen::Vector3d, 3> trigon={
+		Vector3d(0, 0, 0),
+		Vector3d(10, 0, 0),
+		Vector3d(0, 10, 0),
+	};
+	std::array<Eigen::Vector3d, 3> trigon1 = {
+		Vector3d(-5, -5, 0),
+		Vector3d(4, -5, 0),
+		Vector3d(-5, 5, 0),
+	};
+	Eigen::AlignedBox3d box = {
+		Vector3d(0, 0, 0),
+		Vector3d(10, 10, 10), };
+
+	bool isinter = isTriangleAndBoundingBoxIntersectSAT(trigon1, box);
+	return;
+}
+
+
 static int enrol = []()->int
 {
 	//_test1();
@@ -505,6 +527,8 @@ static int enrol = []()->int
 	//_test10();
 	//_test11();
 	_test12();
+	_test13();
+	_test14();
 	cout << "test_triangle_intersect finished.\n" << endl;
 	return 0;
 }();

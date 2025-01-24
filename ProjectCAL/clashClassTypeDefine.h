@@ -56,6 +56,27 @@ namespace clash
                 vbo2_[i] = Eigen::Vector2d(vbo_[i][0], vbo_[i][1]);
         }
 #endif
+        inline operator TriMesh() const
+        {
+            TriMesh mesh;
+            mesh.vbo_ = vbo_;
+            mesh.ibo_ = ibo_;
+            mesh.fno_ = fno_;
+            mesh.bounding_ = bounding_;
+            mesh.index_ = number_;
+            return mesh;
+        }
+        inline TriMesh toTriMesh() const
+        {
+            return operator TriMesh();
+        }
+        static std::vector<TriMesh> toTriMeshs(const std::vector<ModelMesh>& meshVct)
+        {
+            std::vector<TriMesh> meshRes(meshVct.size());
+            for (int i = 0; i < (int)meshVct.size(); ++i)
+                meshRes[i] = meshVct[i]; //operator
+            return meshRes;
+        }
     };
     //static const ModelMesh gMeshEmpty = {};
 
@@ -168,6 +189,7 @@ namespace clash //collide //psykronix
         SURFACE = 0,
         INNER,
         OUTER,
+        UNKNOWN,
     };
 
     enum class RelationOfTwoMesh : int

@@ -1017,7 +1017,7 @@ Eigen::Vector3d clash::getPenetrationDepthOfTwoMeshsParts(const ModelMesh& meshA
 // mesh
 //--------------------------------------------------------------------------------------------------------
 
-Eigen::Affine3d _getRelativeMatrixRectify(const Eigen::Affine3d& matA, const Eigen::Affine3d& matB)
+static Eigen::Affine3d _getRelativeMatrixRectify(const Eigen::Affine3d& matA, const Eigen::Affine3d& matB)
 {
 	//Eigen::Affine3d::Identity()
 	Eigen::Affine3d relative_matrix = matB.inverse() * matA; // model_a * a / b
@@ -1034,7 +1034,7 @@ Eigen::Affine3d _getRelativeMatrixRectify(const Eigen::Affine3d& matA, const Eig
 }
 
 // get the index number of mesh's ibo
-std::array<std::vector<int>, 2> _triangleAndCommonBoxPreclash(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance)
+static std::array<std::vector<int>, 2> _triangleAndCommonBoxPreclash(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance)
 {
 	Eigen::AlignedBox3d box = meshA.bounding_.intersection(meshB.bounding_); //common box
 	Vector3d toleSize = Vector3d(tolerance, tolerance, tolerance);
@@ -1085,11 +1085,8 @@ std::array<std::vector<int>, 2> _triangleAndCommonBoxPreclash(const ModelMesh& m
 	{
 #ifdef STATISTIC_DATA_COUNT
 		//count_tris_box_not_inter++;
-		std::map<std::string, int>& data = test::DataRecordSingleton::getInstance().getData().m_dataCount;
-        if (data.find("count_tris_box_not_inter") == data.end())
-			data.insert({ "count_tris_box_not_inter",1 });
-		else
-			data.at("count_tris_box_not_inter")++;
+		MACRO_EXPANSION_DATA_COUNT("count_tris_box_not_inter");
+		MACRO_EXPANSION_DATA_PAIR(meshA.number_, meshB.number_)
 #endif  
 		return {};//exist situation
 	}

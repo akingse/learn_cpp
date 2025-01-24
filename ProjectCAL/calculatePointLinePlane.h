@@ -194,6 +194,8 @@ namespace clash
 		double minA, maxA, minB, maxB, projection;
 		for (const auto& axis : axes) //fast than index
 		{
+			if (axis.isZero())
+				continue;
 			minA = DBL_MAX;
 			maxA = -DBL_MAX;
 			minB = DBL_MAX;
@@ -252,6 +254,8 @@ namespace clash
 		double minA, maxA, minB, maxB, projection;
 		for (const auto& axis : axes) //fast than index
 		{
+			if (axis.isZero())
+				continue;
 			minA = DBL_MAX;
 			maxA = -DBL_MAX;
 			minB = DBL_MAX;

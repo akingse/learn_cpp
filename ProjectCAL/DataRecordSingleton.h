@@ -67,12 +67,15 @@ namespace test
 
 //macro expand
 #define MACRO_EXPANSION_DATA_COUNT(dataName) \
-	std::map<std::string, int>& data = test::DataRecordSingleton::getInstance().getData().m_dataCount;\
-    if (data.find(dataName) == data.end())\
-        data.insert({ dataName,1 });\
+	std::map<std::string, int>& dataM = test::DataRecordSingleton::getInstance().getData().m_dataCount;\
+    if (dataM.find(dataName) == dataM.end())\
+        dataM.insert({ dataName,1 });\
     else\
-        data[dataName]++;\
+        dataM[dataName]++;\
 
+#define MACRO_EXPANSION_DATA_PAIR(idA, idB) \
+	std::vector<std::pair<int, int>>& dataV = test::DataRecordSingleton::getInstance().getData().m_dataPairId;\
+    dataV.push_back({idA, idB});\
 
 namespace test
 {
@@ -110,6 +113,9 @@ namespace test
             //to keep order
             std::vector<std::pair<std::string, int>> m_dataItemVct;
             std::vector<std::pair<std::string, double>> m_dataTimeVct;
+            //clash pair
+            std::vector<std::pair<int, int>> m_dataPairId;
+
         };
 
     public:

@@ -215,6 +215,8 @@ static bool _isTwoMeshsIntersectSAT(const TriMesh& meshA, const TriMesh& meshB, 
 std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(const std::vector<int>& indexesLeft, const std::vector<int>& indexesRight, 
 	const double tolerance /*= 0.0*/, const std::function<bool(float, int)>& callback /*= nullptr*/)
 {
+	if (sm_meshStore.empty())
+		return {};
 	std::vector<Polyface3d> polyfaceVct(sm_meshStore.size());// simpified TriMesh
 #pragma omp parallel for schedule(dynamic)
 	for (int i = 0; i < (int)sm_meshStore.size(); ++i)
@@ -225,11 +227,11 @@ std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(con
 	bvh::BVHTree3d bvhtree(polyfaceVct);//create spatial search tree
 	set<std::pair<int, int>> signRecord;
 	std::vector<std::pair<int, int>> clashRes;
-//#ifdef _OPENMP 
+#ifdef _OPENMP 
 	int numThreads = omp_get_max_threads() - 1;
 	int maxThreads = std::max(numThreads, 1);
 	omp_set_num_threads(maxThreads);
-//#endif //_OPENMP
+#endif //_OPENMP
 #pragma omp parallel for //schedule(dynamic)
 	for (int i = 0; i < (int)indexesLeft.size(); ++i)
 	{
@@ -288,11 +290,11 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetection(const
 	}
 	bvh::BVHTree3d bvhtree(polyfaceVct);//create spatial search tree
 	std::vector<std::pair<int, int>> clashRes;
-//#ifdef _OPENMP 
+#ifdef _OPENMP 
 	int numThreads = omp_get_max_threads() - 1;
 	int maxThreads = std::max(numThreads, 1);
 	omp_set_num_threads(maxThreads);
-//#endif //_OPENMP
+#endif //_OPENMP
 #pragma omp parallel for //schedule(dynamic)
 	for (int i = 0; i < (int)sm_meshStore.size(); ++i)
 	{
@@ -321,6 +323,7 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetection(const
 			}
 		}
 	}
+	sm_meshStore.clear(); //clearMeshs
 	return clashRes;
 }
 
