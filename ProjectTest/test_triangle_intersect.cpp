@@ -486,13 +486,30 @@ static void _test12()
 	double intrusion = getTrianglesIntrusionSAT(triA, triB); //0.9
 	bool isIntr = isTwoTrianglesIntrusionSAT(triA, triB, 1);
 
+
+
 	return;
 }
 
 //≤‚ ‘isTwoMeshsIntersectSAT
 static void _test13()
 {
+	Eigen::AlignedBox3d box = {
+	Vector3d(0, 0, 0),
+	Vector3d(10, 10, 10), };
 
+	bool isCon = box.contains(Vector3d(0, 0, 0));//include point on box edge
+
+	//ÀÊª˙œÚ¡ø
+	for (int i = 0; i < 10; i++)
+	{
+		Vector3d rayDir = Vector3d(0.0, 0.0, 1.0);
+		Affine3d rotation = Affine3d::Identity();
+		Vector3d axis = Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff).normalized();
+		rotation.rotate(AngleAxisd(1.0, axis));
+		rayDir = rotation * rayDir;
+	}
+	return;
 }
 
 //isTriangleAndBoundingBoxIntersectSAT

@@ -37,6 +37,7 @@ namespace clash
 	public:
 		Eigen::AlignedBox3d m_bound;
 		int m_index = -1;
+		int m_number = -1;
 		RectBase3d() = default;
 		virtual ~RectBase3d() {};
 	};

@@ -37,6 +37,10 @@ namespace clash
 			const double tolerance = 0.0, const std::function<bool(float, int)>& callback = nullptr);
         static std::vector<std::pair<int, int>> executePairClashDetection(const std::vector<TriMesh>& meshsLeft, const std::vector<TriMesh>& meshsRight,
             const double tolerance = 0.0, const std::function<bool(float, int)>& callback = nullptr);
+
+        //using trigon tree
+        static std::vector<std::pair<int, int>> executeFullClashDetectionBVH(const std::vector<TriMesh>& meshVct,
+            const double tolerance = 0.0, const std::function<bool(float, int)>& callback = nullptr);
 #if 0
         //overload
         static void addMeshs(const std::vector<ModelMesh>& meshVct)
