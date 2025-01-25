@@ -51,7 +51,7 @@ int kthSmallest(int arr[], int l, int r, int k)
 
 #ifdef RESERVE_USING_POLYGON2D
 //size_t Polygon2d::m_id = 0;
-std::unique_ptr<BVHNode2d> _createTree2d(std::vector<RectBase2d>& rectVct, int dimension)
+static std::unique_ptr<BVHNode2d> _createTree2d(std::vector<RectBase2d>& rectVct, int dimension)
 {
 	auto _getTotalBounding = [&rectVct]()->Eigen::AlignedBox2d
 	{
@@ -104,7 +104,7 @@ BVHTree2d::BVHTree2d(const std::vector<RectBase2d>& _rectVct)
 }
 
 //sort the input polygons
-std::unique_ptr<BVHNode2d> _createTree2d(std::vector<Polygon2d>& polygons, int dimension = 0)
+static std::unique_ptr<BVHNode2d> _createTree2d(std::vector<Polygon2d>& polygons, int dimension = 0)
 {
 	auto _getTotalBounding = [&polygons](/*const std::vector<Polygon2d>& polygons*/)->Eigen::AlignedBox2d
 	{
@@ -157,7 +157,7 @@ BVHTree2d::BVHTree2d(const std::vector<Polygon2d>& _polygons/*, int depth = 0*/)
 }
 
 //template<class T>
-std::unique_ptr<BVHNode2d> _createTree2d(std::vector<TrigonPart>& triangles, int dimension = 0)
+static std::unique_ptr<BVHNode2d> _createTree2d(std::vector<TrigonPart>& triangles, int dimension = 0)
 {
 	auto _getTotalBounding = [&triangles](/*const std::vector<TrigonPart>& polygons*/)->Eigen::AlignedBox2d
 	{
@@ -419,92 +419,6 @@ std::vector<size_t> BVHTree2d::findIntersect(const ContourPart& profile) const
 	return indexes;
 }
 
-//multi-way tree
-std::unique_ptr<BVHNode2dM> _createTree2dM(std::vector<RectBase2d>& rectVct)
-{
-	auto _getTotalBounding = [&rectVct]()->Eigen::AlignedBox2d
-		{
-			AlignedBox2d fullBox;
-			for (const auto& iter : rectVct)
-				fullBox.extend(iter.m_bound);
-			return fullBox;
-		};
-	auto _getLongest = [](const AlignedBox2d& box)->int
-		{
-			Vector2d size = box.sizes();
-			return (size[0] < size[1]) ? 1 : 0;
-		};
-	if (rectVct.empty()) //no chance
-		return nullptr;
-	std::unique_ptr<BVHNode2dM> currentNode = std::make_unique<BVHNode2dM>();
-	currentNode->m_bound = _getTotalBounding();
-	if (_getLongest(currentNode->m_bound) == 0)//min fast than center
-		std::sort(rectVct.begin(), rectVct.end(), [](const RectBase2d& a, const RectBase2d& b)
-			{ return a.m_bound.min()[0] < b.m_bound.min()[0]; });//x
-	else
-		std::sort(rectVct.begin(), rectVct.end(), [](const RectBase2d& a, const RectBase2d& b)
-			{ return a.m_bound.min()[1] < b.m_bound.min()[1]; });//y
-	if (NodeSize < rectVct.size()) //middle node
-	{
-        int size = (int)ceil(rectVct.size() / (float)NodeSize);
-        for (int i = 0; i < NodeSize; ++i)
-		{
-			if ((i + 1) * size < rectVct.size())
-			{
-				vector<RectBase2d> parts(rectVct.begin() + i * size, rectVct.begin() + (i + 1) * size);
-				currentNode->m_nodes[i] = _createTree2dM(parts);
-			}
-			else
-			{
-                vector<RectBase2d> parts(rectVct.begin() + i * size, rectVct.end());
-                currentNode->m_nodes[i] = _createTree2dM(parts);
-				break;
-			}
-		}
-	}
-	else // end leaf node
-	{
-		for (int i = 0; i < rectVct.size(); ++i)
-		{
-			std::unique_ptr<BVHNode2dM> leafNode = std::make_unique<BVHNode2dM>();
-			leafNode->m_bound = rectVct[i].m_bound;
-			leafNode->m_index = rectVct[i].m_index;
-			currentNode->m_nodes[i] = std::move(leafNode);
-		}
-	}
-	return currentNode;
-}
-
-BVHTree2dM::BVHTree2dM(const std::vector<clash::RectBase2d>& _rectVct)
-{
-	std::vector<RectBase2d> rectVct = _rectVct; //copy
-	m_tree = _createTree2dM(rectVct);
-}
-
-std::vector<int> BVHTree2dM::findIntersect(const Eigen::Vector2d& point) const
-{
-	std::vector<int> indexes;
-	std::function<void(const unique_ptr<BVHNode2dM>&)> _searchTree = [&](const unique_ptr<BVHNode2dM>& node)->void
-		{
-            if (node == nullptr)
-				return;
-			if (node->m_bound.contains(point))
-			{
-				if (node->m_index != -1)
-				{
-					indexes.push_back(node->m_index);
-				}
-				else // isnot leaf node
-				{
-					for (int i = 0; i < NodeSize; ++i)
-						_searchTree(node->m_nodes[i]);
-				}
-				return;
-			}
-		};
-	_searchTree(m_tree);
-	return indexes;
-}
 #endif RESERVE_USING_POLYGON2D
 
 //--------------------------------------------------------------------------------------------------
@@ -646,7 +560,7 @@ bool BVHTree3d::update(const clash::Polyface3d& polyface)
 }
 
 //sort the input polygons // Polyface3d self include index,
-std::shared_ptr<BVHNode3d> _createTree3d(std::vector<Polyface3d>& polyfaces, int dimension = 0)
+static std::shared_ptr<BVHNode3d> _createTree3d(std::vector<Polyface3d>& polyfaces, int dimension = 0)
 {
 	auto _getLongest = [](const AlignedBox3d& box)->int
 	{
@@ -694,7 +608,7 @@ std::shared_ptr<BVHNode3d> _createTree3d(std::vector<Polyface3d>& polyfaces, int
 }
 
 // record count and depth
-std::shared_ptr<BVHNode3d> _createTree3d(std::vector<Polyface3d>& polyfaces, size_t& count, size_t& depth, int dimension = 0)
+static std::shared_ptr<BVHNode3d> _createTree3d(std::vector<Polyface3d>& polyfaces, size_t& count, size_t& depth, int dimension = 0)
 {
 	auto _getTotalBounding = [&polyfaces](/*const std::vector<Polygon2d>& polygons*/)->Eigen::AlignedBox3d
 	{
@@ -905,6 +819,95 @@ std::vector<std::tuple<int, bool>> BVHTree3d::findIntersectClash(const Polyface3
 	return indexes;
 }
 
+
+//--------------------------------------------------------------------------------------------------
+//RectBase
+//--------------------------------------------------------------------------------------------------
+
+static std::unique_ptr<RectBaseNode3d> _createTree3d(std::vector<RectBase3d>& rectVct) //without dimension
+{
+	auto _getTotalBounding = [&rectVct]()->Eigen::AlignedBox3d
+		{
+			AlignedBox3d fullBox;
+			for (const auto& iter : rectVct)
+				fullBox.extend(iter.m_bound);
+			return fullBox;
+		};
+	auto _getLongest = [](const AlignedBox3d& box)->int
+		{
+			Vector3d size = box.sizes();
+			if (size[1] < size[0] && size[2] < size[0])
+				return 0;//AXIS_X
+			return (size[1] < size[2]) ? 2 : 1; //AXIS_Z:AXIS_Y
+		};
+	if (rectVct.empty()) //no chance
+		return nullptr;
+	std::unique_ptr<RectBaseNode3d> currentNode = std::make_unique<RectBaseNode3d>();
+	if (rectVct.size() != 1) //middle node
+	{
+		currentNode->m_bound = _getTotalBounding();
+		int direction = _getLongest(currentNode->m_bound);
+		std::sort(rectVct.begin(), rectVct.end(), [=](const RectBase3d& a, const RectBase3d& b)
+			{ return a.m_bound.min()[direction] < b.m_bound.min()[direction]; });//xyz
+		size_t dichotomy = rectVct.size() / 2; // less | more
+		vector<RectBase3d> leftParts(rectVct.begin(), rectVct.begin() + dichotomy); //for new child node
+		vector<RectBase3d> rightParts(rectVct.begin() + dichotomy, rectVct.end());
+		// using recursion
+		currentNode->m_left = _createTree3d(leftParts);
+		currentNode->m_right = _createTree3d(rightParts);
+		currentNode->m_index = -1; //not leaf node
+	}
+	else // end leaf node
+	{
+		currentNode->m_index = rectVct[0].m_index;
+		currentNode->m_number = rectVct[0].m_number;
+		currentNode->m_bound = rectVct[0].m_bound;
+		currentNode->m_left = nullptr;
+		currentNode->m_right = nullptr;
+	}
+	return currentNode;
+}
+
+RectBaseTree3d::RectBaseTree3d(const std::vector<clash::RectBase3d>& _trigons)
+{
+	std::vector<RectBase3d> trigons = _trigons; //copy 
+	m_tree = _createTree3d(trigons);
+}
+
+std::vector<int> RectBaseTree3d::findIntersect(const clash::RectBase3d& trigon, double tolerance) const
+{
+	if (m_tree == nullptr) // || polygon.m_index == -1 means cannot be external polyface
+		return {};
+	std::vector<int> indexes;
+	Eigen::AlignedBox3d curBox = trigon.m_bound;
+	if (tolerance != 0.0) // not using default epsF
+	{
+		Vector3d tole(tolerance, tolerance, tolerance);
+		curBox.min() -= tole;
+		curBox.max() += tole;
+	}
+	std::function<void(const unique_ptr<RectBaseNode3d>&)> _searchTree = [&](const unique_ptr<RectBaseNode3d>& node)->void
+		{
+			//using recursion
+			if (node->m_bound.intersects(curBox))
+			{
+				if (node->m_index == -1) // isnot leaf node
+				{
+					_searchTree(node->m_left);
+					_searchTree(node->m_right);
+				}
+				else
+				{
+					if (trigon.m_index != node->m_index && trigon.m_number != node->m_number) //exclude self
+						indexes.push_back(node->m_index); //if double loop, index canbe small to large
+					return;
+				}
+			}
+		};
+	_searchTree(m_tree);
+	return indexes;
+}
+
 //--------------------------------------------------------------------------------------------------
 //  spatial
 //--------------------------------------------------------------------------------------------------
@@ -966,8 +969,8 @@ std::vector<int> Quadtree::intersectSearch(const QuadtreeNode* node, const Eigen
 //	return node;
 //}
 
-//write by chatgpt4
-std::shared_ptr<KDTreeNode> buildKdTree(NodeVector data, int depth = 0) //copy data to change
+//wrote by chatgpt4
+static std::shared_ptr<KDTreeNode> buildKdTree(NodeVector data, int depth = 0) //copy data to change
 {
 	if (data.empty())
 		return nullptr;
@@ -983,7 +986,7 @@ std::shared_ptr<KDTreeNode> buildKdTree(NodeVector data, int depth = 0) //copy d
 	return node;
 }
 
-void searchIntersectingNodes(const std::shared_ptr<KDTreeNode>& node, const Eigen::AlignedBox3d& queryBox, std::vector<int>& results)
+static void searchIntersectingNodes(const std::shared_ptr<KDTreeNode>& node, const Eigen::AlignedBox3d& queryBox, std::vector<int>& results)
 {
 	if (!node)
 		return;

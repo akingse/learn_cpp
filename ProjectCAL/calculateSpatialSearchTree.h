@@ -156,42 +156,20 @@ namespace bvh
 	public:
 		BVHTree2d() = delete;
 		BVHTree2d(const BVHTree2d&) = delete;
-		BVHTree2d(const std::vector<clash::RectBase2d>& rectVct);
+		DLLEXPORT_CAL BVHTree2d(const std::vector<clash::RectBase2d>& rectVct);
 		BVHTree2d(const std::vector<clash::Polygon2d>& polygons);
 		BVHTree2d(const std::vector<eigen::TrigonPart>& triangles);
 		BVHTree2d(const std::vector<eigen::ContourPart>& profiles);
-		//std::unique_ptr<BVHNode2d> get() const
-		//{
-		//	return m_tree;
-		//}
-		std::vector<int> findIntersect(const clash::RectBase2d& rect) const; // for RectBase2d
+
+		DLLEXPORT_CAL std::vector<int> findIntersect(const clash::RectBase2d& rect) const; // for RectBase2d
 		std::vector<size_t> findIntersect(const clash::Polygon2d& polygon) const; //searchFromTree
 		std::vector<size_t> findIntersect(const eigen::ContourPart& profile) const;
 		std::vector<size_t> findIntersectOpLess(const eigen::TrigonPart& trigon) const;//operator less
 		std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon) const;
 		//for grid ray only
-		std::vector<int> findIntersect(const Eigen::Vector2d& point) const;
-		std::vector<int> findIntersect(const Eigen::AlignedBox2d& box) const;
-
-	};
-
-	//multi-way tree
-	constexpr int NodeSize = 8;
-
-	struct BVHNode2dM
-	{
-		Eigen::AlignedBox2d m_bound;
-		std::array<std::unique_ptr<BVHNode2dM>, NodeSize> m_nodes;
-		int m_index = -1; //middle node
-	};
-
-	class BVHTree2dM
-	{
-	private:
-		std::unique_ptr<BVHNode2dM> m_tree;
-	public:
-		DLLEXPORT_CAL BVHTree2dM(const std::vector<clash::RectBase2d>& rectVct);
 		DLLEXPORT_CAL std::vector<int> findIntersect(const Eigen::Vector2d& point) const;
+		DLLEXPORT_CAL std::vector<int> findIntersect(const Eigen::AlignedBox2d& box) const;
+
 	};
 
 	//----------------------------------------------------------------------------------------------------------------
@@ -268,6 +246,27 @@ namespace bvh
 		std::vector<std::tuple<int, bool>> findIntersectClash(const clash::Polyface3d& polyface, double tolerance) const; //custom tolerance
 		//for grid ray only
 	};
+
+	struct RectBaseNode3d //for RectBase3d
+	{
+		Eigen::AlignedBox3d m_bound;  // the extend bounding box
+		std::unique_ptr<RectBaseNode3d> m_left;	//BVHNode3d* m_left;  
+		std::unique_ptr<RectBaseNode3d> m_right;  //BVHNode3d* m_right; 
+		int m_index = -1;
+		int m_number = -1;
+	};
+
+	class RectBaseTree3d
+	{
+	private:
+		std::unique_ptr<RectBaseNode3d> m_tree;
+	public:
+		RectBaseTree3d() = delete;
+		RectBaseTree3d(const std::vector<clash::RectBase3d>& trigons);
+		std::vector<int> findIntersect(const clash::RectBase3d& trigon, double tolerance) const;
+
+	};
+
 }
 //--------------------------------------------------------------------------------------------------
 //  spatial

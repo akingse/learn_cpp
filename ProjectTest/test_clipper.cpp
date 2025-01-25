@@ -317,7 +317,8 @@ static void test5()
 		rect.m_bound = { Vector2d(i,i), Vector2d(i,i) + Vector2d(1,1) };
 		rectVct.push_back(rect);
 	}
-	BVHTree2dM tree(rectVct);
+	//BVHTree2d
+	BVHTree2d tree(rectVct);
 	std::vector<int> indexes = tree.findIntersect(Vector2d(2, 2));
 	return;
 }
@@ -333,7 +334,8 @@ static void test6()
 		rectVct.push_back(rect);
 
 	}
-	bvh::BVHTree2dM tree(rectVct); //debug strange
+	//BVHTree2d
+	bvh::BVHTree2d tree(rectVct); //debug strange
 	cout << tree.findIntersect(Vector2d(0.5, 0.5)).size() << endl;
 	return;
 }
