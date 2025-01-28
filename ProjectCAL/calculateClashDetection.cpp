@@ -341,31 +341,51 @@ std::vector<std::pair<int, int>> ClashDetection::executePairClashDetection(const
 	return res;
 }
 
-//create a big trigons tree, contain all meshs trigon
+//create a whole trigons tree, contain all meshs trigon (maybe there is wrong way)
 std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetectionBVH(const std::vector<TriMesh>& meshVct,
 	const double tolerance /*= 0.0*/, const std::function<bool(float, int)>& callback /*= nullptr*/)
 {
 	std::vector<RectBase3d> allTrgions;
 //#pragma omp parallel for schedule(dynamic)
-	int k = 0; //globla index
+	int k = 0; //global index
+	vector<vector<int>> meshTrigon;
 	for (int i = 0; i < (int)meshVct.size(); ++i) //without mesh store
 	{
 		const TriMesh& mesh = meshVct[i];
-		std::vector<RectBase3d> temp(mesh.ibo_.size()); //add ibo face to boundbox
+		std::vector<RectBase3d> tempTri(mesh.ibo_.size()); //add ibo face to boundbox
+		vector<int> tempId(mesh.ibo_.size());
 		for (int j = 0; j < (int)mesh.ibo_.size(); ++j)
 		{
 			AlignedBox3d box;
 			box.extend(mesh.vbo_[mesh.ibo_[j][0]]);
 			box.extend(mesh.vbo_[mesh.ibo_[j][1]]);
 			box.extend(mesh.vbo_[mesh.ibo_[j][2]]);
-			temp[j].m_bound = box;
-			temp[j].m_number = i; //mesh index
-			temp[j].m_index = k++; //unique index
+			tempTri[j].m_bound = box;
+			tempTri[j].m_number = i; //mesh index
+			tempTri[j].m_index = k++; //unique index
+			tempId[j] = tempTri[j].m_index;
 		}
-		allTrgions.insert(allTrgions.end(), temp.begin(), temp.end());
+		allTrgions.insert(allTrgions.end(), tempTri.begin(), tempTri.end());
+		meshTrigon[i] = tempId;
 	}
 	//create tree
+	bvh::RectBaseTree3d tree3d(allTrgions);
+	vector<set<int>> meshInter;//mesh index - all intersect trigon of mesh
+	for (int i = 0; i < (int)meshTrigon.size(); ++i)
+	{
+		for (int j = 0; j < (int)meshTrigon[i].size(); ++j)
+		{
+			const RectBase3d& iter = allTrgions[meshTrigon[i][j]];
+            const std::vector<std::array<int, 2>> preInter = tree3d.findIntersect(iter, tolerance); //trigon index
+			for (const auto& k : preInter)
+                meshInter[i].insert(k[1]); //with trigon boundbox intersect here
+		}
+	}
+	//only trigon intersect SAT
+	for (int i = 0; i < (int)meshInter.size(); ++i)
+	{
 
+	}
 
 	return {};
 }

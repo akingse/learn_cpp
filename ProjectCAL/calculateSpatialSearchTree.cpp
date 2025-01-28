@@ -874,11 +874,11 @@ RectBaseTree3d::RectBaseTree3d(const std::vector<clash::RectBase3d>& _trigons)
 	m_tree = _createTree3d(trigons);
 }
 
-std::vector<int> RectBaseTree3d::findIntersect(const clash::RectBase3d& trigon, double tolerance) const
+std::vector<std::array<int, 2>> RectBaseTree3d::findIntersect(const clash::RectBase3d& trigon, double tolerance) const
 {
 	if (m_tree == nullptr) // || polygon.m_index == -1 means cannot be external polyface
 		return {};
-	std::vector<int> indexes;
+	std::vector<std::array<int, 2>> indexes;
 	Eigen::AlignedBox3d curBox = trigon.m_bound;
 	if (tolerance != 0.0) // not using default epsF
 	{
@@ -899,7 +899,7 @@ std::vector<int> RectBaseTree3d::findIntersect(const clash::RectBase3d& trigon, 
 				else
 				{
 					if (trigon.m_index != node->m_index && trigon.m_number != node->m_number) //exclude self
-						indexes.push_back(node->m_index); //if double loop, index canbe small to large
+                        indexes.push_back({ node->m_index,node->m_number }); //if double loop, index canbe small to large
 					return;
 				}
 			}

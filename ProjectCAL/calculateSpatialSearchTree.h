@@ -263,7 +263,8 @@ namespace bvh
 	public:
 		RectBaseTree3d() = delete;
 		RectBaseTree3d(const std::vector<clash::RectBase3d>& trigons);
-		std::vector<int> findIntersect(const clash::RectBase3d& trigon, double tolerance) const;
+		//trigon index | mesh index
+		std::vector<std::array<int, 2>> findIntersect(const clash::RectBase3d& trigon, double tolerance) const;
 
 	};
 
