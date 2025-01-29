@@ -348,7 +348,7 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetectionBVH(co
 	std::vector<RectBase3d> allTrgions;
 //#pragma omp parallel for schedule(dynamic)
 	int k = 0; //global index
-	vector<vector<int>> meshTrigon;
+	vector<vector<int>> meshTrigon(meshVct.size());
 	for (int i = 0; i < (int)meshVct.size(); ++i) //without mesh store
 	{
 		const TriMesh& mesh = meshVct[i];
@@ -370,23 +370,40 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetectionBVH(co
 	}
 	//create tree
 	bvh::RectBaseTree3d tree3d(allTrgions);
-	vector<set<int>> meshInter;//mesh index - all intersect trigon of mesh
+	//vector<set<int>> meshInter;//mesh index - all intersect trigon of mesh
+	std::vector<std::pair<int, int>> res;
 	for (int i = 0; i < (int)meshTrigon.size(); ++i)
 	{
+		bool isInter = false;
 		for (int j = 0; j < (int)meshTrigon[i].size(); ++j)
 		{
+			const TriMesh& meshA = meshVct[i];
+			std::array<Eigen::Vector3d, 3> triA = {
+				meshA.vbo_[meshA.ibo_[j][0]],
+				meshA.vbo_[meshA.ibo_[j][1]],
+				meshA.vbo_[meshA.ibo_[j][2]] };
 			const RectBase3d& iter = allTrgions[meshTrigon[i][j]];
             const std::vector<std::array<int, 2>> preInter = tree3d.findIntersect(iter, tolerance); //trigon index
+			//for (const auto& k : preInter)
+   //             meshInter[i].insert(k[1]); //with trigon boundbox intersect here
 			for (const auto& k : preInter)
-                meshInter[i].insert(k[1]); //with trigon boundbox intersect here
+			{
+				const TriMesh& meshB = meshVct[k[1]];
+				std::array<Eigen::Vector3d, 3> triB = {
+					meshB.vbo_[meshB.ibo_[k[0]][0]],
+					meshB.vbo_[meshB.ibo_[k[0]][1]],
+					meshB.vbo_[meshB.ibo_[k[0]][2]] };
+				if (!isTwoTrianglesIntrusionSAT(triA, triB))
+					continue;
+				//intersect
+				isInter = true;
+				res.push_back({ i,k[1] });//record
+				break;
+			}
+			if (isInter)
+				break;
 		}
 	}
-	//only trigon intersect SAT
-	for (int i = 0; i < (int)meshInter.size(); ++i)
-	{
-
-	}
-
-	return {};
+	return res;
 }
 
