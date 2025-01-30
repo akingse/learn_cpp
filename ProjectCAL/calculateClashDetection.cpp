@@ -161,7 +161,7 @@ static bool isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 	return false;
 }
 
-static bool _isTwoMeshsIntersectSAT(const TriMesh& meshA, const TriMesh& meshB, double tolerance = 0.0)
+static bool isTwoMeshsIntersect(const TriMesh& meshA, const TriMesh& meshB, double tolerance = 0.0)
 {
 	const std::array<std::vector<int>, 2> indexAB = trianglesAndCommonBoxPreclash(meshA, meshB, tolerance);// first pre-judge
 	if (!indexAB[0].empty() && !indexAB[1].empty())
@@ -260,7 +260,7 @@ std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(con
 			}
 			const TriMesh& meshR = sm_meshStore[iR];
 			//if (meshL.convex_ && meshR.convex_)
-			if (!_isTwoMeshsIntersectSAT(meshL, meshR, tolerance))
+			if (!isTwoMeshsIntersect(meshL, meshR, tolerance))
 				continue;
 #pragma omp critical
 			{
@@ -309,7 +309,7 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetection(const
             if (j <= i) //also canbe exclude in findIntersect;
 				continue;
 			const TriMesh& meshR = sm_meshStore[j];
-			if (!_isTwoMeshsIntersectSAT(meshL, meshR, tolerance))
+			if (!isTwoMeshsIntersect(meshL, meshR, tolerance))
 				continue;
 #pragma omp critical
 			{
@@ -370,11 +370,11 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetectionBVH(co
 	}
 	//create tree
 	bvh::RectBaseTree3d tree3d(allTrgions);
-	//vector<set<int>> meshInter;//mesh index - all intersect trigon of mesh
 	std::vector<std::pair<int, int>> res;
 	for (int i = 0; i < (int)meshTrigon.size(); ++i)
 	{
 		bool isInter = false;
+		set<int> interMesh;
 		for (int j = 0; j < (int)meshTrigon[i].size(); ++j)
 		{
 			const TriMesh& meshA = meshVct[i];
@@ -384,8 +384,6 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetectionBVH(co
 				meshA.vbo_[meshA.ibo_[j][2]] };
 			const RectBase3d& iter = allTrgions[meshTrigon[i][j]];
             const std::vector<std::array<int, 2>> preInter = tree3d.findIntersect(iter, tolerance); //trigon index
-			//for (const auto& k : preInter)
-   //             meshInter[i].insert(k[1]); //with trigon boundbox intersect here
 			for (const auto& k : preInter)
 			{
 				const TriMesh& meshB = meshVct[k[1]];
@@ -393,10 +391,12 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetectionBVH(co
 					meshB.vbo_[meshB.ibo_[k[0]][0]],
 					meshB.vbo_[meshB.ibo_[k[0]][1]],
 					meshB.vbo_[meshB.ibo_[k[0]][2]] };
-				if (!isTwoTrianglesIntrusionSAT(triA, triB))
+                if (interMesh.find(k[1]) != interMesh.end() ||
+					!isTwoTrianglesIntrusionSAT(triA, triB))
 					continue;
 				//intersect
 				isInter = true;
+				interMesh.insert(k[1]);
 				res.push_back({ i,k[1] });//record
 				break;
 			}
@@ -404,6 +404,8 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetectionBVH(co
 				break;
 		}
 	}
+	//inside judge
+
 	return res;
 }
 
