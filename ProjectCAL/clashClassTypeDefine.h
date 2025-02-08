@@ -90,13 +90,6 @@ namespace clash
     };
     //static const ModelMesh gMeshEmpty = {};
 
-    ////convert easy
-    //struct Polyface //equal PolyfaceHandle
-    //{
-    //    std::vector<Eigen::Vector3d> m_point;
-    //    std::vector<int> m_pointIndex; //divide by zero
-    //};
-
 }
 
 namespace clash //collide //psykronix

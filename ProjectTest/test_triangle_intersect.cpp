@@ -533,6 +533,13 @@ static void _test14()
 	return;
 }
 
+static void _test15()
+{
+	TriMesh meshIn = createTriMesh_UnitCube();
+	TriMesh meshOut = eigen::scale(2) * meshIn;
+
+
+}
 
 static int enrol = []()->int
 {

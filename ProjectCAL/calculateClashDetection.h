@@ -68,11 +68,20 @@ namespace clash
 
     };
 
+}
+
+namespace sat //to distinguish clash
+{
     //positive tolerance means magnify
     inline Eigen::AlignedBox3d boxExtendTolerance(const Eigen::AlignedBox3d& box, const double tolerance)
     {
-        Vector3d toleSize = Vector3d(tolerance, tolerance, tolerance);
+        Eigen::Vector3d toleSize = Eigen::Vector3d(tolerance, tolerance, tolerance);
         return Eigen::AlignedBox3d(box.min() - toleSize, box.max() + toleSize);
     }
+
+    DLLEXPORT_CAL bool isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box);
+    DLLEXPORT_CAL std::array<std::vector<int>, 2> trianglesAndCommonBoxPreclash(const clash::TriMesh& meshA, const clash::TriMesh& meshB, double tolerance);
+    DLLEXPORT_CAL bool isMeshInsideOtherMesh(const clash::TriMesh& meshIn, const clash::TriMesh& meshOut);
+    DLLEXPORT_CAL bool isTwoMeshsIntersectSAT(const clash::TriMesh& meshA, const clash::TriMesh& meshB, double tolerance = 0.0);
 
 }

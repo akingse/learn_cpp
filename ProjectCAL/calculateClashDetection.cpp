@@ -3,6 +3,7 @@ using namespace std;
 using namespace Eigen;
 using namespace eigen;
 using namespace clash;
+using namespace sat;
 #define STATISTIC_DATA_RECORD
 
 std::vector<TriMesh> ClashDetection::sm_meshStore;
@@ -12,7 +13,7 @@ count_pre_clash = 0, count_mesh_intersect = 0, count_triangle_intersect = 0,
 count_ = 0;
 
 //without tolerance, critical contact is separate
-static bool _isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box)
+bool sat::isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box)
 {
 	//pre-judge
 	const Vector3d& p0 = trigon[0];
@@ -89,7 +90,7 @@ static bool _isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector
 }
 
 //tolerance keep with hardclash
-static std::array<std::vector<int>, 2> trianglesAndCommonBoxPreclash(const TriMesh& meshA, const TriMesh& meshB, double tolerance)
+std::array<std::vector<int>, 2> sat::trianglesAndCommonBoxPreclash(const TriMesh& meshA, const TriMesh& meshB, double tolerance)
 {
 //#define USING_SECOND_PRECLASH //test shows not faster
 	Eigen::AlignedBox3d boxCom = meshA.bounding_.intersection(meshB.bounding_); // box common
@@ -168,7 +169,7 @@ static std::array<std::vector<int>, 2> trianglesAndCommonBoxPreclash(const TriMe
 }
 
 //hard clash without tolerance
-static bool isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut) 
+bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 {
 	auto _isRayAndTriangleIntersectParallel = [](const Eigen::Vector3d& point, const Eigen::Vector3d& rayDir, const std::array<Eigen::Vector3d, 3 >& trigon, const Eigen::Vector3d& normal)->bool
 		{
@@ -257,9 +258,9 @@ static bool isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 	return (countInter % 2 == 1);
 }
 
-static bool isTwoMeshsIntersect(const TriMesh& meshA, const TriMesh& meshB, double tolerance = 0.0)
+bool sat::isTwoMeshsIntersectSAT(const TriMesh& meshA, const TriMesh& meshB, double tolerance /*= 0.0*/)
 {
-	const std::array<std::vector<int>, 2> indexAB = trianglesAndCommonBoxPreclash(meshA, meshB, tolerance);// first pre-judge
+	const std::array<std::vector<int>, 2> indexAB = sat::trianglesAndCommonBoxPreclash(meshA, meshB, tolerance);// first pre-judge
 	if (!indexAB[0].empty() && !indexAB[1].empty())
 	{
 		for (const int& iA : indexAB[0])
@@ -371,8 +372,7 @@ std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(con
 #ifdef STATISTIC_DATA_RECORD
 			count_mesh_intersect++;
 #endif
-			//if (meshL.convex_ && meshR.convex_)
-			if (!isTwoMeshsIntersect(meshL, meshR, tolerance))
+			if (!sat::isTwoMeshsIntersectSAT(meshL, meshR, tolerance))
 				continue;
 #pragma omp critical
 			{
@@ -419,7 +419,7 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetection(const
             if (j <= i) //also canbe exclude in findIntersect;
 				continue;
 			const TriMesh& meshR = sm_meshStore[j];
-			if (!isTwoMeshsIntersect(meshL, meshR, tolerance))
+			if (!sat::isTwoMeshsIntersectSAT(meshL, meshR, tolerance))
 				continue;
 #pragma omp critical
 			{
