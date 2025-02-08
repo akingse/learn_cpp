@@ -227,7 +227,7 @@ namespace bvh
 			//Vector3d tole = (m_tolerance == 0.0) ? Vector3d(epsF, epsF, epsF) : Vector3d(m_tolerance, m_tolerance, m_tolerance);
 			m_tolerance = Eigen::Vector3d(tolerance, tolerance, tolerance);
 		}
-		std::shared_ptr<BVHNode3d> getTree() const
+		const std::shared_ptr<BVHNode3d> getTree() const
 		{
 			return m_tree;
 		}
@@ -237,11 +237,11 @@ namespace bvh
 		}
 		// the tree crud create read update delete
 		bool insert(const clash::Polyface3d& polyface); //only insert the not exsit index
-		//bool remove(size_t index);
 		bool remove(const clash::Polyface3d& polyface); //find by polyface index
 		bool update(const clash::Polyface3d& polyface); //using polyface self index
 		std::vector<int> findIntersect(const clash::Polyface3d& polyface, double tolerance = 0.0) const; //searchFromTree
-		std::vector<int> findIntersect(const eigen::TrigonPart& trigon) const;
+		//std::vector<int> findIntersect(const eigen::TrigonPart& trigon) const;
+		//using m_tolerance
 		std::vector<std::tuple<int, bool>> findIntersectClash(const clash::Polyface3d& polyface) const; // bool means soft-clash
 		std::vector<std::tuple<int, bool>> findIntersectClash(const clash::Polyface3d& polyface, double tolerance) const; //custom tolerance
 		//for grid ray only

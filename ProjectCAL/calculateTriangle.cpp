@@ -1171,7 +1171,7 @@ namespace eigen
 				minB = std::min(minB, projection);
 				maxB = std::max(maxB, projection);
 			}
-			if (maxA - tolerance <= minB || maxB - tolerance <= minA) //include equal more return
+			if (maxA + tolerance <= minB || maxB + tolerance <= minA) //include equal more return
 				return false; //as long as one axis gap is separate
 		}
 		return true;

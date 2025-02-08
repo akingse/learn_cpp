@@ -1,16 +1,14 @@
 #pragma once
 namespace clash
 {
+    /// <summary>
+    /// self full clash detection of whole trimesh
+    /// </summary>
+    /// <param name="meshVct"></param>
+    /// <param name="tolerance"></param>
+    /// <returns> the index pair of mesh </returns>
     class ClashDetection //DLLEXPORT_CAL
     {
-        //struct ClashInfo
-        //{
-        //    std::pair<int, int> m_indexpair;      
-        //    Eigen::AlignedBox3d m_boundbox;    
-        //    double m_distance = 0.0;           
-        //    std::vector<Eigen::Vector3d> m_points;
-        //};
-
     private:
         static std::vector<TriMesh> sm_meshStore;
 
@@ -23,24 +21,21 @@ namespace clash
         {
             sm_meshStore.clear();
         }
+        //using index
         static std::vector<std::pair<int, int>> executeAssignClashDetection(const std::vector<int>& indexesLeft, const std::vector<int>& indexesRight, 
 			const double tolerance = 0.0, const std::function<bool(float, int)>& callback = nullptr);
 
     public:
-        /// <summary>
-        /// self full clash detection of whole modelmesh
-        /// </summary>
-        /// <param name="meshVct"></param>
-        /// <param name="tolerance"></param>
-        /// <returns> the index pair of mesh </returns>
+        //using meshs
         static std::vector<std::pair<int, int>> executeFullClashDetection(const std::vector<TriMesh>& meshVct,
 			const double tolerance = 0.0, const std::function<bool(float, int)>& callback = nullptr);
         static std::vector<std::pair<int, int>> executePairClashDetection(const std::vector<TriMesh>& meshsLeft, const std::vector<TriMesh>& meshsRight,
             const double tolerance = 0.0, const std::function<bool(float, int)>& callback = nullptr);
 
         //using trigon tree
-        static std::vector<std::pair<int, int>> executeFullClashDetectionBVH(const std::vector<TriMesh>& meshVct,
+        static std::vector<std::pair<int, int>> executeFullClashDetectionByTrigon(const std::vector<TriMesh>& meshVct,
             const double tolerance = 0.0, const std::function<bool(float, int)>& callback = nullptr);
+
 #if 0
         //overload
         static void addMeshs(const std::vector<ModelMesh>& meshVct)
@@ -70,5 +65,14 @@ namespace clash
             return executePairClashDetection(triMeshsLeft, triMeshsRight, tolerance, callback);
         }
 #endif
+
     };
+
+    //positive tolerance means magnify
+    inline Eigen::AlignedBox3d boxExtendTolerance(const Eigen::AlignedBox3d& box, const double tolerance)
+    {
+        Vector3d toleSize = Vector3d(tolerance, tolerance, tolerance);
+        return Eigen::AlignedBox3d(box.min() - toleSize, box.max() + toleSize);
+    }
+
 }

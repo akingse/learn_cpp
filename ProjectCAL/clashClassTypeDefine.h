@@ -30,6 +30,16 @@ namespace clash
         //bool convex_ = true; // isConvex default true
     };
 
+    inline TriMesh operator*(const Eigen::Matrix4d& mat, const TriMesh& mesh)
+    {
+        TriMesh res = mesh;
+        for (int i = 0; i < (int)mesh.vbo_.size(); ++i)
+            res.vbo_[i] = (mat * mesh.vbo_[i].homogeneous()).hnormalized();
+        for (int i = 0; i < (int)mesh.fno_.size(); ++i)
+            res.fno_[i] = (mat * mesh.fno_[i].homogeneous()).hnormalized();
+        return res;
+    }
+
     struct ModelMesh //TriMesh
     {
         std::vector<Eigen::Vector3d> vbo_;
@@ -80,12 +90,12 @@ namespace clash
     };
     //static const ModelMesh gMeshEmpty = {};
 
-    //convert easy
-    struct Polyface //equal PolyfaceHandle
-    {
-        std::vector<Eigen::Vector3d> m_point;
-        std::vector<int> m_pointIndex; //divide by zero
-    };
+    ////convert easy
+    //struct Polyface //equal PolyfaceHandle
+    //{
+    //    std::vector<Eigen::Vector3d> m_point;
+    //    std::vector<int> m_pointIndex; //divide by zero
+    //};
 
 }
 

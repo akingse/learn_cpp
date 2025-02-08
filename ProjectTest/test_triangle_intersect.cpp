@@ -484,8 +484,8 @@ static void _test12()
 		Vector3d(0, -10, 0) ,
 		Vector3d(0, 0, 10) , };
 	double intrusion = getTrianglesIntrusionSAT(triA, triB); //0.9
-	bool isIntr = isTwoTrianglesIntrusionSAT(triA, triB, 1);
-
+	bool isIntr1 = isTwoTrianglesIntrusionSAT(triA, triB, 1);
+	bool isIntr2 = isTwoTrianglesIntrusionSAT(triA, triB, -1);
 
 
 	return;

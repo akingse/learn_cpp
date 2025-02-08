@@ -3,14 +3,89 @@ using namespace std;
 using namespace Eigen;
 using namespace eigen;
 using namespace clash;
+#define STATISTIC_DATA_RECORD
 
 std::vector<TriMesh> ClashDetection::sm_meshStore;
 
-//positive tolerance means magnify
-static Eigen::AlignedBox3d boxExtendTolerance(const Eigen::AlignedBox3d& box, const double tolerance)
+static std::atomic<size_t> count_mesh = 0, count_triangle = 0, count_vertex = 0,
+count_pre_clash = 0, count_mesh_intersect = 0, count_triangle_intersect = 0,
+count_ = 0;
+
+//without tolerance, critical contact is separate
+static bool _isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box)
 {
-	Vector3d toleSize = Vector3d(tolerance, tolerance, tolerance);
-	return Eigen::AlignedBox3d(box.min() - toleSize, box.max() + toleSize);
+	//pre-judge
+	const Vector3d& p0 = trigon[0];
+	const Vector3d& p1 = trigon[1];
+	const Vector3d& p2 = trigon[2];
+	if (box.contains(p0) || box.contains(p1) || box.contains(p2))
+		return true;
+	const Vector3d& min = box.min();
+	const Vector3d& max = box.max();
+	//extreme value filter
+	if (std::max(std::max(p0[0], p1[0]), p2[0]) <= min[0] ||
+		std::min(std::min(p0[0], p1[0]), p2[0]) >= max[0] ||
+		std::max(std::max(p0[1], p1[1]), p2[1]) <= min[1] ||
+		std::min(std::min(p0[1], p1[1]), p2[1]) >= max[1] ||
+		std::max(std::max(p0[2], p1[2]), p2[2]) <= min[2] ||
+		std::min(std::min(p0[2], p1[2]), p2[2]) >= max[2])
+		return false;
+	// Separating Axis Theorem
+	std::array<Eigen::Vector3d, 3> edges = {
+		trigon[1] - trigon[0],
+		trigon[2] - trigon[1],
+		trigon[0] - trigon[2] };
+	std::array<Eigen::Vector3d, 3> coords = {
+		Vector3d(1.,0.,0.),
+		Vector3d(0.,1.,0.),
+		Vector3d(0.,0.,1.) };
+	std::array<Eigen::Vector3d, 10> axes = { {
+			edges[0].cross(edges[1]), //trigon normal
+			coords[0].cross(edges[0]),
+			coords[0].cross(edges[1]),
+			coords[0].cross(edges[2]),
+			coords[1].cross(edges[0]),
+			coords[1].cross(edges[1]),
+			coords[1].cross(edges[2]),
+			coords[2].cross(edges[0]),
+			coords[2].cross(edges[1]),
+			coords[2].cross(edges[2]) } };
+	const Vector3d& origin = box.min();
+	const Vector3d vertex = box.sizes(); //m_max - m_min
+	std::array<Vector3d, 8> vertexes = { {
+		Vector3d(0, 0, 0),
+		Vector3d(vertex[0], 0, 0),
+		Vector3d(vertex[0], vertex[1], 0),
+		Vector3d(0, vertex[1], 0),
+		Vector3d(0, 0, vertex[2]),
+		Vector3d(vertex[0], 0, vertex[2]),
+		Vector3d(vertex[0], vertex[1], vertex[2]),
+		Vector3d(0, vertex[1], vertex[2]) } };
+	double minA, maxA, minB, maxB, projection;
+	for (const auto& axis : axes) //fast than index
+	{
+		if (axis.isZero())
+			continue;
+		minA = DBL_MAX;
+		maxA = -DBL_MAX;
+		minB = DBL_MAX;
+		maxB = -DBL_MAX;
+		for (const auto& iter : trigon)
+		{
+			projection = (iter - origin).dot(axis);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
+		}
+		for (const auto& iter : vertexes)
+		{
+			projection = iter.dot(axis);
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		if (maxA <= minB || maxB <= minA) // absolute zero
+			return false;
+	}
+	return true;
 }
 
 //tolerance keep with hardclash
@@ -18,12 +93,16 @@ static std::array<std::vector<int>, 2> trianglesAndCommonBoxPreclash(const TriMe
 {
 //#define USING_SECOND_PRECLASH //test shows not faster
 	Eigen::AlignedBox3d boxCom = meshA.bounding_.intersection(meshB.bounding_); // box common
-    Eigen::AlignedBox3d boxMag = boxExtendTolerance(boxCom, -tolerance);
+	Vector3d toleSize = Vector3d(tolerance, tolerance, tolerance);
+	Eigen::AlignedBox3d boxMag = Eigen::AlignedBox3d(boxCom.min() - toleSize, boxCom.max() + toleSize);//boxExtendTolerance
+#ifdef USING_SECOND_PRECLASH
 	Eigen::AlignedBox3d boxA;
-	std::vector<int> indexA; 
+	Eigen::AlignedBox3d boxB;
+#endif
+	std::vector<int> indexA;
 	for (int i = 0; i < (int)meshA.ibo_.size(); ++i)
 	{
-		std::array<Eigen::Vector3d, 3> triA = { 
+		const std::array<Eigen::Vector3d, 3> triA = { 
 			meshA.vbo_[meshA.ibo_[i][0]],
 			meshA.vbo_[meshA.ibo_[i][1]],
 			meshA.vbo_[meshA.ibo_[i][2]] };
@@ -39,11 +118,10 @@ static std::array<std::vector<int>, 2> trianglesAndCommonBoxPreclash(const TriMe
 	}
 	if (indexA.empty())
 		return {};
-	Eigen::AlignedBox3d boxB;
 	std::vector<int> indexB;
 	for (int j = 0; j < (int)meshB.ibo_.size(); ++j)
 	{
-		std::array<Eigen::Vector3d, 3> triB= { 
+		const std::array<Eigen::Vector3d, 3> triB= { 
 			meshB.vbo_[meshB.ibo_[j][0]],
 			meshB.vbo_[meshB.ibo_[j][1]],
 			meshB.vbo_[meshB.ibo_[j][2]] };
@@ -92,73 +170,91 @@ static std::array<std::vector<int>, 2> trianglesAndCommonBoxPreclash(const TriMe
 //hard clash without tolerance
 static bool isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut) 
 {
+	auto _isRayAndTriangleIntersectParallel = [](const Eigen::Vector3d& point, const Eigen::Vector3d& rayDir, const std::array<Eigen::Vector3d, 3 >& trigon, const Eigen::Vector3d& normal)->bool
+		{
+			if ((point - trigon[0]).dot(normal) != 0.0) // not coplanar
+				return false;
+			// negetive direction ray cause cross product result opposite
+			return
+				((trigon[0] - point).cross(rayDir).dot(rayDir.cross(trigon[1] - point)) >= 0.0 && (trigon[0] - point).cross(rayDir).dot((trigon[0] - point).cross(trigon[1] - point)) >= 0.0) ||
+				((trigon[1] - point).cross(rayDir).dot(rayDir.cross(trigon[2] - point)) >= 0.0 && (trigon[1] - point).cross(rayDir).dot((trigon[1] - point).cross(trigon[2] - point)) >= 0.0) ||
+				((trigon[2] - point).cross(rayDir).dot(rayDir.cross(trigon[0] - point)) >= 0.0 && (trigon[2] - point).cross(rayDir).dot((trigon[2] - point).cross(trigon[0] - point)) >= 0.0);
+		};
+	Eigen::Vector3d point = gVecNaN;
+	//get inner point
 	for (int i = 0; i < (int)meshIn.vbo_.size(); ++i)
 	{
-		const Eigen::Vector3d& point = meshIn.vbo_[i];
-		//isPointInsidePolyhedronROT
-		if (!meshOut.bounding_.contains(point)) //include point on box edge
-			return false;
-		//one mesh inside other mesh, the bounding-box must inside other mesh
-		Vector3d rayDir = Vector3d(0.0, 0.0, 1.0);
-		int countInter = 0;
-		auto _isRayAndTriangleIntersectParallel = [&point, &rayDir](std::array<Eigen::Vector3d, 3 >& trigon, const Eigen::Vector3d& normal)->bool
-			{
-				if ((point - trigon[0]).dot(normal) != 0.0) // not coplanar
-					return false;
-				// negetive direction ray cause cross product result opposite
-				return
-					((trigon[0] - point).cross(rayDir).dot(rayDir.cross(trigon[1] - point)) >= 0.0 && (trigon[0] - point).cross(rayDir).dot((trigon[0] - point).cross(trigon[1] - point)) >= 0.0) ||
-					((trigon[1] - point).cross(rayDir).dot(rayDir.cross(trigon[2] - point)) >= 0.0 && (trigon[1] - point).cross(rayDir).dot((trigon[1] - point).cross(trigon[2] - point)) >= 0.0) ||
-					((trigon[2] - point).cross(rayDir).dot(rayDir.cross(trigon[0] - point)) >= 0.0 && (trigon[2] - point).cross(rayDir).dot((trigon[2] - point).cross(trigon[0] - point)) >= 0.0);
-			};
-		while (true)
+		bool isOnFace = false;
+		const Eigen::Vector3d& iter = meshIn.vbo_[i];
+		for (int j = 0; j < (int)meshOut.ibo_.size(); ++j)
 		{
-			bool isNewRay = false;//new rayDir
-			for (int i = 0; i < (int)meshOut.ibo_.size(); ++i)//(const auto& iter : ibo) // iterate every trigon
+			std::array<Eigen::Vector3d, 3> trigon = {
+				meshOut.vbo_[meshOut.ibo_[j][0]],
+				meshOut.vbo_[meshOut.ibo_[j][1]],
+				meshOut.vbo_[meshOut.ibo_[j][2]] };
+			if (isPointOnTriangleSurface(iter, trigon))
 			{
-				std::array<Eigen::Vector3d, 3> trigon = {
-					meshOut.vbo_[meshOut.ibo_[i][0]],
-					meshOut.vbo_[meshOut.ibo_[i][1]],
-					meshOut.vbo_[meshOut.ibo_[i][2]] };
-				const Eigen::Vector3d& normal = meshOut.fno_[i];
-				if (isPointOnTriangleSurface(point, trigon))
-					return false;// RelationOfPointAndMesh::SURFACE; // ray across is false
-				double deno = rayDir.dot(normal); //ray.direction
-				if (deno == 0.0)//ray direction is parallel, redo circulation
+				isOnFace = true;
+				break;
+			}
+		}
+        if (isOnFace == false)
+		{
+			point = iter;
+			break;
+		}
+	}
+	if (std::isnan(point[0])) //if (meshIn.vbo_.empty())
+		return false; //all face coincide
+	//ray method
+	Vector3d rayDir = Vector3d(0.0, 0.0, 1.0);
+	int countInter = 0;
+	while (true)
+	{
+		bool isNewRay = false;//new rayDir
+		for (int i = 0; i < (int)meshOut.ibo_.size(); ++i)//(const auto& iter : ibo) // iterate every trigon
+		{
+			std::array<Eigen::Vector3d, 3> trigon = {
+				meshOut.vbo_[meshOut.ibo_[i][0]],
+				meshOut.vbo_[meshOut.ibo_[i][1]],
+				meshOut.vbo_[meshOut.ibo_[i][2]] };
+			const Eigen::Vector3d& normal = meshOut.fno_[i];
+			if (isPointOnTriangleSurface(point, trigon))
+				return false;// RelationOfPointAndMesh::SURFACE; // ray across is false
+			double deno = rayDir.dot(normal); //ray.direction
+			if (deno == 0.0)//ray direction is parallel, redo circulation
+			{
+				if (_isRayAndTriangleIntersectParallel(point, rayDir, trigon, normal)) //coplanar
 				{
-					if (_isRayAndTriangleIntersectParallel(trigon, normal)) //coplanar
-					{
-						rayDir = Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff).normalized();//move RAND_MAX/2
-						isNewRay = true;
-						break;
-					}
-					continue;
-				}
-				double k = (trigon[0] - point).dot(normal) / deno;
-				if (k < 0.0) // only positive direction
-					continue;
-				Vector3d local = point + k * rayDir;
-				if (!isPointInTriangle(local, trigon))
-					continue;
-				if ((local - trigon[0]).isZero() ||
-					(local - trigon[1]).isZero() ||
-					(local - trigon[2]).isZero() ||
-					(local - trigon[0]).cross(local - trigon[1]).isZero() ||
-					(local - trigon[1]).cross(local - trigon[2]).isZero() ||
-					(local - trigon[2]).cross(local - trigon[0]).isZero()) //singularity
-				{
-					rayDir = Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff).normalized();
+					rayDir = Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff).normalized();//move RAND_MAX/2
 					isNewRay = true;
 					break;
 				}
-				countInter++; // ray across is true
+				continue;
 			}
-			if (!isNewRay)
-				break;//end while
+			double k = (trigon[0] - point).dot(normal) / deno;
+			if (k < 0.0) // only positive direction
+				continue;
+			Vector3d local = point + k * rayDir;
+			if (!isPointInTriangle(local, trigon))
+				continue;
+			if ((local - trigon[0]).isZero() ||
+				(local - trigon[1]).isZero() ||
+				(local - trigon[2]).isZero() ||
+				(local - trigon[0]).cross(local - trigon[1]).isZero() ||
+				(local - trigon[1]).cross(local - trigon[2]).isZero() ||
+				(local - trigon[2]).cross(local - trigon[0]).isZero()) //singularity
+			{
+				rayDir = Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff).normalized();
+				isNewRay = true;
+				break;
+			}
+			countInter++; // ray across is true
 		}
-		return (countInter % 2 == 1);
+		if (!isNewRay)
+			break;//end while
 	}
-	return false;
+	return (countInter % 2 == 1);
 }
 
 static bool isTwoMeshsIntersect(const TriMesh& meshA, const TriMesh& meshB, double tolerance = 0.0)
@@ -182,7 +278,10 @@ static bool isTwoMeshsIntersect(const TriMesh& meshA, const TriMesh& meshB, doub
 				{
 					continue;
 				}
-				if (isTwoTrianglesIntersectSAT(triA, triB))
+#ifdef STATISTIC_DATA_RECORD
+				count_triangle_intersect++;
+#endif
+				if (isTwoTrianglesIntrusionSAT(triA, triB, tolerance)) //isTwoTrianglesIntersectSAT
 				{
 					return true;
 				}
@@ -212,6 +311,9 @@ static bool isTwoMeshsIntersect(const TriMesh& meshA, const TriMesh& meshB, doub
 std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(const std::vector<int>& indexesLeft, const std::vector<int>& indexesRight, 
 	const double tolerance /*= 0.0*/, const std::function<bool(float, int)>& callback /*= nullptr*/)
 {
+#ifdef STATISTIC_DATA_RECORD
+	count_mesh = sm_meshStore.size();
+#endif
 	if (sm_meshStore.empty())
 		return {};
 	std::vector<Polyface3d> polyfaceVct(sm_meshStore.size());// simpified TriMesh
@@ -220,6 +322,10 @@ std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(con
 	{
 		polyfaceVct[i].m_index = i; //keep order
 		polyfaceVct[i].m_bound = sm_meshStore[i].bounding_;
+#ifdef STATISTIC_DATA_RECORD
+        count_triangle += sm_meshStore[i].ibo_.size();
+		count_vertex += sm_meshStore[i].vbo_.size();
+#endif
 	}
 	bvh::BVHTree3d bvhtree(polyfaceVct);//create spatial search tree
 	set<std::pair<int, int>> signRecord;
@@ -241,6 +347,9 @@ std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(con
 		if (iL < 0 || sm_meshStore.size() <= iL) //check
 			continue;
 		const std::vector<int> preClash = bvhtree.findIntersect(polyfaceVct[iL], tolerance);
+#ifdef STATISTIC_DATA_RECORD
+		count_pre_clash += preClash.size();
+#endif
 		const TriMesh& meshL = sm_meshStore[iL];
 		for (int j = 0; j < (int)indexesRight.size(); ++j)
 		{
@@ -259,6 +368,9 @@ std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(con
 				signRecord.insert(current);
 			}
 			const TriMesh& meshR = sm_meshStore[iR];
+#ifdef STATISTIC_DATA_RECORD
+			count_mesh_intersect++;
+#endif
 			//if (meshL.convex_ && meshR.convex_)
 			if (!isTwoMeshsIntersect(meshL, meshR, tolerance))
 				continue;
@@ -298,9 +410,7 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetection(const
 #pragma omp critical
 		{
 			if (callback != nullptr)
-			{
-				//callback(100.f * i / (float)sm_meshStore.size(), (int)clashRes.size()); // progress bar | result count
-			}
+				callback(100.f * i / (float)sm_meshStore.size(), (int)clashRes.size()); // progress bar | result count
 		}
 		const TriMesh& meshL = sm_meshStore[i];
 		const std::vector<int> preClash = bvhtree.findIntersect(polyfaceVct[i], tolerance);
@@ -342,7 +452,7 @@ std::vector<std::pair<int, int>> ClashDetection::executePairClashDetection(const
 }
 
 //create a whole trigons tree, contain all meshs trigon (maybe there is wrong way)
-std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetectionBVH(const std::vector<TriMesh>& meshVct,
+std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetectionByTrigon(const std::vector<TriMesh>& meshVct,
 	const double tolerance /*= 0.0*/, const std::function<bool(float, int)>& callback /*= nullptr*/)
 {
 	std::vector<RectBase3d> allTrgions;
