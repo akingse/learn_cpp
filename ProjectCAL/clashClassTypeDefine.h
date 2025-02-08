@@ -33,10 +33,15 @@ namespace clash
     inline TriMesh operator*(const Eigen::Matrix4d& mat, const TriMesh& mesh)
     {
         TriMesh res = mesh;
+        Eigen::AlignedBox3d box; //re calculate
         for (int i = 0; i < (int)mesh.vbo_.size(); ++i)
+        {
             res.vbo_[i] = (mat * mesh.vbo_[i].homogeneous()).hnormalized();
+            box.extend(res.vbo_[i]);
+        }
         for (int i = 0; i < (int)mesh.fno_.size(); ++i)
             res.fno_[i] = (mat * mesh.fno_[i].homogeneous()).hnormalized();
+        res.bounding_ = box;
         return res;
     }
 
@@ -88,6 +93,29 @@ namespace clash
             return meshRes;
         }
     };
+
+    inline TriMesh toTriMesh(const ModelMesh& mesh)
+    {
+        TriMesh res;
+        res.vbo_ = mesh.vbo_;
+        res.ibo_ = mesh.ibo_;
+        res.fno_ = mesh.fno_;
+        res.bounding_ = mesh.bounding_;
+        res.index_ = mesh.number_;
+        return res;
+    }
+
+    inline ModelMesh toModelMesh(const TriMesh& mesh)
+    {
+        ModelMesh res;
+        res.vbo_ = mesh.vbo_;
+        res.ibo_ = mesh.ibo_;
+        res.fno_ = mesh.fno_;
+        res.bounding_ = mesh.bounding_;
+        res.number_ = mesh.index_;
+        return res;
+    }
+
     //static const ModelMesh gMeshEmpty = {};
 
 }

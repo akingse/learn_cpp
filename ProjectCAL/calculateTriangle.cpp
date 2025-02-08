@@ -912,20 +912,17 @@ namespace eigen
 		count_isTrisAndBoxInter++;
 #endif
 		//pre-judge
-		const Vector3d& p0 = trigon[0];
-		const Vector3d& p1 = trigon[1];
-		const Vector3d& p2 = trigon[2];
-		if (box.contains(p0) || box.contains(p1) || box.contains(p2))
+		if (box.contains(trigon[0]) || box.contains(trigon[1]) || box.contains(trigon[2]))
 			return true;
-		const Vector3d& _min = box.min();
-		const Vector3d& _max = box.max();
+		const Vector3d& min = box.min();
+		const Vector3d& max = box.max();
 		//extreme value filter
-		if (std::max(std::max(p0[0], p1[0]), p2[0]) < _min[0] ||
-			std::min(std::min(p0[0], p1[0]), p2[0]) > _max[0] ||
-			std::max(std::max(p0[1], p1[1]), p2[1]) < _min[1] ||
-			std::min(std::min(p0[1], p1[1]), p2[1]) > _max[1] ||
-			std::max(std::max(p0[2], p1[2]), p2[2]) < _min[2] ||
-			std::min(std::min(p0[2], p1[2]), p2[2]) > _max[2])
+		if (std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) <= min[0] ||
+			std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) >= max[0] ||
+			std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) <= min[1] ||
+			std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) >= max[1] ||
+			std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]) <= min[2] ||
+			std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) >= max[2])
 			return false;
 		// Separating Axis Theorem
 		std::array<Eigen::Vector3d, 3> edges = {
@@ -1120,60 +1117,6 @@ namespace eigen
 		//Eigen::Vector3d croA = edgesA[0].cross(edgesA[1]);
 		//Eigen::Vector3d croB = edgesB[0].cross(edgesB[1]);
 		//return !(edgesA[0].cross(edgesA[1]).isZero() || edgesB[0].cross(edgesB[1]).isZero());
-		return true;
-	}
-
-	//must intersect, negative tolerance to filter tiny intersect
-	bool isTwoTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance /*= 0.0*/)
-	{
-		std::array<Eigen::Vector3d, 3> edgesA = {
-			triA[1] - triA[0],
-			triA[2] - triA[1],
-			triA[0] - triA[2] };
-		std::array<Eigen::Vector3d, 3> edgesB = {
-			triB[1] - triB[0],
-			triB[2] - triB[1],
-			triB[0] - triB[2] };
-		Eigen::Vector3d normalA = edgesA[0].cross(edgesA[1]);
-		Eigen::Vector3d normalB = edgesB[0].cross(edgesB[1]);
-		if (normalA.cross(normalB).isZero())//isParallel3d, means not intrusive
-			return false;
-		std::array<Eigen::Vector3d, 11> axes = { {
-			normalA.normalized(), //normal direction projection
-			normalB.normalized(),
-			edgesA[0].cross(edgesB[0]).normalized(),//cross edge pair to get normal
-			edgesA[0].cross(edgesB[1]).normalized(),
-			edgesA[0].cross(edgesB[2]).normalized(),
-			edgesA[1].cross(edgesB[0]).normalized(),
-			edgesA[1].cross(edgesB[1]).normalized(),
-			edgesA[1].cross(edgesB[2]).normalized(),
-			edgesA[2].cross(edgesB[0]).normalized(),
-			edgesA[2].cross(edgesB[1]).normalized(),
-			edgesA[2].cross(edgesB[2]).normalized() } };
-		double minA, maxA, minB, maxB, projection;
-		for (const auto& axis : axes)
-		{
-			if (axis.isZero())
-				continue;
-			minA = DBL_MAX;
-			maxA = -DBL_MAX;
-			minB = DBL_MAX;
-			maxB = -DBL_MAX;
-			for (const auto& vertex : triA)
-			{
-				projection = axis.dot(vertex);
-				minA = std::min(minA, projection);
-				maxA = std::max(maxA, projection);
-			}
-			for (const auto& vertex : triB)
-			{
-				projection = axis.dot(vertex);
-				minB = std::min(minB, projection);
-				maxB = std::max(maxB, projection);
-			}
-			if (maxA + tolerance <= minB || maxB + tolerance <= minA) //include equal more return
-				return false; //as long as one axis gap is separate
-		}
 		return true;
 	}
 

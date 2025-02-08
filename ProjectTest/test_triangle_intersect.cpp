@@ -5,8 +5,8 @@ using namespace para;
 using namespace Eigen;
 using namespace eigen;
 using namespace clash;
-#undef max
-#undef min
+using namespace sat;
+
 
 static Eigen::Vector3d P(std::nan("0"), std::nan("0"), std::nan("0"));
 static Eigen::Vector3d Q(std::nan("0"), std::nan("0"), std::nan("0"));
@@ -515,11 +515,21 @@ static void _test13()
 //isTriangleAndBoundingBoxIntersectSAT
 static void _test14()
 {
-	std::array<Eigen::Vector3d, 3> trigon={
-		Vector3d(0, 0, 0),
+	//3D
+	std::array<Eigen::Vector3d, 3> trigon2 = {
+		Vector3d(-10, 0, 0),
 		Vector3d(10, 0, 0),
 		Vector3d(0, 10, 0),
 	};
+	std::array<Eigen::Vector3d, 3> trigon0 = {
+		Vector3d(0, -10, -10),
+		Vector3d(0, -10, 10),
+		Vector3d(0, 1, 0),
+	};
+
+	bool isinter0 = sat::isTwoTrianglesBoundingBoxIntersect(trigon0, trigon2, -1.1);
+
+
 	std::array<Eigen::Vector3d, 3> trigon1 = {
 		Vector3d(-5, -5, 0),
 		Vector3d(4, -5, 0),
@@ -529,7 +539,7 @@ static void _test14()
 		Vector3d(0, 0, 0),
 		Vector3d(10, 10, 10), };
 
-	bool isinter = isTriangleAndBoundingBoxIntersectSAT(trigon1, box);
+	bool isinter = sat::isTriangleAndBoundingBoxIntersectSAT(trigon1, box);
 	return;
 }
 
@@ -537,8 +547,19 @@ static void _test15()
 {
 	TriMesh meshIn = createTriMesh_UnitCube();
 	TriMesh meshOut = eigen::scale(2) * meshIn;
+	bool isin1 = isMeshInsideOtherMesh(meshIn, meshOut);
+	bool isin2 = isMeshInsideOtherMesh(meshIn, meshIn);
+    bool isin3 = isMeshInsideOtherMesh(eigen::translate(1, 1, 1) * meshIn, meshOut);
+
+	TriMesh meshEmpty;
+	bool isin4 = meshOut.bounding_.contains(meshEmpty.bounding_);
+	bool isin5 = meshOut.bounding_.contains(meshIn.bounding_);
+
+	bool isinter1 = isTwoMeshsIntersectSAT(meshIn, meshOut, 0);
 
 
+
+	return;
 }
 
 static int enrol = []()->int
@@ -553,6 +574,7 @@ static int enrol = []()->int
 	_test12();
 	_test13();
 	_test14();
+	_test15();
 	cout << "test_triangle_intersect finished.\n" << endl;
 	return 0;
 }();

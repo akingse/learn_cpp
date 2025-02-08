@@ -106,6 +106,7 @@ namespace test
             //bool m_valid = false;
             std::string m_name;
             std::map<std::string, int> m_dataCount;
+            //std::map<std::string, std::atomic<int>> m_dataCountA;
             std::map<std::string, double> m_dataFloat;
             std::map<std::string, double> m_dataTime;
             std::map<std::string, Point3d> m_dataPoint;
@@ -146,7 +147,8 @@ namespace test
             sm_recordDatas.clear();
         }
 
-        static void writeToCsvInOne(const std::string& filename);
+        static void writeDataToCsv(const std::string& filename = {});
+        static void writeDatasToCsv(const std::string& filename = {});
 
     };
 

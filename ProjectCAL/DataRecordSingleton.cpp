@@ -19,7 +19,47 @@ DataRecordSingleton::DataMap DataRecordSingleton::sm_recordData;
 std::vector<DataRecordSingleton::DataMap> DataRecordSingleton::sm_recordDatas;
 static const int _invalid_id = -1;
 
-void DataRecordSingleton::writeToCsvInOne(const std::string& fileName)
+void DataRecordSingleton::writeDataToCsv(const std::string& fileName /*= {}*/)
+{
+    //output
+    std::string filename = fileName;
+    std::ofstream ofsFile(filename);
+    //ofsFile.open(filename, std::ios::out | std::ios::out);
+    if (!ofsFile.is_open())
+    {
+        std::cerr << "Could not open the file!" << std::endl;
+        char buffer[MAX_PATH];
+        filename = _getcwd(buffer, sizeof(buffer));
+        string filenameCsv = filename + "/binFile/" + to_string(GetTickCount64()) + ".csv";
+        ofsFile = std::ofstream(filenameCsv);
+        if (!ofsFile.is_open())
+        {
+            string dirName = filename + "/binFile";
+            int res = _mkdir(dirName.c_str()); // 0 is success
+            if (res != 0)
+                return;
+        }
+        ofsFile = std::ofstream(filenameCsv);
+        if (!ofsFile.is_open())
+            return;
+    }
+    ofsFile << "ITEM" << "," << "COUNT" << endl;
+    ofsFile << "name" << "," << sm_recordData.m_name << endl;
+    for (const auto& iter: sm_recordData.m_dataCount)
+        ofsFile << iter.first << "," << to_string(iter.second) << endl;
+    for (const auto& iter: sm_recordData.m_dataFloat)
+        ofsFile << iter.first << "," << to_string(iter.second) << endl;
+    for (const auto& iter: sm_recordData.m_dataTime)
+        ofsFile << iter.first << "," << to_string(iter.second) << endl;
+    //sequence container
+    for (int i = 0; i < sm_recordData.m_dataItemVct.size(); i++)
+        ofsFile << sm_recordData.m_dataItemVct[i].first << "," << to_string(sm_recordData.m_dataItemVct[i].second) << endl;
+    for (int i = 0; i < sm_recordData.m_dataTimeVct.size(); i++)
+        ofsFile << sm_recordData.m_dataTimeVct[i].first << "," << to_string(sm_recordData.m_dataTimeVct[i].second) << endl;
+    ofsFile.close();
+}
+
+void DataRecordSingleton::writeDatasToCsv(const std::string& fileName /*= {}*/)
 {
     //merge into one DataMap
     if (sm_recordDatas.empty())

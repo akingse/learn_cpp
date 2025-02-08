@@ -2,7 +2,6 @@
 #include "calculatePolyhedron.h"
 using namespace std;
 using namespace Eigen;
-//using namespace games;
 using namespace clash;
 using namespace eigen;
 //static constexpr double eps_d = 10 * DBL_EPSILON; // double
@@ -1145,6 +1144,9 @@ bool clash::isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& mesh
 			triRecordHard.push_back({ gTirNaN, gTirNaN }); //two trinan means inside
 			interTriInfoList.push_back({ { gTirNaN, gTirNaN }, {}, 0.0 });
 #endif
+#ifdef STATISTIC_DATA_COUNT
+			count_mesh_inside_mesh++;
+#endif
 			return true;
 		}
 	}
@@ -1155,6 +1157,9 @@ bool clash::isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& mesh
 #ifdef STATISTIC_DATA_RECORD //record all trigon-intersect
 			triRecordHard.push_back({ gTirNaN, gTirNaN });
 			interTriInfoList.push_back({ { gTirNaN, gTirNaN }, {}, 0.0 });
+#endif
+#ifdef STATISTIC_DATA_COUNT
+			count_mesh_inside_mesh++;
 #endif
 			return true;
 		}
