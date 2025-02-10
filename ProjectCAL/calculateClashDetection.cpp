@@ -307,8 +307,12 @@ std::array<std::vector<int>, 2> sat::trianglesAndCommonBoxPreclash(const TriMesh
 {
 //#define USING_SECOND_PRECLASH //test shows not faster
 	Eigen::AlignedBox3d boxCom = meshA.bounding_.intersection(meshB.bounding_); // box common
-	Vector3d toleSize = Vector3d(tolerance, tolerance, tolerance);  //to accelerate calculation, pre extend box
-	Eigen::AlignedBox3d boxMag = Eigen::AlignedBox3d(boxCom.min() - toleSize, boxCom.max() + toleSize);//boxExtendTolerance
+	Eigen::AlignedBox3d boxMag = boxCom;
+	if (0.0 < tolerance)
+	{
+		Vector3d toleSize = Vector3d(tolerance, tolerance, tolerance);  //to accelerate calculation, pre extend box
+		boxMag = Eigen::AlignedBox3d(boxCom.min() - toleSize, boxCom.max() + toleSize);//boxExtendTolerance
+	}
 #ifdef USING_SECOND_PRECLASH
 	Eigen::AlignedBox3d boxA;
 	Eigen::AlignedBox3d boxB;
