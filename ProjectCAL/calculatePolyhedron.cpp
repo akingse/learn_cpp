@@ -1048,7 +1048,7 @@ static std::array<std::vector<int>, 2> _triangleAndCommonBoxPreclash(const Model
 				meshA.pose_ * meshA.vbo_[meshA.ibo_[i][1]],
 				meshA.pose_ * meshA.vbo_[meshA.ibo_[i][2]] };
 		//enlarge box while has tolerance
-		if (isTriangleAndBoundingBoxIntersectSAT(triIter, boxMag))
+		if (isTriangleAndBoxIntersectSAT(triIter, boxMag))
 		{
 			triA_Index.push_back(i);
 			triA_Box.extend(triIter[0]);
@@ -1065,7 +1065,7 @@ static std::array<std::vector<int>, 2> _triangleAndCommonBoxPreclash(const Model
 		triIter = { meshB.pose_ * meshB.vbo_[meshB.ibo_[j][0]],
 					meshB.pose_ * meshB.vbo_[meshB.ibo_[j][1]],
 					meshB.pose_ * meshB.vbo_[meshB.ibo_[j][2]] };
-		if (isTriangleAndBoundingBoxIntersectSAT(triIter, boxMag))
+		if (isTriangleAndBoxIntersectSAT(triIter, boxMag))
 		{
 			triB_Index.push_back(j);
 			triB_Box.extend(triIter[0]);
@@ -1113,7 +1113,7 @@ bool clash::isTwoMeshsIntersectSAT(const ModelMesh& meshA, const ModelMesh& mesh
 					meshB.vbo_[meshB.ibo_[iB][0]],
 					meshB.vbo_[meshB.ibo_[iB][1]],
 					meshB.vbo_[meshB.ibo_[iB][2]] };
-				if (!isTwoTrianglesBoundingBoxIntersect(triA, triB, tolerance)) // second pre-judge
+				if (!isTwoTrianglesBoxIntersect(triA, triB, tolerance)) // second pre-judge
 				{
 #ifdef STATISTIC_DATA_COUNT
 					count_tri_box_exclude_pre++;
@@ -1222,10 +1222,10 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> clash::getTwoMeshsIntersectRelati
 					meshB.vbo_[meshB.ibo_[iB][1]],
 					meshB.vbo_[meshB.ibo_[iB][2]] };
 #ifdef STATISTIC_DATA_RECORD
-				if (!isTwoTrianglesBoundingBoxIntersect(triA, triB))
+				if (!isTwoTrianglesBoxIntersect(triA, triB))
 					count_tri_box_exclude_pre++;
 #endif  
-				if (!isTwoTrianglesBoundingBoxIntersect(triA, triB) || !isTwoTrianglesIntersectSAT(triA, triB)) // second pre-judge, merge
+				if (!isTwoTrianglesBoxIntersect(triA, triB) || !isTwoTrianglesIntersectSAT(triA, triB)) // second pre-judge, merge
 					continue;
 				isContact = true; //isIntersect// maybe intrusive or atleast contact
 				//intersect
@@ -1464,7 +1464,7 @@ std::tuple<double, std::array<int, 2>> clash::getTwoMeshsSeparationDistanceSAT(c
 				meshB.vbo_[meshB.ibo_[iB][0]],
 				meshB.vbo_[meshB.ibo_[iB][1]],
 				meshB.vbo_[meshB.ibo_[iB][2]] };
-			if (!isTwoTrianglesBoundingBoxIntersect(triA, triB, tolerance))
+			if (!isTwoTrianglesBoxIntersect(triA, triB, tolerance))
 			{
 #ifdef STATISTIC_DATA_COUNT
 				count_tri_box_exclude_pre++;

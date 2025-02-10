@@ -4,11 +4,11 @@ using namespace Eigen;
 using namespace clash;
 using namespace test;
 using namespace sat;
-//#define STATISTIC_DATA_RECORD
+//#define STATISTIC_DATA_COUNT
 
 std::vector<TriMesh> ClashDetection::sm_meshStore;
 
-#ifdef STATISTIC_DATA_RECORD
+#ifdef STATISTIC_DATA_COUNT
 static std::atomic<size_t> count_clash = 0, count_mesh = 0, count_triangle = 0, count_vertex = 0,
 count_pre_clash = 0, count_mesh_intersect = 0, count_triangle_and_box_intersect = 0, count_two_triangle_intersect = 0, count_trianglebox_intersect = 0,
 count_preclash_A = 0, count_preclash_B = 0, count_judge_inside = 0, count_mesh_inside = 0,
@@ -56,7 +56,7 @@ bool sat::isPointOnTriangleSurface(const Vector3d& point, const std::array<Vecto
 	return normal.dot(point - trigon[0]) == 0.0;
 }
 
-bool sat::isPointInTriangle(const Vector3d& point, const std::array<Vector3d, 3>& trigon, const Vector3d& normal) //3D
+bool sat::isPointInTriangle(const Vector3d& point, const std::array<Vector3d, 3>& trigon, const Vector3d& normal)
 {
 	return
 		0.0 <= (trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) && //bool isLeftA
@@ -67,7 +67,7 @@ bool sat::isPointInTriangle(const Vector3d& point, const std::array<Vector3d, 3>
 //hard clash without tolerance
 bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 {
-#ifdef STATISTIC_DATA_RECORD
+#ifdef STATISTIC_DATA_COUNT
 	count_judge_inside++;
 #endif
 	auto _isRayAndTriangleIntersectParallel = [](const Eigen::Vector3d& point, const Eigen::Vector3d& rayDir, const std::array<Eigen::Vector3d, 3 >& trigon, const Eigen::Vector3d& normal)->bool
@@ -161,6 +161,14 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 //must intersect, negative tolerance to filter tiny intersect
 bool sat::isTwoTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance /*= 0.0*/)
 {
+	//isTwoTrianglesBoundingBoxIntersect
+	if (std::max(std::max(triA[0][0], triA[1][0]), triA[2][0]) + tolerance < std::min(std::min(triB[0][0], triB[1][0]), triB[2][0]) &&
+		std::max(std::max(triB[0][0], triB[1][0]), triB[2][0]) + tolerance < std::min(std::min(triA[0][0], triA[1][0]), triA[2][0]) &&
+		std::max(std::max(triA[0][1], triA[1][1]), triA[2][1]) + tolerance < std::min(std::min(triB[0][1], triB[1][1]), triB[2][1]) &&
+		std::max(std::max(triB[0][1], triB[1][1]), triB[2][1]) + tolerance < std::min(std::min(triA[0][1], triA[1][1]), triA[2][1]) &&
+		std::max(std::max(triA[0][2], triA[1][2]), triA[2][2]) + tolerance < std::min(std::min(triB[0][2], triB[1][2]), triB[2][2]) &&
+		std::max(std::max(triB[0][2], triB[1][2]), triB[2][2]) + tolerance < std::min(std::min(triA[0][2], triA[1][2]), triA[2][2]))
+		return false;
 	std::array<Eigen::Vector3d, 3> edgesA = {
 		triA[1] - triA[0],
 		triA[2] - triA[1],
@@ -213,9 +221,9 @@ bool sat::isTwoTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA,
 }
 
 //without tolerance, critical contact is separate
-bool sat::isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box)
+bool sat::isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box)
 {
-#ifdef STATISTIC_DATA_RECORD
+#ifdef STATISTIC_DATA_COUNT
 	count_triangle_and_box_intersect++;
 #endif
 	//pre-judge
@@ -241,16 +249,16 @@ bool sat::isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d,
 		Vector3d(0.,1.,0.),
 		Vector3d(0.,0.,1.) };
 	std::array<Eigen::Vector3d, 10> axes = { {
-			edges[0].cross(edges[1]), //trigon normal
-			coords[0].cross(edges[0]),
-			coords[0].cross(edges[1]),
-			coords[0].cross(edges[2]),
-			coords[1].cross(edges[0]),
-			coords[1].cross(edges[1]),
-			coords[1].cross(edges[2]),
-			coords[2].cross(edges[0]),
-			coords[2].cross(edges[1]),
-			coords[2].cross(edges[2]) } };
+		edges[0].cross(edges[1]), //trigon normal
+		coords[0].cross(edges[0]),
+		coords[0].cross(edges[1]),
+		coords[0].cross(edges[2]),
+		coords[1].cross(edges[0]),
+		coords[1].cross(edges[1]),
+		coords[1].cross(edges[2]),
+		coords[2].cross(edges[0]),
+		coords[2].cross(edges[1]),
+		coords[2].cross(edges[2]) } };
 	const Vector3d& origin = box.min();
 	const Vector3d vertex = box.sizes(); //m_max - m_min
 	std::array<Vector3d, 8> vertexes = { {
@@ -283,22 +291,10 @@ bool sat::isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d,
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
-		if (maxA < minB || maxB < minA) // absolute zero, contact not intersect
+		if (maxA <= minB || maxB <= minA) // absolute zero, contact not intersect
 			return false;
 	}
 	return true;
-}
-
-//negative tolerance means intrusion, while coplanar always separate
-bool sat::isTwoTrianglesBoundingBoxIntersect(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB, double tolerance /*= 0.0*/)
-{
-	return
-		std::min(std::min(triB[0][0], triB[1][0]), triB[2][0]) <= std::max(std::max(triA[0][0], triA[1][0]), triA[2][0]) + tolerance &&
-		std::min(std::min(triA[0][0], triA[1][0]), triA[2][0]) <= std::max(std::max(triB[0][0], triB[1][0]), triB[2][0]) + tolerance &&
-		std::min(std::min(triB[0][1], triB[1][1]), triB[2][1]) <= std::max(std::max(triA[0][1], triA[1][1]), triA[2][1]) + tolerance &&
-		std::min(std::min(triA[0][1], triA[1][1]), triA[2][1]) <= std::max(std::max(triB[0][1], triB[1][1]), triB[2][1]) + tolerance &&
-		std::min(std::min(triB[0][2], triB[1][2]), triB[2][2]) <= std::max(std::max(triA[0][2], triA[1][2]), triA[2][2]) + tolerance &&
-		std::min(std::min(triA[0][2], triA[1][2]), triA[2][2]) <= std::max(std::max(triB[0][2], triB[1][2]), triB[2][2]) + tolerance;
 }
 
 //tolerance keep with hardclash
@@ -319,7 +315,7 @@ std::array<std::vector<int>, 2> sat::trianglesAndCommonBoxPreclash(const TriMesh
 			meshA.vbo_[meshA.ibo_[i][0]],
 			meshA.vbo_[meshA.ibo_[i][1]],
 			meshA.vbo_[meshA.ibo_[i][2]] };
-		if (eigen::isTriangleAndBoundingBoxIntersectSAT(triA, boxMag))
+		if (eigen::isTriangleAndBoxIntersectSAT(triA, boxMag))
 		{
 			indexA.push_back(i);
 #ifdef USING_SECOND_PRECLASH
@@ -338,7 +334,7 @@ std::array<std::vector<int>, 2> sat::trianglesAndCommonBoxPreclash(const TriMesh
 			meshB.vbo_[meshB.ibo_[j][0]],
 			meshB.vbo_[meshB.ibo_[j][1]],
 			meshB.vbo_[meshB.ibo_[j][2]] };
-		if (eigen::isTriangleAndBoundingBoxIntersectSAT(triB, boxMag))
+		if (eigen::isTriangleAndBoxIntersectSAT(triB, boxMag))
 		{
 			indexB.push_back(j);
 #ifdef USING_SECOND_PRECLASH
@@ -383,7 +379,7 @@ std::array<std::vector<int>, 2> sat::trianglesAndCommonBoxPreclash(const TriMesh
 bool sat::isTwoMeshsIntersectSAT(const TriMesh& meshA, const TriMesh& meshB, double tolerance /*= 0.0*/)
 {
 	const std::array<std::vector<int>, 2> indexAB = sat::trianglesAndCommonBoxPreclash(meshA, meshB, tolerance);// first pre-judge
-#ifdef STATISTIC_DATA_RECORD
+#ifdef STATISTIC_DATA_COUNT
 	count_preclash_A += indexAB[0].size();
 	count_preclash_B += indexAB[1].size();
 #endif
@@ -401,18 +397,11 @@ bool sat::isTwoMeshsIntersectSAT(const TriMesh& meshA, const TriMesh& meshB, dou
 					meshB.vbo_[meshB.ibo_[iB][0]],
 					meshB.vbo_[meshB.ibo_[iB][1]],
 					meshB.vbo_[meshB.ibo_[iB][2]] };
-#ifdef STATISTIC_DATA_RECORD
-				count_trianglebox_intersect++;
-#endif
-				if (!eigen::isTwoTrianglesBoundingBoxIntersect(triA, triB, tolerance)) // second pre-judge
-				{
-					continue;
-				}
-#ifdef STATISTIC_DATA_RECORD
+#ifdef STATISTIC_DATA_COUNT
 				count_two_triangle_intersect++;
 #endif
-				if (eigen::isTwoTrianglesIntersectSAT(triA, triB))
-				//if (sat::isTwoTrianglesIntrusionSAT(triA, triB, tolerance)) //isTwoTrianglesIntersectSAT
+				//if (eigen::isTwoTrianglesIntersectSAT(triA, triB))
+				if (sat::isTwoTrianglesIntrusionSAT(triA, triB, tolerance)) //isTwoTrianglesIntersectSAT
 				{
 					return true;
 				}
@@ -424,7 +413,7 @@ bool sat::isTwoMeshsIntersectSAT(const TriMesh& meshA, const TriMesh& meshB, dou
 	{
         if (sat::isMeshInsideOtherMesh(meshB, meshA))
 		{
-#ifdef STATISTIC_DATA_RECORD
+#ifdef STATISTIC_DATA_COUNT
 			count_mesh_inside++;
 #endif
 			return true;
@@ -434,7 +423,7 @@ bool sat::isTwoMeshsIntersectSAT(const TriMesh& meshA, const TriMesh& meshB, dou
 	{
 		if (sat::isMeshInsideOtherMesh(meshA, meshB))
 		{
-#ifdef STATISTIC_DATA_RECORD
+#ifdef STATISTIC_DATA_COUNT
 			count_mesh_inside++;
 #endif			
 			return true;
@@ -448,7 +437,7 @@ bool sat::isTwoMeshsIntersectSAT(const TriMesh& meshA, const TriMesh& meshB, dou
 std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(const std::vector<int>& indexesLeft, const std::vector<int>& indexesRight, 
 	const double tolerance /*= 0.0*/, const std::function<bool(float, int)>& callback /*= nullptr*/)
 {
-#ifdef STATISTIC_DATA_RECORD
+#ifdef STATISTIC_DATA_COUNT
 	count_mesh = sm_meshStore.size();
 #endif
 	if (sm_meshStore.empty())
@@ -459,7 +448,7 @@ std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(con
 	{
 		polyfaceVct[i].m_index = i; //keep order
 		polyfaceVct[i].m_bound = sm_meshStore[i].bounding_;
-#ifdef STATISTIC_DATA_RECORD
+#ifdef STATISTIC_DATA_COUNT
         count_triangle += sm_meshStore[i].ibo_.size();
 		count_vertex += sm_meshStore[i].vbo_.size();
 #endif
@@ -484,7 +473,7 @@ std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(con
 		if (iL < 0 || sm_meshStore.size() <= iL) //check
 			continue;
 		const std::vector<int> preClash = bvhtree.findIntersect(polyfaceVct[iL], tolerance);
-#ifdef STATISTIC_DATA_RECORD
+#ifdef STATISTIC_DATA_COUNT
 		count_pre_clash += preClash.size();
 #endif
 		const TriMesh& meshL = sm_meshStore[iL];
@@ -505,7 +494,7 @@ std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(con
 				signRecord.insert(current);
 			}
 			const TriMesh& meshR = sm_meshStore[iR];
-#ifdef STATISTIC_DATA_RECORD
+#ifdef STATISTIC_DATA_COUNT
 			count_mesh_intersect++;
 #endif
 			if (!sat::isTwoMeshsIntersectSAT(meshL, meshR, tolerance))
@@ -519,7 +508,7 @@ std::vector<std::pair<int, int>> ClashDetection::executeAssignClashDetection(con
 			}
 		}
 	}
-#ifdef STATISTIC_DATA_RECORD
+#ifdef STATISTIC_DATA_COUNT
 	count_clash = clashRes.size();
 	_output_data();
 	_clear_atomic();

@@ -891,7 +891,8 @@ int clash::isRayLineCrossTriangleMTA(const Eigen::Vector3d& origin, const Eigen:
 
 namespace eigen
 {
-	bool isTwoTrianglesBoundingBoxIntersect(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB, double tolerance /*= 0.0*/)
+	//BoundingBox
+	bool isTwoTrianglesBoxIntersect(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB, double tolerance /*= 0.0*/)
 	{
 #ifdef STATISTIC_DATA_COUNT
 		count_isTrisBoundBoxInter++;
@@ -906,7 +907,7 @@ namespace eigen
 			std::max(std::max(triA[0][2], triA[1][2]), triA[2][2]) + tolerance < std::min(std::min(triB[0][2], triB[1][2]), triB[2][2]));
 	}
 
-	bool isTriangleAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box)
+	bool isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box)
 	{
 #ifdef STATISTIC_DATA_COUNT
 		count_isTrisAndBoxInter++;
@@ -917,12 +918,12 @@ namespace eigen
 		const Vector3d& min = box.min();
 		const Vector3d& max = box.max();
 		//extreme value filter
-		if (std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) <= min[0] ||
-			std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) >= max[0] ||
-			std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) <= min[1] ||
-			std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) >= max[1] ||
-			std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]) <= min[2] ||
-			std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) >= max[2])
+		if (std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) < min[0] ||
+			std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) > max[0] ||
+			std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) < min[1] ||
+			std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) > max[1] ||
+			std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]) < min[2] ||
+			std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) > max[2])
 			return false;
 		// Separating Axis Theorem
 		std::array<Eigen::Vector3d, 3> edges = {
