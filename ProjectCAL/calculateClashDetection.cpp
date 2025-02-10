@@ -1,6 +1,5 @@
 #include "pch.h"
 using namespace std;
-using namespace Eigen;
 using namespace clash;
 using namespace test;
 using namespace sat;
@@ -162,11 +161,11 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 bool sat::isTwoTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance /*= 0.0*/)
 {
 	//isTwoTrianglesBoundingBoxIntersect
-	if (std::max(std::max(triA[0][0], triA[1][0]), triA[2][0]) + tolerance < std::min(std::min(triB[0][0], triB[1][0]), triB[2][0]) &&
-		std::max(std::max(triB[0][0], triB[1][0]), triB[2][0]) + tolerance < std::min(std::min(triA[0][0], triA[1][0]), triA[2][0]) &&
-		std::max(std::max(triA[0][1], triA[1][1]), triA[2][1]) + tolerance < std::min(std::min(triB[0][1], triB[1][1]), triB[2][1]) &&
-		std::max(std::max(triB[0][1], triB[1][1]), triB[2][1]) + tolerance < std::min(std::min(triA[0][1], triA[1][1]), triA[2][1]) &&
-		std::max(std::max(triA[0][2], triA[1][2]), triA[2][2]) + tolerance < std::min(std::min(triB[0][2], triB[1][2]), triB[2][2]) &&
+	if (std::max(std::max(triA[0][0], triA[1][0]), triA[2][0]) + tolerance < std::min(std::min(triB[0][0], triB[1][0]), triB[2][0]) ||
+		std::max(std::max(triB[0][0], triB[1][0]), triB[2][0]) + tolerance < std::min(std::min(triA[0][0], triA[1][0]), triA[2][0]) ||
+		std::max(std::max(triA[0][1], triA[1][1]), triA[2][1]) + tolerance < std::min(std::min(triB[0][1], triB[1][1]), triB[2][1]) ||
+		std::max(std::max(triB[0][1], triB[1][1]), triB[2][1]) + tolerance < std::min(std::min(triA[0][1], triA[1][1]), triA[2][1]) ||
+		std::max(std::max(triA[0][2], triA[1][2]), triA[2][2]) + tolerance < std::min(std::min(triB[0][2], triB[1][2]), triB[2][2]) ||
 		std::max(std::max(triB[0][2], triB[1][2]), triB[2][2]) + tolerance < std::min(std::min(triA[0][2], triA[1][2]), triA[2][2]))
 		return false;
 	std::array<Eigen::Vector3d, 3> edgesA = {
@@ -221,23 +220,29 @@ bool sat::isTwoTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA,
 }
 
 //without tolerance, critical contact is separate
-bool sat::isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box)
+bool sat::isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& _box, double tolerance /*= 0.0*/)
 {
 #ifdef STATISTIC_DATA_COUNT
 	count_triangle_and_box_intersect++;
 #endif
+	Eigen::AlignedBox3d box = _box; //boxMagnify
+	if (tolerance != 0.0)
+	{
+		Vector3d toleSize = Vector3d(tolerance, tolerance, tolerance);
+		box = Eigen::AlignedBox3d(_box.min() - toleSize, _box.max() + toleSize);//boxExtendTolerance
+	}
 	//pre-judge
 	if (box.contains(trigon[0]) || box.contains(trigon[1]) || box.contains(trigon[2]))
 		return true;
 	const Vector3d& min = box.min();
 	const Vector3d& max = box.max();
 	//extreme value filter
-	if (std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) <= min[0] ||
-		std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) >= max[0] ||
-		std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) <= min[1] ||
-		std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) >= max[1] ||
-		std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]) <= min[2] ||
-		std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) >= max[2])
+	if (std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) < min[0] ||
+		std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) > max[0] ||
+		std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) < min[1] ||
+		std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) > max[1] ||
+		std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]) < min[2] ||
+		std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) > max[2])
 		return false;
 	// Separating Axis Theorem
 	std::array<Eigen::Vector3d, 3> edges = {
@@ -291,7 +296,7 @@ bool sat::isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& tri
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
-		if (maxA <= minB || maxB <= minA) // absolute zero, contact not intersect
+		if (maxA < minB || maxB < minA) // absolute zero, contact not intersect
 			return false;
 	}
 	return true;
@@ -302,7 +307,7 @@ std::array<std::vector<int>, 2> sat::trianglesAndCommonBoxPreclash(const TriMesh
 {
 //#define USING_SECOND_PRECLASH //test shows not faster
 	Eigen::AlignedBox3d boxCom = meshA.bounding_.intersection(meshB.bounding_); // box common
-	Vector3d toleSize = Vector3d(tolerance, tolerance, tolerance);
+	Vector3d toleSize = Vector3d(tolerance, tolerance, tolerance);  //to accelerate calculation, pre extend box
 	Eigen::AlignedBox3d boxMag = Eigen::AlignedBox3d(boxCom.min() - toleSize, boxCom.max() + toleSize);//boxExtendTolerance
 #ifdef USING_SECOND_PRECLASH
 	Eigen::AlignedBox3d boxA;
@@ -315,7 +320,7 @@ std::array<std::vector<int>, 2> sat::trianglesAndCommonBoxPreclash(const TriMesh
 			meshA.vbo_[meshA.ibo_[i][0]],
 			meshA.vbo_[meshA.ibo_[i][1]],
 			meshA.vbo_[meshA.ibo_[i][2]] };
-		if (eigen::isTriangleAndBoxIntersectSAT(triA, boxMag))
+		if (sat::isTriangleAndBoxIntersectSAT(triA, boxMag))
 		{
 			indexA.push_back(i);
 #ifdef USING_SECOND_PRECLASH
@@ -334,7 +339,7 @@ std::array<std::vector<int>, 2> sat::trianglesAndCommonBoxPreclash(const TriMesh
 			meshB.vbo_[meshB.ibo_[j][0]],
 			meshB.vbo_[meshB.ibo_[j][1]],
 			meshB.vbo_[meshB.ibo_[j][2]] };
-		if (eigen::isTriangleAndBoxIntersectSAT(triB, boxMag))
+		if (sat::isTriangleAndBoxIntersectSAT(triB, boxMag))
 		{
 			indexB.push_back(j);
 #ifdef USING_SECOND_PRECLASH
@@ -347,7 +352,6 @@ std::array<std::vector<int>, 2> sat::trianglesAndCommonBoxPreclash(const TriMesh
 	if (indexB.empty())
 		return {};
 #ifdef USING_SECOND_PRECLASH
-	Eigen::AlignedBox3d boxMagB = boxExtendTolerance(boxB, -tolerance);
 	std::vector<int> indexARes;
 	for (const int& iA : indexA)
 	{
@@ -355,10 +359,9 @@ std::array<std::vector<int>, 2> sat::trianglesAndCommonBoxPreclash(const TriMesh
 			meshA.vbo_[meshA.ibo_[iA][0]],
 			meshA.vbo_[meshA.ibo_[iA][1]],
 			meshA.vbo_[meshA.ibo_[iA][2]] };
-		if (isTriangleAndBoundingBoxIntersectSAT(triA, boxMagB))
+		if (isTriangleAndBoxIntersectSAT(triA, boxB, tolerance))
 			indexARes.push_back(iA);
 	}
-	Eigen::AlignedBox3d boxMagA = boxExtendTolerance(boxA, -tolerance);
 	std::vector<int> indexBRes;
 	for (const int& iB : indexB)
 	{
@@ -366,7 +369,7 @@ std::array<std::vector<int>, 2> sat::trianglesAndCommonBoxPreclash(const TriMesh
 			meshB.vbo_[meshB.ibo_[iB][0]],
 			meshB.vbo_[meshB.ibo_[iB][1]],
 			meshB.vbo_[meshB.ibo_[iB][2]] };
-		if (isTriangleAndBoundingBoxIntersectSAT(triB, boxMagA))
+		if (isTriangleAndBoxIntersectSAT(triB, boxA, tolerance))
 			indexBRes.push_back(iB);
 	}
 	return { indexARes, indexBRes };
