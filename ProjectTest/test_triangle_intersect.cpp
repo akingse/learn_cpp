@@ -527,7 +527,7 @@ static void _test14()
 		Vector3d(0, 1, 0),
 	};
 
-	bool isinter0 = sat::isTwoTrianglesBoundingBoxIntersect(trigon0, trigon2, -1.1);
+	bool isinter0 = isTwoTrianglesBoxIntersect(trigon0, trigon2, -1.1);
 
 
 	std::array<Eigen::Vector3d, 3> trigon1 = {
@@ -539,7 +539,7 @@ static void _test14()
 		Vector3d(0, 0, 0),
 		Vector3d(10, 10, 10), };
 
-	bool isinter = sat::isTriangleAndBoundingBoxIntersectSAT(trigon1, box);
+	bool isinter = sat::isTriangleAndBoxIntersectSAT(trigon1, box);
 	return;
 }
 

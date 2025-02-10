@@ -69,15 +69,25 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 #ifdef STATISTIC_DATA_COUNT
 	count_judge_inside++;
 #endif
-	auto _isRayAndTriangleIntersectParallel = [](const Eigen::Vector3d& point, const Eigen::Vector3d& rayDir, const std::array<Eigen::Vector3d, 3 >& trigon, const Eigen::Vector3d& normal)->bool
+	auto _isRayAndTriangleIntersectParallel = [](const Eigen::Vector3d& point, const Eigen::Vector3d& direction, const std::array<Eigen::Vector3d, 3 >& trigon, const Eigen::Vector3d& normal)->bool
 		{
 			if ((point - trigon[0]).dot(normal) != 0.0) // not coplanar
 				return false;
 			// negetive direction ray cause cross product result opposite
 			return
-				((trigon[0] - point).cross(rayDir).dot(rayDir.cross(trigon[1] - point)) >= 0.0 && (trigon[0] - point).cross(rayDir).dot((trigon[0] - point).cross(trigon[1] - point)) >= 0.0) ||
-				((trigon[1] - point).cross(rayDir).dot(rayDir.cross(trigon[2] - point)) >= 0.0 && (trigon[1] - point).cross(rayDir).dot((trigon[1] - point).cross(trigon[2] - point)) >= 0.0) ||
-				((trigon[2] - point).cross(rayDir).dot(rayDir.cross(trigon[0] - point)) >= 0.0 && (trigon[2] - point).cross(rayDir).dot((trigon[2] - point).cross(trigon[0] - point)) >= 0.0);
+				((trigon[0] - point).cross(direction).dot(direction.cross(trigon[1] - point)) >= 0.0 && (trigon[0] - point).cross(direction).dot((trigon[0] - point).cross(trigon[1] - point)) >= 0.0) ||
+				((trigon[1] - point).cross(direction).dot(direction.cross(trigon[2] - point)) >= 0.0 && (trigon[1] - point).cross(direction).dot((trigon[1] - point).cross(trigon[2] - point)) >= 0.0) ||
+				((trigon[2] - point).cross(direction).dot(direction.cross(trigon[0] - point)) >= 0.0 && (trigon[2] - point).cross(direction).dot((trigon[2] - point).cross(trigon[0] - point)) >= 0.0);
+		};
+	auto _isPointOnTriangleVertexOrEdge = [](const Eigen::Vector3d& local, const std::array<Eigen::Vector3d, 3 >& trigon)->bool
+		{
+			return
+				(local - trigon[0]).isZero() ||
+				(local - trigon[1]).isZero() ||
+				(local - trigon[2]).isZero() ||
+				(local - trigon[0]).cross(local - trigon[1]).isZero() ||
+				(local - trigon[1]).cross(local - trigon[2]).isZero() ||
+				(local - trigon[2]).cross(local - trigon[0]).isZero();
 		};
     if (meshIn.vbo_.empty() || meshIn.ibo_.empty())
 		return false;
@@ -109,7 +119,7 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 	if (std::isnan(point[0])) //meshIn.vbo_ not empty
 		return true; //all face coincide
 	//ray method
-	Vector3d rayDir = Vector3d(1.0, 1.0, 1.0); //random direction
+	Vector3d direction = Vector3d(1.0, 1.0, 1.0); //random ray direction
 	int countInter = 0;
 	while (true)
 	{
@@ -121,12 +131,12 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 				meshOut.vbo_[meshOut.ibo_[i][1]],
 				meshOut.vbo_[meshOut.ibo_[i][2]] };
 			const Eigen::Vector3d& normal = meshOut.fno_[i];
-			double deno = rayDir.dot(normal); //ray.direction
+			double deno = direction.dot(normal); //ray.direction
 			if (deno == 0.0)//ray direction is parallel, redo circulation
 			{
-				if (_isRayAndTriangleIntersectParallel(point, rayDir, trigon, normal)) //coplanar
+				if (_isRayAndTriangleIntersectParallel(point, direction, trigon, normal)) //coplanar
 				{
-					rayDir = Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff).normalized();//move RAND_MAX/2
+					direction = Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff).normalized();//move RAND_MAX/2
 					isNewRay = true;
 					break;
 				}
@@ -135,17 +145,12 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 			double k = (trigon[0] - point).dot(normal) / deno;
 			if (k < 0.0) // only positive direction
 				continue;
-			Vector3d local = point + k * rayDir;
+			Vector3d local = point + k * direction;
 			if (!sat::isPointInTriangle(local, trigon, normal))
 				continue;
-			if ((local - trigon[0]).isZero() ||
-				(local - trigon[1]).isZero() ||
-				(local - trigon[2]).isZero() ||
-				(local - trigon[0]).cross(local - trigon[1]).isZero() ||
-				(local - trigon[1]).cross(local - trigon[2]).isZero() ||
-				(local - trigon[2]).cross(local - trigon[0]).isZero()) //singularity
+			if (_isPointOnTriangleVertexOrEdge(local, trigon)) //singularity
 			{
-				rayDir = Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff).normalized();
+				direction = Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff).normalized();
 				isNewRay = true;
 				break;
 			}

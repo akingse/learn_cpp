@@ -160,7 +160,7 @@ static void test1()
 			//corVct.push_back(cropro); //time=72736
 			//corVct.emplace_back(cropro); //time=71642
 
-			bool isI = isTriangleAndBoundingBoxIntersectSAT(tri, boxVct[i]); // time=11022
+			bool isI = isTriangleAndBoxIntersectSAT(tri, boxVct[i]); // time=11022
 		}
 		end = std::chrono::high_resolution_clock::now();
 		duration = std::chrono::duration_cast<microseconds>(end - start);

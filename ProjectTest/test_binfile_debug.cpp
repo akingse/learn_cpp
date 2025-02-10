@@ -189,7 +189,7 @@ static void _test1()
 	triB_2 = Vector3d(4935011.8121505287, -380736.84932261088, -200.00000000000006);
 
 	//bool err1 = isTwoTrianglesIntersectSAT({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
-	bool err2 = isTwoTrianglesBoundingBoxIntersect({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
+	bool err2 = isTwoTrianglesBoxIntersect({ triA_0, triA_1, triA_2 }, { triB_0, triB_1, triB_2 });
 
 	cout << "return 0" << endl;
 }
@@ -855,7 +855,7 @@ static void _test7()
 				meshB.vbo_[meshB.ibo_[j][0]],
 				meshB.vbo_[meshB.ibo_[j][1]],
 				meshB.vbo_[meshB.ibo_[j][2]] };
-			if (isTwoTrianglesBoundingBoxIntersect(triA, triB))
+			if (isTwoTrianglesBoxIntersect(triA, triB))
 			{
 				if (isTwoTrianglesIntersectSAT(triA, triB))
 				{
