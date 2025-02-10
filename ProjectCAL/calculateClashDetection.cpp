@@ -38,46 +38,51 @@ static void _clear_atomic()
 }
 #endif
 
-//using input normal
-bool sat::isPointOnTriangleSurface(const Vector3d& point, const std::array<Vector3d, 3>& trigon, const Vector3d& normal)
-{
-	if (point[0] < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
-		point[0] > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
-		point[1] < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
-		point[1] > std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
-		point[2] < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
-		point[2] > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]))
-		return false;
-	if ((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) < 0.0 ||
-		(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) < 0.0 ||
-		(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal) < 0.0)
-		return false;
-	return normal.dot(point - trigon[0]) == 0.0;
-}
-
-bool sat::isPointInTriangle(const Vector3d& point, const std::array<Vector3d, 3>& trigon, const Vector3d& normal)
-{
-	return
-		0.0 <= (trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) && //bool isLeftA
-		0.0 <= (trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) && //bool isLeftB
-		0.0 <= (trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal);   //bool isLeftC
-}
-
 //hard clash without tolerance
 bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 {
 #ifdef STATISTIC_DATA_COUNT
 	count_judge_inside++;
 #endif
-	auto _isRayAndTriangleIntersectParallel = [](const Eigen::Vector3d& point, const Eigen::Vector3d& direction, const std::array<Eigen::Vector3d, 3 >& trigon, const Eigen::Vector3d& normal)->bool
+	auto _isPointOnTriangleSurface = [](const Vector3d& point, const std::array<Vector3d, 3>& trigon, const Vector3d& normal)->bool
+		{
+			if (point[0] < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+				point[0] > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+				point[1] < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
+				point[1] > std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
+				point[2] < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
+				point[2] > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]))
+				return false;
+			//_isPointInTriangle
+			if ((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) < 0.0 ||
+				(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) < 0.0 ||
+				(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal) < 0.0)
+				return false;
+			return normal.dot(point - trigon[0]) == 0.0;
+		};
+	auto _isRayAndTriangleIntersectParallel = [](const Eigen::Vector3d& point, const Eigen::Vector3d& dir, const std::array<Eigen::Vector3d, 3 >& trigon, const Eigen::Vector3d& normal)->bool
 		{
 			if ((point - trigon[0]).dot(normal) != 0.0) // not coplanar
 				return false;
 			// negetive direction ray cause cross product result opposite
 			return
-				((trigon[0] - point).cross(direction).dot(direction.cross(trigon[1] - point)) >= 0.0 && (trigon[0] - point).cross(direction).dot((trigon[0] - point).cross(trigon[1] - point)) >= 0.0) ||
-				((trigon[1] - point).cross(direction).dot(direction.cross(trigon[2] - point)) >= 0.0 && (trigon[1] - point).cross(direction).dot((trigon[1] - point).cross(trigon[2] - point)) >= 0.0) ||
-				((trigon[2] - point).cross(direction).dot(direction.cross(trigon[0] - point)) >= 0.0 && (trigon[2] - point).cross(direction).dot((trigon[2] - point).cross(trigon[0] - point)) >= 0.0);
+				(0.0 <= (trigon[0] - point).cross(dir).dot(dir.cross(trigon[1] - point)) &&  0.0 <= (trigon[0] - point).cross(dir).dot((trigon[0] - point).cross(trigon[1] - point))) ||
+				(0.0 <= (trigon[1] - point).cross(dir).dot(dir.cross(trigon[2] - point)) &&  0.0 <= (trigon[1] - point).cross(dir).dot((trigon[1] - point).cross(trigon[2] - point))) ||
+				(0.0 <= (trigon[2] - point).cross(dir).dot(dir.cross(trigon[0] - point)) &&  0.0 <= (trigon[2] - point).cross(dir).dot((trigon[2] - point).cross(trigon[0] - point)));
+		};
+	auto _isPointInTriangle = [](const Vector3d& point, const std::array<Vector3d, 3>& trigon, const Vector3d& normal)->bool
+		{
+			if (point[0] < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+				point[0] > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+				point[1] < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
+				point[1] > std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
+				point[2] < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
+				point[2] > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]))
+				return false;
+			return
+				0.0 <= (trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) && //bool isLeftA
+				0.0 <= (trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) && //bool isLeftB
+				0.0 <= (trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal);   //bool isLeftC
 		};
 	auto _isPointOnTriangleVertexOrEdge = [](const Eigen::Vector3d& local, const std::array<Eigen::Vector3d, 3 >& trigon)->bool
 		{
@@ -104,7 +109,7 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 				meshOut.vbo_[meshOut.ibo_[j][1]],
 				meshOut.vbo_[meshOut.ibo_[j][2]] };
 			const Eigen::Vector3d& normal = meshOut.fno_[j];
-			if (sat::isPointOnTriangleSurface(iter, trigon, normal))
+			if (_isPointOnTriangleSurface(iter, trigon, normal))
 			{
 				isOnFace = true;
 				break;
@@ -146,7 +151,7 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 			if (k < 0.0) // only positive direction
 				continue;
 			Vector3d local = point + k * direction;
-			if (!sat::isPointInTriangle(local, trigon, normal))
+			if (!_isPointInTriangle(local, trigon, normal))
 				continue;
 			if (_isPointOnTriangleVertexOrEdge(local, trigon)) //singularity
 			{
@@ -308,7 +313,7 @@ bool sat::isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& tri
 }
 
 //tolerance keep with hardclash
-std::array<std::vector<int>, 2> sat::trianglesAndCommonBoxPreclash(const TriMesh& meshA, const TriMesh& meshB, double tolerance)
+std::array<std::vector<int>, 2> trianglesAndCommonBoxPreclash(const TriMesh& meshA, const TriMesh& meshB, double tolerance)
 {
 //#define USING_SECOND_PRECLASH //test shows not faster
 	Eigen::AlignedBox3d boxCom = meshA.bounding_.intersection(meshB.bounding_); // box common
@@ -390,7 +395,7 @@ std::array<std::vector<int>, 2> sat::trianglesAndCommonBoxPreclash(const TriMesh
 
 bool sat::isTwoMeshsIntersectSAT(const TriMesh& meshA, const TriMesh& meshB, double tolerance /*= 0.0*/)
 {
-	const std::array<std::vector<int>, 2> indexAB = sat::trianglesAndCommonBoxPreclash(meshA, meshB, tolerance);// first pre-judge
+	const std::array<std::vector<int>, 2> indexAB = trianglesAndCommonBoxPreclash(meshA, meshB, tolerance);// first pre-judge
 #ifdef STATISTIC_DATA_COUNT
 	count_preclash_A += indexAB[0].size();
 	count_preclash_B += indexAB[1].size();

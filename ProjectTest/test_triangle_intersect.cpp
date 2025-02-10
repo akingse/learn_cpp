@@ -555,6 +555,7 @@ static void _test15()
 	bool isin4 = meshOut.bounding_.contains(meshEmpty.bounding_);
 	bool isin5 = meshOut.bounding_.contains(meshIn.bounding_);
 
+	bool isinter0 = isMeshInsideOtherMesh(meshIn, meshIn);
 	bool isinter1 = isTwoMeshsIntersectSAT(meshIn, meshOut, 0);
 
 
