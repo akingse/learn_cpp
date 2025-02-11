@@ -5,7 +5,7 @@ using namespace para;
 using namespace Eigen;
 using namespace eigen;
 using namespace clash;
-using namespace sat;
+//using namespace sat;
 
 
 static Eigen::Vector3d P(std::nan("0"), std::nan("0"), std::nan("0"));
@@ -484,9 +484,8 @@ static void _test12()
 		Vector3d(0, -10, 0) ,
 		Vector3d(0, 0, 10) , };
 	double intrusion = getTrianglesIntrusionSAT(triA, triB); //0.9
-	bool isIntr1 = isTwoTrianglesIntrusionSAT(triA, triB, 1);
-	bool isIntr2 = isTwoTrianglesIntrusionSAT(triA, triB, -1);
-
+	bool isIntr1 = sat::isTwoTrianglesIntrusionSAT(triA, triB, 1);
+	bool isIntr2 = sat::isTwoTrianglesIntrusionSAT(triA, triB, -1);
 
 	return;
 }
@@ -545,6 +544,7 @@ static void _test14()
 
 static void _test15()
 {
+	using namespace sat;
 	TriMesh meshIn = createTriMesh_UnitCube();
 	TriMesh meshOut = eigen::scale(2) * meshIn;
 	bool isin1 = isMeshInsideOtherMesh(meshIn, meshOut);

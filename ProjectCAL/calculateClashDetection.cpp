@@ -167,6 +167,68 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 	return (countInter % 2 == 1);
 }
 
+//without tolerance
+bool sat::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
+{
+	//isTwoTrianglesBoundingBoxIntersect
+	if (std::max(std::max(triA[0][0], triA[1][0]), triA[2][0]) < std::min(std::min(triB[0][0], triB[1][0]), triB[2][0]) ||
+		std::max(std::max(triB[0][0], triB[1][0]), triB[2][0]) < std::min(std::min(triA[0][0], triA[1][0]), triA[2][0]) ||
+		std::max(std::max(triA[0][1], triA[1][1]), triA[2][1]) < std::min(std::min(triB[0][1], triB[1][1]), triB[2][1]) ||
+		std::max(std::max(triB[0][1], triB[1][1]), triB[2][1]) < std::min(std::min(triA[0][1], triA[1][1]), triA[2][1]) ||
+		std::max(std::max(triA[0][2], triA[1][2]), triA[2][2]) < std::min(std::min(triB[0][2], triB[1][2]), triB[2][2]) ||
+		std::max(std::max(triB[0][2], triB[1][2]), triB[2][2]) < std::min(std::min(triA[0][2], triA[1][2]), triA[2][2]))
+		return false;
+	std::array<Eigen::Vector3d, 3> edgesA = {
+		triA[1] - triA[0],
+		triA[2] - triA[1],
+		triA[0] - triA[2] };
+	std::array<Eigen::Vector3d, 3> edgesB = {
+		triB[1] - triB[0],
+		triB[2] - triB[1],
+		triB[0] - triB[2] };
+	Eigen::Vector3d normalA = edgesA[0].cross(edgesA[1]);
+	Eigen::Vector3d normalB = edgesB[0].cross(edgesB[1]);
+	if (normalA.cross(normalB).isZero())//isParallel3d, means not intrusive
+		return false;
+	std::array<Eigen::Vector3d, 11> axes = { {
+		normalA.normalized(), //normal direction projection
+		normalB.normalized(),
+		edgesA[0].cross(edgesB[0]),//cross edge pair to get normal
+		edgesA[0].cross(edgesB[1]),
+		edgesA[0].cross(edgesB[2]),
+		edgesA[1].cross(edgesB[0]),
+		edgesA[1].cross(edgesB[1]),
+		edgesA[1].cross(edgesB[2]),
+		edgesA[2].cross(edgesB[0]),
+		edgesA[2].cross(edgesB[1]),
+		edgesA[2].cross(edgesB[2]) } };
+	double minA, maxA, minB, maxB, projection;
+	for (const auto& axis : axes)
+	{
+		if (axis.isZero())
+			continue;
+		minA = DBL_MAX;
+		maxA = -DBL_MAX;
+		minB = DBL_MAX;
+		maxB = -DBL_MAX;
+		for (const auto& vertex : triA)
+		{
+			projection = axis.dot(vertex);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
+		}
+		for (const auto& vertex : triB)
+		{
+			projection = axis.dot(vertex);
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		if (maxA  < minB || maxB  < minA) //include equal make more return
+			return false; //as long as one axis gap is separate
+	}
+	return true;
+}
+
 //must intersect, negative tolerance to filter tiny intersect
 bool sat::isTwoTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance /*= 0.0*/)
 {
@@ -408,6 +470,7 @@ bool sat::isTwoMeshsIntersectSAT(const TriMesh& meshA, const TriMesh& meshB, dou
 				meshA.vbo_[meshA.ibo_[iA][0]],
 				meshA.vbo_[meshA.ibo_[iA][1]],
 				meshA.vbo_[meshA.ibo_[iA][2]] };
+			std::vector<int> contactFace;
 			for (const int& iB : indexAB[1])
 			{
 				const std::array<Eigen::Vector3d, 3> triB = {
@@ -421,6 +484,32 @@ bool sat::isTwoMeshsIntersectSAT(const TriMesh& meshA, const TriMesh& meshB, dou
 				if (sat::isTwoTrianglesIntrusionSAT(triA, triB, tolerance)) //isTwoTrianglesIntersectSAT
 				{
 					return true;
+				}
+				// to distinguish only face-contact intersect
+				if (tolerance < 0.0 && meshA.convex_ && meshB.convex_ && 
+					sat::isTwoTrianglesIntersectSAT(triA, triB))
+				{
+					contactFace.push_back(iB);
+				}
+			}
+			if (contactFace.empty()) //both convex
+				continue;
+			//judge whether two side using sat
+			const Vector3d& normalA = meshA.fno_[iA];
+			bool hasPosi = false, hasNega = false;
+			for (const int& fB : contactFace)
+			{
+				for (int i = 0; i < 3; ++i)
+				{
+					double projection = normalA.dot(meshB.vbo_[meshB.ibo_[fB][i]] - triA[0]);
+					if (0.0 == projection)
+						continue;
+					if (0.0 < projection)
+						hasPosi = true;
+					else if (0.0 > projection && projection <= tolerance) //normal direction out
+						hasNega = true;
+                    if (hasPosi && hasNega)
+						return true;
 				}
 			}
 		}

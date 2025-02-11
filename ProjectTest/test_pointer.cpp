@@ -83,7 +83,7 @@ static void test1()
 	//test_point(data);
 	//cout << *data << endl;
 	//test_point_r(data);
-	test_pointer_pp(&data);
+	//test_pointer_pp(&data); //Garbled
 	cout << *data << endl;
 	return;
 }

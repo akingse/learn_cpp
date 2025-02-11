@@ -28,6 +28,7 @@ namespace clash
         //Eigen::Affine3d pose_ = Eigen::Affine3d::Identity();
         int index_ = -1; //int type index
         //bool convex_ = true; // isConvex default true
+        bool convex_ = true;
     };
 
     inline TriMesh operator*(const Eigen::Matrix4d& mat, const TriMesh& mesh)
@@ -79,6 +80,7 @@ namespace clash
             mesh.fno_ = fno_;
             mesh.bounding_ = bounding_;
             mesh.index_ = number_;
+            mesh.convex_ = convex_;
             return mesh;
         }
         inline TriMesh toTriMesh() const
@@ -102,6 +104,7 @@ namespace clash
         res.fno_ = mesh.fno_;
         res.bounding_ = mesh.bounding_;
         res.index_ = mesh.number_;
+        res.convex_ = mesh.convex_;
         return res;
     }
 
@@ -113,6 +116,7 @@ namespace clash
         res.fno_ = mesh.fno_;
         res.bounding_ = mesh.bounding_;
         res.number_ = mesh.index_;
+        res.convex_ = mesh.convex_;
         return res;
     }
 
