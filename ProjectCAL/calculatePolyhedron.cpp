@@ -42,21 +42,21 @@ extern std::vector<Vector3d> triVertexVctA, triVertexVctB;
 extern std::vector<InterTriInfo> interTriInfoList;
 #endif // STATISTIC_DATA_RECORD
 
-bool clash::isMeshConvexPolyhedron(const ModelMesh& mesh)
 //bool clash::isMeshConvexPolyhedron(const std::vector<Eigen::Vector3d>& vbo, const std::vector<Eigen::Vector3i>& ibo)
+bool clash::isMeshConvexPolyhedron(const ModelMesh& mesh)
 {
 	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
 	const std::vector<Eigen::Vector3i>& ibo = mesh.ibo_;
 	bool isLeft = false;
-	for (const auto& face : ibo)
+    for (int i = 0; i < (int)ibo.size(); ++i) //(const auto& face : ibo)
 	{
-		Vector3d normal = (vbo[face[1]] - vbo[face[0]]).cross(vbo[face[2]] - vbo[face[1]]);// .normalized();
+		const Vector3d& normal = mesh.fno_[i];//(vbo[face[1]] - vbo[face[0]]).cross(vbo[face[2]] - vbo[face[1]]);// .normalized();
 		double d_eps = normal.squaredNorm() * epsF; // wide threshold
 		bool isFirst = true;
-		for (size_t i = 0; i < vbo.size(); ++i)
+		for (int j = 0; j < (int)vbo.size(); ++j)
 		{
-			double projection = normal.dot(vbo[i] - vbo[face[0]]);
-			if (i == face[0] || i == face[1] || i == face[2] || fabs(projection) < d_eps) // self or coplanar
+			double projection = normal.dot(vbo[j] - vbo[ibo[i][0]]);
+			if (j == ibo[i][0] || j == ibo[i][1] || j == ibo[i][2] || fabs(projection) <= d_eps) // self or coplanar
 				continue;
 			bool temp = projection < 0.0;
 			if (isFirst)

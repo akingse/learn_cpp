@@ -12,7 +12,7 @@
 namespace clash
 {
 	// polyhedron
-	bool isMeshConvexPolyhedron(const ModelMesh& mesh);
+	DLLEXPORT_CAL bool isMeshConvexPolyhedron(const ModelMesh& mesh);
 	int getMeshGenusNumber(const ModelMesh& mesh);
 	RelationOfPointAndMesh isPointInsidePolyhedronROT(const Eigen::Vector3d& point, const ModelMesh& mesh); //using random rotate
 	bool isPointInsidePolyhedronMTA(const Eigen::Vector3d& point, const ModelMesh& mesh);
