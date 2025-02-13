@@ -558,7 +558,7 @@ static void _test15()
 	bool isinter0 = isMeshInsideOtherMesh(meshIn, meshIn);
 	bool isinter1 = isTwoMeshsIntersectSAT(meshIn, meshOut, 0);
 
-
+    bool isConvex1 = isMeshConvexPolyhedron(toModelMesh(meshIn));
 
 	return;
 }

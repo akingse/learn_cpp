@@ -312,3 +312,67 @@ int main_regular()
 
 	return 0;
 }
+
+#include <regex>
+
+static int _test1()
+{
+	std::string text = "北京市海淀区阜成路40号(毗邻空军总医院)";
+	// 定义正则表达式模式
+	std::string pattern = R"((?!.*的)(.*?)(广场|小区|大厦|中心|场馆|小吃街|商业街|商城|景区|超市|花园|大学|小学|中学|高中|市场|商场|公园|商厦|医院|酒店|饭店|社区|公寓|公司|车站|机场|综合楼|停车场|足球场|篮球场|大街))";
+
+	std::regex re(pattern);
+	std::smatch matches;
+
+	// 用 std::regex_search 查找匹配
+	if (std::regex_search(text, matches, re)) 
+	{
+		std::cout << "匹配到的地点: " << matches[2] << std::endl; // matches[2] 是包含的地名
+	}
+	else 
+	{
+		std::cout << "没有匹配到地点。" << std::endl;
+	}
+
+	return 0;
+}
+
+#include <iostream>
+#include <string>
+#include <regex>
+#include <locale>
+#include <codecvt>
+
+using namespace std;
+
+static int _test2()
+{
+	// 设置宽字符文本和正则表达式
+	wstring text = L"北京市海淀区阜成路40号（毗邻空军总医院）";
+	wregex pattern(L"^(?!.*的).*?((广场|小区|大厦|中心|场馆|小吃街|商业街|商城|景区|中心|超市|花园|大学|小学|中学|高中|市场|商场|公园|商厦|医院|酒店|饭店|社区|公寓|公司|车站|机场|综合楼|停车场|足球场|篮球场|大街))");
+
+	// 使用wregex进行查找
+	wsmatch matches;
+	wstring::const_iterator iter_start = text.begin();
+	wstring::const_iterator iter_end = text.end();
+	wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+
+	// 查找所有匹配项
+	while (std::regex_search(iter_start, iter_end, matches, pattern)) 
+	{
+		// 输出匹配的第一捕获组
+		iter_start = matches[0].second;
+		cout << converter.to_bytes(matches[0].str()) << endl;
+	}
+
+	return 0;
+}
+
+
+static int enrol = []()->int
+	{
+		_test1();
+		_test2();
+		cout << "test_regular  finished.\n" << endl;
+		return 0;
+	}();
