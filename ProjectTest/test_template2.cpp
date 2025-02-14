@@ -229,3 +229,23 @@ int main_temp()
 }
 
 
+template <typename S>
+void collide(std::vector<S>* node, string* front_list)
+{
+
+}
+
+static void _test1()
+{
+	std::vector<int>* node = new std::vector<int>(1);
+	//collide(node);
+	//破案了，fcl里面是模板函数声明和实现分离了
+}
+
+static int enrol = []()->int
+	{
+		_test1();
+		cout << "test_triangle_intersect finished.\n" << endl;
+		return 0;
+	}();
+
