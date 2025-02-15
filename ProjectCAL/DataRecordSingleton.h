@@ -1,4 +1,11 @@
 #pragma once
+/*****************************************************************//**
+ * \file   DataRecordSingleton.h
+ * \brief  create by doxygen-comment-style
+ * 
+ * \author Aking
+ * \date   February 2025
+ *********************************************************************/
 namespace test
 {
     /// <summary>
