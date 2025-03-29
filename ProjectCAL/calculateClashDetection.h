@@ -45,7 +45,7 @@ namespace clash
             const double tolerance = 0.0, const std::function<bool(float, int)>& callback = nullptr);
 
 #if 0
-        //overload
+        //model class overload
         static void addMeshs(const std::vector<ModelMesh>& meshVct)
         {
             std::vector<TriMesh> triMeshVct(meshVct.size());
@@ -90,7 +90,6 @@ namespace sat //to distinguish clash
     DLLEXPORT_CAL bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
     DLLEXPORT_CAL bool isTwoTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance = 0.0);
     DLLEXPORT_CAL bool isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box, double tolerance = 0.0);
-    //DLLEXPORT_CAL std::array<std::vector<int>, 2> trianglesAndCommonBoxPreclash(const clash::TriMesh& meshA, const clash::TriMesh& meshB, double tolerance);
     DLLEXPORT_CAL bool isTwoMeshsIntersectSAT(const clash::TriMesh& meshA, const clash::TriMesh& meshB, double tolerance = 0.0);
 
 }

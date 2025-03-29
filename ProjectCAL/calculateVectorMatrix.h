@@ -75,7 +75,7 @@ namespace eigen
             V0 = v0.normalized();
             V1 = v1.normalized();
         }
-        double cosRes = V0.dot(V1) / (V0.norm() * V1.norm());
+        double cosRes = V0.dot(V1) / (V0.norm() * V1.norm()); //+1 or -1 
         return std::acos(cosRes);
     }
 

@@ -38,7 +38,7 @@ static void _clear_atomic()
 }
 #endif
 
-//hard clash without tolerance
+//inside clash without depth, without tolerance
 bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 {
 #ifdef STATISTIC_DATA_COUNT
@@ -51,10 +51,9 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 				point[1] < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
 				point[1] > std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
 				point[2] < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
-				point[2] > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]))
-				return false;
+				point[2] > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
 			//_isPointInTriangle
-			if ((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) < 0.0 ||
+				(trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) < 0.0 ||
 				(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) < 0.0 ||
 				(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal) < 0.0)
 				return false;
@@ -167,7 +166,7 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 	return (countInter % 2 == 1);
 }
 
-//without tolerance
+//hard clash without tolerance
 bool sat::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {
 	//isTwoTrianglesBoundingBoxIntersect
@@ -191,8 +190,8 @@ bool sat::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA,
 	if (normalA.cross(normalB).isZero())//isParallel3d, means not intrusive
 		return false;
 	std::array<Eigen::Vector3d, 11> axes = { {
-		normalA.normalized(), //normal direction projection
-		normalB.normalized(),
+		normalA, //normal direction projection
+		normalB,
 		edgesA[0].cross(edgesB[0]),//cross edge pair to get normal
 		edgesA[0].cross(edgesB[1]),
 		edgesA[0].cross(edgesB[2]),
@@ -375,7 +374,7 @@ bool sat::isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& tri
 }
 
 //tolerance keep with hardclash
-std::array<std::vector<int>, 2> trianglesAndCommonBoxPreclash(const TriMesh& meshA, const TriMesh& meshB, double tolerance)
+static std::array<std::vector<int>, 2> trianglesAndCommonBoxPreclash(const TriMesh& meshA, const TriMesh& meshB, double tolerance)
 {
 //#define USING_SECOND_PRECLASH //test shows not faster
 	Eigen::AlignedBox3d boxCom = meshA.bounding_.intersection(meshB.bounding_); // box common
@@ -480,8 +479,7 @@ bool sat::isTwoMeshsIntersectSAT(const TriMesh& meshA, const TriMesh& meshB, dou
 #ifdef STATISTIC_DATA_COUNT
 				count_two_triangle_intersect++;
 #endif
-				//if (eigen::isTwoTrianglesIntersectSAT(triA, triB))
-				if (sat::isTwoTrianglesIntrusionSAT(triA, triB, tolerance)) //isTwoTrianglesIntersectSAT
+				if (sat::isTwoTrianglesIntrusionSAT(triA, triB, tolerance)) //origin isTwoTrianglesIntersectSAT
 				{
 					return true;
 				}
@@ -502,11 +500,11 @@ bool sat::isTwoMeshsIntersectSAT(const TriMesh& meshA, const TriMesh& meshB, dou
 				for (int i = 0; i < 3; ++i)
 				{
 					double projection = normalA.dot(meshB.vbo_[meshB.ibo_[fB][i]] - triA[0]);
-					if (0.0 == projection)
+					if (0.0 == projection) //on face
 						continue;
 					if (0.0 < projection)
 						hasPosi = true;
-					else if (0.0 > projection && projection <= tolerance) //normal direction out
+					else if (0.0 > projection && projection <= tolerance) //default normal direction out
 						hasNega = true;
                     if (hasPosi && hasNega)
 						return true;
