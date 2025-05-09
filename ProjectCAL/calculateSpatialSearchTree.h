@@ -99,13 +99,25 @@ namespace clash
 		{
 			if (m_polygon.size() != rhs.m_polygon.size())
 				return false;
-			return memcmp(m_polygon.data(), rhs.m_polygon.data(), sizeof(Polygon2d) * m_polygon.size()) == 0;
+			//return memcmp(m_polygon.data(), rhs.m_polygon.data(), sizeof(Eigen::Vector2d) * m_polygon.size()) == 0;
+			//memcmp not safe sometimes
+			for (size_t i = 0; i < m_polygon.size(); ++i)
+			{
+				//Matrix has ==, no <
+				if (!m_polygon[i].isApprox(rhs.m_polygon[i])) // Use Eigen's isApprox for floating-point comparison  
+					return false;
+			}
+			//const int n = sizeof(Eigen::Vector2d);//16
+			return true;
 		}
 		inline bool operator<(const Polygon2d& rhs) const
 		{
 			if (m_polygon.size() != rhs.m_polygon.size())
-				return false;
-			return memcmp(m_polygon.data(), rhs.m_polygon.data(), sizeof(Polygon2d) * m_polygon.size()) == -1;
+			{
+				size_t size = (m_polygon.size() < rhs.m_polygon.size()) ? m_polygon.size() : rhs.m_polygon.size();
+				return memcmp(m_polygon.data(), rhs.m_polygon.data(), sizeof(Eigen::Vector2d) * size) == -1;
+			}
+			return memcmp(m_polygon.data(), rhs.m_polygon.data(), sizeof(Eigen::Vector2d) * m_polygon.size()) == -1;
 		}
 	};
 
@@ -128,7 +140,7 @@ namespace clash
 
 namespace bvh
 {
-	//Bounding Volum Hierarchy
+	//Bounding Volume Hierarchy
 	struct BVHNode2d
 	{
 		Eigen::AlignedBox2d m_bound;  // 
