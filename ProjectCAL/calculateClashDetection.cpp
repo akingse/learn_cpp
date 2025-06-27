@@ -100,7 +100,7 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 	for (int i = 0; i < (int)meshIn.vbo_.size(); ++i)
 	{
 		bool isOnFace = false;
-		const Eigen::Vector3d& iter = meshIn.vbo_[i];
+		//const Eigen::Vector3d& iter = meshIn.vbo_[i];
 		for (int j = 0; j < (int)meshOut.ibo_.size(); ++j)
 		{
 			const std::array<Eigen::Vector3d, 3> trigon = {
@@ -108,7 +108,7 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 				meshOut.vbo_[meshOut.ibo_[j][1]],
 				meshOut.vbo_[meshOut.ibo_[j][2]] };
 			const Eigen::Vector3d& normal = meshOut.fno_[j];
-			if (_isPointOnTriangleSurface(iter, trigon, normal))
+			if (_isPointOnTriangleSurface(meshIn.vbo_[i], trigon, normal))
 			{
 				isOnFace = true;
 				break;
@@ -116,7 +116,7 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 		}
         if (isOnFace == false)
 		{
-			point = iter;
+			point = meshIn.vbo_[i];
 			break;
 		}
 	}

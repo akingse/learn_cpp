@@ -560,7 +560,31 @@ static void _test15()
 
     bool isConvex1 = isMeshConvexPolyhedron(toModelMesh(meshIn));
 
+
 	return;
+}
+
+//随机三角形，顶点在法向方向的投影
+static void _test16()
+{
+	double k = 1.2342;
+	for (int i = 0; i < 100; ++i)
+	{
+		//double random_num = rand() / (RAND_MAX + 1.0); //a+b+c=1
+		Triangle3d trigon = { 
+			Vector3d(k*rand() ,k*rand() ,k*rand() ),
+			Vector3d(k*rand() ,k*rand() ,k*rand()), 
+			Vector3d(k*rand() ,k*rand() ,k*rand()), };
+		Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[1]).normalized();
+
+		double delta = 0;
+		delta += fabs(normal.dot(trigon[1] - trigon[0]));
+		delta += fabs(normal.dot(trigon[2] - trigon[0]));
+		continue;
+	}
+	//结论：整形没有误差；
+	//整形+normalized，有较小误差
+	//浮点型+不normalized，误差很大
 }
 
 static int enrol = []()->int
@@ -576,6 +600,7 @@ static int enrol = []()->int
 	_test13();
 	_test14();
 	_test15();
+	_test16();
 	cout << "test_triangle_intersect finished.\n" << endl;
 	return 0;
 }();
