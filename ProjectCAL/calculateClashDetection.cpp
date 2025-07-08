@@ -59,10 +59,8 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 				return false;
 			return normal.dot(point - trigon[0]) == 0.0;
 		};
-	auto _isRayAndTriangleIntersectParallel = [](const Eigen::Vector3d& point, const Eigen::Vector3d& dir, const std::array<Eigen::Vector3d, 3 >& trigon, const Eigen::Vector3d& normal)->bool
+	auto _isRayAndTriangleIntersectParallel = [](const Eigen::Vector3d& point, const Eigen::Vector3d& dir, const std::array<Eigen::Vector3d, 3 >& trigon)->bool
 		{
-			if ((point - trigon[0]).dot(normal) != 0.0) // not coplanar
-				return false;
 			// negetive direction ray cause cross product result opposite
 			return
 				(0.0 <= (trigon[0] - point).cross(dir).dot(dir.cross(trigon[1] - point)) &&  0.0 <= (trigon[0] - point).cross(dir).dot((trigon[0] - point).cross(trigon[1] - point))) ||
@@ -85,13 +83,14 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 		};
 	auto _isPointOnTriangleVertexOrEdge = [](const Eigen::Vector3d& local, const std::array<Eigen::Vector3d, 3 >& trigon)->bool
 		{
+			constexpr double eps = 1e-8; //expand tolerance
 			return
-				(local - trigon[0]).isZero() ||
-				(local - trigon[1]).isZero() ||
-				(local - trigon[2]).isZero() ||
-				(local - trigon[0]).cross(local - trigon[1]).isZero() ||
-				(local - trigon[1]).cross(local - trigon[2]).isZero() ||
-				(local - trigon[2]).cross(local - trigon[0]).isZero();
+				(local - trigon[0]).isZero(eps) ||
+				(local - trigon[1]).isZero(eps) ||
+				(local - trigon[2]).isZero(eps) ||
+				(local - trigon[0]).cross(local - trigon[1]).isZero(eps) ||
+				(local - trigon[1]).cross(local - trigon[2]).isZero(eps) ||
+				(local - trigon[2]).cross(local - trigon[0]).isZero(eps);
 		};
     if (meshIn.vbo_.empty() || meshIn.ibo_.empty())
 		return false;
@@ -124,9 +123,12 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 		return true; //all face coincide
 	//ray method
 	Vector3d direction = Vector3d(1.0, 1.0, 1.0); //random ray direction
+	constexpr int maxCircle = 10;
+	int newRayCount = 0;
 	int countInter = 0;
-	while (true)
+	while (newRayCount < maxCircle) //avoid while-true
 	{
+		newRayCount++;
 		bool isNewRay = false;//new create rand rayDir
 		for (int i = 0; i < (int)meshOut.ibo_.size(); ++i)// iterate every trigon
 		{
@@ -138,13 +140,14 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 			double deno = direction.dot(normal); //ray.direction
 			if (deno == 0.0)//ray direction is parallel, redo circulation
 			{
-				if (_isRayAndTriangleIntersectParallel(point, direction, trigon, normal)) //coplanar
-				{
-					direction = Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff).normalized();//move RAND_MAX/2
-					isNewRay = true;
-					break;
-				}
-				continue;
+				if ((point - trigon[0]).dot(normal) != 0.0) // not coplanar
+					continue;
+				if (!_isRayAndTriangleIntersectParallel(point, direction, trigon)) //coplanar
+                    continue;
+				direction = Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff).normalized();//move RAND_MAX/2
+				isNewRay = true;
+				countInter = 0;//reset
+				break;
 			}
 			double k = (trigon[0] - point).dot(normal) / deno;
 			if (k < 0.0) // only positive direction
@@ -156,6 +159,7 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 			{
 				direction = Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff).normalized();
 				isNewRay = true;
+				countInter = 0;//reset
 				break;
 			}
 			countInter++; // ray across is true

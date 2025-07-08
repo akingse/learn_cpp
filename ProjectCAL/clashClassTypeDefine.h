@@ -19,6 +19,11 @@ namespace clash
     static constexpr size_t N_10E_7 = (size_t)1e7;
     static constexpr size_t N_10E_8 = (size_t)1e8;
 
+    static constexpr double epsF = FLT_EPSILON; //epsFloat=1e-7
+    static constexpr double epsArea = 100 * FLT_EPSILON;
+    //static constexpr double epsA = 1e-6;
+    //static constexpr unsigned long long ULL_MAX = 18446744073709551615; // 2 ^ 64 - 1 //ULLONG_MAX
+
     struct TriMesh //trigon mesh, simplified
     {
         std::vector<Eigen::Vector3d> vbo_;
@@ -63,6 +68,8 @@ namespace clash
         std::vector<int> iboRaw_; //for test debug
         uint64_t index_ = UINT64_MAX;// ULLONG_MAX; // record belong to same polyface
         //uint64_t instanceid = 0; //0 means not instance
+        double area_ = 0;
+        double volume_ = 0;
 #endif
 #ifdef STORAGE_VERTEX_DATA_2D
         inline void to2d()
@@ -93,6 +100,44 @@ namespace clash
             for (int i = 0; i < (int)meshVct.size(); ++i)
                 meshRes[i] = meshVct[i]; //operator
             return meshRes;
+        }
+        inline double area() const
+        {
+            double area = 0;
+            for (int i = 0; i < (int)ibo_.size(); ++i)
+            {
+                area += (vbo_[ibo_[i][1]] - vbo_[ibo_[i][0]]).cross
+                        (vbo_[ibo_[i][2]] - vbo_[ibo_[i][1]]).norm();
+            }
+            return 0.5 * area;
+        }
+        inline double volume() const
+        {
+            Eigen::Vector3d centroid(0, 0, 0);
+            for (const auto& vertex : vbo_) 
+                centroid += vertex;
+            centroid = 1.0 / vbo_.size() * centroid;
+            //tetrahedronVolume
+            double volume = 0;
+            for (int i = 0; i < (int)ibo_.size(); ++i)
+            {
+                volume += fabs((vbo_[ibo_[i][0]] - centroid).dot(
+                    (vbo_[ibo_[i][1]] - centroid).cross(vbo_[ibo_[i][2]] - centroid)));
+            }
+            return volume / 6.0;
+        }
+
+        bool operator==(const ModelMesh& rhs)const
+        {
+            if (vbo_.size() != rhs.vbo_.size() || ibo_.size() != rhs.ibo_.size())
+                return false;
+            double areaThis = area();
+            double voluThis = volume();
+            double areaRhs = rhs.area();
+            double voluRhs = rhs.volume();
+            if (1 < fabs(areaThis - areaRhs) || 1 < fabs(voluThis - voluRhs))
+                return false;
+            return true;
         }
     };
 
@@ -150,10 +195,6 @@ namespace clash //collide //psykronix
     //static const Eigen::Vector3d gVecAxisX(1, 0, 0); //Eigen::Vector3d::UnitX()
     //static const Eigen::Vector3d gVecAxisY(0, 1, 0); //Eigen::Vector3d::UnitY()
     //static const Eigen::Vector3d gVecAxisZ(0, 0, 1); //Eigen::Vector3d::UnitZ()
-    static constexpr double epsF = FLT_EPSILON; //epsFloat=1e-7
-    static constexpr double epsArea = 100 * FLT_EPSILON;
-    //static constexpr double epsA = 1e-6;
-    //static constexpr unsigned long long ULL_MAX = 18446744073709551615; // 2 ^ 64 - 1 //ULLONG_MAX
 
     class Plane3d
     {

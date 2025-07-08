@@ -348,6 +348,8 @@ RelationOfPointAndMesh clash::isPointInsidePolyhedronROT(const Eigen::Vector3d& 
 		}
 		if (!isNew)
 			break;//end while
+		//if (maxCircle < newRayTime)
+		//	break;
 #ifdef STATISTIC_DATA_TESTFOR
 		endT = clock();
 		if (1.0 < double(endT - startT) / CLOCKS_PER_SEC)
