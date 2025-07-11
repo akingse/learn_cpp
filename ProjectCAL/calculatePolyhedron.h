@@ -44,50 +44,5 @@ namespace clash
 //std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConvexALL(const ModelMesh& meshA, const ModelMesh& meshB);
 //std::tuple<Eigen::Vector3d, std::array<size_t, 2>> _getPenetrationDepthOfTwoConvexBOX(const ModelMesh& meshA, const ModelMesh& meshB);
 
-inline clash::TriMesh createTriMesh_UnitCube()
-{
-	clash::TriMesh mesh;
-	mesh.vbo_ = {
-		Eigen::Vector3d(1.0,  1.0,  1.0), // 0
-		Eigen::Vector3d(-1.0,  1.0,  1.0), // 1
-		Eigen::Vector3d(-1.0, -1.0,  1.0), // 2
-		Eigen::Vector3d(1.0, -1.0,  1.0), // 3
-		Eigen::Vector3d(1.0,  1.0, -1.0), // 4
-		Eigen::Vector3d(-1.0,  1.0, -1.0), // 5
-		Eigen::Vector3d(-1.0, -1.0, -1.0), // 6
-		Eigen::Vector3d(1.0, -1.0, -1.0)  // 7
-	};
-	mesh.ibo_ = {
-		// 前脸 (z = 1)
-		{0, 1, 2}, {0, 2, 3},
-		// 后脸 (z = -1)
-		{4, 5, 6}, {4, 6, 7},
-		// 顶脸 (y = 1)
-		{0, 4, 5}, {0, 5, 1},
-		// 底脸 (y = -1)
-		{2, 6, 7}, {2, 7, 3},
-		// 右脸 (x = 1)
-		{0, 3, 7}, {0, 7, 4},
-		// 左脸 (x = -1)
-		{1, 5, 6}, {1, 6, 2}
-	};
-	mesh.fno_ = {
-		// 前脸法线 (0,0,1)
-		{0, 0, 1}, {0, 0, 1},
-		// 后脸法线 (0,0,-1)
-		{0, 0, -1}, {0, 0, -1},
-		// 顶脸法线 (0,1,0)
-		{0, 1, 0}, {0, 1, 0},
-		// 底脸法线 (0,-1,0)
-		{0, -1, 0}, {0, -1, 0},
-		// 右脸法线 (1,0,0)
-		{1, 0, 0}, {1, 0, 0},
-		// 左脸法线 (-1,0,0)
-		{-1, 0, 0}, {-1, 0, 0}
-	};
-	mesh.bounding_ = Eigen::AlignedBox3d(Eigen::Vector3d(-1.0, -1.0, -1.0), Eigen::Vector3d(1.0, 1.0, 1.0));
-	return mesh;
-}
-
 
 #endif// CALCULATE_POLYHEDRON_H
