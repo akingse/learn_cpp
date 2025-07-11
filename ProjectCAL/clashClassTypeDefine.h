@@ -113,18 +113,41 @@ namespace clash
         }
         inline double volume() const
         {
-            Eigen::Vector3d centroid(0, 0, 0);
-            for (const auto& vertex : vbo_) 
-                centroid += vertex;
-            centroid = 1.0 / vbo_.size() * centroid;
+            //Eigen::Vector3d centroid(0, 0, 0);
+            //for (const auto& vertex : vbo_) 
+            //    centroid += vertex;
+            //centroid = 1.0 / vbo_.size() * centroid;
+            if (vbo_.empty())
+                return 0;
+            Eigen::Vector3d origin = vbo_[0];
             //tetrahedronVolume
             double volume = 0;
             for (int i = 0; i < (int)ibo_.size(); ++i)
             {
-                volume += fabs((vbo_[ibo_[i][0]] - centroid).dot(
-                    (vbo_[ibo_[i][1]] - centroid).cross(vbo_[ibo_[i][2]] - centroid)));
+                volume += (vbo_[ibo_[i][0]] - origin).dot((vbo_[ibo_[i][1]] - origin).cross(vbo_[ibo_[i][2]] - origin));
             }
             return volume / 6.0;
+        }
+
+        inline std::pair<double, Eigen::Vector3d> volume_moment() const
+        {
+            if (vbo_.empty())
+                return { 0,Eigen::Vector3d() };
+            Eigen::Vector3d origin = vbo_[0];
+            //tetrahedronVolume
+            double volume = 0;
+            //double factor = 1.0 / 24.0;
+            Eigen::Vector3d moment = Eigen::Vector3d(0, 0, 0);
+            for (int i = 0; i < (int)ibo_.size(); ++i)
+            {
+                const Eigen::Vector3d vector0 = vbo_[ibo_[i][0]] - origin;
+                const Eigen::Vector3d vector1 = vbo_[ibo_[i][1]] - origin;
+                const Eigen::Vector3d vector2 = vbo_[ibo_[i][2]] - origin;
+                double det = (vector0).dot((vector1).cross(vector2));
+                volume += det;
+                moment += det * (vector0 + vector1 + vector2);
+            }
+            return { volume / 6.0,moment / 24.0 };
         }
 
         bool operator==(const ModelMesh& rhs)const
