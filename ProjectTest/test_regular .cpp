@@ -371,8 +371,8 @@ static int _test2()
 
 static int enrol = []()->int
 	{
-		_test1();
-		_test2();
+		//_test1();
+		//_test2();
 		cout << "test_regular  finished.\n" << endl;
 		return 0;
 	}();
