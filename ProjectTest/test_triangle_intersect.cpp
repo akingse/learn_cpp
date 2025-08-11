@@ -637,6 +637,61 @@ static void _test16()
 	//浮点型+不normalized，误差很大
 }
 
+bool isRayAndTriangleIntersect(const Vector3d& pnt, const Vector3d& dir, const std::array<Vector3d, 3 >& tri)
+{
+	return
+		(0.0 <= (tri[0] - pnt).cross(dir).dot(dir.cross(tri[1] - pnt)) && 0.0 <= (tri[0] - pnt).cross(dir).dot((tri[0] - pnt).cross(tri[1] - pnt))) ||
+		(0.0 <= (tri[1] - pnt).cross(dir).dot(dir.cross(tri[2] - pnt)) && 0.0 <= (tri[1] - pnt).cross(dir).dot((tri[1] - pnt).cross(tri[2] - pnt))) ||
+		(0.0 <= (tri[2] - pnt).cross(dir).dot(dir.cross(tri[0] - pnt)) && 0.0 <= (tri[2] - pnt).cross(dir).dot((tri[2] - pnt).cross(tri[0] - pnt)));
+}
+
+//射线法
+static void _test17()
+{
+	auto _isRayAndTriangleIntersectParallel = [](const Vector3d& ori, const Vector3d& dir, const std::array<Vector3d, 3 >& trigon)->bool
+		{
+			// negetive direction ray cause cross product result opposite
+            Vector3d cp0 = (trigon[0] - ori).cross(dir);
+            Vector3d cp1 = dir.cross(trigon[1] - ori);
+            return
+				(0.0 <= (trigon[0] - ori).cross(dir).dot(dir.cross(trigon[1] - ori)) && 0.0 <= (trigon[0] - ori).cross(dir).dot((trigon[0] - ori).cross(trigon[1] - ori))) ||
+				(0.0 <= (trigon[1] - ori).cross(dir).dot(dir.cross(trigon[2] - ori)) && 0.0 <= (trigon[1] - ori).cross(dir).dot((trigon[1] - ori).cross(trigon[2] - ori))) ||
+				(0.0 <= (trigon[2] - ori).cross(dir).dot(dir.cross(trigon[0] - ori)) && 0.0 <= (trigon[2] - ori).cross(dir).dot((trigon[2] - ori).cross(trigon[0] - ori)));
+		};
+
+	const Vector3d& direction = Vector3d(-1, 0, 0);
+	Vector3d face_center = Vector3d(-10, 5, 0);
+	const std::array<Eigen::Vector3d, 3> trigon = {
+		Vector3d(10,0, 0),
+		Vector3d(10,10,0),
+		Vector3d(2,2,0),
+	};
+	bool inter = _isRayAndTriangleIntersectParallel(face_center, direction, trigon);
+
+	for (int j = 0; j < 2; ++j)
+	{
+		const std::array<Eigen::Vector3d, 3> trigon = {
+			Vector3d(10,0, 0),
+			Vector3d(10,10,0),
+			Vector3d(2,2,0),
+		};
+		const Eigen::Vector3d& normal = Vector3d(0, 0, 1);
+		double deno = direction.dot(normal); //ray.direction
+		if (deno == 0.0)//ray direction is parallel, necessarily using tolarance, avoid overflow
+		{
+			if ((face_center - trigon[0]).dot(normal) != 0.0) // ray not coplanar
+				continue;
+			if (!_isRayAndTriangleIntersectParallel(face_center, direction, trigon)) //coplanar
+				continue;
+			face_center = Vector3d(0, 0, 0);
+			//isNewRay = true;
+			//countInter = 0;//reset
+			//break;
+		}
+	}
+
+}
+
 static int enrol = []()->int
 {
 	//_test1();
@@ -651,6 +706,7 @@ static int enrol = []()->int
 	_test14();
 	_test15();
 	_test16();
+	_test17();
 	cout << "test_triangle_intersect finished.\n" << endl;
 	return 0;
 }();
