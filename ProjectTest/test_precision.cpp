@@ -1,5 +1,6 @@
 #include "pch.h"
 using namespace std;
+using namespace clash;
 using namespace Eigen;
 using namespace eigen;
 using namespace accura;
@@ -82,12 +83,46 @@ static void _test4()
 
 }
 
+//精度问题
+static void _test5()
+{
+	//顶点是否在该平面上
+	double delta = 0;
+	for (int i = 0; i < 100; i++)
+	{
+		//Triangle3d trigon = {
+  //          Eigen::Vector3d(rand() + double(rand()) / RAND_MAX, rand(), rand()),
+		//	Eigen::Vector3d(rand(), rand() + double(rand()) / RAND_MAX, rand()),
+		//	Eigen::Vector3d(rand(), rand(), rand() + double(rand()) / RAND_MAX),
+		//};
+		// 
+		Triangle3d trigon = {
+			Eigen::Vector3d(rand() + double(rand()) / RAND_MAX, rand() + double(rand()) / RAND_MAX, rand() + double(rand()) / RAND_MAX),
+			Eigen::Vector3d(rand() + double(rand()) / RAND_MAX, rand() + double(rand()) / RAND_MAX, rand() + double(rand()) / RAND_MAX),
+			Eigen::Vector3d(rand() + double(rand()) / RAND_MAX, rand() + double(rand()) / RAND_MAX, rand() + double(rand()) / RAND_MAX),
+		};
+		//向量是否单位化，结果相差很大
+		Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[1]);
+		//Vector3d normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[1]).normalized();
+		double dot0 = normal.dot(trigon[1] - trigon[0]);
+		double dot1 = normal.dot(trigon[2] - trigon[1]);
+		double dot2 = normal.dot(trigon[0] - trigon[2]);
+		//double dot0 = normal.dot((trigon[1] - trigon[0]).normalized());
+		//double dot1 = normal.dot((trigon[2] - trigon[1]).normalized());
+		//double dot2 = normal.dot((trigon[0] - trigon[2]).normalized());
+		delta += fabs(dot0) + fabs(dot1) + fabs(dot2);
+	}
+
+
+}
+
 static int enrol = []()->int
 	{
-		_test1();
-		_test2();
-		_test3();
-		_test4();
+		//_test1();
+		//_test2();
+		//_test3();
+		//_test4();
+		_test5();
 
 		cout << "test_precision finished.\n" << endl;
 		return 0;
