@@ -692,6 +692,40 @@ static void _test17()
 
 }
 
+static void _test18()
+{
+	auto _isPointOnTriangleSurface = [](const Vector3d& point, const std::array<Vector3d, 3>& trigon, const Vector3d& normal, double toleDist)->bool
+		{
+			//_isPointInTriangle
+			if (point[0] + toleDist < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+				point[0] - toleDist > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+				point[1] + toleDist < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
+				point[1] - toleDist > std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
+				point[2] + toleDist < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
+				point[2] - toleDist > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
+				toleDist < fabs(normal.dot(point - trigon[0])))
+				return false;
+			return
+				-toleDist * (trigon[1] - trigon[0]).norm() < (trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) && //bool isLeftA
+				-toleDist * (trigon[2] - trigon[1]).norm() < (trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) && //bool isLeftB
+				-toleDist * (trigon[0] - trigon[2]).norm() < (trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal);   //bool isLeftC
+		};
+	//Vector3d point(0, 0, 0);
+	//Vector3d point(0, 1, 0);
+	//Vector3d point(2, 0, 0);
+	Vector3d point(0, 0, 1e-7);
+
+	std::array<Vector3d, 3> trigon =
+	{
+		Vector3d(0,0,0),
+		Vector3d(1,0,0),
+		Vector3d(0,1,0),
+	};
+	Vector3d normal(0, 0, 1);
+	bool ison = _isPointOnTriangleSurface(point, trigon, normal, 1e-8);
+	return;
+}
+
 static int enrol = []()->int
 {
 	//_test1();
@@ -707,6 +741,7 @@ static int enrol = []()->int
 	_test15();
 	_test16();
 	_test17();
+	_test18();
 	cout << "test_triangle_intersect finished.\n" << endl;
 	return 0;
 }();

@@ -44,53 +44,54 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 #ifdef STATISTIC_DATA_COUNT
 	count_judge_inside++;
 #endif
-	auto _isPointOnTriangleSurface = [](const Vector3d& point, const std::array<Vector3d, 3>& trigon, const Vector3d& normal)->bool
+	constexpr double toleDist = 1e-8;
+	auto _isPointOnTriangleSurface = [](const Vector3d& point, const std::array<Vector3d, 3>& trigon, const Vector3d& normal, double toleDist)->bool
 		{
-			if (point[0] < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
-				point[0] > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
-				point[1] < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
-				point[1] > std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
-				point[2] < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
-				point[2] > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
 			//_isPointInTriangle
-				(trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) < 0.0 ||
-				(trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) < 0.0 ||
-				(trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal) < 0.0)
-				return false;
-			return normal.dot(point - trigon[0]) == 0.0;
-		};
-	auto _isRayAndTriangleIntersectParallel = [](const Eigen::Vector3d& point, const Eigen::Vector3d& dir, const std::array<Eigen::Vector3d, 3 >& trigon)->bool
-		{
-			// negetive direction ray cause cross product result opposite
-			return
-				(0.0 <= (trigon[0] - point).cross(dir).dot(dir.cross(trigon[1] - point)) &&  0.0 <= (trigon[0] - point).cross(dir).dot((trigon[0] - point).cross(trigon[1] - point))) ||
-				(0.0 <= (trigon[1] - point).cross(dir).dot(dir.cross(trigon[2] - point)) &&  0.0 <= (trigon[1] - point).cross(dir).dot((trigon[1] - point).cross(trigon[2] - point))) ||
-				(0.0 <= (trigon[2] - point).cross(dir).dot(dir.cross(trigon[0] - point)) &&  0.0 <= (trigon[2] - point).cross(dir).dot((trigon[2] - point).cross(trigon[0] - point)));
-		};
-	auto _isPointInTriangle = [](const Vector3d& point, const std::array<Vector3d, 3>& trigon, const Vector3d& normal)->bool
-		{
-			if (point[0] < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
-				point[0] > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
-				point[1] < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
-				point[1] > std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
-				point[2] < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
-				point[2] > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]))
+			if (point[0] + toleDist < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+				point[0] - toleDist > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+				point[1] + toleDist < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
+				point[1] - toleDist > std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
+				point[2] + toleDist < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
+				point[2] - toleDist > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
+				toleDist < fabs(normal.dot(point - trigon[0])))
 				return false;
 			return
-				0.0 <= (trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) && //bool isLeftA
-				0.0 <= (trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) && //bool isLeftB
-				0.0 <= (trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal);   //bool isLeftC
+				-toleDist * (trigon[1] - trigon[0]).norm() < (trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) && //bool isLeftA
+				-toleDist * (trigon[2] - trigon[1]).norm() < (trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) && //bool isLeftB
+				-toleDist * (trigon[0] - trigon[2]).norm() < (trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal);   //bool isLeftC
 		};
-	auto _isPointOnTriangleVertexOrEdge = [](const Eigen::Vector3d& local, const std::array<Eigen::Vector3d, 3 >& trigon)->bool
+	auto _isRayAndTriangleIntersectParallel = [](const Vector3d& pnt, const Vector3d& dir, const std::array<Vector3d, 3 >& tri)->bool
 		{
-			constexpr double eps = 1e-8; //expand tolerance
+			//ray only one direction, negetive direction cause cross product result opposite
 			return
-				(local - trigon[0]).isZero(eps) ||
-				(local - trigon[1]).isZero(eps) ||
-				(local - trigon[2]).isZero(eps) ||
-				(local - trigon[0]).cross(local - trigon[1]).isZero(eps) ||
-				(local - trigon[1]).cross(local - trigon[2]).isZero(eps) ||
-				(local - trigon[2]).cross(local - trigon[0]).isZero(eps);
+				(0.0 <= (tri[0] - pnt).cross(dir).dot(dir.cross(tri[1] - pnt)) && 0.0 <= (tri[0] - pnt).cross(dir).dot((tri[0] - pnt).cross(tri[1] - pnt))) ||
+				(0.0 <= (tri[1] - pnt).cross(dir).dot(dir.cross(tri[2] - pnt)) && 0.0 <= (tri[1] - pnt).cross(dir).dot((tri[1] - pnt).cross(tri[2] - pnt))) ||
+				(0.0 <= (tri[2] - pnt).cross(dir).dot(dir.cross(tri[0] - pnt)) && 0.0 <= (tri[2] - pnt).cross(dir).dot((tri[2] - pnt).cross(tri[0] - pnt)));
+		};
+	auto _isPointInTriangle = [](const Vector3d& point, const std::array<Vector3d, 3>& trigon, const Vector3d& normal, double toleDist)->bool
+		{
+			if (point[0] + toleDist < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+				point[0] - toleDist > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+				point[1] + toleDist < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
+				point[1] - toleDist > std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
+				point[2] + toleDist < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
+				point[2] - toleDist > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]))
+				return false; //using smaller eps
+			return
+				-toleDist * (trigon[1] - trigon[0]).norm() < (trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) && //bool isLeftA
+				-toleDist * (trigon[2] - trigon[1]).norm() < (trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) && //bool isLeftB
+				-toleDist * (trigon[0] - trigon[2]).norm() < (trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal);   //bool isLeftC
+		};
+	auto _isPointOnTriangleVertexOrEdge = [](const Vector3d& point, const std::array<Vector3d, 3 >& trigon, double toleDist)->bool
+		{
+			return //two points coincident, point on edge_line
+				(point - trigon[0]).isZero(toleDist) ||
+				(point - trigon[1]).isZero(toleDist) ||
+				(point - trigon[2]).isZero(toleDist) ||
+				(point - trigon[0]).cross(point - trigon[1]).isZero(toleDist * (trigon[0] - trigon[1]).norm()) ||
+				(point - trigon[1]).cross(point - trigon[2]).isZero(toleDist * (trigon[1] - trigon[2]).norm()) ||
+				(point - trigon[2]).cross(point - trigon[0]).isZero(toleDist * (trigon[2] - trigon[0]).norm());
 		};
     if (meshIn.vbo_.empty() || meshIn.ibo_.empty())
 		return false;
@@ -107,7 +108,7 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 				meshOut.vbo_[meshOut.ibo_[j][1]],
 				meshOut.vbo_[meshOut.ibo_[j][2]] };
 			const Eigen::Vector3d& normal = meshOut.fno_[j];
-			if (_isPointOnTriangleSurface(meshIn.vbo_[i], trigon, normal))
+			if (_isPointOnTriangleSurface(meshIn.vbo_[i], trigon, normal, toleDist))
 			{
 				isOnFace = true;
 				break;
@@ -130,13 +131,13 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 	{
 		newRayCount++;
 		bool isNewRay = false;//new create rand rayDir
-		for (int i = 0; i < (int)meshOut.ibo_.size(); ++i)// iterate every trigon
+		for (int j = 0; j < (int)meshOut.ibo_.size(); ++j)// iterate every trigon
 		{
 			const std::array<Eigen::Vector3d, 3> trigon = {
-				meshOut.vbo_[meshOut.ibo_[i][0]],
-				meshOut.vbo_[meshOut.ibo_[i][1]],
-				meshOut.vbo_[meshOut.ibo_[i][2]] };
-			const Eigen::Vector3d& normal = meshOut.fno_[i];
+				meshOut.vbo_[meshOut.ibo_[j][0]],
+				meshOut.vbo_[meshOut.ibo_[j][1]],
+				meshOut.vbo_[meshOut.ibo_[j][2]] };
+			const Eigen::Vector3d& normal = meshOut.fno_[j];
 			double deno = direction.dot(normal); //ray.direction
 			if (deno == 0.0)//ray direction is parallel, redo circulation
 			{
@@ -144,7 +145,7 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 					continue;
 				if (!_isRayAndTriangleIntersectParallel(point, direction, trigon)) //coplanar
                     continue;
-				direction = Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff).normalized();//move RAND_MAX/2
+				direction = Vector3d(rand() - RAND_MAX, rand() - RAND_MAX, rand() - RAND_MAX).normalized();//move RAND_MAX/2
 				isNewRay = true;
 				countInter = 0;//reset
 				break;
@@ -153,11 +154,11 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 			if (k < 0.0) // only positive direction
 				continue;
 			Vector3d local = point + k * direction;
-			if (!_isPointInTriangle(local, trigon, normal))
+			if (!_isPointInTriangle(local, trigon, normal, toleDist))
 				continue;
-			if (_isPointOnTriangleVertexOrEdge(local, trigon)) //singularity
+			if (_isPointOnTriangleVertexOrEdge(local, trigon, toleDist)) //singularity
 			{
-				direction = Vector3d(rand() - 0x3fff, rand() - 0x3fff, rand() - 0x3fff).normalized();
+				direction = Vector3d(rand() - RAND_MAX, rand() - RAND_MAX, rand() - RAND_MAX).normalized();
 				isNewRay = true;
 				countInter = 0;//reset
 				break;
