@@ -726,23 +726,71 @@ static void _test18()
 	return;
 }
 
-static int enrol = []()->int
+//mesh ±¡Æ¬ÎÊÌâ
+static void _test20()
 {
-	//_test1();
-	//_test2();
-	//_test7();
-	//_test8();
-	//_test9();
-	//_test10();
-	//_test11();
-	_test12();
-	_test13();
-	_test14();
-	_test15();
-	_test16();
-	_test17();
-	_test18();
-	cout << "test_triangle_intersect finished.\n" << endl;
-	return 0;
-}();
+	double toleDist = 1e-6;
+	double toleAngle = 1e-8;
+	//lineTar
+	Triangle3d trigonA = {
+		Vector3d(8127.927601097925, 1160.0165000554985, 4200),
+		Vector3d(8127.927601097925, 1160.0165000554985, 5000),
+		Vector3d(25302.92699713257, 1160.1218053095708, 5000),
+	};
+	Vector3d normalA = (trigonA[1] - trigonA[0]).cross(trigonA[1] - trigonA[2]).normalized();
+
+	//lineTo1
+	Triangle3d trigonB = {
+		Vector3d(8502.927131848737, 1160.1218053090997, 0),
+		Vector3d(7802.927131848737, 1160.1218053090997, 5100),
+		Vector3d(8502.927131848737, 1160.1218053090997, 5100),
+	};
+	Vector3d normalB = (trigonB[1] - trigonB[0]).cross(trigonB[1] - trigonB[2]).normalized();
+
+	Triangle3d trigonC = {
+		Vector3d(16902.927131848737, 1160.1218053090997, 0),
+		Vector3d(16202.927131848737, 1160.1218053090997, 5100),
+		Vector3d(16902.927131848737, 1160.1218053090997, 5100),
+	};
+	Triangle3d trigonD = {
+		Vector3d(25302.927131848737, 1160.1218053090997, 0),
+		Vector3d(24602.927131848737, 1160.1218053090997, 5100),
+		Vector3d(25302.927131848737, 1160.1218053090997, 5100),
+	};
+
+	double dotPrp = fabs(fabs(normalA.dot(normalB) - 1.0));
+	bool isinter = sat::isTwoTrianglesIntersectSAT(trigonA, trigonB);
+	bool isinter1 = sat::isTwoTrianglesIntrusionSAT(trigonA, trigonB, toleDist);
+	bool isinter2 = sat::isTwoTrianglesIntersectSAT(trigonA, trigonC);
+	bool isinter3 = sat::isTwoTrianglesIntersectSAT(trigonA, trigonD);
+
+
+	double distance1 = getTrianglesDistanceSAT(trigonA, trigonB);
+	double distance2 = getTrianglesDistanceSAT(trigonA, trigonC);
+	return;
+}
+
+static int enrol = []()->int
+    {
+        //_test1();
+        //_test2();
+        //_test7();
+        //_test8();
+        //_test9();
+        //_test10();
+        //_test11();
+        //_test12();
+        //_test13();
+        //_test14();
+        //_test15();
+        //_test16();
+        //_test17();
+        //_test18();
+
+        //lamina
+        _test20();
+
+        cout << "test_triangle_intersect finished.\n" << endl;
+        return 0;
+    }();
 

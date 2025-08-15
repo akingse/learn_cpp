@@ -123,7 +123,8 @@ namespace test
             std::vector<std::pair<std::string, double>> m_dataTimeVct;
             //clash pair
             std::vector<std::pair<int, int>> m_dataPairId;
-
+            //mesh check
+            std::vector<std::pair<int, std::string>> m_errInfoVct;
         };
 
     public:
@@ -152,6 +153,17 @@ namespace test
         static void clear()
         {
             sm_recordDatas.clear();
+            //member
+            sm_recordData.m_name.clear();
+            sm_recordData.m_dataCount.clear();
+            sm_recordData.m_dataFloat.clear();
+            sm_recordData.m_dataTime.clear();
+            sm_recordData.m_dataPoint.clear();
+            sm_recordData.m_dataByte.clear();
+            sm_recordData.m_dataItemVct.clear();
+            sm_recordData.m_dataTimeVct.clear();
+            sm_recordData.m_dataPairId.clear();
+            sm_recordData.m_errInfoVct.clear();
         }
 
         static void writeDataToCsv(const std::string& filename = {});
