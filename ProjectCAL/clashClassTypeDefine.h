@@ -101,6 +101,10 @@ namespace clash
                 meshRes[i] = meshVct[i]; //operator
             return meshRes;
         }
+        inline bool empty() const
+        {
+            return vbo_.empty() || ibo_.empty();
+        }
         inline double area() const
         {
             double area = 0;

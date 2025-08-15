@@ -1086,7 +1086,7 @@ namespace eigen
 				edgesA[2].cross(edgesB[2]) } };
 		// Check for overlap along each axis
 		double minA, maxA, minB, maxB, projection;
-		for (const auto& axis : axes) //fast than index
+		for (const Vector3d& axis : axes) //fast than index
 		{
 			if (axis.isZero())
 				continue;
@@ -1094,13 +1094,13 @@ namespace eigen
 			maxA = -DBL_MAX;
 			minB = DBL_MAX;
 			maxB = -DBL_MAX;
-			for (const auto& vertex : triA) //fast than list
+			for (const Vector3d& vertex : triA) //fast than list
 			{
 				projection = axis.dot(vertex);
 				minA = std::min(minA, projection);
 				maxA = std::max(maxA, projection);
 			}
-			for (const auto& vertex : triB)
+			for (const Vector3d& vertex : triB)
 			{
 				projection = axis.dot(vertex);
 				minB = std::min(minB, projection);
@@ -1334,14 +1334,6 @@ namespace eigen
 		//	return 0.0;
 		double dmin = DBL_MAX, dtemp;
 		Vector3d direction, vecSeg, vectA, vectB; // to iterate, get nearest direction
-		std::array<array<Vector3d, 2>, 3> edgesA = { {
-			{ triA[0], triA[1] },
-			{ triA[1], triA[2] },
-			{ triA[2], triA[0] } } };
-		std::array<array<Vector3d, 2>, 3> edgesB = { {
-			{ triB[0], triB[1] },
-			{ triB[1], triB[2] },
-			{ triB[2], triB[0] } } };
 		auto _getDistanceOfPointAndSegmentINF = [&vecSeg](const Vector3d& point, const std::array<Vector3d, 2>& segm)->double
 			{
 				vecSeg = segm[1] - segm[0];// not zero
@@ -1360,8 +1352,8 @@ namespace eigen
 				double deno = -vectA.dot(vectA) * vectB.dot(vectB) + vectA.dot(vectB) * vectB.dot(vectA);//a*d-b*c
 				if (deno == 0.0) // parallel, must exclude, than distance of point to segment in next function
 					return DBL_MAX;
-				double kA = 1 / deno * (-vectB.dot(vectB) * delta1 + vectB.dot(vectA) * delta2);
-				double kB = 1 / deno * (-vectA.dot(vectB) * delta1 + vectA.dot(vectA) * delta2);
+				double kA = 1.0 / deno * (-vectB.dot(vectB) * delta1 + vectB.dot(vectA) * delta2);
+				double kB = 1.0 / deno * (-vectA.dot(vectB) * delta1 + vectA.dot(vectA) * delta2);
 				//	Vector3d pointA = segmA[0] + kA * vectA;
 				//	Vector3d pointB = segmB[0] + kB * vectB;
 				//whether two intersect-point inside segments
@@ -1425,6 +1417,14 @@ namespace eigen
 					}
 				}
 			};
+		std::array<array<Vector3d, 2>, 3> edgesA = { {
+			{ triA[0], triA[1] },
+			{ triA[1], triA[2] },
+			{ triA[2], triA[0] } } };
+		std::array<array<Vector3d, 2>, 3> edgesB = { {
+			{ triB[0], triB[1] },
+			{ triB[1], triB[2] },
+			{ triB[2], triB[0] } } };
 		for (const auto& iterA : edgesA)
 		{
 			for (const auto& iterB : edgesB)

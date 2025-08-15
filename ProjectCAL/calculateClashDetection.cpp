@@ -207,7 +207,7 @@ bool sat::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA,
 		edgesA[2].cross(edgesB[1]),
 		edgesA[2].cross(edgesB[2]) } };
 	double minA, maxA, minB, maxB, projection;
-	for (const auto& axis : axes)
+	for (const Vector3d& axis : axes)
 	{
 		if (axis.isZero())
 			continue;
@@ -215,13 +215,13 @@ bool sat::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA,
 		maxA = -DBL_MAX;
 		minB = DBL_MAX;
 		maxB = -DBL_MAX;
-		for (const auto& vertex : triA)
+		for (const Vector3d& vertex : triA)
 		{
 			projection = axis.dot(vertex);
 			minA = std::min(minA, projection);
 			maxA = std::max(maxA, projection);
 		}
-		for (const auto& vertex : triB)
+		for (const Vector3d& vertex : triB)
 		{
 			projection = axis.dot(vertex);
 			minB = std::min(minB, projection);
@@ -269,7 +269,7 @@ bool sat::isTwoTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA,
 		edgesA[2].cross(edgesB[1]).normalized(),
 		edgesA[2].cross(edgesB[2]).normalized() } };
 	double minA, maxA, minB, maxB, projection;
-	for (const auto& axis : axes)
+	for (const Vector3d& axis : axes)
 	{
 		if (axis.isZero())
 			continue;
@@ -277,13 +277,13 @@ bool sat::isTwoTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA,
 		maxA = -DBL_MAX;
 		minB = DBL_MAX;
 		maxB = -DBL_MAX;
-		for (const auto& vertex : triA)
+		for (const Vector3d& vertex : triA)
 		{
 			projection = axis.dot(vertex);
 			minA = std::min(minA, projection);
 			maxA = std::max(maxA, projection);
 		}
-		for (const auto& vertex : triB)
+		for (const Vector3d& vertex : triB)
 		{
 			projection = axis.dot(vertex);
 			minB = std::min(minB, projection);
