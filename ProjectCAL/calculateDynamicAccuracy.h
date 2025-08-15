@@ -83,14 +83,6 @@ namespace accura
         GlobalAccuracy operator=(const GlobalAccuracy&) = delete;
     };
 
-    // DynamicAccuracy function, same name
-    DLLEXPORT_CAL bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB, double toleDist, double toleAngle);
-    DLLEXPORT_CAL bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double toleDist, double toleAngle);
-    DLLEXPORT_CAL bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB,
-        const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB, double toleDist, double toleAngle);
-    DLLEXPORT_CAL bool isPointInTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon, double toleDist); // 2D
-    DLLEXPORT_CAL bool isTwoSegmentsIntersect(const std::array<Eigen::Vector2d, 2>& segmA, const std::array<Eigen::Vector2d, 2>& segmB, double toleDist);
-
 }
 
 //for MeshGeometry precison
