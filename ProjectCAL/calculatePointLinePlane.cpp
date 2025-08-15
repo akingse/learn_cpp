@@ -41,11 +41,11 @@ namespace eigen
 		Eigen::Vector3d vectB = lineB[1] - lineB[0];
 		double delta1 = (lineB[0] - lineA[0]).dot(vectA);
 		double delta2 = (lineB[0] - lineA[0]).dot(vectB);
-		double deno = -vectA.dot(vectA) * vectB.dot(vectB) + vectA.dot(vectB) * vectB.dot(vectA);//a*d-b*c
+        double deno = vectA.dot(vectB) * vectB.dot(vectA) - vectA.dot(vectA) * vectB.dot(vectB);//a*d-b*c
 		if (deno == 0.0) // parallel
 			return getDistanceOfPointAndLine(lineA[0], lineB);
-		double kA = 1.0 / deno * (-vectB.dot(vectB) * delta1 + vectB.dot(vectA) * delta2);
-		double kB = 1.0 / deno * (-vectA.dot(vectB) * delta1 + vectA.dot(vectA) * delta2);
+		double kA = (vectB.dot(vectA) * delta2 - vectB.dot(vectB) * delta1) / deno;
+		double kB = (vectA.dot(vectA) * delta2 - vectA.dot(vectB) * delta1) / deno;
 		Vector3d pointA = lineA[0] + kA * vectA;
 		Vector3d pointB = lineB[0] + kB * vectB;
 		return (pointB - pointA).norm();

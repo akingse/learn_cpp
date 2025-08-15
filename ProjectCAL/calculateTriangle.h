@@ -43,6 +43,7 @@ namespace eigen
 	DLLEXPORT_CAL bool isTwoTrianglesPenetrationSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance = 0.0);
 	DLLEXPORT_CAL double getTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
 	DLLEXPORT_CAL double getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
+	DLLEXPORT_CAL double getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const Eigen::Vector3d& normalA, const std::array<Eigen::Vector3d, 3>& triB, const Eigen::Vector3d& normalB);
 	DLLEXPORT_CAL std::array<Eigen::Vector3d, 2> getTwoTrianglesNearestPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
 	DLLEXPORT_CAL std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
 	DLLEXPORT_CAL double getDistanceOfPointAndTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon);

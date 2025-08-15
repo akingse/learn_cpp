@@ -93,10 +93,10 @@ bool isPointInTriangleBC(const Vector2d& point, const std::array<Vector2d, 3>& t
 	double d11 = v1.dot(v1);
 	double d20 = v2.dot(v0);
 	double d21 = v2.dot(v1);
-	double denom = d00 * d11 - d01 * d01;
+	double deno = d00 * d11 - d01 * d01;
 	//if (denom==0) //willnot happen, unless triangle degeneracy
-	double a = (d11 * d20 - d01 * d21) / denom;
-	double b = (d00 * d21 - d01 * d20) / denom;
+	double a = (d11 * d20 - d01 * d21) / deno;
+	double b = (d00 * d21 - d01 * d20) / deno;
 	double c = 1.0 - a - b;
 	return 0.0 < a && 0.0 < b && 0.0 < c;
 }
@@ -1306,11 +1306,11 @@ double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA
 			double delta1 = (segmB[0] - segmA[0]).dot(vectA);
 			double delta2 = (segmB[0] - segmA[0]).dot(vectB);
 			// 2*2 inverse matrix, 1/|M|*(exchange main diagonal and -1 counter-diagonal)
-			double deno = -vectA.dot(vectA) * vectB.dot(vectB) + vectA.dot(vectB) * vectB.dot(vectA);//a*d-b*c
+			double deno = vectA.dot(vectB) * vectB.dot(vectA) - vectA.dot(vectA) * vectB.dot(vectB);//a*d-b*c
 			if (deno == 0.0) // parallel, must exclude, than distance of point to segment in next function
 				return DBL_MAX;
-			double kA = 1.0 / deno * (-vectB.dot(vectB) * delta1 + vectB.dot(vectA) * delta2);
-			double kB = 1.0 / deno * (-vectA.dot(vectB) * delta1 + vectA.dot(vectA) * delta2);
+			double kA = (vectB.dot(vectA) * delta2 - vectB.dot(vectB) * delta1) / deno;
+			double kB = (vectA.dot(vectA) * delta2 - vectA.dot(vectB) * delta1) / deno;
 			//	Vector3d pointA = segmA[0] + kA * vectA;
 			//	Vector3d pointB = segmB[0] + kB * vectB;
 			//whether two intersect-point inside segments
@@ -1416,6 +1416,111 @@ double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA
 	return dmax;
 }
 
+double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const Eigen::Vector3d& normalA, const std::array<Eigen::Vector3d, 3>& triB, const Eigen::Vector3d& normalB)
+{
+	auto _getDistanceOfPointAndSegmentINF = [](const Vector3d& point, const std::array<Vector3d, 2>& segm)->double
+		{
+			Vector3d vectseg = segm[1] - segm[0];// not zero
+			double projection = vectseg.dot(point);
+			//the projection must on segment
+			if (vectseg.dot(segm[1]) < projection || projection < vectseg.dot(segm[0]))
+				return DBL_MAX;
+			double k = vectseg.dot(point - segm[0]) / vectseg.dot(vectseg);
+			return (segm[0] - point + k * vectseg).squaredNorm();
+		};
+	auto _getDistanceOfTwoSegmentsINF = [](const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)->double
+		{
+			Vector3d vectA = segmA[1] - segmA[0];
+			Vector3d vectB = segmB[1] - segmB[0];
+			double delta1 = (segmB[0] - segmA[0]).dot(vectA);
+			double delta2 = (segmB[0] - segmA[0]).dot(vectB);
+			// 2*2 inverse matrix, 1/|M|*(exchange main diagonal and -1 counter-diagonal)
+            double deno = vectA.dot(vectB) * vectB.dot(vectA) - vectA.dot(vectA) * vectB.dot(vectB);//a*d-b*c
+			if (deno == 0.0) // parallel, must exclude, than distance of point to segment in next function
+                return DBL_MAX;
+            double kA = (vectB.dot(vectA) * delta2 - vectB.dot(vectB) * delta1) / deno;
+            double kB = (vectA.dot(vectA) * delta2 - vectA.dot(vectB) * delta1) / deno;
+            //whether two intersect-point inside segments
+			if (0 <= kA && kA <= 1 && 0 <= kB && kB <= 1)
+				return (segmA[0] + kA * vectA - segmB[0] - kB * vectB).squaredNorm();
+			return DBL_MAX; // nearest point outof segments
+		};
+	auto _isPointInTriangle = [](const Vector3d& point, const std::array<Vector3d, 3>& trigon, const Vector3d& normal)->bool
+		{
+			constexpr double toleDist = 1e-8;
+			if (point[0] + toleDist < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+				point[0] - toleDist > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+				point[1] + toleDist < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
+				point[1] - toleDist > std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
+				point[2] + toleDist < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
+				point[2] - toleDist > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]))
+				return false;
+			return
+				0 <= (trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) && //bool isLeftA
+				0 <= (trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) && //bool isLeftB
+				0 <= (trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal);   //bool isLeftC
+		};
+	double distance = DBL_MAX;
+	std::array<array<Vector3d, 2>, 3> edgesA = { {
+		{ triA[0], triA[1] },
+		{ triA[1], triA[2] },
+		{ triA[2], triA[0] } } };
+	std::array<array<Vector3d, 2>, 3> edgesB = { {
+		{ triB[0], triB[1] },
+		{ triB[1], triB[2] },
+		{ triB[2], triB[0] } } };
+	for (const Vector3d& vertexA : triA)
+	{
+		//point to point
+		for (const Vector3d& vertexB : triB)
+		{
+			double norm = (vertexA - vertexB).squaredNorm();
+			distance = std::min(distance, norm);
+		}
+		//point to edge
+		for (const auto& edgeB : edgesB)
+		{
+			double temp = _getDistanceOfPointAndSegmentINF(vertexA, edgeB);
+			distance = std::min(distance, temp);
+		}
+		//point to plane
+        double k = (vertexA - triB[0]).dot(normalB) / normalB.dot(normalB);
+        Vector3d point = vertexA + k * normalB;
+		if (_isPointInTriangle(point, triB, normalB))
+		{
+			double norm = (vertexA - point).squaredNorm();
+			distance = std::min(distance, norm);
+		}
+	}
+	for (const Vector3d& vertexB : triB)
+	{
+		//point to edge
+		for (const auto& edgeA : edgesA)
+		{
+			double temp = _getDistanceOfPointAndSegmentINF(vertexB, edgeA);
+			distance = std::min(distance, temp);
+		}
+		//point to plane
+		double k = (vertexB - triA[0]).dot(normalA) / normalA.dot(normalA);
+		Vector3d point = vertexB + k * normalB;
+		if (_isPointInTriangle(point, triA, normalA))
+		{
+			double norm = (vertexB - point).squaredNorm();
+			distance = std::min(distance, norm);
+		}
+	}
+	//edge to edge
+	for (const auto& edgeA : edgesA)
+	{
+		for (const auto& edgeB : edgesB)
+		{
+			double temp = _getDistanceOfTwoSegmentsINF(edgeA, edgeB);
+			distance = std::min(distance, temp);
+		}
+	}
+	return std::sqrt(distance);
+}
+
 //#define EDGE_PAIR_CREATE_AXIS_OPTMIZE
 #ifdef EDGE_PAIR_CREATE_AXIS_OPTMIZE
 double _getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
@@ -1440,8 +1545,8 @@ double _getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, cons
 			double deno = -vectA.dot(vectA) * vectB.dot(vectB) + vectA.dot(vectB) * vectB.dot(vectA);//a*d-b*c
 			if (deno == 0.0) // parallel, must exclude, than distance of point to segment in next function
 				return DBL_MAX;
-			double kA = 1.0 / deno * (-vectB.dot(vectB) * delta1 + vectB.dot(vectA) * delta2);
-			double kB = 1.0 / deno * (-vectA.dot(vectB) * delta1 + vectA.dot(vectA) * delta2);
+			double kA = (-vectB.dot(vectB) * delta1 + vectB.dot(vectA) * delta2) / deno;
+			double kB = (-vectA.dot(vectB) * delta1 + vectA.dot(vectA) * delta2) / deno;
 			if (0 <= kA && kA <= 1 && 0 <= kB && kB <= 1)
 				return (segmA[0] + kA * vectA - segmB[0] - kB * vectB).squaredNorm();
 			return DBL_MAX; // nearest point outof segments
@@ -1571,11 +1676,11 @@ std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesNearestPoints(const std::ar
 			Vector3d vectB = segmB[1] - segmB[0];
 			double deltaA = (segmB[0] - segmA[0]).dot(vectA);
 			double deltaB = (segmB[0] - segmA[0]).dot(vectB);
-			double deno = -vectA.dot(vectA) * vectB.dot(vectB) + vectA.dot(vectB) * vectB.dot(vectA);//a*d-b*c
+			double deno = vectA.dot(vectB) * vectB.dot(vectA) - vectA.dot(vectA) * vectB.dot(vectB);//a*d-b*c
 			if (deno == 0.0) // parallel, must exclude, then distance of point to segment in next function
 				return DBL_MAX;
-			double kA = 1 / deno * (-vectB.dot(vectB) * deltaA + vectB.dot(vectA) * deltaB);
-			double kB = 1 / deno * (-vectA.dot(vectB) * deltaA + vectA.dot(vectA) * deltaB);
+			double kA = (-vectB.dot(vectB) * deltaA + vectB.dot(vectA) * deltaB) / deno ;
+			double kB = (-vectA.dot(vectB) * deltaA + vectA.dot(vectA) * deltaB) / deno ;
 			if (0 <= kA && kA <= 1 && 0 <= kB && kB <= 1)
 			{
 				local = segmA[0] + kA * vectA;
