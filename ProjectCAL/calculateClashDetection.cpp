@@ -758,7 +758,10 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetectionByTrig
 	return res;
 }
 
-//accura
+
+//--------------------------------------------------------------------------------------------------
+//  namespace accura
+//--------------------------------------------------------------------------------------------------
 
 bool accura::isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, const std::array<Vector2d, 3>& triB, double toleDist, double toleAngle)
 {

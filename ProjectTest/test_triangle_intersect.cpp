@@ -559,21 +559,35 @@ static void _test13()
 static void _test14()
 {
 	//3D
+	std::array<Eigen::Vector3d, 3> trigon0 = {
+		Vector3d(-10, 0, 0),
+		Vector3d(0, 0, 0),
+		Vector3d(0, 10, 0),
+	};
+	std::array<Eigen::Vector3d, 3> trigon1 = {
+		Vector3d(0, 0, 0),
+		Vector3d(10, 0, 0),
+		Vector3d(10, 10, 0),
+	};
+	bool isinter0 = isTwoTrianglesBoxIntersect(trigon0, trigon1, 0);
+	bool isinter1 = isTwoTrianglesBoxIntersect(trigon0, trigon1, 0.1);
+	bool isinter2 = isTwoTrianglesBoxIntersect(trigon0, trigon1, -0.1);
+
 	std::array<Eigen::Vector3d, 3> trigon2 = {
 		Vector3d(-10, 0, 0),
 		Vector3d(10, 0, 0),
 		Vector3d(0, 10, 0),
 	};
-	std::array<Eigen::Vector3d, 3> trigon0 = {
+	std::array<Eigen::Vector3d, 3> trigon3 = {
 		Vector3d(0, -10, -10),
 		Vector3d(0, -10, 10),
 		Vector3d(0, 1, 0),
 	};
 
-	bool isinter0 = isTwoTrianglesBoxIntersect(trigon0, trigon2, -1.1);
+	bool isintert1 = isTwoTrianglesBoxIntersect(trigon2, trigon3, -1.1);
 
 
-	std::array<Eigen::Vector3d, 3> trigon1 = {
+	std::array<Eigen::Vector3d, 3> trigon4 = {
 		Vector3d(-5, -5, 0),
 		Vector3d(4, -5, 0),
 		Vector3d(-5, 5, 0),
@@ -582,7 +596,7 @@ static void _test14()
 		Vector3d(0, 0, 0),
 		Vector3d(10, 10, 10), };
 
-	bool isinter = sat::isTriangleAndBoxIntersectSAT(trigon1, box);
+	bool isinter = sat::isTriangleAndBoxIntersectSAT(trigon4, box);
 	return;
 }
 
