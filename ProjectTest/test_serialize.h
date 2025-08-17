@@ -22,11 +22,11 @@ public:
 	{
 		return true;
 	}
-	template<class T>
-	T as()
-	{
-		return T;
-	}
+	//template<class T>
+	//T as() const
+	//{
+	//	return T;
+	//}
 };
 
 

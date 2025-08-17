@@ -148,7 +148,7 @@
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir)auto_include</AdditionalIncludeDirectories>
       <LanguageStandard>Default</LanguageStandard>
       <WholeProgramOptimization>true</WholeProgramOptimization>

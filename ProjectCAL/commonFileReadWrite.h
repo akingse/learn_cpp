@@ -47,7 +47,7 @@ std::vector<std::array<uint64_t, 2>> _readEntityIDFile(const std::string& fileNa
 
 int _wirteNumberFile(size_t n, const std::string& filename);
 int _wirteNumberFile(size_t n, double* _array, const std::string& filename); // n = size(triA, triB)
-double* _readNumberFile(size_t n, const std::string& filename);
+DLLEXPORT_CAL double* _readNumberFile(size_t n, const std::string& filename);
 
 // flatbuffers serialization
 void write_InterTriInfo(const std::vector<InterTriInfo>& infos, const std::string& fileName);

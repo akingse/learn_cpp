@@ -1423,7 +1423,7 @@ double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA
 			Vector3d vectseg = segm[1] - segm[0];// not zero
 			double projection = vectseg.dot(point);
 			//the projection must on segment
-			if (vectseg.dot(segm[1]) < projection || projection < vectseg.dot(segm[0]))
+			if (vectseg.dot(segm[1]) <= projection || projection <= vectseg.dot(segm[0]))
 				return DBL_MAX;
 			double k = vectseg.dot(point - segm[0]) / vectseg.dot(vectseg);
 			return (segm[0] - point + k * vectseg).squaredNorm();
@@ -1455,10 +1455,10 @@ double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA
 				point[2] + toleDist < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
 				point[2] - toleDist > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]))
 				return false;
-			return
-				0 <= (trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) && //bool isLeftA
-				0 <= (trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) && //bool isLeftB
-				0 <= (trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal);   //bool isLeftC
+			return //must inner
+				0.0 < (trigon[1] - trigon[0]).cross(point - trigon[0]).dot(normal) && //bool isLeftA
+				0.0 < (trigon[2] - trigon[1]).cross(point - trigon[1]).dot(normal) && //bool isLeftB
+				0.0 < (trigon[0] - trigon[2]).cross(point - trigon[2]).dot(normal);   //bool isLeftC
 		};
 	double distance = DBL_MAX;
 	std::array<array<Vector3d, 2>, 3> edgesA = { {
@@ -1502,7 +1502,7 @@ double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA
 		}
 		//point to plane
 		double k = (vertexB - triA[0]).dot(normalA) / normalA.dot(normalA);
-		Vector3d point = vertexB + k * normalB;
+		Vector3d point = vertexB + k * normalA;
 		if (_isPointInTriangle(point, triA, normalA))
 		{
 			double norm = (vertexB - point).squaredNorm();

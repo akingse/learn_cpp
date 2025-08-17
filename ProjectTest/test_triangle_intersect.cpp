@@ -766,6 +766,7 @@ static void _test20()
 		Vector3d(16202.927131848737, 1160.1218053090997, 5100),
 		Vector3d(16902.927131848737, 1160.1218053090997, 5100),
 	};
+	Vector3d normalC = (trigonC[1] - trigonC[0]).cross(trigonC[1] - trigonC[2]).normalized();
 	Triangle3d trigonD = {
 		Vector3d(25302.927131848737, 1160.1218053090997, 0),
 		Vector3d(24602.927131848737, 1160.1218053090997, 5100),
@@ -781,7 +782,16 @@ static void _test20()
 
 	double distance1 = getTrianglesDistanceSAT(trigonA, trigonB);
 	double distance2 = getTrianglesDistanceSAT(trigonA, trigonC);
+	//
+	double norm1 = getTrianglesDistanceSAT(trigonA, normalA, trigonB, normalB);
+	double norm2 = getTrianglesDistanceSAT(trigonA, normalA, trigonC, normalC);
 	return;
+}
+
+//Ëæ»úÈı½ÇĞÎ£¬²âÊÔdistanceÎó²î
+static void _test21()
+{
+
 }
 
 static int enrol = []()->int
