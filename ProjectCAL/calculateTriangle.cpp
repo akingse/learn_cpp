@@ -1078,6 +1078,167 @@ bool eigen::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& tri
 	return true;
 }
 
+//--------------------------------------------------------------------------------------------------
+//  namespace accura
+//--------------------------------------------------------------------------------------------------
+
+//origin Penetration
+bool eigen::isTwoTrianglesIntrusionSAT(const std::array<Vector2d, 3>& triA, const std::array<Vector2d, 3>& triB, double toleDist, double toleAngle)
+{
+	// bounding-box been judged
+	std::array<Eigen::Vector2d, 6> edgesAB = {
+		triA[1] - triA[0],
+		triA[2] - triA[1],
+		triA[0] - triA[2],
+		triB[1] - triB[0],
+		triB[2] - triB[1],
+		triB[0] - triB[2] };
+	std::array<Vector2d, 3> triA_R, triB_R; //using relative coordinate
+	double spec = 0; // using max-coord k as coeff
+	for (int i = 0; i < 3; ++i)
+	{
+		triA_R[i] = triA[i] - triA[0]; //triA_R[0]=Vector3d(0,0,0)
+		triB_R[i] = triB[i] - triA[0];
+		spec = std::max(std::max(fabs(triA_R[i][0]), fabs(triA_R[i][1])), spec);
+		spec = std::max(std::max(fabs(triB_R[i][0]), fabs(triB_R[i][1])), spec);
+	}
+	spec = spec * toleDist;
+	for (auto& iter : edgesAB)
+		iter = Vector2d(-iter[1], iter[0]); //rotz(pi/2)
+	double minA, maxA, minB, maxB, projection;
+	for (auto& axis : edgesAB)
+	{
+		if (axis.isZero(toleAngle)) //degeneracy triangle
+			continue;
+		axis.normalize();
+		minA = DBL_MAX;
+		maxA = -DBL_MAX;
+		minB = DBL_MAX;
+		maxB = -DBL_MAX;
+		for (const auto& vertex : triA_R)
+		{
+			projection = axis.dot(vertex - triA[0]);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
+		}
+		for (const auto& vertex : triB_R)
+		{
+			projection = axis.dot(vertex - triA[0]);
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		if (maxA < minB + spec || maxB < minA + spec)
+			return false;
+	}
+	return true;
+}
+
+//#define USING_COMPLETE_SEPARATION_AXIS
+bool eigen::isTwoTrianglesIntrusionSAT(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB,
+	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB, double toleDist, double toleAngle)
+{
+	// bounding-box been judged, both triangle is legal
+	std::array<Eigen::Vector3d, 3> edgesA = {
+		(triA[1] - triA[0]).normalized(),
+		(triA[2] - triA[1]).normalized(),
+		(triA[0] - triA[2]).normalized() };
+	std::array<Eigen::Vector3d, 3> edgesB = {
+		(triB[1] - triB[0]).normalized(),
+		(triB[2] - triB[1]).normalized(),
+		(triB[0] - triB[2]).normalized() };
+	std::array<Vector3d, 3> triA_R, triB_R; //using relative coordinate
+	double spec = 0; // using max-coord k as coeff
+	for (int i = 0; i < 3; ++i)
+	{
+		triA_R[i] = triA[i] - triA[0]; //triA_R[0]=Vector3d(0,0,0)
+		triB_R[i] = triB[i] - triA[0];
+		for (int j = 0; j < 3; ++j)
+			spec = std::max(std::max(fabs(triA_R[i][j]), fabs(triB_R[i][j])), spec);
+	}
+	spec = spec * toleDist;
+	double minA, maxA, minB, maxB, projection;
+	//Eigen::Vector3d normalA = edgesA[0].cross(edgesA[1]).normalized();
+	//Eigen::Vector3d normalB = edgesB[0].cross(edgesB[1]).normalized();
+	if (normalA.cross(normalB).isZero(toleAngle)) //is parallel
+	{
+#ifdef USING_COMPLETE_SEPARATION_AXIS 
+		if (!fabs(normalA.dot(triB_R[0])) < spec) //not coplanar
+			return false;
+		std::array<Eigen::Vector3d, 6> edgesAB = { edgesA[0],edgesA[1],edgesA[2],edgesB[0],edgesB[1],edgesB[2] };
+		for (const auto& axis : edgesAB)
+		{
+			if (axis.isZero(tolerance))
+				continue;
+			minA = DBL_MAX;
+			maxA = -DBL_MAX;
+			minB = DBL_MAX;
+			maxB = -DBL_MAX;
+			for (const auto& vertex : triA_R)
+			{
+				projection = axis.dot(vertex);
+				minA = std::min(minA, projection);
+				maxA = std::max(maxA, projection);
+			}
+			for (const auto& vertex : triB_R)
+			{
+				projection = axis.dot(vertex);
+				minB = std::min(minB, projection);
+				maxB = std::max(maxB, projection);
+			}
+			if (maxA < minB + spec || maxB < minA + spec)
+				return false;
+		}
+		return true;
+#else
+		return false;//exclude coplanar
+#endif
+	}
+	//separation axis theorem
+	std::array<Eigen::Vector3d, 11> axes = { {
+		normalA,
+		normalB,
+		edgesA[0].cross(edgesB[0]),
+		edgesA[0].cross(edgesB[1]),
+		edgesA[0].cross(edgesB[2]),
+		edgesA[1].cross(edgesB[0]),
+		edgesA[1].cross(edgesB[1]),
+		edgesA[1].cross(edgesB[2]),
+		edgesA[2].cross(edgesB[0]),
+		edgesA[2].cross(edgesB[1]),
+		edgesA[2].cross(edgesB[2]) } };
+	for (const auto& axis : axes)
+	{
+		if (axis.isZero(toleAngle))
+			continue;
+		minA = DBL_MAX;
+		maxA = -DBL_MAX;
+		minB = DBL_MAX;
+		maxB = -DBL_MAX;
+		for (const auto& vertex : triA_R)
+		{
+			projection = axis.dot(vertex);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
+		}
+		for (const auto& vertex : triB_R)
+		{
+			projection = axis.dot(vertex);
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		if (maxA < minB + spec || maxB < minA + spec)
+			return false;
+	}
+	return true;
+}
+
+bool eigen::isTwoTrianglesIntrusionSAT(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB, double toleDist, double toleAngle)
+{
+	Eigen::Vector3d normalA = (triA[1] - triA[0]).cross(triA[2] - triA[1]).normalized();
+	Eigen::Vector3d normalB = (triB[1] - triB[0]).cross(triB[2] - triB[1]).normalized();
+	return isTwoTrianglesIntrusionSAT(triA, triB, normalA, normalB, toleDist, toleAngle);
+}
+
 //must intersect before
 double eigen::getTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {
@@ -1134,7 +1295,7 @@ double eigen::getTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& tri
 }
 
 // intersect and penetration judge
-bool eigen::isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, const std::array<Vector2d, 3>& triB, double tolerance /*= 0.0*/)
+bool eigen::isTwoTrianglesIntrusionSAT(const std::array<Vector2d, 3>& triA, const std::array<Vector2d, 3>& triB, double tolerance /*= 0.0*/)
 {
 	// bound box been judged
 	//if (std::max(std::max(triA[0][0], triA[1][0]), triA[2][0]) <= std::min(std::min(triB[0][0], triB[1][0]), triB[2][0]) ||
@@ -1179,7 +1340,7 @@ bool eigen::isTwoTrianglesPenetrationSAT(const std::array<Vector2d, 3>& triA, co
 }
 
 //must intersect
-bool eigen::isTwoTrianglesPenetrationSAT(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB, double tolerance /*= 0.0*/)
+bool eigen::isTwoTrianglesIntrusionSAT(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB, double tolerance /*= 0.0*/)
 {
 	std::array<Eigen::Vector3d, 3> edgesA = {
 		triA[1] - triA[0],

@@ -21,6 +21,36 @@ namespace clash
 	{
 		return eigen::isPerpendi3d(point - plane.m_origin, plane.m_normal);
 	}
+	inline bool isPointInTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon, double toleDist) // 2D
+	{
+		//tole>0 less judge, tole<0 more judge
+		std::array<Eigen::Vector2d, 3> trigonR; // is origin inside trigonR
+		double spec = 0;
+		for (int i = 0; i < 3; ++i)
+		{
+			trigonR[i] = trigon[i] - point;
+			spec = std::max(std::max(fabs(trigonR[i][0]), fabs(trigonR[i][1])), spec);
+		}
+		spec = spec * toleDist; // assert(spec > toleDist);
+		if (-spec < std::min(std::min(trigonR[0][0], trigonR[1][0]), trigonR[2][0]) ||
+			spec > std::max(std::max(trigonR[0][0], trigonR[1][0]), trigonR[2][0]) ||
+			-spec < std::min(std::min(trigonR[0][1], trigonR[1][1]), trigonR[2][1]) ||
+			spec > std::max(std::max(trigonR[0][1], trigonR[1][1]), trigonR[2][1])) //box judge
+			return false;
+		// been legal judge, no zero vector
+		Eigen::Vector2d v0 = (trigon[1] - trigon[0]).normalized();
+		Eigen::Vector2d v1 = (trigon[2] - trigon[1]).normalized();
+		Eigen::Vector2d v2 = (trigon[0] - trigon[2]).normalized();
+		// (p1-p0).cross(p2-p1)
+		double axisz = v0[0] * v1[1] - v0[1] * v1[0];
+		axisz = (0.0 < axisz) ? 1.0 : -1.0;
+		return //cross2d isLeft judge, (trigon[i] - point) is negative direction
+			spec <= axisz * (v0[1] * trigonR[0][0] - v0[0] * trigonR[0][1]) &&
+			spec <= axisz * (v1[1] * trigonR[1][0] - v1[0] * trigonR[1][1]) &&
+			spec <= axisz * (v2[1] * trigonR[2][0] - v2[0] * trigonR[2][1]); // = decide whether include point on edge
+	}
+
+
 }
 
 namespace eigen
@@ -103,6 +133,29 @@ namespace clash
 		return  //double straddling test
 			0.0 <= (segmB[0] - segmA[0]).cross(vecA).dot(vecA.cross(segmB[1] - segmA[0])) && //double separate
 			0.0 <= (segmA[0] - segmB[0]).cross(vecB).dot(vecB.cross(segmA[1] - segmB[0]));
+	}
+
+	inline bool isTwoSegmentsIntersect(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB, double toleDist)
+	{
+		//tole<0 less judge, tole>0 more judge
+		Vector2d vecA = segmA[1] - segmA[0];
+		Vector2d vecB = segmB[1] - segmB[0];
+		double spec = 0;
+		spec = std::max(std::max(fabs(vecA[0]), fabs(vecA[1])), spec);
+		spec = std::max(std::max(fabs(vecB[0]), fabs(vecB[1])), spec);
+		spec = spec * toleDist;// assert(spec > toleDist);
+		if (spec < std::min(segmB[0][0], segmB[1][0]) - std::max(segmA[0][0], segmA[1][0]) ||
+			spec < std::min(segmA[0][0], segmA[1][0]) - std::max(segmB[0][0], segmB[1][0]) ||
+			spec < std::min(segmB[0][1], segmB[1][1]) - std::max(segmA[0][1], segmA[1][1]) ||
+			spec < std::min(segmA[0][1], segmA[1][1]) - std::max(segmB[0][1], segmB[1][1]))
+			return false;
+		Vector2d AB_0 = segmB[0] - segmA[0];
+		Vector2d AB_1 = segmB[1] - segmA[0];
+		Vector2d BA_0 = segmA[0] - segmB[0];
+		Vector2d BA_1 = segmA[1] - segmB[0];
+		return //double straddle test, cross2d opposite direction
+			(AB_0[0] * vecA[1] - AB_0[1] * vecA[0]) * (AB_1[0] * vecA[1] - AB_1[1] * vecA[0]) <= spec &&
+			(BA_0[0] * vecB[1] - BA_0[1] * vecB[0]) * (BA_1[0] * vecB[1] - BA_1[1] * vecB[0]) <= spec; //not support both near zero
 	}
 
 	inline Eigen::Vector2d getTwoSegmentsIntersectPoint(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB)
@@ -277,6 +330,10 @@ namespace clash
 		}
 		return true;
 	}
+
+
+
+
 }
 
 //merge
