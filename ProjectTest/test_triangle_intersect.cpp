@@ -788,8 +788,35 @@ static void _test20()
 	return;
 }
 
-//随机三角形，测试distance误差
+//退化三角形测试
 static void _test21()
+{
+	Triangle3d trigonA = {
+	Vector3d(0,0,0),
+	Vector3d(10,0,0),
+	Vector3d(0,10,0),
+	};
+	Vector3d normalA = (trigonA[1] - trigonA[0]).cross(trigonA[1] - trigonA[2]).normalized();
+
+	//lineTo1
+	Triangle3d trigonB = {
+	Vector3d(10,0,10),
+	Vector3d(10,0,10),
+	Vector3d(0,10,10),
+	};
+	Vector3d normalB = (trigonB[1] - trigonB[0]).cross(trigonB[1] - trigonB[2]).normalized();
+
+	//double distance1 = getTrianglesDistanceSAT(trigonA, trigonB);
+	double distance1 = getTrianglesDistanceSAT(trigonA, eigen::scale(0.5)*trigonB);
+	//
+	double norm1 = getTrianglesDistanceSAT(trigonA, normalA, eigen::scale(0.5) * trigonB, normalB);
+	cout << "distance=" << distance1 << endl;
+	cout << "distance=" << norm1 << endl;
+	return;
+}
+
+//随机三角形，测试distance误差
+static void _test22()
 {
 
 }
@@ -813,6 +840,7 @@ static int enrol = []()->int
 
         //lamina
         _test20();
+        _test21();
 
         cout << "test_triangle_intersect finished.\n" << endl;
         return 0;

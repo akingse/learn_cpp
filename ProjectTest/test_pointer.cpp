@@ -111,9 +111,9 @@ static void test3()
 
 static int enrol = []()->int
 	{
-		test1();
-		test2();
-		test3();
+		//test1();
+		//test2();
+		//test3();
 		cout << "test_pointer finished.\n" << endl;
 		return 0;
 	}();

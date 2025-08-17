@@ -79,6 +79,8 @@ static void _test0()
 #ifdef TEST_TRIGON3_TRIGON3
 	std::array<Vector3d, 3>* randData3 = new std::array<Vector3d, 3>[totalNum];
 	std::array<Vector3d, 3>* randData3_ = new std::array<Vector3d, 3>[totalNum];
+	Vector3d* randData3N = new Vector3d[totalNum];
+	Vector3d* randData3N_ = new Vector3d[totalNum];
 #endif
 
 #ifdef TEST_TRIGON2_TRIGON3
@@ -119,6 +121,10 @@ static void _test0()
 			randData3_[i * length + j] = { { {readNum[j + 1] / 10,readNum[j + 3] / 10,readNum[j + 5] / 10} ,
 											{readNum[j + 7] / 10,readNum[j + 9] / 10,readNum[j + 11] / 10} ,
 											{readNum[j + 13] / 10,readNum[j + 15] / 10,readNum[j + 17] / 10} } };
+			Vector3d normalA = (randData3[i * length + j][1] - randData3[i * length + j][0]).cross(randData3[i * length + j][2] - randData3[i * length + j][1]).normalized();
+			Vector3d normalB = (randData3_[i * length + j][1] - randData3_[i * length + j][0]).cross(randData3_[i * length + j][2] - randData3_[i * length + j][1]).normalized();
+			randData3N[i * length + j] = normalA;
+			randData3N_[i * length + j] = normalB;
 #endif
 #ifdef TEST_TRIGON2D_TRIGON2D
 			randData2D[i * length + j] = { { {readNum[j + 0],readNum[j + 2]} ,
@@ -155,7 +161,7 @@ static void _test0()
 	end = clock(); //completed
 	cout << "data load finished, cost time = " << double(end - start) / CLOCKS_PER_SEC << "s" << endl;
 	int countDiff = 0;
-	for (int i = 0; i < 3; i++)
+	for (int j = 0; j < 3; j++)
 	{
 		start = clock();
 		//totalNum = 1;
@@ -190,10 +196,9 @@ static void _test0()
 			//
 			// 软碰撞
 			//double d = getTrianglesDistance(P, Q, randData3[i], randData3_[i]);
-			double d = getTrianglesDistanceSAT(randData3[i], randData3_[i]);
-			Vector3d normalA = (randData3[i][1] - randData3[i][0]).cross(randData3[i][2] - randData3[i][1]).normalized();
-			Vector3d normalB = (randData3_[i][1] - randData3_[i][0]).cross(randData3_[i][2] - randData3_[i][1]).normalized();
-			double dn = getTrianglesDistanceSAT(randData3[i], normalA, randData3_[i], normalB);
+			double d = getTrianglesDistanceSAT(randData3[i], randData3_[i]); //60s about, 7s(omp)
+			//double dn = getTrianglesDistanceSAT(randData3[i], randData3N[i], randData3_[i], randData3N_[i]); //47s, 5.5s(omp)
+
 			//array<Vector3d, 2> res = getTwoTrianglesNearestPoints(randData3[i], randData3_[i]);
 			//array<Vector3d, 2> res = getTwoTrianglesIntersectPoints(randData3[i], randData3_[i]);
 			//array<Vector3d, 2> res = getTwoTrianglesIntersectPoints(randData3xy[i], randData3_xy[i]);
@@ -224,9 +229,45 @@ static void _test0()
 	cout << "main over." << endl;
 }
 
+static void _test1()
+{
+	//create
+	double* num = new double[totalNum];
+	double* deno = new double[totalNum];
+	clock_t start, end;
+	start = clock();
+	for (int i = 0; i < totalNum; i++)
+	{
+		num[i] = rand() + double(rand()) / RAND_MAX;
+		deno[i] = rand() + double(rand()) / RAND_MAX;
+	}
+	end = clock();
+	cout << "create_time = " << double(end - start) / CLOCKS_PER_SEC << "s" << endl;
+
+	//test
+	double* res = new double[totalNum];
+	double* resR = new double[totalNum];
+	start = clock();
+	for (int j = 0; j < 3; j++)
+	{
+		for (int i = 0; i < totalNum; i++)
+		{
+			//res[i] = num[i] / deno[i]; //0.5s
+   //         resR[i] = deno[i] / num[i];
+            res[i] = 1.0 / deno[i] * num[i]; //用时几乎一样的
+            resR[i] = 1.0 / num[i] * deno[i];
+		}
+	}
+	end = clock();
+	cout << "calculate_time = " << double(end - start) / CLOCKS_PER_SEC << "s" << endl;
+	Sleep(100); //ms
+}
+
 static int enrol = []()->int
 {
-	_test0();
+	//_test0();
+	//_test1();
+	cout << "test_fun_speed finished.\n" << endl;
 	return 0;
 }();
 

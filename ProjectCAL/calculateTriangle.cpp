@@ -1420,7 +1420,9 @@ double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA
 {
 	auto _getDistanceOfPointAndSegmentINF = [](const Vector3d& point, const std::array<Vector3d, 2>& segm)->double
 		{
-			Vector3d vectseg = segm[1] - segm[0];// not zero
+			Vector3d vectseg = segm[1] - segm[0];// canbe zero, next willbe zero
+			//if (vectseg.isZero())
+			//	return DBL_MAX;
 			double projection = vectseg.dot(point);
 			//the projection must on segment
 			if (vectseg.dot(segm[1]) <= projection || projection <= vectseg.dot(segm[0]))
@@ -1432,22 +1434,22 @@ double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA
 		{
 			Vector3d vectA = segmA[1] - segmA[0];
 			Vector3d vectB = segmB[1] - segmB[0];
-			double delta1 = (segmB[0] - segmA[0]).dot(vectA);
-			double delta2 = (segmB[0] - segmA[0]).dot(vectB);
+			double deltaA = (segmB[0] - segmA[0]).dot(vectA);
+			double deltaB = (segmB[0] - segmA[0]).dot(vectB);
 			// 2*2 inverse matrix, 1/|M|*(exchange main diagonal and -1 counter-diagonal)
             double deno = vectA.dot(vectB) * vectB.dot(vectA) - vectA.dot(vectA) * vectB.dot(vectB);//a*d-b*c
 			if (deno == 0.0) // parallel, must exclude, than distance of point to segment in next function
                 return DBL_MAX;
-            double kA = (vectB.dot(vectA) * delta2 - vectB.dot(vectB) * delta1) / deno;
-            double kB = (vectA.dot(vectA) * delta2 - vectA.dot(vectB) * delta1) / deno;
+            double kA = (vectB.dot(vectA) * deltaB - vectB.dot(vectB) * deltaA) / deno;
+            double kB = (vectA.dot(vectA) * deltaB - vectA.dot(vectB) * deltaA) / deno;
             //whether two intersect-point inside segments
-			if (0 <= kA && kA <= 1 && 0 <= kB && kB <= 1)
+			if (0.0 < kA && kA < 1.0 && 0.0 < kB && kB < 1.0)
 				return (segmA[0] + kA * vectA - segmB[0] - kB * vectB).squaredNorm();
 			return DBL_MAX; // nearest point outof segments
 		};
 	auto _isPointInTriangle = [](const Vector3d& point, const std::array<Vector3d, 3>& trigon, const Vector3d& normal)->bool
 		{
-			constexpr double toleDist = 1e-8;
+			constexpr double toleDist = 1e-8; //fixed tolerance
 			if (point[0] + toleDist < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
 				point[0] - toleDist > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
 				point[1] + toleDist < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
@@ -1484,7 +1486,9 @@ double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA
 			distance = std::min(distance, temp);
 		}
 		//point to plane
-        double k = (vertexA - triB[0]).dot(normalB) / normalB.dot(normalB);
+		//if (normalB.isZero())
+		//	continue;
+        double k = (vertexA - triB[0]).dot(normalB) / normalB.dot(normalB); //divide by zero tobe nan
         Vector3d point = vertexA + k * normalB;
 		if (_isPointInTriangle(point, triB, normalB))
 		{
@@ -1501,7 +1505,9 @@ double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA
 			distance = std::min(distance, temp);
 		}
 		//point to plane
-		double k = (vertexB - triA[0]).dot(normalA) / normalA.dot(normalA);
+		//if (normalA.isZero())
+		//	continue;
+		double k = (vertexB - triA[0]).dot(normalA) / normalA.dot(normalA); //divide by zero tobe nan
 		Vector3d point = vertexB + k * normalA;
 		if (_isPointInTriangle(point, triA, normalA))
 		{
