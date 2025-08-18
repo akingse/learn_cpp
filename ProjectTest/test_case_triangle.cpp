@@ -29,9 +29,6 @@ static void _test1()
 	//EXPECT_TRUE(isTwoTrianglesIntersection1(triA, triB));
 }
 
-
-
-
 static int enrol = []()->int
 {
 	//_test1();

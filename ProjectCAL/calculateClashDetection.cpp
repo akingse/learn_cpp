@@ -741,7 +741,7 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetectionByTrig
 					meshB.vbo_[meshB.ibo_[k[0]][1]],
 					meshB.vbo_[meshB.ibo_[k[0]][2]] };
                 if (interMesh.find(k[1]) != interMesh.end() ||
-					!isTwoTrianglesIntrusionSAT(triA, triB))
+					!sat::isTwoTrianglesIntrusionSAT(triA, triB))
 					continue;
 				//intersect
 				isInter = true;

@@ -36,11 +36,12 @@ namespace eigen
 {
 	//triangle about
 	DLLEXPORT_CAL bool isTwoTrianglesBoxIntersect(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance = 0.0);
+	DLLEXPORT_CAL bool isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector2d, 3>& trigon, const Eigen::AlignedBox2d& box);
 	DLLEXPORT_CAL bool isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box);
-	DLLEXPORT_CAL bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB);
-	DLLEXPORT_CAL bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
+	DLLEXPORT_CAL bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB, double tolerance = 0.0);
+	DLLEXPORT_CAL bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance = 0.0);
 	DLLEXPORT_CAL bool isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB,
-		const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB);
+		const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB, double tolerance = 0.0);
 	DLLEXPORT_CAL bool isTwoTrianglesIntrusionSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB, double tolerance = 0.0);
 	DLLEXPORT_CAL bool isTwoTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance = 0.0);
 	DLLEXPORT_CAL bool isTwoTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, 
@@ -58,7 +59,6 @@ namespace eigen
 	DLLEXPORT_CAL std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
 	DLLEXPORT_CAL double getDistanceOfPointAndTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon);
 	DLLEXPORT_CAL double getDistanceOfPointAndTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon);
-	DLLEXPORT_CAL bool isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector2d, 3>& tri, const Eigen::AlignedBox2d& box);
 }
 
 #endif// CALCULATE_TRIANGLE_H

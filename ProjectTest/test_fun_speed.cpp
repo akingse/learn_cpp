@@ -47,6 +47,73 @@ const size_t totalNum = (size_t)1e8;
 static std::string randNumName = "bin_file/random_1e8.bin";
 static std::string randNumNameSepa = "bin_file/random_1e8_sepa.bin";
 
+//vector<> 版本非常慢，50s+
+static bool isTwoTrianglesIntrusionSAT_vector(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB,
+	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB, double tolerance /*= 0.0*/)
+{
+	std::array<Eigen::Vector3d, 3> edgesA = {
+		triA[1] - triA[0],
+		triA[2] - triA[1],
+		triA[0] - triA[2] };
+	std::array<Eigen::Vector3d, 3> edgesB = {
+		triB[1] - triB[0],
+		triB[2] - triB[1],
+		triB[0] - triB[2] };
+	std::vector<Eigen::Vector3d> axes(11);
+	if (normalA.cross(normalB).isZero())//is parallel
+	{
+		if (tolerance < fabs(normalA.dot(triB[0] - triA[0]))) //not coplanar
+			return false;
+		axes.resize(6);
+		axes[0] = normalA.cross(edgesA[0]).normalized();
+		axes[1] = normalA.cross(edgesA[1]).normalized();
+		axes[2] = normalA.cross(edgesA[2]).normalized();
+		axes[3] = normalB.cross(edgesB[0]).normalized();
+		axes[4] = normalB.cross(edgesB[1]).normalized();
+		axes[5] = normalB.cross(edgesB[2]).normalized();
+	}
+	else
+	{
+		//axes.resize(11);
+		axes[0] = normalA;
+		axes[1] = normalB;
+		axes[2] = edgesA[0].cross(edgesB[0]).normalized();
+		axes[3] = edgesA[0].cross(edgesB[1]).normalized();
+		axes[4] = edgesA[0].cross(edgesB[2]).normalized();
+		axes[5] = edgesA[1].cross(edgesB[0]).normalized();
+		axes[6] = edgesA[1].cross(edgesB[1]).normalized();
+		axes[7] = edgesA[1].cross(edgesB[2]).normalized();
+		axes[8] = edgesA[2].cross(edgesB[0]).normalized();
+		axes[9] = edgesA[2].cross(edgesB[1]).normalized();
+		axes[10] = edgesA[2].cross(edgesB[2]).normalized();
+	}
+	double minA, maxA, minB, maxB, projection;
+	for (const Vector3d& axis : axes)
+	{
+		if (axis.isZero())
+			continue;
+		minA = DBL_MAX;
+		maxA = -DBL_MAX;
+		minB = DBL_MAX;
+		maxB = -DBL_MAX;
+		for (const Vector3d& vertex : triA)
+		{
+			projection = axis.dot(vertex);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
+		}
+		for (const Vector3d& vertex : triB)
+		{
+			projection = axis.dot(vertex);
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		if (maxA < minB + tolerance || maxB < minA + tolerance)
+			return false;
+	}
+	return true;
+}
+
 static void _test0()
 {
 	clock_t start, end;
@@ -165,7 +232,8 @@ static void _test0()
 	{
 		start = clock();
 		//totalNum = 1;
-#pragma omp parallel for //开启omp优化
+		int inter_count = 0;
+//#pragma omp parallel for //开启omp优化
 		for (int i = 0; i < totalNum; i++)
 		{
 			//auto res = _get_circumcircle_center({ _get_rand() ,_get_rand() ,_get_rand() });
@@ -179,7 +247,18 @@ static void _test0()
 			//bool res = isTwoSegmentsIntersect(randData2[i], randData2_[i]);
 			// 
 			// 三角形相交测试
-			//bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]);
+			bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]); //9.435s
+			//bool res = isTwoTrianglesIntrusionSAT(randData3[i], randData3_[i]);//14.859s
+			//bool res = isTwoTrianglesIntrusionSAT_vector(randData3[i], randData3_[i], randData3N[i], randData3N_[i], 0.0);//
+			//bool res1 = isTwoTrianglesIntersectSAT_17(randData3[i], randData3_[i], randData3N[i], randData3N_[i]);//
+
+#pragma omp critical
+			{
+				if (res)
+					inter_count++;
+     //           if (res != res1)
+					//countDiff++;
+			}
 			//bool res = isSegmentCrossTriangleSurface(randData2[i], randData3_[i]);
 			//bool res = TriangularIntersectionTest(randData3[i], randData3_[i]);
 			//包围盒
@@ -196,7 +275,7 @@ static void _test0()
 			//
 			// 软碰撞
 			//double d = getTrianglesDistance(P, Q, randData3[i], randData3_[i]);
-			double d = getTrianglesDistanceSAT(randData3[i], randData3_[i]); //60s about, 7s(omp)
+			//double d = getTrianglesDistanceSAT(randData3[i], randData3_[i]); //60s about, 7s(omp)
 			//double dn = getTrianglesDistanceSAT(randData3[i], randData3N[i], randData3_[i], randData3N_[i]); //47s, 5.5s(omp)
 
 			//array<Vector3d, 2> res = getTwoTrianglesNearestPoints(randData3[i], randData3_[i]);
@@ -214,6 +293,8 @@ static void _test0()
 		}
 		end = clock();
 		cout << "time = " << double(end - start) / CLOCKS_PER_SEC << "s" << endl;
+		cout << "inter_count=" << inter_count << endl;
+        cout << "not inter_count=" << totalNum - inter_count << endl;
 		Sleep(100); //ms
 
 	}
@@ -229,6 +310,7 @@ static void _test0()
 	cout << "main over." << endl;
 }
 
+//测试 */ 速度
 static void _test1()
 {
 	//create

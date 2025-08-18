@@ -7,6 +7,7 @@ using namespace clash;
 //#define USING_THRESHOLD_CUSTOMIZE
 //#define USING_ACCURATE_NORMALIZED
 //#define USING_THRESHOLD_GEOMETRIC // to process collinar and coplanar
+#define USING_COMPLETE_SEPARATION_AXIS //3d=17
 
 //--------------------------------------------------------------------------------------------------
 //  triangle
@@ -864,6 +865,52 @@ bool eigen::isTwoTrianglesBoxIntersect(const std::array<Vector3d, 3>& triA, cons
         std::min(std::min(triB[0][2], triB[1][2]), triB[2][2]) <= std::max(std::max(triA[0][2], triA[1][2]), triA[2][2]) + tolerance;
 }
 
+//without tolerance, canbe extend boundbox
+bool eigen::isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector2d, 3>& trigon, const Eigen::AlignedBox2d& box)
+{
+	std::array<Eigen::Vector2d, 6> edges = {
+		trigon[1] - trigon[0],
+		trigon[2] - trigon[1],
+		trigon[0] - trigon[2], };
+	for (auto& axis : edges)
+		axis = Vector2d(-axis[1], axis[0]);
+	std::array<Eigen::Vector2d, 4> vertexes = {
+		box.min(),
+		box.max(),
+		box.min() + Vector2d(box.sizes().x(), 0),
+		box.min() + Vector2d(0, box.sizes().y()) };
+	std::array<Eigen::Vector2d, 5> axes = { {
+		Vector2d(1,0),
+		Vector2d(0,1),
+		edges[0],
+		edges[1],
+		edges[2],
+	} };
+	double minA, maxA, minB, maxB, projection;
+	for (const auto& axis : axes) //none zero
+	{
+		minA = DBL_MAX;
+		maxA = -DBL_MAX;
+		minB = DBL_MAX;
+		maxB = -DBL_MAX;
+		for (const auto& iter : trigon)
+		{
+			projection = iter.dot(axis);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
+		}
+		for (const auto& iter : vertexes)
+		{
+			projection = iter.dot(axis);
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		if (maxA < minB || maxB < minA) // absolute zero
+			return false;
+	}
+	return true;
+}
+
 bool eigen::isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box)
 {
 #ifdef STATISTIC_DATA_COUNT
@@ -943,18 +990,14 @@ bool eigen::isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& t
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
-#ifdef USING_THRESHOLD_CUSTOMIZE
-		if (maxA + epsF < minB || maxB + epsF < minA)
-#else
 		if (maxA < minB || maxB < minA) // absolute zero
-#endif
 			return false;
 	}
 	return true;
 }
 
 //for shield record
-bool eigen::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB)
+bool eigen::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB, double tolerance /*= 0.0*/)
 {
 	std::array<Eigen::Vector2d, 6> edgesAB = {
 		triA[1] - triA[0],
@@ -987,14 +1030,14 @@ bool eigen::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector2d, 3>& tri
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
-		if (maxA <= minB || maxB <= minA) //contact, regard as not shield
+		if (maxA <= minB + tolerance || maxB <= minA + tolerance) //contact, regard as not shield
 			return false;
 	}
 	return true;
 }
 
 bool eigen::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB,
-	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB)
+	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB, double tolerance /*= 0.0*/)
 {
 	std::array<Eigen::Vector3d, 3> edgesA = {
 		triA[1] - triA[0],
@@ -1022,15 +1065,10 @@ bool eigen::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& tri
 	//projection2 = normalB.dot(triA[2] - triB[1]);
 	//if ((0.0 < projection0 && 0.0 < projection1 && 0.0 < projection2) || (0.0 > projection0 && 0.0 > projection1 && 0.0 > projection2))
 	//	return false;
+
+	double minA, maxA, minB, maxB, projection;
+#ifdef USING_COMPLETE_SEPARATION_AXIS 
 	std::array<Eigen::Vector3d, 17> axes = { { // compat zero-vector from parallel edges
-			normalA, //normal direction projection
-			normalB,
-			normalA.cross(edgesA[0]), //perpendi to edge when coplanar
-			normalA.cross(edgesA[1]),
-			normalA.cross(edgesA[2]),
-			normalB.cross(edgesB[0]),
-			normalB.cross(edgesB[1]),
-			normalB.cross(edgesB[2]),
 			edgesA[0].cross(edgesB[0]),//cross edge pair to get normal
 			edgesA[0].cross(edgesB[1]),
 			edgesA[0].cross(edgesB[2]),
@@ -1039,9 +1077,69 @@ bool eigen::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& tri
 			edgesA[1].cross(edgesB[2]),
 			edgesA[2].cross(edgesB[0]),
 			edgesA[2].cross(edgesB[1]),
-			edgesA[2].cross(edgesB[2]) } };
+			edgesA[2].cross(edgesB[2]),
+			normalA, //normal direction projection
+			normalB,
+			normalA.cross(edgesA[0]), //perpendi to edge when coplanar
+			normalA.cross(edgesA[1]),
+			normalA.cross(edgesA[2]),
+			normalB.cross(edgesB[0]),
+			normalB.cross(edgesB[1]),
+			normalB.cross(edgesB[2])
+		} };
+#else
+	if (normalA.cross(normalB).isZero())//is parallel
+	{
+		//constexpr double eps = 1e-8;
+		if (tolerance < fabs(normalA.dot(triB[0] - triA[0]))) //not coplanar
+			return false;
+		std::array<Eigen::Vector3d, 6> edgesAB = {
+			normalA.cross(edgesA[0]), //perpendi to edge when coplanar
+			normalA.cross(edgesA[1]),
+			normalA.cross(edgesA[2]),
+			normalB.cross(edgesB[0]),
+			normalB.cross(edgesB[1]),
+			normalB.cross(edgesB[2]) };
+		for (const Vector3d& axis : edgesAB)
+		{
+			if (axis.isZero())
+				continue;
+			minA = DBL_MAX;
+			maxA = -DBL_MAX;
+			minB = DBL_MAX;
+			maxB = -DBL_MAX;
+			for (const Vector3d& vertex : triA)
+			{
+				projection = axis.dot(vertex);
+				minA = std::min(minA, projection);
+				maxA = std::max(maxA, projection);
+			}
+			for (const Vector3d& vertex : triB)
+			{
+				projection = axis.dot(vertex);
+				minB = std::min(minB, projection);
+				maxB = std::max(maxB, projection);
+			}
+			if (maxA < minB + tolerance || maxB < minA + tolerance)
+				return false;
+		}
+		return true;
+	}
+	std::array<Eigen::Vector3d, 11> axes = {
+        normalA,
+        normalB,
+        edgesA[0].cross(edgesB[0]),
+        edgesA[0].cross(edgesB[1]),
+        edgesA[0].cross(edgesB[2]),
+		edgesA[1].cross(edgesB[0]),
+		edgesA[1].cross(edgesB[1]),
+		edgesA[1].cross(edgesB[2]),
+		edgesA[2].cross(edgesB[0]),
+		edgesA[2].cross(edgesB[1]),
+		edgesA[2].cross(edgesB[2]),
+	};
+#endif
 	// Check for overlap along each axis
-	double minA, maxA, minB, maxB, projection;
 	for (const Eigen::Vector3d& axis : axes) //fast than index
 	{
 		if (axis.isZero())
@@ -1062,7 +1160,7 @@ bool eigen::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& tri
 			minB = std::min(minB, projection);
 			maxB = std::max(maxB, projection);
 		}
-		if (maxA < minB || maxB < minA) // absolute zero, contact is intersect
+		if (maxA < minB + tolerance || maxB < minA + tolerance) //contact is intersect
 			return false; //one axis gap is separate
 	}
 	// special handling degenerate triangle
@@ -1072,11 +1170,11 @@ bool eigen::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& tri
 	return true;
 }
 
-bool eigen::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
+bool eigen::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double tolerance /*= 0.0*/)
 {
 	Eigen::Vector3d normalA = (triA[1] - triA[0]).cross(triA[2] - triA[1]);
 	Eigen::Vector3d normalB = (triB[1] - triB[0]).cross(triB[2] - triB[1]);
-	return isTwoTrianglesIntersectSAT(triA, triB, normalA, normalB);
+	return isTwoTrianglesIntersectSAT(triA, triB, normalA, normalB, tolerance);
 }
 
 // intersect and penetration judge
@@ -1137,27 +1235,77 @@ bool eigen::isTwoTrianglesIntrusionSAT(const std::array<Vector3d, 3>& triA, cons
 		triB[0] - triB[2] };
 	//Eigen::Vector3d normalA = edgesA[0].cross(edgesA[1]);
 	//Eigen::Vector3d normalB = edgesB[0].cross(edgesB[1]);
-	//if (normalA.cross(normalB).isZero(tolerance)) //is parallel
-	//	return false;//exclude coplanar
+	double minA, maxA, minB, maxB, projection;
+#ifdef USING_COMPLETE_SEPARATION_AXIS 
 	std::array<Eigen::Vector3d, 17> axes = { {
-			normalA, //normal direction projection
-			normalB,
+		edgesA[0].cross(edgesB[0]).normalized(),
+		edgesA[0].cross(edgesB[1]).normalized(),
+		edgesA[0].cross(edgesB[2]).normalized(),
+		edgesA[1].cross(edgesB[0]).normalized(),
+		edgesA[1].cross(edgesB[1]).normalized(),
+		edgesA[1].cross(edgesB[2]).normalized(),
+		edgesA[2].cross(edgesB[0]).normalized(),
+		edgesA[2].cross(edgesB[1]).normalized(),
+		edgesA[2].cross(edgesB[2]).normalized(),
+		normalA, //normal direction projection
+		normalB,
+		normalA.cross(edgesA[0]).normalized(), //perpendi to edge when coplanar
+		normalA.cross(edgesA[1]).normalized(),
+		normalA.cross(edgesA[2]).normalized(),
+		normalB.cross(edgesB[0]).normalized(),
+		normalB.cross(edgesB[1]).normalized(),
+		normalB.cross(edgesB[2]).normalized()
+		} };
+#else
+	if (normalA.cross(normalB).isZero())//is parallel
+	{
+        if (tolerance < fabs(normalA.dot(triB[0] - triA[0]))) //not coplanar
+			return false;
+		std::array<Eigen::Vector3d, 6> edgesAB = { 
 			normalA.cross(edgesA[0]).normalized(), //perpendi to edge when coplanar
 			normalA.cross(edgesA[1]).normalized(),
 			normalA.cross(edgesA[2]).normalized(),
 			normalB.cross(edgesB[0]).normalized(),
 			normalB.cross(edgesB[1]).normalized(),
-			normalB.cross(edgesB[2]).normalized(),
-			edgesA[0].cross(edgesB[0]).normalized(),
-			edgesA[0].cross(edgesB[1]).normalized(),
-			edgesA[0].cross(edgesB[2]).normalized(),
-			edgesA[1].cross(edgesB[0]).normalized(),
-			edgesA[1].cross(edgesB[1]).normalized(),
-			edgesA[1].cross(edgesB[2]).normalized(),
-			edgesA[2].cross(edgesB[0]).normalized(),
-			edgesA[2].cross(edgesB[1]).normalized(),
-			edgesA[2].cross(edgesB[2]).normalized() } };
-	double minA, maxA, minB, maxB, projection;
+			normalB.cross(edgesB[2]).normalized() };
+		for (const Vector3d& axis : edgesAB)
+		{
+			if (axis.isZero())
+				continue;
+			minA = DBL_MAX;
+			maxA = -DBL_MAX;
+			minB = DBL_MAX;
+			maxB = -DBL_MAX;
+			for (const Vector3d& vertex : triA)
+			{
+				projection = axis.dot(vertex);
+				minA = std::min(minA, projection);
+				maxA = std::max(maxA, projection);
+			}
+			for (const Vector3d& vertex : triB)
+			{
+				projection = axis.dot(vertex);
+				minB = std::min(minB, projection);
+				maxB = std::max(maxB, projection);
+			}
+			if (maxA < minB + tolerance || maxB < minA + tolerance)
+				return false;
+		}
+		return true;
+	}
+	std::array<Eigen::Vector3d, 11> axes = { 
+		normalA,
+		normalB,
+		edgesA[0].cross(edgesB[0]).normalized(),
+		edgesA[0].cross(edgesB[1]).normalized(),
+		edgesA[0].cross(edgesB[2]).normalized(),
+		edgesA[1].cross(edgesB[0]).normalized(),
+		edgesA[1].cross(edgesB[1]).normalized(),
+		edgesA[1].cross(edgesB[2]).normalized(),
+		edgesA[2].cross(edgesB[0]).normalized(),
+		edgesA[2].cross(edgesB[1]).normalized(),
+		edgesA[2].cross(edgesB[2]).normalized() };
+#endif
 	for (const Vector3d& axis : axes)
 	{
 		if (axis.isZero())
@@ -1208,16 +1356,16 @@ bool eigen::isTwoTrianglesIntrusionSAT(const std::array<Vector3d, 3>& triA, cons
 	if (normalA.cross(normalB).isZero(tolerance)) //is parallel
 		return false;//exclude coplanar
 	std::array<Eigen::Vector3d, 9> axes = { {
-			// only cross edge pair
-			edgesA[0].cross(edgesB[0]),
-			edgesA[0].cross(edgesB[1]),
-			edgesA[0].cross(edgesB[2]),
-			edgesA[1].cross(edgesB[0]),
-			edgesA[1].cross(edgesB[1]),
-			edgesA[1].cross(edgesB[2]),
-			edgesA[2].cross(edgesB[0]),
-			edgesA[2].cross(edgesB[1]),
-			edgesA[2].cross(edgesB[2]) } };
+		// only cross edge pair
+		edgesA[0].cross(edgesB[0]),
+		edgesA[0].cross(edgesB[1]),
+		edgesA[0].cross(edgesB[2]),
+		edgesA[1].cross(edgesB[0]),
+		edgesA[1].cross(edgesB[1]),
+		edgesA[1].cross(edgesB[2]),
+		edgesA[2].cross(edgesB[0]),
+		edgesA[2].cross(edgesB[1]),
+		edgesA[2].cross(edgesB[2]) } };
 	double minA, maxA, minB, maxB, projection;
 	for (const auto& axis : axes)
 	{
@@ -1316,48 +1464,8 @@ bool eigen::isTwoTrianglesIntrusionSAT(double toleDist, const std::array<Vector3
 	double minA, maxA, minB, maxB, projection;
 	//Eigen::Vector3d normalA = edgesA[0].cross(edgesA[1]).normalized();
 	//Eigen::Vector3d normalB = edgesB[0].cross(edgesB[1]).normalized();
-#ifdef USING_COMPLETE_SEPARATION_AXIS 
-	if (normalA.cross(normalB).isZero()) //is parallel
-	{
-		if (!fabs(normalA.dot(triB_R[0])) < spec) //not coplanar
-			return false;
-		std::array<Eigen::Vector3d, 6> edgesAB = { edgesA[0],edgesA[1],edgesA[2],edgesB[0],edgesB[1],edgesB[2] };
-		for (const auto& axis : edgesAB)
-		{
-			if (axis.isZero(tolerance))
-				continue;
-			minA = DBL_MAX;
-			maxA = -DBL_MAX;
-			minB = DBL_MAX;
-			maxB = -DBL_MAX;
-			for (const auto& vertex : triA_R)
-			{
-				projection = axis.dot(vertex);
-				minA = std::min(minA, projection);
-				maxA = std::max(maxA, projection);
-			}
-			for (const auto& vertex : triB_R)
-			{
-				projection = axis.dot(vertex);
-				minB = std::min(minB, projection);
-				maxB = std::max(maxB, projection);
-			}
-			if (maxA < minB + spec || maxB < minA + spec)
-				return false;
-		}
-		return true;
-	}
-#endif
 	//separation axis theorem
 	std::array<Eigen::Vector3d, 17> axes = { {
-		normalA,
-		normalB,
-		normalA.cross(edgesA[0]).normalized(),
-		normalA.cross(edgesA[1]).normalized(),
-		normalA.cross(edgesA[2]).normalized(),
-		normalB.cross(edgesB[0]).normalized(),
-		normalB.cross(edgesB[1]).normalized(),
-		normalB.cross(edgesB[2]).normalized(),
 		edgesA[0].cross(edgesB[0]).normalized(),
 		edgesA[0].cross(edgesB[1]).normalized(),
 		edgesA[0].cross(edgesB[2]).normalized(),
@@ -1366,7 +1474,16 @@ bool eigen::isTwoTrianglesIntrusionSAT(double toleDist, const std::array<Vector3
 		edgesA[1].cross(edgesB[2]).normalized(),
 		edgesA[2].cross(edgesB[0]).normalized(),
 		edgesA[2].cross(edgesB[1]).normalized(),
-		edgesA[2].cross(edgesB[2]).normalized() } };
+		edgesA[2].cross(edgesB[2]).normalized(),
+		normalA,
+		normalB,
+		normalA.cross(edgesA[0]).normalized(),
+		normalA.cross(edgesA[1]).normalized(),
+		normalA.cross(edgesA[2]).normalized(),
+		normalB.cross(edgesB[0]).normalized(),
+		normalB.cross(edgesB[1]).normalized(),
+		normalB.cross(edgesB[2]).normalized()
+		} };
 	for (const Vector3d& axis : axes)
 	{
 		if (axis.isZero())
@@ -2118,50 +2235,5 @@ std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesIntersectPoints(const std::
 		}
 	}
 	return res;
-}
-
-bool eigen::isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector2d, 3>& tri, const Eigen::AlignedBox2d& box)
-{
-	std::array<Eigen::Vector2d, 6> edges = {
-		tri[1] - tri[0],
-		tri[2] - tri[1],
-		tri[0] - tri[2], };
-	for (auto& axis : edges)
-		axis = Vector2d(-axis[1], axis[0]);
-	std::array<Eigen::Vector2d, 4> vertexes = {
-		box.min(),
-		box.max(),
-		box.min() + Vector2d(box.sizes().x(), 0),
-		box.min() + Vector2d(0, box.sizes().y()) };
-	std::array<Eigen::Vector2d, 5> axes = { {
-		Vector2d(1,0),
-		Vector2d(0,1),
-		edges[0],
-		edges[1],
-		edges[2],
-	} };
-	double minA, maxA, minB, maxB, projection;
-	for (const auto& axis : axes) //none zero
-	{
-		minA = DBL_MAX;
-		maxA = -DBL_MAX;
-		minB = DBL_MAX;
-		maxB = -DBL_MAX;
-		for (const auto& iter : tri)
-		{
-			projection = iter.dot(axis);
-			minA = std::min(minA, projection);
-			maxA = std::max(maxA, projection);
-		}
-		for (const auto& iter : vertexes)
-		{
-			projection = iter.dot(axis);
-			minB = std::min(minB, projection);
-			maxB = std::max(maxB, projection);
-		}
-		if (maxA < minB || maxB < minA) // absolute zero
-			return false;
-	}
-	return true;
 }
 
