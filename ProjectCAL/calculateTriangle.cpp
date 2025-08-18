@@ -1518,6 +1518,45 @@ bool eigen::isTwoTrianglesIntrusionSAT(double toleDist, const std::array<Vector3
 }
 
 //must intersect before
+double eigen::getTrianglesIntrusionSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB)
+{
+	std::array<Eigen::Vector2d, 6> edgesAB = {
+		(triA[1] - triA[0]).normalized(),
+		(triA[2] - triA[1]).normalized(),
+		(triA[0] - triA[2]).normalized(),
+		(triB[1] - triB[0]).normalized(),
+		(triB[2] - triB[1]).normalized(),
+		(triB[0] - triB[2]).normalized() };
+	for (Vector2d& iter : edgesAB)
+		iter = Vector2d(-iter[1], iter[0]); //rotz(pi/2)
+	double intrusion = DBL_MAX;
+	double minA, maxA, minB, maxB, projection;
+	for (const Vector2d& axis : edgesAB)
+	{
+		if (axis.isZero())
+			continue;
+		minA = DBL_MAX;
+		maxA = -DBL_MAX;
+		minB = DBL_MAX;
+		maxB = -DBL_MAX;
+		for (const Vector2d& vertex : triA)
+		{
+			projection = axis.dot(vertex);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
+		}
+		for (const Vector2d& vertex : triB)
+		{
+			projection = axis.dot(vertex);
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		if (minB < maxA || minA < maxB) //without tolerance
+			intrusion = std::min(std::min(maxA - minB, maxB - minA), intrusion);
+	}
+	return intrusion;
+}
+
 double eigen::getTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {
 	std::array<Eigen::Vector3d, 3> edgesA = {
@@ -1623,6 +1662,56 @@ double eigen::getDistanceOfPointAndTriangle(const Eigen::Vector3d& point, const 
 }
 
 // must separate
+
+double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB)
+{
+	auto _getDistanceOfPointAndSegmentINF = [](const Vector2d& point, const std::array<Vector2d, 2>& segm)->double
+		{
+			Vector2d vectseg = segm[1] - segm[0];// canbe zero, next willbe zero
+			double projection = vectseg.dot(point);
+			//the projection must on segment
+			if (vectseg.dot(segm[1]) <= projection || projection <= vectseg.dot(segm[0]))
+				return DBL_MAX;
+			double k = vectseg.dot(point - segm[0]) / vectseg.dot(vectseg);
+			return (segm[0] - point + k * vectseg).squaredNorm();
+		};
+	std::array<array<Vector2d, 2>, 3> edgesA = { {
+		{ triA[0], triA[1] },
+		{ triA[1], triA[2] },
+		{ triA[2], triA[0] } } };
+	std::array<array<Vector2d, 2>, 3> edgesB = { {
+		{ triB[0], triB[1] },
+		{ triB[1], triB[2] },
+		{ triB[2], triB[0] } } };
+	double distance = DBL_MAX;
+	for (const Vector2d& vertexA : triA)
+	{
+		//point to point
+		for (const Vector2d& vertexB : triB)
+		{
+			double norm = (vertexA - vertexB).squaredNorm();
+			distance = std::min(distance, norm);
+		}
+		//point to edge
+		for (const auto& edgeB : edgesB)
+		{
+			double temp = _getDistanceOfPointAndSegmentINF(vertexA, edgeB);
+			distance = std::min(distance, temp);
+		}
+	}
+	for (const Vector2d& vertexB : triB)
+	{
+		//point to edge
+		for (const auto& edgeA : edgesA)
+		{
+			double temp = _getDistanceOfPointAndSegmentINF(vertexB, edgeA);
+			distance = std::min(distance, temp);
+		}
+	}
+	return std::sqrt(distance);
+}
+
+//old version
 double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {
 #ifdef STATISTIC_DATA_COUNT
@@ -1757,7 +1846,7 @@ double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA
 	return dmax;
 }
 
-double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const Eigen::Vector3d& normalA, const std::array<Eigen::Vector3d, 3>& triB, const Eigen::Vector3d& normalB)
+double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB)
 {
 	auto _getDistanceOfPointAndSegmentINF = [](const Vector3d& point, const std::array<Vector3d, 2>& segm)->double
 		{

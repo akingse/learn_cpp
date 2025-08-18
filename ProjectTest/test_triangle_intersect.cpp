@@ -460,6 +460,7 @@ static void _test9()
 	return;
 }
 
+//trigon相交测试
 static void _test10()
 {
 	Vector3d triA_0 = Vector3d(0, 0, 0);
@@ -496,6 +497,21 @@ static void _test10()
 	std::vector<Eigen::Vector2d> polygonA = { poly_0 ,poly_1 ,poly_2 };
 	isInter = isTwoPolygonsIntersectSAT(polygonA, polygonA);
 
+	//isTwoTrianglesIntrusionSAT
+	{
+		Triangle3d triA = {
+		Vector3d(0, 0, 0) ,
+		Vector3d(10, 0, 0) ,
+		Vector3d(0, 10, 0) , };
+		Triangle3d triB = {
+			Vector3d(1, 1, -1) ,
+			//Vector3d(0, 0, 0) ,
+			Vector3d(0, -10, 0) ,
+			Vector3d(0, 0, 10) , };
+		double intrusion = getTrianglesIntrusionSAT(triA, triB); //0.9
+		bool isIntr1 = sat::isTwoTrianglesIntrusionSAT(triA, triB, 1);
+		bool isIntr2 = sat::isTwoTrianglesIntrusionSAT(triA, triB, -1);
+	}
 	return;
 }
 
@@ -512,25 +528,6 @@ static void _test11()
 	double distance = getDistanceOfPointAndTriangle(Vector2d(10, 10), triA);
 	//int res=maxSubArray(vector<int>{ -2,1,-3,4,-1,2,1,-5,4 });
 	
-	return;
-}
-
-//测试isTwoTrianglesIntrusionSAT
-static void _test12()
-{
-	Triangle3d triA = {
-		Vector3d(0, 0, 0) ,
-		Vector3d(10, 0, 0) ,
-		Vector3d(0, 10, 0) , };
-	Triangle3d triB = {
-		Vector3d(1, 1, -1) ,
-		//Vector3d(0, 0, 0) ,
-		Vector3d(0, -10, 0) ,
-		Vector3d(0, 0, 10) , };
-	double intrusion = getTrianglesIntrusionSAT(triA, triB); //0.9
-	bool isIntr1 = sat::isTwoTrianglesIntrusionSAT(triA, triB, 1);
-	bool isIntr2 = sat::isTwoTrianglesIntrusionSAT(triA, triB, -1);
-
 	return;
 }
 
@@ -839,7 +836,8 @@ static void _test23()
 	};
 	Vector3d normalB = (trigonB[1] - trigonB[0]).cross(trigonB[1] - trigonB[2]).normalized();
 
-	bool isinter = isTwoTrianglesIntrusionSAT(trigonA, eigen::translate(10.2,0,0) * trigonB, -0.1);
+	bool isinter0 = isTwoTrianglesIntrusionSAT(trigonA, eigen::translate(10.1,0,0) * trigonB, 0.1);
+	bool isinter1 = isTwoTrianglesIntrusionSAT(trigonA, eigen::translate(10.1,0,0) * trigonB, -0.1);
 	return;
 }
 
@@ -883,76 +881,10 @@ static void _test24()
 	return;
 }
 
-
-static bool _isTwoTrianglesIntrusionSAT(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB,
-	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB, double tolerance /*= 0.0*/)
-{
-	std::array<Eigen::Vector3d, 3> edgesA = {
-		triA[1] - triA[0],
-		triA[2] - triA[1],
-		triA[0] - triA[2] };
-	std::array<Eigen::Vector3d, 3> edgesB = {
-		triB[1] - triB[0],
-		triB[2] - triB[1],
-		triB[0] - triB[2] };
-	std::vector<Eigen::Vector3d> axes;
-	if (normalA.cross(normalB).isZero())//is parallel
-	{
-		if (tolerance < fabs(normalA.dot(triB[0] - triA[0]))) //not coplanar
-			return false;
-		axes.resize(6);
-		axes[0] = normalA.cross(edgesA[0]).normalized();
-		axes[1] = normalA.cross(edgesA[1]).normalized();
-		axes[2] = normalA.cross(edgesA[2]).normalized();
-		axes[3] = normalB.cross(edgesB[0]).normalized();
-		axes[4] = normalB.cross(edgesB[1]).normalized();
-		axes[5] = normalB.cross(edgesB[2]).normalized();
-	}
-	else
-	{
-		axes.resize(9);
-		axes[0] = edgesA[0].cross(edgesB[0]).normalized();
-		axes[1] = edgesA[0].cross(edgesB[1]).normalized();
-		axes[2] = edgesA[0].cross(edgesB[2]).normalized();
-		axes[3] = edgesA[1].cross(edgesB[0]).normalized();
-		axes[4] = edgesA[1].cross(edgesB[1]).normalized();
-		axes[5] = edgesA[1].cross(edgesB[2]).normalized();
-		axes[6] = edgesA[2].cross(edgesB[0]).normalized();
-		axes[7] = edgesA[2].cross(edgesB[1]).normalized();
-		axes[8] = edgesA[2].cross(edgesB[2]).normalized();
-	}
-	double minA, maxA, minB, maxB, projection;
-	for (const Vector3d& axis : axes)
-	{
-		if (axis.isZero())
-			continue;
-		minA = DBL_MAX;
-		maxA = -DBL_MAX;
-		minB = DBL_MAX;
-		maxB = -DBL_MAX;
-		for (const Vector3d& vertex : triA)
-		{
-			projection = axis.dot(vertex);
-			minA = std::min(minA, projection);
-			maxA = std::max(maxA, projection);
-		}
-		for (const Vector3d& vertex : triB)
-		{
-			projection = axis.dot(vertex);
-			minB = std::min(minB, projection);
-			maxB = std::max(maxB, projection);
-		}
-		if (maxA < minB + tolerance || maxB < minA + tolerance)
-			return false;
-	}
-	return true;
-}
-
-
-
+//对比
 static void _test25()
 {
-	double epsilon = Eigen::NumTraits<double>::epsilon(); //DBL_EPSILON
+	constexpr double epsilon = Eigen::NumTraits<double>::epsilon(); //DBL_EPSILON
 	int intercount = 0;
 	int intrucount = 0;
 	for (int i = 0; i < int(1e4); i++)
@@ -962,7 +894,6 @@ static void _test25()
 		
 		Eigen::Vector3d normalA = (trigonA[1] - trigonA[0]).cross(trigonA[2] - trigonA[1]).normalized();
 		Eigen::Vector3d normalB = (trigonB[1] - trigonB[0]).cross(trigonB[2] - trigonB[1]).normalized();
-        bool isintru_ = _isTwoTrianglesIntrusionSAT(trigonA, trigonB, normalA, normalB, 0.0);
 
 		bool isinter = isTwoTrianglesIntersectSAT(trigonA, trigonB);
 		if (isinter)
@@ -994,6 +925,7 @@ static int enrol = []()->int
         //lamina
         //_test20();
         //_test21();
+        _test23();
         _test25();
 
         cout << "test_triangle_intersect finished.\n" << endl;
