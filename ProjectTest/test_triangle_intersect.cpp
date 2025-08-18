@@ -821,6 +821,29 @@ static void _test22()
 
 }
 
+//Ïà½»Èİ²î
+static void _test23()
+{
+	Triangle3d trigonA = {
+	Vector3d(0,0,0),
+	Vector3d(10,0,0),
+	Vector3d(0,10,0),
+	};
+	Vector3d normalA = (trigonA[1] - trigonA[0]).cross(trigonA[1] - trigonA[2]).normalized();
+
+	//lineTo1
+	Triangle3d trigonB = {
+	Vector3d(0,0,0),
+	Vector3d(10,0,0),
+	Vector3d(0,10,0),
+	};
+	Vector3d normalB = (trigonB[1] - trigonB[0]).cross(trigonB[1] - trigonB[2]).normalized();
+
+	bool isinter = isTwoTrianglesIntrusionSAT(trigonA, eigen::translate(10.2,0,0) * trigonB, -0.1);
+	return;
+}
+
+
 static int enrol = []()->int
     {
         //_test1();
@@ -839,8 +862,9 @@ static int enrol = []()->int
         //_test18();
 
         //lamina
-        _test20();
-        _test21();
+        //_test20();
+        //_test21();
+        _test23();
 
         cout << "test_triangle_intersect finished.\n" << endl;
         return 0;
