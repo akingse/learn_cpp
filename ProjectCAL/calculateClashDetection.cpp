@@ -153,7 +153,7 @@ bool sat::isMeshInsideOtherMesh(const TriMesh& meshIn, const TriMesh& meshOut)
 			double k = (trigon[0] - point).dot(normal) / deno;
 			if (k < 0.0) // only positive direction
 				continue;
-			Vector3d local = point + k * direction;
+			Vector3d local = point + k * direction; //locate
 			if (!_isPointInTriangle(local, trigon, normal, toleDist))
 				continue;
 			if (_isPointOnTriangleVertexOrEdge(local, trigon, toleDist)) //singularity

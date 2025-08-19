@@ -21,12 +21,12 @@ namespace eigen
 	double getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const clash::Plane3d& plane)
 	{
 		if (plane.m_normal.isZero()) // error triangle plane
-            return (point - plane.m_origin).norm();
+            return (plane.m_origin - point).norm();
 		Vector3d normal = plane.m_normal.normalized();
   //      double k = (plane.m_origin - point).dot(normal) / normal.dot(normal); //normal without normalize
   //      //Vector3d local = point + k * normal;
 		//return fabs(k) * normal.norm(); // (local - point).norm();
-		double dotPro = (point - plane.m_origin).dot(normal);
+		double dotPro = (plane.m_origin - point).dot(normal);
 		return fabs(dotPro);
 	}
 

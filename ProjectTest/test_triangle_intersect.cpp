@@ -10,6 +10,15 @@ using namespace clash;
 static Eigen::Vector3d P(std::nan("0"), std::nan("0"), std::nan("0"));
 static Eigen::Vector3d Q(std::nan("0"), std::nan("0"), std::nan("0"));
 
+static Vector3d createRandVector()
+{
+	Vector3d vec(
+		rand() - RAND_MAX / 2 + double(rand()) / RAND_MAX,
+		rand() - RAND_MAX / 2 + double(rand()) / RAND_MAX,
+		rand() - RAND_MAX / 2 + double(rand()) / RAND_MAX);
+	return vec;
+}
+
 static clash::TriMesh createTriMesh_UnitCube()
 {
 	clash::TriMesh mesh;
@@ -779,10 +788,10 @@ static void _test20()
 
 	double distance1 = getTrianglesDistanceSAT(trigonA, trigonB);
 	double distance2 = getTrianglesDistanceSAT(trigonA, trigonC);
-	//
-	double norm1 = getTrianglesDistanceSAT(trigonA, normalA, trigonB, normalB);
-	double norm2 = getTrianglesDistanceSAT(trigonA, normalA, trigonC, normalC);
-	return;
+    //
+    double norm1 = getTrianglesDistanceSAT(trigonA, trigonB, normalA, normalB);
+    double norm2 = getTrianglesDistanceSAT(trigonA, trigonC, normalA, normalC);
+    return;
 }
 
 //退化三角形测试
@@ -806,7 +815,7 @@ static void _test21()
 	//double distance1 = getTrianglesDistanceSAT(trigonA, trigonB);
 	double distance1 = getTrianglesDistanceSAT(trigonA, eigen::scale(0.5)*trigonB);
 	//
-	double norm1 = getTrianglesDistanceSAT(trigonA, normalA, eigen::scale(0.5) * trigonB, normalB);
+	double norm1 = getTrianglesDistanceSAT(trigonA, eigen::scale(0.5) * trigonB, normalA, normalB);
 	cout << "distance=" << distance1 << endl;
 	cout << "distance=" << norm1 << endl;
 	return;
@@ -822,7 +831,7 @@ static void _test22()
 static void _test23()
 {
 	Triangle3d trigonA = {
-	Vector3d(0,0,0),
+	Vector3d(1,0,0),
 	Vector3d(10,0,0),
 	Vector3d(0,10,0),
 	};
@@ -834,20 +843,24 @@ static void _test23()
 	Vector3d(10,0,0),
 	Vector3d(0,10,0),
 	};
+	trigonB = eigen::translate(10 - 0.2, 0, 0) * trigonB;
+	Eigen::Matrix4d mat = eigen::rotate(createRandVector(), double(rand()) / RAND_MAX);
+	trigonA = mat * trigonA;
+	trigonB = mat * trigonB;
+
 	Vector3d normalB = (trigonB[1] - trigonB[0]).cross(trigonB[1] - trigonB[2]).normalized();
 
-	bool isinter0 = isTwoTrianglesIntrusionSAT(trigonA, eigen::translate(10.1,0,0) * trigonB, 0.1);
-	bool isinter1 = isTwoTrianglesIntrusionSAT(trigonA, eigen::translate(10.1,0,0) * trigonB, -0.1);
-	return;
-}
+	double distance = getTrianglesDistanceSAT(trigonA, trigonB);
+	double distanceNew = getTrianglesDistanceSAT(trigonA, trigonB, normalA, normalB);
 
-static Vector3d createRandVector()
-{
-	Vector3d vec(
-		rand() - RAND_MAX / 2 + double(rand()) / RAND_MAX,
-		rand() - RAND_MAX / 2 + double(rand()) / RAND_MAX,
-		rand() - RAND_MAX / 2 + double(rand()) / RAND_MAX);
-	return vec;
+	bool isinter0 = isTwoTrianglesIntrusionSAT(trigonA, trigonB, 0.1);
+	bool isinter1 = isTwoTrianglesIntrusionSAT(trigonA, trigonB, 0.2);
+	bool isinter2 = isTwoTrianglesIntrusionSAT(trigonA, trigonB, 0.3);
+																		   
+	bool isinter3 = isTwoTrianglesIntrusionSAT(trigonA, trigonB, -0.1);
+	bool isinter4 = isTwoTrianglesIntrusionSAT(trigonA, trigonB, -0.2);
+	bool isinter5 = isTwoTrianglesIntrusionSAT(trigonA, trigonB, -0.3);
+	return;
 }
 
 //旋转对法向的影响 //经过旋转之后，将不再严格平行，但isZero默认参数可以判住

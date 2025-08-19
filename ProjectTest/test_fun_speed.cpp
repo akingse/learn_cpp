@@ -117,14 +117,14 @@ static bool isTwoTrianglesIntrusionSAT_vector(const std::array<Vector3d, 3>& tri
 static void _test0()
 {
 	clock_t start, end;
-	string dir = "C:/Users/Aking/source/repos/learn_cpp/ProjectTest/";//"getExePath();
-	cout << "exepath=" << dir << endl;
+	string exepath = "C:/Users/Aking/source/repos/learn_cpp/ProjectTest/";//"getExePath();
+	cout << "exepath=" << exepath << endl;
 
 #ifdef TEST_SPEED_OF_FUNCTION
 	start = clock();
 	cout << "data number:" << totalNum << ", load start..." << endl;
 	// the data
-    double* readNum = _readNumberFile(size_t(sqrt(totalNum)), dir + randNumName);
+    double* readNum = _readNumberFile(size_t(sqrt(totalNum)), exepath + randNumNameSepa);
 
 #ifdef TEST_TRIGON3
 	std::array<Vector3d, 3>* randData3 = new std::array<Vector3d, 3>[totalNum];
@@ -247,15 +247,17 @@ static void _test0()
 			//bool res = isTwoSegmentsIntersect(randData2[i], randData2_[i]);
 			// 
 			// »˝Ω«–Œœ‡Ωª≤‚ ‘
-			bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]); //9.435s
-			//bool res = isTwoTrianglesIntrusionSAT(randData3[i], randData3_[i]);//14.859s
+			//bool res = isTwoTrianglesIntersectSAT(randData3[i], randData3_[i]); //9.435s
+			//bool res1 = isTwoTrianglesIntrusionSAT(randData3[i], randData3_[i]);//14.859s
+			//if (res)
+			//	continue;
 			//bool res = isTwoTrianglesIntrusionSAT_vector(randData3[i], randData3_[i], randData3N[i], randData3N_[i], 0.0);//
 			//bool res1 = isTwoTrianglesIntersectSAT_17(randData3[i], randData3_[i], randData3N[i], randData3N_[i]);//
 
 #pragma omp critical
 			{
-				if (res)
-					inter_count++;
+				//if (res)
+				//	inter_count++;
      //           if (res != res1)
 					//countDiff++;
 			}
@@ -276,15 +278,20 @@ static void _test0()
 			// »Ì≈ˆ◊≤
 			//double d = getTrianglesDistance(P, Q, randData3[i], randData3_[i]);
 			//double d = getTrianglesDistanceSAT(randData3[i], randData3_[i]); //60s about, 7s(omp)
-			//double dn = getTrianglesDistanceSAT(randData3[i], randData3N[i], randData3_[i], randData3N_[i]); //47s, 5.5s(omp)
+			double dn = getTrianglesDistanceSAT(randData3[i], randData3_[i], randData3N[i], randData3N_[i]); //47s, 5.5s(omp)
 
-			//array<Vector3d, 2> res = getTwoTrianglesNearestPoints(randData3[i], randData3_[i]);
+			//array<Vector3d, 2> near2 = getTwoTrianglesNearestPoints(randData3[i], randData3_[i]);
 			//array<Vector3d, 2> res = getTwoTrianglesIntersectPoints(randData3[i], randData3_[i]);
 			//array<Vector3d, 2> res = getTwoTrianglesIntersectPoints(randData3xy[i], randData3_xy[i]);
 			//double d = (res[1] - res[0]).norm(); << endl
+			//double dnorm = (near2[1] - near2[0]).norm();
 			//≤‚ ‘∞¸Œß∫– 
 			//Eigen::AlignedBox3d res = Eigen::AlignedBox3d(randData2[i][0], randData2[i][1]).intersection(Eigen::AlignedBox3d(randData2_[i][0], randData2_[i][1]));
-
+#pragma omp critical
+			{
+				//if (1e-8 < fabs(d - dn) || 1e-8 < fabs(dnorm - dn))
+				//	countDiff++;
+			}
 			//calculate
 			//double dotPro = (randData3[i][1].dot(randData3[i][2] - randData3_[i][0])) * (randData3[i][1].dot(randData3[i][0] - randData3_[i][0])) < eps;
 			//Vector3d point = randData3[i][0] + (randData3[i][1].dot(randData3[i][0] - randData3_[i][0]) / dotPro) * (randData3[i][1] - randData3[i][0]);
@@ -293,6 +300,7 @@ static void _test0()
 		}
 		end = clock();
 		cout << "time = " << double(end - start) / CLOCKS_PER_SEC << "s" << endl;
+		cout << "countDiff=" << countDiff << endl;
 		cout << "inter_count=" << inter_count << endl;
         cout << "not inter_count=" << totalNum - inter_count << endl;
 		Sleep(100); //ms
