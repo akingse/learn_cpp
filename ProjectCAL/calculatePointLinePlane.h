@@ -49,8 +49,6 @@ namespace clash
 			spec <= axisz * (v1[1] * trigonR[1][0] - v1[0] * trigonR[1][1]) &&
 			spec <= axisz * (v2[1] * trigonR[2][0] - v2[0] * trigonR[2][1]); // = decide whether include point on edge
 	}
-
-
 }
 
 namespace eigen
@@ -330,9 +328,6 @@ namespace clash
 		}
 		return true;
 	}
-
-
-
 
 }
 

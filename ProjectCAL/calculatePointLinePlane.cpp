@@ -23,7 +23,7 @@ namespace eigen
 		if (plane.m_normal.isZero()) // error triangle plane
             return (point - plane.m_origin).norm();
 		Vector3d normal = plane.m_normal.normalized();
-  //      double k = (point - plane.m_origin).dot(normal) / normal.dot(normal); //normal without normalize
+  //      double k = (plane.m_origin - point).dot(normal) / normal.dot(normal); //normal without normalize
   //      //Vector3d local = point + k * normal;
 		//return fabs(k) * normal.norm(); // (local - point).norm();
 		double dotPro = (point - plane.m_origin).dot(normal);
