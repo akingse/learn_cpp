@@ -831,11 +831,10 @@ static void _test22()
 static void _test23()
 {
 	Triangle3d trigonA = {
-	Vector3d(1,0,0),
+	Vector3d(0,0,0),
 	Vector3d(10,0,0),
 	Vector3d(0,10,0),
 	};
-	Vector3d normalA = (trigonA[1] - trigonA[0]).cross(trigonA[1] - trigonA[2]).normalized();
 
 	//lineTo1
 	Triangle3d trigonB = {
@@ -844,10 +843,11 @@ static void _test23()
 	Vector3d(0,10,0),
 	};
 	trigonB = eigen::translate(10 - 0.2, 0, 0) * trigonB;
-	Eigen::Matrix4d mat = eigen::rotate(createRandVector(), double(rand()) / RAND_MAX);
+	Eigen::Matrix4d mat = eigen::rotate(createRandVector(), createRandVector(), double(rand()) / RAND_MAX);
 	trigonA = mat * trigonA;
 	trigonB = mat * trigonB;
 
+	Vector3d normalA = (trigonA[1] - trigonA[0]).cross(trigonA[1] - trigonA[2]).normalized();
 	Vector3d normalB = (trigonB[1] - trigonB[0]).cross(trigonB[1] - trigonB[2]).normalized();
 
 	double distance = getTrianglesDistanceSAT(trigonA, trigonB);

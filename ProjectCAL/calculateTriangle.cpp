@@ -1260,8 +1260,10 @@ bool eigen::isTwoTrianglesIntrusionSAT(const std::array<Vector3d, 3>& triA, cons
 #else
 	if (normalA.cross(normalB).isZero())//is parallel
 	{
+#ifdef _DEBUG
+		double dotpro = fabs(normalA.dot(triB[0] - triA[0]));
+#endif
 		double toleDist = (tolerance < 0.0) ? -tolerance : 1e-8;
-		//double dotpro = fabs(normalA.dot(triB[0] - triA[0]));
         if (toleDist < fabs(normalA.dot(triB[0] - triA[0]))) //not coplanar
 			return false;
 		std::array<Eigen::Vector3d, 6> edgesAB = { 
@@ -1671,7 +1673,6 @@ double eigen::getDistanceOfPointAndTriangle(const Eigen::Vector3d& point, const 
 }
 
 // must separate
-
 double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB)
 {
 	auto _getDistanceOfPointAndSegmentINF = [](const Vector2d& point, const std::array<Vector2d, 2>& segm)->double
@@ -1720,7 +1721,7 @@ double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector2d, 3>& triA
 	return std::sqrt(distance);
 }
 
-//old version
+//old version, confused
 double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {
 #ifdef STATISTIC_DATA_COUNT
@@ -1742,14 +1743,14 @@ double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA
 		};
 	auto _getDistanceOfTwoSegmentsINF = [&vectA, &vectB](const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)->double
 		{
-			double delta1 = (segmB[0] - segmA[0]).dot(vectA);
-			double delta2 = (segmB[0] - segmA[0]).dot(vectB);
+			double deltaA = (segmB[0] - segmA[0]).dot(vectA);
+			double deltaB = (segmB[0] - segmA[0]).dot(vectB);
 			// 2*2 inverse matrix, 1/|M|*(exchange main diagonal and -1 counter-diagonal)
 			double deno = vectA.dot(vectB) * vectB.dot(vectA) - vectA.dot(vectA) * vectB.dot(vectB);//a*d-b*c
 			if (deno == 0.0) // parallel, must exclude, than distance of point to segment in next function
 				return DBL_MAX;
-			double kA = (vectB.dot(vectA) * delta2 - vectB.dot(vectB) * delta1) / deno;
-			double kB = (vectA.dot(vectA) * delta2 - vectA.dot(vectB) * delta1) / deno;
+			double kA = (vectB.dot(vectA) * deltaB - vectB.dot(vectB) * deltaA) / deno;
+			double kB = (vectA.dot(vectA) * deltaB - vectA.dot(vectB) * deltaA) / deno;
 			//	Vector3d pointA = segmA[0] + kA * vectA;
 			//	Vector3d pointB = segmB[0] + kB * vectB;
 			//whether two intersect-point inside segments
@@ -1855,6 +1856,7 @@ double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA
 	return dmax;
 }
 
+//simple version
 double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB)
 {
 	auto _getDistanceOfPointAndSegmentINF = [](const Vector3d& point, const std::array<Vector3d, 2>& segm)->double
