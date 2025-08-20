@@ -54,14 +54,22 @@ namespace clash
 namespace eigen
 {
 	DLLEXPORT_CAL double getDistanceOfPointAndLine(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 2>& line); //get nearest point
+	DLLEXPORT_CAL double getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
+	DLLEXPORT_CAL double getDistanceOfTwoLines(const std::array<Eigen::Vector3d, 2>& lineA, const std::array<Eigen::Vector3d, 2>& lineB); //get two nearest points
+	DLLEXPORT_CAL Eigen::Vector3d getNearestPointOfPointAndLine(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 2>& line);
+	DLLEXPORT_CAL Eigen::Vector3d getNearestPointOfPointAndPlane(const Eigen::Vector3d& point, const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
+	DLLEXPORT_CAL clash::Segment3d getNearestPointOfTwoLines(const std::array<Eigen::Vector3d, 2>& lineA, const std::array<Eigen::Vector3d, 2>& lineB); //get nearest projection point
+	DLLEXPORT_CAL Eigen::Vector3d getIntersectPointOfLineAndPlane(const std::array<Eigen::Vector3d, 2>& line, const std::array<Eigen::Vector3d, 2>& plane);
+	DLLEXPORT_CAL clash::Segment3d getIntersectLineOfTwoPlanes(const Eigen::Vector3d& originA, const Eigen::Vector3d& normalA, const Eigen::Vector3d& originB, const Eigen::Vector3d& normalB);
+
+	//overload
 	DLLEXPORT_CAL double getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& plane); //get nearest projection point
 	DLLEXPORT_CAL double getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const clash::Plane3d& plane); //overload
-	DLLEXPORT_CAL double getDistanceOfTwoLines(const std::array<Eigen::Vector3d, 2>& lineA, const std::array<Eigen::Vector3d, 2>& lineB); //get two nearest points
-	DLLEXPORT_CAL Eigen::Vector3d getIntersectPointOfLineAndPlane(const std::array<Eigen::Vector3d, 2>& line, const std::array<Eigen::Vector3d, 2>& plane);
-	DLLEXPORT_CAL Eigen::Vector2d getIntersectPointOfTwoLines(const std::array<Eigen::Vector2d, 2>& lineA, const std::array<Eigen::Vector2d, 2>& lineB);
 	DLLEXPORT_CAL clash::Segment3d getIntersectLineOfTwoPlanes(const std::array<Eigen::Vector3d, 3>& planeA, const std::array<Eigen::Vector3d, 3>& planeB);
 	DLLEXPORT_CAL clash::Segment3d getIntersectLineOfTwoPlanes(const clash::Plane3d& planeA, const clash::Plane3d& planeB); //overload
-	DLLEXPORT_CAL clash::Segment3d getIntersectLineOfTwoPlanesP3D(const clash::Plane3d& planeA, const clash::Plane3d& planeB); 
+	//2D
+	DLLEXPORT_CAL double getDistanceOfPointAndLine(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 2>& line); //get nearest point
+	DLLEXPORT_CAL Eigen::Vector2d getIntersectPointOfTwoLines(const std::array<Eigen::Vector2d, 2>& lineA, const std::array<Eigen::Vector2d, 2>& lineB);
 }
 
 //segment

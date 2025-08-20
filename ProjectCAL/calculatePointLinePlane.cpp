@@ -5,133 +5,187 @@ using namespace Eigen;
 using namespace eigen;
 using namespace clash;
 
-namespace eigen
+//2D
+double eigen::getDistanceOfPointAndLine(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 2>& line)
 {
-	//calculate distance
-	double getDistanceOfPointAndLine(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 2>& line)
-	{
-		Vector3d vecSeg = line[1] - line[0];// not zero
-		if (vecSeg.isZero())
-			return (line[0] - point).norm();
-		double k = vecSeg.dot(point - line[0]) / vecSeg.dot(vecSeg);
-		Vector3d local = point + k * vecSeg;
-		return (line[0] - local).norm();
-	}
+	Vector2d vecSeg = line[1] - line[0];// not zero
+	if (vecSeg.isZero())
+		return (line[0] - point).norm();
+	double k = vecSeg.dot(point - line[0]) / vecSeg.dot(vecSeg);
+	Vector2d local = point + k * vecSeg;
+	return (line[0] - local).norm();
+}
 
-	double getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const clash::Plane3d& plane)
-	{
-		if (plane.m_normal.isZero()) // error triangle plane
-            return (plane.m_origin - point).norm();
-		Vector3d normal = plane.m_normal.normalized();
-  //      double k = (plane.m_origin - point).dot(normal) / normal.dot(normal); //normal without normalize
-  //      //Vector3d local = point + k * normal;
-		//return fabs(k) * normal.norm(); // (local - point).norm();
-		double dotPro = (plane.m_origin - point).dot(normal);
-		return fabs(dotPro);
-	}
+Eigen::Vector2d eigen::getIntersectPointOfTwoLines(const std::array<Eigen::Vector2d, 2>& lineA, const std::array<Eigen::Vector2d, 2>& lineB)
+{
+	Eigen::Vector2d vecA = lineA[1] - lineA[0];
+	Eigen::Vector2d vecB = lineB[1] - lineB[0];
+	if (isParallel2d(vecA, vecB))
+		return gVecNaN2d; //lines collinear
+	double k = cross2d(lineB[0] - lineA[0], vecB) / cross2d(vecA, vecB);
+	return lineA[0] + k * vecA;
+}
 
-	double getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& plane)
-	{
-		return getDistanceOfPointAndPlane(point, Plane3d(plane));
-	}
+//calculate distance
+double eigen::getDistanceOfPointAndLine(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 2>& line)
+{
+	Vector3d vecSeg = line[1] - line[0];// not zero
+	if (vecSeg.isZero())
+		return (line[0] - point).norm();
+	double k = vecSeg.dot(point - line[0]) / vecSeg.dot(vecSeg);
+	Vector3d local = point + k * vecSeg;
+	return (line[0] - local).norm();
+}
 
-	double getDistanceOfTwoLines(const std::array<Eigen::Vector3d, 2>& lineA, const std::array<Eigen::Vector3d, 2>& lineB)
-	{
-		Eigen::Vector3d vectA = lineA[1] - lineA[0];
-		Eigen::Vector3d vectB = lineB[1] - lineB[0];
-		double delta1 = (lineB[0] - lineA[0]).dot(vectA);
-		double delta2 = (lineB[0] - lineA[0]).dot(vectB);
-        double deno = vectA.dot(vectB) * vectB.dot(vectA) - vectA.dot(vectA) * vectB.dot(vectB);//a*d-b*c
-		if (deno == 0.0) // parallel
-			return getDistanceOfPointAndLine(lineA[0], lineB);
-		double kA = (vectB.dot(vectA) * delta2 - vectB.dot(vectB) * delta1) / deno;
-		double kB = (vectA.dot(vectA) * delta2 - vectA.dot(vectB) * delta1) / deno;
-		Vector3d pointA = lineA[0] + kA * vectA;
-		Vector3d pointB = lineB[0] + kB * vectB;
-		return (pointB - pointA).norm();
-	}
+double eigen::getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const Eigen::Vector3d& origin, const Eigen::Vector3d& normal)
+{
+	if (normal.isZero()) // error triangle plane
+        return (origin - point).norm();
+    //double k = (origin - point).dot(normal) / normal.dot(normal); //normal not required normalize
+    //Vector3d local = point + k * normal;
+    //return (local - point).norm(); //fabs(k) * normal.norm();
+    double dotPro = (origin - point).dot(normal.normalized());
+	return fabs(dotPro);
+}
 
-	//calculate intersect
-	Eigen::Vector3d getIntersectPointOfLineAndPlane(const std::array<Eigen::Vector3d, 2>& line, const std::array<Eigen::Vector3d, 2>& plane)
-	{
-		Vector3d normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);
-		Eigen::Vector3d v = line[1] - line[0];
-		if (isPerpendi3d(v, normal))
-			return gVecNaN; //pointOnPlane
-		double k = (plane[0] - line[0]).dot(normal) / (v.dot(normal));
-		return line[0] + k * v;
-	}
+double eigen::getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const clash::Plane3d& plane)
+{
+	return getDistanceOfPointAndPlane(point, plane.m_origin, plane.m_normal);
+}
 
-	Eigen::Vector2d getIntersectPointOfTwoLines(const std::array<Eigen::Vector2d, 2>& lineA, const std::array<Eigen::Vector2d, 2>& lineB)
-	{
-		Eigen::Vector2d vecA = lineA[1] - lineA[0];
-		Eigen::Vector2d vecB = lineB[1] - lineB[0];
-        if (isParallel2d(vecA, vecB))
-			return gVecNaN2d; //lines collinear
-		double k = cross2d(lineB[0] - lineA[0], vecB) / cross2d(vecA, vecB);
-		return lineA[0] + k * vecA;
-	}
+double eigen::getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& plane)
+{
+	return getDistanceOfPointAndPlane(point, Plane3d(plane));
+}
 
-	clash::Segment3d getIntersectLineOfTwoPlanes(const clash::Plane3d& planeA, const clash::Plane3d& planeB)
-	{
-		const Vector3d& pA = planeA.m_origin;
-		const Vector3d& pB = planeB.m_origin;
-		const Vector3d& nA = planeA.m_normal;
-		const Vector3d& nB = planeB.m_normal;
-		Vector3d v = nA.cross(nB).normalized();
-		if (v.isZero())
-			return { gVecNaN, gVecNaN };
-		Eigen::Matrix3d matrix;
-		matrix << nA, nB, v;
-		Vector3d p = matrix.inverse() * Vector3d(pA.dot(nA), pB.dot(nB), 0.5 * (pA + pB).dot(v));
-        return { p, p + v };
-		//Vector3d vx = nA.cross(Vector3d(0, 1, 0));
-		//Vector3d iB = getIntersectPointOfLineAndPlane(PosVec3d{ pA,vx }, planeB);
-		//Vector3d iV = (iB - p).normalized();
-	}
+double eigen::getDistanceOfTwoLines(const std::array<Eigen::Vector3d, 2>& lineA, const std::array<Eigen::Vector3d, 2>& lineB)
+{
+	Eigen::Vector3d vectA = lineA[1] - lineA[0];
+	Eigen::Vector3d vectB = lineB[1] - lineB[0];
+	double deltaA = (lineB[0] - lineA[0]).dot(vectA);
+	double deltaB = (lineB[0] - lineA[0]).dot(vectB);
+    double deno = vectA.dot(vectB) * vectB.dot(vectA) - vectA.dot(vectA) * vectB.dot(vectB);//a*d-b*c
+	if (deno == 0.0) // parallel
+		return getDistanceOfPointAndLine(lineA[0], lineB);
+	double kA = (vectB.dot(vectA) * deltaB - vectB.dot(vectB) * deltaA) / deno;
+	double kB = (vectA.dot(vectA) * deltaB - vectA.dot(vectB) * deltaA) / deno;
+	Vector3d pointA = lineA[0] + kA * vectA;
+	Vector3d pointB = lineB[0] + kB * vectB;
+	return (pointB - pointA).norm();
+}
 
-	Vector3d _intersectThreePlanes(const Plane3d& plane1, const Plane3d& plane2, const Plane3d& plane3)
-	{
-		// all 3 planes normal been normalized
-		const Vector3d& crV1 = plane1.m_normal;
-		const Vector3d& crV2 = plane2.m_normal;
-		const Vector3d& crV3 = plane3.m_normal;
-		//determinant3Vectors(crV1, crV2, crV3);
-		double dDet = crV1.x() * crV2.y() * crV3.z() - crV1.x() * crV2.z() * crV3.y();
-		dDet -= crV1.y() * crV2.x() * crV3.z() - crV1.y() * crV2.z() * crV3.x();
-		dDet += crV1.z() * crV2.x() * crV3.y() - crV1.z() * crV2.y() * crV3.x();
-		if (dDet == 0)
-			return gVecNaN;
-		const Vector3d& crP1 = plane1.m_origin;
-		const Vector3d& crP2 = plane2.m_origin;
-		const Vector3d& crP3 = plane3.m_origin;
-		Vector3d sWork = 
-			(crP1.dot(crV1) * (crV2.cross(crV3))) +
-			(crP2.dot(crV2) * (crV3.cross(crV1))) +
-			(crP3.dot(crV3) * (crV1.cross(crV2)));
-		return sWork / dDet;
-	}
+//calculate intersect
+Eigen::Vector3d eigen::getNearestPointOfPointAndLine(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 2>& line)
+{
+	Vector3d vecSeg = line[1] - line[0];// not zero
+	if (vecSeg.isZero())
+		return line[0];
+	double k = vecSeg.dot(point - line[0]) / vecSeg.dot(vecSeg);
+	Vector3d local = point + k * vecSeg;
+	return local;
+}
 
-	//copy from P3dGuTsect
-	clash::Segment3d getIntersectLineOfTwoPlanesP3D(const clash::Plane3d& planeA, const clash::Plane3d& planeB)
-	{
-		const Vector3d& P1 = planeA.m_origin;
-		const Vector3d& P2 = planeB.m_origin;
-		const Vector3d& V1 = planeA.m_normal.normalized();
-		const Vector3d& V2 = planeB.m_normal.normalized();
-		Vector3d V3 = V1.cross(V2).normalized();
-		Vector3d P3 = 0.5 * (P1 + P2);
-		if (V3.isZero())
-			return { gVecNaN, gVecNaN };
-		Vector3d O3 = _intersectThreePlanes(planeA, planeB, Plane3d(P3, V3));
-		return { O3,V3 };
-	}
+Eigen::Vector3d eigen::getNearestPointOfPointAndPlane(const Eigen::Vector3d& point, const Eigen::Vector3d& origin, const Eigen::Vector3d& normal)
+{
+	double k = (origin - point).dot(normal) / normal.dot(normal); //normal not required normalize
+	Vector3d local = point + k * normal;
+	return local;
+}
 
-	clash::Segment3d getIntersectLineOfTwoPlanes(const std::array<Eigen::Vector3d, 3>& planeA, const std::array<Eigen::Vector3d, 3>& planeB)
-	{
-		return getIntersectLineOfTwoPlanes(Plane3d(planeA), Plane3d(planeB));
-	}
+clash::Segment3d eigen::getNearestPointOfTwoLines(const std::array<Eigen::Vector3d, 2>& lineA, const std::array<Eigen::Vector3d, 2>& lineB)
+{
+	Eigen::Vector3d vectA = lineA[1] - lineA[0];
+	Eigen::Vector3d vectB = lineB[1] - lineB[0];
+	double deltaA = (lineB[0] - lineA[0]).dot(vectA);
+	double deltaB = (lineB[0] - lineA[0]).dot(vectB);
+	double deno = vectA.dot(vectB) * vectB.dot(vectA) - vectA.dot(vectA) * vectB.dot(vectB);//a*d-b*c
+	if (deno == 0.0) // parallel
+		return { lineA[0], getNearestPointOfPointAndLine(lineA[0], lineB) };
+	double kA = (vectB.dot(vectA) * deltaB - vectB.dot(vectB) * deltaA) / deno;
+	double kB = (vectA.dot(vectA) * deltaB - vectA.dot(vectB) * deltaA) / deno;
+	Vector3d pointA = lineA[0] + kA * vectA;
+	Vector3d pointB = lineB[0] + kB * vectB;
+	return { pointA,pointB };
+}
 
+Eigen::Vector3d eigen::getIntersectPointOfLineAndPlane(const std::array<Eigen::Vector3d, 2>& line, const std::array<Eigen::Vector3d, 2>& plane)
+{
+	Vector3d normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);
+	Eigen::Vector3d v = line[1] - line[0];
+	if (isPerpendi3d(v, normal))
+		return gVecNaN; //pointOnPlane
+	double k = (plane[0] - line[0]).dot(normal) / (v.dot(normal));
+	return line[0] + k * v;
+}
+
+clash::Segment3d eigen::getIntersectLineOfTwoPlanes(const Vector3d& originA, const Vector3d& normalA, const Vector3d& originB, const Vector3d& normalB)
+{
+	//const Vector3d& pA = planeA.m_origin;
+	//const Vector3d& pB = planeB.m_origin;
+	//const Vector3d& nA = planeA.m_normal;
+	//const Vector3d& nB = planeB.m_normal;
+	Vector3d normal = normalA.cross(normalB);// .normalized();
+	if (normal.isZero())
+		return { gVecNaN, gVecNaN };
+    if ((originA - originB).isZero())
+		return { originA, normal };
+	Eigen::Matrix3d matrix;
+	matrix.row(0) = normalA;
+	matrix.row(1) = normalB;
+	matrix.row(2) = normal;
+	//matrix << normalA, normalB, normal;
+	Vector3d point = matrix.inverse() * Vector3d(originA.dot(normalA), originB.dot(normalA), 0.5 * (originA + originB).dot(normal));
+    return { point, normal }; //position and vector
+	//Vector3d vx = nA.cross(Vector3d(0, 1, 0));
+	//Vector3d iB = getIntersectPointOfLineAndPlane(PosVec3d{ pA,vx }, planeB);
+	//Vector3d iV = (iB - p).normalized();
+}
+
+clash::Segment3d eigen::getIntersectLineOfTwoPlanes(const clash::Plane3d& planeA, const clash::Plane3d& planeB)
+{
+	return getIntersectLineOfTwoPlanes(planeA.m_origin, planeA.m_normal, planeB.m_origin, planeB.m_normal);
+}
+
+clash::Segment3d eigen::getIntersectLineOfTwoPlanes(const std::array<Eigen::Vector3d, 3>& planeA, const std::array<Eigen::Vector3d, 3>& planeB)
+{
+	return getIntersectLineOfTwoPlanes(Plane3d(planeA), Plane3d(planeB));
+}
+
+static Vector3d _intersectThreePlanes(const Plane3d& plane1, const Plane3d& plane2, const Plane3d& plane3)
+{
+	// all 3 planes normal been normalized
+	const Vector3d& crV1 = plane1.m_normal;
+	const Vector3d& crV2 = plane2.m_normal;
+	const Vector3d& crV3 = plane3.m_normal;
+	//determinant3Vectors(crV1, crV2, crV3);
+	double dDet = crV1.x() * crV2.y() * crV3.z() - crV1.x() * crV2.z() * crV3.y();
+	dDet -= crV1.y() * crV2.x() * crV3.z() - crV1.y() * crV2.z() * crV3.x();
+	dDet += crV1.z() * crV2.x() * crV3.y() - crV1.z() * crV2.y() * crV3.x();
+	if (dDet == 0)
+		return gVecNaN;
+	const Vector3d& crP1 = plane1.m_origin;
+	const Vector3d& crP2 = plane2.m_origin;
+	const Vector3d& crP3 = plane3.m_origin;
+	Vector3d sWork = 
+		(crP1.dot(crV1) * (crV2.cross(crV3))) +
+		(crP2.dot(crV2) * (crV3.cross(crV1))) +
+		(crP3.dot(crV3) * (crV1.cross(crV2)));
+	return sWork / dDet;
+}
+
+//copy from P3dGuTsect
+static clash::Segment3d getIntersectLineOfTwoPlanes_P3D(const clash::Plane3d& planeA, const clash::Plane3d& planeB)
+{
+	const Vector3d& P1 = planeA.m_origin;
+	const Vector3d& P2 = planeB.m_origin;
+	const Vector3d& V1 = planeA.m_normal.normalized();
+	const Vector3d& V2 = planeB.m_normal.normalized();
+	Vector3d V3 = V1.cross(V2).normalized();
+	Vector3d P3 = 0.5 * (P1 + P2);
+	if (V3.isZero())
+		return { gVecNaN, gVecNaN };
+	Vector3d O3 = _intersectThreePlanes(planeA, planeB, Plane3d(P3, V3));
+	return { O3,V3 };
 }
 
 // for profile section

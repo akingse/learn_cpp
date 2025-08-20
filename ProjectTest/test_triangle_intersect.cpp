@@ -10,15 +10,6 @@ using namespace clash;
 static Eigen::Vector3d P(std::nan("0"), std::nan("0"), std::nan("0"));
 static Eigen::Vector3d Q(std::nan("0"), std::nan("0"), std::nan("0"));
 
-static Vector3d createRandVector()
-{
-	Vector3d vec(
-		rand() - RAND_MAX / 2 + double(rand()) / RAND_MAX,
-		rand() - RAND_MAX / 2 + double(rand()) / RAND_MAX,
-		rand() - RAND_MAX / 2 + double(rand()) / RAND_MAX);
-	return vec;
-}
-
 static clash::TriMesh createTriMesh_UnitCube()
 {
 	clash::TriMesh mesh;

@@ -59,7 +59,16 @@ std::vector<clash::ModelMesh> read_ModelMesh(const std::vector<clash::ModelMesh>
 // the AlignedBox data
 int _writeBinFileAlignedBox(size_t N);
 
-double* _readBinFileAlignedBox(size_t N); //call write inner
+DLLEXPORT_CAL double* _readBinFileAlignedBox(size_t N); //call write inner
+
+inline Eigen::Vector3d createRandVector()
+{
+    Eigen::Vector3d vec(
+        rand() - RAND_MAX / 2 + double(rand()) / RAND_MAX,
+        rand() - RAND_MAX / 2 + double(rand()) / RAND_MAX,
+        rand() - RAND_MAX / 2 + double(rand()) / RAND_MAX);
+    return vec;
+}
 
 #ifdef USING_CONDITIONAL_COMPILE_PROJECT_2
 inline Vec2 _get_rand()

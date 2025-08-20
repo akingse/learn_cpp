@@ -195,8 +195,8 @@ static void test2()
 		for (int j = 0; j < N / 2; j++)
 		{
 			//res = intersectWithTwoPlanes(planeVct[2 * j], planeVct[2 * j + 1]);
-			res = getIntersectLineOfTwoPlanes(planeVct[2 * j], planeVct[2 * j + 1]); //29905 faster
-			//res = getIntersectLineOfTwoPlanesP3D(planeVct[2 * j], planeVct[2 * j + 1]); //53539
+			res = getIntersectLineOfTwoPlanes(planeVct[2 * j], planeVct[2 * j + 1]); //14398 ms faster
+			res = getIntersectLineOfTwoPlanes_P3D(planeVct[2 * j], planeVct[2 * j + 1]); //30700 ms
 			//if (!isnan(res[0][0]))
 			//	resSeg.push_back(res);
 		}
@@ -206,19 +206,6 @@ static void test2()
 		//cout << "res_pair=" << resSeg.size() << endl;
 		resSeg.clear();
 	}
-
-	return;
-}
-
-static void test3() //测试getIntersectLineOfTwoPlane
-{
-	Plane3d plane1(Vector3d(0, 10, 0), Vector3d(-1, 0, 0)); //可以共线
-	Plane3d plane2(Vector3d(0, -10, 0), Vector3d(0, 0, 1));
-	PosVec3d interLine = getIntersectLineOfTwoPlanes(plane1, plane2);
-
-	plane1 = Plane3d{ Vector3d(10, 20, 3), Vector3d(1, 2, 3) };
-	plane2 = Plane3d{ Vector3d(10, 20, 3), Vector3d(1, 2, 3) };
-	interLine = getIntersectLineOfTwoPlanes(plane1, plane2);
 
 	return;
 }
@@ -288,12 +275,49 @@ static void test5()
 //测试 面面交线
 static void test6()
 {
-	clash::Plane3d planeA = Plane3d(Vector3d(0, 0, 0), Vector3d(0, 0, 1));
-	clash::Plane3d planeB = Plane3d(Vector3d(0, 0, 0), Vector3d(1, 1, 0));
+	int a = 0;
+	{
+		Plane3d plane1(Vector3d(1, 0, 0), Vector3d(1, 0, 0)); //可以共线
+		Plane3d plane2(Vector3d(2, 0, 0), Vector3d(1, 1, 0));
+		PosVec3d interLine = getIntersectLineOfTwoPlanes(plane1, plane2);
 
-	Segment3d interLine1 = getIntersectLineOfTwoPlanes(planeA, planeB);
-	Segment3d interLine2 = getIntersectLineOfTwoPlanesP3D(planeA, planeB);
+		plane1=Plane3d(Vector3d(1, 0, 0), Vector3d(0, 0, 1)); //可以共线
+		plane2=Plane3d(Vector3d(1, 0, 0), Vector3d(1, 1, 0));
+		interLine = getIntersectLineOfTwoPlanes(plane1, plane2);
+		PosVec3d interLine1 = getIntersectLineOfTwoPlanes_P3D(plane1, plane2);
+		a++;
+	}
+	{
+		Plane3d plane1(Vector3d(0, 10, 0), Vector3d(-1, 0, 0)); //可以共线
+		Plane3d plane2(Vector3d(0, -10, 0), Vector3d(0, 0, 1));
+		PosVec3d interLine = getIntersectLineOfTwoPlanes(plane1, plane2);
 
+		plane1 = Plane3d{ Vector3d(10, 20, 3), Vector3d(1, 2, 3) };
+		plane2 = Plane3d{ Vector3d(10, 20, 3), Vector3d(1, 2, 3) };
+		interLine = getIntersectLineOfTwoPlanes(plane1, plane2);
+	}
+	{
+		clash::Plane3d planeA = Plane3d(Vector3d(0, 0, 0), Vector3d(0, 0, 1));
+		clash::Plane3d planeB = Plane3d(Vector3d(10, 0, 0), Vector3d(1, 1, 0));
+
+		Segment3d interLine1 = getIntersectLineOfTwoPlanes(planeA, planeB);
+		Segment3d interLine2 = getIntersectLineOfTwoPlanes_P3D(planeA, planeB);
+		Vector3d cropro = (interLine1[1]).cross(interLine2[1]);
+		a++;
+	}
+
+	//正确性对比
+	int countDiff = 0;
+	for (int i = 0; i < 100; i++)
+	{
+		clash::Plane3d planeA = Plane3d(createRandVector(), createRandVector());
+		clash::Plane3d planeB = Plane3d(createRandVector(), createRandVector());
+		Segment3d interLine1 = getIntersectLineOfTwoPlanes(planeA, planeB);
+		Segment3d interLine2 = getIntersectLineOfTwoPlanes_P3D(planeA, planeB);
+		Vector3d cropro = (interLine1[1]).cross(interLine2[1]);
+		if (!(interLine1[1]).cross(interLine2[1]).isZero())
+			countDiff++;
+	}
 	return;
 }
 

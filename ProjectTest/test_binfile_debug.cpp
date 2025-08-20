@@ -371,10 +371,13 @@ static void _test3()
 //测试函数 PointLinePlane
 static void _test8()
 {
-	clash::Plane3d plane(Vector3d(1, 2, 0), Vector3d(0, 0, 2));
+	clash::Plane3d plane = Plane3d(Vector3d(1, 2, 0), Vector3d(0, 0, 2));
 	Vector3d point(5, 6, 10);
 	double distance = getDistanceOfPointAndPlane(point, plane);
 
+	plane = Plane3d(Vector3d(0, 0, 0), Vector3d(0, 0, 2)); //normal不需要单位化
+	point = Vector3d(5, 6, 10);
+	double distance1 = getDistanceOfPointAndPlane(point, plane);
 	return;
 }
 
