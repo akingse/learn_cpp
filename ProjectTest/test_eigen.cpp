@@ -197,15 +197,6 @@ static void test3()
 	return;
 }
 
-static int enrol = []()->int
-	{
-		//test0();
-		//test2();
-		//test3();
-		cout << "test_eigen finished.\n" << endl;
-		return 0;
-	}();
-
 void eigen_matlab()
 {
 	// A simple quickref for Eigen. Add anything that's missing.
@@ -460,4 +451,13 @@ void eigen_matlab2()
 }
 
 */
+
+static int enrol = []()->int
+	{
+		//test0();
+		//test2();
+		//test3();
+		cout << "test_eigen finished.\n" << endl;
+		return 0;
+	}();
 

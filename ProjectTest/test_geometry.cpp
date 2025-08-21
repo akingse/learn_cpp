@@ -74,6 +74,124 @@ namespace clash
 		return { origin, normal };
 #endif
 	}
+
+	//竖列存储
+	typedef std::array<double, 9> Matrix3x3;
+	Matrix3x3 get_inverse(const Matrix3x3& elements)
+	{
+		//determinant
+		const double& a = elements[0];
+		const double& b = elements[1];
+		const double& c = elements[2];
+		const double& d = elements[3];
+		const double& e = elements[4];
+		const double& f = elements[5];
+		const double& g = elements[6];
+		const double& h = elements[7];
+		const double& i = elements[8];
+		double determinant = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
+		if (determinant == 0.0)
+			return Matrix3x3{0,0,0,0,0,0,0,0,0};
+		determinant = 1.0 / determinant;
+		//Matrix3x3 adj{
+	 //       e* i - f * h, c* h - b * i, b* f - c * e ,
+	 //       f* g - d * i, a* i - c * g, c* d - a * f ,
+	 //       d* h - e * g, b* g - a * h, a* e - b * d
+	 //   };
+		Matrix3x3 inv{
+			e * i - f * h, c * h - b * i, b * f - c * e ,
+			f * g - d * i, a * i - c * g, c * d - a * f ,
+			d * h - e * g, b * g - a * h, a * e - b * d
+		};
+		for (double& iter : inv)
+			iter = determinant * iter;
+		return inv;
+	}
+
+	Eigen::Matrix3d get_inverse_c(const Eigen::Matrix3d& matrix)
+	{
+		Matrix3x3 mat3;
+		memcpy(mat3.data(), matrix.data(), sizeof(Matrix3x3));
+		Matrix3x3 inv3 = get_inverse(mat3);
+		Eigen::Matrix3d inv;
+		memcpy(inv.data(), inv3.data(), sizeof(Matrix3x3));
+		return inv;
+	}
+
+	Eigen::Matrix3d get_inverse(const Eigen::Matrix3d& matrix)
+	{
+		const double& a = matrix(0); //不能使用[]索引
+		const double& b = matrix(1);
+		const double& c = matrix(2);
+		const double& d = matrix(3);
+		const double& e = matrix(4);
+		const double& f = matrix(5);
+		const double& g = matrix(6);
+		const double& h = matrix(7);
+		const double& i = matrix(8);
+		double determinant = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
+		if (determinant == 0.0)
+		{
+			Eigen::Matrix3d inv;
+			memset(inv.data(), 0, sizeof(Matrix3x3));
+			return inv;
+		}
+		determinant = 1.0 / determinant;
+		Matrix3x3 inv3{
+			e * i - f * h, c * h - b * i, b * f - c * e ,
+			f * g - d * i, a * i - c * g, c * d - a * f ,
+			d * h - e * g, b * g - a * h, a * e - b * d
+		};
+		for (double& iter : inv3)
+			iter = determinant * iter;
+		Eigen::Matrix3d inv;
+		memcpy(inv.data(), inv3.data(), sizeof(Matrix3x3));
+		return inv;
+	}
+
+	//矩阵求逆效率
+	static void test8()
+	{
+		srand((unsigned)time(0));
+		Vector3d c0 = createRandVector();
+		Vector3d c1 = createRandVector();
+		Vector3d c2 = createRandVector();
+		Eigen::Matrix3d matrix;
+		matrix << c0, c1, c2;
+		Eigen::Matrix3d inv = matrix.inverse();
+		Matrix3x3 matrix3 = {
+			c0[0],c0[1],c0[2],
+			c1[0],c1[1],c1[2],
+			c2[0],c2[1],c2[2],
+		};
+		Matrix3x3 inv3 = get_inverse(matrix3);
+		Eigen::Matrix3d inv1 = get_inverse(matrix);
+		Eigen::Matrix3d inv2 = get_inverse_c(matrix);
+
+		//计时
+		steady_clock::time_point start, end;
+		microseconds duration;
+		size_t N = N_10E_6;
+
+		start = std::chrono::high_resolution_clock::now();
+		for (int i = 0; i < N; i++)
+		{
+			Eigen::Matrix3d inv = matrix.inverse();
+		}
+		end = std::chrono::high_resolution_clock::now();
+		duration = std::chrono::duration_cast<microseconds>(end - start);
+		cout << "eigen_time=" << duration.count() + duration.count() << " micro_seconds" << endl;
+
+		start = std::chrono::high_resolution_clock::now();
+		for (int i = 0; i < N; i++)
+		{
+			Matrix3x3 inv3 = get_inverse(matrix3);
+		}
+		end = std::chrono::high_resolution_clock::now();
+		duration = std::chrono::duration_cast<microseconds>(end - start);
+		cout << "my_time=" << duration.count() + duration.count() << " micro_seconds" << endl;
+		return;
+	}
 }
 
 //inner-core version
@@ -196,7 +314,7 @@ static void test2()
 		{
 			//res = intersectWithTwoPlanes(planeVct[2 * j], planeVct[2 * j + 1]);
 			res = getIntersectLineOfTwoPlanes(planeVct[2 * j], planeVct[2 * j + 1]); //14398 ms faster
-			res = getIntersectLineOfTwoPlanes_P3D(planeVct[2 * j], planeVct[2 * j + 1]); //30700 ms
+			//res = getIntersectLineOfTwoPlanes_P3D(planeVct[2 * j], planeVct[2 * j + 1]); //30700 ms
 			//if (!isnan(res[0][0]))
 			//	resSeg.push_back(res);
 		}
@@ -284,7 +402,7 @@ static void test6()
 		plane1=Plane3d(Vector3d(1, 0, 0), Vector3d(0, 0, 1)); //可以共线
 		plane2=Plane3d(Vector3d(1, 0, 0), Vector3d(1, 1, 0));
 		interLine = getIntersectLineOfTwoPlanes(plane1, plane2);
-		PosVec3d interLine1 = getIntersectLineOfTwoPlanes_P3D(plane1, plane2);
+		//PosVec3d interLine1 = getIntersectLineOfTwoPlanes_P3D(plane1, plane2);
 		a++;
 	}
 	{
@@ -301,7 +419,7 @@ static void test6()
 		clash::Plane3d planeB = Plane3d(Vector3d(10, 0, 0), Vector3d(1, 1, 0));
 
 		Segment3d interLine1 = getIntersectLineOfTwoPlanes(planeA, planeB);
-		Segment3d interLine2 = getIntersectLineOfTwoPlanes_P3D(planeA, planeB);
+		Segment3d interLine2;// = getIntersectLineOfTwoPlanes_P3D(planeA, planeB);
 		Vector3d cropro = (interLine1[1]).cross(interLine2[1]);
 		a++;
 	}
@@ -313,10 +431,10 @@ static void test6()
 		clash::Plane3d planeA = Plane3d(createRandVector(), createRandVector());
 		clash::Plane3d planeB = Plane3d(createRandVector(), createRandVector());
 		Segment3d interLine1 = getIntersectLineOfTwoPlanes(planeA, planeB);
-		Segment3d interLine2 = getIntersectLineOfTwoPlanes_P3D(planeA, planeB);
-		Vector3d cropro = (interLine1[1]).cross(interLine2[1]);
-		if (!(interLine1[1]).cross(interLine2[1]).isZero())
-			countDiff++;
+		//Segment3d interLine2 = getIntersectLineOfTwoPlanes_P3D(planeA, planeB);
+		//Vector3d cropro = (interLine1[1]).cross(interLine2[1]);
+		//if (!(interLine1[1]).cross(interLine2[1]).isZero())
+		//	countDiff++;
 	}
 	return;
 }
@@ -374,6 +492,7 @@ static int enrol = []()->int
 	//test4();
 	//test5();
 	//test6();
+	test8();
 	cout << "test_geometry finished.\n" << endl;
 	return 0;
 }();

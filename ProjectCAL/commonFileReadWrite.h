@@ -68,6 +68,14 @@ inline Eigen::Vector3d createRandVector()
         rand() - RAND_MAX / 2 + double(rand()) / RAND_MAX,
         rand() - RAND_MAX / 2 + double(rand()) / RAND_MAX);
     return vec;
+    /*
+    int num = rand() % 100; //产生0~99这100个整数中的一个随机整数
+    rand() % (b-a+1)+ a ;    //表示  a~b 之间的一个随机整数。
+    通常rand()产生的随机数在每次运行的时候都是与上一次相同的，这样是为了便于程序的调试。若要产生每次不同的随机数，则可以使用srand( seed )函数进行产生随机化种子，随着seed的不同，就能够产生不同的随机数。
+
+    rand() 会返回一随机数值，范围在 0 至 RAND_MAX 间。
+    rand()产生的是假随机数字，每次执行时是相同的。若要不同,以不同的值来初始化它.初始化的函数就是 srand()。
+    */
 }
 
 #ifdef USING_CONDITIONAL_COMPILE_PROJECT_2
