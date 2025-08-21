@@ -47,10 +47,10 @@ namespace eigen
 	DLLEXPORT_CAL bool isTwoTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, 
 		const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB, double tolerance = 0.0);
 	// DynamicAccuracy and RelativeCoordinates, overload
-	DLLEXPORT_CAL bool isTwoTrianglesIntrusionSAT(double toleDist, const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB);
-	DLLEXPORT_CAL bool isTwoTrianglesIntrusionSAT(double toleDist, const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
-	DLLEXPORT_CAL bool isTwoTrianglesIntrusionSAT(double toleDist, const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB,
-		const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB);
+	DLLEXPORT_CAL bool isTwoTrianglesIntrusionSAT_DA(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB, double toleDist);
+	DLLEXPORT_CAL bool isTwoTrianglesIntrusionSAT_DA(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, double toleDist);
+	DLLEXPORT_CAL bool isTwoTrianglesIntrusionSAT_DA(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, 
+		const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB, double toleDist);
 
 	DLLEXPORT_CAL double getTrianglesIntrusionSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB);
 	DLLEXPORT_CAL double getTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);

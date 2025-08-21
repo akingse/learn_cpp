@@ -1406,7 +1406,7 @@ bool eigen::isTwoTrianglesIntrusionSAT(const std::array<Vector3d, 3>& triA, cons
 #endif
 
 //origin Penetration
-bool eigen::isTwoTrianglesIntrusionSAT(double toleDist, const std::array<Vector2d, 3>& triA, const std::array<Vector2d, 3>& triB)
+bool eigen::isTwoTrianglesIntrusionSAT_DA(const std::array<Vector2d, 3>& triA, const std::array<Vector2d, 3>& triB, double toleDist)
 {
 	// bounding-box been judged
 	std::array<Eigen::Vector2d, 6> edgesAB = {
@@ -1453,8 +1453,8 @@ bool eigen::isTwoTrianglesIntrusionSAT(double toleDist, const std::array<Vector2
 }
 
 //#define USING_COMPLETE_SEPARATION_AXIS
-bool eigen::isTwoTrianglesIntrusionSAT(double toleDist, const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB,
-	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB)
+bool eigen::isTwoTrianglesIntrusionSAT_DA(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB,
+	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB, double toleDist)
 {
 	// bounding-box been judged, both triangle is legal
 	std::array<Eigen::Vector3d, 3> edgesA = {
@@ -1521,11 +1521,11 @@ bool eigen::isTwoTrianglesIntrusionSAT(double toleDist, const std::array<Vector3
 	return true;
 }
 
-bool eigen::isTwoTrianglesIntrusionSAT(double toleDist, const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB)
+bool eigen::isTwoTrianglesIntrusionSAT_DA(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB, double toleDist)
 {
 	Eigen::Vector3d normalA = (triA[1] - triA[0]).cross(triA[2] - triA[1]).normalized();
 	Eigen::Vector3d normalB = (triB[1] - triB[0]).cross(triB[2] - triB[1]).normalized();
-	return isTwoTrianglesIntrusionSAT(toleDist, triA, triB, normalA, normalB);
+	return isTwoTrianglesIntrusionSAT(triA, triB, normalA, normalB, toleDist);
 }
 
 //must intersect before

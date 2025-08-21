@@ -120,20 +120,15 @@ Eigen::Vector3d eigen::getIntersectPointOfLineAndPlane(const std::array<Eigen::V
 
 clash::Segment3d eigen::getIntersectLineOfTwoPlanes(const Vector3d& originA, const Vector3d& normalA, const Vector3d& originB, const Vector3d& normalB)
 {
-	//const Vector3d& pA = planeA.m_origin;
-	//const Vector3d& pB = planeB.m_origin;
-	//const Vector3d& nA = planeA.m_normal;
-	//const Vector3d& nB = planeB.m_normal;
 	Vector3d normal = normalA.cross(normalB);// .normalized();
 	if (normal.isZero())
 		return { gVecNaN, gVecNaN };
     if ((originA - originB).isZero())
 		return { originA, normal };
-	Eigen::Matrix3d matrix;
+	Eigen::Matrix3d matrix;//matrix << normalA, normalB, normal; //is column
 	matrix.row(0) = normalA;
 	matrix.row(1) = normalB;
 	matrix.row(2) = normal;
-	//matrix << normalA, normalB, normal;
 	Vector3d point = matrix.inverse() * Vector3d(originA.dot(normalA), originB.dot(normalA), 0.5 * (originA + originB).dot(normal));
     return { point, normal }; //position and vector
 	//Vector3d vx = nA.cross(Vector3d(0, 1, 0));
