@@ -108,16 +108,6 @@ namespace clash
 		return inv;
 	}
 
-	Eigen::Matrix3d get_inverse_c(const Eigen::Matrix3d& matrix)
-	{
-		Matrix3x3 mat3;
-		memcpy(mat3.data(), matrix.data(), sizeof(Matrix3x3));
-		Matrix3x3 inv3 = get_inverse(mat3);
-		Eigen::Matrix3d inv;
-		memcpy(inv.data(), inv3.data(), sizeof(Matrix3x3));
-		return inv;
-	}
-
 	Eigen::Matrix3d get_inverse(const Eigen::Matrix3d& matrix)
 	{
 		const double& a = matrix(0); //不能使用[]索引
@@ -149,6 +139,31 @@ namespace clash
 		return inv;
 	}
 
+	//Eigen::Matrix3d get_inverse_c(const Eigen::Matrix3d& matrix) //time double
+	//{
+	//	Matrix3x3 mat3;
+	//	memcpy(mat3.data(), matrix.data(), sizeof(Matrix3x3));
+	//	Matrix3x3 inv3 = get_inverse(mat3);
+	//	Eigen::Matrix3d inv;
+	//	memcpy(inv.data(), inv3.data(), sizeof(Matrix3x3));
+	//	return inv;
+	//}
+
+	std::vector<Matrix3d> getRandMatrix(size_t size)
+	{
+		std::vector<Matrix3d> res(size);
+		for (int i = 0; i < size; i++)
+		{
+			Vector3d c0 = createRandVector();
+			Vector3d c1 = createRandVector();
+			Vector3d c2 = createRandVector();
+			Eigen::Matrix3d matrix;
+			matrix << c0, c1, c2;
+			res[i] = matrix;
+		}
+		return res;
+	}
+
 	//矩阵求逆效率
 	static void test8()
 	{
@@ -166,17 +181,23 @@ namespace clash
 		};
 		Matrix3x3 inv3 = get_inverse(matrix3);
 		Eigen::Matrix3d inv1 = get_inverse(matrix);
-		Eigen::Matrix3d inv2 = get_inverse_c(matrix);
+		//Eigen::Matrix3d inv2 = get_inverse_c(matrix);
 
 		//计时
 		steady_clock::time_point start, end;
 		microseconds duration;
-		size_t N = N_10E_6;
+		size_t N = N_10E_4;
+        std::vector<Matrix3d> matVct = getRandMatrix(N);
+		std::vector<Matrix3x3> mat3Vct(N);
+		for (int i = 0; i < N; i++)
+			memcpy(mat3Vct[i].data(), matVct[i].data(), sizeof(Matrix3x3));
+
 
 		start = std::chrono::high_resolution_clock::now();
 		for (int i = 0; i < N; i++)
 		{
-			Eigen::Matrix3d inv = matrix.inverse();
+            for (const auto& iter : matVct)
+				Eigen::Matrix3d inv = iter.inverse();
 		}
 		end = std::chrono::high_resolution_clock::now();
 		duration = std::chrono::duration_cast<microseconds>(end - start);
@@ -185,11 +206,22 @@ namespace clash
 		start = std::chrono::high_resolution_clock::now();
 		for (int i = 0; i < N; i++)
 		{
-			Matrix3x3 inv3 = get_inverse(matrix3);
+			for (const auto& iter : matVct)
+				Eigen::Matrix3d inv3 = get_inverse(iter);
 		}
 		end = std::chrono::high_resolution_clock::now();
 		duration = std::chrono::duration_cast<microseconds>(end - start);
 		cout << "my_time=" << duration.count() + duration.count() << " micro_seconds" << endl;
+
+		start = std::chrono::high_resolution_clock::now();
+		for (int i = 0; i < N; i++)
+		{
+			for (const auto& iter : mat3Vct)
+				Matrix3x3 inv3 = get_inverse(iter);
+		}
+		end = std::chrono::high_resolution_clock::now();
+		duration = std::chrono::duration_cast<microseconds>(end - start);
+		cout << "my_3_time=" << duration.count() + duration.count() << " micro_seconds" << endl;
 		return;
 	}
 }
@@ -492,7 +524,7 @@ static int enrol = []()->int
 	//test4();
 	//test5();
 	//test6();
-	test8();
+	//test8();
 	cout << "test_geometry finished.\n" << endl;
 	return 0;
 }();

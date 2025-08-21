@@ -129,7 +129,7 @@ clash::Segment3d eigen::getIntersectLineOfTwoPlanes(const Vector3d& originA, con
 	matrix.row(0) = normalA;
 	matrix.row(1) = normalB;
 	matrix.row(2) = normal;
-	Vector3d point = matrix.inverse() * Vector3d(originA.dot(normalA), originB.dot(normalA), 0.5 * (originA + originB).dot(normal));
+	Vector3d point = matrix.inverse() * Vector3d(originA.dot(normalA), originB.dot(normalA), 0.5 * (originA + originB).dot(normal)); //Eigen inverse fast enough
     return { point, normal }; //position and vector
 	//Vector3d vx = nA.cross(Vector3d(0, 1, 0));
 	//Vector3d iB = getIntersectPointOfLineAndPlane(PosVec3d{ pA,vx }, planeB);
