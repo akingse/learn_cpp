@@ -561,14 +561,23 @@ static void _test14()
 		Vector3d(0, 0, 0),
 		Vector3d(0, 10, 0),
 	};
-	std::array<Eigen::Vector3d, 3> trigon1 = {
+	std::array<Eigen::Vector3d, 3> trigon1_O = {
 		Vector3d(0, 0, 0),
 		Vector3d(10, 0, 0),
 		Vector3d(10, 10, 0),
 	};
-	bool isinter0 = isTwoTrianglesBoxIntersect(trigon0, trigon1, 0);
-	bool isinter1 = isTwoTrianglesBoxIntersect(trigon0, trigon1, 0.1);
-	bool isinter2 = isTwoTrianglesBoxIntersect(trigon0, trigon1, -0.1);
+	//œ‡¿Î
+	std::array<Eigen::Vector3d, 3> trigon1_sepa = eigen::translate(2, 0) * trigon1_O;
+	double d_sepa = getTrianglesDistanceSAT(trigon0, trigon1_sepa);
+	bool isinter0 = isTwoTrianglesBoxIntersect(trigon0, trigon1_sepa, 1);
+	bool isinter1 = isTwoTrianglesBoxIntersect(trigon0, trigon1_sepa, 2);
+	bool isinter2 = isTwoTrianglesBoxIntersect(trigon0, trigon1_sepa, 3);
+	//œ‡Ωª
+	std::array<Eigen::Vector3d, 3> trigon1_inte =eigen::translate(-2, 0, 2) *  eigen::roty(M_PI/2)* trigon1_O;
+	double d_inte = getTrianglesIntrusionSAT(trigon0, trigon1_inte);
+	bool isinter3 = isTwoTrianglesBoxIntersect(trigon0, trigon1_inte, -1);
+	bool isinter4 = isTwoTrianglesBoxIntersect(trigon0, trigon1_inte, -2);
+	bool isinter5 = isTwoTrianglesBoxIntersect(trigon0, trigon1_inte, -3);
 
 	std::array<Eigen::Vector3d, 3> trigon2 = {
 		Vector3d(-10, 0, 0),
@@ -920,7 +929,7 @@ static int enrol = []()->int
         //_test11();
         //_test12();
         //_test13();
-        //_test14();
+        _test14();
         //_test15();
         //_test16();
         //_test17();
@@ -929,8 +938,8 @@ static int enrol = []()->int
         //lamina
         //_test20();
         //_test21();
-        _test23();
-        _test25();
+        //_test23();
+        //_test25();
 
         cout << "test_triangle_intersect finished.\n" << endl;
         return 0;

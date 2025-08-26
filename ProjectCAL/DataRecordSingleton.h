@@ -24,6 +24,7 @@ namespace test
         static bool sm_openCheck;// =false
         static bool sm_openOutput;// =false
         static bool sm_isAverage;// =false
+        static bool sm_isDrawGeo;// =false
 
     public:
 #pragma region inline_function
@@ -66,7 +67,14 @@ namespace test
         {
             return sm_isAverage;
         }
-
+        static void setDrawGeo(bool isDraw = true)
+        {
+            sm_isDrawGeo = isDraw;
+        }
+        static bool& isDrawGeo()
+        {
+            return sm_isDrawGeo;
+        }
 #pragma endregion
 
     };
@@ -125,9 +133,13 @@ namespace test
             std::vector<std::pair<int, int>> m_dataPairId;
             //mesh check
             std::vector<std::pair<int, std::string>> m_errInfoVct;
+            DataMap() = default;
+            DataMap(const std::string& name) :m_name(name) {}
         };
 
     public:
+        static double sm_toleFiecd;
+        static double sm_toleAngle;
         static double sm_toleDist;
         static double sm_tolerence;
 
@@ -168,7 +180,23 @@ namespace test
 
         static void writeDataToCsv(const std::string& filename = {});
         static void writeDatasToCsv(const std::string& filename = {});
+        static void writeDatasToCsv(const std::vector<DataMap>& datas);
 
+        //DataMap sm_recordData
+        static void dataCountAppend(const std::string& key, int value)
+        {
+            if (sm_recordData.m_dataCount.find(key) == sm_recordData.m_dataCount.end())
+                sm_recordData.m_dataCount.emplace(key, value);
+            else
+                sm_recordData.m_dataCount.at(key) += value;
+        }
+        static void dataTimeAppend(const std::string& key, int value)
+        {
+            if (sm_recordData.m_dataTime.find(key) == sm_recordData.m_dataTime.end())
+                sm_recordData.m_dataTime.emplace(key, value);
+            else
+                sm_recordData.m_dataTime.at(key) += value;
+        }
     };
 
 

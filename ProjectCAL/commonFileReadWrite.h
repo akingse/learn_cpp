@@ -53,7 +53,7 @@ DLLEXPORT_CAL double* _readNumberFile(size_t n, const std::string& filename);
 void write_InterTriInfo(const std::vector<InterTriInfo>& infos, const std::string& fileName);
 void write_ModelMesh(const std::vector<clash::ModelMesh>& meshs, const std::string& fileName);
 std::vector<InterTriInfo> read_InterTriInfo(const std::string& fileName);
-std::vector<clash::ModelMesh> read_ModelMesh(const std::string& fileName);
+inline std::vector<clash::ModelMesh> read_ModelMesh(const std::string& fileName) { return {}; }
 std::vector<clash::ModelMesh> read_ModelMesh(const std::vector<clash::ModelMesh>& meshVct, const Eigen::Matrix4d& matRela);
 
 // the AlignedBox data

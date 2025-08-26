@@ -12,9 +12,12 @@ bool DataRecordDashboard::sm_openTime = false;
 bool DataRecordDashboard::sm_openCheck = false;
 bool DataRecordDashboard::sm_openOutput = false;
 bool DataRecordDashboard::sm_isAverage = false;
+bool DataRecordDashboard::sm_isDrawGeo = false;
 
+double DataRecordSingleton::sm_toleFiecd = 1e-10;
+double DataRecordSingleton::sm_toleAngle = 1e-8;
 double DataRecordSingleton::sm_toleDist = 1e-6;
-double DataRecordSingleton::sm_tolerence = 1e-6;
+double DataRecordSingleton::sm_tolerence = FLT_EPSILON;
 DataRecordSingleton::DataMap DataRecordSingleton::sm_recordData;
 std::vector<DataRecordSingleton::DataMap> DataRecordSingleton::sm_recordDatas;
 static const int _invalid_id = -1;
@@ -112,3 +115,35 @@ void DataRecordSingleton::writeDatasToCsv(const std::string& fileName /*= {}*/)
     ofsFile.close();
 }
 
+void DataRecordSingleton::writeDatasToCsv(const std::vector<DataMap>& datas)
+{
+    if (datas.empty())
+        return;
+    //std::ofstream ofsFile(filename);
+    //if (!ofsFile.is_open())
+    char buffer[MAX_PATH];
+    string filename = _getcwd(buffer, sizeof(buffer));
+    string filenameCsv = filename + "/binFile/" + to_string(GetTickCount64()) + ".csv";
+    std::ofstream ofsFile = std::ofstream(filenameCsv);
+    if (!ofsFile.is_open())
+    {
+        string dirName = filename + "/binFile";
+        int res = _mkdir(dirName.c_str()); // 0 is success
+        if (res != 0)
+            return;
+    }
+    ofsFile = std::ofstream(filenameCsv);
+    if (!ofsFile.is_open())
+        return;
+    ofsFile << "writeDatasToCsv" << endl;
+    for (int i = 0; i < datas.size(); i++)
+    {
+
+        ofsFile << datas[i].m_name << ",";
+        for (const auto& iter: datas[i].m_dataCount)
+            ofsFile << iter.first << "," << iter.second << ",";
+        for (const auto& iter: datas[i].m_dataTime)
+            ofsFile << iter.first << "," << iter.second << std::setprecision(numeric_limits<double>::digits10) << ",";
+        ofsFile << std::endl;
+    }
+}

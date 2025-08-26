@@ -136,11 +136,10 @@ namespace clash
         inline std::pair<double, Eigen::Vector3d> volume_moment() const
         {
             if (vbo_.empty())
-                return { 0,Eigen::Vector3d() };
+                return { 0, Eigen::Vector3d(0,0,0) };
             Eigen::Vector3d origin = vbo_[0];
             //tetrahedronVolume
             double volume = 0;
-            //double factor = 1.0 / 24.0;
             Eigen::Vector3d moment = Eigen::Vector3d(0, 0, 0);
             for (int i = 0; i < (int)ibo_.size(); ++i)
             {
@@ -166,6 +165,46 @@ namespace clash
                 return false;
             return true;
         }
+
+        static bool isEqualMesh(const ModelMesh& meshA, const ModelMesh& meshB)
+        {
+            if (meshA.ibo_.size() != meshB.ibo_.size() || meshA.vbo_.size() != meshB.vbo_.size())
+                return false;
+            if (!meshA.bounding_.isApprox(meshB.bounding_))
+                return false;
+            if (meshA.ibo_.empty() || meshA.vbo_.empty() || meshB.ibo_.empty() || meshB.vbo_.empty())
+                return false;
+            if (meshA.ibo_.front() != meshB.ibo_.front())
+                return false;
+            if (!meshA.vbo_.front().isApprox(meshB.vbo_.front()))
+                return false;
+            constexpr double toleFixed = 1e-8;
+            std::pair<double, Eigen::Vector3d> vmA = meshA.volume_moment();
+            std::pair<double, Eigen::Vector3d> vmB = meshB.volume_moment();
+            if (!vmA.second.isApprox(vmB.second))
+                return false;
+            if (toleFixed < fabs(vmA.first - vmB.first))
+                return false;
+            if (toleFixed < fabs(meshA.area() - meshB.area()))
+                return false;
+            return true;
+        }
+        static bool isSameMesh(const ModelMesh& meshA, const ModelMesh& meshB)
+        {
+            if (meshA.ibo_.size() != meshB.ibo_.size() || meshA.vbo_.size() != meshB.vbo_.size())
+                return false;
+            if (!meshA.bounding_.isApprox(meshB.bounding_))
+                return false;
+            if (!meshA.vbo_.empty() && meshA.vbo_.front() != meshB.vbo_.front())
+                return false;
+            for (int i = 0; i < (int)meshA.ibo_.size(); i++)
+            {
+                if (meshA.ibo_[i] != meshB.ibo_[i])
+                    return false;
+            }
+            return true;
+        }
+
     };
 
     inline TriMesh toTriMesh(const ModelMesh& mesh)

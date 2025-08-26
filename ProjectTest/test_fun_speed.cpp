@@ -49,7 +49,7 @@ static std::string randNumNameSepa = "bin_file/random_1e8_sepa.bin";
 
 //vector<> 版本非常慢，50s+
 static bool isTwoTrianglesIntrusionSAT_vector(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB,
-	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB, double tolerance /*= 0.0*/)
+	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB, double tolerance = 0.0)
 {
 	std::array<Eigen::Vector3d, 3> edgesA = {
 		triA[1] - triA[0],
@@ -59,34 +59,52 @@ static bool isTwoTrianglesIntrusionSAT_vector(const std::array<Vector3d, 3>& tri
 		triB[1] - triB[0],
 		triB[2] - triB[1],
 		triB[0] - triB[2] };
-	std::vector<Eigen::Vector3d> axes(11);
-	if (normalA.cross(normalB).isZero())//is parallel
-	{
-		if (tolerance < fabs(normalA.dot(triB[0] - triA[0]))) //not coplanar
-			return false;
-		axes.resize(6);
-		axes[0] = normalA.cross(edgesA[0]).normalized();
-		axes[1] = normalA.cross(edgesA[1]).normalized();
-		axes[2] = normalA.cross(edgesA[2]).normalized();
-		axes[3] = normalB.cross(edgesB[0]).normalized();
-		axes[4] = normalB.cross(edgesB[1]).normalized();
-		axes[5] = normalB.cross(edgesB[2]).normalized();
-	}
-	else
-	{
-		//axes.resize(11);
-		axes[0] = normalA;
-		axes[1] = normalB;
-		axes[2] = edgesA[0].cross(edgesB[0]).normalized();
-		axes[3] = edgesA[0].cross(edgesB[1]).normalized();
-		axes[4] = edgesA[0].cross(edgesB[2]).normalized();
-		axes[5] = edgesA[1].cross(edgesB[0]).normalized();
-		axes[6] = edgesA[1].cross(edgesB[1]).normalized();
-		axes[7] = edgesA[1].cross(edgesB[2]).normalized();
-		axes[8] = edgesA[2].cross(edgesB[0]).normalized();
-		axes[9] = edgesA[2].cross(edgesB[1]).normalized();
-		axes[10] = edgesA[2].cross(edgesB[2]).normalized();
-	}
+	std::vector<Eigen::Vector3d> axes(17);
+    axes[0] = normalA;
+	axes[1] = normalB;
+    axes[2] = edgesA[0].cross(edgesB[0]).normalized();
+    axes[3] = edgesA[0].cross(edgesB[1]).normalized();
+    axes[4] = edgesA[0].cross(edgesB[2]).normalized();
+    axes[5] = edgesA[1].cross(edgesB[0]).normalized();
+    axes[6] = edgesA[1].cross(edgesB[1]).normalized();
+    axes[7] = edgesA[1].cross(edgesB[2]).normalized();
+    axes[8] = edgesA[2].cross(edgesB[0]).normalized();
+    axes[9] = edgesA[2].cross(edgesB[1]).normalized();
+    axes[10] = edgesA[2].cross(edgesB[2]).normalized();
+    axes[11] = normalA.cross(edgesA[0]).normalized();
+    axes[12] = normalA.cross(edgesA[1]).normalized();
+    axes[13] = normalA.cross(edgesA[2]).normalized();
+    axes[14] = normalB.cross(edgesB[0]).normalized();
+    axes[15] = normalB.cross(edgesB[1]).normalized();
+    axes[16] = normalB.cross(edgesB[2]).normalized();
+
+	//if (normalA.cross(normalB).isZero())//is parallel
+	//{
+	//	if (tolerance < fabs(normalA.dot(triB[0] - triA[0]))) //not coplanar
+	//		return false;
+	//	axes.resize(6);
+	//	axes[0] = normalA.cross(edgesA[0]).normalized();
+	//	axes[1] = normalA.cross(edgesA[1]).normalized();
+	//	axes[2] = normalA.cross(edgesA[2]).normalized();
+	//	axes[3] = normalB.cross(edgesB[0]).normalized();
+	//	axes[4] = normalB.cross(edgesB[1]).normalized();
+	//	axes[5] = normalB.cross(edgesB[2]).normalized();
+	//}
+	//else
+	//{
+	//	//axes.resize(11);
+	//	axes[0] = normalA;
+	//	axes[1] = normalB;
+	//	axes[2] = edgesA[0].cross(edgesB[0]).normalized();
+	//	axes[3] = edgesA[0].cross(edgesB[1]).normalized();
+	//	axes[4] = edgesA[0].cross(edgesB[2]).normalized();
+	//	axes[5] = edgesA[1].cross(edgesB[0]).normalized();
+	//	axes[6] = edgesA[1].cross(edgesB[1]).normalized();
+	//	axes[7] = edgesA[1].cross(edgesB[2]).normalized();
+	//	axes[8] = edgesA[2].cross(edgesB[0]).normalized();
+	//	axes[9] = edgesA[2].cross(edgesB[1]).normalized();
+	//	axes[10] = edgesA[2].cross(edgesB[2]).normalized();
+	//}
 	double minA, maxA, minB, maxB, projection;
 	for (const Vector3d& axis : axes)
 	{
@@ -114,6 +132,125 @@ static bool isTwoTrianglesIntrusionSAT_vector(const std::array<Vector3d, 3>& tri
 	return true;
 }
 
+static bool isTwoTrianglesIntrusionSAT_c_array(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB,
+	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB, double tolerance = 0.0)
+{
+	std::array<Eigen::Vector3d, 3> edgesA = {
+		triA[1] - triA[0],
+		triA[2] - triA[1],
+		triA[0] - triA[2] };
+	std::array<Eigen::Vector3d, 3> edgesB = {
+		triB[1] - triB[0],
+		triB[2] - triB[1],
+		triB[0] - triB[2] };
+	//Eigen::Vector3d axes[17]; //49s
+	std::array<Eigen::Vector3d, 17> axes;//55s
+	axes[0] = normalA;
+	axes[1] = normalB;
+	axes[2] = edgesA[0].cross(edgesB[0]).normalized();
+	axes[3] = edgesA[0].cross(edgesB[1]).normalized();
+	axes[4] = edgesA[0].cross(edgesB[2]).normalized();
+	axes[5] = edgesA[1].cross(edgesB[0]).normalized();
+	axes[6] = edgesA[1].cross(edgesB[1]).normalized();
+	axes[7] = edgesA[1].cross(edgesB[2]).normalized();
+	axes[8] = edgesA[2].cross(edgesB[0]).normalized();
+	axes[9] = edgesA[2].cross(edgesB[1]).normalized();
+	axes[10] = edgesA[2].cross(edgesB[2]).normalized();
+	axes[11] = normalA.cross(edgesA[0]).normalized();
+	axes[12] = normalA.cross(edgesA[1]).normalized();
+	axes[13] = normalA.cross(edgesA[2]).normalized();
+	axes[14] = normalB.cross(edgesB[0]).normalized();
+	axes[15] = normalB.cross(edgesB[1]).normalized();
+	axes[16] = normalB.cross(edgesB[2]).normalized();
+	double minA, maxA, minB, maxB, projection;
+	//for (const Vector3d& axis : axes)
+    for (int i = 0; i < 17; i++)
+	{
+		const Vector3d& axis = axes[i];
+		if (axis.isZero())
+			continue;
+		minA = DBL_MAX;
+		maxA = -DBL_MAX;
+		minB = DBL_MAX;
+		maxB = -DBL_MAX;
+		for (const Vector3d& vertex : triA)
+		{
+			projection = axis.dot(vertex);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
+		}
+		for (const Vector3d& vertex : triB)
+		{
+			projection = axis.dot(vertex);
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		if (maxA < minB + tolerance || maxB < minA + tolerance)
+			return false;
+	}
+	return true;
+}
+
+static bool isTwoTrianglesIntrusionSAT_array(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB,
+	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB, double tolerance = 0.0)
+{
+	std::array<Eigen::Vector3d, 3> edgesA = {
+		triA[1] - triA[0],
+		triA[2] - triA[1],
+		triA[0] - triA[2] };
+	std::array<Eigen::Vector3d, 3> edgesB = {
+		triB[1] - triB[0],
+		triB[2] - triB[1],
+		triB[0] - triB[2] };
+	std::array<Eigen::Vector3d, 17> axes = { {
+		edgesA[0].cross(edgesB[0]).normalized(),
+		edgesA[0].cross(edgesB[1]).normalized(),
+		edgesA[0].cross(edgesB[2]).normalized(),
+		edgesA[1].cross(edgesB[0]).normalized(),
+		edgesA[1].cross(edgesB[1]).normalized(),
+		edgesA[1].cross(edgesB[2]).normalized(),
+		edgesA[2].cross(edgesB[0]).normalized(),
+		edgesA[2].cross(edgesB[1]).normalized(),
+		edgesA[2].cross(edgesB[2]).normalized(),
+		normalA, //normal direction projection
+		normalB,
+		normalA.cross(edgesA[0]).normalized(), //perpendi to edge when coplanar
+		normalA.cross(edgesA[1]).normalized(),
+		normalA.cross(edgesA[2]).normalized(),
+		normalB.cross(edgesB[0]).normalized(),
+		normalB.cross(edgesB[1]).normalized(),
+		normalB.cross(edgesB[2]).normalized()
+		} };
+	double minA, maxA, minB, maxB, projection;
+	for (const Vector3d& axis : axes) //25s
+	//for (int i = 0; i < 17; i++) //30s
+	{
+		//const Vector3d& axis = axes[i];
+		if (axis.isZero())
+			continue;
+		minA = DBL_MAX;
+		maxA = -DBL_MAX;
+		minB = DBL_MAX;
+		maxB = -DBL_MAX;
+		for (const Vector3d& vertex : triA)
+		{
+			projection = axis.dot(vertex);
+			minA = std::min(minA, projection);
+			maxA = std::max(maxA, projection);
+		}
+		for (const Vector3d& vertex : triB)
+		{
+			projection = axis.dot(vertex);
+			minB = std::min(minB, projection);
+			maxB = std::max(maxB, projection);
+		}
+		if (maxA < minB + tolerance || maxB < minA + tolerance)
+			return false;
+	}
+	return true;
+}
+
+//测速
 static void _test0()
 {
 	clock_t start, end;
@@ -252,6 +389,7 @@ static void _test0()
 			//if (res)
 			//	continue;
 			//bool res = isTwoTrianglesIntrusionSAT_vector(randData3[i], randData3_[i], randData3N[i], randData3N_[i], 0.0);//
+			bool res = isTwoTrianglesIntrusionSAT_array(randData3[i], randData3_[i], randData3N[i], randData3N_[i], 0.0);//
 			//bool res1 = isTwoTrianglesIntersectSAT_17(randData3[i], randData3_[i], randData3N[i], randData3N_[i]);//
 
 #pragma omp critical
@@ -278,7 +416,7 @@ static void _test0()
 			// 软碰撞
 			//double d = getTrianglesDistance(P, Q, randData3[i], randData3_[i]);
 			//double d = getTrianglesDistanceSAT(randData3[i], randData3_[i]); //60s about, 7s(omp)
-			double dn = getTrianglesDistanceSAT(randData3[i], randData3_[i], randData3N[i], randData3N_[i]); //47s, 5.5s(omp)
+			//double dn = getTrianglesDistanceSAT(randData3[i], randData3_[i], randData3N[i], randData3N_[i]); //47s, 5.5s(omp)
 
 			//array<Vector3d, 2> near2 = getTwoTrianglesNearestPoints(randData3[i], randData3_[i]);
 			//array<Vector3d, 2> res = getTwoTrianglesIntersectPoints(randData3[i], randData3_[i]);
@@ -318,7 +456,7 @@ static void _test0()
 	cout << "main over." << endl;
 }
 
-//测试 */ 速度
+//测试 运算符 速度
 static void _test1()
 {
 	//create
@@ -353,10 +491,21 @@ static void _test1()
 	Sleep(100); //ms
 }
 
+static void _test2()
+{
+	Triangle3d triA = { createRandVector(),createRandVector(),createRandVector() };
+	Triangle3d triB = { createRandVector(),createRandVector(),createRandVector() };
+	Vector3d normalA = (triA[1] - triA[0]).cross(triA[2] - triA[0]).normalized();
+	Vector3d normalB = (triB[1] - triB[0]).cross(triB[2] - triB[0]).normalized();
+	//bool res = isTwoTrianglesIntrusionSAT_c(triA, triB, normalA, normalB);
+	return;
+}
+
 static int enrol = []()->int
 {
-	//_test0();
+	_test0();
 	//_test1();
+	//_test2();
 	cout << "test_fun_speed finished.\n" << endl;
 	return 0;
 }();
