@@ -119,8 +119,6 @@ void DataRecordSingleton::writeDatasToCsv(const std::vector<DataMap>& datas)
 {
     if (datas.empty())
         return;
-    //std::ofstream ofsFile(filename);
-    //if (!ofsFile.is_open())
     char buffer[MAX_PATH];
     string filename = _getcwd(buffer, sizeof(buffer));
     string filenameCsv = filename + "/binFile/" + to_string(GetTickCount64()) + ".csv";

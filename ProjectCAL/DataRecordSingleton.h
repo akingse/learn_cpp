@@ -183,14 +183,14 @@ namespace test
         static void writeDatasToCsv(const std::vector<DataMap>& datas);
 
         //DataMap sm_recordData
-        static void dataCountAppend(const std::string& key, int value)
+        static void dataCountAppend(const std::string& key, int value = 1)
         {
             if (sm_recordData.m_dataCount.find(key) == sm_recordData.m_dataCount.end())
                 sm_recordData.m_dataCount.emplace(key, value);
             else
                 sm_recordData.m_dataCount.at(key) += value;
         }
-        static void dataTimeAppend(const std::string& key, int value)
+        static void dataTimeAppend(const std::string& key, double value)
         {
             if (sm_recordData.m_dataTime.find(key) == sm_recordData.m_dataTime.end())
                 sm_recordData.m_dataTime.emplace(key, value);

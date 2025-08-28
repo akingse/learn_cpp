@@ -110,8 +110,7 @@ namespace clash
             double area = 0;
             for (int i = 0; i < (int)ibo_.size(); ++i)
             {
-                area += (vbo_[ibo_[i][1]] - vbo_[ibo_[i][0]]).cross
-                        (vbo_[ibo_[i][2]] - vbo_[ibo_[i][1]]).norm();
+                area += (vbo_[ibo_[i][1]] - vbo_[ibo_[i][0]]).cross(vbo_[ibo_[i][2]] - vbo_[ibo_[i][1]]).norm();
             }
             return 0.5 * area;
         }
@@ -195,8 +194,11 @@ namespace clash
                 return false;
             if (!meshA.bounding_.isApprox(meshB.bounding_))
                 return false;
-            if (!meshA.vbo_.empty() && meshA.vbo_.front() != meshB.vbo_.front())
-                return false;
+            for (int i = 0; i < (int)meshA.vbo_.size(); i++)
+            {
+                if (meshA.vbo_[i] != meshB.vbo_[i])
+                    return false;
+            }
             for (int i = 0; i < (int)meshA.ibo_.size(); i++)
             {
                 if (meshA.ibo_[i] != meshB.ibo_[i])
