@@ -516,6 +516,23 @@ static void test7()
 	return;
 }
 
+//chrono¼ÆÊ±
+static void test9()
+{
+	std::chrono::steady_clock::time_point timestart, timeend;
+	std::chrono::duration<double, std::milli> duration_ms;
+	timestart = std::chrono::high_resolution_clock::now();
+	Sleep(1.5);
+	timeend = std::chrono::high_resolution_clock::now();
+
+
+	duration_ms = timeend - timestart;
+	double time0 = duration_ms.count();
+	double time1 = duration_cast<microseconds>(timeend - timestart).count();
+	double time2 = duration<double, std::milli>(timeend - timestart).count();
+	return;
+}
+
 static int enrol = []()->int
 {
 	//test1();
@@ -524,7 +541,7 @@ static int enrol = []()->int
 	//test4();
 	//test5();
 	//test6();
-	//test8();
+	//test9();
 	cout << "test_geometry finished.\n" << endl;
 	return 0;
 }();

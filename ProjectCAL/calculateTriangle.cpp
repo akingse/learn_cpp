@@ -1875,7 +1875,7 @@ double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA
 		{
 			//if (normal.isZero()) // error triangle plane
 			//	return DBL_MAX;
-			double k = (trigon[0] - point).dot(normal) / normal.dot(normal);
+			double k = (trigon[0] - point).dot(normal);// / normal.dot(normal);
 			Vector3d local = point + k * normal; // reference closure
 			//if (!isPointInTriangle(local, plane))
 			constexpr double toleDist = 1e-8; //fixed tolerance
@@ -2117,8 +2117,8 @@ std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesNearestPoints(const std::ar
 			double deno = vectA.dot(vectB) * vectB.dot(vectA) - vectA.dot(vectA) * vectB.dot(vectB);//a*d-b*c
 			if (deno == 0.0) // parallel, must exclude, then distance of point to segment in next function
 				return DBL_MAX;
-			double kA = (-vectB.dot(vectB) * deltaA + vectB.dot(vectA) * deltaB) / deno ;
-			double kB = (-vectA.dot(vectB) * deltaA + vectA.dot(vectA) * deltaB) / deno ;
+			double kA = (-vectB.dot(vectB) * deltaA + vectB.dot(vectA) * deltaB) / deno;
+			double kB = (-vectA.dot(vectB) * deltaA + vectA.dot(vectA) * deltaB) / deno;
 			if (0 <= kA && kA <= 1 && 0 <= kB && kB <= 1)
 			{
 				local = segmA[0] + kA * vectA;

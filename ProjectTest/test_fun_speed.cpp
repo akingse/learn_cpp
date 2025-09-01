@@ -503,7 +503,7 @@ static void _test2()
 
 static int enrol = []()->int
 {
-	_test0();
+	//_test0();
 	//_test1();
 	//_test2();
 	cout << "test_fun_speed finished.\n" << endl;
