@@ -996,6 +996,56 @@ bool eigen::isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& t
 	return true;
 }
 
+double eigen::getDistanceOfPointAndTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon)
+{
+	//https://www.bilibili.com/video/BV1MF4m1V7e3/
+	if (isPointInTriangle(point, trigon))
+		return -1;
+	double distance = DBL_MAX;
+	//for (const auto& vertex : trigon)
+	for (int i = 0; i < 3; ++i)
+	{
+		distance = std::min((trigon[i] - point).norm(), distance);
+		int j = (i + 1) % 3;
+		Vector2d direction = trigon[j] - trigon[i];
+		if (0.0 < direction.dot(point - trigon[i]) && direction.dot(point - trigon[j]) < 0.0) //relative and projection
+		{
+			//double h = (point - trigon[i]).cross(direction).norm() / direction.norm();
+			//double h = (trigon[i] - point + direction.dot(point - trigon[i]) / direction.dot(direction) * direction).norm();
+			distance = std::min(cross2d(point - trigon[i], direction) / direction.norm(), distance);
+		}
+	}
+	return distance;
+}
+
+double eigen::getDistanceOfPointAndTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon)
+{
+	bool isInTri;
+	auto _getDistanceOfPointAndPlane = [&isInTri](const Vector3d& vertex, const std::array<Vector3d, 3>& plane)->double
+		{
+			Vector3d normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);
+			double k = (plane[0] - vertex).dot(normal) / normal.dot(normal);
+			//_getProjectionOfPointAndPlane
+			Vector3d local = vertex + k * normal; // reference closure
+			isInTri = isPointInTriangle(local, plane);
+			return (k * normal).norm();
+		};
+	double perpendi = _getDistanceOfPointAndPlane(point, trigon);
+	if (isInTri)
+		return perpendi;
+	// distance of point to frame line
+	double distance = DBL_MAX;
+	for (int i = 0; i < 3; ++i)
+	{
+		distance = std::min((trigon[i] - point).norm(), distance);
+		int j = (i + 1) % 3;
+		Vector3d direction = trigon[j] - trigon[i];
+		if (0.0 < direction.dot(point - trigon[i]) && direction.dot(point - trigon[j]) < 0.0) //relative and projection
+			distance = std::min((point - trigon[i]).cross(direction).norm() / direction.norm(), distance);
+	}
+	return distance;
+}
+
 //for shield record
 bool eigen::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector2d, 3>& triA, const std::array<Eigen::Vector2d, 3>& triB, double tolerance /*= 0.0*/)
 {
@@ -1568,7 +1618,8 @@ double eigen::getTrianglesIntrusionSAT(const std::array<Eigen::Vector2d, 3>& tri
 	return intrusion;
 }
 
-double eigen::getTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
+double eigen::getTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB,
+	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB)
 {
 	std::array<Eigen::Vector3d, 3> edgesA = {
 		triA[1] - triA[0],
@@ -1578,13 +1629,11 @@ double eigen::getTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& tri
 		triB[1] - triB[0],
 		triB[2] - triB[1],
 		triB[0] - triB[2] };
-	Eigen::Vector3d normalA = edgesA[0].cross(edgesA[1]);
-	Eigen::Vector3d normalB = edgesB[0].cross(edgesB[1]);
 	if (normalA.cross(normalB).isZero())//isParallel3d, means not intrusive
 		return 0.0;
 	std::array<Eigen::Vector3d, 11> axes = { {
-		normalA.normalized(), //normal direction projection
-		normalB.normalized(),
+		normalA, //normal direction projection
+		normalB,
 		edgesA[0].cross(edgesB[0]).normalized(),//cross edge pair to get normal
 		edgesA[0].cross(edgesB[1]).normalized(),
 		edgesA[0].cross(edgesB[2]).normalized(),
@@ -1622,54 +1671,11 @@ double eigen::getTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& tri
 	return intrusion;
 }
 
-double eigen::getDistanceOfPointAndTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon)
+double eigen::getTrianglesIntrusionSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {
-	//https://www.bilibili.com/video/BV1MF4m1V7e3/
-	if (isPointInTriangle(point, trigon))
-		return -1;
-	double distance = DBL_MAX;
-	//for (const auto& vertex : trigon)
-	for (int i = 0; i < 3; ++i)
-	{
-		distance = std::min((trigon[i] - point).norm(), distance);
-		int j = (i + 1) % 3;
-		Vector2d direction = trigon[j] - trigon[i];
-		if (0.0 < direction.dot(point - trigon[i]) && direction.dot(point - trigon[j]) < 0.0) //relative and projection
-		{
-			//double h = (point - trigon[i]).cross(direction).norm() / direction.norm();
-			//double h = (trigon[i] - point + direction.dot(point - trigon[i]) / direction.dot(direction) * direction).norm();
-			distance = std::min(cross2d(point - trigon[i], direction) / direction.norm(), distance);
-		}
-	}
-	return distance;
-}
-
-double eigen::getDistanceOfPointAndTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon)
-{
-	bool isInTri;
-	auto _getDistanceOfPointAndPlane = [&isInTri](const Vector3d& vertex, const std::array<Vector3d, 3>& plane)->double
-		{
-			Vector3d normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);
-			double k = (plane[0] - vertex).dot(normal) / normal.dot(normal);
-			//_getProjectionOfPointAndPlane
-			Vector3d local = vertex + k * normal; // reference closure
-			isInTri = isPointInTriangle(local, plane);
-			return (k * normal).norm();
-		};
-	double perpendi = _getDistanceOfPointAndPlane(point, trigon);
-	if (isInTri)
-		return perpendi;
-	// distance of point to frame line
-	double distance = DBL_MAX;
-	for (int i = 0; i < 3; ++i)
-	{
-		distance = std::min((trigon[i] - point).norm(), distance);
-		int j = (i + 1) % 3;
-		Vector3d direction = trigon[j] - trigon[i];
-		if (0.0 < direction.dot(point - trigon[i]) && direction.dot(point - trigon[j]) < 0.0) //relative and projection
-			distance = std::min((point - trigon[i]).cross(direction).norm() / direction.norm(), distance);
-	}
-	return distance;
+	Eigen::Vector3d normalA = (triA[1] - triA[0]).cross(triA[2] - triA[1]).normalized();
+	Eigen::Vector3d normalB = (triB[1] - triB[0]).cross(triB[2] - triB[1]).normalized();
+	return getTrianglesIntrusionSAT(triA, triB, normalA, normalB);
 }
 
 // must separate
@@ -1857,7 +1863,8 @@ double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA
 }
 
 //simple version
-double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB)
+double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, 
+	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB)
 {
 	auto _getDistanceOfPointAndSegmentINF = [](const Vector3d& point, const std::array<Vector3d, 2>& segm)->double
 		{
@@ -2087,7 +2094,8 @@ double getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const
 #endif //REDUCED_AXIS_OPTMIZE
 
 //must separate
-std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesNearestPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
+std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesNearestPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB,
+	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB)
 {
 	std::array<Vector3d, 2> res;
 #ifdef STATISTIC_DATA_COUNT
@@ -2097,14 +2105,25 @@ std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesNearestPoints(const std::ar
 #endif
 	double dmin = DBL_MAX, dtemp;
 	Eigen::Vector3d local, local2;
-	auto _getDistanceOfPointAndPlaneINF = [&local](const Vector3d& point, const std::array<Vector3d, 3>& plane)->double
+	auto _getDistanceOfPointAndPlaneINF = [&local](const Vector3d& point, const std::array<Vector3d, 3>& trigon, const Vector3d& normal)->double
 		{
-			Vector3d normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);
+			//Vector3d normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);
 			//if (normal.isZero()) // error triangle plane
 			//	return DBL_MAX;
-			double k = (plane[0] - point).dot(normal) / normal.dot(normal);
+			double k = (trigon[0] - point).dot(normal);// / normal.dot(normal);
 			local = point + k * normal; // reference closure
-			if (!isPointInTriangle(local, plane))
+			//if (!isPointInTriangle(local, plane))
+			//	return DBL_MAX;
+			constexpr double toleDist = 1e-8; //fixed tolerance
+			if (local[0] + toleDist < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+				local[0] - toleDist > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) ||
+				local[1] + toleDist < std::min(std::min(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
+				local[1] - toleDist > std::max(std::max(trigon[0][1], trigon[1][1]), trigon[2][1]) ||
+				local[2] + toleDist < std::min(std::min(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
+				local[2] - toleDist > std::max(std::max(trigon[0][2], trigon[1][2]), trigon[2][2]) ||
+				(trigon[1] - trigon[0]).cross(local - trigon[0]).dot(normal) <= 0.0 || //bool isLeftA
+				(trigon[2] - trigon[1]).cross(local - trigon[1]).dot(normal) <= 0.0 || //bool isLeftB
+				(trigon[0] - trigon[2]).cross(local - trigon[2]).dot(normal) <= 0.0)   //bool isLeftC
 				return DBL_MAX;
 			return (k * normal).squaredNorm(); //to be fast
 		};
@@ -2162,7 +2181,7 @@ std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesNearestPoints(const std::ar
 	}
 	for (const auto& vertex : triA)
 	{
-		dtemp = _getDistanceOfPointAndPlaneINF(vertex, triB);  // vertex to face
+		dtemp = _getDistanceOfPointAndPlaneINF(vertex, triB, normalB);  // vertex to face
 		if (dtemp < dmin)
 		{
 			dmin = dtemp;
@@ -2180,7 +2199,7 @@ std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesNearestPoints(const std::ar
 	}
 	for (const auto& vertex : triB)
 	{
-		dtemp = _getDistanceOfPointAndPlaneINF(vertex, triA);  // vertex to face
+		dtemp = _getDistanceOfPointAndPlaneINF(vertex, triA, normalA);  // vertex to face
 		if (dtemp < dmin)
 		{
 			dmin = dtemp;
@@ -2212,7 +2231,8 @@ std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesNearestPoints(const std::ar
 }
 
 //must intersect
-std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesIntersectPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
+std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesIntersectPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB,
+	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB)
 {
 	std::array<Vector3d, 2> res = { gVecNaN , gVecNaN }; // avoid separate
 #ifdef STATISTIC_DATA_COUNT
@@ -2220,19 +2240,19 @@ std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesIntersectPoints(const std::
 		count_err_tris_sepa++;
 	//	return res;
 #endif
-	Vector3d vecSeg, normal, local;
-	auto _getIntersectOfSegmentAndPlaneINF = [&vecSeg, &normal](const std::array<Vector3d, 2>& segment, const std::array<Vector3d, 3>& plane)->double
+	Vector3d vecSeg, local;
+	auto _getIntersectOfSegmentAndPlaneINF = [&vecSeg](const std::array<Vector3d, 2>& segment, const Vector3d& origin, const Vector3d& normal)->double
 		{
 			vecSeg = segment[1] - segment[0];
-			normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]).normalized(); //avoid over threshold
+			//normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]).normalized(); //avoid over threshold
 			if (fabs(vecSeg.dot(normal)) < epsF)
-				return (fabs((segment[0] - plane[0]).dot(normal)) < epsF) ? DBL_MAX : -DBL_MAX; // positive infinity means separate
-			return (plane[0] - segment[0]).dot(normal) / vecSeg.dot(normal); //k
+				return (fabs((origin - segment[0]).dot(normal)) < epsF) ? DBL_MAX : -DBL_MAX; // positive infinity means separate
+			return (origin - segment[0]).dot(normal) / vecSeg.dot(normal); //k
 			//return segment[0] + k * vecSeg; // intersect point
 		};
-	auto _getPointOfTwoIntersectSegments = [&vecSeg, &normal](const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)->double
+	auto _getPointOfTwoIntersectSegments = [&vecSeg](const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)->double
 		{
-			normal = (segmB[0] - segmB[1]).cross(vecSeg);
+			Vector3d normal = (segmB[0] - segmB[1]).cross(vecSeg);
 			if (normal.isZero(epsF)) // intersect cause collinear
 				return DBL_MAX;
 			return (segmA[0] - segmB[0]).cross(segmA[0] - segmB[1]).norm() / normal.norm(); //k
@@ -2261,7 +2281,7 @@ std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesIntersectPoints(const std::
 	double k, k2;
 	for (const auto& edgeA : edgesA)
 	{
-		k = _getIntersectOfSegmentAndPlaneINF(edgeA, triB); // refer revise direction of edgeA
+		k = _getIntersectOfSegmentAndPlaneINF(edgeA, triB[0], normalB); // refer revise direction of edgeA
 		if (DBL_MAX == k) //positive infinity means coplanar
 		{
 			if (isPointInTriangle(edgeA[0], triB) && isPointInTriangle(edgeA[1], triB))
@@ -2293,7 +2313,7 @@ std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesIntersectPoints(const std::
 	}
 	for (const auto& edgeB : edgesB)
 	{
-		k = _getIntersectOfSegmentAndPlaneINF(edgeB, triA);
+		k = _getIntersectOfSegmentAndPlaneINF(edgeB, triA[0], normalA);
 		if (DBL_MAX == k) //coplanar
 		{
 			if (isPointInTriangle(edgeB[0], triA) && isPointInTriangle(edgeB[1], triA))
