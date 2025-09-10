@@ -370,3 +370,4 @@ FodyWeavers.xsd
 /readme/.obsidian/workspace.json
 /DawnCache
 /GPUCache
+*.pcd
