@@ -57,6 +57,9 @@
     <ClCompile Include="DataRecordSingleton.cpp">
       <Filter>calculate</Filter>
     </ClCompile>
+    <ClCompile Include="calculatePolygon3d.cpp">
+      <Filter>calculate</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -105,6 +108,9 @@
       <Filter>calculate</Filter>
     </ClInclude>
     <ClInclude Include="DataRecordSingleton.h">
+      <Filter>calculate</Filter>
+    </ClInclude>
+    <ClInclude Include="calculatePolygon3d.h">
       <Filter>calculate</Filter>
     </ClInclude>
   </ItemGroup>
