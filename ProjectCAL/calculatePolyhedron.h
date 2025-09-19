@@ -11,6 +11,27 @@
 #define CALCULATE_POLYHEDRON_H
 namespace clash
 {
+	enum class RelationOfPointAndMesh : int
+	{
+		SURFACE = 0,
+		INNER,
+		OUTER,
+		UNKNOWN,
+	};
+
+	enum class RelationOfTwoMesh : int
+	{
+		SEPARATE = 0,
+		INTRUSIVE, //d>0
+		CONTACT_OUTER, //d==0
+		INSEDE_AINB, //total inside
+		INSEDE_AINB_CONT, // partly cont 
+		INSEDE_AINB_FIT, //all vertex cont
+		INSEDE_BINA,
+		INSEDE_BINA_CONT,
+		INSEDE_BINA_FIT,
+	};
+
 	// polyhedron
 	DLLEXPORT_CAL bool isMeshConvexPolyhedron(const ModelMesh& mesh);
 	int getMeshGenusNumber(const ModelMesh& mesh);

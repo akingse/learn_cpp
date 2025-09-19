@@ -39,10 +39,10 @@ Eigen::Matrix4d eigen::getProjectionMatrixByPlane(const Eigen::Vector3d& point, 
 	return matOri * invPro;
 }
 
-Matrix4d eigen::getProjectionMatrixByPlane(const Plane3d& plane)
-{
-	return getProjectionMatrixByPlane(plane.m_origin, plane.m_normal);
-}
+//Matrix4d eigen::getProjectionMatrixByPlane(const Plane3d& plane)
+//{
+//	return getProjectionMatrixByPlane(plane.m_origin, plane.m_normal);
+//}
 
 std::array<Eigen::Matrix4d, 2> eigen::getRelativeMatrixByProjectionPlane(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal)
 {
@@ -68,10 +68,10 @@ std::array<Eigen::Matrix4d, 2> eigen::getRelativeMatrixByProjectionPlane(const E
 	return { matFor,matInv };
 }
 
-std::array<Eigen::Matrix4d, 2> eigen::getRelativeMatrixByProjectionPlane(const Plane3d& plane)
-{
-	return getRelativeMatrixByProjectionPlane(plane.m_origin, plane.m_normal);
-}
+//std::array<Eigen::Matrix4d, 2> eigen::getRelativeMatrixByProjectionPlane(const Plane3d& plane)
+//{
+//	return getRelativeMatrixByProjectionPlane(plane.m_origin, plane.m_normal);
+//}
 
 Eigen::Matrix4d eigen::inverseOrth(const Eigen::Matrix4d& mat)
 {

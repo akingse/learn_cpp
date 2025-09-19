@@ -1,8 +1,8 @@
 #include "pch.h"
-#include <iostream>
-#include <fstream>
-#include <iomanip> //setprecision()
-#include <direct.h> //_getcwd
+//#include <iostream>
+//#include <fstream>
+//#include <iomanip> //setprecision()
+//#include <direct.h> //_getcwd
 
 using namespace std;
 using namespace test;

@@ -60,6 +60,9 @@
     <ClCompile Include="calculatePolygon3d.cpp">
       <Filter>calculate</Filter>
     </ClCompile>
+    <ClCompile Include="clashClassTypeDefine.cpp">
+      <Filter>calculate</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">

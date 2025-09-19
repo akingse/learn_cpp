@@ -162,6 +162,7 @@
     <ClCompile Include="calculatePolyhedron.cpp" />
     <ClCompile Include="calculateTriangle.cpp" />
     <ClCompile Include="calculateVectorMatrix.cpp" />
+    <ClCompile Include="clashClassTypeDefine.cpp" />
     <ClCompile Include="commonFileReadWrite.cpp" />
     <ClCompile Include="DataRecordSingleton.cpp" />
     <ClCompile Include="pch.cpp">

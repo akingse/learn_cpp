@@ -24,6 +24,80 @@ namespace clash
     //static constexpr double epsA = 1e-6;
     //static constexpr unsigned long long ULL_MAX = 18446744073709551615; // 2 ^ 64 - 1 //ULLONG_MAX
 
+    // global type and variable define 
+    typedef std::array<Eigen::Vector3d, 2> Segment;
+    typedef std::array<Eigen::Vector2d, 2> Segment2d;
+    typedef std::array<Eigen::Vector3d, 2> Segment3d; //can be line, two points form
+    typedef std::array<Eigen::Vector3d, 3> Triangle;
+    typedef std::array<Eigen::Vector2d, 3> Triangle2d;
+    typedef std::array<Eigen::Vector3d, 3> Triangle3d;//can be plane, three points form
+    typedef std::array<Eigen::Vector3d, 2> PosVec3d;
+    typedef std::array<Eigen::Vector3d, 2> RayLine;
+    typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>> Polyhedron;
+    //typedef std::array<Eigen::Vector2d, 3> TrigonEigen; same as Triangle2d
+    typedef std::vector<std::vector<Eigen::Vector2d>> PathsEigen; //ContourProfile
+    typedef std::vector<std::vector<Eigen::Vector3d>> PathsEigen3d;
+
+    //global constexpr
+    static const Eigen::Vector2d gVecNaN2d(std::nan("0"), std::nan("0"));
+    static const Eigen::Vector3d gVecNaN(std::nan("0"), std::nan("0"), std::nan("0"));
+    static const Triangle gSegNaN = { gVecNaN, gVecNaN };
+    static const Triangle gTirNaN = { gVecNaN, gVecNaN, gVecNaN };
+    static const PosVec3d gPVNaN = { gVecNaN ,gVecNaN };
+    //static const Eigen::Vector3d gVecZero = Eigen::Vector3d::Zero();// Vector3d(0, 0, 0);
+    //static const Eigen::Vector3d gVecAxisX(1, 0, 0); //Eigen::Vector3d::UnitX()
+    //static const Eigen::Vector3d gVecAxisY(0, 1, 0); //Eigen::Vector3d::UnitY()
+    //static const Eigen::Vector3d gVecAxisZ(0, 0, 1); //Eigen::Vector3d::UnitZ()
+
+    class Plane3d
+    {
+    public:
+        Eigen::Vector3d m_origin;
+        Eigen::Vector3d m_normal;
+        Plane3d()
+        {
+            m_origin = Eigen::Vector3d::Zero();
+            m_normal = Eigen::Vector3d::UnitZ(); //default plane XoY
+        }
+        Plane3d(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal)
+        {
+            m_origin = origin;
+            m_normal = (normal.isApprox(Eigen::Vector3d::Zero(), 0)) ? gVecNaN : normal;
+        }
+        Plane3d(const std::array<Eigen::Vector3d, 3>& triangle)
+        {
+            m_origin = triangle[0];
+            m_normal = (triangle[1] - triangle[0]).cross(triangle[2] - triangle[1]);//without normalize
+        }
+        //get the plane origin through world coordinate origin
+        Eigen::Vector3d origin() const
+        {
+            double o_n = m_origin.dot(normal());
+            double maxCoor = 0;
+            for (int i = 0; i < 3; ++i)
+                maxCoor = std::max(fabs(m_origin[i]), maxCoor); // maxCoeff
+            return (fabs(o_n) < epsF * maxCoor) ? m_origin : o_n / m_normal.squaredNorm() * m_normal;
+        }
+        //get normalized vector
+        Eigen::Vector3d normal() const
+        {
+            //if (fabs(m_normal.squaredNorm() - 1) < epsF)
+   //             return m_normal;
+            return m_normal.normalized();
+        }
+
+    };
+
+    // equal BPEntityId
+    struct UnifiedIdentify
+    {
+        int32_t mid; //PModelId=-2; 
+        uint64_t eid; //PEntityId=0; 
+    };
+}
+
+namespace clash
+{
     struct TriMesh //trigon mesh, simplified
     {
         std::vector<Eigen::Vector3d> vbo_;
@@ -36,20 +110,7 @@ namespace clash
         bool convex_ = true;
     };
 
-    inline TriMesh operator*(const Eigen::Matrix4d& mat, const TriMesh& mesh)
-    {
-        TriMesh res = mesh;
-        Eigen::AlignedBox3d box; //re calculate
-        for (int i = 0; i < (int)mesh.vbo_.size(); ++i)
-        {
-            res.vbo_[i] = (mat * mesh.vbo_[i].homogeneous()).hnormalized();
-            box.extend(res.vbo_[i]);
-        }
-        for (int i = 0; i < (int)mesh.fno_.size(); ++i)
-            res.fno_[i] = (mat * mesh.fno_[i].homogeneous()).hnormalized();
-        res.bounding_ = box;
-        return res;
-    }
+    TriMesh operator*(const Eigen::Matrix4d& mat, const TriMesh& mesh);
 
     struct ModelMesh //TriMesh
     {
@@ -152,7 +213,7 @@ namespace clash
             return { volume / 6.0,moment / 24.0 };
         }
 
-        bool operator==(const ModelMesh& rhs)const
+        bool operator==(const ModelMesh& rhs) const
         {
             if (vbo_.size() != rhs.vbo_.size() || ibo_.size() != rhs.ibo_.size())
                 return false;
@@ -165,107 +226,22 @@ namespace clash
             return true;
         }
 
-        static bool isEqualMesh(const ModelMesh& meshA, const ModelMesh& meshB)
+        bool operator<(const ModelMesh& rhs) const
         {
-            if (meshA.ibo_.size() != meshB.ibo_.size() || meshA.vbo_.size() != meshB.vbo_.size())
-                return false;
-            if (!meshA.bounding_.isApprox(meshB.bounding_))
-                return false;
-            if (meshA.ibo_.empty() || meshA.vbo_.empty() || meshB.ibo_.empty() || meshB.vbo_.empty())
-                return false;
-            if (meshA.ibo_.front() != meshB.ibo_.front())
-                return false;
-            if (!meshA.vbo_.front().isApprox(meshB.vbo_.front()))
-                return false;
-            constexpr double toleFixed = 1e-8;
-            std::pair<double, Eigen::Vector3d> vmA = meshA.volume_moment();
-            std::pair<double, Eigen::Vector3d> vmB = meshB.volume_moment();
-            if (!vmA.second.isApprox(vmB.second))
-                return false;
-            if (toleFixed < fabs(vmA.first - vmB.first))
-                return false;
-            if (toleFixed < fabs(meshA.area() - meshB.area()))
-                return false;
-            return true;
-        }
-        static bool isSameMesh(const ModelMesh& meshA, const ModelMesh& meshB)
-        {
-            if (meshA.ibo_.size() != meshB.ibo_.size() || meshA.vbo_.size() != meshB.vbo_.size())
-                return false;
-            if (!meshA.bounding_.isApprox(meshB.bounding_))
-                return false;
-            for (int i = 0; i < (int)meshA.vbo_.size(); i++)
-            {
-                if (meshA.vbo_[i] != meshB.vbo_[i])
-                    return false;
-            }
-            for (int i = 0; i < (int)meshA.ibo_.size(); i++)
-            {
-                if (meshA.ibo_[i] != meshB.ibo_[i])
-                    return false;
-            }
-            return true;
+            return number_ < rhs.number_;
         }
 
+        static bool isEqualMesh(const ModelMesh& meshA, const ModelMesh& meshB);
+
         //IO
-        static bool writeToFile(const std::vector<ModelMesh>& meshs, const std::string& filename) //obj format
-        {
-            std::ofstream ofs(filename);
-            if (!ofs.is_open()) {
-                std::cerr << "Unable to open file: " << filename << std::endl;
-                return false;
-            }
-            //for (const auto& mesh : meshs)
-            for (int i = 0; i < meshs.size(); i++)
-            {
-                const ModelMesh& mesh = meshs[i];
-                ofs << "# Mesh_" << std::to_string(i) << "\n";
-                ofs << "g mesh" << std::to_string(i) << "\n";
-                for (const auto& vertex : mesh.vbo_) {
-                    ofs << "v " << vertex.x() << " " << vertex.y() << " " << vertex.z() << "\n";
-                }
-                for (const auto& face : mesh.ibo_) {
-                    ofs << "f " << (face(0) + 1) << " " << (face(1) + 1) << " " << (face(2) + 1) << "\n";
-                }
-                ofs << "\n";
-            }
-            ofs.close();
-            return true;
-        }
-        static std::vector<ModelMesh> readFromFile(const std::string& filename) //obj format
-        {
-            std::vector<ModelMesh> meshs;
-            std::ifstream ifs(filename);
-            if (!ifs.is_open()) {
-                std::cerr << "Unable to open file: " << filename << std::endl;
-                return meshs;
-            }
-            std::string line;
-            while (std::getline(ifs, line)) 
-            {
-                ModelMesh mesh;
-                std::istringstream is(line);
-                std::string prefix;
-                is >> prefix;
-                if (prefix == "v") {
-                    Eigen::Vector3d vertex;
-                    is >> vertex[0] >> vertex[1] >> vertex[2];
-                    mesh.vbo_.push_back(vertex);
-                }
-                else if (prefix == "f") {
-                    Eigen::Vector3i face;
-                    int index;
-                    for (int i = 0; i < 3; ++i) { // 假设是三角形面
-                        is >> index;
-                        face[i] = index - 1; // OBJ 格式索引从 1 开始，所以减去 1
-                    }
-                    mesh.ibo_.push_back(face);
-                }
-            }
-            ifs.close();
-            return meshs;
-        }
+        static bool writeToFile(const std::vector<ModelMesh>& meshs, const std::string& filename = {}); //obj format
+
+        static std::vector<ModelMesh> readFromFile(const std::string& filename); //obj format
+
     };
+
+    //deepcopy
+    ModelMesh operator*(const Eigen::Matrix4d& mat, const ModelMesh& mesh);
 
     inline TriMesh toTriMesh(const ModelMesh& mesh)
     {
@@ -290,138 +266,6 @@ namespace clash
         res.convex_ = mesh.convex_;
         return res;
     }
-
-    //static const ModelMesh gMeshEmpty = {};
-
-}
-
-namespace clash //collide //psykronix
-{
-    // global type and variable define 
-    typedef std::array<Eigen::Vector3d, 2> Segment;
-    typedef std::array<Eigen::Vector2d, 2> Segment2d;
-    typedef std::array<Eigen::Vector3d, 2> Segment3d; //can be line, two points form
-    typedef std::array<Eigen::Vector3d, 3> Triangle;
-    typedef std::array<Eigen::Vector2d, 3> Triangle2d;
-    typedef std::array<Eigen::Vector3d, 3> Triangle3d;//can be plane, three points form
-    typedef std::array<Eigen::Vector3d, 2> PosVec3d;
-    typedef std::array<Eigen::Vector3d, 2> RayLine;
-    typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>> Polyhedron;
-    //typedef std::array<Eigen::Vector2d, 3> TrigonEigen; same as Triangle2d
-    typedef std::vector<std::vector<Eigen::Vector2d>> PathsEigen; //ContourProfile
-    typedef std::vector<std::vector<Eigen::Vector3d>> PathsEigen3d;
-
-    //global constexpr
-    static const Eigen::Vector2d gVecNaN2d(std::nan("0"), std::nan("0"));
-    static const Eigen::Vector3d gVecNaN(std::nan("0"), std::nan("0"), std::nan("0"));
-    static const Triangle gSegNaN = { gVecNaN, gVecNaN };
-    static const Triangle gTirNaN = { gVecNaN, gVecNaN, gVecNaN };
-    static const PosVec3d gPVNaN = { gVecNaN ,gVecNaN };
-    //static const Eigen::Vector3d gVecZero = Eigen::Vector3d::Zero();// Vector3d(0, 0, 0);
-    //static const Eigen::Vector3d gVecAxisX(1, 0, 0); //Eigen::Vector3d::UnitX()
-    //static const Eigen::Vector3d gVecAxisY(0, 1, 0); //Eigen::Vector3d::UnitY()
-    //static const Eigen::Vector3d gVecAxisZ(0, 0, 1); //Eigen::Vector3d::UnitZ()
-
-    class Plane3d
-    {
-    public:
-        Eigen::Vector3d m_origin;
-        Eigen::Vector3d m_normal;
-        Plane3d()
-        {
-            m_origin = Eigen::Vector3d::Zero();
-            m_normal = Eigen::Vector3d::UnitZ(); //default plane XoY
-        }
-        Plane3d(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal)
-        {
-            m_origin = origin;
-            m_normal = (normal.isApprox(Eigen::Vector3d::Zero(), 0)) ? gVecNaN : normal;
-        }
-        Plane3d(const std::array<Eigen::Vector3d, 3>& triangle)
-        {
-            m_origin = triangle[0];
-            m_normal = (triangle[1] - triangle[0]).cross(triangle[2] - triangle[1]);//without normalize
-        }
-        //get the plane origin through world coordinate origin
-        Eigen::Vector3d origin() const
-        {
-            double o_n = m_origin.dot(normal());
-            double maxCoor = 0;
-            for (int i = 0; i < 3; ++i)
-                maxCoor = std::max(fabs(m_origin[i]), maxCoor); // maxCoeff
-            return (fabs(o_n) < epsF * maxCoor) ? m_origin : o_n / m_normal.squaredNorm() * m_normal;
-        }
-        //get normalized vector
-        Eigen::Vector3d normal() const
-        {
-			//if (fabs(m_normal.squaredNorm() - 1) < epsF)
-   //             return m_normal;
-            return m_normal.normalized();
-        }
-
-    };
-
-    // equal BPEntityId
-    struct UnifiedIdentify
-    {
-        int32_t mid; //PModelId=-2; 
-        uint64_t eid; //PEntityId=0; 
-    };
-
-    enum class RelationOfTwoTriangles : int //two intersect triangle
-    {
-        COPLANAR = 0,   //intersect or separate
-        CONTACT,        //intersect but depth is zero
-        INTRUSIVE,      //sat intersect all
-        //PARALLEL,       //but not coplanr, must separate
-        //SEPARATE,
-    };
-
-    enum class RelationOfTrigon : int
-    {
-        SEPARATE = 0,
-        INTERSECT, //intersect point local one or two trigon
-        COPLANAR_AINB, //A_INSIDE_B
-        COPLANAR_BINA, //B_INSIDE_A
-        COPLANAR_INTERSECT,
-    };
-
-    enum class RelationOfPointAndMesh : int
-    {
-        SURFACE = 0,
-        INNER,
-        OUTER,
-        UNKNOWN,
-    };
-
-    enum class RelationOfTwoMesh : int
-    {
-        SEPARATE = 0,
-        INTRUSIVE, //d>0
-        CONTACT_OUTER, //d==0
-        INSEDE_AINB, //total inside
-        INSEDE_AINB_CONT, // partly cont 
-        INSEDE_AINB_FIT, //all vertex cont
-        INSEDE_BINA,
-        INSEDE_BINA_CONT,
-        INSEDE_BINA_FIT,
-    };
-
-    enum class RelationOfRayAndTrigon : int
-    {
-        CROSS_OUTER = 0,
-        CROSS_INNER,
-        CROSS_VERTEX_0,
-        CROSS_VERTEX_1,
-        CROSS_VERTEX_2,
-        CROSS_EDGE_01,
-        CROSS_EDGE_12,
-        CROSS_EDGE_20,
-        COIN_EDGE_01, //collinear
-        COIN_EDGE_12,
-        COIN_EDGE_20,
-    };
-
 }
 
 namespace eigen

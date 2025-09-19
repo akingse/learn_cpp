@@ -231,7 +231,7 @@ vector<Eigen::Vector3d> clash::getProfileOutOfMesh(const ModelMesh& mesh, const 
 	vector<Vector3d> profilePoints;
 	for (const int& i : profileIndex)
 		profilePoints.push_back(vbo[i]);
-	Matrix4d matSha = eigen::getProjectionMatrixByPlane(plane);
+	Matrix4d matSha = eigen::getProjectionMatrixByPlane(plane.m_origin, plane.m_normal);
 	for (auto& iter : profilePoints)
 		iter = (matSha * iter.homogeneous()).hnormalized();
 	return profilePoints;
@@ -408,109 +408,109 @@ RelationOfPointAndMesh clash::isPointInsidePolyhedronROT(const Eigen::Vector3d& 
 }
 
 // include point on face
-bool isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const ModelMesh& mesh)
-{
-	//Eigen::Vector3d point = mesh.pose_.inverse() * _point;
-	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
-	const std::vector<Eigen::Vector3i>& ibo = mesh.ibo_;
-	auto _relationOfPointAndTriangle = [&point](/*const Vector3d& point,*/ const std::array<Vector3d, 3>& trigon)->RelationOfRayAndTrigon // axisZ direction
-		{
-			//if (!isPointRayAcrossTriangle(point, trigon))
-			//	return PointOnTrigon::CROSS_OUTER;
-			// must intersect
-			if (point.x() == trigon[0].x() && point.y() == trigon[0].y()) // include ray and edge collinear
-				return RelationOfRayAndTrigon::CROSS_VERTEX_0;
-			else if (point.x() == trigon[1].x() && point.y() == trigon[1].y())
-				return RelationOfRayAndTrigon::CROSS_VERTEX_1;
-			else if (point.x() == trigon[2].x() && point.y() == trigon[2].y())
-				return RelationOfRayAndTrigon::CROSS_VERTEX_2;
-			else if ((point - trigon[1]).cross(point - trigon[0]).z() == 0.0) // point on edge's projection
-				return RelationOfRayAndTrigon::CROSS_EDGE_01;
-			else if ((point - trigon[2]).cross(point - trigon[1]).z() == 0.0)
-				return RelationOfRayAndTrigon::CROSS_EDGE_12;
-			else if ((point - trigon[0]).cross(point - trigon[2]).z() == 0.0)
-				return RelationOfRayAndTrigon::CROSS_EDGE_20;
-			return RelationOfRayAndTrigon::CROSS_INNER;
-		};
-	auto isLeftAll = [&vbo](const Eigen::Vector3i& trigon)->bool // buildin lambda function
-		{
-			Vector3d normal = (vbo[trigon[1]] - vbo[trigon[0]]).cross(vbo[trigon[2]] - vbo[trigon[1]]).normalized(); // for precision
-			bool isFirst = true, isLeft = false, temp /*= false*/;
-			for (size_t i = 0; i < vbo.size(); ++i)
-			{
-				if (i == trigon[0] || i == trigon[1] || i == trigon[2] || fabs(normal.dot((vbo[i] - vbo[trigon[0]]).normalized())) < epsF) // self and coplanar
-					continue;
-				temp = normal.dot(vbo[i] - vbo[trigon[0]]) < 0.0;
-				if (isFirst)
-				{
-					isLeft = temp;
-					isFirst = false;
-				}
-				else
-				{
-					if (temp != isLeft)
-						return false;
-				}
-			}
-			return true;
-		};
-	size_t count = 0;
-	set<int> vertexSet;
-	set<array<int, 2>> edgeSet;
-	//bool isConvex = isMeshConvexPolyhedron(vbo, ibo);
-	for (const auto& iter : ibo)
-	{
-		Triangle trigon = { { vbo[iter[0]] ,vbo[iter[1]] ,vbo[iter[2]] } };
-		if (!isPointRayAcrossTriangleSAT(point, trigon))
-			continue;
-		RelationOfRayAndTrigon relation = _relationOfPointAndTriangle(trigon);
-		if (RelationOfRayAndTrigon::CROSS_INNER == relation)
-			count++;
-		else if (RelationOfRayAndTrigon::CROSS_VERTEX_0 == relation && vertexSet.find(iter[0]) == vertexSet.end())
-		{
-			if (mesh.convex_ || isLeftAll(iter)) // isConvex or Concave outer face
-			{
-				count++;
-				vertexSet.insert(iter[0]);
-			}
-		}
-		else if (RelationOfRayAndTrigon::CROSS_VERTEX_1 == relation && vertexSet.find(iter[1]) == vertexSet.end())
-		{
-			if (mesh.convex_ || isLeftAll(iter)) // isConvex or Concave outer face
-			{
-				count++;
-				vertexSet.insert(iter[1]);
-			}
-		}
-		else if (RelationOfRayAndTrigon::CROSS_VERTEX_2 == relation && vertexSet.find(iter[2]) == vertexSet.end())
-		{
-			if (mesh.convex_ || isLeftAll(iter)) // isConvex or Concave outer face
-			{
-				count++;
-				vertexSet.insert(iter[2]);
-			}
-		}
-		else if (RelationOfRayAndTrigon::CROSS_EDGE_01 == relation &&
-			edgeSet.find({ iter[0], iter[1] }) == edgeSet.end() && edgeSet.find({ iter[1], iter[0] }) == edgeSet.end())
-		{
-			count++;
-			edgeSet.insert({ iter[0], iter[1] });
-		}
-		else if (RelationOfRayAndTrigon::CROSS_EDGE_12 == relation &&
-			edgeSet.find({ iter[1], iter[2] }) == edgeSet.end() && edgeSet.find({ iter[2], iter[1] }) == edgeSet.end())
-		{
-			count++;
-			edgeSet.insert({ iter[1], iter[2] });
-		}
-		else if (RelationOfRayAndTrigon::CROSS_EDGE_20 == relation &&
-			edgeSet.find({ iter[2], iter[0] }) == edgeSet.end() && edgeSet.find({ iter[0], iter[2] }) == edgeSet.end())
-		{
-			count++;
-			edgeSet.insert({ iter[2], iter[0] });
-		}
-	}
-	return count % 2 == 1;
-}
+//bool isPointInsidePolyhedronAZ(const Eigen::Vector3d& point, const ModelMesh& mesh)
+//{
+//	//Eigen::Vector3d point = mesh.pose_.inverse() * _point;
+//	const std::vector<Eigen::Vector3d>& vbo = mesh.vbo_;
+//	const std::vector<Eigen::Vector3i>& ibo = mesh.ibo_;
+//	auto _relationOfPointAndTriangle = [&point](/*const Vector3d& point,*/ const std::array<Vector3d, 3>& trigon)->RelationOfRayAndTrigon // axisZ direction
+//		{
+//			//if (!isPointRayAcrossTriangle(point, trigon))
+//			//	return PointOnTrigon::CROSS_OUTER;
+//			// must intersect
+//			if (point.x() == trigon[0].x() && point.y() == trigon[0].y()) // include ray and edge collinear
+//				return RelationOfRayAndTrigon::CROSS_VERTEX_0;
+//			else if (point.x() == trigon[1].x() && point.y() == trigon[1].y())
+//				return RelationOfRayAndTrigon::CROSS_VERTEX_1;
+//			else if (point.x() == trigon[2].x() && point.y() == trigon[2].y())
+//				return RelationOfRayAndTrigon::CROSS_VERTEX_2;
+//			else if ((point - trigon[1]).cross(point - trigon[0]).z() == 0.0) // point on edge's projection
+//				return RelationOfRayAndTrigon::CROSS_EDGE_01;
+//			else if ((point - trigon[2]).cross(point - trigon[1]).z() == 0.0)
+//				return RelationOfRayAndTrigon::CROSS_EDGE_12;
+//			else if ((point - trigon[0]).cross(point - trigon[2]).z() == 0.0)
+//				return RelationOfRayAndTrigon::CROSS_EDGE_20;
+//			return RelationOfRayAndTrigon::CROSS_INNER;
+//		};
+//	auto isLeftAll = [&vbo](const Eigen::Vector3i& trigon)->bool // buildin lambda function
+//		{
+//			Vector3d normal = (vbo[trigon[1]] - vbo[trigon[0]]).cross(vbo[trigon[2]] - vbo[trigon[1]]).normalized(); // for precision
+//			bool isFirst = true, isLeft = false, temp /*= false*/;
+//			for (size_t i = 0; i < vbo.size(); ++i)
+//			{
+//				if (i == trigon[0] || i == trigon[1] || i == trigon[2] || fabs(normal.dot((vbo[i] - vbo[trigon[0]]).normalized())) < epsF) // self and coplanar
+//					continue;
+//				temp = normal.dot(vbo[i] - vbo[trigon[0]]) < 0.0;
+//				if (isFirst)
+//				{
+//					isLeft = temp;
+//					isFirst = false;
+//				}
+//				else
+//				{
+//					if (temp != isLeft)
+//						return false;
+//				}
+//			}
+//			return true;
+//		};
+//	size_t count = 0;
+//	set<int> vertexSet;
+//	set<array<int, 2>> edgeSet;
+//	//bool isConvex = isMeshConvexPolyhedron(vbo, ibo);
+//	for (const auto& iter : ibo)
+//	{
+//		Triangle trigon = { { vbo[iter[0]] ,vbo[iter[1]] ,vbo[iter[2]] } };
+//		if (!isPointRayAcrossTriangleSAT(point, trigon))
+//			continue;
+//		RelationOfRayAndTrigon relation = _relationOfPointAndTriangle(trigon);
+//		if (RelationOfRayAndTrigon::CROSS_INNER == relation)
+//			count++;
+//		else if (RelationOfRayAndTrigon::CROSS_VERTEX_0 == relation && vertexSet.find(iter[0]) == vertexSet.end())
+//		{
+//			if (mesh.convex_ || isLeftAll(iter)) // isConvex or Concave outer face
+//			{
+//				count++;
+//				vertexSet.insert(iter[0]);
+//			}
+//		}
+//		else if (RelationOfRayAndTrigon::CROSS_VERTEX_1 == relation && vertexSet.find(iter[1]) == vertexSet.end())
+//		{
+//			if (mesh.convex_ || isLeftAll(iter)) // isConvex or Concave outer face
+//			{
+//				count++;
+//				vertexSet.insert(iter[1]);
+//			}
+//		}
+//		else if (RelationOfRayAndTrigon::CROSS_VERTEX_2 == relation && vertexSet.find(iter[2]) == vertexSet.end())
+//		{
+//			if (mesh.convex_ || isLeftAll(iter)) // isConvex or Concave outer face
+//			{
+//				count++;
+//				vertexSet.insert(iter[2]);
+//			}
+//		}
+//		else if (RelationOfRayAndTrigon::CROSS_EDGE_01 == relation &&
+//			edgeSet.find({ iter[0], iter[1] }) == edgeSet.end() && edgeSet.find({ iter[1], iter[0] }) == edgeSet.end())
+//		{
+//			count++;
+//			edgeSet.insert({ iter[0], iter[1] });
+//		}
+//		else if (RelationOfRayAndTrigon::CROSS_EDGE_12 == relation &&
+//			edgeSet.find({ iter[1], iter[2] }) == edgeSet.end() && edgeSet.find({ iter[2], iter[1] }) == edgeSet.end())
+//		{
+//			count++;
+//			edgeSet.insert({ iter[1], iter[2] });
+//		}
+//		else if (RelationOfRayAndTrigon::CROSS_EDGE_20 == relation &&
+//			edgeSet.find({ iter[2], iter[0] }) == edgeSet.end() && edgeSet.find({ iter[0], iter[2] }) == edgeSet.end())
+//		{
+//			count++;
+//			edgeSet.insert({ iter[2], iter[0] });
+//		}
+//	}
+//	return count % 2 == 1;
+//}
 
 // include point on surface
 bool isPointInsidePolyhedronCL(const Eigen::Vector3d& _point, const ModelMesh& mesh) // more judge like ceil
@@ -1285,7 +1285,8 @@ std::tuple<RelationOfTwoMesh, Eigen::Vector3d> clash::getTwoMeshsIntersectRelati
 #ifdef USING_ALL_SEPARATE_AXES_FOR_DEPTH
 				// add the separate axis
 				//RelationOfTwoTriangles relation = getRelationOfTwoTrianglesSAT(triA, triB);
-				if (RelationOfTwoTriangles::INTRUSIVE != getRelationOfTwoTrianglesSAT(triA, triB))
+				//if (RelationOfTwoTriangles::INTRUSIVE != getRelationOfTwoTrianglesSAT(triA, triB))
+				if (!isTwoTrianglesIntrusionSAT(triA, triB))
 					continue;
 				isIntrusive = true;
 				// add the faces vertex index

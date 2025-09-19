@@ -80,11 +80,11 @@ namespace eigen
         }
         else
             cosRes = V0.dot(V1) / (V0.norm() * V1.norm()); //+1 or -1 
-        if (1.0 < cosRes)
+        if (1.0 < cosRes) //avoid nan
             cosRes = 1.0;
         if (-1.0 > cosRes)
             cosRes = -1.0;
-        return std::acos(cosRes);
+        return std::acos(cosRes); // 0->PI
     }
 
     // dynamic accuracy
@@ -288,7 +288,57 @@ namespace eigen
         return T;
     }
 
+    inline Eigen::Matrix3d toMatrix3d(const Eigen::Matrix4d& mat4)
+    {
+        Eigen::Matrix3d mat3 = mat4.block<3, 3>(0, 0);
+        return mat3;
+    }
+    inline Eigen::Matrix4d toMatrix4d(const Eigen::Matrix3d& mat3)
+    {
+        Eigen::Matrix4d mat4 = Eigen::Matrix4d::Identity();
+        mat4.block<3, 3>(0, 0) = mat3;
+        return mat4;
+    }
+
+    inline Eigen::Matrix4d rotx90()
+    {
+        Eigen::Matrix4d R;
+        R <<
+            1, 0, 0, 0,
+            0, 0, -1, 0,
+            0, 1, 0, 0,
+            0, 0, 0, 1;
+        return R;
+    }
+
+    inline Eigen::Matrix4d roty90()
+    {
+        Eigen::Matrix4d R;
+        R <<
+            0, 0, 1, 0,
+            0, 1, 0, 0,
+            -1, 0, 0, 0,
+            0, 0, 0, 1;
+        return R;
+    }
+
+    inline Eigen::Matrix4d rotz90()
+    {
+        Eigen::Matrix4d R;
+        R <<
+            0, -1, 0, 0,
+            1, 0, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1;
+        return R;
+    }
+
     //operator overload
+    inline Eigen::Vector3d operator_mul(const Eigen::Matrix4d& mat, const Eigen::Vector3d& vec)
+    {
+        return (mat * vec.homogeneous()).hnormalized();
+    }
+
     inline std::array<Eigen::Vector3d, 2> operator*(const Eigen::Matrix4d& mat, const std::array<Eigen::Vector3d, 2>& line)
     {
         std::array<Eigen::Vector3d, 2> segment = {
@@ -407,9 +457,9 @@ namespace eigen
 
     // generate matrix
     DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
-    DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const clash::Plane3d& plane);
+    //DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const clash::Plane3d& plane);
     DLLEXPORT_CAL std::array<Eigen::Matrix4d, 2> getRelativeMatrixByProjectionPlane(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
-    DLLEXPORT_CAL std::array<Eigen::Matrix4d, 2> getRelativeMatrixByProjectionPlane(const clash::Plane3d& plane);
+    //DLLEXPORT_CAL std::array<Eigen::Matrix4d, 2> getRelativeMatrixByProjectionPlane(const clash::Plane3d& plane);
     DLLEXPORT_CAL Eigen::Matrix4d inverseOrth(const Eigen::Matrix4d& mat);
 }
 
