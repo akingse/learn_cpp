@@ -71,14 +71,14 @@ namespace clash
         return wstring2string(wstr.c_str());
     }
 
-    //inline std::string getExePath() // include<afx.h>
-    //{
-    //    TCHAR buff[MAX_PATH];
-    //    GetModuleFileNameW(NULL, buff, MAX_PATH);
-    //    CString path = buff;
-    //    path = path.Left(path.ReverseFind('\\')); // delete *.exe name
-    //    return (std::string)(CStringA)path;
-    //}
+    inline std::string getExePath() // include<afx.h>
+    {
+        TCHAR buff[MAX_PATH];
+        GetModuleFileNameW(NULL, buff, MAX_PATH);
+        CString path = buff;
+        path = path.Left(path.ReverseFind('\\')); // delete *.exe name
+        return (std::string)(CStringA)path;
+    }
 
     inline std::vector<std::string> string_split(const std::string& text, char delimiter)
     {

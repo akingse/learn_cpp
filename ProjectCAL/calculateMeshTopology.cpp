@@ -3,6 +3,7 @@ using namespace std;
 using namespace Eigen;
 using namespace games;
 using namespace clash;
+#define USING_HALFEDGE_STRUCTURE
 
 // interconversion
 HeMesh::HeMesh(const ModelMesh& mesh)
@@ -650,7 +651,7 @@ HeMesh games::meshLoopSubdivision(const HeMesh& mesh)
 //}
 
 // all function of QEM
-inline void _getPlaneCoefficient(const array<Vector3d, 3>& trigon, double& a, double& b, double& c, double& d)
+static void _getPlaneCoefficient(const array<Vector3d, 3>& trigon, double& a, double& b, double& c, double& d)
 {
 	// a*x + b*y + c*z + d = 0
 	//Vector3d N = (A - B).cross(C - B); // N_x*(x-A_x) + N_y*(y-A_y) + N_z*(y-A_z) = 0
@@ -669,7 +670,7 @@ inline void _getPlaneCoefficient(const array<Vector3d, 3>& trigon, double& a, do
 }
 
 // calculate Q of every vertex
-inline Matrix4d _getQMatrixOfVertex(const std::vector<Eigen::Vector3i>& ibo, const std::vector<Eigen::Vector3d>& vbo, int i)
+static Matrix4d _getQMatrixOfVertex(const std::vector<Eigen::Vector3i>& ibo, const std::vector<Eigen::Vector3d>& vbo, int i)
 {
 	Matrix4d Q = Eigen::Matrix4d::Zero();
 	for (const auto& face : ibo)
@@ -684,7 +685,7 @@ inline Matrix4d _getQMatrixOfVertex(const std::vector<Eigen::Vector3i>& ibo, con
 	return Q;
 }
 
-inline Matrix4d _getQMatrixOfVertex(const HeMesh& mesh, int i)
+static Matrix4d _getQMatrixOfVertex(const HeMesh& mesh, int i)
 {
 	Matrix4d Q = Eigen::Matrix4d::Zero();
 	for (const auto& face : mesh.m_faces)
@@ -699,7 +700,7 @@ inline Matrix4d _getQMatrixOfVertex(const HeMesh& mesh, int i)
 	return Q;
 }
 
-inline QEMEdge _getCostAndVbarOfEdge(const std::vector<Matrix4d>& Qs, const std::vector<Vector3d>& vbo, const array<int, 2 >& i)
+static QEMEdge _getCostAndVbarOfEdge(const std::vector<Matrix4d>& Qs, const std::vector<Vector3d>& vbo, const array<int, 2 >& i)
 {
 	QEMEdge edge;
 	edge.m_edge = i;
@@ -720,7 +721,7 @@ inline QEMEdge _getCostAndVbarOfEdge(const std::vector<Matrix4d>& Qs, const std:
 	return edge;
 }
 
-inline QEMEdge _getCostAndVbarOfEdge(const std::vector<Matrix4d>& Qs, const HeEdge* i)
+static QEMEdge _getCostAndVbarOfEdge(const std::vector<Matrix4d>& Qs, const HeEdge* i)
 {
 	QEMEdge edge;
 	edge.m_index = i->m_index;

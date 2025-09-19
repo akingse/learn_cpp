@@ -75,7 +75,7 @@ namespace clash
         inline void to2d()
         {
             vbo2_.resize(vbo_.size());
-            for (int i = 0; i < vbo2_.size(); ++i)
+            for (int i = 0; i < (int)vbo2_.size(); ++i)
                 vbo2_[i] = Eigen::Vector2d(vbo_[i][0], vbo_[i][1]);
         }
 #endif
@@ -207,6 +207,64 @@ namespace clash
             return true;
         }
 
+        //IO
+        static bool writeToFile(const std::vector<ModelMesh>& meshs, const std::string& filename) //obj format
+        {
+            std::ofstream ofs(filename);
+            if (!ofs.is_open()) {
+                std::cerr << "Unable to open file: " << filename << std::endl;
+                return false;
+            }
+            //for (const auto& mesh : meshs)
+            for (int i = 0; i < meshs.size(); i++)
+            {
+                const ModelMesh& mesh = meshs[i];
+                ofs << "# Mesh_" << std::to_string(i) << "\n";
+                ofs << "g mesh" << std::to_string(i) << "\n";
+                for (const auto& vertex : mesh.vbo_) {
+                    ofs << "v " << vertex.x() << " " << vertex.y() << " " << vertex.z() << "\n";
+                }
+                for (const auto& face : mesh.ibo_) {
+                    ofs << "f " << (face(0) + 1) << " " << (face(1) + 1) << " " << (face(2) + 1) << "\n";
+                }
+                ofs << "\n";
+            }
+            ofs.close();
+            return true;
+        }
+        static std::vector<ModelMesh> readFromFile(const std::string& filename) //obj format
+        {
+            std::vector<ModelMesh> meshs;
+            std::ifstream ifs(filename);
+            if (!ifs.is_open()) {
+                std::cerr << "Unable to open file: " << filename << std::endl;
+                return meshs;
+            }
+            std::string line;
+            while (std::getline(ifs, line)) 
+            {
+                ModelMesh mesh;
+                std::istringstream is(line);
+                std::string prefix;
+                is >> prefix;
+                if (prefix == "v") {
+                    Eigen::Vector3d vertex;
+                    is >> vertex[0] >> vertex[1] >> vertex[2];
+                    mesh.vbo_.push_back(vertex);
+                }
+                else if (prefix == "f") {
+                    Eigen::Vector3i face;
+                    int index;
+                    for (int i = 0; i < 3; ++i) { // 假设是三角形面
+                        is >> index;
+                        face[i] = index - 1; // OBJ 格式索引从 1 开始，所以减去 1
+                    }
+                    mesh.ibo_.push_back(face);
+                }
+            }
+            ifs.close();
+            return meshs;
+        }
     };
 
     inline TriMesh toTriMesh(const ModelMesh& mesh)
