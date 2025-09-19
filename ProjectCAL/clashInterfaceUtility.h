@@ -23,18 +23,6 @@ namespace clash
         vctA.push_back(elem);
     }
 
-    //inline std::wstring transfer_string_to_wstring(const std::string& str)
-    //{
-    //    std::wstring strw;
-    //    int lengthW = MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, NULL, NULL);
-    //    wchar_t* pUnicode = new wchar_t[lengthW + 1];
-    //    MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, pUnicode, lengthW);
-    //    pUnicode[lengthW] = L'\0';
-    //    strw.append(pUnicode);
-    //    delete[] pUnicode;
-    //    return strw;
-    //}
-
     inline std::wstring string2wstring(const char* str)
     {
         int nLen = MultiByteToWideChar(CP_ACP, 0, str, -1, NULL, NULL);
