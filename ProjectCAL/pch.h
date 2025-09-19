@@ -1,12 +1,15 @@
 #pragma once
 #include<iostream>
 #include<sstream>
+#include <iostream>
+#include <fstream>
 #define _USE_MATH_DEFINES //using M_PI
 #define _AFXDLL
 //#define WIN32_LEAN_AND_MEAN
 //windows API
 #include<windows.h>
 //#include <afx.h> //CString
+#include<direct.h> //_getcwd
 #if defined(min) || defined(max)
 #undef min
 #undef max

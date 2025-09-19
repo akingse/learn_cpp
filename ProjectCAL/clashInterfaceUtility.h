@@ -1,5 +1,6 @@
 #pragma once
 
+#define USING_CLASHINTERFACEUTILITY
 namespace clash
 {
 
@@ -59,13 +60,11 @@ namespace clash
         return wstring2string(wstr.c_str());
     }
 
-    inline std::string getExePath() // include<afx.h>
+    inline std::string get_exe_path()
     {
-        TCHAR buff[MAX_PATH];
-        GetModuleFileNameW(NULL, buff, MAX_PATH);
-        CString path = buff;
-        path = path.Left(path.ReverseFind('\\')); // delete *.exe name
-        return (std::string)(CStringA)path;
+        char buffer[MAX_PATH];//int max_path = 260;
+        std::string exeName = _getcwd(buffer, sizeof(buffer));//<direct.h>
+        return exeName;
     }
 
     inline std::vector<std::string> string_split(const std::string& text, char delimiter)
