@@ -155,13 +155,13 @@ namespace clash
         {
             return operator TriMesh();
         }
-        static std::vector<TriMesh> toTriMeshs(const std::vector<ModelMesh>& meshVct)
-        {
-            std::vector<TriMesh> meshRes(meshVct.size());
-            for (int i = 0; i < (int)meshVct.size(); ++i)
-                meshRes[i] = meshVct[i]; //operator
-            return meshRes;
-        }
+        //inline static std::vector<TriMesh> toTriMeshs(const std::vector<ModelMesh>& meshVct)
+        //{
+        //    std::vector<TriMesh> meshRes(meshVct.size());
+        //    for (int i = 0; i < (int)meshVct.size(); ++i)
+        //        meshRes[i] = meshVct[i]; //operator=
+        //    return meshRes;
+        //}
         inline bool empty() const
         {
             return vbo_.empty() || ibo_.empty();
@@ -231,17 +231,17 @@ namespace clash
             return number_ < rhs.number_;
         }
 
-        static bool isEqualMesh(const ModelMesh& meshA, const ModelMesh& meshB);
+        DLLEXPORT_CAL static bool isEqualMesh(const ModelMesh& meshA, const ModelMesh& meshB);
 
         //IO
-        static bool writeToFile(const std::vector<ModelMesh>& meshs, const std::string& filename = {}); //obj format
+        DLLEXPORT_CAL static bool writeToFile(const std::vector<ModelMesh>& meshs, const std::string& filename = {}); //obj format
 
-        static std::vector<ModelMesh> readFromFile(const std::string& filename); //obj format
+        DLLEXPORT_CAL static std::vector<ModelMesh> readFromFile(const std::string& filename); //obj format
 
     };
 
     //deepcopy
-    ModelMesh operator*(const Eigen::Matrix4d& mat, const ModelMesh& mesh);
+    DLLEXPORT_CAL ModelMesh operator*(const Eigen::Matrix4d& mat, const ModelMesh& mesh);
 
     inline TriMesh toTriMesh(const ModelMesh& mesh)
     {

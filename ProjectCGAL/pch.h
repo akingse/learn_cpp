@@ -10,6 +10,7 @@
 //container
 #include <vector>
 #include <map>
+#include <tuple>
 
 #include <algorithm> 
 #include <utility>
@@ -48,4 +49,10 @@ typedef std::vector<Point2>									Vector2;
 
 #undef min
 #undef max
-#include "ProjectCAL_API.h"
+#define STORAGE_VERTEX_DATA_2D
+#define DLLEXPORT_CAL
+#define USING_PROJECT_CGAL
+
+//#include "ProjectCAL_API.h"
+#include "clashInterfaceUtility.h"   // header only
+#include "clashClassTypeDefine.h"   // header only

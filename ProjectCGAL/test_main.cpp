@@ -1,13 +1,12 @@
-/*
-注意：这是vs配置的项目，仅支持cgal计算，不支持qt可视化；
-*/
 #include "pch.h"
-#include <iostream>
 #include <CGAL/Simple_cartesian.h>
 //typedef CGAL::Simple_cartesian<double> Kernel;
 typedef Kernel::Point_2 Point_2;
 typedef Kernel::Segment_2 Segment_2;
 
+/*
+注意：这是vs配置的项目，仅支持cgal计算，不支持qt可视化；
+*/
 void test_0()
 {
     Point_2 p(1, 1), q(10, 10);
@@ -38,7 +37,7 @@ void test_0()
 
 int main()
 {
-    test_0();
+    //test_0();
     return 0;
 }
 

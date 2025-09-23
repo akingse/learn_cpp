@@ -1,4 +1,8 @@
+#ifndef USING_PROJECT_CGAL
 #include "pch.h"
+#else
+#include "ProjectCGAL\pch.h"
+#endif
 using namespace std;
 using namespace eigen;
 using namespace clash;
@@ -50,8 +54,9 @@ TriMesh clash::operator*(const Eigen::Matrix4d& mat, const TriMesh& mesh)
         res.vbo_[i] = (mat * mesh.vbo_[i].homogeneous()).hnormalized();
         box.extend(res.vbo_[i]);
     }
+    Eigen::Matrix3d mat3 = mat.block<3, 3>(0, 0);
     for (int i = 0; i < (int)mesh.fno_.size(); ++i)
-        res.fno_[i] = toMatrix3d(mat) * mesh.fno_[i];
+        res.fno_[i] = mat3 * mesh.fno_[i];
     res.bounding_ = box;
     return res;
 }
@@ -65,8 +70,9 @@ ModelMesh clash::operator*(const Eigen::Matrix4d& mat, const ModelMesh& mesh)
         res.vbo_[i] = (mat * mesh.vbo_[i].homogeneous()).hnormalized();
         box.extend(res.vbo_[i]);
     }
+    Eigen::Matrix3d mat3 = mat.block<3, 3>(0, 0);
     for (int i = 0; i < (int)mesh.fno_.size(); ++i)
-        res.fno_[i] = toMatrix3d(mat) * mesh.fno_[i];
+        res.fno_[i] = mat3 * mesh.fno_[i];
     res.bounding_ = box;
     return res;
 }
@@ -101,7 +107,7 @@ bool ModelMesh::writeToFile(const std::vector<ModelMesh>& meshs, const std::stri
     std::string filename = _filename;
     if (filename.empty())
     {
-        filename = clash::get_exe_path();
+        filename = clash::get_exe_path();//clashInterfaceUtility
         filename += "/OutputObj/modelmesh_" + std::to_string(GetTickCount64()) + ".obj";
     }
     std::ofstream ofs(filename);

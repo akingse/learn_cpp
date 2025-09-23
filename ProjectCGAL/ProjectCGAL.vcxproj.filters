@@ -24,16 +24,22 @@
     <ClCompile Include="test_main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="test_2.cpp">
+    <ClCompile Include="test_cgal_delaunay.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="test_3.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\ProjectCAL\clashClassTypeDefine.cpp">
+      <Filter>head</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ProjectCAL\clashClassTypeDefine.h">
+      <Filter>head</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ProjectCAL\clashInterfaceUtility.h">
+      <Filter>head</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
