@@ -133,7 +133,7 @@ namespace clash
         double volume_ = 0;
 #endif
 #ifdef STORAGE_VERTEX_DATA_2D
-        inline void to2d()
+        inline void to2D()
         {
             vbo2_.resize(vbo_.size());
             for (int i = 0; i < (int)vbo2_.size(); ++i)

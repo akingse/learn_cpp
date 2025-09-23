@@ -73,7 +73,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)..\TPL\eigen-3.4.0;C:\Users\Aking\source\repos\TPL\eigen-3.4.0;$(ProjectDir)..\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\TPL\eigen-3.4.0;$(ProjectDir)..\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir)..\TPL\eigen-3.4.0;C:\Users\Aking\source\repos\TPL\eigen-3.4.0;$(ProjectDir)..\;$(IncludePath)</IncludePath>
