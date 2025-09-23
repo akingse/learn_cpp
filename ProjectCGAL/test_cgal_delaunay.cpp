@@ -116,10 +116,50 @@ static void readTerrainDataToMesh_csv2()
     //TriMesh trimesh = createTriMesh(points);
 }
 
+static ModelMesh read_obj_mesh(std::string filename) //to python
+{
+    std::vector<ModelMesh> meshVct = ModelMesh::readFromFile(filename);
+    return meshVct[0];
+}
+
+//¼ò»¯
+static void readTerrainDataToMesh_csv3()
+{
+    string filename = R"(C:\Users\Aking\source\repos\learn_cpp\ProjectCGAL\OutputObj\modelmesh_528808828.obj)";
+    ModelMesh mesh = read_obj_mesh(filename);
+    ModelMesh simmesh;
+    simmesh.vbo_ = mesh.vbo_;
+    for (const auto& face : mesh.ibo_)
+    {
+        array<Eigen::Vector3d, 3> trigon = {
+            mesh.vbo_[face[0]],
+            mesh.vbo_[face[1]],
+            mesh.vbo_[face[2]] };
+        double area = 0.5 * (trigon[1]- trigon[0]).cross(trigon[2] - trigon[1]).norm();
+        if (600 < area)
+            continue;
+        double edge = max(max((trigon[1] - trigon[0]).norm(), (trigon[2] - trigon[0]).norm()), (trigon[2] - trigon[1]).norm());
+        if (80 < edge)
+            continue;
+        if (600 > max(max(trigon[0][0], trigon[1][0]), trigon[2][0]))
+            continue;
+        const Vector3d edge0 = mesh.vbo_[face[1]] - mesh.vbo_[face[0]];
+        const Vector3d edge1 = mesh.vbo_[face[2]] - mesh.vbo_[face[1]];
+        double side0 = edge0.norm();
+        double side1 = edge1.norm();
+        double cos01 = edge0.dot(edge1) / (side0 * side1);
+        if (fabs(fabs(cos01) - 1.0) < 5 / 180 * M_PI)
+            continue;
+        simmesh.ibo_.push_back(face);
+    }
+    ModelMesh::writeToFile({ simmesh });
+    cout << "writeToFile finish" << endl;
+}
 
 static int _enrol = []()
     {
-        readTerrainDataToMesh_csv1();
+        //readTerrainDataToMesh_csv1();
         //readTerrainDataToMesh_csv2();
+        readTerrainDataToMesh_csv3();
         return 0;
     }();
