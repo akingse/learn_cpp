@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)..\TPL\eigen-3.4.0;$(SolutionDir)..\TPL\boost-1.81.0;$(SolutionDir)..\TPL\CGAL-5.5.2\include;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\TPL\boost-1.81.0\libs;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\TPL\eigen-3.4.0;$(SolutionDir)..\TPL\boost-1.81.0;$(SolutionDir)..\TPL\CGAL-5.5.2\include;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include;$(SolutionDir)auto_include;$(SolutionDir)ProjectCAL;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\TPL\boost-1.81.0\libs;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib;$(SolutionDir)$(PlatformName)\$(ConfigurationName);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -110,6 +110,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(PlatformName)\$(ConfigurationName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

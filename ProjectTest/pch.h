@@ -4,7 +4,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <algorithm> 
 //time
 #include <chrono>   
 #include <time.h> //clock()
@@ -39,6 +38,7 @@
 #include <typeinfo>
 #include <typeindex> 
 #include <type_traits>
+#include <algorithm> 
 #include <utility> 
 #include <functional>
 #include <memory>

@@ -2,19 +2,31 @@
 #define _CRT_SECURE_NO_WARNINGS
 //#define NDEBUG
 
+//stream
+#include<iostream>
+#include<sstream>
+#include<fstream>
+
+//container
 #include <vector>
 #include <map>
+
+#include <algorithm> 
+#include <utility>
+#include <random>
+#include <chrono>
+
+//win
+#define _USE_MATH_DEFINES //using M_PI
 #include <cstdlib>
 #include <windows.h>
 #include <stdio.h>
-#include <algorithm>
-#include <fstream>
-#include <random>
-#include <chrono>
+#include <direct.h>
+
+//TPL
 #include <Eigen/Dense>
 
-
-
+//CGAL
 #include <CGAL/point_generators_2.h>
 #include <CGAL/algorithm.h>
 #include <CGAL/random_selection.h>
@@ -34,3 +46,6 @@ typedef std::vector<Point2>									Vector2;
 //typedef Eigen::Matrix<double, 3, 3> Matrix3d;
 //typedef Eigen::Matrix<double, 4, 4> Matrix4d;
 
+#undef min
+#undef max
+#include "ProjectCAL_API.h"
