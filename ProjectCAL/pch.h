@@ -20,13 +20,16 @@
 #include<array>
 #include<vector>
 #include<map>
+#include<unordered_map>
 #include<set>
+#include<unordered_set>
 #include<queue>
 #include<Eigen/Dense>
 #define USING_HALFEDGE_STRUCTURE
 #define USING_POINTER_VERION
 #define TEST_CALCULATION_DEBUG
 //#define STATISTIC_DATA_COUNT
+#define STORAGE_VERTEX_DATA_2D
 
 #define PROJECT_CAL_DLLEXPORT_DEFINE //set on pre-processor define
 #include "auto_include/ProjectCAL_API.h"  //PublicAPI

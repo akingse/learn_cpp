@@ -12,6 +12,7 @@
 #include "calculateVectorMatrix.h"  // namespace eigen
 #include "calculatePointLinePlane.h"// namespace clash
 #include "calculatePolygon2d.h"     // namespace clash
+#include "calculatePolygon3d.h"     // namespace land
 #include "calculateTriangle.h"	    // namespace clash
 #include "calculatePolyhedron.h"    // namespace clash
 #include "calculateMeshTopology.h"  //namespace games
