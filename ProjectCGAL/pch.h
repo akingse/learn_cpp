@@ -49,9 +49,9 @@ typedef std::vector<Point2>									Vector2;
 #undef min
 #undef max
 #define STORAGE_VERTEX_DATA_2D
-//#define DLLEXPORT_CAL
 #define USING_PROJECT_CGAL
 
-//#include "clashInterfaceUtility.h"   // header only
-//#include "clashClassTypeDefine.h"   // header only
-#include "ProjectCAL_API.h"
+#define DLLEXPORT_CAL
+#include "clashInterfaceUtility.h"   // header only
+#include "clashClassTypeDefine.h"   // header only
+//#include "ProjectCAL_API.h"

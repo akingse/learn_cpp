@@ -78,6 +78,7 @@ std::vector<Eigen::Vector3i> delaunay_triangulation(const std::vector<Eigen::Vec
 static void readTerrainDataToMesh_csv1()
 {
     string filename = R"(C:\Users\Aking\source\repos\bimbase\src\P3d2Stl\OutputObj\modelmesh_terrain0.obj)";
+    //std::vector<std::string> names = string_split(filename,'\\');
     std::vector<ModelMesh> meshVct = ModelMesh::readFromFile(filename);
     if (meshVct.empty())
         return;
@@ -108,8 +109,8 @@ static void readTerrainDataToMesh_csv2()
             points2d.push_back(Vector2d(x, y));
         }
     }
-    double area2 = computeTriangleArea(array<Vector2d, 3>{ points2d[0], points2d[22], points2d[33] });
-    double area3 = computeTriangleArea(array<Vector3d, 3>{ points[0], points[22], points[33] });
+    //double area2 = computeTriangleArea(array<Vector2d, 3>{ points2d[0], points2d[22], points2d[33] });
+    //double area3 = computeTriangleArea(array<Vector3d, 3>{ points[0], points[22], points[33] });
     ModelMesh mesh;
     mesh.vbo_ = points;
     std::vector<Eigen::Vector3i> ibo = delaunay_triangulation(points2d);
