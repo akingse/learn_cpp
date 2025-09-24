@@ -17,6 +17,9 @@ $(SolutionDir)..\TPL\boost-1.81.0\libs
 $(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib
 $(SolutionDir)$(PlatformName)\$(ConfigurationName)
 
+//dll path (useless)
+PATH=$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib;$(SolutionDir)$(Platform)\$(Configuration)
+
 */
 
 

@@ -133,11 +133,11 @@ bool ModelMesh::writeToFile(const std::vector<ModelMesh>& meshs, const std::stri
 
 std::vector<ModelMesh> ModelMesh::readFromFile(const std::string& filename) //obj format
 {
-    std::vector<ModelMesh> meshes;
+    std::vector<ModelMesh> meshVct;
     std::ifstream ifs(filename);
     if (!ifs.is_open()) {
         std::cerr << "Unable to open file: " << filename << std::endl;
-        return meshes;
+        return meshVct;
     }
     std::string line;
     ModelMesh mesh;
@@ -161,14 +161,15 @@ std::vector<ModelMesh> ModelMesh::readFromFile(const std::string& filename) //ob
             mesh.ibo_.push_back(face);
         }
         else if (prefix == "g" || prefix == "o") {
-            if (!mesh.vbo_.empty() || !mesh.ibo_.empty()) {
-                meshes.push_back(mesh);
+            if (!mesh.vbo_.empty())// || !mesh.ibo_.empty()) 
+            {
+                meshVct.push_back(mesh);
                 mesh = ModelMesh(); //reset clear
             }
         }
     }
-    if (!mesh.vbo_.empty() || !mesh.ibo_.empty())
-        meshes.push_back(mesh);
+    if (!mesh.vbo_.empty())// || !mesh.ibo_.empty())
+        meshVct.push_back(mesh);
     ifs.close();
-    return meshes;
+    return meshVct;
 }
