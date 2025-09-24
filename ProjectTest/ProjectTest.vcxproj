@@ -215,6 +215,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="test_model_mesh.cpp" />
     <ClCompile Include="test_paste1.cpp" />
     <ClCompile Include="test_omp.cpp" />
     <ClCompile Include="test_pointer.cpp" />

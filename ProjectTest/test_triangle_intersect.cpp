@@ -159,6 +159,77 @@ static bool _isPointInMesh(const Vector3d& point, const std::vector<Eigen::Vecto
 	return true;
 }
 
+//数据测试
+static void _test0()
+{
+	// 极限情形
+	Triangle triA = {
+			Vector3d(-3104.3029002511553, 203615.26133667614, -1.2996778653295850e-11),
+			Vector3d(-3286.9535856740031, 203476.36577477955, -1.2977752206211335e-11),
+			Vector3d(-2947.7343472114298, 203688.33348047285, -1.3011058896950091e-11),
+	};
+	Triangle triB = {
+			Vector3d(-3081.5417249541943, 203579.95860459140, -300.00000000001290),
+			Vector3d(-3092.6700295030910, 203597.76761461070, -300.00000000001290),
+			Vector3d(-3092.6700295030919, 203597.76761461070, 3999.9999999999854),
+	};
+	bool b1 = isTwoTrianglesIntersectSAT(triA, triB);
+	auto b2 = getTwoTrianglesIntersectPoints(triA, triB);
+
+
+	double rd = double(rand());// / RAND_MAX;
+	rd = double(rand());
+	rd = double(rand());
+	// 不相交的三角形
+	Vector3d triA_0 = Vector3d(4924494.8122771187, -385870.18283433426, 5749.9999999999054);
+	Vector3d triA_1 = Vector3d(4924599.8122771177, -385945.18283433421, 5749.9999999999054);
+	Vector3d triA_2 = Vector3d(4924586.8713248633, -385946.88654301979, 5749.9999999999054);
+	Vector3d triB_0 = Vector3d(4924601.8102601077, -385940.89359764993, 5750.0000000000000);
+	Vector3d triB_1 = Vector3d(4924595.2577039087, -385951.32193110074, 5750.0000000000000);
+	Vector3d triB_2 = Vector3d(4924589.8109916430, -385975.18553675216, 5750.0000000000000);
+	//Triangle triA = { triA_0, triA_1, triA_2 };
+	//Triangle triB = { triB_0, triB_1, triB_2 };
+	//double d = getTrianglesDistanceSAT(triA, triB);
+
+	triA_0 = Vector3d(0, 0, 0);
+	triA_1 = Vector3d(0, 10, 0);
+	triA_2 = Vector3d(10, 5, 0);
+	triB_0 = Vector3d(-10, 0, 0);
+	triB_1 = Vector3d(-10, 10, 0);
+	triB_2 = Vector3d(-5, 5, 5);
+	triA = { triA_0, triA_1, triA_2 };
+	triB = { triB_0, triB_1, triB_2 };
+
+	//double d0 = getTrianglesDistance(P, Q, triA, triB);
+	double d1 = getTrianglesDistanceSAT(triA, triB);
+	double d = std::nan("0");
+	if (0.0 > d) // nan not greater, not less
+		d++;
+	if (0.0 < d)
+		d++;
+
+	Vector3d v1(1, 0, 0);
+	Vector3d v2(1, 0, 0);
+	Vector3d v3 = v1.cross(v2).normalized(); //0的单位化还是0
+
+	//size_t m2 = ULL_MAX + 2; //归零重新开始计数
+	double dm1 = DBL_MAX + 1;
+	double dm2 = DBL_MAX + DBL_MAX;
+	double dm3 = 2 * DBL_MAX;
+	double dm4 = DBL_MAX + 10000;
+	double dm5 = 1.1 * DBL_MAX;
+	double dm6 = DBL_MAX + 1e300;
+
+	double _inf = std::numeric_limits<double>::infinity();
+	double _max = std::numeric_limits<double>::max();
+	double _min = std::numeric_limits<double>::min();
+	bool s1 = signbit(1.2);
+	bool s2 = signbit(-1.2);
+	bool isi = isinf(DBL_MAX + 1);
+	bool isf = isfinite(gVecNaN[0]);// :ture is a finite value, false otherwise。可用来一起判断inf和nan。
+	cout << "return 0;" << endl;
+}
+
 //测试平行
 static void _test1()
 {
@@ -449,12 +520,12 @@ static void _test9()
 	std::array<Vector3d, 3> tri1 = { Vector3d(), Vector3d(), Vector3d()}; //both support
 	std::array<Vector3d, 3> tri2 = { { Vector3d(), Vector3d(), Vector3d()} };
 	//RelationOfTwoTriangles rela = getRelationOfTwoTrianglesSAT(triA, triB);
-	if (RelationOfTwoTriangles::COPLANAR == getRelationOfTwoTrianglesSAT(triA, triB)) //O2优化不掉两次运行
-		cout << "COPLANAR" << endl;
-	else if (RelationOfTwoTriangles::CONTACT == getRelationOfTwoTrianglesSAT(triA, triB))
-		cout << "CONTACT" << endl;
-	else
-		cout << "INTRUSIVE" << endl;
+	//if (RelationOfTwoTriangles::COPLANAR == getRelationOfTwoTrianglesSAT(triA, triB)) //O2优化不掉两次运行
+	//	cout << "COPLANAR" << endl;
+	//else if (RelationOfTwoTriangles::CONTACT == getRelationOfTwoTrianglesSAT(triA, triB))
+	//	cout << "CONTACT" << endl;
+	//else
+	//	cout << "INTRUSIVE" << endl;
 	cout << "count_gRTT=" << count_gRTT << endl;
 
 	return;

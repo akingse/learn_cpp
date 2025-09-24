@@ -4,6 +4,7 @@
 #else
 #define DLLEXPORT_CAL __declspec(dllimport)
 #endif
+//#define DLLEXPORT_CAL
 
 #include "clashInterfaceUtility.h"  // header only
 #include "clashClassTypeDefine.h"   // header only

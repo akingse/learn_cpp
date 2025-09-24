@@ -1,6 +1,5 @@
 #pragma once
 #define _CRT_SECURE_NO_WARNINGS
-//#define NDEBUG
 
 //stream
 #include<iostream>
@@ -50,9 +49,9 @@ typedef std::vector<Point2>									Vector2;
 #undef min
 #undef max
 #define STORAGE_VERTEX_DATA_2D
-#define DLLEXPORT_CAL
+//#define DLLEXPORT_CAL
 #define USING_PROJECT_CGAL
 
-//#include "ProjectCAL_API.h"
-#include "clashInterfaceUtility.h"   // header only
-#include "clashClassTypeDefine.h"   // header only
+//#include "clashInterfaceUtility.h"   // header only
+//#include "clashClassTypeDefine.h"   // header only
+#include "ProjectCAL_API.h"

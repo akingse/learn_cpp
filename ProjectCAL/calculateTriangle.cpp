@@ -2228,6 +2228,13 @@ std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesNearestPoints(const std::ar
 	return res;
 }
 
+std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesNearestPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
+{
+	Eigen::Vector3d normalA = (triA[1] - triA[0]).cross(triA[2] - triA[1]).normalized();
+	Eigen::Vector3d normalB = (triB[1] - triB[0]).cross(triB[2] - triB[1]).normalized();
+	return getTwoTrianglesNearestPoints(triA, triB, normalA, normalB);
+}
+
 //must intersect
 std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesIntersectPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB,
 	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB)
@@ -2344,3 +2351,9 @@ std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesIntersectPoints(const std::
 	return res;
 }
 
+std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesIntersectPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
+{
+	Eigen::Vector3d normalA = (triA[1] - triA[0]).cross(triA[2] - triA[1]).normalized();
+	Eigen::Vector3d normalB = (triB[1] - triB[0]).cross(triB[2] - triB[1]).normalized();
+	return getTwoTrianglesIntersectPoints(triA, triB, normalA, normalB);
+}

@@ -108,6 +108,8 @@ static void readTerrainDataToMesh_csv2()
             points2d.push_back(Vector2d(x, y));
         }
     }
+    double area2 = computeTriangleArea(array<Vector2d, 3>{ points2d[0], points2d[22], points2d[33] });
+    double area3 = computeTriangleArea(array<Vector3d, 3>{ points[0], points[22], points[33] });
     ModelMesh mesh;
     mesh.vbo_ = points;
     std::vector<Eigen::Vector3i> ibo = delaunay_triangulation(points2d);
@@ -139,7 +141,7 @@ static void readTerrainDataToMesh_csv3()
         if (600 < area)
             continue;
         double edge = max(max((trigon[1] - trigon[0]).norm(), (trigon[2] - trigon[0]).norm()), (trigon[2] - trigon[1]).norm());
-        if (80 < edge)
+        if (100 < edge)
             continue;
         if (600 > max(max(trigon[0][0], trigon[1][0]), trigon[2][0]))
             continue;
@@ -158,8 +160,8 @@ static void readTerrainDataToMesh_csv3()
 
 static int _enrol = []()
     {
-        //readTerrainDataToMesh_csv1();
+        readTerrainDataToMesh_csv1();
         //readTerrainDataToMesh_csv2();
-        readTerrainDataToMesh_csv3();
+        //readTerrainDataToMesh_csv3();
         return 0;
     }();

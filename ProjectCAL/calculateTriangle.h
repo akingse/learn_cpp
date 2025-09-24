@@ -12,8 +12,8 @@
 namespace clash
 {
 	//bool judge
-	double computeTriangleArea(const std::array<Eigen::Vector2d, 3>& triangle);
-	double computeTriangleArea(const std::array<Eigen::Vector3d, 3>& triangle, bool is2D = true);
+	DLLEXPORT_CAL double computeTriangleArea(const std::array<Eigen::Vector2d, 3>& triangle);
+	DLLEXPORT_CAL double computeTriangleArea(const std::array<Eigen::Vector3d, 3>& triangle, bool is2D = true);
 	// intersect of triangle
 	DLLEXPORT_CAL bool isPointInTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon);
 	DLLEXPORT_CAL bool isPointInTriangleCCW(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon);
@@ -64,8 +64,10 @@ namespace eigen
 	DLLEXPORT_CAL double getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
 	DLLEXPORT_CAL double getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB, 
 		const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB);
+	DLLEXPORT_CAL std::array<Eigen::Vector3d, 2> getTwoTrianglesNearestPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
 	DLLEXPORT_CAL std::array<Eigen::Vector3d, 2> getTwoTrianglesNearestPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB,
 		const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB);
+	DLLEXPORT_CAL std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB);
 	DLLEXPORT_CAL std::array<Eigen::Vector3d, 2> getTwoTrianglesIntersectPoints(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB,
 		const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB);
 

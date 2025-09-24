@@ -34,7 +34,6 @@
 #include <condition_variable>
 
 #include <process.h>
-#include <cassert>
 #include <typeinfo>
 #include <typeindex> 
 #include <type_traits>
@@ -54,6 +53,7 @@
 #define WIN32_LEAN_AND_MEAN //avoid _WINSOCKAPI_ warning
 #include <windows.h> //min max
 #include <afx.h> // MFC <cstring>
+#include<direct.h>
 #if defined(min) || defined(max)
 #undef min
 #undef max

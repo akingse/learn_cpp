@@ -217,6 +217,9 @@
     <ClCompile Include="test_thread_pool.cpp">
       <Filter>test_thread</Filter>
     </ClCompile>
+    <ClCompile Include="test_model_mesh.cpp">
+      <Filter>test_geo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">

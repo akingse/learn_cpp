@@ -1,8 +1,4 @@
-#ifndef USING_PROJECT_CGAL
 #include "pch.h"
-#else
-#include "ProjectCGAL\pch.h"
-#endif
 using namespace std;
 using namespace eigen;
 using namespace clash;
