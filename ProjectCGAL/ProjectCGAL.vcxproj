@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{38b8f31f-a122-4a84-b022-3548fe39697b}</ProjectGuid>
+    <ProjectGuid>{13354f72-b53b-46b3-ad54-3f6c1438b046}</ProjectGuid>
     <RootNamespace>ProjectCGAL</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -71,11 +71,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)..\TPL\eigen-3.4.0;$(SolutionDir)..\TPL\boost-1.81.0;$(SolutionDir)..\TPL\CGAL-5.5.2\include;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include;$(SolutionDir)auto_include;$(SolutionDir)ProjectCAL;$(ProjectDir)..\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\TPL\eigen-3.4.0;$(SolutionDir)..\TPL\boost-1.81.0;$(SolutionDir)..\TPL\CGAL-5.5.2\include;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include;$(SolutionDir)auto_include;$(SolutionDir)ProjectCAL;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\TPL\boost-1.81.0\libs;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib;$(SolutionDir)$(PlatformName)\$(ConfigurationName);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)..\TPL\eigen-3.4.0;$(SolutionDir)..\TPL\boost-1.81.0;$(SolutionDir)..\TPL\CGAL-5.5.2\include;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include;$(SolutionDir)auto_include;$(SolutionDir)ProjectCAL;$(ProjectDir)..\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\TPL\eigen-3.4.0;$(SolutionDir)..\TPL\boost-1.81.0;$(SolutionDir)..\TPL\CGAL-5.5.2\include;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\include;$(SolutionDir)auto_include;$(SolutionDir)ProjectCAL;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\TPL\boost-1.81.0\libs;$(SolutionDir)..\TPL\CGAL-5.5.2\auxiliary\gmp\lib;$(SolutionDir)$(PlatformName)\$(ConfigurationName);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -106,18 +106,17 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;USING_PROJECT_CGAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <MinimalRebuild>false</MinimalRebuild>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)$(PlatformName)\$(ConfigurationName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(PlatformName)\$(ConfigurationName)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -128,6 +127,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -136,7 +137,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="test_cgal_delaunay.cpp" />
     <ClCompile Include="test_main.cpp" />
   </ItemGroup>

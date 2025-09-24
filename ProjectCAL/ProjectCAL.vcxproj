@@ -19,22 +19,21 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <VCProjectVersion>16.0</VCProjectVersion>
+    <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{ec9c8ab0-a518-41f8-96f0-91713c819e59}</ProjectGuid>
-    <RootNamespace>Projectcal</RootNamespace>
+    <ProjectGuid>{488c2405-5a64-489f-ac3f-7f3c301b346b}</ProjectGuid>
+    <RootNamespace>ProjectCAL</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>ProjectCAL</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -48,11 +47,10 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
+    <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <SpectreMitigation>false</SpectreMitigation>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -73,10 +71,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)..\TPL\eigen-3.4.0;$(ProjectDir)..\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)..\;$(SolutionDir)..\TPL\eigen-3.4.0;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)..\TPL\eigen-3.4.0;$(ProjectDir)..\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)..\;$(SolutionDir)..\TPL\eigen-3.4.0;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -101,20 +99,15 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <TreatWarningAsError>false</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -123,72 +116,51 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
-      <FunctionLevelLinking>
-      </FunctionLevelLinking>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
-      <Optimization>MaxSpeed</Optimization>
-      <LanguageStandard>Default</LanguageStandard>
-      <DebugInformationFormat>None</DebugInformationFormat>
-      <WholeProgramOptimization>false</WholeProgramOptimization>
-      <OpenMPSupport>true</OpenMPSupport>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <EnableCOMDATFolding>
-      </EnableCOMDATFolding>
-      <OptimizeReferences>
-      </OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="calculateClashDetection.cpp" />
-    <ClCompile Include="calculatePolygon3d.cpp" />
-    <ClCompile Include="calculateSpatialSearchTree.cpp" />
     <ClCompile Include="calculateDynamicAccuracy.cpp" />
     <ClCompile Include="calculateMeshTopology.cpp" />
     <ClCompile Include="calculatePointLinePlane.cpp" />
     <ClCompile Include="calculatePolygon2d.cpp" />
+    <ClCompile Include="calculatePolygon3d.cpp" />
     <ClCompile Include="calculatePolyhedron.cpp" />
+    <ClCompile Include="calculateSpatialSearchTree.cpp" />
     <ClCompile Include="calculateTriangle.cpp" />
     <ClCompile Include="calculateVectorMatrix.cpp" />
     <ClCompile Include="clashClassTypeDefine.cpp" />
     <ClCompile Include="commonFileReadWrite.cpp" />
     <ClCompile Include="DataRecordSingleton.cpp" />
-    <ClCompile Include="pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="test_triangle_intersect.cpp" />
+    <ClCompile Include="pch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\auto_include\ProjectCAL_API.h" />
     <ClInclude Include="calculateClashDetection.h" />
-    <ClInclude Include="calculatePolygon3d.h" />
-    <ClInclude Include="calculateSpatialSearchTree.h" />
     <ClInclude Include="calculateDynamicAccuracy.h" />
     <ClInclude Include="calculateMeshTopology.h" />
     <ClInclude Include="calculatePointLinePlane.h" />
     <ClInclude Include="calculatePolygon2d.h" />
+    <ClInclude Include="calculatePolygon3d.h" />
     <ClInclude Include="calculatePolyhedron.h" />
+    <ClInclude Include="calculateSpatialSearchTree.h" />
     <ClInclude Include="calculateTriangle.h" />
     <ClInclude Include="calculateVectorMatrix.h" />
+    <ClInclude Include="clashClassTypeDefine.h" />
     <ClInclude Include="clashInterfaceUtility.h" />
     <ClInclude Include="commonFileReadWrite.h" />
     <ClInclude Include="DataRecordSingleton.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="clashClassTypeDefine.h" />
-    <ClInclude Include="test_triangle_intersect.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
