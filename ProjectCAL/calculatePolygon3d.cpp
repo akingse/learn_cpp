@@ -3,13 +3,12 @@ using namespace std;
 using namespace clash;
 using namespace land;
 
-
 //compute by ibo index count
-std::pair<std::vector<Eigen::Vector3d>, std::unordered_set<int>> computeBoundaryEdges(const ModelMesh& mesh)
+std::pair<std::vector<Vector3d>, std::unordered_set<int>> computeBoundaryEdges(const vector<Vector3d>& mesh_vbo, const vector<Vector3i>& mesh_ibo)//const ModelMesh& mesh)
 {
     std::unordered_map<Edge, int> edgeCount;
     // count every edge
-    for (const auto& triangle : mesh.ibo_)
+    for (const auto& triangle : mesh_ibo)
     {
         std::array<Edge, 3> edges = {
             Edge(triangle[0], triangle[1]),
@@ -31,8 +30,7 @@ std::pair<std::vector<Eigen::Vector3d>, std::unordered_set<int>> computeBoundary
             uniqueEdge.insert(pair.first.v2);
         }
     }
-    //return boundEdges; //extractboundContour
-    // 建立边界的邻接表
+    //extractboundContour
     std::unordered_map<int, std::vector<int>> adjacencyList;
     for (const auto& edge : boundEdges)
     {
@@ -40,14 +38,13 @@ std::pair<std::vector<Eigen::Vector3d>, std::unordered_set<int>> computeBoundary
         adjacencyList[edge.v2].push_back(edge.v1);
     }
     std::vector<Eigen::Vector3d> boundContour;
-    // 从一个顶点开始，遍历构建轮廓线
-    int startVertex = boundEdges[0].v1; // 选择任意边的起始顶点
+    int startVertex = boundEdges[0].v1; // choose one random index
     int currentVertex = startVertex;
     int previousVertex = -1;
     std::vector<int> check;
     std::set<int> checkset;
     do {
-        boundContour.push_back(mesh.vbo_[currentVertex]);
+        boundContour.push_back(mesh_vbo[currentVertex]);
         const std::vector<int>& neighbors = adjacencyList[currentVertex];
         for (const int neighbor : neighbors)
         {
@@ -64,16 +61,17 @@ std::pair<std::vector<Eigen::Vector3d>, std::unordered_set<int>> computeBoundary
 }
 
 //copy all vbo, filter ibo
-ModelMesh getInnerMeshByBoundary(const ModelMesh& mesh, const std::unordered_set<int>& boundEdge)
+//ModelMesh getInnerMeshByBoundary(const ModelMesh& mesh, const std::unordered_set<int>& boundEdge)
+vector<Vector3i>  getInnerMeshByBoundary(const vector<Vector3i>& ibo, const std::unordered_set<int>& boundEdge)
 {
     //ModelMesh removeOuterEdges(const ModelMesh& mesh,const std::vector<Edge>& boundEdges)
-    ModelMesh innMesh;
-    innMesh.vbo_ = mesh.vbo_;
-    ModelMesh outMesh;
-    outMesh.vbo_ = mesh.vbo_;
+    vector<Vector3i> innMesh;
+    //innMesh.vbo_ = mesh.vbo_;
+    vector<Vector3i> outMesh;
+    //outMesh.vbo_ = mesh.vbo_;
     unordered_set<int> outContour;
     unordered_set<Edge> outEdges;
-    for (const auto& face : mesh.ibo_)
+    for (const auto& face : ibo)
     {
         bool isOut = false;
         for (const auto& i : face)
@@ -102,7 +100,7 @@ ModelMesh getInnerMeshByBoundary(const ModelMesh& mesh, const std::unordered_set
         //}
         if (isOut)
         {
-            outMesh.ibo_.push_back(face);
+            outMesh.push_back(face);
             for (int i = 0; i < 3; i++)
             {
                 outEdges.insert(Edge(face[i], face[(i + 1) % 3]));
@@ -112,7 +110,7 @@ ModelMesh getInnerMeshByBoundary(const ModelMesh& mesh, const std::unordered_set
         }
         else
         {
-            innMesh.ibo_.push_back(face);
+            innMesh.push_back(face);
         }
     }
     //_drawPolyface(getPolyfaceHandleFromModelMesh(innMesh));
@@ -120,7 +118,7 @@ ModelMesh getInnerMeshByBoundary(const ModelMesh& mesh, const std::unordered_set
     return innMesh;
 }
 
-std::array<std::vector<Eigen::Vector3d>, 4> splitFirstContourToEdge(
+std::array<std::vector<Eigen::Vector3d>, 4> splitContourToEdgeFirst(
     const std::vector<Eigen::Vector3d>& boundContour, const std::array<Eigen::Vector2d, 4>& cornerPoints)
 {
     std::map<double, int> angleMap; //夹角排序，轮廓中有的地方夹角很大
@@ -221,33 +219,32 @@ std::array<std::vector<Eigen::Vector3d>, 4> splitContourToEdge(
 //Advancing Front Technique
 void testAdvancingFront(const ModelMesh& mesh)
 {
-    pair<vector<Vector3d>, unordered_set<int>> boundContour = computeBoundaryEdges(mesh);
+    pair<vector<Vector3d>, unordered_set<int>> boundContour = computeBoundaryEdges(mesh.vbo_, mesh.ibo_);
     std::array<Eigen::Vector2d, 4> cornerPoints = {
         Eigen::Vector2d(0,0),
         Eigen::Vector2d(mesh.bounding_.max()[0],0),
         Eigen::Vector2d(mesh.bounding_.max()[0],mesh.bounding_.max()[1]),
         Eigen::Vector2d(0,mesh.bounding_.max()[1]),
     };
-    std::array<std::vector<Eigen::Vector3d>, 4> edgeUV = splitFirstContourToEdge(boundContour.first, cornerPoints);
-    ModelMesh meshI = getInnerMeshByBoundary(mesh, boundContour.second);
+    std::array<std::vector<Eigen::Vector3d>, 4> edgeUV = splitContourToEdgeFirst(boundContour.first, cornerPoints);
+    vector<Vector3i> meshIbo = getInnerMeshByBoundary(mesh.ibo_, boundContour.second);
     //for (const auto& iter : edgeUV)
     //    _drawPolygon(iter, colorRand(), true);
 
-    //for (int t = 0; t < 50; t++)
     int count = 0;
     while (true)
     {
         count++;
-        boundContour = computeBoundaryEdges(meshI);
+        boundContour = computeBoundaryEdges(mesh.vbo_, meshIbo);
         if (boundContour.first.empty())
             break;
         for (int i = 0; i < 4; i++)
             cornerPoints[i] = to_vec2(edgeUV[i].front());
         edgeUV = splitContourToEdge(boundContour.first, cornerPoints);
-        meshI = getInnerMeshByBoundary(meshI, boundContour.second);
+        meshIbo = getInnerMeshByBoundary(meshIbo, boundContour.second);
         //for (const auto& iter : edgeUV)
         //    _drawPolygon(iter, colorRand(), true);
-        if (meshI.ibo_.empty())
+        if (meshIbo.empty())
             break;
     }
     //PolyfaceHandlePtr polyface = getPolyfaceHandleFromModelMesh(meshI);
