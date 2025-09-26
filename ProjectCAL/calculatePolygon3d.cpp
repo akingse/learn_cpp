@@ -264,6 +264,8 @@ static void testTerrainMesh_UVline_0()
     return;
 }
 
+#define TEST_TERRAINMESH
+#ifdef TEST_TERRAINMESH
 static int enrol = []()->int
     {
         testTerrainMesh_UVline_0();
@@ -271,4 +273,8 @@ static int enrol = []()->int
         return 0;
     }();
 
-
+int main()
+{
+    return 0;
+}
+#endif // TEST_TERRAINMESH
