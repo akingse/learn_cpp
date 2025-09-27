@@ -3,9 +3,10 @@ using namespace std;
 using namespace clash;
 using namespace land;
 
-//compute by ibo index count
+//ordered edge points and vertex index
 std::pair<std::vector<Vector3d>, std::unordered_set<int>> computeBoundaryEdges(const vector<Vector3d>& mesh_vbo, const vector<Vector3i>& mesh_ibo)//const ModelMesh& mesh)
 {
+    //compute by ibo index count
     std::unordered_map<Edge, int> edgeCount;
     // count every edge
     for (const auto& triangle : mesh_ibo)
@@ -62,7 +63,7 @@ std::pair<std::vector<Vector3d>, std::unordered_set<int>> computeBoundaryEdges(c
 
 //copy all vbo, filter ibo
 //ModelMesh getInnerMeshByBoundary(const ModelMesh& mesh, const std::unordered_set<int>& boundEdge)
-vector<Vector3i>  getInnerMeshByBoundary(const vector<Vector3i>& ibo, const std::unordered_set<int>& boundEdge)
+vector<Vector3i> getInnerMeshFacesByBoundary(const vector<Vector3i>& ibo, const std::unordered_set<int>& boundEdge)
 {
     //ModelMesh removeOuterEdges(const ModelMesh& mesh,const std::vector<Edge>& boundEdges)
     vector<Vector3i> innMesh;
@@ -101,12 +102,12 @@ vector<Vector3i>  getInnerMeshByBoundary(const vector<Vector3i>& ibo, const std:
         if (isOut)
         {
             outMesh.push_back(face);
-            for (int i = 0; i < 3; i++)
-            {
-                outEdges.insert(Edge(face[i], face[(i + 1) % 3]));
-                if (boundEdge.find(face[i]) == boundEdge.end())
-                    outContour.insert(face[i]);
-            }
+            //for (int i = 0; i < 3; i++)
+            //{
+            //    outEdges.insert(Edge(face[i], face[(i + 1) % 3]));
+            //    if (boundEdge.find(face[i]) == boundEdge.end())
+            //        outContour.insert(face[i]);
+            //}
         }
         else
         {
@@ -118,6 +119,7 @@ vector<Vector3i>  getInnerMeshByBoundary(const vector<Vector3i>& ibo, const std:
     return innMesh;
 }
 
+//first base on max anlge
 std::array<std::vector<Eigen::Vector3d>, 4> splitContourToEdgeFirst(
     const std::vector<Eigen::Vector3d>& boundContour, const std::array<Eigen::Vector2d, 4>& cornerPoints)
 {
@@ -176,6 +178,7 @@ std::array<std::vector<Eigen::Vector3d>, 4> splitContourToEdgeFirst(
     return edgeUV;
 }
 
+//left - right - above - below
 std::array<std::vector<Eigen::Vector3d>, 4> splitContourToEdge(
     const std::vector<Eigen::Vector3d>& boundContour, const std::array<Eigen::Vector2d, 4>& cornerPoints)
 {
@@ -216,8 +219,14 @@ std::array<std::vector<Eigen::Vector3d>, 4> splitContourToEdge(
     return edgeUV;
 }
 
+bool isBoundaryEdgeClose(const std::unordered_set<int>& index)
+{
+
+    return false;
+}
+
 //Advancing Front Technique
-void testAdvancingFront(const ModelMesh& mesh)
+void processAdvancingFrontTechnique(const ModelMesh& mesh)
 {
     pair<vector<Vector3d>, unordered_set<int>> boundContour = computeBoundaryEdges(mesh.vbo_, mesh.ibo_);
     std::array<Eigen::Vector2d, 4> cornerPoints = {
@@ -227,10 +236,15 @@ void testAdvancingFront(const ModelMesh& mesh)
         Eigen::Vector2d(0,mesh.bounding_.max()[1]),
     };
     std::array<std::vector<Eigen::Vector3d>, 4> edgeUV = splitContourToEdgeFirst(boundContour.first, cornerPoints);
-    vector<Vector3i> meshIbo = getInnerMeshByBoundary(mesh.ibo_, boundContour.second);
+    vector<Vector3i> meshIbo = getInnerMeshFacesByBoundary(mesh.ibo_, boundContour.second);
     //for (const auto& iter : edgeUV)
     //    _drawPolygon(iter, colorRand(), true);
 
+    vector<vector<Vector3d>> allEdges;
+    vector<vector<Eigen::Vector3d>> edgesLt;
+    vector<vector<Eigen::Vector3d>> edgesRt;
+    vector<vector<Eigen::Vector3d>> edgesDn;
+    vector<vector<Eigen::Vector3d>> edgesUp;
     int count = 0;
     while (true)
     {
@@ -241,7 +255,7 @@ void testAdvancingFront(const ModelMesh& mesh)
         for (int i = 0; i < 4; i++)
             cornerPoints[i] = to_vec2(edgeUV[i].front());
         edgeUV = splitContourToEdge(boundContour.first, cornerPoints);
-        meshIbo = getInnerMeshByBoundary(meshIbo, boundContour.second);
+        meshIbo = getInnerMeshFacesByBoundary(meshIbo, boundContour.second);
         //for (const auto& iter : edgeUV)
         //    _drawPolygon(iter, colorRand(), true);
         if (meshIbo.empty())
