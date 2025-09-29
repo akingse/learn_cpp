@@ -44,6 +44,7 @@ namespace std
 
 namespace land
 {
+    using namespace Eigen;
     using namespace eigen;
 
     //#ifdef STORAGE_VERTEX_DATA_2D
@@ -120,6 +121,174 @@ namespace land
         Eigen::Matrix4d mat4 = toMatrix4d(mat.inverse()) * translate(bounding.min());
         return mat4;
     }
+
+    //ordered edge points and vertex index
+    inline std::pair<std::vector<Vector3d>, std::unordered_set<int>> computeBoundaryEdges(const std::vector<Vector3d>& mesh_vbo, const std::vector<Vector3i>& mesh_ibo)//const ModelMesh& mesh)
+    {
+        //compute by ibo index count
+        std::unordered_map<Edge, int> edgeCount;
+        // count every edge
+        for (const auto& triangle : mesh_ibo)
+        {
+            std::array<Edge, 3> edges = {
+                Edge(triangle[0], triangle[1]),
+                Edge(triangle[1], triangle[2]),
+                Edge(triangle[2], triangle[0])
+            };
+            for (const auto& edge : edges)
+                edgeCount[edge]++;
+        }
+        // collect
+        std::vector<Edge> boundEdges;
+        std::unordered_set<int> uniqueEdge;
+        for (const auto& pair : edgeCount)
+        {
+            if (pair.second == 1)
+            {
+                boundEdges.push_back(pair.first);
+                uniqueEdge.insert(pair.first.v1);
+                uniqueEdge.insert(pair.first.v2);
+            }
+        }
+        //extractboundContour
+        std::unordered_map<int, std::vector<int>> adjacencyList;
+        for (const auto& edge : boundEdges)
+        {
+            adjacencyList[edge.v1].push_back(edge.v2);
+            adjacencyList[edge.v2].push_back(edge.v1);
+        }
+        std::vector<Eigen::Vector3d> boundContour;
+        int startVertex = boundEdges[0].v1; // choose one random index
+        int currentVertex = startVertex;
+        int previousVertex = -1;
+        std::vector<int> check;
+        std::set<int> checkset;
+        do {
+            boundContour.push_back(mesh_vbo[currentVertex]);
+            const std::vector<int>& neighbors = adjacencyList[currentVertex];
+            for (const int neighbor : neighbors)
+            {
+                if (neighbor != previousVertex) {
+                    previousVertex = currentVertex;
+                    currentVertex = neighbor;
+                    break;
+                }
+            }
+            if (boundEdges.size() < boundContour.size())
+                return {};// break;
+        } while (currentVertex != startVertex);
+        return { boundContour,uniqueEdge };
+    }
+
+    //copy all vbo, filter ibo
+    //ModelMesh getInnerMeshByBoundary(const ModelMesh& mesh, const std::unordered_set<int>& boundEdge)
+    inline std::vector<Vector3i> getInnerMeshFacesByBoundary(const std::vector<Vector3i>& ibo, const std::unordered_set<int>& boundEdge)
+    {
+        //ModelMesh removeOuterEdges(const ModelMesh& mesh,const std::vector<Edge>& boundEdges)
+        std::vector<Vector3i> innMesh;
+        //innMesh.vbo_ = mesh.vbo_;
+        std::vector<Vector3i> outMesh;
+        //outMesh.vbo_ = mesh.vbo_;
+        std::unordered_set<int> outContour;
+        std::unordered_set<Edge> outEdges;
+        for (const auto& face : ibo)
+        {
+            bool isOut = false;
+            for (const auto& i : face)
+            {
+                //if (std::find(boundEdges.begin(), boundEdges.end(), edge) != boundEdges.end())
+                if (boundEdge.find(i) != boundEdge.end())
+                {
+                    isOut = true;
+                    break;
+                }
+            }
+            if (isOut)
+            {
+                outMesh.push_back(face);
+            }
+            else
+            {
+                innMesh.push_back(face);
+            }
+        }
+        //_drawPolyface(getPolyfaceHandleFromModelMesh(innMesh));
+        //_drawPolyface(getPolyfaceHandleFromModelMesh(outMesh), colorRand());
+        return innMesh;
+    }
+
+    inline //first base on max anlge
+        std::array<std::vector<Eigen::Vector3d>, 4> splitContourToEdge(
+            const std::vector<Eigen::Vector3d>& boundContour, const std::array<Eigen::Vector2d, 4>& cornerPoints, bool isFirst = false)
+    {
+        std::map<double, int> angleMap; //夹角排序，轮廓中有的地方夹角很大
+        if (isFirst)
+        {
+            int n = (int)boundContour.size();
+            double minCorner = 1;
+            for (int i = 0; i < boundContour.size(); i++)
+            {
+                int _i = (i == 0) ? n - 1 : i - 1;
+                int i_ = (i + 1) % n;
+                Eigen::Vector3d veci = boundContour[i] - boundContour[_i];
+                Eigen::Vector3d vecj = boundContour[i_] - boundContour[i];
+                double angle = angle_two_vectors(to_vec3(to_vec2(veci)), to_vec3(to_vec2(vecj)));
+                if (angle < minCorner)
+                    continue;
+                angleMap.emplace(angle, i);
+            }
+            if (angleMap.size() < 4)
+                return {};
+        }
+        std::array<int, 4> corner_index;
+        for (int i = 0; i < 4; i++)
+        {
+            double distance = DBL_MAX;
+            if (isFirst)
+                for (auto iter = angleMap.begin(); iter != angleMap.end(); iter++)
+                {
+                    double temp = (cornerPoints[i] - to_vec2(boundContour[iter->second])).squaredNorm();
+                    if (temp < distance)
+                    {
+                        distance = temp;
+                        corner_index[i] = iter->second;
+                    }
+                }
+            else
+                for (int j = 0; j < (int)boundContour.size(); j++)
+                {
+                    double temp = (cornerPoints[i] - to_vec2(boundContour[j])).squaredNorm();
+                    if (temp < distance)
+                    {
+                        distance = temp;
+                        corner_index[i] = j;
+                    }
+                }
+        }
+        //left - right - above - below
+        std::array<std::vector<Eigen::Vector3d>, 4> edgeUV4;
+        for (int i = 0; i < 4; i++)
+        {
+            int end = corner_index[i];
+            int start = corner_index[(i + 1) % 4];
+            std::vector<Eigen::Vector3d> temp;
+            if (start < end)
+            {
+                for (int j = start; j <= end; j++)
+                    temp.push_back(boundContour[j]);
+            }
+            else
+            {
+                for (int j = start; j < boundContour.size(); j++)
+                    temp.push_back(boundContour[j]);
+                for (int j = 0; j <= end; j++)
+                    temp.push_back(boundContour[j]);
+            }
+            edgeUV4[i] = temp;
+        }
+        return edgeUV4;
+    }
+
 
 }
 
