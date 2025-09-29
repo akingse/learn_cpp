@@ -123,7 +123,8 @@ namespace land
     }
 
     //ordered edge points and vertex index
-    inline std::pair<std::vector<Vector3d>, std::unordered_set<int>> computeBoundaryEdges(const std::vector<Vector3d>& mesh_vbo, const std::vector<Vector3i>& mesh_ibo)//const ModelMesh& mesh)
+    inline std::pair<std::vector<Vector3d>, std::unordered_set<int>> computeBoundaryEdges(
+        const std::vector<Vector3d>& mesh_vbo, const std::vector<Vector3i>& mesh_ibo)//const ModelMesh& mesh)
     {
         //compute by ibo index count
         std::unordered_map<Edge, int> edgeCount;
@@ -181,10 +182,8 @@ namespace land
     }
 
     //copy all vbo, filter ibo
-    //ModelMesh getInnerMeshByBoundary(const ModelMesh& mesh, const std::unordered_set<int>& boundEdge)
-    inline std::vector<Vector3i> getInnerMeshFacesByBoundary(const std::vector<Vector3i>& ibo, const std::unordered_set<int>& boundEdge)
+    inline std::vector<Vector3i> getInnerMeshByBoundary(const std::vector<Vector3i>& ibo, const std::unordered_set<int>& boundEdge)
     {
-        //ModelMesh removeOuterEdges(const ModelMesh& mesh,const std::vector<Edge>& boundEdges)
         std::vector<Vector3i> innMesh;
         //innMesh.vbo_ = mesh.vbo_;
         std::vector<Vector3i> outMesh;
@@ -217,8 +216,8 @@ namespace land
         return innMesh;
     }
 
-    inline //first base on max anlge
-        std::array<std::vector<Eigen::Vector3d>, 4> splitContourToEdge(
+    //first base on max anlge
+    inline std::array<std::vector<Eigen::Vector3d>, 4> splitContourToEdge(
             const std::vector<Eigen::Vector3d>& boundContour, const std::array<Eigen::Vector2d, 4>& cornerPoints, bool isFirst = false)
     {
         std::map<double, int> angleMap; //夹角排序，轮廓中有的地方夹角很大
@@ -226,7 +225,7 @@ namespace land
         {
             int n = (int)boundContour.size();
             double minCorner = 1;
-            for (int i = 0; i < boundContour.size(); i++)
+            for (int i = 0; i < n; i++)
             {
                 int _i = (i == 0) ? n - 1 : i - 1;
                 int i_ = (i + 1) % n;
@@ -240,7 +239,7 @@ namespace land
             if (angleMap.size() < 4)
                 return {};
         }
-        std::array<int, 4> corner_index;
+        std::array<int, 4> cornerIndex;
         for (int i = 0; i < 4; i++)
         {
             double distance = DBL_MAX;
@@ -251,7 +250,7 @@ namespace land
                     if (temp < distance)
                     {
                         distance = temp;
-                        corner_index[i] = iter->second;
+                        cornerIndex[i] = iter->second;
                     }
                 }
             else
@@ -261,16 +260,16 @@ namespace land
                     if (temp < distance)
                     {
                         distance = temp;
-                        corner_index[i] = j;
+                        cornerIndex[i] = j;
                     }
                 }
         }
-        //left - right - above - below
+        //left - right - up - down
         std::array<std::vector<Eigen::Vector3d>, 4> edgeUV4;
         for (int i = 0; i < 4; i++)
         {
-            int end = corner_index[i];
-            int start = corner_index[(i + 1) % 4];
+            int end = cornerIndex[i];
+            int start = cornerIndex[(i + 1) % 4];
             std::vector<Eigen::Vector3d> temp;
             if (start < end)
             {

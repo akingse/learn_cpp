@@ -77,7 +77,7 @@ std::vector<Eigen::Vector3i> delaunay_triangulation(const std::vector<Eigen::Vec
 
 static void readTerrainDataToMesh_csv1()
 {
-    string filename = R"(C:\Users\Aking\source\repos\bimbase\src\P3d2Stl\OutputObj\modelmesh_terrain0.obj)";
+    string filename = R"(C:\Users\Aking\source\repos\bimbase\src\P3d2Stl\OutputObj\modelmesh_terrain_0.obj)";
     //std::vector<std::string> names = string_split(filename,'\\');
     std::vector<ModelMesh> meshVct = ModelMesh::readFromFile(filename);
     if (meshVct.empty())
@@ -128,7 +128,7 @@ static ModelMesh read_obj_mesh(std::string filename) //to python
 //¼ò»¯
 static void readTerrainDataToMesh_csv3()
 {
-    string filename = R"(C:\Users\Aking\source\repos\learn_cpp\ProjectCGAL\OutputObj\modelmesh_528808828.obj)";
+    string filename = R"(C:\Users\Aking\source\repos\learn_cpp\ProjectCGAL\OutputObj\modelmesh_1059395046.obj)";
     ModelMesh mesh = read_obj_mesh(filename);
     ModelMesh simmesh;
     simmesh.vbo_ = mesh.vbo_;
@@ -146,6 +146,8 @@ static void readTerrainDataToMesh_csv3()
             continue;
         if (600 > max(max(trigon[0][0], trigon[1][0]), trigon[2][0]))
             continue;
+        if (530 > min(min(trigon[0][0], trigon[1][0]), trigon[2][0]))
+            continue;
         const Vector3d edge0 = mesh.vbo_[face[1]] - mesh.vbo_[face[0]];
         const Vector3d edge1 = mesh.vbo_[face[2]] - mesh.vbo_[face[1]];
         double side0 = edge0.norm();
@@ -161,7 +163,7 @@ static void readTerrainDataToMesh_csv3()
 
 static int _enrol = []()
     {
-        readTerrainDataToMesh_csv1();
+        //readTerrainDataToMesh_csv1();
         //readTerrainDataToMesh_csv2();
         //readTerrainDataToMesh_csv3();
         return 0;
