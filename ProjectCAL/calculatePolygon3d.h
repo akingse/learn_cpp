@@ -90,7 +90,7 @@ namespace land
     }
 
     //using relative matrix
-    inline Eigen::Matrix4d mesh_relative_transform(clash::ModelMesh& mesh)
+    inline Eigen::Matrix4d meshRelativeTransform(clash::ModelMesh& mesh)
     {
         mesh.to2D();
         std::pair<Eigen::Vector2d, Eigen::Vector2d> axis2 = computePrincipalAxes2D(mesh);
@@ -122,8 +122,8 @@ namespace land
         return mat4;
     }
 
-    //ordered edge points and vertex index
-    inline std::pair<std::vector<Vector3d>, std::unordered_set<int>> computeBoundaryEdges(
+    //ordered contour points and vertex index
+    inline std::pair<std::vector<Vector3d>, std::unordered_set<int>> computeBoundaryContour(
         const std::vector<Vector3d>& mesh_vbo, const std::vector<Vector3i>& mesh_ibo)//const ModelMesh& mesh)
     {
         //compute by ibo index count
@@ -162,8 +162,8 @@ namespace land
         int startVertex = boundEdges[0].v1; // choose one random index
         int currentVertex = startVertex;
         int previousVertex = -1;
-        std::vector<int> check;
-        std::set<int> checkset;
+        //std::vector<int> check;
+        //std::set<int> checkset;
         do {
             boundContour.push_back(mesh_vbo[currentVertex]);
             const std::vector<int>& neighbors = adjacencyList[currentVertex];
@@ -216,6 +216,22 @@ namespace land
         return innMesh;
     }
 
+    inline bool isContourCCW(const std::vector<Vector3d>& contour)
+    {
+        const size_t n = contour.size();
+        if (n < 3)
+            return true;
+        double area = 0.0;
+        for (size_t i = 0; i < n; ++i)
+        {
+            const size_t j = (i + 1) % n;
+            const Eigen::Vector3d& p1 = contour[i];
+            const Eigen::Vector3d& p2 = contour[j];
+            area += (p2.x() - p1.x()) * (p2.y() + p1.y());
+        }
+        return area < 0;
+    }
+
     //first base on max anlge
     inline std::array<std::vector<Eigen::Vector3d>, 4> splitContourToEdge(
             const std::vector<Eigen::Vector3d>& boundContour, const std::array<Eigen::Vector2d, 4>& cornerPoints, bool isFirst = false)
@@ -239,51 +255,97 @@ namespace land
             if (angleMap.size() < 4)
                 return {};
         }
-        std::array<int, 4> cornerIndex;
-        for (int i = 0; i < 4; i++)
+        int firstpoint = 0;
+        double distance = DBL_MAX;
+        if (isFirst)
+            for (auto iter = angleMap.begin(); iter != angleMap.end(); iter++)
+            {
+                double temp = (cornerPoints[0] - to_vec2(boundContour[iter->second])).squaredNorm();
+                if (temp < distance)
+                {
+                    distance = temp;
+                    firstpoint = iter->second;
+                }
+            }
+        else
+            for (int j = 0; j < (int)boundContour.size(); j++)
+            {
+                double temp = (cornerPoints[0] - to_vec2(boundContour[j])).squaredNorm();
+                if (temp < distance)
+                {
+                    distance = temp;
+                    firstpoint = j;
+                }
+            }
+        //std::vector<Eigen::Vector3d> ccwContour = boundContour;
+        std::vector<Eigen::Vector3d> ccwContour(boundContour.size());
+        bool isCCW = isContourCCW(boundContour);
+        int n = (int)boundContour.size();
+        for (int i = 0; i < n; i++)
+            ccwContour[i] = boundContour[(i + firstpoint) % n];
+        if (!isCCW)
+            std::reverse(ccwContour.begin(), ccwContour.end());
+        std::array<int, 4> cornerIndex = { 0,0,0,0 };
+        for (int i = 1; i < 4; i++)
         {
             double distance = DBL_MAX;
             if (isFirst)
                 for (auto iter = angleMap.begin(); iter != angleMap.end(); iter++)
                 {
+                    // angleMap record origin index
                     double temp = (cornerPoints[i] - to_vec2(boundContour[iter->second])).squaredNorm();
                     if (temp < distance)
                     {
+                        //if (iter->second <= cornerIndex[i - 1])
+                        //    continue;
                         distance = temp;
-                        cornerIndex[i] = iter->second;
+                        cornerIndex[i] = (iter->second + n - firstpoint) % n; //avoid nega
                     }
                 }
             else
-                for (int j = 0; j < (int)boundContour.size(); j++)
+                for (int j = 0; j < (int)ccwContour.size(); j++)
                 {
-                    double temp = (cornerPoints[i] - to_vec2(boundContour[j])).squaredNorm();
+                    double temp = (cornerPoints[i] - to_vec2(ccwContour[j])).squaredNorm();
                     if (temp < distance)
                     {
+                        if (j <= cornerIndex[i - 1])
+                            continue;
                         distance = temp;
                         cornerIndex[i] = j;
                     }
                 }
         }
-        //left - right - up - down
+        //left - right - down - up
         std::array<std::vector<Eigen::Vector3d>, 4> edgeUV4;
+        //int countLess = 0;
+        //for (int i = 0; i < 4; i++)
+        //{
+        //    if (cornerIndex[i] < cornerIndex[(i + 1) % 4])
+        //        countLess++;
+        //}
+        //bool isCCW = countLess == 3;
         for (int i = 0; i < 4; i++)
         {
-            int end = cornerIndex[i];
-            int start = cornerIndex[(i + 1) % 4];
-            std::vector<Eigen::Vector3d> temp;
+            int start = cornerIndex[i];
+            int end = cornerIndex[(i + 1) % 4];
+            std::vector<Eigen::Vector3d> edge;
+            //if (!isCCW)
+            //    std::swap(start, end);
             if (start < end)
             {
                 for (int j = start; j <= end; j++)
-                    temp.push_back(boundContour[j]);
+                    edge.push_back(ccwContour[j]);
             }
             else
             {
-                for (int j = start; j < boundContour.size(); j++)
-                    temp.push_back(boundContour[j]);
+                for (int j = start; j < ccwContour.size(); j++)
+                    edge.push_back(ccwContour[j]);
                 for (int j = 0; j <= end; j++)
-                    temp.push_back(boundContour[j]);
+                    edge.push_back(ccwContour[j]);
             }
-            edgeUV4[i] = temp;
+            if (i == 2 || i == 3)//(!isCCW && (i == 0 || i == 1)))
+                std::reverse(edge.begin(), edge.end());
+            edgeUV4[i] = edge;
         }
         return edgeUV4;
     }
