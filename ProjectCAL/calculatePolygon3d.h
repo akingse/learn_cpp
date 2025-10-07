@@ -182,7 +182,7 @@ namespace land
     }
 
     //copy all vbo, filter ibo
-    inline std::vector<Vector3i> getInnerMeshByBoundary(const std::vector<Vector3i>& ibo, const std::unordered_set<int>& boundEdge)
+    inline std::vector<Vector3i> getInnerMeshByBoundary(const std::vector<Vector3i>& ibo, const std::unordered_set<int>& boundEdge, bool isInner = true)
     {
         std::vector<Vector3i> innMesh;
         //innMesh.vbo_ = mesh.vbo_;
@@ -213,7 +213,7 @@ namespace land
         }
         //_drawPolyface(getPolyfaceHandleFromModelMesh(innMesh));
         //_drawPolyface(getPolyfaceHandleFromModelMesh(outMesh), colorRand());
-        return innMesh;
+        return isInner ? innMesh : outMesh;
     }
 
     inline bool isContourCCW(const std::vector<Vector3d>& contour)
