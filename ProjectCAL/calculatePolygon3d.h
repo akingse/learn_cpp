@@ -178,15 +178,16 @@ namespace land
             if (boundEdges.size() < boundContour.size())
                 return {};// break;
         } while (currentVertex != startVertex);
+        //boundContour.push_back(boundContour.front());//closed
         return { boundContour,uniqueEdge };
     }
 
-    //copy all vbo, filter ibo
+    //filter ibo, distinguish inner and outer
     inline std::vector<Vector3i> getInnerMeshByBoundary(const std::vector<Vector3i>& ibo, const std::unordered_set<int>& boundEdge, bool isInner = true)
     {
-        std::vector<Vector3i> innMesh;
+        std::vector<Vector3i> innMesh; //inner
         //innMesh.vbo_ = mesh.vbo_;
-        std::vector<Vector3i> outMesh;
+        std::vector<Vector3i> outMesh; //outer
         //outMesh.vbo_ = mesh.vbo_;
         std::unordered_set<int> outContour;
         std::unordered_set<Edge> outEdges;
@@ -296,10 +297,10 @@ namespace land
                     double temp = (cornerPoints[i] - to_vec2(boundContour[iter->second])).squaredNorm();
                     if (temp < distance)
                     {
-                        //if (iter->second <= cornerIndex[i - 1])
-                        //    continue;
                         distance = temp;
                         cornerIndex[i] = (iter->second + n - firstpoint) % n; //avoid nega
+                        if (!isCCW)
+                            cornerIndex[i] = n - 1 - cornerIndex[i];
                     }
                 }
             else
