@@ -244,10 +244,10 @@ namespace land
             double minCorner = 1;
             for (int i = 0; i < n; i++)
             {
-                int _i = (i == 0) ? n - 1 : i - 1;
-                int i_ = (i + 1) % n;
-                Eigen::Vector3d veci = boundContour[i] - boundContour[_i];
-                Eigen::Vector3d vecj = boundContour[i_] - boundContour[i];
+                int h = (i == 0) ? n - 1 : i - 1;
+                int j = (i + 1) % n;
+                Eigen::Vector3d veci = boundContour[i] - boundContour[h];
+                Eigen::Vector3d vecj = boundContour[j] - boundContour[i];
                 double angle = angle_two_vectors(to_vec3(to_vec2(veci)), to_vec3(to_vec2(vecj)));
                 if (angle < minCorner)
                     continue;
@@ -284,8 +284,13 @@ namespace land
         int n = (int)boundContour.size();
         for (int i = 0; i < n; i++)
             ccwContour[i] = boundContour[(i + firstpoint) % n];
+        //ccwContour[n - 1] = ccwContour[0]; //closed, for reverse
         if (!isCCW)
+        {
+            ccwContour.push_back(ccwContour.front());
             std::reverse(ccwContour.begin(), ccwContour.end());
+            ccwContour.pop_back();
+        }
         std::array<int, 4> cornerIndex = { 0,0,0,0 };
         for (int i = 1; i < 4; i++)
         {
@@ -300,7 +305,7 @@ namespace land
                         distance = temp;
                         cornerIndex[i] = (iter->second + n - firstpoint) % n; //avoid nega
                         if (!isCCW)
-                            cornerIndex[i] = n - 1 - cornerIndex[i];
+                            cornerIndex[i] = n - cornerIndex[i];
                     }
                 }
             else
@@ -330,8 +335,6 @@ namespace land
             int start = cornerIndex[i];
             int end = cornerIndex[(i + 1) % 4];
             std::vector<Eigen::Vector3d> edge;
-            //if (!isCCW)
-            //    std::swap(start, end);
             if (start < end)
             {
                 for (int j = start; j <= end; j++)
