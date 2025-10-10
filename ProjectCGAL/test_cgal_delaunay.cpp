@@ -148,6 +148,13 @@ static void readTerrainDataToMesh_csv3()
             continue;
         if (530 > min(min(trigon[0][0], trigon[1][0]), trigon[2][0]))
             continue;
+        //right limit
+        if (9000 < max(max(trigon[0][0], trigon[1][0]), trigon[2][0]))
+            continue;
+        if (4700 < max(max(trigon[0][1], trigon[1][1]), trigon[2][1]))
+            continue;
+        if (800 > max(max(trigon[0][1], trigon[1][1]), trigon[2][1]))
+            continue;
         const Vector3d edge0 = mesh.vbo_[face[1]] - mesh.vbo_[face[0]];
         const Vector3d edge1 = mesh.vbo_[face[2]] - mesh.vbo_[face[1]];
         double side0 = edge0.norm();
