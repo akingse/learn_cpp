@@ -66,7 +66,7 @@ int test1()
 static int enrol = []()->int
 {
     //test0();
-    cout << "test_omp finished.\n" << endl;
+    cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
     return 0;
 }();
 

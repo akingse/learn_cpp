@@ -123,7 +123,6 @@ static int enrol = []()->int
 		//_test3();
 		//_test4();
 		_test5();
-
-		cout << "test_precision finished.\n" << endl;
+		cout << get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();

@@ -241,7 +241,7 @@ static void _test_stl_0()
 static int _enrol = []()->int
 	{
 		_test_stl_0();
-		cout << "test_stl finished.\n" << endl;
+		cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();
 

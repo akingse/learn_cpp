@@ -813,6 +813,6 @@ static int enrol = []()->int
 	//_test7();
 #endif
 	_test8();
-	cout << "test_binfile_debug finished.\n" << endl;
+	cout << get_filepath_filename(__FILE__) << " finished.\n" << endl;
 	return 0;
 }();

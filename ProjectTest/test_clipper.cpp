@@ -348,7 +348,7 @@ static int enrol = []()->int
 	//test3();
 	//test5();
 	//test6();
-	cout << "test_clipper finished.\n" << endl;
+	cout << get_filepath_filename(__FILE__) << " finished.\n" << endl;
 	return 0;
 }();
 

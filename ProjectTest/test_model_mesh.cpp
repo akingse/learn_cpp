@@ -20,7 +20,7 @@ static void readTerrainDataToMesh_csv1()
 static int enrol = []()->int
 	{
 		//readTerrainDataToMesh_csv1(); //Îö¹¹¿¨ËÀ
-		cout << "test_model_mesh finished.\n" << endl;
+		cout << get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();
 

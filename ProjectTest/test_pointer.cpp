@@ -114,6 +114,6 @@ static int enrol = []()->int
 		//test1();
 		//test2();
 		//test3();
-		cout << "test_pointer finished.\n" << endl;
+		cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();

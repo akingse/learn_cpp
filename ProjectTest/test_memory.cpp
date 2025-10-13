@@ -80,6 +80,6 @@ static void test_sharedptr_1()
 static int enrol = []()->int
     {
         test_sharedptr_1();
-        cout << "test_memory_leak finished.\n" << endl;
+        cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
         return 0;
     }();

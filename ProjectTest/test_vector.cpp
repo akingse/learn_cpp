@@ -328,7 +328,7 @@ static int _enrol = []()->int
 		test_vector_6();
 		test_vector_7();
 		test_vector_8();
-		cout << "test_vector finished.\n" << endl;
+		cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();
 

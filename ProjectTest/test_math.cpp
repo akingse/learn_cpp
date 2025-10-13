@@ -550,7 +550,7 @@ static int enrol = []()->int
     //test2(); //for funciton
     //test3();
     //test5();
-    cout << "test_math finished.\n" << endl;
+    cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
     return 0;
 }();
 

@@ -102,6 +102,6 @@ static int enrol = []()->int
 	{
 		//_test0();
 		_test1();
-		cout << "test_data_structure finished.\n" << endl;
+		cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();

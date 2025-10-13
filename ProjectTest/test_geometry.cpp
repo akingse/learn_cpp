@@ -542,7 +542,7 @@ static int enrol = []()->int
 	//test5();
 	//test6();
 	//test9();
-	cout << "test_geometry finished.\n" << endl;
+	cout << get_filepath_filename(__FILE__) << " finished.\n" << endl;
 	return 0;
 }();
 

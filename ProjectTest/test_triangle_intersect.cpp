@@ -1012,7 +1012,7 @@ static int enrol = []()->int
         //_test23();
         //_test25();
 
-        cout << "test_triangle_intersect finished.\n" << endl;
+		cout << get_filepath_filename(__FILE__) << " finished.\n" << endl;
         return 0;
     }();
 
