@@ -97,6 +97,7 @@ static void readTerrainDataToMesh_csv1()
     return;
 }
 
+//πÊ‘Úµ„’Û≤‚ ‘
 static void readTerrainDataToMesh_csv2()
 {
     std::vector<Eigen::Vector3d> points;
@@ -148,7 +149,7 @@ static void readTerrainDataToMesh_csv3()
             continue;
         if (530 > min(min(trigon[0][0], trigon[1][0]), trigon[2][0]))
             continue;
-        //right limit
+        // limit
         if (9000 < max(max(trigon[0][0], trigon[1][0]), trigon[2][0]))
             continue;
         if (4700 < max(max(trigon[0][1], trigon[1][1]), trigon[2][1]))

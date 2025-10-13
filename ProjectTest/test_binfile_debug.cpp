@@ -812,7 +812,7 @@ static int enrol = []()->int
 	//_test6();
 	//_test7();
 #endif
-	_test8();
+	//_test8();
 	cout << "test_binfile_debug finished.\n" << endl;
 	return 0;
 }();

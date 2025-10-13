@@ -29,10 +29,33 @@ static void _test1()
 	//EXPECT_TRUE(isTwoTrianglesIntersection1(triA, triB));
 }
 
-static int enrol = []()->int
+//Èı½ÇĞÎ¼Ğ½Ç
+static void _test2()
 {
-	//_test1();
-	return 0;
-}();
+	array<Eigen::Vector3d, 3> trigon = {
+		Vector3d(0,0,0),
+		Vector3d(10,0,0),
+		Vector3d(-10,1,0),
+	};
+	Vector3d edge0 = trigon[1] - trigon[0];
+	Vector3d edge1 = trigon[2] - trigon[1];
+	Vector3d edge2 = trigon[0] - trigon[2];
+	double side0 = edge0.norm();
+	double side1 = edge1.norm();
+	double side2 = edge2.norm();
+	//angle
+	double cos01 = edge0.dot(edge1) / (side0 * side1);
+	double cos12 = edge1.dot(edge2) / (side1 * side2);
+	double cos20 = edge2.dot(edge0) / (side2 * side0);
+	return;
+}
+
+static int enrol = []()->int
+    {
+        //_test1();
+        _test2();
+		cout << __FILE__ << " finished.\n" << endl;
+		return 0;
+    }();
 
 
