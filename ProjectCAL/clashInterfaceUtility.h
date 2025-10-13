@@ -79,4 +79,13 @@ namespace clash
         return tokens;
     }
 
+    inline std::string get_filename(const std::string& filepath)
+    {
+        std::string filename;
+        std::vector<std::string> namevct = string_split(filepath, '\\');
+        if (namevct.empty())
+            return "";
+        return namevct.back();
+    }
+
 }

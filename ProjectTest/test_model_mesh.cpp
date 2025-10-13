@@ -7,11 +7,11 @@ using namespace accura;
 
 static void readTerrainDataToMesh_csv1()
 {
-    string filename = R"(C:\Users\Aking\source\repos\bimbase\src\P3d2Stl\OutputObj\modelmesh_terrain0.obj)";
+    string filename = R"(C:\Users\Aking\source\repos\bimbase\src\P3d2Stl\OutputObj\modelmesh_terrain_0.obj)";
     std::vector<ModelMesh> meshVct = ModelMesh::readFromFile(filename);
     if (meshVct.empty())
         return;
-    ModelMesh mesh = meshVct[0];
+    const ModelMesh& mesh = meshVct[0];
 
     return;
 }
@@ -19,7 +19,7 @@ static void readTerrainDataToMesh_csv1()
 
 static int enrol = []()->int
 	{
-		readTerrainDataToMesh_csv1();
+		//readTerrainDataToMesh_csv1(); //Îö¹¹¿¨ËÀ
 		cout << "test_model_mesh finished.\n" << endl;
 		return 0;
 	}();

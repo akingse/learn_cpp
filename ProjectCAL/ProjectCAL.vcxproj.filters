@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="commonFileReadWrite.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>common</Filter>
     </ClCompile>
@@ -57,11 +54,11 @@
     <ClCompile Include="clashClassTypeDefine.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="commonFileReadWrite.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="commonFileReadWrite.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -106,6 +103,9 @@
     </ClInclude>
     <ClInclude Include="..\auto_include\ProjectCAL_API.h">
       <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="commonFileReadWrite.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
