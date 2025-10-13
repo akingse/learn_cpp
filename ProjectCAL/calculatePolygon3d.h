@@ -244,8 +244,8 @@ namespace land
             double minCorner = 1;
             for (int i = 0; i < n; i++)
             {
-                int h = (i == 0) ? n - 1 : i - 1;
-                int j = (i + 1) % n;
+                int h = (i == 0) ? n - 1 : i - 1; //last
+                int j = (i + 1) % n; //next
                 Eigen::Vector3d veci = boundContour[i] - boundContour[h];
                 Eigen::Vector3d vecj = boundContour[j] - boundContour[i];
                 double angle = angle_two_vectors(to_vec3(to_vec2(veci)), to_vec3(to_vec2(vecj)));
