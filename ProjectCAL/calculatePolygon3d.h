@@ -47,25 +47,6 @@ namespace land
     using namespace Eigen;
     using namespace eigen;
 
-    //#ifdef STORAGE_VERTEX_DATA_2D
-    inline std::pair<Eigen::Vector2d, Eigen::Vector2d> computePrincipalAxes2D(const clash::ModelMesh& mesh)
-    {
-        Eigen::MatrixXd points(mesh.vbo2_.size(), 2);
-        for (size_t i = 0; i < mesh.vbo2_.size(); ++i)
-            points.row(i) = mesh.vbo2_[i].transpose();
-        Eigen::Vector2d mean = points.colwise().mean();
-        Eigen::MatrixXd centered = points.rowwise() - mean.transpose();
-        Eigen::MatrixXd covariance = (centered.transpose() * centered) / (points.rows() - 1);
-        Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> solver(covariance);
-        if (solver.info() != 0)
-            throw std::runtime_error("Eigen decomposition failed.");
-        Eigen::MatrixXd res = solver.eigenvectors();
-        Eigen::Vector2d principalAxis = solver.eigenvectors().col(1);
-        Eigen::Vector2d secondaryAxis = solver.eigenvectors().col(0);
-        return { principalAxis, secondaryAxis };
-        //return { to_vec3(principalAxis), to_vec3(secondaryAxis) };
-    }
-
     inline std::pair<Eigen::Vector3d, Eigen::Vector3d> computePrincipalAxes3D(const clash::ModelMesh& mesh)
     {
         // 1. Ã·»°∂•µ„
@@ -89,15 +70,31 @@ namespace land
         return { principalAxis, secondaryAxis };
     }
 
+#ifdef STORAGE_VERTEX_DATA_2D
+    inline std::pair<Eigen::Vector2d, Eigen::Vector2d> computePrincipalAxes2D(const clash::ModelMesh& mesh)
+    {
+        Eigen::MatrixXd points(mesh.vbo2_.size(), 2);
+        for (size_t i = 0; i < mesh.vbo2_.size(); ++i)
+            points.row(i) = mesh.vbo2_[i].transpose();
+        Eigen::Vector2d mean = points.colwise().mean();
+        Eigen::MatrixXd centered = points.rowwise() - mean.transpose();
+        Eigen::MatrixXd covariance = (centered.transpose() * centered) / (points.rows() - 1);
+        Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> solver(covariance);
+        if (solver.info() != 0)
+            throw std::runtime_error("Eigen decomposition failed.");
+        Eigen::MatrixXd res = solver.eigenvectors();
+        Eigen::Vector2d principalAxis = solver.eigenvectors().col(1);
+        Eigen::Vector2d secondaryAxis = solver.eigenvectors().col(0);
+        return { principalAxis, secondaryAxis };
+        //return { to_vec3(principalAxis), to_vec3(secondaryAxis) };
+    }
+
     //using relative matrix
     inline Eigen::Matrix4d meshRelativeTransform(clash::ModelMesh& mesh)
     {
         mesh.to2D();
         std::pair<Eigen::Vector2d, Eigen::Vector2d> axis2 = computePrincipalAxes2D(mesh);
         //double dotpro = axis2.first.dot(axis2.second);
-        //double size = 2000;
-        //_drawSegment(Vector3d(), 2* size*axis2.first);
-        //_drawSegment(Vector3d(), 1* size*axis2.second);
         Eigen::Matrix3d mat = toMatrix3d(rotz90() * rotz90() * rotz90()); //avoid tiny float deviation
         if (axis2.first[0] != 0)
             mat = toMatrix3d(rotz(-atan(axis2.first[1] / axis2.first[0])));
@@ -121,6 +118,7 @@ namespace land
         Eigen::Matrix4d mat4 = toMatrix4d(mat.inverse()) * translate(bounding.min());
         return mat4;
     }
+#endif
 
     //ordered contour points and vertex index
     inline std::pair<std::vector<Vector3d>, std::unordered_set<int>> computeBoundaryContour(
@@ -183,7 +181,7 @@ namespace land
     }
 
     //filter ibo, distinguish inner and outer
-    inline std::vector<Vector3i> getInnerMeshByBoundary(const std::vector<Vector3i>& ibo, const std::unordered_set<int>& boundEdge, bool isInner = true)
+    inline std::vector<Vector3i> getRingMeshByBoundary(const std::vector<Vector3i>& ibo, const std::unordered_set<int>& boundEdge, bool isInner = true)
     {
         std::vector<Vector3i> innMesh; //inner
         //innMesh.vbo_ = mesh.vbo_;
