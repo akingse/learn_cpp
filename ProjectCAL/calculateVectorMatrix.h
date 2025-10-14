@@ -87,6 +87,11 @@ namespace eigen
         return std::acos(cosRes); // 0->PI
     }
 
+    inline double get_angle(const Eigen::Vector3d& v0, const Eigen::Vector3d& v1, bool isNorm = true)
+    {
+        return angle_two_vectors(v0, v1, isNorm);
+    }
+
     // dynamic accuracy
     //bool isParallel(const Eigen::Vector2d& vecA, const Eigen::Vector2d& vecB);
     //bool isParallel(const Eigen::Vector3d& vecA, const Eigen::Vector3d& vecB);
