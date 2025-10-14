@@ -24,6 +24,14 @@ namespace eigen
         return Eigen::Vector2d(vec3[0], vec3[1]); // to replace shadow matrix of relative coordinate
     }
 
+    inline std::vector<Eigen::Vector2d> to_vec2(const std::vector<Eigen::Vector3d>& vec3s)
+    {
+        std::vector<Eigen::Vector2d> res(vec3s.size());
+        for (int i = 0; i < res.size(); ++i)
+            res[i] = to_vec2(vec3s[i]);
+        return res;
+    }
+
     inline std::array<Eigen::Vector2d, 3> to_vec2(const std::array<Eigen::Vector3d, 3>& vec3s)
     {
         std::array<Eigen::Vector2d, 3> vec2s;
@@ -35,6 +43,14 @@ namespace eigen
     inline Eigen::Vector3d to_vec3(const Eigen::Vector2d& vec2)
     {
         return Eigen::Vector3d(vec2[0], vec2[1], 0.0);
+    }
+
+    inline std::vector<Eigen::Vector3d> to_vec3(const std::vector<Eigen::Vector2d>& vec2s)
+    {
+        std::vector<Eigen::Vector3d> res(vec2s.size());
+        for (int i = 0; i < res.size(); ++i)
+            res[i] = to_vec3(vec2s[i]);
+        return res;
     }
 
     inline std::array<Eigen::Vector3d, 3> to_vec3(const std::array<Eigen::Vector2d, 3>& vec2s)

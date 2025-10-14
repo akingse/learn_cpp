@@ -231,7 +231,7 @@ namespace land
         return area < 0;
     }
 
-    //first base on max anlge
+    //down-right-up-left, positive direction //first base on max anlge
     inline std::array<std::vector<Eigen::Vector3d>, 4> splitContourToEdge(
             const std::vector<Eigen::Vector3d>& boundContour, const std::array<Eigen::Vector2d, 4>& cornerPoints, bool isFirst = false)
     {
