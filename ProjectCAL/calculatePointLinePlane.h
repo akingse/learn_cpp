@@ -67,7 +67,6 @@ namespace eigen
 	DLLEXPORT_CAL Eigen::Vector3d getIntersectPointOfLineAndPlane(const std::array<Eigen::Vector3d, 2>& line, const std::array<Eigen::Vector3d, 2>& plane);
 	DLLEXPORT_CAL clash::Segment3d getIntersectLineOfTwoPlanes(const Eigen::Vector3d& originA, const Eigen::Vector3d& normalA, const Eigen::Vector3d& originB, const Eigen::Vector3d& normalB);
 	DLLEXPORT_CAL clash::Segment3d getIntersectLineOfTwoPlanes(const std::array<Eigen::Vector3d, 3>& planeA, const std::array<Eigen::Vector3d, 3>& planeB);
-	//DLLEXPORT_CAL clash::Segment3d getIntersectLineOfTwoPlanes(const clash::Plane3d& planeA, const clash::Plane3d& planeB); //overload
 	
 	DLLEXPORT_CAL Eigen::Vector2d getIntersectPointOfTwoLines(const std::array<Eigen::Vector2d, 2>& lineA, const std::array<Eigen::Vector2d, 2>& lineB);
 	DLLEXPORT_CAL Eigen::Vector3d getIntersectPointOfTwoLines(const std::array<Eigen::Vector3d, 2>& lineA, const std::array<Eigen::Vector3d, 2>& lineB);
@@ -78,8 +77,7 @@ namespace clash
 {
 	using namespace Eigen;
 
-	//isTwoSegmentsIntersect2D
-	inline bool isTwoSegmentsIntersect(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB, double tolerance = 0)
+	inline bool isTwoSegmentsIntersect(const std::array<Eigen::Vector2d, 2>& segmA, const std::array<Eigen::Vector2d, 2>& segmB, double tolerance = 0)
 	{
 		// segmA's two point on both sides of segmB
 		if (std::max(segmA[0][0], segmA[1][0]) < std::min(segmB[0][0], segmB[1][0]) + tolerance ||
@@ -94,13 +92,13 @@ namespace clash
 			((segmB[1] - segmB[0])[0] * (segmA[1] - segmB[0])[1] - (segmA[1] - segmB[0])[0] * (segmB[1] - segmB[0])[1]) >= 0.0;
 	}
 
-    inline bool isTwoSegmentsIntersect(const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB, double tolerance = 0)
+    inline bool isTwoSegmentsIntersect(const std::array<Eigen::Vector3d, 2>& segmA, const std::array<Eigen::Vector3d, 2>& segmB, double tolerance = 0)
 	{
 		if (std::max(segmA[0][0], segmA[1][0]) < std::min(segmB[0][0], segmB[1][0]) + tolerance ||
 			std::max(segmB[0][0], segmB[1][0]) < std::min(segmA[0][0], segmA[1][0]) + tolerance ||
 			std::max(segmA[0][1], segmA[1][1]) < std::min(segmB[0][1], segmB[1][1]) + tolerance ||
 			std::max(segmB[0][1], segmB[1][1]) < std::min(segmA[0][1], segmA[1][1]) + tolerance ||
-			std::max(segmB[0][2], segmB[1][2]) < std::min(segmA[0][2], segmA[1][2]) + tolerance ||
+			std::max(segmA[0][2], segmA[1][2]) < std::min(segmB[0][2], segmB[1][2]) + tolerance ||
 			std::max(segmB[0][2], segmB[1][2]) < std::min(segmA[0][2], segmA[1][2]) + tolerance)
 			return false;
 		Eigen::Vector3d point = eigen::getIntersectPointOfTwoLines(segmA, segmB);

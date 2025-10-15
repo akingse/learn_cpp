@@ -52,7 +52,7 @@ static bool isTwoSegmentsIntersect_DA(const std::array<Vector3d, 2>& segmA, cons
 		std::max(segmB[0][0], segmB[1][0]) < std::min(segmA[0][0], segmA[1][0]) + spec ||
 		std::max(segmA[0][1], segmA[1][1]) < std::min(segmB[0][1], segmB[1][1]) + spec ||
 		std::max(segmB[0][1], segmB[1][1]) < std::min(segmA[0][1], segmA[1][1]) + spec ||
-		std::max(segmB[0][2], segmB[1][2]) < std::min(segmA[0][2], segmA[1][2]) + spec ||
+		std::max(segmA[0][2], segmA[1][2]) < std::min(segmB[0][2], segmB[1][2]) + spec ||
 		std::max(segmB[0][2], segmB[1][2]) < std::min(segmA[0][2], segmA[1][2]) + spec)
 		return false;
 	Vector3d AB_0 = segmB[0] - segmA[0];
