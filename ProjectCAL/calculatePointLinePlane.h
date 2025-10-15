@@ -53,23 +53,24 @@ namespace clash
 
 namespace eigen
 {
+	DLLEXPORT_CAL double getDistanceOfPointAndLine(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 2>& line); //get nearest point
 	DLLEXPORT_CAL double getDistanceOfPointAndLine(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 2>& line); //get nearest point
 	DLLEXPORT_CAL double getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
+	DLLEXPORT_CAL double getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& plane); //get nearest projection point
+	//DLLEXPORT_CAL double getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const clash::Plane3d& plane); //overload
+
 	DLLEXPORT_CAL double getDistanceOfTwoLines(const std::array<Eigen::Vector3d, 2>& lineA, const std::array<Eigen::Vector3d, 2>& lineB); //get two nearest points
 	DLLEXPORT_CAL Eigen::Vector3d getNearestPointOfPointAndLine(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 2>& line);
 	DLLEXPORT_CAL Eigen::Vector3d getNearestPointOfPointAndPlane(const Eigen::Vector3d& point, const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
+	
 	DLLEXPORT_CAL clash::Segment3d getNearestPointOfTwoLines(const std::array<Eigen::Vector3d, 2>& lineA, const std::array<Eigen::Vector3d, 2>& lineB); //get nearest projection point
 	DLLEXPORT_CAL Eigen::Vector3d getIntersectPointOfLineAndPlane(const std::array<Eigen::Vector3d, 2>& line, const std::array<Eigen::Vector3d, 2>& plane);
 	DLLEXPORT_CAL clash::Segment3d getIntersectLineOfTwoPlanes(const Eigen::Vector3d& originA, const Eigen::Vector3d& normalA, const Eigen::Vector3d& originB, const Eigen::Vector3d& normalB);
-
-	//overload
-	DLLEXPORT_CAL double getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& plane); //get nearest projection point
-	DLLEXPORT_CAL double getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const clash::Plane3d& plane); //overload
 	DLLEXPORT_CAL clash::Segment3d getIntersectLineOfTwoPlanes(const std::array<Eigen::Vector3d, 3>& planeA, const std::array<Eigen::Vector3d, 3>& planeB);
-	DLLEXPORT_CAL clash::Segment3d getIntersectLineOfTwoPlanes(const clash::Plane3d& planeA, const clash::Plane3d& planeB); //overload
-	//2D
-	DLLEXPORT_CAL double getDistanceOfPointAndLine(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 2>& line); //get nearest point
+	//DLLEXPORT_CAL clash::Segment3d getIntersectLineOfTwoPlanes(const clash::Plane3d& planeA, const clash::Plane3d& planeB); //overload
+	
 	DLLEXPORT_CAL Eigen::Vector2d getIntersectPointOfTwoLines(const std::array<Eigen::Vector2d, 2>& lineA, const std::array<Eigen::Vector2d, 2>& lineB);
+	DLLEXPORT_CAL Eigen::Vector3d getIntersectPointOfTwoLines(const std::array<Eigen::Vector3d, 2>& lineA, const std::array<Eigen::Vector3d, 2>& lineB);
 }
 
 //segment
@@ -78,157 +79,37 @@ namespace clash
 	using namespace Eigen;
 
 	//isTwoSegmentsIntersect2D
-	inline bool isTwoSegmentsIntersect(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB)
+	inline bool isTwoSegmentsIntersect(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB, double tolerance = 0)
 	{
 		// segmA's two point on both sides of segmB
-		// (segmB[0] - segmA[0])x(segmA[1] - segmA[0])*(segmA[1] - segmA[0])x(segmB[1] - segmA[0])>=0
-		// (segmA[0] - segmB[0])x(segmB[1] - segmB[0])*(segmB[1] - segmB[0])x(segmA[1] - segmB[0])>=0
-		if (std::max(segmA[0][0], segmA[1][0]) < std::min(segmB[0][0], segmB[1][0]) ||
-			std::min(segmA[0][0], segmA[1][0]) > std::max(segmB[0][0], segmB[1][0]) ||
-			std::max(segmA[0][1], segmA[1][1]) < std::min(segmB[0][1], segmB[1][1]) ||
-			std::min(segmA[0][1], segmA[1][1]) > std::max(segmB[0][1], segmB[1][1]))
+		if (std::max(segmA[0][0], segmA[1][0]) < std::min(segmB[0][0], segmB[1][0]) + tolerance ||
+            std::max(segmB[0][0], segmB[1][0]) < std::min(segmA[0][0], segmA[1][0]) + tolerance ||
+			std::max(segmA[0][1], segmA[1][1]) < std::min(segmB[0][1], segmB[1][1]) + tolerance ||
+            std::max(segmB[0][1], segmB[1][1]) < std::min(segmA[0][1], segmA[1][1]) + tolerance)
 			return false;
-#ifdef USING_THRESHOLD_GEOMETRIC
-		bool isBetweenB = ((segmB[0] - segmA[0]).x() * (segmA[1] - segmA[0]).y() - (segmA[1] - segmA[0]).x() * (segmB[0] - segmA[0]).y()) *
-			((segmA[1] - segmA[0]).x() * (segmB[1] - segmA[0]).y() - (segmB[1] - segmA[0]).x() * (segmA[1] - segmA[0]).y()) > _epsF;
-		bool isBetweenA = ((segmA[0] - segmB[0]).x() * (segmB[1] - segmB[0]).y() - (segmB[1] - segmB[0]).x() * (segmA[0] - segmB[0]).y()) *
-			((segmB[1] - segmB[0]).x() * (segmA[1] - segmB[0]).y() - (segmA[1] - segmB[0]).x() * (segmB[1] - segmB[0]).y()) > _epsF;
-		return isBetweenB && isBetweenA;
-#else
-		//Vector2d vecA = segmA[1] - segmA[0];
-		//Vector2d AB_0 = segmB[0] - segmA[0];
-		//Vector2d AB_1 = segmB[1] - segmA[0];
-		//Vector2d vecB = segmB[1] - segmB[0];
-		//Vector2d BA_0 = segmA[0] - segmB[0];
-		//Vector2d BA_1 = segmA[1] - segmB[0];
-		//return
-		//	(AB_0[0] * vecA[1] - AB_0[1] * vecA[0]) * (AB_1[0] * vecA[1] - AB_1[1] * vecA[0]) <= 0.0 &&
-		//	(BA_0[0] * vecB[1] - BA_0[1] * vecB[0]) * (BA_1[0] * vecB[1] - BA_1[1] * vecB[0]) <= 0.0;
 		return // double point on line judge
 			((segmB[0] - segmA[0])[0] * (segmA[1] - segmA[0])[1] - (segmA[1] - segmA[0])[0] * (segmB[0] - segmA[0])[1]) *
 			((segmA[1] - segmA[0])[0] * (segmB[1] - segmA[0])[1] - (segmB[1] - segmA[0])[0] * (segmA[1] - segmA[0])[1]) >= 0.0 &&
 			((segmA[0] - segmB[0])[0] * (segmB[1] - segmB[0])[1] - (segmB[1] - segmB[0])[0] * (segmA[0] - segmB[0])[1]) *
 			((segmB[1] - segmB[0])[0] * (segmA[1] - segmB[0])[1] - (segmA[1] - segmB[0])[0] * (segmB[1] - segmB[0])[1]) >= 0.0;
-#endif
 	}
 
-	// must coplanar
-	inline bool isTwoSegmentsIntersect(const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)
+    inline bool isTwoSegmentsIntersect(const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB, double tolerance = 0)
 	{
-		// quick reject box
-	  //if (std::max(segmA[0].x(), segmA[1].x()) < std::min(segmB[0].x(), segmB[1].x()) ||
-		//	std::min(segmA[0].x(), segmA[1].x()) > std::max(segmB[0].x(), segmB[1].x()) ||
-		//	std::max(segmA[0].y(), segmA[1].y()) < std::min(segmB[0].y(), segmB[1].y()) ||
-		//	std::min(segmA[0].y(), segmA[1].y()) > std::max(segmB[0].y(), segmB[1].y()) ||
-		//	std::max(segmA[0].z(), segmA[1].z()) < std::min(segmB[0].z(), segmB[1].z()) ||
-		//	std::min(segmA[0].z(), segmA[1].z()) > std::max(segmB[0].z(), segmB[1].z()))
-		if (std::max(segmA[0][0], segmA[1][0]) < std::min(segmB[0][0], segmB[1][0]) ||
-			std::min(segmA[0][0], segmA[1][0]) > std::max(segmB[0][0], segmB[1][0]) ||
-			std::max(segmA[0][1], segmA[1][1]) < std::min(segmB[0][1], segmB[1][1]) ||
-			std::min(segmA[0][1], segmA[1][1]) > std::max(segmB[0][1], segmB[1][1]) ||
-			std::max(segmA[0][2], segmA[1][2]) < std::min(segmB[0][2], segmB[1][2]) ||
-			std::min(segmA[0][2], segmA[1][2]) > std::max(segmB[0][2], segmB[1][2])) //index will be fast
+		if (std::max(segmA[0][0], segmA[1][0]) < std::min(segmB[0][0], segmB[1][0]) + tolerance ||
+			std::max(segmB[0][0], segmB[1][0]) < std::min(segmA[0][0], segmA[1][0]) + tolerance ||
+			std::max(segmA[0][1], segmA[1][1]) < std::min(segmB[0][1], segmB[1][1]) + tolerance ||
+			std::max(segmB[0][1], segmB[1][1]) < std::min(segmA[0][1], segmA[1][1]) + tolerance ||
+			std::max(segmB[0][2], segmB[1][2]) < std::min(segmA[0][2], segmA[1][2]) + tolerance ||
+			std::max(segmB[0][2], segmB[1][2]) < std::min(segmA[0][2], segmA[1][2]) + tolerance)
 			return false;
-		Eigen::Vector3d vecA = segmA[1] - segmA[0];
-		Eigen::Vector3d vecB = segmB[1] - segmB[0];
-		//judge coplanar first, without tolerance
-		Eigen::Vector3d vecN = vecA.cross(vecB).normalized();
-		//double dotPro = vecN.dot(segmB[0] - segmA[0]);
-        if (!vecN.isZero() && 0 != std::fabs(vecN.dot(segmB[0] - segmA[0])))
+		Eigen::Vector3d point = eigen::getIntersectPointOfTwoLines(segmA, segmB);
+		if (std::isnan(point[0]))
 			return false;
-		return  //double straddling test
-			0.0 <= (segmB[0] - segmA[0]).cross(vecA).dot(vecA.cross(segmB[1] - segmA[0])) && //double separate
-			0.0 <= (segmA[0] - segmB[0]).cross(vecB).dot(vecB.cross(segmA[1] - segmB[0]));
-	}
-
-	inline bool isTwoSegmentsIntersect(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB, double toleDist)
-	{
-		//tole<0 less judge, tole>0 more judge
-		Vector2d vecA = segmA[1] - segmA[0];
-		Vector2d vecB = segmB[1] - segmB[0];
-		double spec = 0;
-		spec = std::max(std::max(fabs(vecA[0]), fabs(vecA[1])), spec);
-		spec = std::max(std::max(fabs(vecB[0]), fabs(vecB[1])), spec);
-		spec = spec * toleDist;// assert(spec > toleDist);
-		if (spec < std::min(segmB[0][0], segmB[1][0]) - std::max(segmA[0][0], segmA[1][0]) ||
-			spec < std::min(segmA[0][0], segmA[1][0]) - std::max(segmB[0][0], segmB[1][0]) ||
-			spec < std::min(segmB[0][1], segmB[1][1]) - std::max(segmA[0][1], segmA[1][1]) ||
-			spec < std::min(segmA[0][1], segmA[1][1]) - std::max(segmB[0][1], segmB[1][1]))
+        if (0 < (point - segmA[0]).dot(point - segmA[1]) || 0 < (point - segmB[0]).dot(point - segmB[1]))
 			return false;
-		Vector2d AB_0 = segmB[0] - segmA[0];
-		Vector2d AB_1 = segmB[1] - segmA[0];
-		Vector2d BA_0 = segmA[0] - segmB[0];
-		Vector2d BA_1 = segmA[1] - segmB[0];
-		return //double straddle test, cross2d opposite direction
-			(AB_0[0] * vecA[1] - AB_0[1] * vecA[0]) * (AB_1[0] * vecA[1] - AB_1[1] * vecA[0]) <= spec &&
-			(BA_0[0] * vecB[1] - BA_0[1] * vecB[0]) * (BA_1[0] * vecB[1] - BA_1[1] * vecB[0]) <= spec; //not support both near zero
+		return true;
 	}
-
-	inline Eigen::Vector2d getTwoSegmentsIntersectPoint(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB)
-	{
-		if (!isTwoSegmentsIntersect(segmA, segmB))
-			return Vector2d(std::nan("0"), std::nan("0"));
-		//get intersect point 2D
-		const Eigen::Vector2d& A1 = segmA[0];
-		const Eigen::Vector2d& A2 = segmA[1];
-		const Eigen::Vector2d& B1 = segmB[0];
-		const Eigen::Vector2d& B2 = segmB[1];
-		double kA = -((B2.x() - B1.x()) * (A1.y() - B1.y()) - (B2.y() - B1.y()) * (A1.x() - B1.x())) /
-			((B2.x() - B1.x()) * (A2.y() - A1.y()) - (B2.y() - B1.y()) * (A2.x() - A1.x())); //not parallel
-		return A1 + kA * (A2 - A1);
-		//double kB = -((A2.x() - A1.x()) * (B1.y() - A1.y()) - (A2.y() - A1.y()) * (B1.x() - A1.x())) /
-		//	((A2.x() - A1.x()) * (B2.y() - B1.y()) - (A2.y() - A1.y()) * (B2.x() - B1.x())); //not parallel
-		//return B1 + kB * (B2 - B1);
-	}
-
-	inline Eigen::Vector3d getTwoSegmentsIntersectPoint(const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)
-	{
-		if (!isTwoSegmentsIntersect(segmA, segmB))
-			return gVecNaN;
-		Vector3d vecSeg = segmA[1] - segmA[0];
-		Vector3d normal = (vecSeg).cross(segmB[1] - segmB[0]);
-		if (normal.isZero(epsF)) // intersect cause collinear
-			return segmA[0];
-		//double k = (segmA[0] - segmB[0]).cross(segmA[0] - segmB[1]).norm() / normal.norm(); //triangle area method
-		double k = (segmB[0] - segmA[0]).cross(vecSeg).dot(normal) / normal.squaredNorm(); //k
-		return segmA[0] + k * vecSeg;
-	}
-
-	// for soft clash
-	//inline Vector3d getIntersectOfPointAndLine(const Vector3d& point, const std::array<Vector3d, 2>& segm)
-	//{
-	//	Eigen::Vector3d direction = (segm[1] - segm[0]);// not zero
-	//	double projection = direction.dot(point);
-	//	//the projection must on segment
-	//	if (direction.dot(segm[1]) < projection || projection < direction.dot(segm[0]))
-	//		return gVecNaN;// DBL_MAX;
-	//	double k = direction.dot(point - segm[0]) / direction.dot(direction);
-	//	return (segm[0] - point + k * direction);//.squaredNorm();
-	//}
-	//inline Vector3d getIntersectOfTwoSegments(const std::array<Vector3d, 2>& segmA, const std::array<Vector3d, 2>& segmB)
-	//{
-	//	Vector3d vectA = segmA[1] - segmA[0];
-	//	Vector3d vectB = segmB[1] - segmB[0];
-	//	double delta1 = (segmB[0] - segmA[0]).dot(vectA);
-	//	double delta2 = (segmB[0] - segmA[0]).dot(vectB);
-	//	// 2*2 inverse matrix, 1/|M|*(exchange main diagonal and -1 counter-diagonal)
-	//	double deno = -vectA.dot(vectA) * vectB.dot(vectB) + vectA.dot(vectB) * vectB.dot(vectA);//a*d-b*c
-	//	if (deno == 0.0) // parallel, must exclude, than distance of point to segment in next function
-	//		return gVecNaN;// DBL_MAX;
-	//	double kA = 1 / deno * (-vectB.dot(vectB) * delta1 + vectB.dot(vectA) * delta2);
-	//	double kB = 1 / deno * (-vectA.dot(vectB) * delta1 + vectA.dot(vectA) * delta2);
-	//	//	Vector3d pointA = segmA[0] + kA * vectA;
-	//	//	Vector3d pointB = segmB[0] + kB * vectB;
-	//	//whether two intersect-point inside segments
-	//	if (0 <= kA && kA <= 1 && 0 <= kB && kB <= 1)
-	//		return (segmA[0] + kA * vectA - segmB[0] - kB * vectB);//.squaredNorm();
-	//	return gVecNaN;// DBL_MAX; // nearest point outof segments
-	//}
-	//inline Eigen::Vector3d getIntersectPointOfLineAndPlane(const PosVec3d& ray, const Plane3d& plane)
-	//{
-	//	double k = (plane.m_origin - ray[0]).dot(plane.m_normal) / (ray[1].dot(plane.m_normal));
-	//	return ray[0] + k * ray[1];
-	//}
 
 	inline bool isSegmentAndBoundingBoxIntersectSAT(const std::array<Eigen::Vector2d, 2>& segment, const Eigen::AlignedBox2d& box)
 	{

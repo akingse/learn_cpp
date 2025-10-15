@@ -145,7 +145,7 @@ namespace accura
 
         static bool isPointOnPlane(const Eigen::Vector3d& point, const clash::Plane3d& plane, double tolerance = 0.1 * Confusion())
         {
-            double distance = eigen::getDistanceOfPointAndPlane(point, plane);
+            double distance = eigen::getDistanceOfPointAndPlane(point, plane.m_origin, plane.m_normal);
             return distance <= tolerance;
         }
 
