@@ -97,6 +97,7 @@ static std::unique_ptr<BVHNode2d> _createTree2d(std::vector<RectBase2d>& rectVct
 	}
 	return currentNode;
 }
+
 BVHTree2d::BVHTree2d(const std::vector<RectBase2d>& _rectVct)
 {
 	std::vector<RectBase2d> rectVct = _rectVct; //copy
