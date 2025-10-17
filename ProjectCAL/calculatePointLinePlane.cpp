@@ -80,7 +80,7 @@ Eigen::Vector3d eigen::getIntersectPointOfTwoLines(const std::array<Eigen::Vecto
 	Eigen::Vector3d dirB = lineB[1] - lineB[0];
 	//if (isParallel2d(vecA, vecB))
 	//	return gVecNaN2d; //lines collinear
-	Eigen::Vector3d crossProd = dirA.cross(dirB);
+	Eigen::Vector3d crossProd = dirA.cross(dirB); // plane normal
 	double denom = crossProd.squaredNorm();
 	if (denom == 0)
 		return gVecNaN;// std::nullopt; // 平行或重合

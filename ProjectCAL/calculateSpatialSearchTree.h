@@ -173,14 +173,14 @@ namespace bvh
 		BVHTree2d(const std::vector<eigen::TrigonPart>& triangles);
 		BVHTree2d(const std::vector<eigen::ContourPart>& profiles);
 
+		//for grid ray only
+		DLLEXPORT_CAL std::vector<int> findIntersect(const Eigen::Vector2d& point) const;
+		DLLEXPORT_CAL std::vector<int> findIntersect(const Eigen::AlignedBox2d& box) const;
 		DLLEXPORT_CAL std::vector<int> findIntersect(const clash::RectBase2d& rect) const; // for RectBase2d
 		std::vector<size_t> findIntersect(const clash::Polygon2d& polygon) const; //searchFromTree
 		std::vector<size_t> findIntersect(const eigen::ContourPart& profile) const;
 		std::vector<size_t> findIntersectOpLess(const eigen::TrigonPart& trigon) const;//operator less
 		std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon) const;
-		//for grid ray only
-		DLLEXPORT_CAL std::vector<int> findIntersect(const Eigen::Vector2d& point) const;
-		DLLEXPORT_CAL std::vector<int> findIntersect(const Eigen::AlignedBox2d& box) const;
 
 	};
 

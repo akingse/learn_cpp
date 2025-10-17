@@ -345,7 +345,7 @@ static void test2()
 		for (int j = 0; j < N / 2; j++)
 		{
 			//res = intersectWithTwoPlanes(planeVct[2 * j], planeVct[2 * j + 1]);
-			res = getIntersectLineOfTwoPlanes(planeVct[2 * j], planeVct[2 * j + 1]); //14398 ms faster
+			//res = getIntersectLineOfTwoPlanes(planeVct[2 * j], planeVct[2 * j + 1]); //14398 ms faster
 			//res = getIntersectLineOfTwoPlanes_P3D(planeVct[2 * j], planeVct[2 * j + 1]); //30700 ms
 			//if (!isnan(res[0][0]))
 			//	resSeg.push_back(res);
@@ -399,7 +399,7 @@ static void test5()
 	Segment segmB = { Vector3d(0,0,0), Vector3d(100,102,0) };
 	//segmA = eigen::translate(12345678, 12345678, 0) * segmA;
 	//segmB = eigen::translate(12345678, 12345678, 0) * segmB;
-	Eigen::Vector3d inter = clash::getTwoSegmentsIntersectPoint(segmA, segmB);
+	Eigen::Vector3d inter = getIntersectPointOfTwoLines(segmA, segmB);// clash::getTwoSegmentsIntersectPoint(segmA, segmB);
 	Vector3d error = (inter - segmA[0]).cross(inter - segmA[1]);
 	//9.0949470177292824e-13
 	//-1.4156103134155273e-07
@@ -420,6 +420,11 @@ static void test5()
 	bool isinter3 = isTwoSegmentsIntersect(mat*segm3A, mat*segm3B); //tole>0 more judge
 
 	return;
+}
+
+static Segment3d getIntersectLineOfTwoPlanes(const clash::Plane3d& planeA, const clash::Plane3d& planeB)
+{
+	return getIntersectLineOfTwoPlanes(planeA.m_origin, planeA.m_normal, planeB.m_origin, planeB.m_normal);
 }
 
 //测试 面面交线

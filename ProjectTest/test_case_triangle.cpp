@@ -1,4 +1,5 @@
 #include "pch.h"
+using namespace eigen;
 using namespace std;
 using namespace Eigen;
 using namespace clash;
@@ -59,10 +60,49 @@ static void _test2()
 	return;
 }
 
+double getDepthZ(const Triangle3d trigon, const Vector2d& p)
+{
+	Triangle2d trigon2d = { to_vec2(trigon[0]), to_vec2(trigon[1]), to_vec2(trigon[2]) };
+	Vector3d fno = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[1]).normalized();
+
+	if (!isPointInTriangle(p, trigon2d))
+		return -1;
+	double deno = Vector3d(0, 0, 1).dot(fno);
+	if (deno == 0)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+            if (0 < (p - trigon2d[j]).dot(p - trigon2d[(j + 1) % 3]))
+				continue;
+			Vector3d dir = trigon[(j + 1) % 3] - trigon[j];
+			Vector3d normal = Vector3d(0, 0, 1).cross(dir);
+			double k = (trigon[j] - to_vec3(p)).cross(dir).dot(normal) / (normal.dot(normal));
+			//return k;
+			continue;
+		}
+	}
+	double k = (trigon[0] - Vector3d(p[0], p[1], 0)).dot(fno) / deno;
+	return k;
+}
+
+static void _test3()
+{
+	Triangle3d trigon =
+	{
+		Vector3d(0,0,1),
+		Vector3d(0,10,1),
+		Vector3d(0,5,11),
+	};
+	Vector2d p(0, 2);
+	double z = getDepthZ(trigon, p);
+	return;
+}
+
 static int enrol = []()->int
     {
         //_test1();
-        _test2();
+        //_test2();
+        _test3();
 		cout << get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
     }();
