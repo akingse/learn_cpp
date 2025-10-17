@@ -10,47 +10,6 @@
 #ifndef CALCULATE_POINTLINEPLANE_H
 #define CALCULATE_POINTLINEPLANE_H
 
-namespace clash
-{
-	//inline in common use
-	inline bool isPointOnLine(const Eigen::Vector3d& point, const Segment& line)
-	{
-		return eigen::isParallel3d(point - line[0], point - line[1]);
-	}
-	inline bool isPointOnPlane(const Eigen::Vector3d& point, const Plane3d& plane)
-	{
-		return eigen::isPerpendi3d(point - plane.m_origin, plane.m_normal);
-	}
-	inline bool isPointInTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon, double toleDist) // 2D
-	{
-		//tole>0 less judge, tole<0 more judge
-		std::array<Eigen::Vector2d, 3> trigonR; // is origin inside trigonR
-		double spec = 0;
-		for (int i = 0; i < 3; ++i)
-		{
-			trigonR[i] = trigon[i] - point;
-			spec = std::max(std::max(fabs(trigonR[i][0]), fabs(trigonR[i][1])), spec);
-		}
-		spec = spec * toleDist; // assert(spec > toleDist);
-		if (-spec < std::min(std::min(trigonR[0][0], trigonR[1][0]), trigonR[2][0]) ||
-			spec > std::max(std::max(trigonR[0][0], trigonR[1][0]), trigonR[2][0]) ||
-			-spec < std::min(std::min(trigonR[0][1], trigonR[1][1]), trigonR[2][1]) ||
-			spec > std::max(std::max(trigonR[0][1], trigonR[1][1]), trigonR[2][1])) //box judge
-			return false;
-		// been legal judge, no zero vector
-		Eigen::Vector2d v0 = (trigon[1] - trigon[0]).normalized();
-		Eigen::Vector2d v1 = (trigon[2] - trigon[1]).normalized();
-		Eigen::Vector2d v2 = (trigon[0] - trigon[2]).normalized();
-		// (p1-p0).cross(p2-p1)
-		double axisz = v0[0] * v1[1] - v0[1] * v1[0];
-		axisz = (0.0 < axisz) ? 1.0 : -1.0;
-		return //cross2d isLeft judge, (trigon[i] - point) is negative direction
-			spec <= axisz * (v0[1] * trigonR[0][0] - v0[0] * trigonR[0][1]) &&
-			spec <= axisz * (v1[1] * trigonR[1][0] - v1[0] * trigonR[1][1]) &&
-			spec <= axisz * (v2[1] * trigonR[2][0] - v2[0] * trigonR[2][1]); // = decide whether include point on edge
-	}
-}
-
 namespace eigen
 {
 	DLLEXPORT_CAL double getDistanceOfPointAndLine(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 2>& line); //get nearest point
@@ -76,6 +35,17 @@ namespace eigen
 namespace clash
 {
 	using namespace Eigen;
+
+	//inline in common use
+	inline bool isPointOnLine(const Eigen::Vector3d& point, const Segment& line)
+	{
+		return eigen::isParallel3d(point - line[0], point - line[1]);
+	}
+
+	inline bool isPointOnPlane(const Eigen::Vector3d& point, const Plane3d& plane)
+	{
+		return eigen::isPerpendi3d(point - plane.m_origin, plane.m_normal);
+	}
 
 	inline bool isTwoSegmentsIntersect(const std::array<Eigen::Vector2d, 2>& segmA, const std::array<Eigen::Vector2d, 2>& segmB, double tolerance = 0)
 	{

@@ -46,6 +46,7 @@ namespace land
 {
     using namespace Eigen;
     using namespace eigen;
+    using namespace clash;
 
     inline std::pair<Eigen::Vector3d, Eigen::Vector3d> computePrincipalAxes3D(const clash::ModelMesh& mesh)
     {
@@ -350,6 +351,64 @@ namespace land
             edgeUV4[i] = edge;
         }
         return edgeUV4;
+    }
+
+    inline Eigen::Vector2d getIntersectPoint(const std::vector<Eigen::Vector2d>& lineA, const std::vector<Eigen::Vector2d>& lineB)
+    {
+        for (int i = 0; i < lineA.size() - 1; ++i)
+        {
+            std::array<Vector2d, 2> segmA = { lineA[i],lineA[i + 1] };
+            for (int j = 0; j < lineB.size() - 1; ++j)
+            {
+                std::array<Vector2d, 2> segmB = { lineB[j],lineB[j + 1] };
+                if (!isTwoSegmentsIntersect(segmA, segmB))
+                    continue;
+                Eigen::Vector2d point = getIntersectPointOfTwoLines(segmA, segmB);
+                return point;
+            }
+        }
+        return Eigen::Vector2d(std::nan("0"), std::nan("0"));
+    }
+
+    inline std::vector<Eigen::Vector2d> linspace(const Vector2d& p0, const Vector2d& p1, int n)
+    {
+        std::vector<Eigen::Vector2d> res(n);
+        Vector2d v = 1.0 / n * (p1 - p0);
+        for (int i = 0; i < n; ++i)
+            res[i] = p0 + double(i) * v;
+        return res;
+    }
+
+    //double getDepthZ(const ModelMesh& mesh, const Vector2d& p)
+    inline double getDepthZ(const ModelMesh& mesh, const std::vector<int>& inters, const Vector2d& p)
+    {
+        for (const int& i : inters)//(int i = 0; i < mesh.ibo_.size(); ++i)
+        {
+            Triangle2d trigon2d = { //2D
+                mesh.vbo2_[mesh.ibo_[i][0]],
+                mesh.vbo2_[mesh.ibo_[i][1]],
+                mesh.vbo2_[mesh.ibo_[i][2]] };
+            if (!isPointInTriangle(p, trigon2d))
+                continue;
+            double deno = Vector3d(0, 0, 1).dot(mesh.fno_[i]);
+            if (deno == 0)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (0 < (p - trigon2d[j]).dot(p - trigon2d[(j + 1) % 3]))
+                        continue;
+                    Vector3d dir = mesh.vbo_[mesh.ibo_[i][(j + 1) % 3]] - mesh.vbo_[mesh.ibo_[i][j]];
+                    Vector3d normal = Vector3d(0, 0, 1).cross(dir);
+                    if (normal.isZero())
+                        return mesh.vbo_[mesh.ibo_[i][j]].z();
+                    double k = (mesh.vbo_[mesh.ibo_[i][j]] - to_vec3(p)).cross(dir).dot(normal) / (normal.dot(normal));
+                    return k;
+                }
+            }
+            double k = (mesh.vbo_[mesh.ibo_[i][0]] - Vector3d(p[0], p[1], 0)).dot(mesh.fno_[i]) / deno;
+            return k;
+        }
+        return std::nan("0");
     }
 
 

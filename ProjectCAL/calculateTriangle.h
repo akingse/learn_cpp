@@ -16,6 +16,7 @@ namespace clash
 	DLLEXPORT_CAL double computeTriangleArea(const std::array<Eigen::Vector3d, 3>& triangle, bool is2D = true);
 	// intersect of triangle
 	DLLEXPORT_CAL bool isPointInTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon);
+	DLLEXPORT_CAL bool isPointInTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon, double tolerance);
 	DLLEXPORT_CAL bool isPointInTriangleCCW(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon);
 	DLLEXPORT_CAL bool isPointInTriangle(const Eigen::Vector3d& point, const std::array<Eigen::Vector3d, 3>& trigon);
 	bool isSegmentCrossTriangle(const std::array<Eigen::Vector3d, 2>& segment, const std::array<Eigen::Vector3d, 3>& trigon);

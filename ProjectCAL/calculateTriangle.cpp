@@ -13,15 +13,15 @@ using namespace clash;
 //  triangle
 //--------------------------------------------------------------------------------------------------
 
-#ifdef STATISTIC_DATA_COUNT
-std::atomic<size_t>
-count_isTwoTrisInter = 0, count_getTrisDistance = 0, count_isTrisBoundBoxInter = 0, count_isTrisAndBoxInter = 0,
-count_pointInTri = 0, count_err_degen_tri = 0,
-count_err_inputbox = 0, count_err_inter_dist = 0, count_err_repeat_tri = 0,
-count_err_tris_sepa = 0, count_err_tris_inter = 0;
-#endif //STATISTIC_DATA_COUNT
-#ifdef STATISTIC_DATA_TESTFOR
-#endif
+//#ifdef STATISTIC_DATA_COUNT
+//std::atomic<size_t>
+//count_isTwoTrisInter = 0, count_getTrisDistance = 0, count_isTrisBoundBoxInter = 0, count_isTrisAndBoxInter = 0,
+//count_pointInTri = 0, count_err_degen_tri = 0,
+//count_err_inputbox = 0, count_err_inter_dist = 0, count_err_repeat_tri = 0,
+//count_err_tris_sepa = 0, count_err_tris_inter = 0;
+//#endif //STATISTIC_DATA_COUNT
+//#ifdef STATISTIC_DATA_TESTFOR
+//#endif
 
 double clash::computeTriangleArea(const std::array<Vector2d, 3>& triangle)
 {
@@ -80,8 +80,38 @@ bool clash::isPointInTriangleCCW(const Vector2d& point, const std::array<Vector2
 		0.0 <= ((p0[0] - p2[0]) * (point[1] - p2[1]) - (point[0] - p2[0]) * (p0[1] - p2[1]));
 }
 
+//isPointInTriangle_DA
+bool clash::isPointInTriangle(const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 3>& trigon, double toleDist) // 2D
+{
+	//tole>0 less judge, tole<0 more judge
+	std::array<Eigen::Vector2d, 3> trigonR; // is origin inside trigonR
+	double spec = 0;
+	for (int i = 0; i < 3; ++i)
+	{
+		trigonR[i] = trigon[i] - point;
+		spec = std::max(std::max(fabs(trigonR[i][0]), fabs(trigonR[i][1])), spec);
+	}
+	spec = spec * toleDist; // assert(spec > toleDist);
+	if (-spec < std::min(std::min(trigonR[0][0], trigonR[1][0]), trigonR[2][0]) ||
+		spec > std::max(std::max(trigonR[0][0], trigonR[1][0]), trigonR[2][0]) ||
+		-spec < std::min(std::min(trigonR[0][1], trigonR[1][1]), trigonR[2][1]) ||
+		spec > std::max(std::max(trigonR[0][1], trigonR[1][1]), trigonR[2][1])) //box judge
+		return false;
+	// been legal judge, no zero vector
+	Eigen::Vector2d v0 = (trigon[1] - trigon[0]).normalized();
+	Eigen::Vector2d v1 = (trigon[2] - trigon[1]).normalized();
+	Eigen::Vector2d v2 = (trigon[0] - trigon[2]).normalized();
+	// (p1-p0).cross(p2-p1)
+	double axisz = v0[0] * v1[1] - v0[1] * v1[0];
+	axisz = (0.0 < axisz) ? 1.0 : -1.0;
+	return //cross2d isLeft judge, (trigon[i] - point) is negative direction
+		spec <= axisz * (v0[1] * trigonR[0][0] - v0[0] * trigonR[0][1]) &&
+		spec <= axisz * (v1[1] * trigonR[1][0] - v1[0] * trigonR[1][1]) &&
+		spec <= axisz * (v2[1] * trigonR[2][0] - v2[0] * trigonR[2][1]); // = decide whether include point on edge
+}
+
 // using Barycentric Coordinates
-bool isPointInTriangleBC(const Vector2d& point, const std::array<Vector2d, 3>& triangle)
+static bool isPointInTriangleBC(const Vector2d& point, const std::array<Vector2d, 3>& triangle)
 {
 	// -:14, *:6, /:2, dot:5(+:5, *:10)
 	Eigen::Vector2d v0 = triangle[1] - triangle[0];
@@ -100,7 +130,7 @@ bool isPointInTriangleBC(const Vector2d& point, const std::array<Vector2d, 3>& t
 	return 0.0 < a && 0.0 < b && 0.0 < c;
 }
 
-bool isPointInTriangleSAT(const Vector2d& point, const std::array<Vector2d, 3>& triangle)
+static bool isPointInTriangleSAT(const Vector2d& point, const std::array<Vector2d, 3>& triangle)
 {
 	std::array<Vector2d, 3> axes = {
 		triangle[1] - triangle[0],

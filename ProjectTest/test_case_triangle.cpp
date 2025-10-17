@@ -76,6 +76,8 @@ double getDepthZ(const Triangle3d trigon, const Vector2d& p)
 				continue;
 			Vector3d dir = trigon[(j + 1) % 3] - trigon[j];
 			Vector3d normal = Vector3d(0, 0, 1).cross(dir);
+			if (normal.isZero())
+				return trigon[j].z();
 			double k = (trigon[j] - to_vec3(p)).cross(dir).dot(normal) / (normal.dot(normal));
 			//return k;
 			continue;
@@ -89,11 +91,15 @@ static void _test3()
 {
 	Triangle3d trigon =
 	{
+		//Vector3d(0,0,1),
+		//Vector3d(0,10,1),
+		//Vector3d(0,5,11),
+
 		Vector3d(0,0,1),
 		Vector3d(0,10,1),
-		Vector3d(0,5,11),
+		Vector3d(0,0,11),
 	};
-	Vector2d p(0, 2);
+	Vector2d p(0, 0);
 	double z = getDepthZ(trigon, p);
 	return;
 }

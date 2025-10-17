@@ -65,6 +65,7 @@
 //#include <CGAL/>
 //#include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 
+#define STORAGE_VERTEX_DATA_2D
 //import
 #include "ProjectCAL_API.h"
 #include "ProjectPPC_API.h" //add head include: $(SolutionDir)Project1
