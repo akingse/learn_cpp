@@ -23,13 +23,13 @@ namespace clash
 		Eigen::AlignedBox2d m_bound;
 		DLLEXPORT_CAL RectBase2d() = default;
 		DLLEXPORT_CAL RectBase2d(int index, const Eigen::AlignedBox2d& bound) :m_index(index), m_bound(bound) {}
-		bool operator<(const RectBase2d& rhs) const //usually custom in build tree sort
-		{
-			Eigen::AlignedBox2d bound = m_bound; //merge bound box
-			bound.extend(rhs.m_bound);
-			int axis = (bound.sizes()[0] < bound.sizes()[1]) ? 1 : 0;
-			return m_bound.center()[axis] < rhs.m_bound.center()[axis];
-		}
+		//bool operator<(const RectBase2d& rhs) const //usually custom in build tree sort
+		//{
+		//	Eigen::AlignedBox2d bound = m_bound; //merge bound box
+		//	bound.extend(rhs.m_bound);
+		//	int axis = (bound.sizes()[0] < bound.sizes()[1]) ? 1 : 0;
+		//	return m_bound.center()[axis] < rhs.m_bound.center()[axis];
+		//}
 		//virtual ~RectBase2d() {};
 	};
 	class RectBase3d

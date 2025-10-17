@@ -51,49 +51,47 @@ int kthSmallest(int arr[], int l, int r, int k)
 
 #ifdef RESERVE_USING_POLYGON2D
 //size_t Polygon2d::m_id = 0;
-static std::unique_ptr<BVHNode2d> _createTree2d(std::vector<RectBase2d>& rectVct, int dimension)
+static std::unique_ptr<BVHNode2d> _createTree2d(std::vector<RectBase2d>& rectVct, int dimension = 0)
 {
-	auto _getTotalBounding = [&rectVct]()->Eigen::AlignedBox2d
+	auto _getTotalBounding = [](const std::vector<RectBase2d>& rectVct)->Eigen::AlignedBox2d
 	{
 		AlignedBox2d fullBox;
 		for (const auto& iter : rectVct)
 			fullBox.extend(iter.m_bound);
 		return fullBox;
 	};
-	auto _getLongest = [](const AlignedBox2d& box)->int
+	//auto _getLongest = [](const AlignedBox2d& box)->int
+	//{
+	//	Vector2d size = box.sizes();
+	//	return (size[0] < size[1]) ? 1 : 0;
+	//};
+	auto operator_less_x = [](const RectBase2d & a, const RectBase2d & b)
 	{
-		Vector2d size = box.sizes();
-		return (size[0] < size[1]) ? 1 : 0;
+		return a.m_bound.min()[0] < b.m_bound.min()[0];
 	};
-	if (rectVct.empty()) //no chance
-		return nullptr;
+	//if (rectVct.empty()) //no chance
+	//	return nullptr;
 	//int direction = dimension % 2;  // the direction of xy, x=0/y=1
 	std::unique_ptr<BVHNode2d> currentNode = std::make_unique<BVHNode2d>();
 	if (rectVct.size() != 1) //middle node
 	{
-		currentNode->m_bound = _getTotalBounding();// calculateBoundingBox(polygons);  
-		//std::sort(rectVct.begin(), rectVct.end(), [axis](const RectBase2d& a, const RectBase2d& b)
-		//	{ return a.m_bound.min()[axis] < b.m_bound.min()[axis]; }); 
-		if (_getLongest(currentNode->m_bound) == 0)//min fast than center
-			std::sort(rectVct.begin(), rectVct.end(), [](const RectBase2d& a, const RectBase2d& b)
-				{ return a.m_bound.min()[0] < b.m_bound.min()[0]; });//x
-		else
-			std::sort(rectVct.begin(), rectVct.end(), [](const RectBase2d& a, const RectBase2d& b)
-				{ return a.m_bound.min()[1] < b.m_bound.min()[1]; });//y
+		currentNode->m_bound = _getTotalBounding(rectVct); 
+		//if (_getLongest(currentNode->m_bound) == 0)//min fast than center
+		std::sort(rectVct.begin(), rectVct.end(), operator_less_x);
 		size_t dichotomy = rectVct.size() / 2; // less | more
 		vector<RectBase2d> leftParts(rectVct.begin(), rectVct.begin() + dichotomy); //for new child node
 		vector<RectBase2d> rightParts(rectVct.begin() + dichotomy, rectVct.end());
 		// using recursion
 		currentNode->m_left = _createTree2d(leftParts, dimension + 1);
 		currentNode->m_right = _createTree2d(rightParts, dimension + 1);
-		currentNode->m_index = -1; //not leaf node
+		//currentNode->m_index = -1; //not leaf node
 	}
 	else // end leaf node
 	{
 		currentNode->m_index = rectVct[0].m_index;
 		currentNode->m_bound = rectVct[0].m_bound;
-		currentNode->m_left = nullptr;
-		currentNode->m_right = nullptr;
+		//currentNode->m_left = nullptr;
+		//currentNode->m_right = nullptr;
 	}
 	return currentNode;
 }
@@ -101,7 +99,7 @@ static std::unique_ptr<BVHNode2d> _createTree2d(std::vector<RectBase2d>& rectVct
 BVHTree2d::BVHTree2d(const std::vector<RectBase2d>& _rectVct)
 {
 	std::vector<RectBase2d> rectVct = _rectVct; //copy
-    m_tree = _createTree2d(rectVct, 0);
+    m_tree = _createTree2d(rectVct);
 }
 
 //sort the input polygons
