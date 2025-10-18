@@ -92,6 +92,20 @@ namespace test
 	std::vector<std::pair<int, int>>& dataV = test::DataRecordSingleton::getInstance().getData().m_dataPairId;\
     dataV.push_back({idA, idB});\
 
+//for dataTimeAppend
+#define MACRO_EXPANSION_TIME_DEFINE() \
+    std::chrono::steady_clock::time_point timestart, timeend;\
+
+#define MACRO_EXPANSION_TIME_START() \
+    timestart = std::chrono::high_resolution_clock::now();\
+
+#define MACRO_EXPANSION_TIME_END() \
+    timeend = std::chrono::high_resolution_clock::now();\
+
+#define MACRO_EXPANSION_TIME_RECORD(dataName) \
+    test::DataRecordSingleton::dataTimeAppend(dataName, duration<double, std::milli>(timeend - timestart).count());\
+
+
 namespace test
 {
     /// <summary>

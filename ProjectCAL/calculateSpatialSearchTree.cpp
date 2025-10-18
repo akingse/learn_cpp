@@ -53,19 +53,19 @@ int kthSmallest(int arr[], int l, int r, int k)
 //size_t Polygon2d::m_id = 0;
 static std::unique_ptr<BVHNode2d> _createTree2d(std::vector<RectBase2d>& rectVct, int dimension = 0)
 {
-	auto _getTotalBounding = [](const std::vector<RectBase2d>& rectVct)->Eigen::AlignedBox2d
+	auto _get_total_bounding = [](const std::vector<RectBase2d>& rectVct)->Eigen::AlignedBox2d
 	{
-		AlignedBox2d fullBox;
+		AlignedBox2d bound;
 		for (const auto& iter : rectVct)
-			fullBox.extend(iter.m_bound);
-		return fullBox;
+			bound.extend(iter.m_bound);
+		return bound;
 	};
 	//auto _getLongest = [](const AlignedBox2d& box)->int
 	//{
 	//	Vector2d size = box.sizes();
 	//	return (size[0] < size[1]) ? 1 : 0;
 	//};
-	auto operator_less_x = [](const RectBase2d & a, const RectBase2d & b)
+	auto _operator_less_x = [](const RectBase2d & a, const RectBase2d & b)->bool
 	{
 		return a.m_bound.min()[0] < b.m_bound.min()[0];
 	};
@@ -75,9 +75,9 @@ static std::unique_ptr<BVHNode2d> _createTree2d(std::vector<RectBase2d>& rectVct
 	std::unique_ptr<BVHNode2d> currentNode = std::make_unique<BVHNode2d>();
 	if (rectVct.size() != 1) //middle node
 	{
-		currentNode->m_bound = _getTotalBounding(rectVct); 
+		currentNode->m_bound = _get_total_bounding(rectVct);
 		//if (_getLongest(currentNode->m_bound) == 0)//min fast than center
-		std::sort(rectVct.begin(), rectVct.end(), operator_less_x);
+		std::sort(rectVct.begin(), rectVct.end(), _operator_less_x);
 		size_t dichotomy = rectVct.size() / 2; // less | more
 		vector<RectBase2d> leftParts(rectVct.begin(), rectVct.begin() + dichotomy); //for new child node
 		vector<RectBase2d> rightParts(rectVct.begin() + dichotomy, rectVct.end());

@@ -1,5 +1,6 @@
 #include "pch.h"
 using namespace std;
+using namespace Eigen;
 using namespace clash;
 using namespace test;
 using namespace sat;

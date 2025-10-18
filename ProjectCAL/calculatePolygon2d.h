@@ -191,7 +191,7 @@ namespace clash
 			Eigen::AlignedBox2d box2d;
 			for (int j = 0; j < profile[i].size(); ++j)//(const auto& iter : profile[i])
 			{
-				const Vector2d& point = profile[i][j];
+				const Eigen::Vector2d& point = profile[i][j];
 				box2d.extend(point);
 				if (point[1] < pathsPart.m_ymin)
 					pathsPart.m_ymin = point[1];

@@ -157,9 +157,6 @@ static bool isPointInTriangleSAT(const Vector2d& point, const std::array<Vector2
 //must coplanar
 bool clash::isPointInTriangle(const Vector3d& point, const std::array<Vector3d, 3>& trigon) //3D
 {
-#ifdef STATISTIC_DATA_COUNT
-	count_pointInTri++;
-#endif
 	// precision problem, cause misjudge without tolerance
 	//if (point.x() < std::min(std::min(trigon[0][0], trigon[1][0]), trigon[2][0]) /*+ -epsF*/ ||
 	//	point.x() > std::max(std::max(trigon[0][0], trigon[1][0]), trigon[2][0]) /*+ epsF */ ||
@@ -880,9 +877,6 @@ int clash::isRayLineCrossTriangleMTA(const Eigen::Vector3d& origin, const Eigen:
 
 bool eigen::isTwoTrianglesBoxIntersect(const std::array<Vector3d, 3>& triA, const std::array<Vector3d, 3>& triB, double tolerance /*= 0.0*/)
 {
-#ifdef STATISTIC_DATA_COUNT
-	count_isTrisBoundBoxInter++;
-#endif
 	//get min and max of two trigons
 	return 
         std::min(std::min(triA[0][0], triA[1][0]), triA[2][0]) <= std::max(std::max(triB[0][0], triB[1][0]), triB[2][0]) + tolerance &&
@@ -941,9 +935,6 @@ bool eigen::isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector2d, 3>& t
 
 bool eigen::isTriangleAndBoxIntersectSAT(const std::array<Eigen::Vector3d, 3>& trigon, const Eigen::AlignedBox3d& box)
 {
-#ifdef STATISTIC_DATA_COUNT
-	count_isTrisAndBoxInter++;
-#endif
 	//pre-judge
 	if (box.contains(trigon[0]) || box.contains(trigon[1]) || box.contains(trigon[2]))
 		return true;
@@ -1125,13 +1116,7 @@ bool eigen::isTwoTrianglesIntersectSAT(const std::array<Eigen::Vector3d, 3>& tri
 		triB[1] - triB[0],
 		triB[2] - triB[1],
 		triB[0] - triB[2] };
-#ifdef STATISTIC_DATA_COUNT
-	count_isTwoTrisInter++;
-	if (triA[0] == triB[0] && triA[1] == triB[1] && triA[2] == triB[2])
-		count_err_repeat_tri++;
-	if (edgesA[0].cross(edgesA[1]).isZero() || edgesB[0].cross(edgesB[1]).isZero())
-		count_err_degen_tri++;
-#endif
+
 	//// to avoid precision error, cause normal isnot unique, different normal lead to two result
 	//double projection0 = normalA.dot(triB[0] - triA[1]);
 	//double projection1 = normalA.dot(triB[1] - triA[1]);
@@ -1758,9 +1743,6 @@ double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector2d, 3>& triA
 //old version, confused
 double eigen::getTrianglesDistanceSAT(const std::array<Eigen::Vector3d, 3>& triA, const std::array<Eigen::Vector3d, 3>& triB)
 {
-#ifdef STATISTIC_DATA_COUNT
-	count_getTrisDistance++;
-#endif
 	//if (isTwoTrianglesIntersectSAT(triA, triB))
 	//	return 0.0;
 	double dmin = DBL_MAX, dtemp;
@@ -2126,11 +2108,6 @@ std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesNearestPoints(const std::ar
 	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB)
 {
 	std::array<Vector3d, 2> res;
-#ifdef STATISTIC_DATA_COUNT
-	if (isTwoTrianglesIntersectSAT(triA, triB))
-		count_err_tris_inter++;
-	return res;
-#endif
 	double dmin = DBL_MAX, dtemp;
 	Eigen::Vector3d local, local2;
 	auto _getDistanceOfPointAndPlaneINF = [&local](const Vector3d& point, const std::array<Vector3d, 3>& trigon, const Vector3d& normal)->double
@@ -2270,11 +2247,6 @@ std::array<Eigen::Vector3d, 2> eigen::getTwoTrianglesIntersectPoints(const std::
 	const Eigen::Vector3d& normalA, const Eigen::Vector3d& normalB)
 {
 	std::array<Vector3d, 2> res = { gVecNaN , gVecNaN }; // avoid separate
-#ifdef STATISTIC_DATA_COUNT
-	if (!isTwoTrianglesIntersectSAT(triA, triB))
-		count_err_tris_sepa++;
-	//	return res;
-#endif
 	Vector3d vecSeg, local;
 	auto _getIntersectOfSegmentAndPlaneINF = [&vecSeg](const std::array<Vector3d, 2>& segment, const Vector3d& origin, const Vector3d& normal)->double
 		{

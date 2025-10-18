@@ -1,8 +1,8 @@
 #pragma once
-#include <ctime>   
-#include <iostream>
-#include <fstream>
-#include <sstream>
+//#include <ctime>   
+//#include <iostream>
+//#include <fstream>
+//#include <sstream>
 //#ifndef CLASH_DETECTION_SOLUTION
 #pragma warning(disable: 4996) //ctime
 
@@ -13,7 +13,7 @@ struct InterTriInfo
     double distance;
 };
 
-static size_t countFile = 0;
+//static size_t countFile = 0;
 inline void writeDataContent(const std::string& context, const std::string& fileName = {})
 {
     std::time_t currentTime = std::time(nullptr);
@@ -27,14 +27,14 @@ inline void writeDataContent(const std::string& context, const std::string& file
     }
     std::string fileNameO = fileName;
     if (fileNameO.empty())
-        fileNameO = "../txt_file/LogTxt_" + timeString + "_N" + std::to_string(countFile) + ".txt";
+        fileNameO = "../txt_file/LogTxt_" + timeString + "_N" + std::to_string(GetTickCount64()) + ".txt";
     std::ofstream outputFile(fileNameO);
     if (outputFile.is_open()) 
     {
         outputFile << "| create time: |" << timeString << "| \n| ---- | ---- | \n";
         outputFile << context;
         outputFile.close();
-        countFile++;
+        //countFile++;
     }
     return;
 }

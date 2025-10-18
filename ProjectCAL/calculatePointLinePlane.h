@@ -34,8 +34,6 @@ namespace eigen
 //segment
 namespace clash
 {
-	using namespace Eigen;
-
 	//inline in common use
 	inline bool isPointOnLine(const Eigen::Vector3d& point, const Segment& line)
 	{
@@ -83,22 +81,22 @@ namespace clash
 	{
 		if (box.contains(segment[0]) || box.contains(segment[1]))
 			return true;
-		const Vector2d& _min = box.min();
-		const Vector2d& _max = box.max();
+		const Eigen::Vector2d& _min = box.min();
+		const Eigen::Vector2d& _max = box.max();
 		if (std::max(segment[0].x(), segment[1].x()) < _min.x() ||
 			std::min(segment[0].x(), segment[1].x()) > _max.x() ||
 			std::max(segment[0].y(), segment[1].y()) < _min.y() ||
 			std::min(segment[0].y(), segment[1].y()) > _max.y())
 			return false;
 		std::array<Eigen::Vector2d, 3> axes = { {
-			Vector2d(1,0),
-			Vector2d(0,1),
-			Vector2d(-(segment[1] - segment[0]).y(),(segment[1] - segment[0]).x())} }; //canbe zero
+			Eigen::Vector2d(1,0),
+			Eigen::Vector2d(0,1),
+			Eigen::Vector2d(-(segment[1] - segment[0]).y(),(segment[1] - segment[0]).x())} }; //canbe zero
 		std::array<Eigen::Vector2d, 4> boxVtx = { {
 			box.min(),
-			Vector2d(box.max().x(),box.min().y()),
+			Eigen::Vector2d(box.max().x(),box.min().y()),
 			box.max(),
-			Vector2d(box.min().x(),box.max().y())} };
+			Eigen::Vector2d(box.min().x(),box.max().y())} };
 		double minA, maxA, minB, maxB, projection;
 		for (const auto& axis : axes) //fast than index
 		{
@@ -131,8 +129,8 @@ namespace clash
 		//whlie segment with tolerance, using large box
 		if (box.contains(segment[0]) || box.contains(segment[1]))
 			return true;
-		const Vector3d& _min = box.min();
-		const Vector3d& _max = box.max();
+		const Eigen::Vector3d& _min = box.min();
+		const Eigen::Vector3d& _max = box.max();
 		if (std::max(segment[0].x(), segment[1].x()) < _min.x() ||
 			std::min(segment[0].x(), segment[1].x()) > _max.x() ||
 			std::max(segment[0].y(), segment[1].y()) < _min.y() ||
@@ -140,25 +138,25 @@ namespace clash
 			std::max(segment[0].z(), segment[1].z()) < _min.z() ||
 			std::min(segment[0].z(), segment[1].z()) > _max.z())
 			return false;
-		Vector3d vecSeg = segment[1] - segment[0];//segment direction
+		Eigen::Vector3d vecSeg = segment[1] - segment[0];//segment direction
 		std::array<Eigen::Vector3d, 7> axes = { {
 			vecSeg, //maybe not work
-			Vector3d(1,0,0),
-			Vector3d(0,1,0),
-			Vector3d(0,0,1),
-			vecSeg.cross(Vector3d(1,0,0)),
-			vecSeg.cross(Vector3d(0,1,0)),
-			vecSeg.cross(Vector3d(0,0,1)) } };
-		Vector3d vecBox = box.max() - box.min();
+			Eigen::Vector3d(1,0,0),
+			Eigen::Vector3d(0,1,0),
+			Eigen::Vector3d(0,0,1),
+			vecSeg.cross(Eigen::Vector3d(1,0,0)),
+			vecSeg.cross(Eigen::Vector3d(0,1,0)),
+			vecSeg.cross(Eigen::Vector3d(0,0,1)) } };
+		Eigen::Vector3d vecBox = box.max() - box.min();
 		std::array<Eigen::Vector3d, 8> boxVtx = { { //box.min() is origin
-			Vector3d(0,0,0),
-			Vector3d(vecBox[0],0,0),
-			Vector3d(vecBox[0],vecBox[1],0),
-			Vector3d(0,vecBox[1],0),
-			Vector3d(0,0,vecBox[2]),
-			Vector3d(vecBox[0],0,vecBox[2]),
+			Eigen::Vector3d(0,0,0),
+			Eigen::Vector3d(vecBox[0],0,0),
+			Eigen::Vector3d(vecBox[0],vecBox[1],0),
+			Eigen::Vector3d(0,vecBox[1],0),
+			Eigen::Vector3d(0,0,vecBox[2]),
+			Eigen::Vector3d(vecBox[0],0,vecBox[2]),
 			vecBox, //Vector3d(vecBox[0],vecBox[1],vecBox[2])
-			Vector3d(0,vecBox[1],vecBox[2]) } };
+			Eigen::Vector3d(0,vecBox[1],vecBox[2]) } };
 		double minA, maxA, minB, maxB, projection;
 		for (const auto& axis : axes) //fast than index
 		{
