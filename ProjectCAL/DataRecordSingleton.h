@@ -6,6 +6,31 @@
  * \author Aking
  * \date   February 2025
  *********************************************************************/
+
+ //macro expand
+#define MACRO_EXPANSION_DATA_COUNT(dataName) \
+	std::map<std::string, int>& dataM = test::DataRecordSingleton::getInstance().getData().m_dataCount;\
+    if (dataM.find(dataName) == dataM.end())\
+        dataM.insert({ dataName,1 });\
+    else\
+        dataM[dataName]++;\
+
+#define MACRO_EXPANSION_DATA_PAIR(idA, idB) \
+	std::vector<std::pair<int, int>>& dataV = test::DataRecordSingleton::getInstance().getData().m_dataPairId;\
+    dataV.push_back({idA, idB});\
+
+//for dataTimeAppend
+#define MACRO_EXPANSION_TIME_DEFINE \
+    std::chrono::steady_clock::time_point timestart, timeend;\
+
+#define MACRO_EXPANSION_TIME_START \
+    timestart = std::chrono::high_resolution_clock::now();\
+
+#define MACRO_EXPANSION_TIME_END(dataName) \
+    timeend = std::chrono::high_resolution_clock::now();\
+    test::DataRecordSingleton::dataTimeAppend(dataName, duration<double, std::milli>(timeend - timestart).count());\
+
+
 namespace test
 {
     /// <summary>
@@ -79,32 +104,6 @@ namespace test
 
     };
 }
-
-//macro expand
-#define MACRO_EXPANSION_DATA_COUNT(dataName) \
-	std::map<std::string, int>& dataM = test::DataRecordSingleton::getInstance().getData().m_dataCount;\
-    if (dataM.find(dataName) == dataM.end())\
-        dataM.insert({ dataName,1 });\
-    else\
-        dataM[dataName]++;\
-
-#define MACRO_EXPANSION_DATA_PAIR(idA, idB) \
-	std::vector<std::pair<int, int>>& dataV = test::DataRecordSingleton::getInstance().getData().m_dataPairId;\
-    dataV.push_back({idA, idB});\
-
-//for dataTimeAppend
-#define MACRO_EXPANSION_TIME_DEFINE() \
-    std::chrono::steady_clock::time_point timestart, timeend;\
-
-#define MACRO_EXPANSION_TIME_START() \
-    timestart = std::chrono::high_resolution_clock::now();\
-
-#define MACRO_EXPANSION_TIME_END() \
-    timeend = std::chrono::high_resolution_clock::now();\
-
-#define MACRO_EXPANSION_TIME_RECORD(dataName) \
-    test::DataRecordSingleton::dataTimeAppend(dataName, duration<double, std::milli>(timeend - timestart).count());\
-
 
 namespace test
 {
