@@ -14,7 +14,22 @@ namespace clash
 {
     struct Edge
     {
-        //Eigen::Vector2i m_id;
+#ifdef USING_EIGEN_VERISON
+        Eigen::Vector2i m_id;
+        Edge(int a, int b)
+        {
+            m_id[0] = std::min(a, b);
+            m_id[1] = std::max(a, b);
+        }
+        bool operator==(const Edge& other) const
+        {
+            return m_id == other.m_id;
+        }
+        inline int first() const
+        {
+            return m_id[0];
+        }
+#else
         int v1, v2;
         Edge(int a, int b)
         {
@@ -25,6 +40,11 @@ namespace clash
         {
             return (v1 == other.v1 && v2 == other.v2);
         }
+        inline int first() const
+        {
+            return v1;
+        }
+#endif
     };
 }
 
@@ -35,8 +55,13 @@ namespace std
     {
         size_t operator()(const clash::Edge& edge) const
         {
+#ifdef USING_EIGEN_VERISON
+            size_t v1 = std::hash<int>()(edge.m_id[0]);
+            size_t v2 = std::hash<int>()(edge.m_id[1]);
+#else
             size_t v1 = std::hash<int>()(edge.v1);
             size_t v2 = std::hash<int>()(edge.v2);
+#endif
             return v1 ^ (v2 + 0x9e3779b9 + (v1 << 6) + (v1 >> 2));
         }
     };
@@ -122,9 +147,11 @@ namespace clash
     inline std::pair<std::vector<Eigen::Vector3d>, std::unordered_set<int>> computeBoundaryContour(
         const std::vector<Eigen::Vector3d>& mesh_vbo, const std::vector<Eigen::Vector3i>& mesh_ibo)//const ModelMesh& mesh)
     {
+        MACRO_EXPANSION_TIME_DEFINE;
         //compute by ibo index count
         std::unordered_map<Edge, int> edgeCount;
         // count every edge
+        MACRO_EXPANSION_TIME_START;
         for (const auto& triangle : mesh_ibo)
         {
             std::array<Edge, 3> edges = {
@@ -135,31 +162,45 @@ namespace clash
             for (const auto& edge : edges)
                 edgeCount[edge]++;
         }
+        MACRO_EXPANSION_TIME_END("time_create_edgeCount");
         // collect
         std::vector<Edge> boundEdges;
         std::unordered_set<int> uniqueEdge;
+        MACRO_EXPANSION_TIME_START;
         for (const auto& pair : edgeCount)
         {
             if (pair.second == 1)
             {
                 boundEdges.push_back(pair.first);
+#ifdef USING_EIGEN_VERISON
+                uniqueEdge.insert(pair.first.m_id[0]);
+                uniqueEdge.insert(pair.first.m_id[1]);
+#else
                 uniqueEdge.insert(pair.first.v1);
                 uniqueEdge.insert(pair.first.v2);
+#endif
             }
         }
+        MACRO_EXPANSION_TIME_END("time_create_uniqueEdge");
         //extractboundContour
         std::unordered_map<int, std::vector<int>> adjacencyList;
+        MACRO_EXPANSION_TIME_START;
         for (const auto& edge : boundEdges)
         {
+#ifdef USING_EIGEN_VERISON
+            adjacencyList[edge.m_id[0]].push_back(edge.m_id[1]);
+            adjacencyList[edge.m_id[1]].push_back(edge.m_id[0]);
+#else
             adjacencyList[edge.v1].push_back(edge.v2);
             adjacencyList[edge.v2].push_back(edge.v1);
+#endif
         }
+        MACRO_EXPANSION_TIME_END("time_create_adjacencyList");
         std::vector<Eigen::Vector3d> boundContour;
-        int startVertex = boundEdges[0].v1; // choose one random index
+        int startVertex = boundEdges[0].first(); // choose one random index
         int currentVertex = startVertex;
         int previousVertex = -1;
-        //std::vector<int> check;
-        //std::set<int> checkset;
+        MACRO_EXPANSION_TIME_START;
         do {
             boundContour.push_back(mesh_vbo[currentVertex]);
             const std::vector<int>& neighbors = adjacencyList[currentVertex];
@@ -174,7 +215,9 @@ namespace clash
             if (boundEdges.size() < boundContour.size())
                 return {};// break;
         } while (currentVertex != startVertex);
+        MACRO_EXPANSION_TIME_END("time_create_boundContour");
         //boundContour.push_back(boundContour.front());//closed
+        std::map<std::string, double>& dataTime = test::DataRecordSingleton::getData().m_dataTime;
         return { boundContour,uniqueEdge };
     }
 
@@ -235,10 +278,10 @@ namespace clash
 
     inline Eigen::Vector2d getIntersectPoint(const std::vector<Eigen::Vector2d>& lineA, const std::vector<Eigen::Vector2d>& lineB)
     {
-        for (int i = 0; i < lineA.size() - 1; ++i)
+        for (int i = 0; i < (int)lineA.size() - 1; ++i)
         {
             std::array<Eigen::Vector2d, 2> segmA = { lineA[i],lineA[i + 1] };
-            for (int j = 0; j < lineB.size() - 1; ++j)
+            for (int j = 0; j < (int)lineB.size() - 1; ++j)
             {
                 std::array<Eigen::Vector2d, 2> segmB = { lineB[j],lineB[j + 1] };
                 if (!isTwoSegmentsIntersect(segmA, segmB))
