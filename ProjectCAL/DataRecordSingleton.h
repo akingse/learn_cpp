@@ -28,7 +28,7 @@
 
 #define MACRO_EXPANSION_TIME_END(dataName) \
     timeend = std::chrono::high_resolution_clock::now();\
-    test::DataRecordSingleton::dataTimeAppend(dataName, duration<double, std::milli>(timeend - timestart).count());\
+    test::DataRecordSingleton::dataTimeAppend(dataName, std::chrono::duration<double, std::milli>(timeend - timestart).count());\
 
 
 namespace test

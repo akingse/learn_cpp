@@ -150,14 +150,14 @@ tuple<vector<Eigen::Vector3i>, vector<set<int>>> _getMeshVertexLinkedInfo(const 
 	//get diagonal vertex index of each face-edge
 	vector<Eigen::Vector3i> edgeDiag(mesh.ibo_.size(), { -1,-1,-1 }); //init
 	// generate new middle vertex
-	for (int i = 0; i < mesh.ibo_.size(); ++i)
+	for (int i = 0; i < (int)mesh.ibo_.size(); ++i)
 	{
 		if (edgeDiag[i][0] != -1 && edgeDiag[i][1] != -1 && edgeDiag[i][2] != -1) //has been assemble
 			continue;
 		Eigen::Vector3i faceA = mesh.ibo_[i]; //copy
 		std::sort(faceA.begin(), faceA.end());
 		int find = 0;
-		for (int j = 0; j < mesh.ibo_.size(); ++j)
+		for (int j = 0; j < (int)mesh.ibo_.size(); ++j)
 		{
 			if (i >= j) //edgeDiag[j] been revised
 				continue;
@@ -210,7 +210,7 @@ tuple<vector<Eigen::Vector3i>, vector<set<int>>> _getMeshVertexLinkedInfo(const 
 	}
 	// update origin vertex
 	vector<set<int>> roundVct(mesh.vbo_.size());
-	for (int i = 0; i < mesh.vbo_.size(); ++i)
+	for (int i = 0; i < (int)mesh.vbo_.size(); ++i)
 	{
 		set<int> round;// vector<Vector3d> round;
 		for (const auto& face : mesh.ibo_)
@@ -256,7 +256,7 @@ ModelMesh games::meshLoopSubdivision(const ModelMesh& mesh)
 	tuple<vector<Eigen::Vector3i>, vector<set<int>>> info = _getMeshVertexLinkedInfo(mesh);
 	const vector<Eigen::Vector3i>& edgeDiag = get<0>(info);
 	map<array<int, 2>, int> uniqueEdge;
-	for (int i = 0; i < mesh.ibo_.size(); ++i)
+	for (int i = 0; i < (int)mesh.ibo_.size(); ++i)
 	{
 		const Eigen::Vector3i& face = mesh.ibo_[i];
 		int mid01, mid12, mid20; //the new vertex index of edge middle
@@ -303,7 +303,7 @@ ModelMesh games::meshLoopSubdivision(const ModelMesh& mesh)
 		iboNew.push_back({ mid01,mid12,mid20 });
 	}
 	const vector<set<int>>& roundIndex = get<1>(info);
-	for (int i = 0; i < mesh.vbo_.size(); ++i)
+	for (int i = 0; i < (int)mesh.vbo_.size(); ++i)
 	{
 		vector<Vector3d> round;
 		for (const auto& j : roundIndex[i])

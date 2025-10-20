@@ -16,7 +16,7 @@ namespace clash
 	inline bool isPointInPolygon2D(const Eigen::Vector2d& point, const std::vector<Eigen::Vector2d>& polygon)// pnpoly
 	{
 		Eigen::AlignedBox2d box;
-        for (int i = 0; i < polygon.size(); ++i)//(const auto& iter : polygon)
+        for (int i = 0; i < (int)polygon.size(); ++i)//(const auto& iter : polygon)
 			box.extend(polygon[i]);
 		if (!box.contains(point))
 			return false;

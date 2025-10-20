@@ -55,9 +55,9 @@ void DataRecordSingleton::writeDataToCsv(const std::string& fileName /*= {}*/)
     for (const auto& iter: sm_recordData.m_dataTime)
         ofsFile << iter.first << "," << to_string(iter.second) << endl;
     //sequence container
-    for (int i = 0; i < sm_recordData.m_dataItemVct.size(); i++)
+    for (int i = 0; i < (int)sm_recordData.m_dataItemVct.size(); i++)
         ofsFile << sm_recordData.m_dataItemVct[i].first << "," << to_string(sm_recordData.m_dataItemVct[i].second) << endl;
-    for (int i = 0; i < sm_recordData.m_dataTimeVct.size(); i++)
+    for (int i = 0; i < (int)sm_recordData.m_dataTimeVct.size(); i++)
         ofsFile << sm_recordData.m_dataTimeVct[i].first << "," << to_string(sm_recordData.m_dataTimeVct[i].second) << endl;
     ofsFile.close();
 }
@@ -70,7 +70,7 @@ void DataRecordSingleton::writeDatasToCsv(const std::string& fileName /*= {}*/)
     DataMap mergeData = sm_recordDatas[0];//copy
     const int time = (int)sm_recordDatas.size();
     const int size = (int)mergeData.m_dataTimeVct.size();
-    for (int i = 1; i < sm_recordDatas.size(); i++)
+    for (int i = 1; i < (int)sm_recordDatas.size(); i++)
     {
         for (int j = 0; j < size; j++) //default same size
         {
@@ -107,7 +107,7 @@ void DataRecordSingleton::writeDatasToCsv(const std::string& fileName /*= {}*/)
             return;
     }
     ofsFile << "function" << "," << "time/ms" << endl;
-    for (int i = 0; i < mergeData.m_dataTimeVct.size(); i++)
+    for (int i = 0; i < (int)mergeData.m_dataTimeVct.size(); i++)
     {
         ofsFile << mergeData.m_dataTimeVct[i].first << ",";
         ofsFile << mergeData.m_dataTimeVct[i].second << std::setprecision(numeric_limits<double>::digits10) << std::endl;
@@ -134,7 +134,7 @@ void DataRecordSingleton::writeDatasToCsv(const std::vector<DataMap>& datas)
     if (!ofsFile.is_open())
         return;
     ofsFile << "writeDatasToCsv" << endl;
-    for (int i = 0; i < datas.size(); i++)
+    for (int i = 0; i < (int)datas.size(); i++)
     {
 
         ofsFile << datas[i].m_name << ",";
