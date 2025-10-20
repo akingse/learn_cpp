@@ -18,12 +18,17 @@ namespace clash
         Eigen::Vector2i m_id;
         Edge(int a, int b)
         {
-            m_id[0] = std::min(a, b);
-            m_id[1] = std::max(a, b);
+            //m_id[0] = std::min(a, b);
+            //m_id[1] = std::max(a, b);
+            m_id = (a < b) ? Eigen::Vector2i(a, b) : Eigen::Vector2i(b, a);
         }
         bool operator==(const Edge& other) const
         {
             return m_id == other.m_id;
+        }
+        bool operator<(const Edge& other) const
+        {
+            return memcmp(m_id.data(), other.m_id.data(), 8) == -1; //2*sizeof(int)
         }
         inline int first() const
         {
@@ -154,15 +159,18 @@ namespace clash
         MACRO_EXPANSION_TIME_START;
         for (const auto& triangle : mesh_ibo)
         {
-            std::array<Edge, 3> edges = {
-                Edge(triangle[0], triangle[1]),
-                Edge(triangle[1], triangle[2]),
-                Edge(triangle[2], triangle[0])
-            };
-            for (const auto& edge : edges)
-                edgeCount[edge]++;
+            //std::array<Edge, 3> edges = {
+            //    Edge(triangle[0], triangle[1]),
+            //    Edge(triangle[1], triangle[2]),
+            //    Edge(triangle[2], triangle[0])
+            //};
+            //for (const auto& edge : edges)
+                //edgeCount[edge]++;
+            edgeCount[Edge(triangle[0], triangle[1])]++;
+            edgeCount[Edge(triangle[1], triangle[2])]++;
+            edgeCount[Edge(triangle[2], triangle[0])]++;
         }
-        MACRO_EXPANSION_TIME_END("time_create_edgeCount");
+        MACRO_EXPANSION_TIME_END("time_create_edgeCount");//cost most time
         // collect
         std::vector<Edge> boundEdges;
         std::unordered_set<int> uniqueEdge;
@@ -200,7 +208,7 @@ namespace clash
         int startVertex = boundEdges[0].first(); // choose one random index
         int currentVertex = startVertex;
         int previousVertex = -1;
-        MACRO_EXPANSION_TIME_START;
+        //MACRO_EXPANSION_TIME_START;
         do {
             boundContour.push_back(mesh_vbo[currentVertex]);
             const std::vector<int>& neighbors = adjacencyList[currentVertex];
@@ -215,9 +223,9 @@ namespace clash
             if (boundEdges.size() < boundContour.size())
                 return {};// break;
         } while (currentVertex != startVertex);
-        MACRO_EXPANSION_TIME_END("time_create_boundContour");
+        //MACRO_EXPANSION_TIME_END("time_create_boundContour");//little ignore
         //boundContour.push_back(boundContour.front());//closed
-        std::map<std::string, double>& dataTime = test::DataRecordSingleton::getData().m_dataTime;
+        //std::map<std::string, double>& dataTime = test::DataRecordSingleton::getData().m_dataTime;
         return { boundContour,uniqueEdge };
     }
 
