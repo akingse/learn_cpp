@@ -89,6 +89,9 @@ static std::unique_ptr<BVHNode2d> _createTree2d(std::vector<RectBase2d>& rectVct
 	else // end leaf node
 	{
 		currentNode->m_index = rectVct[0].m_index;
+#ifdef USING_BVHTREE_INDEX2
+		currentNode->m_index2 = rectVct[0].m_index2;
+#endif
 		currentNode->m_bound = rectVct[0].m_bound;
 		//currentNode->m_left = nullptr;
 		//currentNode->m_right = nullptr;
@@ -100,6 +103,14 @@ BVHTree2d::BVHTree2d(const std::vector<RectBase2d>& _rectVct)
 {
 	std::vector<RectBase2d> rectVct = _rectVct; //copy
     m_tree = _createTree2d(rectVct);
+}
+
+BVHTree2d BVHTree2d::create(const std::vector<clash::RectBase2d>& _rectVct)
+{
+	std::vector<RectBase2d> rectVct = _rectVct; //copy
+	BVHTree2d tree;
+	tree.m_tree = _createTree2d(rectVct);
+	return tree;
 }
 
 //sort the input polygons
@@ -417,6 +428,29 @@ std::vector<size_t> BVHTree2d::findIntersect(const ContourPart& profile) const
 	_searchTree(m_tree);
 	return indexes;
 }
+
+#ifdef USING_BVHTREE_INDEX2
+std::vector<std::pair<int, int>> BVHTree2d::findIntersect2(const AlignedBox2d& box) const
+{
+	std::vector<std::pair<int, int>> indexes;
+	std::function<void(const unique_ptr<BVHNode2d>&)> _searchTree = [&](const unique_ptr<BVHNode2d>& node)->void
+		{
+			if (!node->m_bound.intersects(box))
+				return;
+			if (node->m_index != -1)
+			{
+                indexes.push_back({ node->m_index,node->m_index2 });
+			}
+			else // isnot leaf node
+			{
+				_searchTree(node->m_left);
+				_searchTree(node->m_right);
+			}
+		};
+	_searchTree(m_tree);
+	return indexes;
+}
+#endif
 
 #endif RESERVE_USING_POLYGON2D
 

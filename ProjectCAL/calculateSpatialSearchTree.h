@@ -13,6 +13,7 @@
 
 #define USING_AUTO_CLOSE
 #define RESERVE_USING_POLYGON2D
+//#define USING_BVHTREE_INDEX2
 
 namespace clash
 {
@@ -20,6 +21,11 @@ namespace clash
 	{
 	public:
 		int m_index = -1;
+#ifdef USING_BVHTREE_INDEX2
+		int m_index2 = 0;
+		//Eigen::Vector2i m_index2 = Eigen::Vector2i(-1, -1);
+		DLLEXPORT_CAL RectBase2d(int index, int index2, const Eigen::AlignedBox2d& bound) :m_index(index), m_index2(index2), m_bound(bound) {}
+#endif
 		Eigen::AlignedBox2d m_bound;
 		DLLEXPORT_CAL RectBase2d() = default;
 		DLLEXPORT_CAL RectBase2d(int index, const Eigen::AlignedBox2d& bound) :m_index(index), m_bound(bound) {}
@@ -147,6 +153,10 @@ namespace bvh
 		std::unique_ptr<BVHNode2d> m_left;	//BVHNode2d* m_left;  
 		std::unique_ptr<BVHNode2d> m_right; //BVHNode2d* m_right; 
 		int m_index = -1; // the middle node's index
+#ifdef USING_BVHTREE_INDEX2
+		int m_index2 = 0;
+		//Eigen::Vector2i m_index2 = Eigen::Vector2i(-1, -1);
+#endif
 #ifdef TEST_BVHNODE_DIMENSION_DEBUG
 		// other data
 		//std::array<int, 2> m_index2 = { -1,-1 }; //for TrigonPart
@@ -165,10 +175,10 @@ namespace bvh
 	{
 	private:
 		std::unique_ptr<BVHNode2d> m_tree;
+		BVHTree2d() = default;
+		//BVHTree2d(const BVHTree2d&) = default;
 	public:
-		BVHTree2d() = delete;
-		BVHTree2d(const BVHTree2d&) = delete;
-		DLLEXPORT_CAL BVHTree2d(const std::vector<clash::RectBase2d>& rectVct);
+		BVHTree2d(const std::vector<clash::RectBase2d>& rectVct);
 		BVHTree2d(const std::vector<clash::Polygon2d>& polygons);
 		BVHTree2d(const std::vector<eigen::TrigonPart>& triangles);
 		BVHTree2d(const std::vector<eigen::ContourPart>& profiles);
@@ -177,10 +187,14 @@ namespace bvh
 		DLLEXPORT_CAL std::vector<int> findIntersect(const Eigen::Vector2d& point) const;
 		DLLEXPORT_CAL std::vector<int> findIntersect(const Eigen::AlignedBox2d& box) const;
 		DLLEXPORT_CAL std::vector<int> findIntersect(const clash::RectBase2d& rect) const; // for RectBase2d
+        DLLEXPORT_CAL std::vector<std::pair<int, int>> findIntersect2(const Eigen::AlignedBox2d& box) const;
 		std::vector<size_t> findIntersect(const clash::Polygon2d& polygon) const; //searchFromTree
 		std::vector<size_t> findIntersect(const eigen::ContourPart& profile) const;
 		std::vector<size_t> findIntersectOpLess(const eigen::TrigonPart& trigon) const;//operator less
 		std::vector<size_t> findIntersect(const eigen::TrigonPart& trigon) const;
+		//static
+		DLLEXPORT_CAL static BVHTree2d create(const std::vector<clash::RectBase2d>& rectVct);
+		//DLLEXPORT_CAL static BVHTree2d create2(const std::vector<clash::RectBase2d>& rectVct);
 
 	};
 

@@ -284,6 +284,7 @@ namespace clash
     std::array<std::vector<Eigen::Vector3d>, 4> splitContourToEdge(
         const std::vector<Eigen::Vector3d>& boundContour, const std::array<Eigen::Vector2d, 4>& cornerPoints, bool isFirst = false);
 
+    //violence traverse
     inline Eigen::Vector2d getIntersectPoint(const std::vector<Eigen::Vector2d>& lineA, const std::vector<Eigen::Vector2d>& lineB)
     {
         for (int i = 0; i < (int)lineA.size() - 1; ++i)
