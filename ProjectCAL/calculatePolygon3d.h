@@ -340,6 +340,7 @@ namespace clash
             double k = (mesh.vbo_[mesh.ibo_[i][0]] - eigen::to_vec3(p)).dot(mesh.fno_[i]) / deno;
             return k;
         }
+        test::DataRecordSingleton::dataCountAppend("getDepthZ_nan");
         return std::nan("0");
     }
 

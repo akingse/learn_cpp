@@ -210,6 +210,17 @@ namespace test
             else
                 sm_recordData.m_dataTime.at(key) += value;
         }
+        static std::string getDataString(bool clear = true)
+        {
+            std::string str;
+            for (const auto& iter : DataRecordSingleton::getData().m_dataTime)
+                str += iter.first + "=" + to_string(iter.second) + "\n";
+            for (const auto& iter : DataRecordSingleton::getData().m_dataCount)
+                str += iter.first + "=" + to_string(iter.second) + "\n";
+            if (clear)
+                DataRecordSingleton::clear();
+            return str;
+        }
     };
 
 
