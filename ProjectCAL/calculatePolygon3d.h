@@ -284,23 +284,30 @@ namespace clash
     std::array<std::vector<Eigen::Vector3d>, 4> splitContourToEdge(
         const std::vector<Eigen::Vector3d>& boundContour, const std::array<Eigen::Vector2d, 4>& cornerPoints, bool isFirst = false);
 
-    //violence traverse
-    inline Eigen::Vector2d getIntersectPoint(const std::vector<Eigen::Vector2d>& lineA, const std::vector<Eigen::Vector2d>& lineB)
+#ifdef USING_BVHTREE_INDEX2
+    inline vector<Eigen::Vector2d> getIntersectPoint(const std::vector<Eigen::Vector2d>& lineA, const vector<vector<Eigen::Vector2d>>& linesV, const bvh::BVHTree2d& bvhtree)
     {
+        vector<Eigen::Vector2d> res;
         for (int i = 0; i < (int)lineA.size() - 1; ++i)
         {
+            Eigen::AlignedBox2d box;
+            box.extend(lineA[i]);
+            box.extend(lineA[i + 1]);
+            std::vector<std::pair<int, int>> inters = bvhtree.findIntersect2(box);
             std::array<Eigen::Vector2d, 2> segmA = { lineA[i],lineA[i + 1] };
-            for (int j = 0; j < (int)lineB.size() - 1; ++j)
+            for (const auto& j : inters)
             {
-                std::array<Eigen::Vector2d, 2> segmB = { lineB[j],lineB[j + 1] };
+                std::array<Eigen::Vector2d, 2> segmB = { linesV[j.first][j.second], linesV[j.first][j.second + 1] };
                 if (!isTwoSegmentsIntersect(segmA, segmB))
                     continue;
                 Eigen::Vector2d point = eigen::getIntersectPointOfTwoLines(segmA, segmB);
-                return point;
+                if (res.empty() || !(point - res.back()).isZero()) //using tolerancce
+                    res.push_back(point);
             }
         }
-        return Eigen::Vector2d(std::nan("0"), std::nan("0"));
+        return res;
     }
+#endif 
 
     inline std::vector<Eigen::Vector2d> linspace(const Eigen::Vector2d& p0, const Eigen::Vector2d& p1, int n)
     {
@@ -346,7 +353,5 @@ namespace clash
 
 
 }
-
-
 
 #endif// CALCULATE_POLYGON3D_H

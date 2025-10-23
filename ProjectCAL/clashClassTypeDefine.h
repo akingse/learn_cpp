@@ -36,6 +36,7 @@ namespace clash
     typedef std::tuple<std::vector<Eigen::Vector3d>, std::vector<std::array<int, 3>>> Polyhedron;
     //typedef std::array<Eigen::Vector2d, 3> TrigonEigen; same as Triangle2d
     typedef std::vector<std::vector<Eigen::Vector2d>> PathsEigen; //ContourProfile
+    typedef std::vector<std::vector<Eigen::Vector2d>> PathsEigen2d;
     typedef std::vector<std::vector<Eigen::Vector3d>> PathsEigen3d;
 
     //global constexpr

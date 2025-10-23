@@ -11,12 +11,12 @@
 #include "DataRecordSingleton.h"    //singleton
 #include "calculateVectorMatrix.h"  // namespace eigen
 #include "calculatePointLinePlane.h"// namespace clash
-#include "calculatePolygon2d.h"     // namespace clash
+#include "calculateSpatialSearchTree.h" // clash //spatial partition tree
 #include "calculateTriangle.h"	    // namespace clash
+#include "calculatePolygon2d.h"     // namespace clash
 #include "calculatePolygon3d.h"     // namespace land
 #include "calculatePolyhedron.h"    // namespace clash
 #include "calculateMeshTopology.h"  //namespace games
-#include "calculateSpatialSearchTree.h" // clash //spatial partition tree
 #include "calculateDynamicAccuracy.h"//namespace accura
 #include "calculateClashDetection.h"
 

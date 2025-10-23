@@ -124,7 +124,25 @@ std::array<std::vector<Eigen::Vector3d>, 4> clash::splitContourToEdge(
     return edgeUV4;
 }
 
-#define TEST_TERRAINMESH
+//useless //violence traverse
+static Eigen::Vector2d getIntersectPoint(const std::vector<Eigen::Vector2d>& lineA, const std::vector<Eigen::Vector2d>& lineB)
+{
+    for (int i = 0; i < (int)lineA.size() - 1; ++i)
+    {
+        std::array<Eigen::Vector2d, 2> segmA = { lineA[i],lineA[i + 1] };
+        for (int j = 0; j < (int)lineB.size() - 1; ++j)
+        {
+            std::array<Eigen::Vector2d, 2> segmB = { lineB[j],lineB[j + 1] };
+            if (!isTwoSegmentsIntersect(segmA, segmB))
+                continue;
+            Eigen::Vector2d point = eigen::getIntersectPointOfTwoLines(segmA, segmB);
+            return point;
+        }
+    }
+    return Eigen::Vector2d(std::nan("0"), std::nan("0"));
+}
+
+//#define TEST_TERRAINMESH
 #ifdef TEST_TERRAINMESH
 static int enrol = []()->int
     {
