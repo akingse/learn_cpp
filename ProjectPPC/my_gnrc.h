@@ -275,8 +275,8 @@ public:
 	IClass* m_imp;
 	static std::map<std::type_index, GeneFactoryClassBase*> s_map;
 
-	Gene();
-	Gene(std::type_index id ,void* src=nullptr, bool isRef=false);
+	DLLEXPORT_PPC Gene();
+	DLLEXPORT_PPC Gene(std::type_index id ,void* src=nullptr, bool isRef=false);
 	template <typename T>
 	static void enrol()
 	{
@@ -284,7 +284,7 @@ public:
 			s_map[typeid(T)] = new GeneFactoryClass<T>();
 	}
 	template <typename T> //Gnrc 默认构造(值)
-	Gene(const T& src) : m_imp(new Templator<T>(src)) 
+	Gene(const T& src) : m_imp(new Templator<T>(src))
 	{ //enrol here
 		static bool isOnce = false;
 		if (isOnce)
@@ -296,9 +296,9 @@ public:
 	Gene(const T*) = delete;
 	template <typename T>
 	Gene(T*) = delete;
-	Gene(const Gene& lhs); //拷贝构造
+	DLLEXPORT_PPC Gene(const Gene& lhs); //拷贝构造
 	Gene& operator=(const Gene& lhs) noexcept; //拷贝赋值
-	Gene(Gene&& rhs) noexcept;  //移动构造
+	DLLEXPORT_PPC Gene(Gene&& rhs) noexcept;  //移动构造
 	Gene& operator=(Gene&& src) noexcept; //移动赋值
 	Gene* operator&(); //对一般对象的取址函数
 	const Gene* operator&() const; //对常对象的取址函数
@@ -311,7 +311,7 @@ public:
 	bool operator>=(const Gene& other) const;
 	std::type_index get_id() const;
 
-	~Gene(); //Gnrc::~Gnrc()
+	DLLEXPORT_PPC ~Gene(); //Gnrc::~Gnrc()
 
 
 	template <typename T>
@@ -339,12 +339,12 @@ public:
 		}
 	}
 
-	const std::type_index& _id() //compat
+	inline const std::type_index& _id() //compat
 	{
 		return m_imp->_get_id();
 	}
 
-	void* _imp() const
+	inline void* _imp() const
 	{
 		return (void*)m_imp;
 	}

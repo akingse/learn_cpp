@@ -285,9 +285,9 @@ namespace clash
         const std::vector<Eigen::Vector3d>& boundContour, const std::array<Eigen::Vector2d, 4>& cornerPoints, bool isFirst = false);
 
 #ifdef USING_BVHTREE_INDEX2
-    inline vector<Eigen::Vector2d> getIntersectPoint(const std::vector<Eigen::Vector2d>& lineA, const vector<vector<Eigen::Vector2d>>& linesV, const bvh::BVHTree2d& bvhtree)
+    inline std::vector<Eigen::Vector2d> getIntersectPoint(const std::vector<Eigen::Vector2d>& lineA, const std::vector<std::vector<Eigen::Vector2d>>& linesV, const bvh::BVHTree2d& bvhtree)
     {
-        vector<Eigen::Vector2d> res;
+        std::vector<Eigen::Vector2d> res;
         for (int i = 0; i < (int)lineA.size() - 1; ++i)
         {
             Eigen::AlignedBox2d box;

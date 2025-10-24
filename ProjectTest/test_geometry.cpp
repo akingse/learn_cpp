@@ -1,5 +1,6 @@
 #include "pch.h"
 using namespace std;
+using namespace bvh;
 using namespace clash;
 using namespace Eigen;
 using namespace eigen;
@@ -530,6 +531,10 @@ static void test9()
 	Sleep(1.5);
 	timeend = std::chrono::high_resolution_clock::now();
 
+	std::vector<BVHTree2d> treeVct;
+	std::vector<Gene> geneVct;
+	geneVct.reserve(2);
+	//geneVct.resize(2);
 
 	duration_ms = timeend - timestart;
 	double time0 = duration_ms.count();
@@ -546,7 +551,7 @@ static int enrol = []()->int
 	//test4();
 	//test5();
 	//test6();
-	//test9();
+	test9();
 	cout << get_filepath_filename(__FILE__) << " finished.\n" << endl;
 	return 0;
 }();
