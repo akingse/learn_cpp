@@ -157,7 +157,7 @@ namespace clash
         std::unordered_map<Edge, int> edgeCount;
         // count every edge
         MACRO_EXPANSION_TIME_START;
-        for (const auto& triangle : mesh_ibo)
+        for (const auto& triangle : mesh_ibo) //cost most time
         {
             //std::array<Edge, 3> edges = {
             //    Edge(triangle[0], triangle[1]),
@@ -229,6 +229,64 @@ namespace clash
         return { boundContour,uniqueEdge };
     }
 
+    //AdvancingFront U version
+    inline std::vector<std::pair<Eigen::Vector3d, int>> computeBoundaryContourU(
+        const std::vector<Eigen::Vector3d>& mesh_vbo, const std::vector<Eigen::Vector3i>& mesh_ibo)
+    {
+        MACRO_EXPANSION_TIME_DEFINE;
+        //compute by ibo index count
+        std::unordered_map<Edge, int> edgeCount;
+        // count every edge
+        for (const auto& triangle : mesh_ibo) //cost most time
+        {
+            edgeCount[Edge(triangle[0], triangle[1])]++;
+            edgeCount[Edge(triangle[1], triangle[2])]++;
+            edgeCount[Edge(triangle[2], triangle[0])]++;
+        }
+        // collect
+        std::vector<Edge> boundEdges;
+        //std::unordered_set<int> uniqueEdge;
+        MACRO_EXPANSION_TIME_START;
+        for (const auto& pair : edgeCount)
+        {
+            if (pair.second == 1)
+            {
+                boundEdges.push_back(pair.first);
+                //uniqueEdge.insert(pair.first.m_id[0]);
+                //uniqueEdge.insert(pair.first.m_id[1]);
+            }
+        }
+        MACRO_EXPANSION_TIME_END("time_create_uniqueEdge");
+        //extractboundContour
+        std::unordered_map<int, std::vector<int>> adjacencyList;
+        MACRO_EXPANSION_TIME_START;
+        for (const auto& edge : boundEdges)
+        {
+            adjacencyList[edge.m_id[0]].push_back(edge.m_id[1]);
+            adjacencyList[edge.m_id[1]].push_back(edge.m_id[0]);
+        }
+        MACRO_EXPANSION_TIME_END("time_create_adjacencyList");
+        std::vector<std::pair<Eigen::Vector3d, int>> boundContour;//std::vector<Eigen::Vector3d>
+        int startVertex = boundEdges[0].first(); // choose one random index
+        int currentVertex = startVertex;
+        int previousVertex = -1;
+        do {
+            boundContour.push_back({ mesh_vbo[currentVertex], currentVertex });
+            const std::vector<int>& neighbors = adjacencyList[currentVertex];
+            for (const int neighbor : neighbors)
+            {
+                if (neighbor != previousVertex) {
+                    previousVertex = currentVertex;
+                    currentVertex = neighbor;
+                    break;
+                }
+            }
+            if (boundEdges.size() < boundContour.size())
+                return {};// break;
+        } while (currentVertex != startVertex);
+        return boundContour;
+    }
+
     //filter ibo, distinguish inner and outer
     inline std::vector<Eigen::Vector3i> getRingMeshByBoundary(const std::vector<Eigen::Vector3i>& ibo, const std::unordered_set<int>& boundEdge, bool isInner = true)
     {
@@ -279,10 +337,29 @@ namespace clash
         }
         return area < 0;
     }
+    inline bool isContourCCW(const std::vector<std::pair<Eigen::Vector3d, int>>& contour)
+    {
+        const size_t n = contour.size();
+        if (n < 3)
+            return true;
+        double area = 0.0;
+        for (size_t i = 0; i < n; ++i)
+        {
+            const size_t j = (i + 1) % n;
+            const Eigen::Vector3d& p1 = contour[i].first;
+            const Eigen::Vector3d& p2 = contour[j].first;
+            area += (p2.x() - p1.x()) * (p2.y() + p1.y());
+        }
+        return area < 0;
+    }
 
     //down-right-up-left, positive direction //first base on max anlge
     std::array<std::vector<Eigen::Vector3d>, 4> splitContourToEdge(
         const std::vector<Eigen::Vector3d>& boundContour, const std::array<Eigen::Vector2d, 4>& cornerPoints, bool isFirst = false);
+
+    //AdvancingFront U version
+    std::array<std::vector<std::pair<Eigen::Vector3d, int>>, 2> splitContourToEdgeFirst(
+        const std::vector<std::pair<Eigen::Vector3d, int>>& boundContour, const std::array<Eigen::Vector2d, 4>& cornerPoints);
 
 #ifdef USING_BVHTREE_INDEX2
     inline std::vector<Eigen::Vector2d> getIntersectPoint(const std::vector<Eigen::Vector2d>& lineA, const std::vector<std::vector<Eigen::Vector2d>>& linesV, const bvh::BVHTree2d& bvhtree)
@@ -309,6 +386,7 @@ namespace clash
     }
 #endif 
 
+    //template<class T>
     inline std::vector<Eigen::Vector2d> linspace(const Eigen::Vector2d& p0, const Eigen::Vector2d& p1, int n)
     {
         std::vector<Eigen::Vector2d> res(n);
@@ -351,6 +429,65 @@ namespace clash
         return std::nan("0");
     }
 
+    inline double getDeviationZ(const ModelMesh& mesh, const std::vector<int>& inters, const Eigen::Vector3d& p)
+    {
+        for (const int& i : inters)
+        {
+            Triangle2d trigon2d = { //2D
+                mesh.vbo2_[mesh.ibo_[i][0]],
+                mesh.vbo2_[mesh.ibo_[i][1]],
+                mesh.vbo2_[mesh.ibo_[i][2]] };
+            if (!isPointInTriangle(eigen::to_vec2(p), trigon2d))
+                continue;
+            double deno = mesh.fno_[i][2];// Vector3d(0, 0, 1).dot(mesh.fno_[i]);
+            if (deno == 0)
+            {
+                double interz = 0;
+                return interz / 2;
+            }
+            double k = (mesh.vbo_[mesh.ibo_[i][0]] - p).dot(mesh.fno_[i]) / deno;
+            return fabs(k);
+        }
+        return std::nan("0");
+    }
+
+    template<class T>
+    std::vector<std::vector<T>> matrix_transpose(const std::vector<std::vector<T>>& cross2D)
+    {
+        int sizeU = (int)cross2D[0].size();
+        int sizeV = (int)cross2D.size();
+        std::vector<std::vector<T>> transp(sizeU);
+        for (int i = 0; i < sizeU; ++i)
+        {
+            std::vector<T> temp(sizeV);
+            for (int j = 0; j < sizeV; ++j)
+                temp[j] = cross2D[j][i];
+            transp[i] = temp;
+        }
+        return transp;
+    }
+
+    template<class T>
+    std::vector<std::vector<T>> getBoundGridAreaByIndex(const std::vector<std::vector<T>>& cross2D, int interU, int interV, int u, int v)
+    {
+        int sizeU = (int)cross2D[0].size();
+        int sizeV = (int)cross2D.size();
+        int iLt = std::round((u + 0) * (sizeU - 1) / double(interU + 1));
+        int iRt = std::round((u + 1) * (sizeU - 1) / double(interU + 1));
+        int iDn = std::round((v + 0) * (sizeV - 1) / double(interV + 1));
+        int iUp = std::round((v + 1) * (sizeV - 1) / double(interV + 1));
+        std::vector<std::vector<T>> block(iUp - iDn + 1);
+        int io = 0;
+        for (int i = iDn; i <= iUp; i++)
+        {
+            std::vector<T> temp(iRt - iLt + 1);
+            int jo = 0;
+            for (int j = iLt; j <= iRt; j++)
+                temp[jo++] = cross2D[i][j];
+            block[io++] = temp;
+        }
+        return block;
+    }
 
 }
 
