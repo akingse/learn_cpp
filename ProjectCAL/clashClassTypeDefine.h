@@ -143,9 +143,12 @@ namespace clash
 #endif
         inline void normalize()
         {
-            fno_.resize(ibo_.size());
-            for (int i = 0; i < (int)fno_.size(); ++i)
-                fno_[i] = (vbo_[ibo_[i][1]] - vbo_[ibo_[i][0]]).cross((vbo_[ibo_[i][2]] - vbo_[ibo_[i][1]])).normalized();
+            //fno_.resize(ibo_.size());
+            //for (int i = 0; i < (int)fno_.size(); ++i)
+            //    fno_[i] = (vbo_[ibo_[i][1]] - vbo_[ibo_[i][0]]).cross((vbo_[ibo_[i][2]] - vbo_[ibo_[i][1]])).normalized();
+            fno_.reserve(ibo_.size()); //fast than resize
+            for (int i = 0; i < (int)ibo_.size(); ++i)
+                fno_.push_back((vbo_[ibo_[i][1]] - vbo_[ibo_[i][0]]).cross((vbo_[ibo_[i][2]] - vbo_[ibo_[i][1]])).normalized());
         }
         inline operator TriMesh() const
         {
