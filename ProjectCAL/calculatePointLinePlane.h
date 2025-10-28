@@ -23,7 +23,7 @@ namespace eigen
 	DLLEXPORT_CAL Eigen::Vector3d getNearestPointOfPointAndPlane(const Eigen::Vector3d& point, const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
 	
 	DLLEXPORT_CAL clash::Segment3d getNearestPointOfTwoLines(const std::array<Eigen::Vector3d, 2>& lineA, const std::array<Eigen::Vector3d, 2>& lineB); //get nearest projection point
-	DLLEXPORT_CAL Eigen::Vector3d getIntersectPointOfLineAndPlane(const std::array<Eigen::Vector3d, 2>& line, const std::array<Eigen::Vector3d, 2>& plane);
+	DLLEXPORT_CAL Eigen::Vector3d getIntersectPointOfLineAndPlane(const std::array<Eigen::Vector3d, 2>& line, const std::array<Eigen::Vector3d, 3>& plane);
 	DLLEXPORT_CAL clash::Segment3d getIntersectLineOfTwoPlanes(const Eigen::Vector3d& originA, const Eigen::Vector3d& normalA, const Eigen::Vector3d& originB, const Eigen::Vector3d& normalB);
 	DLLEXPORT_CAL clash::Segment3d getIntersectLineOfTwoPlanes(const std::array<Eigen::Vector3d, 3>& planeA, const std::array<Eigen::Vector3d, 3>& planeB);
 	

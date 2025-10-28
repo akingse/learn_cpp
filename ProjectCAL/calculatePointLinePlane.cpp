@@ -243,14 +243,14 @@ clash::Segment3d eigen::getNearestPointOfTwoLines(const std::array<Eigen::Vector
 	return { pointA,pointB };
 }
 
-Eigen::Vector3d eigen::getIntersectPointOfLineAndPlane(const std::array<Eigen::Vector3d, 2>& line, const std::array<Eigen::Vector3d, 2>& plane)
+Eigen::Vector3d eigen::getIntersectPointOfLineAndPlane(const std::array<Eigen::Vector3d, 2>& line, const std::array<Eigen::Vector3d, 3>& plane)
 {
 	Vector3d normal = (plane[1] - plane[0]).cross(plane[2] - plane[1]);
-	Eigen::Vector3d v = line[1] - line[0];
-	if (isPerpendi3d(v, normal))
+	Eigen::Vector3d vector = line[1] - line[0];
+	if (isPerpendi3d(vector, normal))
 		return gVecNaN; //pointOnPlane
-	double k = (plane[0] - line[0]).dot(normal) / (v.dot(normal));
-	return line[0] + k * v;
+	double k = (plane[0] - line[0]).dot(normal) / (vector.dot(normal));
+	return line[0] + k * vector;
 }
 
 clash::Segment3d eigen::getIntersectLineOfTwoPlanes(const Vector3d& originA, const Vector3d& normalA, const Vector3d& originB, const Vector3d& normalB)
