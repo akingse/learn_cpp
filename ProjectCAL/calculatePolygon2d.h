@@ -13,13 +13,40 @@
 namespace clash
 {
 	// pnpoly
-	inline bool isPointInPolygon2D(const Eigen::Vector2d& point, const std::vector<Eigen::Vector2d>& polygon)// pnpoly
+    inline bool isPointInPolygon2D(const Eigen::Vector2d& point, const std::vector<Eigen::Vector2d>& polygon, 
+        double tolerance = 0, bool usingBox = true)// pnpoly
 	{
-		Eigen::AlignedBox2d box;
-        for (int i = 0; i < (int)polygon.size(); ++i)//(const auto& iter : polygon)
-			box.extend(polygon[i]);
-		if (!box.contains(point))
-			return false;
+		auto _getDistanceOfPointAndSegmentINF = [](const Eigen::Vector2d& point, const std::array<Eigen::Vector2d, 2>& segm)->double
+			{
+				Eigen::Vector2d vectseg = segm[1] - segm[0];// canbe zero, next willbe zero
+				double projection = vectseg.dot(point);
+				//the projection must on segment
+				if (vectseg.dot(segm[1]) <= projection || projection <= vectseg.dot(segm[0]))
+					return DBL_MAX;
+				double k = vectseg.dot(point - segm[0]) / vectseg.dot(vectseg);
+				return (segm[0] - point + k * vectseg).norm();
+			};
+		if (tolerance != 0)
+		{
+			int nvert = (int)polygon.size();
+			for (int i = 0; i < (int)polygon.size(); ++i)
+			{
+                if ((point - polygon[i]).norm() <= tolerance)
+					return true;
+				std::array<Eigen::Vector2d, 2> segment = { polygon[i], polygon[(i + 1) % nvert] };
+                if (_getDistanceOfPointAndSegmentINF(point, segment) < tolerance)
+					return true;
+			}
+		}
+		if (usingBox)
+		{
+			Eigen::AlignedBox2d box;
+			for (int i = 0; i < (int)polygon.size(); ++i)//(const auto& iter : polygon)
+				box.extend(polygon[i]);
+			if (!box.contains(point))
+				return false;
+		}
+		//origin algorithm
 		bool isIn = false;
 		int nvert = (int)polygon.size(); // polygon need not close
 		int i, j;
