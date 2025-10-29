@@ -311,17 +311,42 @@ namespace clash
                 }
             }
             if (isOut)
-            {
                 outMesh.push_back(face);
-            }
             else
-            {
                 innMesh.push_back(face);
-            }
         }
         //_drawPolyface(getPolyfaceHandleFromModelMesh(innMesh));
         //_drawPolyface(getPolyfaceHandleFromModelMesh(outMesh), colorRand());
         return isInner ? innMesh : outMesh;
+    }
+
+    inline std::vector<Eigen::Vector3i> getBandMeshByBoundary(const std::vector<Eigen::Vector3i>& ibo, const std::array<std::vector<std::pair<Eigen::Vector3d, int>>, 2>& edgeU2)
+    {
+        std::unordered_set<int> boundEdge;
+        for (int i = 0; i < 2; i++)
+            for (const auto& iter : edgeU2[i])
+                boundEdge.insert(iter.second);
+        std::vector<Eigen::Vector3i> innMesh; //inner
+        std::vector<Eigen::Vector3i> outMesh; //outer
+        std::unordered_set<int> outContour;
+        std::unordered_set<Edge> outEdges;
+        for (const auto& face : ibo)
+        {
+            bool isOut = false;
+            for (const auto& i : face)
+            {
+                if (boundEdge.find(i) != boundEdge.end())
+                {
+                    isOut = true;
+                    break;
+                }
+            }
+            if (isOut)
+                outMesh.push_back(face);
+            else
+                innMesh.push_back(face);
+        }
+        return innMesh;
     }
 
     inline bool isContourCCW(const std::vector<Eigen::Vector3d>& contour)
