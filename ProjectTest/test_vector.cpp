@@ -185,12 +185,16 @@ static void test_vector_3()
 //wrote by chatgpt
 static int test_vector_4()
 {
-	//							 |         |		
 	std::vector<double> vec{ 1.2, 3.4, 3.5, 5.6 };
 	if (std::find(vec.begin(), vec.end(), 1.2) != vec.end())
 	{
 		cout << "" << endl;
 	}
+    if (auto it = std::find(vec.begin(), vec.end(), 1.0) != vec.end()) //先=赋值后判断，可行
+	{
+		cout << "" << endl;
+	}
+
 	//double a1 = vec[-1]; //not support
 	double a2 = vec.front();
 	double a3 = vec.back();
@@ -325,9 +329,10 @@ static void test_vector_8()
 
 static int _enrol = []()->int 
 	{
-		test_vector_6();
-		test_vector_7();
-		test_vector_8();
+		test_vector_4();
+		//test_vector_6();
+		//test_vector_7();
+		//test_vector_8();
 		cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();

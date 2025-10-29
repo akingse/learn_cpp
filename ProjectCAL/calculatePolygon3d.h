@@ -262,8 +262,10 @@ namespace clash
         MACRO_EXPANSION_TIME_START;
         for (const auto& edge : boundEdges)
         {
+#ifdef USING_EIGEN_VERISON
             adjacencyList[edge.m_id[0]].push_back(edge.m_id[1]);
             adjacencyList[edge.m_id[1]].push_back(edge.m_id[0]);
+#endif
         }
         MACRO_EXPANSION_TIME_END("time_create_adjacencyList");
         std::vector<std::pair<Eigen::Vector3d, int>> boundContour;//std::vector<Eigen::Vector3d>
