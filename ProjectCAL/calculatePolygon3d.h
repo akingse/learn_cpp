@@ -289,6 +289,44 @@ namespace clash
         return boundContour;
     }
 
+//    inline std::vector<std::pair<Eigen::Vector3d, int>> computeBoundaryContourU(
+//        const std::vector<Eigen::Vector3d>& mesh_vbo, const std::vector<Eigen::Vector3i>& mesh_ibo)
+//    {
+//        MACRO_EXPANSION_TIME_DEFINE;
+//        std::vector<Edge> boundEdges;
+//        // todo 优化获取最外边效率
+//        //extractboundContour
+//        std::unordered_map<int, std::vector<int>> adjacencyList;
+//        MACRO_EXPANSION_TIME_START;
+//        for (const auto& edge : boundEdges)
+//        {
+//#ifdef USING_EIGEN_VERISON
+//            adjacencyList[edge.m_id[0]].push_back(edge.m_id[1]);
+//            adjacencyList[edge.m_id[1]].push_back(edge.m_id[0]);
+//#endif
+//        }
+//        MACRO_EXPANSION_TIME_END("time_create_adjacencyList");
+//        std::vector<std::pair<Eigen::Vector3d, int>> boundContour;//std::vector<Eigen::Vector3d>
+//        int startVertex = boundEdges[0].first(); // choose one random index
+//        int currentVertex = startVertex;
+//        int previousVertex = -1;
+//        do {
+//            boundContour.push_back({ mesh_vbo[currentVertex], currentVertex });
+//            const std::vector<int>& neighbors = adjacencyList[currentVertex];
+//            for (const int neighbor : neighbors)
+//            {
+//                if (neighbor != previousVertex) {
+//                    previousVertex = currentVertex;
+//                    currentVertex = neighbor;
+//                    break;
+//                }
+//            }
+//            if (boundEdges.size() < boundContour.size())
+//                return {};// break;
+//        } while (currentVertex != startVertex);
+//        return boundContour;
+//    }
+
     //filter ibo, distinguish inner and outer
     inline std::vector<Eigen::Vector3i> getRingMeshByBoundary(const std::vector<Eigen::Vector3i>& ibo, const std::unordered_set<int>& boundEdge, bool isInner = true)
     {
@@ -317,36 +355,7 @@ namespace clash
         }
         //_drawPolyface(getPolyfaceHandleFromModelMesh(innMesh));
         //_drawPolyface(getPolyfaceHandleFromModelMesh(outMesh), colorRand());
-        return isInner ? innMesh : outMesh;
-    }
-
-    inline std::vector<Eigen::Vector3i> getBandMeshByBoundary(const std::vector<Eigen::Vector3i>& ibo, const std::array<std::vector<std::pair<Eigen::Vector3d, int>>, 2>& edgeU2)
-    {
-        std::unordered_set<int> boundEdge;
-        for (int i = 0; i < 2; i++)
-            for (const auto& iter : edgeU2[i])
-                boundEdge.insert(iter.second);
-        std::vector<Eigen::Vector3i> innMesh; //inner
-        std::vector<Eigen::Vector3i> outMesh; //outer
-        std::unordered_set<int> outContour;
-        std::unordered_set<Edge> outEdges;
-        for (const auto& face : ibo)
-        {
-            bool isOut = false;
-            for (const auto& i : face)
-            {
-                if (boundEdge.find(i) != boundEdge.end())
-                {
-                    isOut = true;
-                    break;
-                }
-            }
-            if (isOut)
-                outMesh.push_back(face);
-            else
-                innMesh.push_back(face);
-        }
-        return innMesh;
+        return isInner ? innMesh : outMesh; //getBandMeshByBoundary
     }
 
     inline bool isContourCCW(const std::vector<Eigen::Vector3d>& contour)
@@ -383,6 +392,8 @@ namespace clash
     //down-right-up-left, positive direction //first base on max anlge
     std::array<std::vector<Eigen::Vector3d>, 4> splitContourToEdge(
         const std::vector<Eigen::Vector3d>& boundContour, const std::array<Eigen::Vector2d, 4>& cornerPoints, bool isFirst = false);
+    std::array<std::vector<std::pair<Eigen::Vector3d, int>>, 4> splitContourToEdge(
+        const std::vector<std::pair<Eigen::Vector3d, int>>& boundContour, const std::array<Eigen::Vector2d, 4>& cornerPoints, bool isFirst = false);
 
     //AdvancingFront U version
     std::array<std::vector<std::pair<Eigen::Vector3d, int>>, 2> splitContourToEdgeFirst(
