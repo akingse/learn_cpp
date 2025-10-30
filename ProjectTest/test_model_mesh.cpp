@@ -16,6 +16,7 @@ static void readTerrainDataToMesh_csv1()
     return;
 }
 
+//merge 2
 static void test_mesh_0()
 {
     ModelMesh mesh;
@@ -35,13 +36,42 @@ static void test_mesh_0()
         Vector3d(0,0,1),
     };
 
-    ModelMesh sim = games::meshMergeFacesBaseNormal(mesh);
+    ModelMesh merge = games::meshMergeFacesBaseNormal(mesh);
     return;
 }
 
+//merge 4
+static void test_mesh_1()
+{
+    ModelMesh mesh;
+    mesh.vbo_ = {
+        Vector3d(0,0,0),
+        Vector3d(1,0,0),
+        Vector3d(0,1,0),
+        Vector3d(-1,0,0),
+        Vector3d(0,-1,0),
+    };
+    mesh.ibo_ = {
+        Vector3i(0,1,2),
+        Vector3i(0,2,3),
+        Vector3i(0,3,4),
+        Vector3i(0,4,1),
+    };
+    mesh.fno_ = {
+        Vector3d(0,0,1),
+        Vector3d(0,0,1),
+        Vector3d(0,0,1),
+        Vector3d(0,0,1),
+    };
+
+    ModelMesh merge = games::meshMergeFacesBaseNormal(mesh);
+    return;
+}
+
+
 static int enrol = []()->int
 	{
-        test_mesh_0();
+        test_mesh_1();
 		//readTerrainDataToMesh_csv1(); //Îö¹¹¿¨ËÀ
 		cout << get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;

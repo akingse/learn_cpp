@@ -67,6 +67,7 @@
 
 #define STORAGE_VERTEX_DATA_2D
 #define USING_BVHTREE_INDEX2
+#define FILL_PROFILE_DEBUG_TEMP
 
 //import
 #include "ProjectCAL_API.h"
