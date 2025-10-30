@@ -91,15 +91,15 @@ ModelMesh HeMesh::toMeshs() const
 	int max = m_edges.size();
 	for (int i = 0; i < (int)m_faces.size(); ++i)
 	{
-		if (m_faces[i] == nullptr)
+		const HeFace* face = m_faces[i];
+		if (face->m_isDel)//(face == nullptr)
 			continue;
-        mesh.fno_.push_back(m_faces[i]->m_normal);
-		mesh.ibos_.push_back(m_faces[i]->ibos(max));
+        mesh.fno_.push_back(face->m_normal);
+		mesh.ibos_.push_back(face->ibos(max));
 	}
 	return mesh;
 	//simplify
 }
-
 
 HeMesh::operator ModelMesh() const
 {
@@ -1052,32 +1052,38 @@ clash::ModelMesh games::meshMergeFacesBaseNormal(const clash::ModelMesh& mesh, d
 	for (int i = 0; i < hesh.m_edges.size(); i++)
 	{
 		HeEdge* edge = hesh.m_edges[i];
-		if (edge == nullptr)
+		if (edge == nullptr || edge->m_isDel) 
 			continue;
 		HeEdge* edgeTw = hesh.m_edges[i]->m_twinEdge;
-		if (edgeTw == nullptr)
+		if (edgeTw == nullptr || edgeTw->m_isDel)//bound co-edge is null
 			continue;
-		double angle = angle_two_vectors(edge->m_incFace->m_normal, edgeTw->m_incFace->m_normal, false);
-		if (toleAngle < angle)
+		//double angle = angle_two_vectors(edge->m_incFace->m_normal, edgeTw->m_incFace->m_normal, false);
+        if (toleAngle < fabs(1.0 - edge->m_incFace->m_normal.dot(edgeTw->m_incFace->m_normal)))
 			continue;
 		//merge
 		edge->m_prevEdge->m_nextEdge = edgeTw->m_nextEdge;
 		edgeTw->m_nextEdge->m_prevEdge = edge->m_prevEdge;
 		edge->m_nextEdge->m_prevEdge = edgeTw->m_prevEdge;
 		edgeTw->m_prevEdge->m_nextEdge = edge->m_nextEdge;
-		//edge->m_incFace->m_normal = 0.5*() //not update
+		edge->m_incFace->m_normal = 0.5 * (edge->m_incFace->m_normal + edgeTw->m_incFace->m_normal); //not update
 		//delete from vector
-		hesh.m_edges[i] = nullptr;
+		//hesh.m_edges[i] = nullptr;
+		hesh.m_edges[i]->m_isDel = true;
         auto itedge = std::find(hesh.m_edges.begin(), hesh.m_edges.end(), edgeTw);
-		*itedge = nullptr;//if (it!= hesh.m_edges.end())
+		(*itedge)->m_isDel = true;
+		//*itedge = nullptr;//if (it!= hesh.m_edges.end())
 		auto itface = std::find(hesh.m_faces.begin(), hesh.m_faces.end(), edgeTw->m_incFace);
-		*itface = nullptr;
-		delete edgeTw->m_incFace;
-		edgeTw->m_incFace = nullptr;
-		delete edge;
-		edge = nullptr;
-		delete edgeTw;
-		edgeTw = nullptr;
+		(*itface)->m_isDel = true;
+
+		//*itface = nullptr;
+		//delete edgeTw->m_incFace;
+		//edgeTw->m_incFace = nullptr;
+		//delete edge; //the inc vertex will be wild
+		//edge = nullptr;
+		//delete edgeTw;
+		//edgeTw = nullptr;
 	}
-	return hesh.toMeshs();
+	ModelMesh res = hesh.toMeshs();
+	hesh.clear();
+	return res;
 }

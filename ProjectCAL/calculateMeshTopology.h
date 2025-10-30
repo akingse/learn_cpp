@@ -80,6 +80,7 @@ namespace games
 		HeEdge* m_prevEdge = nullptr;
 		HeEdge* m_nextEdge = nullptr;
 		HeFace* m_incFace = nullptr; //incident face
+		bool m_isDel = false;
 	};
 
 	struct HeFace
@@ -89,6 +90,7 @@ namespace games
 		int m_index = -1;
 		HeEdge* m_incEdge = nullptr; //any one of three edges
 		Eigen::Vector3d m_normal = Eigen::Vector3d::Zero();
+		bool m_isDel = false;
 		inline Eigen::Vector3i ibo() const
 		{
 			Eigen::Vector3i face = {
@@ -101,13 +103,21 @@ namespace games
 		{
 			std::vector<int> face;
 			int count = 0;
-			HeEdge* iter = m_incEdge;
+			HeEdge* recrod = m_incEdge;
+			while (recrod->m_isDel)
+			{
+				recrod = recrod->m_nextEdge;
+				if (max < count++) //avoid endlessloop
+					break;
+			}
+			count = 0;
+			HeEdge* iter = recrod;
 			do {
 				face.push_back(iter->m_oriVertex->m_index);
 				iter = iter->m_nextEdge;
 				if (max < count++) //avoid endlessloop
 					break;
-			} while (iter != m_incEdge);
+			} while (iter != recrod);
 			return face;
 		}
 		inline std::array<Eigen::Vector3d, 3> ibo_v() const
