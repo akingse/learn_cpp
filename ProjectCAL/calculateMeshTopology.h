@@ -97,6 +97,19 @@ namespace games
 				m_incEdge->m_prevEdge->m_oriVertex->m_index };
 			return face;
 		}
+		inline std::vector<int> ibos(int max) const
+		{
+			std::vector<int> face;
+			int count = 0;
+			HeEdge* iter = m_incEdge;
+			do {
+				face.push_back(iter->m_oriVertex->m_index);
+				iter = iter->m_nextEdge;
+				if (max < count++) //avoid endlessloop
+					break;
+			} while (iter != m_incEdge);
+			return face;
+		}
 		inline std::array<Eigen::Vector3d, 3> ibo_v() const
 		{
 			std::array<Eigen::Vector3d, 3> face = {
@@ -137,6 +150,7 @@ namespace games
 		//convert
 		HeMesh(const clash::ModelMesh& mesh); //fromTriangleMesh
 		clash::ModelMesh toMesh() const;
+		clash::ModelMesh toMeshs() const; //support polygon
 		operator clash::ModelMesh() const; //toTriangleMesh
 		bool isValid() const; //is mainfold mesh
 

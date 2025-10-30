@@ -82,6 +82,24 @@ ModelMesh HeMesh::toMesh() const
 	}
 	return mesh;
 }
+ModelMesh HeMesh::toMeshs() const
+{
+	ModelMesh mesh;
+	mesh.vbo_.resize(m_vertexes.size());
+	for (int i = 0; i < m_vertexes.size(); ++i)
+		mesh.vbo_[i] = m_vertexes[i]->m_coord;
+	int max = m_edges.size();
+	for (int i = 0; i < (int)m_faces.size(); ++i)
+	{
+		if (m_faces[i] == nullptr)
+			continue;
+        mesh.fno_.push_back(m_faces[i]->m_normal);
+		mesh.ibos_.push_back(m_faces[i]->ibos(max));
+	}
+	return mesh;
+	//simplify
+}
+
 
 HeMesh::operator ModelMesh() const
 {
@@ -1047,20 +1065,19 @@ clash::ModelMesh games::meshMergeFacesBaseNormal(const clash::ModelMesh& mesh, d
 		edgeTw->m_nextEdge->m_prevEdge = edge->m_prevEdge;
 		edge->m_nextEdge->m_prevEdge = edgeTw->m_prevEdge;
 		edgeTw->m_prevEdge->m_nextEdge = edge->m_nextEdge;
-		//edge->m_incFace->m_normal = //not update
-		//delete
+		//edge->m_incFace->m_normal = 0.5*() //not update
+		//delete from vector
 		hesh.m_edges[i] = nullptr;
-        auto it = std::find(hesh.m_edges.begin(), hesh.m_edges.end(), edgeTw);
-		*it = nullptr;//if (it!= hesh.m_edges.end())
+        auto itedge = std::find(hesh.m_edges.begin(), hesh.m_edges.end(), edgeTw);
+		*itedge = nullptr;//if (it!= hesh.m_edges.end())
+		auto itface = std::find(hesh.m_faces.begin(), hesh.m_faces.end(), edgeTw->m_incFace);
+		*itface = nullptr;
 		delete edgeTw->m_incFace;
 		edgeTw->m_incFace = nullptr;
 		delete edge;
 		edge = nullptr;
 		delete edgeTw;
 		edgeTw = nullptr;
-		
-
 	}
-
-	return clash::ModelMesh();
+	return hesh.toMeshs();
 }

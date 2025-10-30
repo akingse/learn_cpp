@@ -127,12 +127,12 @@ namespace clash
         int genus_ = 0; //number of genus, default 0
         int number_ = -1; //int type index
 #ifdef FILL_PROFILE_DEBUG_TEMP
+        std::vector<std::vector<int>> ibos_; //support polygon face
         std::vector<int> iboRaw_; //for test debug
-        uint64_t index_ = UINT64_MAX;// ULLONG_MAX; // record belong to same polyface
+        size_t index_ = UINT64_MAX;// ULLONG_MAX; // record belong to same polyface
         //uint64_t instanceid = 0; //0 means not instance
         double area_ = 0;
         double volume_ = 0;
-        std::vector<std::vector<int>> ibos_; //support polygon face
 #endif
 #ifdef STORAGE_VERTEX_DATA_2D
         inline void to2D()
