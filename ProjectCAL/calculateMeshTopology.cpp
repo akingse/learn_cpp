@@ -94,8 +94,11 @@ ModelMesh HeMesh::toMeshs() const
 		const HeFace* face = m_faces[i];
 		if (face->m_isDel)//(face == nullptr)
 			continue;
+		std::vector<int> ibos = face->ibos(max);
+        if (ibos.size() < 2)
+			continue;
+		mesh.ibos_.push_back(ibos);
         mesh.fno_.push_back(face->m_normal);
-		mesh.ibos_.push_back(face->ibos(max));
 	}
 	return mesh;
 	//simplify
@@ -1048,7 +1051,11 @@ HeMesh games::meshQEMSimplification(const HeMesh& mesh, size_t edgeCollapseTarge
 
 clash::ModelMesh games::meshMergeFacesBaseNormal(const clash::ModelMesh& mesh, double toleAngle)
 {
+	MACRO_EXPANSION_TIME_DEFINE;
+	MACRO_EXPANSION_TIME_START;
 	HeMesh hesh = HeMesh(mesh);
+	MACRO_EXPANSION_TIME_END("time_mesh2hesh");
+	MACRO_EXPANSION_TIME_START;
 	for (int i = 0; i < hesh.m_edges.size(); i++)
 	{
 		HeEdge* edge = hesh.m_edges[i];
@@ -1083,7 +1090,10 @@ clash::ModelMesh games::meshMergeFacesBaseNormal(const clash::ModelMesh& mesh, d
 		//delete edgeTw;
 		//edgeTw = nullptr;
 	}
+	MACRO_EXPANSION_TIME_END("time_calMerge");
+	MACRO_EXPANSION_TIME_START;
 	ModelMesh res = hesh.toMeshs();
+	MACRO_EXPANSION_TIME_END("time_hesh2Meshs");
 	hesh.clear();
 	return res;
 }

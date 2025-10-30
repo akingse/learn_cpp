@@ -107,8 +107,10 @@ namespace games
 			while (recrod->m_isDel)
 			{
 				recrod = recrod->m_nextEdge;
-				if (max < count++) //avoid endlessloop
-					break;
+				//if (max < count++) //avoid endlessloop
+				//	break;
+				if (3 < count++)
+					return {};
 			}
 			count = 0;
 			HeEdge* iter = recrod;
