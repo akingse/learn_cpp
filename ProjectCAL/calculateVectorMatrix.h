@@ -83,29 +83,24 @@ namespace eigen
     //    return std::acos(cosRes);
     //}
 
-    inline double angle_two_vectors(const Eigen::Vector3d& v0, const Eigen::Vector3d& v1, bool isNorm = true)
+    inline double get_angle_of_two_vectors(const Eigen::Vector3d& V0, const Eigen::Vector3d& V1)
     {
-        Eigen::Vector3d V0 = v0;
-        Eigen::Vector3d V1 = v1;
-        double cosRes = 0;
-        if (isNorm)
-        {
-            V0 = v0.normalized();
-            V1 = v1.normalized();
-            cosRes = V0.dot(V1); //+1 or -1 
-        }
-        else
-            cosRes = V0.dot(V1) / (V0.norm() * V1.norm()); //+1 or -1 
+        double cosRes = cosRes = V0.dot(V1) / (V0.norm() * V1.norm()); //+1 or -1 
         if (1.0 < cosRes) //avoid nan
             cosRes = 1.0;
-        if (-1.0 > cosRes)
+        else if (-1.0 > cosRes)
             cosRes = -1.0;
         return std::acos(cosRes); // 0->PI
     }
 
-    inline double get_angle(const Eigen::Vector3d& v0, const Eigen::Vector3d& v1, bool isNorm = true)
+    inline double get_angle_of_two_unit(const Eigen::Vector3d& v0, const Eigen::Vector3d& v1)
     {
-        return angle_two_vectors(v0, v1, isNorm);
+        double cosres = v0.dot(v0);// / (v0.norm() * v1.norm());
+        if (1.0 < cosres) //avoid nan
+            cosres = 1.0;
+        else if (-1.0 > cosres)
+            cosres = -1.0;
+        return std::acos(cosres); // 0->PI
     }
 
     // dynamic accuracy

@@ -19,7 +19,7 @@ std::array<std::vector<Eigen::Vector3d>, 4> clash::splitContourToEdge(
             int j = (i + 1) % n; //next
             Eigen::Vector3d veci = boundContour[i] - boundContour[h];
             Eigen::Vector3d vecj = boundContour[j] - boundContour[i];
-            double angle = eigen::angle_two_vectors(to_vec3(to_vec2(veci)), to_vec3(to_vec2(vecj)));
+            double angle = eigen::get_angle_of_two_vectors(to_vec3(to_vec2(veci)), to_vec3(to_vec2(vecj)));
             if (angle < minCorner)
                 continue;
             angleMap.emplace(angle, i);
@@ -131,7 +131,7 @@ std::array<std::vector<std::pair<Eigen::Vector3d, int>>, 4> clash::splitContourT
             int j = (i + 1) % n; //next
             Eigen::Vector3d veci = boundContour[i].first - boundContour[h].first;
             Eigen::Vector3d vecj = boundContour[j].first - boundContour[i].first;
-            double angle = eigen::angle_two_vectors(to_vec3(to_vec2(veci)), to_vec3(to_vec2(vecj)));
+            double angle = eigen::get_angle_of_two_vectors(to_vec3(to_vec2(veci)), to_vec3(to_vec2(vecj)));
             if (angle < minCorner)
                 continue;
             angleMap.emplace(angle, i);
@@ -240,7 +240,7 @@ std::array<std::vector<std::pair<Vector3d, int>>, 2> clash::splitContourToEdgeFi
         int j = (i + 1) % n; //next
         Eigen::Vector3d veci = boundContour[i].first - boundContour[h].first;
         Eigen::Vector3d vecj = boundContour[j].first - boundContour[i].first;
-        double angle = eigen::angle_two_vectors(to_vec3(to_vec2(veci)), to_vec3(to_vec2(vecj)));
+        double angle = eigen::get_angle_of_two_vectors(to_vec3(to_vec2(veci)), to_vec3(to_vec2(vecj)));
         if (angle < minCorner)
             continue;
         angleMap.emplace(angle, i);
