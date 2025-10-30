@@ -132,6 +132,7 @@ namespace clash
         //uint64_t instanceid = 0; //0 means not instance
         double area_ = 0;
         double volume_ = 0;
+        std::vector<std::vector<int>> ibos_; //support polygon face
 #endif
 #ifdef STORAGE_VERTEX_DATA_2D
         inline void to2D()

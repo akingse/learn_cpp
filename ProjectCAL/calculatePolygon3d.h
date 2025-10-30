@@ -289,45 +289,45 @@ namespace clash
         return boundContour;
     }
 
-//    inline std::vector<std::pair<Eigen::Vector3d, int>> computeBoundaryContourU(
-//        const std::vector<Eigen::Vector3d>& mesh_vbo, const std::vector<Eigen::Vector3i>& mesh_ibo)
-//    {
-//        MACRO_EXPANSION_TIME_DEFINE;
-//        std::vector<Edge> boundEdges;
-//        // todo 优化获取最外边效率
-//        //extractboundContour
-//        std::unordered_map<int, std::vector<int>> adjacencyList;
-//        MACRO_EXPANSION_TIME_START;
-//        for (const auto& edge : boundEdges)
-//        {
-//#ifdef USING_EIGEN_VERISON
-//            adjacencyList[edge.m_id[0]].push_back(edge.m_id[1]);
-//            adjacencyList[edge.m_id[1]].push_back(edge.m_id[0]);
-//#endif
-//        }
-//        MACRO_EXPANSION_TIME_END("time_create_adjacencyList");
-//        std::vector<std::pair<Eigen::Vector3d, int>> boundContour;//std::vector<Eigen::Vector3d>
-//        int startVertex = boundEdges[0].first(); // choose one random index
-//        int currentVertex = startVertex;
-//        int previousVertex = -1;
-//        do {
-//            boundContour.push_back({ mesh_vbo[currentVertex], currentVertex });
-//            const std::vector<int>& neighbors = adjacencyList[currentVertex];
-//            for (const int neighbor : neighbors)
-//            {
-//                if (neighbor != previousVertex) {
-//                    previousVertex = currentVertex;
-//                    currentVertex = neighbor;
-//                    break;
-//                }
-//            }
-//            if (boundEdges.size() < boundContour.size())
-//                return {};// break;
-//        } while (currentVertex != startVertex);
-//        return boundContour;
-//    }
+    //    inline std::vector<std::pair<Eigen::Vector3d, int>> computeBoundaryContourU(
+    //        const std::vector<Eigen::Vector3d>& mesh_vbo, const std::vector<Eigen::Vector3i>& mesh_ibo)
+    //    {
+    //        MACRO_EXPANSION_TIME_DEFINE;
+    //        std::vector<Edge> boundEdges;
+    //        // todo 优化获取最外边效率
+    //        //extractboundContour
+    //        std::unordered_map<int, std::vector<int>> adjacencyList;
+    //        MACRO_EXPANSION_TIME_START;
+    //        for (const auto& edge : boundEdges)
+    //        {
+    //#ifdef USING_EIGEN_VERISON
+    //            adjacencyList[edge.m_id[0]].push_back(edge.m_id[1]);
+    //            adjacencyList[edge.m_id[1]].push_back(edge.m_id[0]);
+    //#endif
+    //        }
+    //        MACRO_EXPANSION_TIME_END("time_create_adjacencyList");
+    //        std::vector<std::pair<Eigen::Vector3d, int>> boundContour;//std::vector<Eigen::Vector3d>
+    //        int startVertex = boundEdges[0].first(); // choose one random index
+    //        int currentVertex = startVertex;
+    //        int previousVertex = -1;
+    //        do {
+    //            boundContour.push_back({ mesh_vbo[currentVertex], currentVertex });
+    //            const std::vector<int>& neighbors = adjacencyList[currentVertex];
+    //            for (const int neighbor : neighbors)
+    //            {
+    //                if (neighbor != previousVertex) {
+    //                    previousVertex = currentVertex;
+    //                    currentVertex = neighbor;
+    //                    break;
+    //                }
+    //            }
+    //            if (boundEdges.size() < boundContour.size())
+    //                return {};// break;
+    //        } while (currentVertex != startVertex);
+    //        return boundContour;
+    //    }
 
-    //filter ibo, distinguish inner and outer
+        //filter ibo, distinguish inner and outer
     inline std::vector<Eigen::Vector3i> getRingMeshByBoundary(const std::vector<Eigen::Vector3i>& ibo, const std::unordered_set<int>& boundEdge, bool isInner = true)
     {
         std::vector<Eigen::Vector3i> innMesh; //inner
@@ -423,6 +423,11 @@ namespace clash
         return res;
     }
 #endif 
+
+}
+
+namespace clash
+{
 
     //template<class T>
     inline std::vector<Eigen::Vector2d> linspace(const Eigen::Vector2d& p0, const Eigen::Vector2d& p1, int n)

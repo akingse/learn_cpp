@@ -1,6 +1,8 @@
 #include "pch.h"
+#include "calculateMeshTopology.h"
 using namespace std;
 using namespace Eigen;
+using namespace eigen;
 using namespace games;
 using namespace clash;
 #define USING_HALFEDGE_STRUCTURE
@@ -69,10 +71,10 @@ ModelMesh HeMesh::toMesh() const
 {
 	ModelMesh mesh;
 	mesh.vbo_.resize(m_vertexes.size());
-	mesh.ibo_.resize(m_faces.size());
-	mesh.fno_.resize(m_faces.size());
 	for (int i = 0; i < m_vertexes.size(); ++i)
 		mesh.vbo_[i] = m_vertexes[i]->m_coord;
+	mesh.ibo_.resize(m_faces.size());
+	mesh.fno_.resize(m_faces.size());
 	for (int i = 0; i < m_faces.size(); ++i)
 	{
 		mesh.ibo_[i] = m_faces[i]->ibo();
@@ -509,7 +511,6 @@ HeMesh games::meshLoopSubdivision(const HeMesh& mesh)
 //{
 //	return mesh;
 //}
-
 ////without update
 //ModelMesh meshQuadricErrorMetricsSimplification(const ModelMesh& mesh, size_t collapseEdgeCount /*= 0*/) //edge collapse and quadirc error metrics
 //{
@@ -1024,4 +1025,42 @@ HeMesh games::meshQEMSimplification(const HeMesh& mesh, size_t edgeCollapseTarge
 	}
 	return meshSim;
 }
+
 #endif //USING_HALFEDGE_STRUCTURE
+
+clash::ModelMesh games::meshMergeFacesBaseNormal(const clash::ModelMesh& mesh, double toleAngle)
+{
+	HeMesh hesh = HeMesh(mesh);
+	for (int i = 0; i < hesh.m_edges.size(); i++)
+	{
+		HeEdge* edge = hesh.m_edges[i];
+		if (edge == nullptr)
+			continue;
+		HeEdge* edgeTw = hesh.m_edges[i]->m_twinEdge;
+		if (edgeTw == nullptr)
+			continue;
+		double angle = angle_two_vectors(edge->m_incFace->m_normal, edgeTw->m_incFace->m_normal, false);
+		if (toleAngle < angle)
+			continue;
+		//merge
+		edge->m_prevEdge->m_nextEdge = edgeTw->m_nextEdge;
+		edgeTw->m_nextEdge->m_prevEdge = edge->m_prevEdge;
+		edge->m_nextEdge->m_prevEdge = edgeTw->m_prevEdge;
+		edgeTw->m_prevEdge->m_nextEdge = edge->m_nextEdge;
+		//edge->m_incFace->m_normal = //not update
+		//delete
+		hesh.m_edges[i] = nullptr;
+        auto it = std::find(hesh.m_edges.begin(), hesh.m_edges.end(), edgeTw);
+		*it = nullptr;//if (it!= hesh.m_edges.end())
+		delete edgeTw->m_incFace;
+		edgeTw->m_incFace = nullptr;
+		delete edge;
+		edge = nullptr;
+		delete edgeTw;
+		edgeTw = nullptr;
+		
+
+	}
+
+	return clash::ModelMesh();
+}
