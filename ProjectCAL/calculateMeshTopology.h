@@ -115,7 +115,10 @@ namespace games
 			count = 0;
 			HeEdge* iter = recrod;
 			do {
+				if (iter->m_isDel)
+					return {};
 				face.push_back(iter->m_oriVertex->m_index);
+				iter->m_isDel = true;//isUsed
 				iter = iter->m_nextEdge;
 				if (max < count++) //avoid endlessloop
 					break;

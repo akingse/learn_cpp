@@ -1055,6 +1055,22 @@ clash::ModelMesh games::meshMergeFacesBaseNormal(const clash::ModelMesh& mesh, d
 	MACRO_EXPANSION_TIME_START;
 	HeMesh hesh = HeMesh(mesh);
 	MACRO_EXPANSION_TIME_END("time_mesh2hesh");
+	auto _topo_and_mark = [](HeEdge* edge, HeEdge* edgeTw, int i) //merge
+		{
+			edge->m_prevEdge->m_nextEdge = edgeTw->m_nextEdge;
+			edgeTw->m_nextEdge->m_prevEdge = edge->m_prevEdge;
+			edge->m_nextEdge->m_prevEdge = edgeTw->m_prevEdge;
+			edgeTw->m_prevEdge->m_nextEdge = edge->m_nextEdge;
+			edge->m_incFace->m_normal = 0.5 * (edge->m_incFace->m_normal + edgeTw->m_incFace->m_normal); //not update
+			edge->m_isDel = true;
+			edgeTw->m_isDel = true;
+			edgeTw->m_incFace->m_isDel = true;
+			//hesh.m_edges[i]->m_isDel = true;
+			//auto itedge = std::find(hesh.m_edges.begin(), hesh.m_edges.end(), edgeTw);
+			//(*itedge)->m_isDel = true;
+			//auto itface = std::find(hesh.m_faces.begin(), hesh.m_faces.end(), edgeTw->m_incFace);
+			//(*itface)->m_isDel = true;
+		};
 	MACRO_EXPANSION_TIME_START;
 	for (int i = 0; i < hesh.m_edges.size(); i++)
 	{
@@ -1064,31 +1080,34 @@ clash::ModelMesh games::meshMergeFacesBaseNormal(const clash::ModelMesh& mesh, d
 		HeEdge* edgeTw = hesh.m_edges[i]->m_twinEdge;
 		if (edgeTw == nullptr || edgeTw->m_isDel)//bound co-edge is null
 			continue;
-		//double angle = angle_two_vectors(edge->m_incFace->m_normal, edgeTw->m_incFace->m_normal, false);
-        if (toleAngle < fabs(1.0 - edge->m_incFace->m_normal.dot(edgeTw->m_incFace->m_normal)))
+		if (edge->m_nextEdge == edgeTw || edge->m_prevEdge == edgeTw ||
+			fabs(1.0 - edge->m_incFace->m_normal.dot(edgeTw->m_incFace->m_normal)) <= toleAngle)
+		{
+			_topo_and_mark(edge, edgeTw, i);
+		}
+	}
+	for (int i = 0; i < hesh.m_edges.size(); i++)
+	{
+		HeEdge* edge = hesh.m_edges[i];
+		if (edge == nullptr || edge->m_isDel)
 			continue;
-		//merge
-		edge->m_prevEdge->m_nextEdge = edgeTw->m_nextEdge;
-		edgeTw->m_nextEdge->m_prevEdge = edge->m_prevEdge;
-		edge->m_nextEdge->m_prevEdge = edgeTw->m_prevEdge;
-		edgeTw->m_prevEdge->m_nextEdge = edge->m_nextEdge;
-		edge->m_incFace->m_normal = 0.5 * (edge->m_incFace->m_normal + edgeTw->m_incFace->m_normal); //not update
-		//delete from vector
-		//hesh.m_edges[i] = nullptr;
-		hesh.m_edges[i]->m_isDel = true;
-        auto itedge = std::find(hesh.m_edges.begin(), hesh.m_edges.end(), edgeTw);
-		(*itedge)->m_isDel = true;
-		//*itedge = nullptr;//if (it!= hesh.m_edges.end())
-		auto itface = std::find(hesh.m_faces.begin(), hesh.m_faces.end(), edgeTw->m_incFace);
-		(*itface)->m_isDel = true;
-
-		//*itface = nullptr;
-		//delete edgeTw->m_incFace;
-		//edgeTw->m_incFace = nullptr;
-		//delete edge; //the inc vertex will be wild
-		//edge = nullptr;
-		//delete edgeTw;
-		//edgeTw = nullptr;
+		HeEdge* edgeTw = hesh.m_edges[i]->m_twinEdge;
+		if (edgeTw == nullptr || edgeTw->m_isDel)//bound co-edge is null
+			continue;
+		//HeEdge* iter = edge;
+		//HeEdge* iterTw = edgeTw;
+		while (edge->m_nextEdge == edgeTw && !edge->m_isDel)
+		{
+			_topo_and_mark(edge, edgeTw, i);
+			edge = edge->m_prevEdge;
+			edgeTw = edgeTw->m_nextEdge;
+		}
+		while (edge->m_prevEdge == edgeTw && !edge->m_isDel)
+		{
+			_topo_and_mark(edge, edgeTw, i);
+			edge = edge->m_nextEdge;
+			edgeTw = edgeTw->m_prevEdge;
+		}
 	}
 	MACRO_EXPANSION_TIME_END("time_calMerge");
 	MACRO_EXPANSION_TIME_START;
