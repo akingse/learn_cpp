@@ -95,7 +95,7 @@ ModelMesh HeMesh::toMeshs() const
 		if (face->m_isDel)//(face == nullptr)
 			continue;
 		std::vector<int> ibos = face->ibos(max);
-        if (ibos.size() < 2)
+        if (ibos.size() < 3)
 			continue;
 		mesh.ibos_.push_back(ibos);
         mesh.fno_.push_back(face->m_normal);
@@ -1055,32 +1055,28 @@ clash::ModelMesh games::meshMergeFacesBaseNormal(const clash::ModelMesh& mesh, d
 	MACRO_EXPANSION_TIME_START;
 	HeMesh hesh = HeMesh(mesh);
 	MACRO_EXPANSION_TIME_END("time_mesh2hesh");
-	auto _topo_and_mark = [](HeEdge* edge, HeEdge* edgeTw, int i) //merge
+    auto _topo_and_mark = [](HeEdge* edge, HeEdge* edgeTw, int i) //merge
 		{
 			edge->m_prevEdge->m_nextEdge = edgeTw->m_nextEdge;
 			edgeTw->m_nextEdge->m_prevEdge = edge->m_prevEdge;
 			edge->m_nextEdge->m_prevEdge = edgeTw->m_prevEdge;
 			edgeTw->m_prevEdge->m_nextEdge = edge->m_nextEdge;
-			edge->m_incFace->m_normal = 0.5 * (edge->m_incFace->m_normal + edgeTw->m_incFace->m_normal); //not update
+			//edge->m_incFace->m_normal = 0.5 * (edge->m_incFace->m_normal + edgeTw->m_incFace->m_normal); //average
 			edge->m_isDel = true;
 			edgeTw->m_isDel = true;
-			edgeTw->m_incFace->m_isDel = true;
-			//hesh.m_edges[i]->m_isDel = true;
-			//auto itedge = std::find(hesh.m_edges.begin(), hesh.m_edges.end(), edgeTw);
-			//(*itedge)->m_isDel = true;
-			//auto itface = std::find(hesh.m_faces.begin(), hesh.m_faces.end(), edgeTw->m_incFace);
-			//(*itface)->m_isDel = true;
+			//if (delFace)
+			edgeTw->m_incFace->m_isDel = true; //only accelerate convert mesh
 		};
 	MACRO_EXPANSION_TIME_START;
 	for (int i = 0; i < hesh.m_edges.size(); i++)
 	{
 		HeEdge* edge = hesh.m_edges[i];
-		if (edge == nullptr || edge->m_isDel) 
+		if (edge->m_isDel) 
 			continue;
-		HeEdge* edgeTw = hesh.m_edges[i]->m_twinEdge;
+		HeEdge* edgeTw = edge->m_twinEdge;
 		if (edgeTw == nullptr || edgeTw->m_isDel)//bound co-edge is null
 			continue;
-		if (edge->m_nextEdge == edgeTw || edge->m_prevEdge == edgeTw ||
+		if (edge->m_nextEdge == edgeTw || edge->m_prevEdge == edgeTw || //all edge ccw
 			fabs(1.0 - edge->m_incFace->m_normal.dot(edgeTw->m_incFace->m_normal)) <= toleAngle)
 		{
 			_topo_and_mark(edge, edgeTw, i);
@@ -1089,24 +1085,24 @@ clash::ModelMesh games::meshMergeFacesBaseNormal(const clash::ModelMesh& mesh, d
 	for (int i = 0; i < hesh.m_edges.size(); i++)
 	{
 		HeEdge* edge = hesh.m_edges[i];
-		if (edge == nullptr || edge->m_isDel)
+		if (edge->m_isDel)
 			continue;
-		HeEdge* edgeTw = hesh.m_edges[i]->m_twinEdge;
+		HeEdge* edgeTw = edge->m_twinEdge;
 		if (edgeTw == nullptr || edgeTw->m_isDel)//bound co-edge is null
 			continue;
-		//HeEdge* iter = edge;
-		//HeEdge* iterTw = edgeTw;
-		while (edge->m_nextEdge == edgeTw && !edge->m_isDel)
+		while (edge->m_nextEdge == edgeTw && !edge->m_isDel)// && !edgeTw->m_isDel)
 		{
 			_topo_and_mark(edge, edgeTw, i);
 			edge = edge->m_prevEdge;
 			edgeTw = edgeTw->m_nextEdge;
+			test::DataRecordSingleton::dataCountAppend("count_BackWard0");
 		}
-		while (edge->m_prevEdge == edgeTw && !edge->m_isDel)
+		while (edge->m_prevEdge == edgeTw && !edge->m_isDel)// && !edgeTw->m_isDel)
 		{
 			_topo_and_mark(edge, edgeTw, i);
 			edge = edge->m_nextEdge;
 			edgeTw = edgeTw->m_prevEdge;
+            test::DataRecordSingleton::dataCountAppend("count_BackWard1"); //notCCW
 		}
 	}
 	MACRO_EXPANSION_TIME_END("time_calMerge");
