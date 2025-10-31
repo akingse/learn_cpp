@@ -18,6 +18,8 @@ double DataRecordSingleton::sm_toleFiecd = 1e-10;
 double DataRecordSingleton::sm_toleAngle = 1e-8;
 double DataRecordSingleton::sm_toleDist = 1e-6;
 double DataRecordSingleton::sm_tolerence = FLT_EPSILON;
+int DataRecordSingleton::sm_testmode = 0;
+std::string DataRecordSingleton::sm_testname;
 DataRecordSingleton::DataMap DataRecordSingleton::sm_recordData;
 std::vector<DataRecordSingleton::DataMap> DataRecordSingleton::sm_recordDatas;
 static const int _invalid_id = -1;

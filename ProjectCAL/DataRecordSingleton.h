@@ -155,6 +155,9 @@ namespace test
         static double sm_toleAngle;
         static double sm_toleDist;
         static double sm_tolerence;
+        //attach
+        static int sm_testmode;
+        static std::string sm_testname;
 
     private:
         //static int sm_index;
