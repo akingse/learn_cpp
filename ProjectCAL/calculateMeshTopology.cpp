@@ -1090,19 +1090,20 @@ clash::ModelMesh games::meshMergeFacesBaseNormal(const clash::ModelMesh& mesh, d
 		HeEdge* edgeTw = edge->m_twinEdge;
 		if (edgeTw == nullptr || edgeTw->m_isDel)//bound co-edge is null
 			continue;
-		while (edge->m_nextEdge == edgeTw && !edge->m_isDel)// && !edgeTw->m_isDel)
+		//if (test::DataRecordSingleton::sm_testmode == 1)
+		while (edge->m_nextEdge == edgeTw && !edge->m_isDel && edge->m_twinEdge == edgeTw)// && !edgeTw->m_isDel)
 		{
 			_topo_and_mark(edge, edgeTw, i);
 			edge = edge->m_prevEdge;
 			edgeTw = edgeTw->m_nextEdge;
 			test::DataRecordSingleton::dataCountAppend("count_BackWard0");
 		}
-		while (edge->m_prevEdge == edgeTw && !edge->m_isDel)// && !edgeTw->m_isDel)
+		while (edge->m_prevEdge == edgeTw && !edge->m_isDel && edge->m_twinEdge == edgeTw)// && !edgeTw->m_isDel)
 		{
 			_topo_and_mark(edge, edgeTw, i);
 			edge = edge->m_nextEdge;
 			edgeTw = edgeTw->m_prevEdge;
-            test::DataRecordSingleton::dataCountAppend("count_BackWard1"); //notCCW
+			test::DataRecordSingleton::dataCountAppend("count_BackWard1"); //notCCW
 		}
 	}
 	MACRO_EXPANSION_TIME_END("time_calMerge");

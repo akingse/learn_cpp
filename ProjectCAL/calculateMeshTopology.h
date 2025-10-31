@@ -107,8 +107,6 @@ namespace games
 			while (recrod->m_isDel)
 			{
 				recrod = recrod->m_nextEdge;
-				//if (max < count++) //avoid endlessloop
-				//	break;
 				if (3 < count++)
 					return {};
 			}
@@ -121,7 +119,7 @@ namespace games
 				iter->m_isDel = true;//isUsed
 				iter = iter->m_nextEdge;
 				if (max < count++) //avoid endlessloop
-					break;
+					return {}; //topo error
 			} while (iter != recrod);
 			return face;
 		}
