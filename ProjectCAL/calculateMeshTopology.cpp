@@ -1055,7 +1055,7 @@ clash::ModelMesh games::meshMergeFacesBaseNormal(const clash::ModelMesh& mesh, d
 	MACRO_EXPANSION_TIME_START;
 	HeMesh hesh = HeMesh(mesh);
 	MACRO_EXPANSION_TIME_END("time_mesh2hesh");
-    auto _topo_and_mark = [](HeEdge* edge, HeEdge* edgeTw, int i) //merge
+    auto _topo_merge_and_mark = [](HeEdge* edge, HeEdge* edgeTw) //merge
 		{
 			edge->m_prevEdge->m_nextEdge = edgeTw->m_nextEdge;
 			edgeTw->m_nextEdge->m_prevEdge = edge->m_prevEdge;
@@ -1068,39 +1068,38 @@ clash::ModelMesh games::meshMergeFacesBaseNormal(const clash::ModelMesh& mesh, d
 			edgeTw->m_incFace->m_isDel = true; //only accelerate convert mesh
 		};
 	MACRO_EXPANSION_TIME_START;
-	for (int i = 0; i < hesh.m_edges.size(); i++)
+	for (size_t i = 0; i < hesh.m_edges.size(); i++)
 	{
 		HeEdge* edge = hesh.m_edges[i];
 		if (edge->m_isDel) 
 			continue;
 		HeEdge* edgeTw = edge->m_twinEdge;
-		if (edgeTw == nullptr || edgeTw->m_isDel)//bound co-edge is null
+		if (edgeTw == nullptr || edgeTw->m_isDel)//boundary twin-edge is null
 			continue;
 		if (edge->m_nextEdge == edgeTw || edge->m_prevEdge == edgeTw || //all edge ccw
 			fabs(1.0 - edge->m_incFace->m_normal.dot(edgeTw->m_incFace->m_normal)) <= toleAngle)
 		{
-			_topo_and_mark(edge, edgeTw, i);
+			_topo_merge_and_mark(edge, edgeTw);
 		}
 	}
-	for (int i = 0; i < hesh.m_edges.size(); i++)
+	for (size_t i = 0; i < hesh.m_edges.size(); i++)
 	{
 		HeEdge* edge = hesh.m_edges[i];
 		if (edge->m_isDel)
 			continue;
 		HeEdge* edgeTw = edge->m_twinEdge;
-		if (edgeTw == nullptr || edgeTw->m_isDel)//bound co-edge is null
+		if (edgeTw == nullptr || edgeTw->m_isDel)//boundary twin-edge is null
 			continue;
-		//if (test::DataRecordSingleton::sm_testmode == 1)
-		while (edge->m_nextEdge == edgeTw && !edge->m_isDel && edge->m_twinEdge == edgeTw)// && !edgeTw->m_isDel)
+		while (edge->m_nextEdge == edgeTw && !edge->m_isDel && edge->m_twinEdge == edgeTw)
 		{
-			_topo_and_mark(edge, edgeTw, i);
+			_topo_merge_and_mark(edge, edgeTw);
 			edge = edge->m_prevEdge;
 			edgeTw = edgeTw->m_nextEdge;
 			test::DataRecordSingleton::dataCountAppend("count_BackWard0");
 		}
-		while (edge->m_prevEdge == edgeTw && !edge->m_isDel && edge->m_twinEdge == edgeTw)// && !edgeTw->m_isDel)
+		while (edge->m_prevEdge == edgeTw && !edge->m_isDel && edge->m_twinEdge == edgeTw)
 		{
-			_topo_and_mark(edge, edgeTw, i);
+			_topo_merge_and_mark(edge, edgeTw);
 			edge = edge->m_nextEdge;
 			edgeTw = edgeTw->m_prevEdge;
 			test::DataRecordSingleton::dataCountAppend("count_BackWard1"); //notCCW
