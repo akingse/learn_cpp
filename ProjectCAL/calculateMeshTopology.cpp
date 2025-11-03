@@ -1049,7 +1049,7 @@ HeMesh games::meshQEMSimplification(const HeMesh& mesh, size_t edgeCollapseTarge
 
 #endif //USING_HALFEDGE_STRUCTURE
 
-clash::ModelMesh games::meshMergeFacesBaseNormal(const clash::ModelMesh& mesh, double toleAngle)
+clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh, double toleAngle)
 {
 	MACRO_EXPANSION_TIME_DEFINE;
 	MACRO_EXPANSION_TIME_START;
