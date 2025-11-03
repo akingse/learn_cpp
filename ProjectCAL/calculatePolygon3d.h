@@ -420,6 +420,8 @@ namespace clash
                     res.push_back(point);
             }
         }
+        //if (lineA.size() != res.size() + 2)
+        //    return {};//error
         return res;
     }
 #endif 
@@ -429,11 +431,11 @@ namespace clash
 namespace clash
 {
 
-    //template<class T>
-    inline std::vector<Eigen::Vector2d> linspace(const Eigen::Vector2d& p0, const Eigen::Vector2d& p1, int n)
+    template<class T>
+    inline std::vector<T> linspace(const T& p0, const T& p1, int n) //noEnd
     {
-        std::vector<Eigen::Vector2d> res(n);
-        Eigen::Vector2d v = 1.0 / n * (p1 - p0);
+        std::vector<T> res(n);
+        T v = 1.0 / n * (p1 - p0);
         for (int i = 0; i < n; ++i)
             res[i] = p0 + double(i) * v;
         return res;

@@ -501,6 +501,7 @@ inline bool GetIntersectPoint(const Vector2i& ln1a, const Vector2i& ln1b,
 	return true;
 }
 
+//相交
 static void test7()
 {
 	//整形
@@ -543,6 +544,16 @@ static void test9()
 	return;
 }
 
+//几何
+static void test10()
+{
+	Eigen::Vector2d p0(0, 0);
+	Eigen::Vector2d p1(5, 0);
+
+	vector<Eigen::Vector2d> temp = linspace(p0, p1,4);
+	return;
+}
+
 static int enrol = []()->int
 {
 	//test1();
@@ -551,7 +562,8 @@ static int enrol = []()->int
 	//test4();
 	//test5();
 	//test6();
-	test9();
+	//test9();
+	test10();
 	cout << get_filepath_filename(__FILE__) << " finished.\n" << endl;
 	return 0;
 }();

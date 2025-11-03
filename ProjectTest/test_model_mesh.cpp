@@ -36,7 +36,7 @@ static void test_mesh_0()
         Vector3d(0,0,1),
     };
 
-    ModelMesh merge = games::meshMergeFacesBaseNormal(mesh);
+    ModelMesh merge = games::meshMergeFacesBaseonNormal(mesh);
     return;
 }
 
@@ -64,7 +64,7 @@ static void test_mesh_1()
         Vector3d(0,0,1),
     };
 
-    ModelMesh merge = games::meshMergeFacesBaseNormal(mesh);
+    ModelMesh merge = games::meshMergeFacesBaseonNormal(mesh);
     return;
 }
 
