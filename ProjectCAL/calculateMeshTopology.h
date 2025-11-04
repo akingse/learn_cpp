@@ -91,6 +91,7 @@ namespace games
 		HeEdge* m_incEdge = nullptr; //any one of three edges
 		Eigen::Vector3d m_normal = Eigen::Vector3d::Zero();
 		bool m_isDel = false;
+		bool m_isMark = false;
 		inline Eigen::Vector3i ibo() const
 		{
 			Eigen::Vector3i face = {
@@ -185,6 +186,7 @@ namespace games
 	clash::ModelMesh meshQEMSimplification(const clash::ModelMesh& mesh, size_t collapseEdgeCount = 0);
 	HeMesh meshQEMSimplification(const HeMesh& mesh, size_t edgeCollapseTarget = 0);
 	DLLEXPORT_CAL clash::ModelMesh meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh, double toleAngle = 1e-6);
+	DLLEXPORT_CAL clash::ModelMesh meshMergeFacesToQuadrangle(const clash::ModelMesh& mesh, double toleAngle = 1e-6);
 
 }
 #endif// CALCULATE_MESHTOPOLOGY_H

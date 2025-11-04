@@ -1112,3 +1112,46 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 	hesh.clear();
 	return res;
 }
+
+clash::ModelMesh games::meshMergeFacesToQuadrangle(const clash::ModelMesh& mesh, double toleAngle)
+{
+	MACRO_EXPANSION_TIME_DEFINE;
+	MACRO_EXPANSION_TIME_START;
+	HeMesh hesh = HeMesh(mesh);
+	MACRO_EXPANSION_TIME_END("time_mesh2hesh");
+	auto _topo_merge_and_mark = [](HeEdge* edge, HeEdge* edgeTw) //merge
+		{
+			edge->m_prevEdge->m_nextEdge = edgeTw->m_nextEdge;
+			edgeTw->m_nextEdge->m_prevEdge = edge->m_prevEdge;
+			edge->m_nextEdge->m_prevEdge = edgeTw->m_prevEdge;
+			edgeTw->m_prevEdge->m_nextEdge = edge->m_nextEdge;
+			edge->m_isDel = true;
+			edgeTw->m_isDel = true;
+			edgeTw->m_incFace->m_isDel = true; //only accelerate convert mesh
+			edge->m_incFace->m_isMark = true;
+			edgeTw->m_incFace->m_isMark = true;
+		};
+	MACRO_EXPANSION_TIME_START;
+	for (size_t i = 0; i < hesh.m_edges.size(); i++)
+	{
+		HeEdge* edge = hesh.m_edges[i];
+		if (edge->m_isDel)
+			continue;
+		HeEdge* edgeTw = edge->m_twinEdge;
+		if (edgeTw == nullptr || edgeTw->m_isDel)//boundary twin-edge is null
+			continue;
+		if (edge->m_incFace->m_isMark == true || edgeTw->m_incFace->m_isMark == true)
+			continue;
+		if (edge->m_nextEdge == edgeTw || edge->m_prevEdge == edgeTw || //all edge ccw
+			fabs(1.0 - edge->m_incFace->m_normal.dot(edgeTw->m_incFace->m_normal)) <= toleAngle)
+		{
+			_topo_merge_and_mark(edge, edgeTw);
+		}
+	}
+	MACRO_EXPANSION_TIME_END("time_calMerge");
+	MACRO_EXPANSION_TIME_START;
+	ModelMesh res = hesh.toMeshs();
+	MACRO_EXPANSION_TIME_END("time_hesh2Meshs");
+	hesh.clear();
+	return res;
+}
