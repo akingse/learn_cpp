@@ -534,6 +534,74 @@ namespace clash
         return block;
     }
 
+    inline std::vector<Eigen::Vector2d> edgeAlignEqual(const std::vector<Eigen::Vector2d>& origin, int num)
+    {
+        if (num <= origin.size())
+            return origin;
+        std::vector<Eigen::Vector2d> res;
+        if (2 * origin.size() - 1 <= num)
+        {
+            res.reserve(2 * origin.size() - 1);
+            for (int i = 0; i < origin.size() - 1; ++i)
+            {
+                res.push_back(origin[i]);
+                res.push_back(0.5 * (origin[i + 1] + origin[i]));
+            }
+            res.push_back(origin.back());
+        }
+        else
+        {
+            int add = num - origin.size();
+            std::vector<std::pair<double, int>> distVct;
+            for (int i = 0; i < origin.size() - 1; ++i)
+                distVct.push_back({ (origin[i + 1] - origin[i]).squaredNorm(), i });
+            std::sort(distVct.begin(), distVct.end(), []
+            (const std::pair<double, int>& dist0, const std::pair<double, int>& dist1)
+                {return dist0.first > dist1.first; });
+            //int count = 0;
+            std::map<int, double> distMap;
+            for (const auto& iter : distVct)
+            {
+                distMap.emplace(iter.second, iter.first);
+                if (distMap.size() + origin.size() == num)
+                    break;
+            }
+            res = origin;
+            for (auto iter = distMap.rbegin(); iter != distMap.rend(); iter++)
+            {
+                int i = iter->first;
+                Eigen::Vector2d pnt = 0.5 * (origin[i + 1] + origin[i]);
+                res.insert(res.begin() + 1 + i, pnt);
+                if (res.size() == num)
+                    break;
+            }
+        }
+        if (res.size() < num)
+            res = edgeAlignEqual(res, num);
+        return res;
+    }
+
+    inline std::vector<Eigen::Vector2d> edgeDistanceEqual(const std::vector<Eigen::Vector2d>& origin, int num)
+    {
+        if (num <= origin.size())
+            return origin;
+        double length = 0;
+        for (int i = 0; i < origin.size() - 1; ++i)
+            length += (origin[i + 1] - origin[i]).norm();
+        length = length / (num - 1);
+        std::vector<Eigen::Vector2d> res;
+        double current = 0;
+        for (int i = 0; i < origin.size() - 1; ++i)
+        {
+            double dist = (origin[i + 1] - origin[i]).norm();
+            current += dist;
+            int num = round(current / length) - res.size();
+            std::vector<Eigen::Vector2d> temp = linspace(origin[i], origin[i + 1], num);
+            res.insert(res.end(), temp.begin(), temp.end());
+        }
+        res.push_back(origin.back());
+        return res;
+    }
 }
 
 #endif// CALCULATE_POLYGON3D_H
