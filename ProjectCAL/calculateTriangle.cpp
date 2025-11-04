@@ -61,10 +61,11 @@ bool clash::isPointInTriangle(const Vector2d& point, const std::array<Vector2d, 
 	// (p1-p0).cross(p2-p1); -:20, *:11
 	double axisz = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p2[0] - p0[0]) * (p1[1] - p0[1]);
 	axisz = (0.0 < axisz) ? 1.0 : -1.0;
+	double toleFiexd = 1e-10;
 	return
-		0.0 <= axisz * ((p1[0] - p0[0]) * (point[1] - p0[1]) - (point[0] - p0[0]) * (p1[1] - p0[1])) &&
-		0.0 <= axisz * ((p2[0] - p1[0]) * (point[1] - p1[1]) - (point[0] - p1[0]) * (p2[1] - p1[1])) &&
-		0.0 <= axisz * ((p0[0] - p2[0]) * (point[1] - p2[1]) - (point[0] - p2[0]) * (p0[1] - p2[1]));
+		-toleFiexd < axisz * ((p1[0] - p0[0]) * (point[1] - p0[1]) - (point[0] - p0[0]) * (p1[1] - p0[1])) &&
+		-toleFiexd < axisz * ((p2[0] - p1[0]) * (point[1] - p1[1]) - (point[0] - p1[0]) * (p2[1] - p1[1])) &&
+		-toleFiexd < axisz * ((p0[0] - p2[0]) * (point[1] - p2[1]) - (point[0] - p2[0]) * (p0[1] - p2[1]));
 #endif
 }
 
