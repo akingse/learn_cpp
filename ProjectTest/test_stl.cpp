@@ -235,6 +235,33 @@ static void _test_stl_0()
 	pqueue.pop();
 	pqueue.pop();
 
+}
+
+//栈和队列
+static void _test_stl_1()
+{
+	std::stack<int> myStack;
+	// 压栈（push）
+	myStack.push(1);
+	myStack.push(2);
+	myStack.push(3);
+	// 查看栈顶元素（不删除）
+	std::cout << "Top element: " << myStack.top() << std::endl;
+	// 弹出栈顶元素（pop）
+	myStack.pop();
+
+
+	std::queue<int> myQueue;
+
+	// 入队（push）
+	myQueue.push(1);
+	myQueue.push(2);
+	myQueue.push(3);
+	// 查看队首元素（不删除）
+	std::cout << "Front element: " << myQueue.front() << std::endl;
+	// 出队（pop）
+	myQueue.pop();
+	std::cout << "After pop, front element: " << myQueue.front() << std::endl;
 
 }
 

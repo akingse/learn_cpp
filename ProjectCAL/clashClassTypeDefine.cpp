@@ -173,3 +173,73 @@ std::vector<ModelMesh> ModelMesh::readFromFile(const std::string& filename) //ob
     ifs.close();
     return meshVct;
 }
+
+std::vector<int> ModelMesh::selfIntersectCheck() //const
+{
+    auto _findDuplicate = [](const std::vector<int>& nums)
+        {
+            std::unordered_set<int> seen;
+            for (int num : nums)
+            {
+                if (seen.find(num) != seen.end())
+                    return num;
+                seen.insert(num);
+            }
+            return 0; //error
+        };
+
+    std::vector<int> res;
+    for (int i = 0; i < (int)ibos_.size(); ++i)
+    {
+        std::set<int> unique;
+        for (const int& j : ibos_[i])
+            unique.insert(j);
+
+        int differ = ibos_[i].size() - unique.size();
+        if (differ == 0)
+            continue;
+        else if (differ == 1)
+        {
+            int com = _findDuplicate(ibos_[i]);
+            std::vector<int> poly0;
+            std::vector<int> poly1;
+            bool just = true;
+            for (const int& j : ibos_[i])
+            {
+                (just) ? poly0.push_back(j) : poly1.push_back(j);
+                if (j == com)
+                    just = !just;
+            }
+            ibos_[i] = (poly0.size() < poly1.size()) ? poly1 : poly0;
+            test::DataRecordSingleton::dataCountAppend("count_split_poly");
+            std::vector<int> inner = (poly0.size() < poly1.size()) ? poly0 : poly1;
+            int sumI = 0;
+            int mulI = 1;
+            for (const int& k : inner)
+            {
+                sumI += k;
+                mulI *= k;
+            }
+            for (int j = 0; j < (int)ibos_.size(); ++j)
+            {
+                if (ibos_[j].size() != inner.size())
+                    continue;
+                int sumJ = 0;
+                int mulJ = 1;
+                for (const auto& k : ibos_[j])
+                {
+                    sumJ += k;
+                    mulJ *= k;
+                }
+                if (sumI != sumJ || mulI != mulJ)
+                    continue;
+                ibos_[j].clear();
+                test::DataRecordSingleton::dataCountAppend("count_removeTriangle");
+            }
+            //continue;
+        }
+        if (unique.size() < ibos_[i].size())
+            res.push_back(i);
+    }
+    return res;
+}
