@@ -174,12 +174,12 @@ std::vector<ModelMesh> ModelMesh::readFromFile(const std::string& filename) //ob
     return meshVct;
 }
 
-std::vector<int> ModelMesh::selfIntersectCheck() //const
+std::vector<int> ModelMesh::selfIntersectCheck() const
 {
-    auto _findDuplicate = [](const std::vector<int>& nums)
+    auto _findDuplicate = [](const std::vector<int>& nums)->int
         {
             std::unordered_set<int> seen;
-            for (int num : nums)
+            for (const int num : nums)
             {
                 if (seen.find(num) != seen.end())
                     return num;
@@ -194,7 +194,35 @@ std::vector<int> ModelMesh::selfIntersectCheck() //const
         std::set<int> unique;
         for (const int& j : ibos_[i])
             unique.insert(j);
+        int differ = ibos_[i].size() - unique.size();
+        if (differ == 0)
+            continue;
+        if (unique.size() < ibos_[i].size())
+            res.push_back(i);
+    }
+    return res;
+}
 
+std::vector<int> ModelMesh::selfIntersectRepair() 
+{
+    auto _findDuplicate = [](const std::vector<int>& nums)->int
+        {
+            std::unordered_set<int> seen;
+            for (const int num : nums)
+            {
+                if (seen.find(num) != seen.end())
+                    return num;
+                seen.insert(num);
+            }
+            return 0; //error
+        };
+
+    std::vector<int> res;
+    for (int i = 0; i < (int)ibos_.size(); ++i)
+    {
+        std::set<int> unique;
+        for (const int& j : ibos_[i])
+            unique.insert(j);
         int differ = ibos_[i].size() - unique.size();
         if (differ == 0)
             continue;

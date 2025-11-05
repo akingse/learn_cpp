@@ -151,7 +151,8 @@ namespace clash
             for (int i = 0; i < (int)ibo_.size(); ++i)
                 fno_.push_back((vbo_[ibo_[i][1]] - vbo_[ibo_[i][0]]).cross((vbo_[ibo_[i][2]] - vbo_[ibo_[i][1]])).normalized());
         }
-        std::vector<int> selfIntersectCheck(); //const
+        std::vector<int> selfIntersectCheck() const;
+        std::vector<int> selfIntersectRepair();
 
         inline operator TriMesh() const
         {
