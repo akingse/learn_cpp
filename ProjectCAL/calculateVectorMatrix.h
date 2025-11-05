@@ -85,12 +85,12 @@ namespace eigen
 
     inline double get_angle_of_two_vectors(const Eigen::Vector3d& V0, const Eigen::Vector3d& V1)
     {
-        double cosRes = cosRes = V0.dot(V1) / (V0.norm() * V1.norm()); //+1 or -1 
-        if (1.0 < cosRes) //avoid nan
-            cosRes = 1.0;
-        else if (-1.0 > cosRes)
-            cosRes = -1.0;
-        return std::acos(cosRes); // 0->PI
+        double cosres = cosres = V0.dot(V1) / (V0.norm() * V1.norm()); //+1 or -1 
+        if (1.0 < cosres) //avoid nan
+            cosres = 1.0;
+        else if (-1.0 > cosres)
+            cosres = -1.0;
+        return std::acos(cosres); // 0->PI
     }
 
     inline double get_angle_of_two_unit(const Eigen::Vector3d& v0, const Eigen::Vector3d& v1)

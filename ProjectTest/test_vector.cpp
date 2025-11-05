@@ -185,6 +185,11 @@ static void test_vector_3()
 //wrote by chatgpt
 static int test_vector_4()
 {
+	vector<int> v1 = { 0,1,2 };
+	vector<int> v2 = { 0,1,2,3 };
+    if (v1 == v2)
+		cout << "" << endl;
+
 	std::vector<double> vec{ 1.2, 3.4, 3.5, 5.6 };
 	if (std::find(vec.begin(), vec.end(), 1.2) != vec.end())
 	{
