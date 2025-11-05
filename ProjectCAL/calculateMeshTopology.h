@@ -110,16 +110,16 @@ namespace games
 		inline std::vector<int> ibos(int max) const
 		{
 			int count = 0;
-			HeEdge* recrod = m_incEdge;
-			while (recrod->m_isDel)
+			HeEdge* edge = m_incEdge;
+			while (edge->m_isDel)
 			{
-				recrod = recrod->m_nextEdge;
+				edge = edge->m_nextEdge;
 				if (3 < count++)
 					return {};
 			}
 			std::vector<int> face;
 			count = 0;
-			HeEdge* edge = recrod;
+			HeEdge* first = edge;
 			do {
 				if (edge->m_isDel)
 					return {};
@@ -128,26 +128,26 @@ namespace games
 				edge = edge->m_nextEdge;
 				if (max < count++) //avoid endlessloop
 					return {}; //topo error
-			} while (edge != recrod);
+			} while (edge != first);
 			return face;
 		}
 		inline std::vector<int> ibos() const
 		{
 			int count = 0;
-			HeEdge* recrod = m_incEdge;
-			while (recrod->m_isDel)
+			HeEdge* edge = m_incEdge;
+			while (edge->m_isDel)
 			{
-				recrod = recrod->m_nextEdge;
+				edge = edge->m_nextEdge;
 				if (3 < count++)
 					return {};
 			}
 			std::vector<int> face;
-			HeEdge* edge = recrod;
+			HeEdge* first = edge;
 			do {
 				face.push_back(edge->m_oriVertex->m_index);
 				//edge->m_isDel = true;//isUsed
 				edge = edge->m_nextEdge;
-			} while (edge != recrod);
+			} while (edge != first);
 			return face;
 		}
 		inline std::array<Eigen::Vector3d, 3> triangle() const
@@ -156,6 +156,24 @@ namespace games
 				m_incEdge->m_oriVertex->m_coord,
 				m_incEdge->m_nextEdge->m_oriVertex->m_coord,
 				m_incEdge->m_prevEdge->m_oriVertex->m_coord };
+			return face;
+		}
+		inline std::vector<Eigen::Vector3d> polygon() const
+		{
+			int count = 0;
+			HeEdge* edge = m_incEdge;
+			while (edge->m_isDel)
+			{
+				edge = edge->m_nextEdge;
+				if (3 < count++)
+					return {};
+			}
+			std::vector<Eigen::Vector3d> face;
+			HeEdge* first = edge;
+			do {
+				face.push_back(edge->m_oriVertex->m_coord);
+				edge = edge->m_nextEdge;
+			} while (edge != first);
 			return face;
 		}
 		inline bool isinclude(const HeVertex* vt) const
