@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "calculateMeshTopology.h"
+//#include "calculateMeshTopology.h"
 using namespace std;
 using namespace Eigen;
 using namespace eigen;
@@ -100,11 +100,11 @@ ModelMesh HeMesh::toMeshs() const
 	mesh.vbo_.resize(m_vertexes.size());
 	for (int i = 0; i < m_vertexes.size(); ++i)
 		mesh.vbo_[i] = m_vertexes[i]->m_coord;
-	int max = m_edges.size();
+    int max = m_edges.size() / 2;
 	for (int i = 0; i < (int)m_faces.size(); ++i)
 	{
 		const HeFace* face = m_faces[i];
-		if (face->m_isDel)//(face == nullptr)
+		if (face->m_isDel) //why not on backward line
 			continue;
 		std::vector<int> ibos = face->ibos(max);
         if (ibos.size() < 3)
@@ -1079,6 +1079,14 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			//if (delFace)
 			edgeTw->m_incFace->m_isDel = true; //only accelerate convert mesh
 		};
+	auto _inner_remove_and_mark = [](HeEdge* last, HeEdge* edge) //merge
+		{
+			last->m_prevEdge->m_nextEdge = edge;
+			edge->m_prevEdge->m_nextEdge = last;
+			HeEdge* swap = last->m_prevEdge;
+			last->m_prevEdge = edge->m_prevEdge;
+			edge->m_prevEdge = swap;
+		};
 	MACRO_EXPANSION_TIME_START;
 	for (size_t i = 0; i < hesh.m_edges.size(); i++)
 	{
@@ -1088,13 +1096,13 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		HeEdge* edgeTw = edge->m_twinEdge;
 		if (edgeTw == nullptr || edgeTw->m_isDel)//boundary twin-edge is null
 			continue;
-		if (edge->m_nextEdge == edgeTw || edge->m_prevEdge == edgeTw ||
-			fabs(1.0 - edge->m_incFace->m_normal.dot(edgeTw->m_incFace->m_normal)) <= toleAngle)
+		if (edge->m_nextEdge == edgeTw || edge->m_prevEdge == edgeTw || //single backward
+			fabs(1.0 - edge->m_incFace->m_normal.dot(edgeTw->m_incFace->m_normal)) <= toleAngle) //small angle
 		{
 			_topo_merge_and_mark(edge, edgeTw);
 		}
 	}
-	for (size_t i = 0; i < hesh.m_edges.size(); i++)
+	for (size_t i = 0; i < hesh.m_edges.size(); i++) //for multi backward
 	{
 		HeEdge* edge = hesh.m_edges[i];
 		if (edge->m_isDel)
@@ -1117,6 +1125,61 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			test::DataRecordSingleton::dataCountAppend("count_BackWard1"); //notCCW
 		}
 	}
+	//process self intersect
+	//for (size_t i = 0; i < hesh.m_faces.size(); i++)
+	//{
+	//	const HeFace* face = hesh.m_faces[i];
+	//	if (face->m_isDel)
+	//		continue;
+ //       //int max = hesh.m_edges.size() / 2;
+	//	std::vector<int> ibos = face->ibos();
+	//	if (ibos.size() < 6) //min inner triangle
+	//		continue;
+	//	std::unordered_set<int> seen;// unique;
+	//	std::unordered_set<int> breakset;//repeat
+	//	for (const int& j : ibos)
+	//	{
+	//		if (seen.find(j) != seen.end())
+	//			breakset.insert(j);
+	//		seen.insert(j);
+	//	}
+	//	if (ibos.size() == seen.size())
+	//		continue; //check
+	//	//re-topo
+	//	//std::unordered_set<HeVertex*> breakset;//repeat
+	//	HeEdge* edge = face->m_incEdge;
+	//	HeEdge* first = edge;
+	//	std::stack<HeEdge*> edgeRec; //record
+	//	edge = face->m_incEdge;
+	//	first = edge;
+	//	int count = 0;
+	//	do {
+	//		count++;
+	//		if (breakset.find(edge->m_oriVertex->m_index) == breakset.end())
+	//		{
+	//			edge = edge->m_nextEdge;
+	//			continue;
+	//		}
+	//		if (edgeRec.empty())
+	//		{
+	//			edgeRec.push(edge);
+	//			edge = edge->m_nextEdge;
+	//			continue;
+	//		}
+ //           if (edge->m_oriVertex != edgeRec.top()->m_oriVertex)
+	//			edgeRec.push(edge);
+	//		else
+	//		{
+	//			HeEdge*& last = edgeRec.top();
+	//			//if (edge == last->m_prevEdge->m_twinEdge)
+	//			//	_topo_merge_and_mark(edge, last->m_prevEdge->m_twinEdge);
+	//			_inner_remove_and_mark(last, edge);
+	//			edgeRec.pop();
+	//		}
+	//		edge = edge->m_nextEdge;
+	//	} while (edge != first);
+	//}
+
 	MACRO_EXPANSION_TIME_END("time_calMerge");
 	MACRO_EXPANSION_TIME_START;
 	ModelMesh res = hesh.toMeshs();
