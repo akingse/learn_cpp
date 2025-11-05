@@ -105,10 +105,13 @@ ModelMesh HeMesh::toMeshs() const
 	{
 		const HeFace* face = m_faces[i];
 		if (face->m_isDel) //why not on backward line
+		{
+			mesh.ibos_.push_back({});
 			continue;
+		}
 		std::vector<int> ibos = face->ibos(max);
-        if (ibos.size() < 3)
-			continue;
+   //     if (ibos.size() < 3)
+			//continue;
 		mesh.ibos_.push_back(ibos);
         mesh.fno_.push_back(face->m_normal);
 	}
@@ -1076,7 +1079,6 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			//edge->m_incFace->m_normal = 0.5 * (edge->m_incFace->m_normal + edgeTw->m_incFace->m_normal); //average
 			edge->m_isDel = true;
 			edgeTw->m_isDel = true;
-			//if (delFace)
 			edgeTw->m_incFace->m_isDel = true; //only accelerate convert mesh
 		};
 	auto _inner_remove_and_mark = [](HeEdge* last, HeEdge* edge) //merge
@@ -1126,59 +1128,72 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		}
 	}
 	//process self intersect
-	//for (size_t i = 0; i < hesh.m_faces.size(); i++)
-	//{
-	//	const HeFace* face = hesh.m_faces[i];
-	//	if (face->m_isDel)
-	//		continue;
- //       //int max = hesh.m_edges.size() / 2;
-	//	std::vector<int> ibos = face->ibos();
-	//	if (ibos.size() < 6) //min inner triangle
-	//		continue;
-	//	std::unordered_set<int> seen;// unique;
-	//	std::unordered_set<int> breakset;//repeat
-	//	for (const int& j : ibos)
-	//	{
-	//		if (seen.find(j) != seen.end())
-	//			breakset.insert(j);
-	//		seen.insert(j);
-	//	}
-	//	if (ibos.size() == seen.size())
-	//		continue; //check
-	//	//re-topo
-	//	//std::unordered_set<HeVertex*> breakset;//repeat
-	//	HeEdge* edge = face->m_incEdge;
-	//	HeEdge* first = edge;
-	//	std::stack<HeEdge*> edgeRec; //record
-	//	edge = face->m_incEdge;
-	//	first = edge;
-	//	int count = 0;
-	//	do {
-	//		count++;
-	//		if (breakset.find(edge->m_oriVertex->m_index) == breakset.end())
-	//		{
-	//			edge = edge->m_nextEdge;
-	//			continue;
-	//		}
-	//		if (edgeRec.empty())
-	//		{
-	//			edgeRec.push(edge);
-	//			edge = edge->m_nextEdge;
-	//			continue;
-	//		}
- //           if (edge->m_oriVertex != edgeRec.top()->m_oriVertex)
-	//			edgeRec.push(edge);
-	//		else
-	//		{
-	//			HeEdge*& last = edgeRec.top();
-	//			//if (edge == last->m_prevEdge->m_twinEdge)
-	//			//	_topo_merge_and_mark(edge, last->m_prevEdge->m_twinEdge);
-	//			_inner_remove_and_mark(last, edge);
-	//			edgeRec.pop();
-	//		}
-	//		edge = edge->m_nextEdge;
-	//	} while (edge != first);
-	//}
+	for (size_t i = 0; i < hesh.m_faces.size(); i++)
+	{
+		HeFace* face = hesh.m_faces[i];
+		if (face->m_isDel)
+			continue;
+        //int max = hesh.m_edges.size() / 2;
+		std::vector<int> ibos = face->ibos();
+		std::vector<Eigen::Vector3d> polygon = face->polygon();
+		if (ibos.size() < 6) //min inner triangle
+			continue;
+		std::unordered_set<int> seen;// unique;
+		std::unordered_set<int> breakset;//repeat
+		for (const int& j : ibos)
+		{
+			if (seen.find(j) != seen.end())
+				breakset.insert(j);
+			seen.insert(j);
+		}
+		if (ibos.size() == seen.size())
+			continue; //check
+		//re-topo
+		//std::unordered_set<HeVertex*> breakset;//repeat
+		HeEdge* edge = face->m_incEdge;
+		//bool isDelFace = false;
+		int count = 0;
+		while (edge->m_isDel)
+		{
+			edge = edge->m_nextEdge;
+			if (3 < count++)
+			{
+				face->m_isDel = true;
+				break;
+			}
+		}
+		if (face->m_isDel)
+			continue;
+		HeEdge* first = edge;
+		std::stack<HeEdge*> edgeRec; //record
+		do {
+			count++;
+			if (breakset.find(edge->m_oriVertex->m_index) == breakset.end()) //not inter
+			{
+				edge = edge->m_nextEdge;
+				continue;
+			}
+			if (edgeRec.empty()) //fitst 
+			{
+				edgeRec.push(edge);
+				edge = edge->m_nextEdge;
+				continue;
+			}
+            if (edge->m_oriVertex != edgeRec.top()->m_oriVertex)
+				edgeRec.push(edge);
+			else
+			{
+				HeEdge*& last = edgeRec.top();
+				//if (edge == last->m_prevEdge->m_twinEdge)
+				//	_topo_merge_and_mark(edge, last->m_prevEdge->m_twinEdge);
+				_inner_remove_and_mark(last, edge);
+				edgeRec.pop();
+			}
+			edge = edge->m_nextEdge;
+		} while (edge != first);
+
+
+	}
 
 	MACRO_EXPANSION_TIME_END("time_calMerge");
 	MACRO_EXPANSION_TIME_START;
