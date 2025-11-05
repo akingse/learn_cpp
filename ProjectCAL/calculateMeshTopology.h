@@ -81,6 +81,11 @@ namespace games
 		HeEdge* m_nextEdge = nullptr;
 		HeFace* m_incFace = nullptr; //incident face
 		bool m_isDel = false;
+		bool m_isSide = true;
+		inline Eigen::Vector3d vector() const //direction
+		{
+			return (m_nextEdge->m_oriVertex->m_coord - m_oriVertex->m_coord).normalized();
+		}
 	};
 
 	struct HeFace
@@ -92,6 +97,8 @@ namespace games
 		Eigen::Vector3d m_normal = Eigen::Vector3d::Zero();
 		bool m_isDel = false;
 		bool m_isMark = false;
+		bool m_isThin = false;
+
 		inline Eigen::Vector3i ibo() const
 		{
 			Eigen::Vector3i face = {
@@ -124,7 +131,7 @@ namespace games
 			} while (iter != recrod);
 			return face;
 		}
-		inline std::array<Eigen::Vector3d, 3> ibo_v() const
+		inline std::array<Eigen::Vector3d, 3> triangle() const
 		{
 			std::array<Eigen::Vector3d, 3> face = {
 				m_incEdge->m_oriVertex->m_coord,
@@ -139,6 +146,7 @@ namespace games
 				vt == m_incEdge->m_nextEdge->m_oriVertex ||
 				vt == m_incEdge->m_prevEdge->m_oriVertex;
 		}
+
 	};
 
 #define USING_POINTER_VERION
@@ -187,6 +195,7 @@ namespace games
 	HeMesh meshQEMSimplification(const HeMesh& mesh, size_t edgeCollapseTarget = 0);
 	DLLEXPORT_CAL clash::ModelMesh meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh, double toleAngle = 1e-6);
 	DLLEXPORT_CAL clash::ModelMesh meshMergeFacesToQuadrangle(const clash::ModelMesh& mesh, double toleAngle = 1e-6);
+	DLLEXPORT_CAL clash::ModelMesh meshMergeFacesSideEdgeOnly(const clash::ModelMesh& mesh, double toleAngle = 1e-6);
 
 }
 #endif// CALCULATE_MESHTOPOLOGY_H

@@ -30,6 +30,18 @@ HeMesh::HeMesh(const ModelMesh& mesh)
 		heFace->m_index = i;
 		//heFace->m_normal = (vbo[ibo[i][1]] - vbo[ibo[i][0]]).cross(vbo[ibo[i][2]] - vbo[ibo[i][1]]);// with normalized
 		heFace->m_normal = mesh.fno_[i];
+		//mark thin triangle
+		Triangle3d trigon = {
+			mesh.vbo_[mesh.ibo_[i][0]],
+			mesh.vbo_[mesh.ibo_[i][1]],
+			mesh.vbo_[mesh.ibo_[i][2]] };
+		constexpr double thin = 10.0 / 180 * M_PI;
+		for (int j = 0; j < 3; ++j)
+		{
+			double angle = get_angle_of_two_vectors(trigon[(j + 1) % 3] - trigon[(j) % 3], trigon[(j + 2) % 3] - trigon[(j + 1) % 3]);
+			if (angle < thin)
+				heFace->m_isThin = true;
+		}
 		int firstEdge = countEdge;
 		for (int j = 0; j < 3; ++j) //create 3 edges from 1 face
 		{
@@ -715,7 +727,7 @@ static Matrix4d _getQMatrixOfVertex(const HeMesh& mesh, int i)
 		if (!face->isinclude(mesh.m_vertexes[i]))
 			continue;
 		double a, b, c, d;
-		_getPlaneCoefficient(face->ibo_v(), a, b, c, d);
+		_getPlaneCoefficient(face->triangle(), a, b, c, d);
 		Vector4d p(a, b, c, d);
 		Q += p * p.transpose(); //Kp matrix sigma
 	}
@@ -1076,7 +1088,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		HeEdge* edgeTw = edge->m_twinEdge;
 		if (edgeTw == nullptr || edgeTw->m_isDel)//boundary twin-edge is null
 			continue;
-		if (edge->m_nextEdge == edgeTw || edge->m_prevEdge == edgeTw || //all edge ccw
+		if (edge->m_nextEdge == edgeTw || edge->m_prevEdge == edgeTw ||
 			fabs(1.0 - edge->m_incFace->m_normal.dot(edgeTw->m_incFace->m_normal)) <= toleAngle)
 		{
 			_topo_merge_and_mark(edge, edgeTw);
@@ -1146,6 +1158,79 @@ clash::ModelMesh games::meshMergeFacesToQuadrangle(const clash::ModelMesh& mesh,
 			fabs(1.0 - edge->m_incFace->m_normal.dot(edgeTw->m_incFace->m_normal)) <= toleAngle)
 		{
 			_topo_merge_and_mark(edge, edgeTw);
+		}
+	}
+	MACRO_EXPANSION_TIME_END("time_calMerge");
+	MACRO_EXPANSION_TIME_START;
+	ModelMesh res = hesh.toMeshs();
+	MACRO_EXPANSION_TIME_END("time_hesh2Meshs");
+	hesh.clear();
+	return res;
+}
+
+clash::ModelMesh games::meshMergeFacesSideEdgeOnly(const clash::ModelMesh& mesh, double toleAngle)
+{
+	MACRO_EXPANSION_TIME_DEFINE;
+	MACRO_EXPANSION_TIME_START;
+	HeMesh hesh = HeMesh(mesh);
+	MACRO_EXPANSION_TIME_END("time_mesh2hesh");
+	//统计顶点使用次数
+	//map<HeVertex*, int> vertCount;
+	//for (size_t i = 0; i < hesh.m_edges.size(); i++)
+	//{
+	//	HeEdge* edge = hesh.m_edges[i];
+	//	HeVertex* vert = edge->m_oriVertex;
+	//	if (vertCount.find(vert) == vertCount.end())
+	//		vertCount.emplace(vert, 1);
+	//	else
+	//		vertCount.at(vert) += 1;
+	//}
+	//vector<pair<HeVertex*, int>> vertCountVct;
+	//for (const auto& iter : vertCount)
+	//{
+	//	if (iter.second > 10)
+	//		vertCountVct.push_back(iter);
+	//}
+	auto _topo_merge_and_mark = [](HeEdge* edge, HeEdge* edgeTw, double toleAngle) //merge
+		{
+			if (edge->m_nextEdge == edgeTw || edge->m_prevEdge == edgeTw)
+				test::DataRecordSingleton::dataCountAppend("count_BackWardLine");
+			edge->m_nextEdge->m_isSide = false;
+			edgeTw->m_prevEdge->m_isSide = false;
+			edge->m_prevEdge->m_isSide = false;
+			edgeTw->m_nextEdge->m_isSide = false;
+			if (fabs(1.0 - edge->m_nextEdge->vector().dot(edgeTw->m_prevEdge->vector())) <= toleAngle)
+			{
+				edge->m_prevEdge->m_isSide = true;
+				edgeTw->m_nextEdge->m_isSide = true;
+			}
+			if (fabs(1.0 - edge->m_prevEdge->vector().dot(edgeTw->m_nextEdge->vector())) <= toleAngle)
+			{
+				edge->m_nextEdge->m_isSide = true;
+				edgeTw->m_prevEdge->m_isSide = true;
+			}
+			edge->m_prevEdge->m_nextEdge = edgeTw->m_nextEdge;
+			edgeTw->m_nextEdge->m_prevEdge = edge->m_prevEdge;
+			edge->m_nextEdge->m_prevEdge = edgeTw->m_prevEdge;
+			edgeTw->m_prevEdge->m_nextEdge = edge->m_nextEdge;
+			edge->m_isDel = true;
+			edgeTw->m_isDel = true;
+			edgeTw->m_incFace->m_isDel = true; //only accelerate convert mesh
+		};
+	MACRO_EXPANSION_TIME_START;
+	for (size_t i = 0; i < hesh.m_edges.size(); i++)
+	{
+		HeEdge* edge = hesh.m_edges[i];
+		if (edge->m_isDel)
+			continue;
+		HeEdge* edgeTw = edge->m_twinEdge;
+		if (edgeTw == nullptr || edgeTw->m_isDel)//boundary twin-edge is null
+			continue;
+        if (edge->m_isSide == false || edgeTw->m_isSide == false)
+			continue;
+		if (fabs(1.0 - edge->m_incFace->m_normal.dot(edgeTw->m_incFace->m_normal)) <= toleAngle)
+		{
+            _topo_merge_and_mark(edge, edgeTw, 2 * toleAngle);
 		}
 	}
 	MACRO_EXPANSION_TIME_END("time_calMerge");
