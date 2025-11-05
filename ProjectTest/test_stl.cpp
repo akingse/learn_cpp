@@ -250,7 +250,6 @@ static void _test_stl_1()
 	// 弹出栈顶元素（pop）
 	myStack.pop();
 
-
 	std::queue<int> myQueue;
 
 	// 入队（push）

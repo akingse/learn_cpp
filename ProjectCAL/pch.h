@@ -1,7 +1,7 @@
 #pragma once
 #include<iostream>
-#include<sstream>
 #include<fstream>
+#include<sstream>
 #define _USE_MATH_DEFINES //using M_PI
 #define _AFXDLL
 //#define WIN32_LEAN_AND_MEAN
@@ -23,6 +23,7 @@
 #include<unordered_map>
 #include<set>
 #include<unordered_set>
+#include<stack>
 #include<queue>
 #include<Eigen/Dense>
 #define USING_HALFEDGE_STRUCTURE
