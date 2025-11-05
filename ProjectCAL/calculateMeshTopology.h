@@ -109,7 +109,6 @@ namespace games
 		}
 		inline std::vector<int> ibos(int max) const
 		{
-			std::vector<int> face;
 			int count = 0;
 			HeEdge* recrod = m_incEdge;
 			while (recrod->m_isDel)
@@ -118,17 +117,37 @@ namespace games
 				if (3 < count++)
 					return {};
 			}
+			std::vector<int> face;
 			count = 0;
-			HeEdge* iter = recrod;
+			HeEdge* edge = recrod;
 			do {
-				if (iter->m_isDel)
+				if (edge->m_isDel)
 					return {};
-				face.push_back(iter->m_oriVertex->m_index);
-				iter->m_isDel = true;//isUsed
-				iter = iter->m_nextEdge;
+				face.push_back(edge->m_oriVertex->m_index);
+				edge->m_isDel = true;//isUsed
+				edge = edge->m_nextEdge;
 				if (max < count++) //avoid endlessloop
 					return {}; //topo error
-			} while (iter != recrod);
+			} while (edge != recrod);
+			return face;
+		}
+		inline std::vector<int> ibos() const
+		{
+			int count = 0;
+			HeEdge* recrod = m_incEdge;
+			while (recrod->m_isDel)
+			{
+				recrod = recrod->m_nextEdge;
+				if (3 < count++)
+					return {};
+			}
+			std::vector<int> face;
+			HeEdge* edge = recrod;
+			do {
+				face.push_back(edge->m_oriVertex->m_index);
+				//edge->m_isDel = true;//isUsed
+				edge = edge->m_nextEdge;
+			} while (edge != recrod);
 			return face;
 		}
 		inline std::array<Eigen::Vector3d, 3> triangle() const
