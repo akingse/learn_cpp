@@ -141,6 +141,7 @@ std::vector<ModelMesh> ModelMesh::readFromFile(const std::string& filename) //ob
     }
     std::string line;
     ModelMesh mesh;
+    int index = -1;
     while (std::getline(ifs, line))
     {
         std::istringstream is(line);
@@ -161,15 +162,21 @@ std::vector<ModelMesh> ModelMesh::readFromFile(const std::string& filename) //ob
             mesh.ibo_.push_back(face);
         }
         else if (prefix == "g" || prefix == "o") {
-            if (!mesh.vbo_.empty())// || !mesh.ibo_.empty()) 
+            //if (!mesh.vbo_.empty())// || !mesh.ibo_.empty()) 
+            if (index != -1)
             {
+                mesh.index_ = index;
                 meshVct.push_back(mesh);
                 mesh = ModelMesh(); //reset clear
             }
+            index++;
         }
     }
-    if (!mesh.vbo_.empty())// || !mesh.ibo_.empty())
+    if (index != -1)//(!mesh.vbo_.empty())// || !mesh.ibo_.empty())
+    {
+        mesh.index_ = index;
         meshVct.push_back(mesh);
+    }
     ifs.close();
     return meshVct;
 }
