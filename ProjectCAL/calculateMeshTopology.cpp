@@ -1166,10 +1166,11 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		std::stack<HeEdge*> edgeRec; //record edge
 		HeEdge* recThis = nullptr;  //to skip loop
 		HeEdge* recNext = nullptr;
+		vector<vector<HeEdge*>> contourVct;
 		do {
 			if (max < count++) //avoid endlessloop
 				break;
-			if (edge == recThis || edge == recNext)
+			if (edge == recThis)
 			{
 				edge->m_isDel = true;
 				break;
