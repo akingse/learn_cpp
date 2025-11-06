@@ -1109,7 +1109,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		if (edge->m_isDel)
 			continue;
 		HeEdge* edgeTw = edge->m_twinEdge;
-		if (edgeTw == nullptr || edgeTw->m_isDel)//boundary twin-edge is null
+		if (edgeTw == nullptr || edgeTw->m_isDel)
 			continue;
 		while (edge->m_nextEdge == edgeTw && !edge->m_isDel && edge->m_twinEdge == edgeTw)
 		{
@@ -1195,6 +1195,29 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		} while (edge != first);
 	}
 #endif
+	for (size_t i = 0; i < hesh.m_edges.size(); i++) //for multi backward
+	{
+		HeEdge* edge = hesh.m_edges[i];
+		if (edge->m_isDel)
+			continue;
+		HeEdge* edgeTw = edge->m_twinEdge;
+		if (edgeTw == nullptr || edgeTw->m_isDel)
+			continue;
+		while (edge->m_nextEdge == edgeTw && !edge->m_isDel && edge->m_twinEdge == edgeTw)
+		{
+			_topo_merge_and_mark(edge, edgeTw);
+			edge = edge->m_prevEdge;
+			edgeTw = edgeTw->m_nextEdge;
+			test::DataRecordSingleton::dataCountAppend("count_BackWard2");
+		}
+		while (edge->m_prevEdge == edgeTw && !edge->m_isDel && edge->m_twinEdge == edgeTw)
+		{
+			_topo_merge_and_mark(edge, edgeTw);
+			edge = edge->m_nextEdge;
+			edgeTw = edgeTw->m_prevEdge;
+			test::DataRecordSingleton::dataCountAppend("count_BackWard3"); //notCCW
+		}
+	}
 	MACRO_EXPANSION_TIME_END("time_calMerge");
 	MACRO_EXPANSION_TIME_START;
 	ModelMesh res = hesh.toMeshs();
