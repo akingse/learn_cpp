@@ -1076,12 +1076,11 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			edgeTw->m_nextEdge->m_prevEdge = edge->m_prevEdge;
 			edge->m_nextEdge->m_prevEdge = edgeTw->m_prevEdge;
 			edgeTw->m_prevEdge->m_nextEdge = edge->m_nextEdge;
-			//edge->m_incFace->m_normal = 0.5 * (edge->m_incFace->m_normal + edgeTw->m_incFace->m_normal); //average
 			edge->m_isDel = true;
 			edgeTw->m_isDel = true;
 			edgeTw->m_incFace->m_isDel = true; //only accelerate convert mesh
 		};
-	auto _inner_remove_and_mark = [](HeEdge* last, HeEdge* edge) //merge
+	auto _topo_split_and_mark = [](HeEdge* last, HeEdge* edge) //split
 		{
 			last->m_prevEdge->m_nextEdge = edge;
 			edge->m_prevEdge->m_nextEdge = last;
@@ -1128,30 +1127,29 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		}
 	}
 	//process self intersect
+#if 1
 	for (size_t i = 0; i < hesh.m_faces.size(); i++)
 	{
 		HeFace* face = hesh.m_faces[i];
 		if (face->m_isDel)
 			continue;
-        //int max = hesh.m_edges.size() / 2;
+        int max = hesh.m_edges.size() / 2;
 		std::vector<int> ibos = face->ibos();
-		std::vector<Eigen::Vector3d> polygon = face->polygon();
+		std::vector<Eigen::Vector3d> polygon = face->polygon();//debug
 		if (ibos.size() < 6) //min inner triangle
 			continue;
 		std::unordered_set<int> seen;// unique;
-		std::unordered_set<int> breakset;//repeat
+		std::unordered_set<int> common;//repeat
 		for (const int& j : ibos)
 		{
 			if (seen.find(j) != seen.end())
-				breakset.insert(j);
+				common.insert(j);
 			seen.insert(j);
 		}
 		if (ibos.size() == seen.size())
 			continue; //check
 		//re-topo
-		//std::unordered_set<HeVertex*> breakset;//repeat
 		HeEdge* edge = face->m_incEdge;
-		//bool isDelFace = false;
 		int count = 0;
 		while (edge->m_isDel)
 		{
@@ -1165,36 +1163,38 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		if (face->m_isDel)
 			continue;
 		HeEdge* first = edge;
-		std::stack<HeEdge*> edgeRec; //record
+		std::stack<HeEdge*> edgeRec; //record edge
+		HeEdge* recThis = nullptr;  //to skip loop
+		HeEdge* recNext = nullptr;
 		do {
-			count++;
-			if (breakset.find(edge->m_oriVertex->m_index) == breakset.end()) //not inter
+			if (max < count++) //avoid endlessloop
+				break;
+			if (edge == recThis || edge == recNext)
+			{
+				edge->m_isDel = true;
+				break;
+			}
+			if (common.find(edge->m_oriVertex->m_index) == common.end()) //not intersect
 			{
 				edge = edge->m_nextEdge;
 				continue;
 			}
-			if (edgeRec.empty()) //fitst 
+			if (edgeRec.empty() || //first 
+				(!edgeRec.empty() && edge->m_oriVertex != edgeRec.top()->m_oriVertex))
 			{
 				edgeRec.push(edge);
 				edge = edge->m_nextEdge;
 				continue;
 			}
-            if (edge->m_oriVertex != edgeRec.top()->m_oriVertex)
-				edgeRec.push(edge);
-			else
-			{
-				HeEdge*& last = edgeRec.top();
-				//if (edge == last->m_prevEdge->m_twinEdge)
-				//	_topo_merge_and_mark(edge, last->m_prevEdge->m_twinEdge);
-				_inner_remove_and_mark(last, edge);
-				edgeRec.pop();
-			}
-			edge = edge->m_nextEdge;
+			recThis = edge;
+			recNext = edge->m_nextEdge;
+			HeEdge*& last = edgeRec.top();
+			_topo_split_and_mark(last, edge);
+			edgeRec.pop();
+			edge = recNext;
 		} while (edge != first);
-
-
 	}
-
+#endif
 	MACRO_EXPANSION_TIME_END("time_calMerge");
 	MACRO_EXPANSION_TIME_START;
 	ModelMesh res = hesh.toMeshs();

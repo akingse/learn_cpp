@@ -243,6 +243,7 @@ static void _test_stl_1()
 	std::stack<int> myStack;
 	// Ñ¹Õ»£¨push£©
 	myStack.push(1);
+	int a = myStack.top();
 	myStack.push(2);
 	myStack.push(3);
 	// ²é¿´Õ»¶¥ÔªËØ£¨²»É¾³ı£©
@@ -266,7 +267,8 @@ static void _test_stl_1()
 
 static int _enrol = []()->int
 	{
-		_test_stl_0();
+		//_test_stl_0();
+		_test_stl_1();
 		cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();
