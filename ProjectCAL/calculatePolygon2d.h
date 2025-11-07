@@ -161,10 +161,30 @@ namespace clash
 		return false;
 	}
 
+	//equal area < 0
+	inline double isContourCCW(const std::vector<Eigen::Vector2d>& contour)
+	{
+		const size_t n = contour.size();
+		if (n < 3)
+			return false;
+		double area = 0.0;
+		for (size_t i = 0; i < n; ++i)
+		{
+			const size_t j = (i + 1) % n;
+			const Eigen::Vector2d& p1 = contour[i];
+			const Eigen::Vector2d& p2 = contour[j];
+			area += (p2.x() - p1.x()) * (p2.y() + p1.y());
+		}
+		return area; // area < 0;
+	}
+
+	//area is fabs
 	inline double calculatePolygonArea(const std::vector<Eigen::Vector2d>& polygon) //using Shoelace-Gauss method
 	{
 		double area = 0.0;
-		size_t n = polygon.size();
+		int n = (int)polygon.size();
+		if (n < 3)
+			return 0;
 		for (int i = 0; i < n; ++i)
 		{
 			int j = (i + 1) % n; //avoid index over bound

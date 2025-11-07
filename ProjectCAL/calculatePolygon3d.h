@@ -358,37 +358,6 @@ namespace clash
         return isInner ? innMesh : outMesh; //getBandMeshByBoundary
     }
 
-    inline bool isContourCCW(const std::vector<Eigen::Vector3d>& contour)
-    {
-        const size_t n = contour.size();
-        if (n < 3)
-            return true;
-        double area = 0.0;
-        for (size_t i = 0; i < n; ++i)
-        {
-            const size_t j = (i + 1) % n;
-            const Eigen::Vector3d& p1 = contour[i];
-            const Eigen::Vector3d& p2 = contour[j];
-            area += (p2.x() - p1.x()) * (p2.y() + p1.y());
-        }
-        return area < 0;
-    }
-    inline bool isContourCCW(const std::vector<std::pair<Eigen::Vector3d, int>>& contour)
-    {
-        const size_t n = contour.size();
-        if (n < 3)
-            return true;
-        double area = 0.0;
-        for (size_t i = 0; i < n; ++i)
-        {
-            const size_t j = (i + 1) % n;
-            const Eigen::Vector3d& p1 = contour[i].first;
-            const Eigen::Vector3d& p2 = contour[j].first;
-            area += (p2.x() - p1.x()) * (p2.y() + p1.y());
-        }
-        return area < 0;
-    }
-
     //down-right-up-left, positive direction //first base on max anlge
     std::array<std::vector<Eigen::Vector3d>, 4> splitContourToEdge(
         const std::vector<Eigen::Vector3d>& boundContour, const std::array<Eigen::Vector2d, 4>& cornerPoints, bool isFirst = false);

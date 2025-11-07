@@ -549,8 +549,19 @@ static void test10()
 {
 	Eigen::Vector2d p0(0, 0);
 	Eigen::Vector2d p1(5, 0);
-
 	vector<Eigen::Vector2d> temp = linspace(p0, p1,4);
+
+	std::vector<Eigen::Vector2d> contour =
+	{
+		Vector2d(0,0),
+		Vector2d(10,0),
+		Vector2d(10,10),
+		Vector2d(0,10),
+	};
+	double area0 = isContourCCW(contour);
+	std::reverse(contour.begin(), contour.end());
+	double area1 = isContourCCW(contour);
+
 	return;
 }
 

@@ -51,7 +51,7 @@ std::array<std::vector<Eigen::Vector3d>, 4> clash::splitContourToEdge(
         }
     //std::vector<Eigen::Vector3d> ccwContour = boundContour;
     std::vector<Eigen::Vector3d> ccwContour(boundContour.size());
-    bool isCCW = isContourCCW(boundContour);
+    bool isCCW = isContourCCW(to_vec2(boundContour)) < 0;
     int n = (int)boundContour.size();
     for (int i = 0; i < n; i++)
         ccwContour[i] = boundContour[(i + firstpoint) % n];
@@ -162,10 +162,14 @@ std::array<std::vector<std::pair<Eigen::Vector3d, int>>, 4> clash::splitContourT
             }
         }
     std::vector<std::pair<Eigen::Vector3d, int>> ccwContour(boundContour.size());
-    bool isCCW = isContourCCW(boundContour);
+    std::vector<Eigen::Vector2d> contour2d(boundContour.size());
     int n = (int)boundContour.size();
     for (int i = 0; i < n; i++)
+    {
         ccwContour[i] = boundContour[(i + firstpoint) % n];
+        contour2d[i] = to_vec2(boundContour[i].first);
+    }
+    bool isCCW = isContourCCW(contour2d) < 0;
     //ccwContour[n - 1] = ccwContour[0]; //closed, for reverse
     if (!isCCW)
     {
@@ -259,9 +263,13 @@ std::array<std::vector<std::pair<Vector3d, int>>, 2> clash::splitContourToEdgeFi
         }
     }
     std::vector<std::pair<Vector3d, int>> ccwContour(boundContour.size());
-    bool isCCW = isContourCCW(boundContour);
+    std::vector<Eigen::Vector2d> contour2d(boundContour.size());
     for (int i = 0; i < n; i++)
+    {
         ccwContour[i] = boundContour[(i + firstpoint) % n];
+        contour2d[i] = to_vec2(boundContour[i].first);
+    }
+    bool isCCW = isContourCCW(contour2d) < 0;
     if (!isCCW)
     {
         ccwContour.push_back(ccwContour.front());
