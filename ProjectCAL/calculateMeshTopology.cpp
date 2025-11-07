@@ -1163,10 +1163,13 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		if (face->m_isDel)
 			continue;
 		HeEdge* first = edge;
+		face->m_incEdge = first;
 		std::stack<HeEdge*> edgeRec; //record edge
 		HeEdge* recThis = nullptr;  //to skip loop
 		HeEdge* recNext = nullptr;
 		vector<vector<HeEdge*>> contourVct;
+		std::vector<HeEdge*> edgeVct = face->edges();
+		//int number = 0;
 		do {
 			if (max < count++) //avoid endlessloop
 				break;
@@ -1187,6 +1190,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 				edge = edge->m_nextEdge;
 				continue;
 			}
+			//do_split
 			recThis = edge;
 			recNext = edge->m_nextEdge;
 			HeEdge*& last = edgeRec.top();
@@ -1194,6 +1198,41 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			edgeRec.pop();
 			edge = recNext;
 		} while (edge != first);
+		for (auto& iter : edgeVct)
+		{
+			if (iter->m_isClose)
+				continue;
+			vector<Vector2d> polygon2d;
+			HeEdge* front = iter;//first
+			do {
+				if (max < count++) //avoid endlessloop
+					break;
+				polygon2d.push_back(mesh.vbo2_[iter->m_oriVertex->m_index]);
+				iter->m_isClose = true;//isUsed
+				iter = iter->m_nextEdge;
+			} while (front != iter);
+			if (polygon2d.size() <= 3)
+			{
+				front->m_isDel = true;
+				continue;
+			}
+			double area = isContourCCW(polygon2d);
+            if (0 <= area)
+				front->m_isDel = true;
+			if (!front->m_isDel)
+				face->m_incEdge = front;
+		}
+		//for (const auto& contour : contourVct)
+		//{
+		//	vector<Vector2d> polygon2d;
+		//	for (const auto& iter : contour)
+		//		polygon2d.push_back(mesh.vbo2_[iter->m_oriVertex->m_index]);
+		//	if (polygon2d.size() <= 3)
+		//		contour.front()->m_isDel = true;
+		//	double area = calculatePolygonArea(polygon2d);
+		//	if (area <= 0)
+		//		contour.front()->m_isDel;
+		//}
 	}
 #endif
 	for (size_t i = 0; i < hesh.m_edges.size(); i++) //for multi backward

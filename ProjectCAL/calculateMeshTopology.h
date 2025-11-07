@@ -81,6 +81,7 @@ namespace games
 		HeEdge* m_nextEdge = nullptr;
 		HeFace* m_incFace = nullptr; //incident face
 		bool m_isDel = false;
+		bool m_isClose = false;
 		bool m_isSide = true;
 		inline Eigen::Vector3d vector() const //direction
 		{
@@ -145,6 +146,25 @@ namespace games
 			HeEdge* first = edge;
 			do {
 				face.push_back(edge->m_oriVertex->m_index);
+				//edge->m_isDel = true;//isUsed
+				edge = edge->m_nextEdge;
+			} while (edge != first);
+			return face;
+		}
+		inline std::vector<HeEdge*> edges() const
+		{
+			int count = 0;
+			HeEdge* edge = m_incEdge;
+			while (edge->m_isDel)
+			{
+				edge = edge->m_nextEdge;
+				if (3 < count++)
+					return {};
+			}
+			std::vector<HeEdge*> face;
+			HeEdge* first = edge;
+			do {
+				face.push_back(edge);
 				//edge->m_isDel = true;//isUsed
 				edge = edge->m_nextEdge;
 			} while (edge != first);
