@@ -227,6 +227,26 @@ namespace clash
             return { volume / 6.0,moment / 24.0 };
         }
 
+        inline std::array<Eigen::Vector3d, 3> triangle(int i) const
+        {
+            if (ibo_.size() <= i || i < 0)
+                return {};
+            Triangle3d trigon = {
+                vbo_[ibo_[i][0]],
+                vbo_[ibo_[i][1]],
+                vbo_[ibo_[i][2]] };
+            return trigon;
+        }
+        inline std::vector<Eigen::Vector3d> polygon(int i) const
+        {
+            if (ibos_.size() <= i || i < 0)
+                return {};
+            std::vector<Eigen::Vector3d> polygon;
+            for (const int& j : ibos_[i])
+                polygon.push_back(vbo_[j]);
+            return polygon;
+        }
+        
         bool operator==(const ModelMesh& rhs) const
         {
             if (vbo_.size() != rhs.vbo_.size() || ibo_.size() != rhs.ibo_.size())

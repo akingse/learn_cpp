@@ -1070,7 +1070,8 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 	MACRO_EXPANSION_TIME_START;
 	HeMesh hesh = HeMesh(mesh);
 	MACRO_EXPANSION_TIME_END("time_mesh2hesh");
-    auto _topo_merge_and_mark = [](HeEdge* edge, HeEdge* edgeTw) //merge
+	int max = hesh.m_edges.size() / 2;
+	auto _topo_merge_and_mark = [](HeEdge* edge, HeEdge* edgeTw) //merge
 		{
 			edge->m_prevEdge->m_nextEdge = edgeTw->m_nextEdge;
 			edgeTw->m_nextEdge->m_prevEdge = edge->m_prevEdge;
@@ -1079,14 +1080,6 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			edge->m_isDel = true;
 			edgeTw->m_isDel = true;
 			edgeTw->m_incFace->m_isDel = true; //only accelerate convert mesh
-		};
-	auto _topo_split_and_mark = [](HeEdge* last, HeEdge* edge) //split
-		{
-			last->m_prevEdge->m_nextEdge = edge;
-			edge->m_prevEdge->m_nextEdge = last;
-			HeEdge* swap = last->m_prevEdge;
-			last->m_prevEdge = edge->m_prevEdge;
-			edge->m_prevEdge = swap;
 		};
 	MACRO_EXPANSION_TIME_START;
 	for (size_t i = 0; i < hesh.m_edges.size(); i++)
@@ -1128,12 +1121,19 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 	}
 	//process self intersect
 #if 1
+	auto _topo_split_and_mark = [](HeEdge* last, HeEdge* edge) //split
+		{
+			last->m_prevEdge->m_nextEdge = edge;
+			edge->m_prevEdge->m_nextEdge = last;
+			HeEdge* swap = last->m_prevEdge;
+			last->m_prevEdge = edge->m_prevEdge;
+			edge->m_prevEdge = swap;
+		};
 	for (size_t i = 0; i < hesh.m_faces.size(); i++)
 	{
 		HeFace* face = hesh.m_faces[i];
 		if (face->m_isDel)
 			continue;
-        int max = hesh.m_edges.size() / 2;
 		std::vector<int> ibos = face->ibos();
 		std::vector<Eigen::Vector3d> polygon = face->polygon();//debug
 		if (ibos.size() < 6) //min inner triangle
@@ -1211,28 +1211,15 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 				iter->m_isClose = true;//isUsed
 				iter = iter->m_nextEdge;
 			} while (front != iter);
-			if (polygon2d.size() <= 3)
+			//double area = isContourCCW(polygon2d);
+			if (polygon2d.size() <= 3 || 0 <= isContourCCW(polygon2d))
 			{
 				front->m_isDel = true;
 				continue;
 			}
-			double area = isContourCCW(polygon2d);
-            if (0 <= area)
-				front->m_isDel = true;
 			if (!front->m_isDel)
 				face->m_incEdge = front;
 		}
-		//for (const auto& contour : contourVct)
-		//{
-		//	vector<Vector2d> polygon2d;
-		//	for (const auto& iter : contour)
-		//		polygon2d.push_back(mesh.vbo2_[iter->m_oriVertex->m_index]);
-		//	if (polygon2d.size() <= 3)
-		//		contour.front()->m_isDel = true;
-		//	double area = calculatePolygonArea(polygon2d);
-		//	if (area <= 0)
-		//		contour.front()->m_isDel;
-		//}
 	}
 #endif
 	for (size_t i = 0; i < hesh.m_edges.size(); i++) //for multi backward
