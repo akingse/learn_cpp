@@ -194,6 +194,17 @@ namespace clash
 		return 0.5 * std::fabs(area);
 	}
 
+	inline Eigen::Vector2d computeCentroid(const std::array<Eigen::Vector2d, 3>& trigon)
+	{
+		Eigen::Vector2d centroid = (trigon[0] + trigon[1] + trigon[2]) / 3.0;
+		return centroid;
+	}
+	inline Eigen::Vector3d computeCentroid(const std::array<Eigen::Vector3d, 3>& trigon)
+	{
+		Eigen::Vector3d centroid = (trigon[0] + trigon[1] + trigon[2]) / 3.0;
+		return centroid;
+	}
+
 	inline Eigen::Vector2d computeCentroid(const std::vector<Eigen::Vector2d>& polygon)
 	{
 		double area = 0.0;
