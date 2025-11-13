@@ -1079,9 +1079,10 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			edgeTw->m_prevEdge->m_nextEdge = edge->m_nextEdge;
 			edge->m_isDel = true;
 			edgeTw->m_isDel = true;
-			edgeTw->m_incFace->m_isDel = true; //only accelerate convert mesh
+			//edgeTw->m_incFace->m_isDel = true; //only accelerate convert mesh
 		};
 	MACRO_EXPANSION_TIME_START;
+	//const HeFace* face = hesh.m_faces[30184];
 	for (size_t i = 0; i < hesh.m_edges.size(); i++)
 	{
 		HeEdge* edge = hesh.m_edges[i];
@@ -1215,6 +1216,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			if (polygon2d.size() <= 3 || 0 <= isContourCCW(polygon2d))
 			{
 				front->m_isDel = true;
+				front->m_twinEdge->m_isDel = true;
 				continue;
 			}
 			if (!front->m_isDel)
