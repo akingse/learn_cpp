@@ -82,7 +82,7 @@ namespace games
 		HeFace* m_incFace = nullptr; //incident face
 		bool m_isDel = false;
 		bool m_isClose = false;
-		bool m_isSide = true;
+		//bool m_isSide = true;
 		inline Eigen::Vector3d vector() const //direction
 		{
 			return (m_nextEdge->m_oriVertex->m_coord - m_oriVertex->m_coord).normalized();
@@ -97,8 +97,8 @@ namespace games
 		HeEdge* m_incEdge = nullptr; //any one of three edges
 		Eigen::Vector3d m_normal = Eigen::Vector3d::Zero();
 		bool m_isDel = false;
-		bool m_isMark = false;
-		bool m_isThin = false;
+		//bool m_isMark = false;
+		//bool m_isThin = false;
 
 		inline Eigen::Vector3i ibo() const
 		{

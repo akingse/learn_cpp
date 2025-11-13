@@ -36,12 +36,12 @@ HeMesh::HeMesh(const ModelMesh& mesh)
 			mesh.vbo_[mesh.ibo_[i][1]],
 			mesh.vbo_[mesh.ibo_[i][2]] };
 		constexpr double thin = 10.0 / 180 * M_PI;
-		for (int j = 0; j < 3; ++j)
-		{
-			double angle = get_angle_of_two_vectors(trigon[(j + 1) % 3] - trigon[(j) % 3], trigon[(j + 2) % 3] - trigon[(j + 1) % 3]);
-			if (angle < thin)
-				heFace->m_isThin = true;
-		}
+		//for (int j = 0; j < 3; ++j)
+		//{
+		//	double angle = get_angle_of_two_vectors(trigon[(j + 1) % 3] - trigon[(j) % 3], trigon[(j + 2) % 3] - trigon[(j + 1) % 3]);
+		//	if (angle < thin)
+		//		heFace->m_isThin = true;
+		//}
 		int firstEdge = countEdge;
 		for (int j = 0; j < 3; ++j) //create 3 edges from 1 face
 		{
@@ -1255,6 +1255,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 	return res;
 }
 
+#if 0
 clash::ModelMesh games::meshMergeFacesToQuadrangle(const clash::ModelMesh& mesh, double toleAngle)
 {
 	MACRO_EXPANSION_TIME_DEFINE;
@@ -1370,3 +1371,4 @@ clash::ModelMesh games::meshMergeFacesSideEdgeOnly(const clash::ModelMesh& mesh,
 	hesh.clear();
 	return res;
 }
+#endif
