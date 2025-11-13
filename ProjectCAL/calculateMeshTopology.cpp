@@ -1082,7 +1082,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			//edgeTw->m_incFace->m_isDel = true; //only accelerate convert mesh
 		};
 	MACRO_EXPANSION_TIME_START;
-	//const HeFace* face = hesh.m_faces[30184];
+	//process all edges
 	for (size_t i = 0; i < hesh.m_edges.size(); i++)
 	{
 		HeEdge* edge = hesh.m_edges[i];
@@ -1097,7 +1097,8 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			_topo_merge_and_mark(edge, edgeTw);
 		}
 	}
-	for (size_t i = 0; i < hesh.m_edges.size(); i++) //for multi backward
+	//for multi backward
+	for (size_t i = 0; i < hesh.m_edges.size(); i++) 
 	{
 		HeEdge* edge = hesh.m_edges[i];
 		if (edge->m_isDel)
@@ -1149,7 +1150,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		}
 		if (ibos.size() == seen.size())
 			continue; //check
-		//re-topo
+		//get valid edge
 		HeEdge* edge = face->m_incEdge;
 		int count = 0;
 		while (edge->m_isDel)
@@ -1163,6 +1164,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		}
 		if (face->m_isDel)
 			continue;
+		//re-topo
 		HeEdge* first = edge;
 		face->m_incEdge = first;
 		std::stack<HeEdge*> edgeRec; //record edge
@@ -1199,6 +1201,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			edgeRec.pop();
 			edge = recNext;
 		} while (edge != first);
+		//mark-del inner trianlge
 		for (auto& iter : edgeVct)
 		{
 			if (iter->m_isClose)
