@@ -118,6 +118,8 @@ namespace games
 				if (3 < count++)
 					return {};
 			}
+			if (edge->m_incFace->m_index != m_index) //faceid
+				return {};
 			std::vector<int> face;
 			count = 0;
 			HeEdge* first = edge;
