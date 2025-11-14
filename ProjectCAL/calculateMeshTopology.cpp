@@ -1123,7 +1123,6 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		}
 	}
 	//process self intersect
-#if 1
 	auto _topo_split_and_swap = [](HeEdge* last, HeEdge* edge) //split
 		{
 			last->m_prevEdge->m_nextEdge = edge;
@@ -1132,6 +1131,20 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			last->m_prevEdge = edge->m_prevEdge;
 			edge->m_prevEdge = swap;
 		};
+	auto _topo_del_and_mark = [](HeEdge* edge, const HeEdge* first, int max)
+		{
+			int count = 0;
+			do {
+				if (max < count++) //avoid endlessloop
+					break;
+				edge->m_isDel = true;
+				edge->m_twinEdge->m_isDel = true;
+				edge->m_incFace->m_isDel = true;
+				edge->m_twinEdge->m_incFace->m_isDel = true;
+				edge = edge->m_nextEdge;
+			} while (first != edge);
+		};
+#if 0
 	for (size_t i = 0; i < hesh.m_faces.size(); i++)
 	{
 		HeFace* face = hesh.m_faces[i];
@@ -1209,13 +1222,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			if (polygon2d.size() <= 3 || 0 <= isContourCCW(polygon2d))
 			{
 				HeEdge* first = iter;
-				do {
-					iter->m_isDel = true;
-					iter->m_twinEdge->m_isDel = true;
-					iter->m_incFace->m_isDel = true;
-					iter->m_twinEdge->m_incFace->m_isDel = true;
-					iter = iter->m_nextEdge;
-				} while (first != iter);
+				_topo_del_and_mark(iter, first, max);
 				continue;
 			}
 			if (!front->m_isDel)
@@ -1271,15 +1278,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			continue;
 		//mark del
 		edge = edge->m_nextEdge;
-		do {
-			if (max < count++) 
-				break;
-			edge->m_isDel = true;
-			edge->m_twinEdge->m_isDel = true;
-			edge->m_incFace->m_isDel = true;
-			edge->m_twinEdge->m_incFace->m_isDel = true;
-			edge = edge->m_nextEdge;
-		} while (first != edge);
+		_topo_del_and_mark(edge, first, max);
 	}
 	MACRO_EXPANSION_TIME_END("time_calMerge");
 	MACRO_EXPANSION_TIME_START;
