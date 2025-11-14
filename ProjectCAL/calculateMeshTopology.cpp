@@ -1,6 +1,7 @@
 #include "pch.h"
 //#include "calculateMeshTopology.h"
 using namespace std;
+using namespace test;
 using namespace Eigen;
 using namespace eigen;
 using namespace games;
@@ -1137,7 +1138,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		if (face->m_isDel)
 			continue;
 		std::vector<int> ibos = face->ibos();
-		std::vector<Eigen::Vector3d> polygon = face->polygon();//debug
+		//std::vector<Eigen::Vector3d> polygon = face->polygon();//debug
 		if (ibos.size() < 6) //min inner triangle
 			continue;
 		std::unordered_set<int> seen;// unique;
@@ -1160,7 +1161,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		HeEdge* recThis = nullptr;  //to skip loop
 		HeEdge* recNext = nullptr;
 		std::stack<HeEdge*> edgeRec; //record edge
-		std::vector<HeEdge*> edgeVct = face->edges();//collect before _topo_split
+		std::vector<HeEdge*> edgeVct = face->edges();//collect before split
 		int count = 0;
 		do {
 			if (max < count++) //avoid endlessloop
@@ -1211,6 +1212,8 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 				do {
 					iter->m_isDel = true;
 					iter->m_twinEdge->m_isDel = true;
+					iter->m_incFace->m_isDel = true;
+					iter->m_twinEdge->m_incFace->m_isDel = true;
 					iter = iter->m_nextEdge;
 				} while (first != iter);
 				continue;
@@ -1242,6 +1245,41 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			edgeTw = edgeTw->m_prevEdge;
 			test::DataRecordSingleton::dataCountAppend("count_BackWard3"); //notCCW
 		}
+	}
+	//remove inside double polygon
+	for (size_t i = 0; i < hesh.m_faces.size(); i++)
+	{
+		HeFace* face = hesh.m_faces[i];
+		if (face->m_isDel)
+			continue;
+		HeEdge* edge = face->get_edge();
+		if (edge == nullptr) //not m_isDel
+			continue;
+		int count = 0;
+		vector<Vector2d> polygon2d;
+		const HeEdge* first = edge;
+		do {
+			if (max < count++)
+				break;
+			polygon2d.push_back(mesh.vbo2_[edge->m_oriVertex->m_index]);
+			edge = edge->m_nextEdge;
+		} while (first != edge);
+		if (polygon2d.size() < 3)
+			test::DataRecordSingleton::dataCountAppend("count_BackWardLine");
+		if (polygon2d.size() < 3 || //BackWardLine
+			isContourCCW(polygon2d) < 0)
+			continue;
+		//mark del
+		edge = edge->m_nextEdge;
+		do {
+			if (max < count++) 
+				break;
+			edge->m_isDel = true;
+			edge->m_twinEdge->m_isDel = true;
+			edge->m_incFace->m_isDel = true;
+			edge->m_twinEdge->m_incFace->m_isDel = true;
+			edge = edge->m_nextEdge;
+		} while (first != edge);
 	}
 	MACRO_EXPANSION_TIME_END("time_calMerge");
 	MACRO_EXPANSION_TIME_START;

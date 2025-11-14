@@ -120,6 +120,7 @@ namespace games
 			}
 			if (edge->m_incFace->m_index != m_index) //faceid
 				return nullptr; //m_isDel = true;
+			//m_incEdge = edge;
 			return edge;
 		}
 		inline std::vector<int> ibos(int max) const
