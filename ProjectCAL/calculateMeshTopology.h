@@ -108,7 +108,7 @@ namespace games
 				m_incEdge->m_prevEdge->m_oriVertex->m_index };
 			return face;
 		}
-		inline std::vector<int> ibos(int max) const
+		inline HeEdge* get_edge() const
 		{
 			int count = 0;
 			HeEdge* edge = m_incEdge;
@@ -116,12 +116,19 @@ namespace games
 			{
 				edge = edge->m_nextEdge;
 				if (3 < count++)
-					return {};
+					return nullptr; //m_isDel = true;
 			}
 			if (edge->m_incFace->m_index != m_index) //faceid
+				return nullptr; //m_isDel = true;
+			return edge;
+		}
+		inline std::vector<int> ibos(int max) const
+		{
+			HeEdge* edge = get_edge();
+            if (edge == nullptr)
 				return {};
 			std::vector<int> face;
-			count = 0;
+			int count = 0;
 			HeEdge* first = edge;
 			do {
 				if (edge->m_isDel)
@@ -136,14 +143,9 @@ namespace games
 		}
 		inline std::vector<int> ibos() const
 		{
-			int count = 0;
-			HeEdge* edge = m_incEdge;
-			while (edge->m_isDel)
-			{
-				edge = edge->m_nextEdge;
-				if (3 < count++)
-					return {};
-			}
+			HeEdge* edge = get_edge();
+			if (edge == nullptr)
+				return {};
 			std::vector<int> face;
 			HeEdge* first = edge;
 			do {
@@ -155,14 +157,9 @@ namespace games
 		}
 		inline std::vector<HeEdge*> edges() const
 		{
-			int count = 0;
-			HeEdge* edge = m_incEdge;
-			while (edge->m_isDel)
-			{
-				edge = edge->m_nextEdge;
-				if (3 < count++)
-					return {};
-			}
+			HeEdge* edge = get_edge();
+            if (edge == nullptr)
+				return {};
 			std::vector<HeEdge*> face;
 			HeEdge* first = edge;
 			do {
@@ -182,14 +179,9 @@ namespace games
 		}
 		inline std::vector<Eigen::Vector3d> polygon() const
 		{
-			int count = 0;
-			HeEdge* edge = m_incEdge;
-			while (edge->m_isDel)
-			{
-				edge = edge->m_nextEdge;
-				if (3 < count++)
-					return {};
-			}
+			HeEdge* edge = get_edge();
+			if (edge == nullptr)
+				return {};
 			std::vector<Eigen::Vector3d> face;
 			HeEdge* first = edge;
 			do {

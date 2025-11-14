@@ -1122,8 +1122,8 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		}
 	}
 	//process self intersect
-#if 1
-	auto _topo_split_and_mark = [](HeEdge* last, HeEdge* edge) //split
+#if 0
+	auto _topo_split_and_swap = [](HeEdge* last, HeEdge* edge) //split
 		{
 			last->m_prevEdge->m_nextEdge = edge;
 			edge->m_prevEdge->m_nextEdge = last;
@@ -1151,28 +1151,17 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		if (ibos.size() == seen.size())
 			continue; //check
 		//get valid edge
-		HeEdge* edge = face->m_incEdge;
-		int count = 0;
-		while (edge->m_isDel)
-		{
-			edge = edge->m_nextEdge;
-			if (3 < count++)
-			{
-				face->m_isDel = true;
-				break;
-			}
-		}
-		if (face->m_isDel)
+		HeEdge* edge = face->get_edge();
+		if (edge == nullptr)
 			continue;
 		//re-topo
 		HeEdge* first = edge;
 		face->m_incEdge = first;
-		std::stack<HeEdge*> edgeRec; //record edge
 		HeEdge* recThis = nullptr;  //to skip loop
 		HeEdge* recNext = nullptr;
-		vector<vector<HeEdge*>> contourVct;
+		std::stack<HeEdge*> edgeRec; //record edge
 		std::vector<HeEdge*> edgeVct = face->edges();
-		//int number = 0;
+		int count = 0;
 		do {
 			if (max < count++) //avoid endlessloop
 				break;
@@ -1197,7 +1186,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			recThis = edge;
 			recNext = edge->m_nextEdge;
 			HeEdge*& last = edgeRec.top();
-			_topo_split_and_mark(last, edge);
+			_topo_split_and_swap(last, edge);
 			edgeRec.pop();
 			edge = recNext;
 		} while (edge != first);
