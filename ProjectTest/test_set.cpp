@@ -52,7 +52,7 @@ static int mainstl()
     return 0;
 }
 
-static void _test_set()
+static void _test_set_0()
 {
     set<int> mset{ 1,2,3 };
     auto iter = mset.begin();
@@ -85,9 +85,23 @@ static void _test_set()
     return;
 }
 
+static void _test_set_2()
+{
+    set<int> set0{ 1,2,3 };
+    set<int> set1{ 3,2,1 };
+
+    set<int> set2{ 1,2,4 };
+    set<int> set3{ 1,2,3,4 };
+    //set可以使用==判断
+    bool iseq = set0 == set1;
+    bool iseq1 = set0 == set2;
+    return;
+}
+
 static int enrol = []()->int
 {
-    //_test_set();
     //mainstl();
+    //_test_set_1();
+    _test_set_2();
     return 0;
 }();
