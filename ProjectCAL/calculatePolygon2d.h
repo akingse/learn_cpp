@@ -171,9 +171,10 @@ namespace clash
 		for (size_t i = 0; i < n; ++i)
 		{
 			const size_t j = (i + 1) % n;
-			const Eigen::Vector2d& p1 = contour[i];
-			const Eigen::Vector2d& p2 = contour[j];
-			area += (p2.x() - p1.x()) * (p2.y() + p1.y());
+			//const Eigen::Vector2d& p1 = contour[i];
+			//const Eigen::Vector2d& p2 = contour[j];
+			//area += (p2.x() - p1.x()) * (p2.y() + p1.y());
+			area += (contour[j][0] - contour[i][0]) * (contour[j][1] + contour[i][1]);
 		}
 		return area; // area < 0;
 	}
