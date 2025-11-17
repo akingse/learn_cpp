@@ -1080,10 +1080,10 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			edgeTw->m_prevEdge->m_nextEdge = edge->m_nextEdge;
 			edge->m_isDel = true;
 			edgeTw->m_isDel = true;
-			//edgeTw->m_incFace->m_isDel = true; //only accelerate convert mesh
+			//edgeTw->m_incFace->m_isDel = true; //only accelerate convert mesh //cause polygon lost
 		};
 	MACRO_EXPANSION_TIME_START;
-	//process all edges
+	//process all tolerance edges
 	for (size_t i = 0; i < hesh.m_edges.size(); i++)
 	{
 		HeEdge* edge = hesh.m_edges[i];
@@ -1122,7 +1122,6 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			test::DataRecordSingleton::dataCountAppend("count_BackWard1"); //notCCW
 		}
 	}
-	//process self intersect
 	auto _topo_split_and_swap = [](HeEdge* last, HeEdge* edge) //split
 		{
 			last->m_prevEdge->m_nextEdge = edge;
@@ -1145,7 +1144,30 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 				edge = edge->m_nextEdge;
 			} while (first != edge);
 		};
+	std::function<void(HeEdge*, int)> _topo_del_and_mark_recursion = [&](HeEdge* edge, int max)->void
+		{
+			const HeEdge* first = edge;
+			int count = 0;
+			do {
+				if (max < count++) //avoid endlessloop
+					break;
+				if (edge->m_isDel)// || edge->m_incFace->m_isDel)
+				{
+					edge = edge->m_nextEdge;
+					continue;
+				}
+				edge->m_isDel = true;
+				edge->m_incFace->m_isDel = true;
+				_topo_del_and_mark_recursion(edge->m_twinEdge, max);
+				edge = edge->m_nextEdge;
+			} while (first != edge);
+		};
+	//vector<std::pair<int, vector<Vector2d>>> m_ccw;
+	//vector<std::pair<int, vector<Vector2d>>> m_ccw_anti;
+	vector<vector<Vector2d>> m_ccw;
+	vector<vector<Vector2d>> m_cw;
 #if 1
+	//process self intersect
 	for (size_t i = 0; i < hesh.m_faces.size(); i++)
 	{
 		HeFace* face = hesh.m_faces[i];
@@ -1176,7 +1198,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		HeEdge* recNext = nullptr;
 		std::stack<HeEdge*> edgeRec; //record edge
 		std::vector<HeEdge*> edgeVct = face->edges();//collect before split
-		std::vector<HeEdge*> edgeTwins;
+		//std::vector<HeEdge*> edgeTwins;
 		int count = 0;
 		do {
 			if (max < count++) //avoid endlessloop
@@ -1220,10 +1242,21 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 				iter->m_isClose = true;//isUsed
 				iter = iter->m_nextEdge;
 			} while (front != iter);
-			//double area = isContourCCW(polygon2d);
-			if (polygon2d.size() <= 3 || 0 <= isContourCCW(polygon2d))
+			if (polygon2d.size() <= 3)
 			{
+				test::DataRecordSingleton::dataCountAppend("count_polygon2dLess1");
 				_topo_del_and_mark(iter, max);
+				continue;
+			}
+			double area = isContourCCW(polygon2d);
+			if (0 <= area)
+				m_cw.push_back(polygon2d);
+			else
+				m_ccw.push_back(polygon2d);
+
+			if (0 <= isContourCCW(polygon2d))
+			{
+				_topo_del_and_mark_recursion(iter, max);
 				continue;
 			}
 			if (!front->m_isDel)
@@ -1231,7 +1264,8 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		}
 	}
 #endif
-	for (size_t i = 0; i < hesh.m_edges.size(); i++) //for multi backward
+	//for multi backward
+	for (size_t i = 0; i < hesh.m_edges.size(); i++) 
 	{
 		HeEdge* edge = hesh.m_edges[i];
 		if (edge->m_isDel)
@@ -1273,7 +1307,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			edge = edge->m_nextEdge;
 		} while (first != edge);
 		if (polygon2d.size() < 3)
-			test::DataRecordSingleton::dataCountAppend("count_BackWardLine");
+			test::DataRecordSingleton::dataCountAppend("count_polygon2dLess2");
 		if (polygon2d.size() < 3 || //BackWardLine
 			isContourCCW(polygon2d) < 0)
 			continue;
@@ -1283,6 +1317,8 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 	MACRO_EXPANSION_TIME_END("time_calMerge");
 	MACRO_EXPANSION_TIME_START;
 	ModelMesh res = hesh.toMeshs();
+	res.m_ccw = m_ccw;
+	res.m_cw = m_cw;
 	MACRO_EXPANSION_TIME_END("time_hesh2Meshs");
 	hesh.clear();
 	return res;

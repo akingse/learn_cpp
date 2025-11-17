@@ -118,6 +118,8 @@ namespace clash
         std::vector<Eigen::Vector3d> vbo_;
 #ifdef STORAGE_VERTEX_DATA_2D
         std::vector<Eigen::Vector2d> vbo2_; //using for 2d
+        std::vector<std::vector<Eigen::Vector2d>> m_ccw;
+        std::vector<std::vector<Eigen::Vector2d>> m_cw;
 #endif
         std::vector<Eigen::Vector3i> ibo_; //array<int, 3>
         std::vector<Eigen::Vector3d> fno_; //Face Normal

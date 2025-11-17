@@ -151,7 +151,6 @@ namespace games
 			HeEdge* first = edge;
 			do {
 				face.push_back(edge->m_oriVertex->m_index);
-				//edge->m_isDel = true;//isUsed
 				edge = edge->m_nextEdge;
 			} while (edge != first);
 			return face;
