@@ -1138,9 +1138,12 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 				if (max < count++) //avoid endlessloop
 					break;
 				edge->m_isDel = true;
-				edge->m_twinEdge->m_isDel = true;
 				edge->m_incFace->m_isDel = true;
-				edge->m_twinEdge->m_incFace->m_isDel = true;
+				if (edge->m_twinEdge)
+				{
+					edge->m_twinEdge->m_isDel = true;
+					edge->m_twinEdge->m_incFace->m_isDel = true;
+				}
 				edge = edge->m_nextEdge;
 			} while (first != edge);
 		};
@@ -1248,15 +1251,14 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 				_topo_del_and_mark(iter, max);
 				continue;
 			}
-			double area = isContourCCW(polygon2d);
-			if (0 <= area)
-				m_cw.push_back(polygon2d);
-			else
-				m_ccw.push_back(polygon2d);
-
+			//double area = isContourCCW(polygon2d);
+			//if (0 <= area)
+			//	m_cw.push_back(polygon2d);
+			//else
+			//	m_ccw.push_back(polygon2d);
 			if (0 <= isContourCCW(polygon2d))
 			{
-				_topo_del_and_mark_recursion(iter, max);
+				_topo_del_and_mark_recursion(iter, max);//cw contour is inner
 				continue;
 			}
 			if (!front->m_isDel)
@@ -1306,19 +1308,21 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			polygon2d.push_back(mesh.vbo2_[edge->m_oriVertex->m_index]);
 			edge = edge->m_nextEdge;
 		} while (first != edge);
-		if (polygon2d.size() < 3)
+		if (polygon2d.size() < 3) //BackWardLine
+		{
 			test::DataRecordSingleton::dataCountAppend("count_polygon2dLess2");
-		if (polygon2d.size() < 3 || //BackWardLine
-			isContourCCW(polygon2d) < 0)
 			continue;
-		//mark del
-		_topo_del_and_mark(edge, max);
+		}
+        if (0 < isContourCCW(polygon2d))
+		{
+			_topo_del_and_mark_recursion(edge, max);
+		}
 	}
 	MACRO_EXPANSION_TIME_END("time_calMerge");
 	MACRO_EXPANSION_TIME_START;
 	ModelMesh res = hesh.toMeshs();
-	res.m_ccw = m_ccw;
-	res.m_cw = m_cw;
+	//res.m_ccw = m_ccw;
+	//res.m_cw = m_cw;
 	MACRO_EXPANSION_TIME_END("time_hesh2Meshs");
 	hesh.clear();
 	return res;
