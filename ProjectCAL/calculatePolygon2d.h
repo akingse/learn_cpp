@@ -188,9 +188,9 @@ namespace clash
 			return 0;
 		for (int i = 0; i < n; ++i)
 		{
-			int j = (i + 1) % n; //avoid index over bound
-			area += (polygon[i][0] + polygon[j][0]) * (polygon[i][1] - polygon[j][1]);
+			int j = (i + 1) % n;
 			//area += polygon[i][0] * polygon[j][1] - polygon[i][1] * polygon[j][0]; //cross2d
+			area += (polygon[i][0] + polygon[j][0]) * (polygon[i][1] - polygon[j][1]);
 		}
 		return 0.5 * std::fabs(area);
 	}
