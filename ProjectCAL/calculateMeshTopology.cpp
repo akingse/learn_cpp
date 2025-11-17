@@ -1131,8 +1131,9 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			last->m_prevEdge = edge->m_prevEdge;
 			edge->m_prevEdge = swap;
 		};
-	auto _topo_del_and_mark = [](HeEdge* edge, const HeEdge* first, int max)
+	auto _topo_del_and_mark = [](HeEdge* edge, int max)
 		{
+			const HeEdge* first = edge;
 			int count = 0;
 			do {
 				if (max < count++) //avoid endlessloop
@@ -1144,7 +1145,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 				edge = edge->m_nextEdge;
 			} while (first != edge);
 		};
-#if 0
+#if 1
 	for (size_t i = 0; i < hesh.m_faces.size(); i++)
 	{
 		HeFace* face = hesh.m_faces[i];
@@ -1175,6 +1176,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		HeEdge* recNext = nullptr;
 		std::stack<HeEdge*> edgeRec; //record edge
 		std::vector<HeEdge*> edgeVct = face->edges();//collect before split
+		std::vector<HeEdge*> edgeTwins;
 		int count = 0;
 		do {
 			if (max < count++) //avoid endlessloop
@@ -1221,8 +1223,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			//double area = isContourCCW(polygon2d);
 			if (polygon2d.size() <= 3 || 0 <= isContourCCW(polygon2d))
 			{
-				HeEdge* first = iter;
-				_topo_del_and_mark(iter, first, max);
+				_topo_del_and_mark(iter, max);
 				continue;
 			}
 			if (!front->m_isDel)
@@ -1277,8 +1278,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 			isContourCCW(polygon2d) < 0)
 			continue;
 		//mark del
-		edge = edge->m_nextEdge;
-		_topo_del_and_mark(edge, first, max);
+		_topo_del_and_mark(edge, max);
 	}
 	MACRO_EXPANSION_TIME_END("time_calMerge");
 	MACRO_EXPANSION_TIME_START;
