@@ -101,7 +101,7 @@ ModelMesh HeMesh::toMeshs() const
 	mesh.vbo_.resize(m_vertexes.size());
 	for (int i = 0; i < m_vertexes.size(); ++i)
 		mesh.vbo_[i] = m_vertexes[i]->m_coord;
-    int max = m_edges.size() / 2;
+    int max = (int)m_edges.size() / 2;
 	for (int i = 0; i < (int)m_faces.size(); ++i)
 	{
 		const HeFace* face = m_faces[i];
@@ -1071,7 +1071,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 	MACRO_EXPANSION_TIME_START;
 	HeMesh hesh = HeMesh(mesh);
 	MACRO_EXPANSION_TIME_END("time_mesh2hesh");
-	int max = hesh.m_edges.size() / 2;
+	int max = (int)hesh.m_edges.size() / 2;
 	auto _topo_merge_and_mark = [](HeEdge* edge, HeEdge* edgeTw) //merge
 		{
 			edge->m_prevEdge->m_nextEdge = edgeTw->m_nextEdge;

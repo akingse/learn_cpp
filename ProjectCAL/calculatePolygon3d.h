@@ -486,10 +486,10 @@ namespace clash
     {
         int sizeU = (int)cross2D[0].size();
         int sizeV = (int)cross2D.size();
-        int iLt = std::round((u + 0) * (sizeU - 1) / double(interU + 1));
-        int iRt = std::round((u + 1) * (sizeU - 1) / double(interU + 1));
-        int iDn = std::round((v + 0) * (sizeV - 1) / double(interV + 1));
-        int iUp = std::round((v + 1) * (sizeV - 1) / double(interV + 1));
+        int iLt = int(std::round((u + 0) * (sizeU - 1) / double(interU + 1)));
+        int iRt = int(std::round((u + 1) * (sizeU - 1) / double(interU + 1)));
+        int iDn = int(std::round((v + 0) * (sizeV - 1) / double(interV + 1)));
+        int iUp = int(std::round((v + 1) * (sizeV - 1) / double(interV + 1)));
         std::vector<std::vector<T>> block(iUp - iDn + 1);
         int io = 0;
         for (int i = iDn; i <= iUp; i++)
@@ -520,7 +520,7 @@ namespace clash
         }
         else
         {
-            int add = num - origin.size();
+            int add = num - (int)origin.size();
             std::vector<std::pair<double, int>> distVct;
             for (int i = 0; i < origin.size() - 1; ++i)
                 distVct.push_back({ (origin[i + 1] - origin[i]).squaredNorm(), i });
@@ -564,7 +564,7 @@ namespace clash
         {
             double dist = (origin[i + 1] - origin[i]).norm();
             current += dist;
-            int num = round(current / length) - res.size();
+            int num = int(round(current / length) - res.size());
             std::vector<Eigen::Vector2d> temp = linspace(origin[i], origin[i + 1], num);
             res.insert(res.end(), temp.begin(), temp.end());
         }

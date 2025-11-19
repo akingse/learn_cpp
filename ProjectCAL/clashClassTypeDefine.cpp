@@ -201,7 +201,7 @@ std::vector<int> ModelMesh::selfIntersectCheck() const
         std::set<int> unique;
         for (const int& j : ibos_[i])
             unique.insert(j);
-        int differ = ibos_[i].size() - unique.size();
+        size_t differ = ibos_[i].size() - unique.size();
         if (differ == 0)
             continue;
         if (unique.size() < ibos_[i].size())
@@ -230,7 +230,7 @@ std::vector<int> ModelMesh::selfIntersectRepair()
         std::set<int> unique;
         for (const int& j : ibos_[i])
             unique.insert(j);
-        int differ = ibos_[i].size() - unique.size();
+        size_t differ = ibos_[i].size() - unique.size();
         if (differ == 0)
             continue;
         else if (differ == 1)
