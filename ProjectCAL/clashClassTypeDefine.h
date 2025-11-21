@@ -155,6 +155,7 @@ namespace clash
         }
         std::vector<int> selfIntersectCheck() const;
         std::vector<int> selfIntersectRepair();
+        void makeCoplanar();
 
         inline operator TriMesh() const
         {

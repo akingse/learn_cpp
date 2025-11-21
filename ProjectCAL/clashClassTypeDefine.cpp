@@ -1,4 +1,5 @@
 #include "pch.h"
+//#include "clashClassTypeDefine.h"
 using namespace std;
 using namespace eigen;
 using namespace clash;
@@ -277,4 +278,22 @@ std::vector<int> ModelMesh::selfIntersectRepair()
             res.push_back(i);
     }
     return res;
+}
+
+void clash::ModelMesh::makeCoplanar()
+{
+    for (int i = 0; i < (int)ibos_.size(); ++i)
+    {
+        const std::vector<int>& face = ibos_[i];
+        if (face.empty())
+            continue;
+        if (face.size() == 3)
+            continue;
+        vector<Eigen::Vector3d> polygon;
+        for (const int i : face)
+            polygon.push_back(vbo_[i]);
+
+
+
+    }
 }
