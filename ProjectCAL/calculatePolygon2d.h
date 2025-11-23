@@ -223,6 +223,14 @@ namespace clash
 			area += crossProduct;
 			centroid += (polygon[i] + polygon[j]) * crossProduct; // Accumulate weighted centroid
 		}
+		if (area == 0)
+		{
+			Eigen::Vector2d center(0.0, 0.0);
+			for (int i = 0; i < n; ++i)
+				center += polygon[i];
+			center = center / n;
+			return center;
+		}
 		area *= 0.5;
 		centroid /= (6.0 * area); // Final centroid calculation
 		return centroid;
