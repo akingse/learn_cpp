@@ -280,8 +280,45 @@ std::vector<int> ModelMesh::selfIntersectRepair()
     return res;
 }
 
+static ModelMesh simpleMeshEdge(const ModelMesh& meshO)
+{
+    ModelMesh mesh;
+    mesh.vbo_ = meshO.vbo_;
+    const std::vector<std::vector<int>> indexes = meshO.ibos_;
+    const std::vector<Eigen::Vector3d>& points = meshO.vbo_;
+    mesh.ibos_.resize(indexes.size());
+    for (int i = 0; i < (int)meshO.ibo_.size(); i++)
+    {
+        const std::vector<int>& face = indexes[i];
+        if (face.size() == 3)
+        {
+            mesh.ibos_[i] = face;
+            continue;
+        }
+        std::vector<int> temp;
+        int n = face.size();
+        for (int j = 0; j < (int)face.size(); j++)
+        {
+            int k = j + n;
+            Eigen::Vector3d normal = (points[face[k % n]] - points[face[(k - 1) % n]]).cross(points[face[(k + 1) % n]] - points[face[k % n]]);
+            if (normal.isZero())
+                continue;
+            temp.push_back(face[k % n]);
+        }
+        mesh.ibos_[i] = temp;
+    }
+    return mesh;
+}
+
+void clash::ModelMesh::removeColinearVertex()
+{
+    ModelMesh mesh = simpleMeshEdge(*this);
+    ibos_ = mesh.ibos_;
+}
+
 void clash::ModelMesh::makeCoplanar()
 {
+    removeColinearVertex();
     for (int i = 0; i < (int)ibos_.size(); ++i)
     {
         const std::vector<int>& face = ibos_[i];
@@ -292,8 +329,9 @@ void clash::ModelMesh::makeCoplanar()
         vector<Eigen::Vector3d> polygon;
         for (const int i : face)
             polygon.push_back(vbo_[i]);
-
-
-
+        Eigen::Vector3d normal = (polygon[1] - polygon[0]).cross(polygon[2] - polygon[1]).normalized();
+        double accum = 0;
+        for (int j = 3; j < (int)face.size(); ++j)
+            accum += fabs(normal.dot(vbo_[j]));
     }
 }
