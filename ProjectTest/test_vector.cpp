@@ -20,9 +20,6 @@ void operator+=(std::vector<T>& vctA, const std::vector<T>& vctB)
 
 #pragma region MyRegion
 
-//指针偏移
-//指针偏移获取类的私有成员
-//但违反了类的封装原则，在使用指针的类中也极不安全，所以不建议使用。
 #pragma pack(1) // memory alignment
 
 class Base

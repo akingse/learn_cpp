@@ -109,11 +109,82 @@ static void test3()
 	cout << a << endl;
 }
 
+//Ö¸ÕëÆ«ÒÆ
+
+class Ref
+{
+	atomic<int> count;
+};
+class RefBase :public Ref
+{
+	void* m_ptr;
+};
+
+
+class Object :public RefBase
+{
+	void* m_imp = nullptr;
+	bool m_own = true;
+public:
+	Object() = default;
+	Object(void* imp):m_imp(imp)
+	{ }
+	void set(void* imp)
+	{
+		m_imp = imp;
+	}
+	size_t add()const
+	{
+		return size_t(m_imp);
+	}
+	virtual ~Object() {}
+};
+
+class GkVertex :public Object
+{
+public:
+	GkVertex() = default;
+	GkVertex(void* imp)
+	{
+		set(imp);
+	}
+	~GkVertex()
+	{
+
+	}
+};
+
+
+static void test4()
+{
+	int a0 = sizeof(Ref);
+	int a1 = sizeof(RefBase);
+	int a2 = sizeof(Object);
+	int a3 = sizeof(GkVertex);
+
+	int value = 1;
+	GkVertex* ptr = new GkVertex(&value);
+	size_t add = ptr->add();
+
+	int offset = 24;
+	size_t size = *(size_t*)((char*)ptr + offset);
+	void* imp = (void*)((char*)ptr + offset);
+	size_t addr = 0;
+	for (int i = 0; i < 32; i++)
+	{
+		addr = *(size_t*)((char*)ptr + i);
+		if (addr == add)
+			imp = (void*)addr;
+	}
+	return;
+}
+
 static int enrol = []()->int
 	{
 		//test1();
 		//test2();
 		//test3();
+		test4();
 		cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();

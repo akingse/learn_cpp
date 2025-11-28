@@ -63,7 +63,8 @@ static void test_mesh_1()
         Vector3d(0,0,1),
         Vector3d(0,0,1),
     };
-
+    mesh.to2D();
+    mesh.normalize();
     ModelMesh merge = games::meshMergeFacesBaseonNormal(mesh);
     return;
 }
