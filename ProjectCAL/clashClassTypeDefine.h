@@ -153,6 +153,15 @@ namespace clash
             for (int i = 0; i < (int)ibo_.size(); ++i)
                 fno_.push_back((vbo_[ibo_[i][1]] - vbo_[ibo_[i][0]]).cross((vbo_[ibo_[i][2]] - vbo_[ibo_[i][1]])).normalized());
         }
+        inline Eigen::AlignedBox3d getboundingbox()
+        {
+            Eigen::AlignedBox3d box;
+            for (const auto& iter : vbo_)
+                box.extend(iter);
+            bounding_ = box;
+            return box;
+        }
+
         std::vector<int> selfIntersectCheck() const;
         std::vector<int> selfIntersectRepair();
         void makeCoplanar();
