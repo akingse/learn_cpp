@@ -95,7 +95,7 @@ namespace eigen
 
     inline double get_angle_of_two_unit(const Eigen::Vector3d& v0, const Eigen::Vector3d& v1)
     {
-        double cosres = v0.dot(v0);// / (v0.norm() * v1.norm());
+        double cosres = v0.dot(v1);// / (v0.norm() * v1.norm());
         if (1.0 < cosres) //avoid nan
             cosres = 1.0;
         else if (-1.0 > cosres)
