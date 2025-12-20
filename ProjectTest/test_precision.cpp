@@ -90,6 +90,7 @@ static void _test5()
 	double delta = 0;
 	for (int i = 0; i < 100; i++)
 	{
+		double r = double(rand()) / RAND_MAX;
 		//Triangle3d trigon = {
   //          Eigen::Vector3d(rand() + double(rand()) / RAND_MAX, rand(), rand()),
 		//	Eigen::Vector3d(rand(), rand() + double(rand()) / RAND_MAX, rand()),

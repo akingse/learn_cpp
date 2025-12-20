@@ -137,24 +137,30 @@ namespace clash
         double volume_ = 0;
 #endif
 #ifdef STORAGE_VERTEX_DATA_2D
-        inline void to2D()
+        inline void to2D(bool force = false)
         {
+            if (!force && !vbo2_.empty())
+                return;
             vbo2_.resize(vbo_.size());
             for (int i = 0; i < (int)vbo2_.size(); ++i)
                 vbo2_[i] = Eigen::Vector2d(vbo_[i][0], vbo_[i][1]);
         }
 #endif
-        inline void normalize()
+        inline void normalize(bool force = false)
         {
-            //fno_.resize(ibo_.size());
-            //for (int i = 0; i < (int)fno_.size(); ++i)
-            //    fno_[i] = (vbo_[ibo_[i][1]] - vbo_[ibo_[i][0]]).cross((vbo_[ibo_[i][2]] - vbo_[ibo_[i][1]])).normalized();
-            fno_.reserve(ibo_.size()); //fast than resize
-            for (int i = 0; i < (int)ibo_.size(); ++i)
-                fno_.push_back((vbo_[ibo_[i][1]] - vbo_[ibo_[i][0]]).cross((vbo_[ibo_[i][2]] - vbo_[ibo_[i][1]])).normalized());
+            if (!force && !fno_.empty())
+                return;
+            fno_.resize(ibo_.size());
+            for (int i = 0; i < (int)fno_.size(); ++i)
+                fno_[i] = (vbo_[ibo_[i][1]] - vbo_[ibo_[i][0]]).cross((vbo_[ibo_[i][2]] - vbo_[ibo_[i][1]])).normalized();
+            //fno_.reserve(ibo_.size()); //reserve fast than resize
+            //for (int i = 0; i < (int)ibo_.size(); ++i)
+            //    fno_.push_back((vbo_[ibo_[i][1]] - vbo_[ibo_[i][0]]).cross((vbo_[ibo_[i][2]] - vbo_[ibo_[i][1]])).normalized());
         }
-        inline Eigen::AlignedBox3d getboundingbox()
+        inline Eigen::AlignedBox3d getboundingbox(bool force = false)
         {
+            if (!force && !bounding_.isEmpty())
+                return bounding_;
             Eigen::AlignedBox3d box;
             for (const auto& iter : vbo_)
                 box.extend(iter);
@@ -166,6 +172,7 @@ namespace clash
         std::vector<int> selfIntersectRepair();
         void makeCoplanar();
         void removeColinearVertex();
+        void setNormalDirection(bool isUp);
 
         inline operator TriMesh() const
         {

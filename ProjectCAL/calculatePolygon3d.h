@@ -552,8 +552,8 @@ namespace clash
 
     inline std::vector<Eigen::Vector2d> edgeDistanceEqual(const std::vector<Eigen::Vector2d>& origin, int num)
     {
-        if (num <= origin.size())
-            return origin;
+        if (origin.size() == num)
+            return origin; //always on vertex
         double length = 0;
         for (int i = 0; i < origin.size() - 1; ++i)
             length += (origin[i + 1] - origin[i]).norm();

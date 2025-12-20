@@ -1,5 +1,6 @@
 #include "pch.h"
 //#include "clashClassTypeDefine.h"
+//#include "clashClassTypeDefine.h"
 using namespace std;
 using namespace eigen;
 using namespace clash;
@@ -314,6 +315,20 @@ void clash::ModelMesh::removeColinearVertex()
 {
     ModelMesh mesh = simpleMeshEdge(*this);
     ibos_ = mesh.ibos_;
+}
+
+void clash::ModelMesh::setNormalDirection(bool isUp)
+{
+    if (ibo_.size() != fno_.size())
+    {
+        normalize();
+    }
+    for (int i = 0; i < (int)ibo_.size(); ++i)
+    {
+        if ((isUp && fno_[i][2] < 0) ||
+            (!isUp && fno_[i][2] > 0))
+            ibo_[i] = Eigen::Vector3i(ibo_[i][0], ibo_[i][2], ibo_[i][1]);
+    }
 }
 
 void clash::ModelMesh::makeCoplanar()

@@ -565,6 +565,25 @@ static void test10()
 	return;
 }
 
+//test calculatePolygon3d
+static void test11()
+{
+	//pathµÈ¾à·Ö¸î
+	std::vector<Eigen::Vector2d> origin = {
+		Vector2d(0,0),
+		Vector2d(10,0),
+		Vector2d(20,0),
+		Vector2d(30,0),
+		Vector2d(40,0),
+
+	};
+	//std::vector<Eigen::Vector2d> edge2 = edgeDistanceEqual(origin, 3);
+	std::vector<Eigen::Vector2d> edge2 = edgeDistanceEqual(origin, 4);
+
+
+	return;
+}
+
 static int enrol = []()->int
 {
 	//test1();
@@ -574,7 +593,8 @@ static int enrol = []()->int
 	//test5();
 	//test6();
 	//test9();
-	test10();
+	//test10();
+	test11();
 	cout << get_filepath_filename(__FILE__) << " finished.\n" << endl;
 	return 0;
 }();
