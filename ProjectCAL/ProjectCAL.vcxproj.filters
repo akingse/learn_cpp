@@ -51,10 +51,10 @@
     <ClCompile Include="DataRecordSingleton.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="clashClassTypeDefine.cpp">
+    <ClCompile Include="commonFileReadWrite.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="commonFileReadWrite.cpp">
+    <ClCompile Include="DataClassTypeDefine.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -95,16 +95,13 @@
     <ClInclude Include="DataRecordSingleton.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="clashInterfaceUtility.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="clashClassTypeDefine.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\auto_include\ProjectCAL_API.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="commonFileReadWrite.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="DataClassTypeDefine.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

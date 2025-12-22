@@ -24,7 +24,10 @@
     <ClCompile Include="test_main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\ProjectCAL\clashClassTypeDefine.cpp">
+    <ClCompile Include="..\ProjectCAL\DataClassTypeDefine.cpp">
+      <Filter>head</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ProjectCAL\DataRecordSingleton.cpp">
       <Filter>head</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,10 +35,10 @@
     <ClInclude Include="pch.h">
       <Filter>com</Filter>
     </ClInclude>
-    <ClInclude Include="..\ProjectCAL\clashClassTypeDefine.h">
+    <ClInclude Include="..\ProjectCAL\DataClassTypeDefine.h">
       <Filter>head</Filter>
     </ClInclude>
-    <ClInclude Include="..\ProjectCAL\clashInterfaceUtility.h">
+    <ClInclude Include="..\ProjectCAL\DataRecordSingleton.h">
       <Filter>head</Filter>
     </ClInclude>
   </ItemGroup>

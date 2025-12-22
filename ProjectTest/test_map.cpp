@@ -90,6 +90,6 @@ static int enrol = []()->int
 	//º¯ÊıÖ¸Õë
 	//trigger = test_map;
 	test_map();
-	cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
+	cout << get_filepath_filename(__FILE__) << " finished.\n" << endl;
 	return 0;
 }();

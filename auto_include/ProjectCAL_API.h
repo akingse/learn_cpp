@@ -6,8 +6,8 @@
 #endif
 //#define DLLEXPORT_CAL
 
-#include "clashInterfaceUtility.h"  // header only
-#include "clashClassTypeDefine.h"   // header only
+//#include "clashInterfaceUtility.h"  // header only
+#include "DataClassTypeDefine.h"   
 #include "DataRecordSingleton.h"    //singleton
 #include "calculateVectorMatrix.h"  // namespace eigen
 #include "calculatePointLinePlane.h"// namespace clash
@@ -19,5 +19,4 @@
 #include "calculateMeshTopology.h"  //namespace games
 #include "calculateDynamicAccuracy.h"//namespace accura
 #include "calculateClashDetection.h"
-
 #include "commonFileReadWrite.h" 

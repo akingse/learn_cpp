@@ -50,8 +50,10 @@ typedef std::vector<Point2>									Vector2;
 #undef max
 #define STORAGE_VERTEX_DATA_2D
 #define USING_PROJECT_CGAL
+#define FILL_PROFILE_DEBUG_TEMP
 
 #define DLLEXPORT_CAL
-#include "clashInterfaceUtility.h"   // header only
-#include "clashClassTypeDefine.h"   // header only
+#include "DataRecordSingleton.h"
+#include "DataClassTypeDefine.h"
+//#include "clashInterfaceUtility.h"
 //#include "ProjectCAL_API.h"

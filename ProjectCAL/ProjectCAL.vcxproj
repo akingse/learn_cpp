@@ -141,8 +141,8 @@
     <ClCompile Include="calculateSpatialSearchTree.cpp" />
     <ClCompile Include="calculateTriangle.cpp" />
     <ClCompile Include="calculateVectorMatrix.cpp" />
-    <ClCompile Include="clashClassTypeDefine.cpp" />
     <ClCompile Include="commonFileReadWrite.cpp" />
+    <ClCompile Include="DataClassTypeDefine.cpp" />
     <ClCompile Include="DataRecordSingleton.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -160,9 +160,8 @@
     <ClInclude Include="calculateSpatialSearchTree.h" />
     <ClInclude Include="calculateTriangle.h" />
     <ClInclude Include="calculateVectorMatrix.h" />
-    <ClInclude Include="clashClassTypeDefine.h" />
-    <ClInclude Include="clashInterfaceUtility.h" />
     <ClInclude Include="commonFileReadWrite.h" />
+    <ClInclude Include="DataClassTypeDefine.h" />
     <ClInclude Include="DataRecordSingleton.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>

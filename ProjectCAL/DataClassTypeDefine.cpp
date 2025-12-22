@@ -100,12 +100,19 @@ bool ModelMesh::isEqualMesh(const ModelMesh& meshA, const ModelMesh& meshB)
     return true;
 }
 
+static std::string _get_exe_path()
+{
+    char buffer[MAX_PATH];//int max_path = 260;
+    std::string exeName = _getcwd(buffer, sizeof(buffer));//<direct.h>
+    return exeName;
+}
+
 bool ModelMesh::writeToFile(const std::vector<ModelMesh>& meshs, const std::string& _filename /*= {}*/) //obj format
 {
     std::string filename = _filename;
     if (filename.empty())
     {
-        filename = clash::get_exe_path();//clashInterfaceUtility
+        filename = _get_exe_path();//clashInterfaceUtility
         filename += "/OutputObj/modelmesh_" + std::to_string(GetTickCount64()) + ".obj";
     }
     std::ofstream ofs(filename);
