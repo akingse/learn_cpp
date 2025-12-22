@@ -595,7 +595,7 @@ static int enrol = []()->int
 	//test9();
 	//test10();
 	test11();
-	cout << get_filepath_filename(__FILE__) << " finished.\n" << endl;
+	cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 	return 0;
 }();
 
