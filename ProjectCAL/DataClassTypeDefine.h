@@ -12,18 +12,6 @@
 
 namespace clash
 {
-    static constexpr size_t N_10E_3 = (size_t)1e3;
-    static constexpr size_t N_10E_4 = (size_t)1e4;
-    static constexpr size_t N_10E_5 = (size_t)1e5;
-    static constexpr size_t N_10E_6 = (size_t)1e6;
-    static constexpr size_t N_10E_7 = (size_t)1e7;
-    static constexpr size_t N_10E_8 = (size_t)1e8;
-
-    static constexpr double epsF = FLT_EPSILON; //epsFloat=1e-7
-    static constexpr double epsArea = 100 * FLT_EPSILON;
-    //static constexpr double epsA = 1e-6;
-    //static constexpr unsigned long long ULL_MAX = 18446744073709551615; // 2 ^ 64 - 1 //ULLONG_MAX
-
     // global type and variable define 
     typedef std::array<Eigen::Vector3d, 2> Segment;
     typedef std::array<Eigen::Vector2d, 2> Segment2d;
@@ -40,6 +28,8 @@ namespace clash
     typedef std::vector<std::vector<Eigen::Vector3d>> PathsEigen3d;
 
     //global constexpr
+    constexpr double epsF = FLT_EPSILON; //epsFloat=1e-7
+    constexpr double epsArea = 100 * FLT_EPSILON;
     static const Eigen::Vector2d gVecNaN2d(std::nan("0"), std::nan("0"));
     static const Eigen::Vector3d gVecNaN(std::nan("0"), std::nan("0"), std::nan("0"));
     static const Triangle gSegNaN = { gVecNaN, gVecNaN };

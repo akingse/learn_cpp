@@ -401,10 +401,10 @@ namespace clash
 {
 
     template<class T>
-    inline std::vector<T> linspace(const T& p0, const T& p1, int n) //noEnd
+    inline std::vector<T> linspace(const T& p0, const T& p1, int n, bool withend = false) //noEnd
     {
         std::vector<T> res(n);
-        T v = 1.0 / n * (p1 - p0);
+        T v = (withend) ? 1.0 / (n - 1) * (p1 - p0) : 1.0 / n * (p1 - p0);
         for (int i = 0; i < n; ++i)
             res[i] = p0 + double(i) * v;
         return res;

@@ -162,6 +162,14 @@ namespace eigen
     }
 
     //overload
+    inline Eigen::Matrix2d scale2d(double x, double y)
+    {
+        Eigen::Matrix2d mat = Eigen::Matrix2d::Identity();
+        mat <<
+            x, 0,
+            0, y;
+        return mat;
+    }
 
     inline Eigen::Matrix4d translate(double x, double y, double z = 0.0)
     {
