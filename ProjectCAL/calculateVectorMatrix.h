@@ -61,10 +61,10 @@ namespace eigen
         return vec3s;
     }
 
-    inline Eigen::Vector4d to_vec4(const Eigen::Vector2d& vec2)
-    {
-        return Eigen::Vector4d(vec2[0], vec2[1], 0.0, 1.0);
-    }
+    //inline Eigen::Vector4d to_vec4(const Eigen::Vector2d& vec2)
+    //{
+    //    return Eigen::Vector4d(vec2[0], vec2[1], 0.0, 1.0);
+    //}
 
     inline Eigen::Vector3d cross(const Eigen::Vector2d& v0, const Eigen::Vector2d& v1)
     {
