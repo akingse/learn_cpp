@@ -16,11 +16,19 @@ namespace clash
     {
 #ifdef USING_EIGEN_VERISON
         Eigen::Vector2i m_id;
+        bool m_sense = true;//means forward
         Edge(int a, int b)
         {
             //m_id[0] = std::min(a, b);
             //m_id[1] = std::max(a, b);
-            m_id = (a < b) ? Eigen::Vector2i(a, b) : Eigen::Vector2i(b, a);
+            //m_id = (a < b) ? Eigen::Vector2i(a, b) : Eigen::Vector2i(b, a);
+            if (a < b)
+                m_id = Eigen::Vector2i(a, b);
+            else
+            {
+                m_id = Eigen::Vector2i(b, a);
+                m_sense = false;
+            }
         }
         bool operator==(const Edge& other) const
         {
