@@ -95,10 +95,8 @@ namespace clash
         std::vector<Eigen::Vector3i> ibo_;
         std::vector<Eigen::Vector3d> fno_; //Face Normal
         Eigen::AlignedBox3d bounding_;
-        //Eigen::Affine3d pose_ = Eigen::Affine3d::Identity();
         int index_ = -1; //int type index
-        //bool convex_ = true; // isConvex default true
-        bool convex_ = true;
+        bool convex_ = true; // isConvex default true
     };
 
     TriMesh operator*(const Eigen::Matrix4d& mat, const TriMesh& mesh);
@@ -115,6 +113,7 @@ namespace clash
         std::vector<Eigen::Vector3d> fno_; //Face Normal
         Eigen::AlignedBox3d bounding_;
         Eigen::Affine3d pose_ = Eigen::Affine3d::Identity();
+        //Eigen::Matrix4d pose_ = Eigen::Matrix4d::Identity();
         bool convex_ = true; // isConvex default true
         int genus_ = 0; //number of genus, default 0
         int number_ = -1; //int type index

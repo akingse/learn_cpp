@@ -407,9 +407,9 @@ namespace clash
 
 namespace clash
 {
-
+    //linear space
     template<class T>
-    inline std::vector<T> linspace(const T& p0, const T& p1, int n, bool withend = false) //noEnd
+    inline std::vector<T> linspace(const T& p0, const T& p1, int n, bool withend = false) //default noEnd
     {
         std::vector<T> res(n);
         T v = (withend) ? 1.0 / (n - 1) * (p1 - p0) : 1.0 / n * (p1 - p0);
