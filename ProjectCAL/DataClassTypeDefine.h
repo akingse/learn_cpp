@@ -112,7 +112,7 @@ namespace clash
         std::vector<Eigen::Vector3i> ibo_; //array<int, 3>
         std::vector<Eigen::Vector3d> fno_; //Face Normal
         Eigen::AlignedBox3d bounding_;
-        Eigen::Affine3d pose_ = Eigen::Affine3d::Identity();
+        //Eigen::Affine3d pose_ = Eigen::Affine3d::Identity();
         //Eigen::Matrix4d pose_ = Eigen::Matrix4d::Identity();
         bool convex_ = true; // isConvex default true
         int genus_ = 0; //number of genus, default 0
@@ -254,6 +254,18 @@ namespace clash
             for (const int& j : ibos_[i])
                 polygon.push_back(vbo_[j]);
             return polygon;
+        }
+
+        inline void apply_pose()
+        {
+
+        }
+
+        inline ModelMesh apply_pose() const
+        {
+            ModelMesh mesh = *this;
+            mesh.apply_pose();
+            return mesh;
         }
         
         bool operator==(const ModelMesh& rhs) const
