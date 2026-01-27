@@ -113,7 +113,7 @@ namespace clash
         std::vector<Eigen::Vector3d> fno_; //Face Normal
         Eigen::AlignedBox3d bounding_;
         //Eigen::Affine3d pose_ = Eigen::Affine3d::Identity();
-        //Eigen::Matrix4d pose_ = Eigen::Matrix4d::Identity();
+        Eigen::Matrix4d pose_ = Eigen::Matrix4d::Identity();
         bool convex_ = true; // isConvex default true
         int genus_ = 0; //number of genus, default 0
         int number_ = -1; //int type index
@@ -258,7 +258,11 @@ namespace clash
 
         inline void apply_pose()
         {
-
+            if (pose_.isApprox(Eigen::Matrix4d::Identity()))
+                return;
+            for (int i = 0; i < (int)vbo_.size(); ++i)
+                vbo_[i] = (pose_ * vbo_[i].homogeneous()).hnormalized();
+            pose_ = Eigen::Matrix4d::Identity();
         }
 
         inline ModelMesh apply_pose() const
