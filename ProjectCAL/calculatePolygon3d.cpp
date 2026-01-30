@@ -8,7 +8,7 @@ using namespace Eigen;
 std::array<std::vector<Eigen::Vector3d>, 4> clash::splitContourToEdge(
     const std::vector<Eigen::Vector3d>& boundContour, const std::array<Eigen::Vector2d, 4>& cornerPoints, bool isFirst /*= false*/)
 {
-    std::map<double, int> angleMap; //夹角排序，轮廓中有的地方夹角很大
+    std::map<double, int> angleMap; //angle sort
     if (isFirst)
     {
         int n = (int)boundContour.size();
@@ -65,7 +65,7 @@ std::array<std::vector<Eigen::Vector3d>, 4> clash::splitContourToEdge(
     std::array<int, 4> cornerIndex = { 0,0,0,0 };
     for (int i = 1; i < 4; i++)
     {
-        double distance = DBL_MAX;
+        /*double*/ distance = DBL_MAX;
         if (isFirst)
             for (auto iter = angleMap.begin(); iter != angleMap.end(); iter++)
             {

@@ -980,6 +980,8 @@ HeMesh games::meshQEMSimplification(const HeMesh& mesh, size_t edgeCollapseTarge
 	{
 		const QEMEdge& mini = heap.top();
 		HeEdge* heEdge = meshC.m_edges[mini.m_index];
+		if (heEdge == nullptr)
+			break;
 		//update first vertex, delete second vertex
 		heEdge->m_oriVertex->m_coord = mini.m_vbar.hnormalized(); //update merged vertex
 		for (auto iter : mesh.m_edges)

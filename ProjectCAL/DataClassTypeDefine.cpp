@@ -170,10 +170,10 @@ std::vector<ModelMesh> ModelMesh::readFromFile(const std::string& filename) //ob
         }
         else if (prefix == "f") {
             Eigen::Vector3i face;
-            int index;
-            for (int i = 0; i < 3; ++i) {
-                is >> index;
-                face[i] = index - 1; // OBJ index begin 1
+            int i; //shadows outer variable
+            for (int j = 0; j < 3; ++j) {
+                is >> i;
+                face[j] = i - 1; // OBJ index begin 1
             }
             mesh.ibo_.push_back(face);
         }
@@ -356,11 +356,12 @@ void clash::ModelMesh::makeCoplanar()
         if (face.size() == 3)
             continue;
         vector<Eigen::Vector3d> polygon;
-        for (const int i : face)
-            polygon.push_back(vbo_[i]);
+        for (const int j : face)
+            polygon.push_back(vbo_[j]);
         Eigen::Vector3d normal = (polygon[1] - polygon[0]).cross(polygon[2] - polygon[1]).normalized();
         double accum = 0;
         for (int j = 3; j < (int)face.size(); ++j)
             accum += fabs(normal.dot(vbo_[j]));
+        cout << accum << endl;
     }
 }

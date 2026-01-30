@@ -228,7 +228,7 @@ namespace clash
 			Eigen::Vector2d center(0.0, 0.0);
 			for (int i = 0; i < n; ++i)
 				center += polygon[i];
-			center = center / n;
+			center = center / double(n);
 			return center;
 		}
 		area *= 0.5;

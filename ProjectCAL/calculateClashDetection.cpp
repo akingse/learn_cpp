@@ -697,7 +697,7 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetectionByTrig
 {
 	std::vector<RectBase3d> allTrgions;
 //#pragma omp parallel for schedule(dynamic)
-	int k = 0; //global index
+	int index = 0; //global index
 	vector<vector<int>> meshTrigon(meshVct.size());
 	for (int i = 0; i < (int)meshVct.size(); ++i) //without mesh store
 	{
@@ -712,7 +712,7 @@ std::vector<std::pair<int, int>> ClashDetection::executeFullClashDetectionByTrig
 			box.extend(mesh.vbo_[mesh.ibo_[j][2]]);
 			tempTri[j].m_bound = box;
 			tempTri[j].m_number = i; //mesh index
-			tempTri[j].m_index = k++; //unique index
+			tempTri[j].m_index = index++; //unique index
 			tempId[j] = tempTri[j].m_index;
 		}
 		allTrgions.insert(allTrgions.end(), tempTri.begin(), tempTri.end());

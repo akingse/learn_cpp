@@ -61,6 +61,21 @@ namespace eigen
         return vec3s;
     }
 
+    //convert
+#ifdef USING_MATRIX_LIBRARY_EIGEN
+    inline Eigen::Matrix4d toEg(const Eigen::Affine3d& affine)
+    {
+        Eigen::Matrix4d mat = affine.matrix();
+        return mat;
+    }
+
+    inline Eigen::Affine3d toEg(const Eigen::Matrix4d& mat)
+    {
+        Eigen::Affine3d affine(mat);
+        return affine;
+    }
+#endif
+
     //inline Eigen::Vector4d to_vec4(const Eigen::Vector2d& vec2)
     //{
     //    return Eigen::Vector4d(vec2[0], vec2[1], 0.0, 1.0);
@@ -85,7 +100,7 @@ namespace eigen
 
     inline double get_angle_of_two_vectors(const Eigen::Vector3d& V0, const Eigen::Vector3d& V1)
     {
-        double cosres = cosres = V0.dot(V1) / (V0.norm() * V1.norm()); //+1 or -1 
+        double cosres = V0.dot(V1) / (V0.norm() * V1.norm()); //+1 or -1 
         if (1.0 < cosres) //avoid nan
             cosres = 1.0;
         else if (-1.0 > cosres)

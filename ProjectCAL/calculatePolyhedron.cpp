@@ -347,7 +347,7 @@ RelationOfPointAndMesh clash::isPointInsidePolyhedronROT(const Eigen::Vector3d& 
 #ifdef STATISTIC_DATA_TESTFOR
 	clock_t startT = clock(), endT;
 #endif
-	auto _isRayAndTriangleIntersectParallel = [&point, &normal, &rayLine](std::array<Eigen::Vector3d, 3 >& trigon)->bool
+	auto _isRayAndTriangleIntersectParallel = [&point, &normal, &rayLine](const std::array<Eigen::Vector3d, 3 >& trigon)->bool
 		{
 			//if (fabs((point - trigon[0]).dot(normal)) > epsF) // not coplanar
 			if ((point - trigon[0]).dot(normal) != 0.0) // not coplanar
@@ -784,9 +784,9 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 {
 	if (faceSetA.empty() && faceSetB.empty())
         return { Vector3d::Zero(), {ULLONG_MAX, ULLONG_MAX} };
-	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
+	//const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
+	//const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
 	const std::vector<Eigen::Vector3i>& iboA = meshA.ibo_;
-	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
 	const std::vector<Eigen::Vector3i>& iboB = meshB.ibo_;
 #ifdef USING_MESH_RELATIVE_MATRIX
 	const Eigen::Affine3d& matA = meshA.pose_;
