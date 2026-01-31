@@ -36,7 +36,7 @@ HeMesh::HeMesh(const ModelMesh& mesh)
 			mesh.vbo_[mesh.ibo_[i][0]],
 			mesh.vbo_[mesh.ibo_[i][1]],
 			mesh.vbo_[mesh.ibo_[i][2]] };
-		constexpr double thin = 10.0 / 180 * M_PI;
+		//constexpr double thin = 10.0 / 180 * M_PI;
 		//for (int j = 0; j < 3; ++j)
 		//{
 		//	double angle = get_angle_of_two_vectors(trigon[(j + 1) % 3] - trigon[(j) % 3], trigon[(j + 2) % 3] - trigon[(j + 1) % 3]);
@@ -1169,8 +1169,8 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 		};
 	//vector<std::pair<int, vector<Vector2d>>> m_ccw;
 	//vector<std::pair<int, vector<Vector2d>>> m_ccw_anti;
-	vector<vector<Vector2d>> m_ccw;
-	vector<vector<Vector2d>> m_cw;
+	//vector<vector<Vector2d>> m_ccw;
+	//vector<vector<Vector2d>> m_cw;
 #if 1
 	//process self intersect
 	for (size_t i = 0; i < hesh.m_faces.size(); i++)
@@ -1218,8 +1218,7 @@ clash::ModelMesh games::meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh,
 				edge = edge->m_nextEdge;
 				continue;
 			}
-			if (edgeRec.empty() || //first 
-				(!edgeRec.empty() && edge->m_oriVertex != edgeRec.top()->m_oriVertex))
+			if (edgeRec.empty() || edge->m_oriVertex != edgeRec.top()->m_oriVertex)
 			{
 				edgeRec.push(edge);
 				edge = edge->m_nextEdge;

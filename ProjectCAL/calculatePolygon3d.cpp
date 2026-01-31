@@ -180,7 +180,7 @@ std::array<std::vector<std::pair<Eigen::Vector3d, int>>, 4> clash::splitContourT
     std::array<int, 4> cornerIndex = { 0,0,0,0 };
     for (int i = 1; i < 4; i++)
     {
-        double distance = DBL_MAX;
+        /*double*/ distance = DBL_MAX;
         if (isFirst)
             for (auto iter = angleMap.begin(); iter != angleMap.end(); iter++)
             {
@@ -279,7 +279,7 @@ std::array<std::vector<std::pair<Vector3d, int>>, 2> clash::splitContourToEdgeFi
     std::array<int, 4> cornerIndex = { 0,0,0,0 };
     for (int i = 1; i < 4; i++)
     {
-        double distance = DBL_MAX;
+        /*double*/ distance = DBL_MAX;
         for (auto iter = angleMap.begin(); iter != angleMap.end(); iter++)
         {
             // angleMap record origin index
