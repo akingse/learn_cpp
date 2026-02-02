@@ -29,7 +29,7 @@ namespace clash
 
     inline std::string get_filepath_filename(const std::string& filepath)
     {
-        std::string filename;
+        //std::string filename;
         std::vector<std::string> namevct = string_split(filepath, '\\');
         if (namevct.empty())
             return "";
@@ -68,7 +68,7 @@ namespace clash
         return str;
     }
 
-    inline std::string wstring2string(const std::wstring wstr)
+    inline std::string wstring2string(const std::wstring& wstr)
     {
         return wstring2string(wstr.c_str());
     }

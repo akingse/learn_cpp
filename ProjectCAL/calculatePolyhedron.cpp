@@ -784,8 +784,8 @@ std::tuple<Eigen::Vector3d, std::array<size_t, 2>> getPenetrationDepthOfTwoConve
 {
 	if (faceSetA.empty() && faceSetB.empty())
         return { Vector3d::Zero(), {ULLONG_MAX, ULLONG_MAX} };
-	//const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
-	//const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
+	const std::vector<Eigen::Vector3d>& vboA = meshA.vbo_;
+	const std::vector<Eigen::Vector3d>& vboB = meshB.vbo_;
 	const std::vector<Eigen::Vector3i>& iboA = meshA.ibo_;
 	const std::vector<Eigen::Vector3i>& iboB = meshB.ibo_;
 #ifdef USING_MESH_RELATIVE_MATRIX
