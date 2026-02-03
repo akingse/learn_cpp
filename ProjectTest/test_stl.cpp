@@ -219,8 +219,7 @@ static int mainstl()
 	return 0;
 }
 
-//测试优先队列 priority_queue
-
+// 优先队列 priority_queue
 static void _test_stl_0()
 {
 	priority_queue<int> pqueue;//大数在上
@@ -265,10 +264,49 @@ static void _test_stl_1()
 
 }
 
+//std11
+
+//内置函数
+	//为了让我们的生活更轻松。
+static void _test_stl11()
+{
+	//std::all_of();
+	//std::none_of();
+	//std::any_of();
+	//std::count_if();
+	//std::transform(); 
+	//std::accumulate();
+	//std::replace_if();
+
+	std::vector<std::string> wordList =
+	{ "Hi", "Hello", "Test", "First", "Second", "Third", "Fourth" };
+	bool result = std::all_of(wordList.begin(), wordList.end(),
+		[](const std::string& str) {return str.size() == 4;	});
+
+	//chatgpt
+	std::vector<std::string> container = wordList;
+	std::sort(container.begin(), container.end());
+	string value = "Hello";
+	auto iterator = std::find(container.begin(), container.end(), value);
+	auto it_first = std::find_if(container.begin(), container.end(), 
+		[](string name) { return x > 10; });
+
+
+	return;
+}
+
+//<algorithm>
+static void _test_stl_alg()
+{
+//https://www.runoob.com/cplusplus/cpp-libs-algorithm.html
+
+}
+
 static int _enrol = []()->int
 	{
 		//_test_stl_0();
-		_test_stl_1();
+		//_test_stl_1();
+		_test_stl11();
 		cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();
