@@ -14,6 +14,7 @@ using namespace std::chrono;
 //#define USING_CONTAINER_SET
 #define USING_KDTREE_METHOD
 #define USING_FINDINTERSECTCLASH
+static constexpr size_t N_10E_4 = (size_t)1e4;
 
 //≤‚ ‘kd-tree
 static void test0()

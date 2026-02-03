@@ -14,6 +14,8 @@ using namespace std::chrono;
 #endif // 
 //#define USING_RELATIVE_MATRIX
 
+static constexpr size_t N_10E_6 = (size_t)1e6;
+
 namespace clash
 {
 	//两平面求交
@@ -187,7 +189,7 @@ namespace clash
 		//计时
 		steady_clock::time_point start, end;
 		microseconds duration;
-		size_t N = N_10E_4;
+		size_t N = N_10E_6;
         std::vector<Matrix3d> matVct = getRandMatrix(N);
 		std::vector<Matrix3x3> mat3Vct(N);
 		for (int i = 0; i < N; i++)
