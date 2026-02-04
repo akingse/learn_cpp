@@ -1,5 +1,4 @@
 #include "pch.h"
-#include "calculatePolyhedron.h"
 using namespace std;
 using namespace Eigen;
 using namespace clash;

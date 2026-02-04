@@ -296,10 +296,57 @@ static void _test_stl11()
 }
 
 //<algorithm>
+#include <numeric>
 static void _test_stl_alg()
 {
-//https://www.runoob.com/cplusplus/cpp-libs-algorithm.html
+	//https://www.runoob.com/cplusplus/cpp-libs-algorithm.html
 
+	std::vector<int> vec = { 1, 2, 3, 4, 5 };
+	int sum = std::accumulate(vec.begin(), vec.end(), 0);
+	auto min_it = std::min_element(vec.begin(), vec.end());
+	auto max_it = std::max_element(vec.begin(), vec.end());
+
+	std::sort(vec.begin(), vec.end());  // 先排序
+	bool found = std::binary_search(vec.begin(), vec.end(), 4);
+	auto it = std::find(vec.begin(), vec.end(), 3);
+	auto it1 = std::find_if(vec.begin(), vec.end(), [](int x) { return x > 3; });
+
+
+	std::reverse(vec.begin(), vec.end());
+	std::fill(vec.begin(), vec.end(), 0);  // 所有元素设为 0
+	std::replace(vec.begin(), vec.end(), 1, 99);  // 将所有 1 替换为 99
+	std::vector<int> vec2(6);
+	std::copy(vec.begin(), vec.end(), vec2.begin());
+}
+
+static void _test_stl_alg2()
+{
+	//std::next_permutation: 生成字典序的下一个排列，如果没有下一个排列则返回 false。
+	std::vector<int> vec = { 1, 2, 3 };
+	do {
+		for (int n : vec) std::cout << n << " ";
+		std::cout << std::endl;
+	} while (std::next_permutation(vec.begin(), vec.end()));
+
+	std::vector<int> v1 = { 1, 2, 3, 4, 5 };
+	std::vector<int> v2 = { 1, 2, 3, 4, 5 };
+	bool are_equal = std::equal(v1.begin(), v1.end(), v2.begin());
+
+	//std::merge: 将两个有序区间合并到一个有序区间。
+	std::vector<int> vec1 = { 1, 3, 5 };
+	std::vector<int> vec2 = { 2, 4, 6 };
+	std::vector<int> result(6);
+	std::merge(vec1.begin(), vec1.end(), vec2.begin(), vec2.end(), result.begin());
+
+	//std::inplace_merge(vec.begin(), middle, vec.end());
+}
+
+static void _test_stl_alg3()
+{
+	std::vector<int> vec = { 1, 2, 3,0 };
+	if (!std::all_of(vec.begin(), vec.end(), [](int i) {return i <= 0; }))
+		return;
+	return;
 }
 
 static int _enrol = []()->int
@@ -307,6 +354,7 @@ static int _enrol = []()->int
 		//_test_stl_0();
 		//_test_stl_1();
 		_test_stl11();
+		_test_stl_alg3();
 		cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();
