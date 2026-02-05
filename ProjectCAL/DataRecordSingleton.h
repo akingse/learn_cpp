@@ -119,10 +119,10 @@ namespace test
         DataRecordSingleton(DataRecordSingleton&&) = delete;
 
     public:
-        struct Point3d
+        struct Vect3d
         {
             double xyz[3];
-            inline bool isEqual(const Point3d& rhs, double tolerance = 0.0) const
+            inline bool isEqual(const Vect3d& rhs, double tolerance = 0.0) const
             {
                 return fabs(xyz[0] - rhs.xyz[0]) <= tolerance && fabs(xyz[1] - rhs.xyz[1]) <= tolerance && fabs(xyz[2] - rhs.xyz[2]) <= tolerance;
             }
@@ -137,8 +137,8 @@ namespace test
             //std::map<std::string, std::atomic<int>> m_dataCountA;
             std::map<std::string, double> m_dataFloat;
             std::map<std::string, double> m_dataTime;
-            std::map<std::string, Point3d> m_dataPoint;
-            std::map<std::string, std::string> m_dataByte; // equal std::vector<unsigned char>
+            std::map<std::string, Vect3d> m_dataPoint;
+            std::map<std::string, std::string> m_dataByte;
             //to keep order
             std::vector<std::pair<std::string, int>> m_dataItemVct;
             std::vector<std::pair<std::string, double>> m_dataTimeVct;
@@ -148,6 +148,19 @@ namespace test
             std::vector<std::pair<int, std::string>> m_errInfoVct;
             DataMap() = default;
             DataMap(const std::string& name) :m_name(name) {}
+            inline void clear()
+            {
+                m_name.clear();
+                m_dataCount.clear();
+                m_dataFloat.clear();
+                m_dataTime.clear();
+                m_dataPoint.clear();
+                m_dataByte.clear();
+                m_dataItemVct.clear();
+                m_dataTimeVct.clear();
+                m_dataPairId.clear();
+                m_errInfoVct.clear();
+            }
         };
 
     public:
@@ -164,6 +177,7 @@ namespace test
         static DataMap sm_recordData;
         static std::vector<DataMap> sm_recordDatas;
 
+#pragma region inline_function
     public:
         static DataRecordSingleton& getInstance()
         {
@@ -180,18 +194,9 @@ namespace test
         }
         static void clear()
         {
-            sm_recordDatas.clear();
             //member
-            sm_recordData.m_name.clear();
-            sm_recordData.m_dataCount.clear();
-            sm_recordData.m_dataFloat.clear();
-            sm_recordData.m_dataTime.clear();
-            sm_recordData.m_dataPoint.clear();
-            sm_recordData.m_dataByte.clear();
-            sm_recordData.m_dataItemVct.clear();
-            sm_recordData.m_dataTimeVct.clear();
-            sm_recordData.m_dataPairId.clear();
-            sm_recordData.m_errInfoVct.clear();
+            sm_recordData.clear();
+            sm_recordDatas.clear();
         }
 
         static void writeDataToCsv(const std::string& filename = {});
@@ -225,6 +230,7 @@ namespace test
             return str;
         }
     };
+#pragma endregion
 
 
 }
