@@ -243,11 +243,31 @@ namespace eigen
 
     inline Eigen::Matrix4d rotate(const Eigen::Vector3d& axis = { 0, 0, 1 }, double theta = 0.0)
     {
-        Eigen::Quaterniond q = Eigen::Quaterniond(Eigen::AngleAxisd(theta, axis.normalized()));
-        Eigen::Matrix3d R = q.toRotationMatrix();
-        Eigen::Matrix4d mat4d = Eigen::Matrix4d::Identity();
-        mat4d.block<3, 3>(0, 0) = R; //block<rows,cols>(row_index,col_index) <>is child size, () is begin index
+        //Eigen::Quaterniond q = Eigen::Quaterniond(Eigen::AngleAxisd(theta, axis.normalized()));
+        //Eigen::Matrix3d R = q.toRotationMatrix();
+        //Eigen::Matrix4d mat4d = Eigen::Matrix4d::Identity();
+        //mat4d.block<3, 3>(0, 0) = R; //block<rows,cols>(row_index,col_index) <>is child size, () is begin index
         //using custom alg
+        Eigen::Vector3d nv = axis.normalized();
+        double c = 1.0 - cos(theta);
+        double s = sin(theta);
+        Eigen::Matrix4d matA, matB, matC;
+        matA <<
+            0.0, -nv.z() * c, nv.y()* c, 0.0,
+            nv.z()* c, 0.0, -nv.x() * c, 0.0,
+            -nv.y() * c, nv.x()* c, 0.0, 0.0,
+            0, 0, 0, 1;
+        matB <<
+            0.0, -nv.z(), nv.y(), 0.0,
+            nv.z(), 0.0, -nv.x(), 0.0,
+            -nv.y(), nv.x(), 0.0, 0.0,
+            0, 0, 0, 1;
+        matC <<
+            1.0, -nv.z() * s, nv.y()* s, 0.0,
+            +nv.z() * s, 1.0, -nv.x() * s, 0.0,
+            -nv.y() * s, nv.x()* s, 1.0, 0.0,
+            0, 0, 0, 0;
+        Eigen::Matrix4d mat4d = matA * matB + matC;
         return mat4d;
     }
 
