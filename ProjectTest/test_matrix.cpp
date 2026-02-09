@@ -1,6 +1,6 @@
 #include "pch.h"
-
 using namespace std;
+using namespace Eigen;
 #define N 3    //测试矩阵维数定义
 
 //按第一行展开计算|A|
@@ -89,7 +89,7 @@ bool GetMatrixInverse(double src[N][N], int n, double des[N][N])
     return true;
 }
 
-int main3()
+static int test0()
 {
     bool flag;//标志位，如果行列式为0，则结束程序
     int row = N;
@@ -153,3 +153,53 @@ int main3()
 
     return 0;
 }
+
+static Eigen::Matrix4d _rotate(const Eigen::Vector3d& axis = { 0, 0, 1 }, double theta = 0.0)
+{
+    Eigen::Vector3d nv = axis.normalized();
+    double c = 1.0 - cos(theta);
+    double s = sin(theta);
+    Eigen::Matrix4d matA, matB, matC;
+    matA <<
+        0.0, -nv.z() * c, nv.y()* c, 0.0,
+        nv.z()* c, 0.0, -nv.x() * c, 0.0,
+        -nv.y() * c, nv.x()* c, 0.0, 0.0,
+        0, 0, 0, 1;
+    matB <<
+        0.0, -nv.z(), nv.y(), 0.0,
+        nv.z(), 0.0, -nv.x(), 0.0,
+        -nv.y(), nv.x(), 0.0, 0.0,
+        0, 0, 0, 1;
+    matC <<
+        1.0, -nv.z() * s, nv.y()* s, 0.0,
+        +nv.z() * s, 1.0, -nv.x() * s, 0.0,
+        -nv.y() * s, nv.x()* s, 1.0, 0.0,
+        0, 0, 0, 0;
+    Eigen::Matrix4d T = matA * matB + matC;
+    return T;
+}
+
+static void test1()
+{
+    Matrix4d RE0 = eigen::rotate();
+    Matrix4d RE1 = _rotate();
+
+    Matrix4d R0 = eigen::rotate(Vector3d(0,0,1), M_PI_2);
+    Matrix4d R1 = _rotate(Vector3d(0, 0, 1), M_PI_2);
+
+    Matrix4d R2 = eigen::rotate(Vector3d(1, 1, 1), 1);
+    Matrix4d R3 = _rotate(Vector3d(1, 1, 1), 1);
+
+    Matrix4d dia = R2 - R3;
+    return;
+}
+
+static int enrol = []()->int
+    {
+        test1();
+        //test2();
+        //test3();
+        cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
+        return 0;
+    }();
+

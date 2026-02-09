@@ -289,7 +289,7 @@ static void _test_stl11()
 	string value = "Hello";
 	auto iterator = std::find(container.begin(), container.end(), value);
 	auto it_first = std::find_if(container.begin(), container.end(), 
-		[](string name) { return x > 10; });
+		[](string name) { return name.size() > 10; });
 
 
 	return;
