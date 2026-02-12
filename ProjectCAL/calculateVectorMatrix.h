@@ -249,24 +249,27 @@ namespace eigen
         //mat4d.block<3, 3>(0, 0) = R; //block<rows,cols>(row_index,col_index) <>is child size, () is begin index
         //using custom alg
         Eigen::Vector3d nv = axis.normalized();
+        double x = nv.x();
+        double y = nv.y();
+        double z = nv.z();
         double c = 1.0 - cos(theta);
         double s = sin(theta);
         Eigen::Matrix4d matA, matB, matC;
         matA <<
-            0.0, -nv.z() * c, nv.y()* c, 0.0,
-            nv.z()* c, 0.0, -nv.x() * c, 0.0,
-            -nv.y() * c, nv.x()* c, 0.0, 0.0,
-            0, 0, 0, 1;
+            0.0, -z * c, y * c, 0.0,
+            z * c, 0.0, -x * c, 0.0,
+            -y * c, x * c, 0.0, 0.0,
+            0.0, 0.0, 0.0, 1.0;
         matB <<
-            0.0, -nv.z(), nv.y(), 0.0,
-            nv.z(), 0.0, -nv.x(), 0.0,
-            -nv.y(), nv.x(), 0.0, 0.0,
-            0, 0, 0, 1;
+            0.0, -z, y, 0.0,
+            z, 0.0, -x, 0.0,
+            -y, x, 0.0, 0.0,
+            0.0, 0.0, 0.0, 1.0;
         matC <<
-            1.0, -nv.z() * s, nv.y()* s, 0.0,
-            nv.z()* s, 1.0, -nv.x() * s, 0.0,
-            -nv.y() * s, nv.x()* s, 1.0, 0.0,
-            0, 0, 0, 0;
+            1.0, -z * s, y * s, 0.0,
+            z * s, 1.0, -x * s, 0.0,
+            -y * s, x * s, 1.0, 0.0,
+            0.0, 0.0, 0.0, 0.0;
         Eigen::Matrix4d mat4d = matA * matB + matC;
         return mat4d;
     }
