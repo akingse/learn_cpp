@@ -353,8 +353,8 @@ static int _enrol = []()->int
 	{
 		//_test_stl_0();
 		//_test_stl_1();
-		_test_stl11();
-		_test_stl_alg3();
+		//_test_stl11();
+		//_test_stl_alg3();
 		cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();

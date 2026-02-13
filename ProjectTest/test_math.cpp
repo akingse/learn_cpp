@@ -543,13 +543,98 @@ static void test5()
     return;
 }
 
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <string>
+#include <limits>
+#include <cmath>
+
+int significant_digits(double x) 
+{
+    if (std::isnan(x) || std::isinf(x) || x == 0.0)
+        return 0;   // 0 可认为有效位为0或1，按需修改
+
+    // 使用足够精度格式化，强制使用定点或科学记数法均可，这里用科学记数法便于处理
+    std::ostringstream oss;
+    oss << std::scientific << std::setprecision(std::numeric_limits<double>::digits10) << x;
+    std::string s = oss.str();
+
+    // 找到 'e' 或 'E' 截断指数部分，只保留尾数部分（含小数点）
+    size_t e_pos = s.find('e');
+    if (e_pos == std::string::npos)
+        e_pos = s.find('E');
+    std::string mantissa = s.substr(0, e_pos);
+
+    // 移除可能的前导 '+' 或 '-'
+    if (!mantissa.empty() && (mantissa[0] == '+' || mantissa[0] == '-'))
+        mantissa = mantissa.substr(1);
+
+    // 移除小数点，得到纯数字字符串
+    std::string digits;
+    for (char ch : mantissa) 
+    {
+        if (std::isdigit(ch))
+            digits.push_back(ch);
+    }
+
+    // 去除前导零
+    size_t start = digits.find_first_not_of('0');
+    if (start == std::string::npos)
+        return 0;   // 全是零（但前面已排除0）
+
+    // 去除尾随零（有效数字不考虑末尾无意义的零）
+    size_t end = digits.find_last_not_of('0');
+    if (end == std::string::npos)
+        end = start; // 不会发生，因为至少有一个非零数字
+
+    // 有效位数 = end - start + 1
+    return static_cast<int>(end - start + 1);
+}
+
+//double位数
+static void test6()
+{
+    //double value = M_PI;
+    //double value = 0.03;
+    double value = 0.03001;
+    //double value = 0.3;
+    //double value = 1e-10;
+    int dig = significant_digits(value);
+
+
+    std::ostringstream oss;
+    // 使用科学计数法输出
+    oss << std::setprecision(std::numeric_limits<double>::digits10) << value; // 精度可以根据需要调整
+    std::string str = oss.str();
+    size_t posE = str.find('e');
+    if (posE != std::string::npos) {
+        str = str.substr(0, posE); // 只获取数字部分
+    }
+    int count = 0;
+    bool leadingZero = true;
+    for (const char c : str) 
+    {
+        if (c == '.') 
+            continue; // 跳过小数点
+        if (c != '0') 
+            leadingZero = false; // 第一个非零数字
+        if (!leadingZero) 
+            ++count; // 记数有效位数
+    }
+
+
+    return;
+}
+
 static int enrol = []()->int
 {
     //test0();
     //test1();
-    //test2(); //for funciton
+    test2(); //for funciton
     //test3();
     //test5();
+    test6();
     cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
     return 0;
 }();
