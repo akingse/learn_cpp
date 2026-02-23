@@ -241,6 +241,39 @@ namespace eigen
         return R;
     }
 
+    inline Eigen::Matrix4d rotx90()
+    {
+        Eigen::Matrix4d R;
+        R <<
+            1, 0, 0, 0,
+            0, 0, -1, 0,
+            0, 1, 0, 0,
+            0, 0, 0, 1;
+        return R;
+    }
+
+    inline Eigen::Matrix4d roty90()
+    {
+        Eigen::Matrix4d R;
+        R <<
+            0, 0, 1, 0,
+            0, 1, 0, 0,
+            -1, 0, 0, 0,
+            0, 0, 0, 1;
+        return R;
+    }
+
+    inline Eigen::Matrix4d rotz90()
+    {
+        Eigen::Matrix4d R;
+        R <<
+            0, -1, 0, 0,
+            1, 0, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1;
+        return R;
+    }
+
     inline Eigen::Matrix4d rotate(const Eigen::Vector3d& axis = { 0, 0, 1 }, double theta = 0.0)
     {
         //Eigen::Quaterniond q = Eigen::Quaterniond(Eigen::AngleAxisd(theta, axis.normalized()));
