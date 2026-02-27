@@ -190,7 +190,7 @@ static void test1()
     Matrix4d R2 = eigen::rotate(Vector3d(1, 1, 1), 1);
     Matrix4d R3 = _rotate(Vector3d(1, 1, 1), 1);
 
-    Matrix4d dia = R2 - R3;
+    Matrix4d deviation = R2 - R3;
 
     Matrix4d mat = eigen::rotz(M_PI / 2);
     return;
