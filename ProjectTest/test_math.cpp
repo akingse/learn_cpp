@@ -477,17 +477,24 @@ static void test4() //C++数学函数
 //数学特殊数字
 static void test5()
 {
-    ///double NaN = 0.0 / 0.0;
-//puts(NaN);
-//double nan = 0xFFFFFFFFFFFFFFFF;// 0x7FF0000000000000;
-//if (nan == 0xFFFFFFFFFFFFFFFF)
-//	puts("yes");
-//	cout << nan << endl;
+    double e = exp(1);
+    double pi2 = acos(0);
+    double pi1 = asin(1);
+    //double pi0 = atan(0);
+    double pi5 = atan(DBL_MAX);
+    double pi3 = atan2(-1,0);
+    double pi4 = atan2(0,-1);
 
-//float x = 0.0f / 0.0f;
-//if (isnan(x))
-//	puts("yes");
-//cout << isnan(0.0f / 0.0f) << endl;
+    ///double NaN = 0.0 / 0.0;
+    //puts(NaN);
+    //double nan = 0xFFFFFFFFFFFFFFFF;// 0x7FF0000000000000;
+    //if (nan == 0xFFFFFFFFFFFFFFFF)
+    //	puts("yes");
+    //	cout << nan << endl;
+    //float x = 0.0f / 0.0f;
+    //if (isnan(x))
+    //	puts("yes");
+    //cout << isnan(0.0f / 0.0f) << endl;
     double fnan = nan("0");
     double f2 = fnan * 2;
 
@@ -633,8 +640,8 @@ static int enrol = []()->int
     //test1();
     //test2(); //for funciton
     //test3();
-    //test5();
-    test6();
+    test5();
+    //test6();
     cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
     return 0;
 }();
