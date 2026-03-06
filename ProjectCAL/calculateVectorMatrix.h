@@ -391,39 +391,6 @@ namespace eigen
         return mat4;
     }
 
-    inline Eigen::Matrix4d rotx90()
-    {
-        Eigen::Matrix4d R;
-        R <<
-            1, 0, 0, 0,
-            0, 0, -1, 0,
-            0, 1, 0, 0,
-            0, 0, 0, 1;
-        return R;
-    }
-
-    inline Eigen::Matrix4d roty90()
-    {
-        Eigen::Matrix4d R;
-        R <<
-            0, 0, 1, 0,
-            0, 1, 0, 0,
-            -1, 0, 0, 0,
-            0, 0, 0, 1;
-        return R;
-    }
-
-    inline Eigen::Matrix4d rotz90()
-    {
-        Eigen::Matrix4d R;
-        R <<
-            0, -1, 0, 0,
-            1, 0, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1;
-        return R;
-    }
-
     //operator overload
     inline Eigen::Vector3d operator_mul(const Eigen::Matrix4d& mat, const Eigen::Vector3d& vec)
     {
