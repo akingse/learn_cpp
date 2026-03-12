@@ -514,11 +514,22 @@ static void _test1()
 class Base {
 public:
 	virtual ~Base() {} // 为了确保多态性，Base类应该有虚析构函数
+
+	inline virtual void thefun()
+	{
+		cout << "base" << endl;
+	}
 };
 
 class DerivedA : public Base {
 public:
 	void info() { std::cout << "I am DerivedA" << std::endl; }
+protected:
+	virtual void thefun() override
+	{
+		cout << "child" << endl;
+	}
+
 };
 
 class DerivedB : public Base {
@@ -554,10 +565,18 @@ static void _test2()
 	return;
 }
 
+static void _test3()
+{
+	shared_ptr<Base> ptr = make_shared<DerivedA>();
+	ptr->thefun();
+	return;
+}
+
 static int enrol = []()->int
 	{
 		//_test1();
 		//_test2();
+		_test3();
 		cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();
