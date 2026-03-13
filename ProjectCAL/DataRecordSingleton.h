@@ -15,6 +15,10 @@
     else\
         dataM[dataName]++;\
 
+#define MACRO_EXPANSION_DATA_INSERT(dataName, dataNum) \
+	std::map<std::string, int>& dataM = test::DataRecordSingleton::getInstance().getData().m_dataCount;\
+    dataM.insert({ dataName,dataNum });\
+
 #define MACRO_EXPANSION_DATA_PAIR(idA, idB) \
 	std::vector<std::pair<int, int>>& dataV = test::DataRecordSingleton::getInstance().getData().m_dataPairId;\
     dataV.push_back({idA, idB});\
@@ -29,7 +33,6 @@
 #define MACRO_EXPANSION_TIME_END(dataName) \
     timeend = std::chrono::high_resolution_clock::now();\
     test::DataRecordSingleton::dataTimeAppend(dataName, std::chrono::duration<double, std::milli>(timeend - timestart).count());\
-
 
 namespace test
 {
@@ -119,9 +122,16 @@ namespace test
         DataRecordSingleton(DataRecordSingleton&&) = delete;
 
     public:
-        struct Vect3d
+        struct Vect3d //Point3d
         {
             double xyz[3];
+            Vect3d() = default;
+            Vect3d(double x, double y, double z)
+            {
+                xyz[0] = x;
+                xyz[1] = y;
+                xyz[2] = z;
+            }
             inline bool isEqual(const Vect3d& rhs, double tolerance = 0.0) const
             {
                 return fabs(xyz[0] - rhs.xyz[0]) <= tolerance && fabs(xyz[1] - rhs.xyz[1]) <= tolerance && fabs(xyz[2] - rhs.xyz[2]) <= tolerance;
@@ -177,7 +187,6 @@ namespace test
         static DataMap sm_recordData;
         static std::vector<DataMap> sm_recordDatas;
 
-#pragma region inline_function
     public:
         static DataRecordSingleton& getInstance()
         {
@@ -197,6 +206,17 @@ namespace test
             //member
             sm_recordData.clear();
             sm_recordDatas.clear();
+            //member
+            sm_recordData.m_name.clear();
+            sm_recordData.m_dataCount.clear();
+            sm_recordData.m_dataFloat.clear();
+            sm_recordData.m_dataTime.clear();
+            sm_recordData.m_dataPoint.clear();
+            sm_recordData.m_dataByte.clear();
+            sm_recordData.m_dataItemVct.clear();
+            sm_recordData.m_dataTimeVct.clear();
+            sm_recordData.m_dataPairId.clear();
+            sm_recordData.m_errInfoVct.clear();
         }
 
         static void writeDataToCsv(const std::string& filename = {});
@@ -218,16 +238,19 @@ namespace test
             else
                 sm_recordData.m_dataTime.at(key) += value;
         }
-        static std::string getDataString(bool clear = true)
+        static void dataVectAppend(const std::string& key, const Vect3d& value)
         {
-            std::string str;
+
+        }
+        static std::string getDataString() //auto clear
+        {
+            std::string timecost;
             for (const auto& iter : DataRecordSingleton::getData().m_dataTime)
-                str += iter.first + "=" + std::to_string(iter.second) + "\n";
+                timecost += iter.first + "=" + std::to_string(iter.second) + "\n";
             for (const auto& iter : DataRecordSingleton::getData().m_dataCount)
-                str += iter.first + "=" + std::to_string(iter.second) + "\n";
-            if (clear)
-                DataRecordSingleton::clear();
-            return str;
+                timecost += iter.first + "=" + std::to_string(iter.second) + "\n";
+            DataRecordSingleton::clear();
+            return timecost;
         }
     };
 #pragma endregion
