@@ -162,7 +162,10 @@ namespace clash
         void makeCoplanar();
         void removeColinearVertex();
         void setNormalDirection(bool isUp);
-
+        ModelMesh simpleMesh(bool isIbos = false) const;
+        ModelMesh simpleMeshEdge() const;
+        ModelMesh getIntersectMesh(const Eigen::AlignedBox3d& box) const;
+		
         inline operator TriMesh() const
         {
             TriMesh mesh;
@@ -254,6 +257,12 @@ namespace clash
             for (const int& j : ibos_[i])
                 polygon.push_back(vbo_[j]);
             return polygon;
+        }
+
+        inline void translate(const Eigen::Vector3d& rela)
+        {
+            for (int i = 0; i < (int)vbo_.size(); ++i)
+                vbo_[i] += rela;
         }
 
         inline void apply_pose()

@@ -1,6 +1,5 @@
 #include "pch.h"
-//#include "clashClassTypeDefine.h"
-//#include "clashClassTypeDefine.h"
+//#include "DataClassTypeDefine.h"
 using namespace std;
 using namespace eigen;
 using namespace clash;
@@ -109,6 +108,12 @@ bool ModelMesh::isEqualMesh(const ModelMesh& meshA, const ModelMesh& meshB)
 
 static std::string _get_exe_path()
 {
+    //char exePath[MAX_PATH];
+    //GetModuleFileNameA(NULL, exePath, MAX_PATH);
+    //std::string wexePath = exePath;
+    //size_t pos = wexePath.rfind("\\");
+    //return wexePath.substr(0, pos + 1);
+	
     char buffer[MAX_PATH];//int max_path = 260;
     std::string exeName = _getcwd(buffer, sizeof(buffer));//<direct.h>
     return exeName;
@@ -295,14 +300,69 @@ std::vector<int> ModelMesh::selfIntersectRepair()
     return res;
 }
 
-static ModelMesh simpleMeshEdge(const ModelMesh& meshO)
+ModelMesh clash::ModelMesh::simpleMesh(bool isIbos /*= false*/) const
 {
     ModelMesh mesh;
-    mesh.vbo_ = meshO.vbo_;
-    const std::vector<std::vector<int>> indexes = meshO.ibos_;
-    const std::vector<Eigen::Vector3d>& points = meshO.vbo_;
+    std::map<int, int> indexmap;
+    std::vector<Eigen::Vector3d> vbo(vbo_.size(), Eigen::Vector3d(std::nan("0"), 0, 0));
+    //for (auto& iter : vbo)
+    //    iter = Eigen::Vector3d(std::nan("0"), 0, 0);
+    if (isIbos)
+        for (const auto& face : ibos_)
+        {
+            for (const int& i : face)
+                vbo[i] = vbo_[i];
+        }
+    else
+        for (const auto& face : ibo_)
+        {
+            for (const int& i : face)
+                vbo[i] = vbo_[i];
+        }
+    int index = 0;
+    for (int i = 0; i < (int)vbo.size(); i++)
+    {
+        if (std::isnan(vbo[i][0]))
+            continue;
+        mesh.vbo_.push_back(vbo[i]);
+        indexmap.emplace(i, index++);
+    }
+    //using index 
+    if (isIbos)
+    {
+        mesh.ibos_.resize(ibos_.size());
+        for (int i = 0; i < (int)ibos_.size(); i++)
+        {
+            const std::vector<int>& face = ibos_[i];
+            std::vector<int> ibos;
+            for (int j = 0; j < (int)face.size(); j++)
+                ibos[j] = indexmap[face[j]];
+            mesh.ibos_[i] = ibos;
+        }
+    }
+    else
+    {
+        mesh.ibo_.resize(ibo_.size());
+        for (int i = 0; i < (int)ibo_.size(); i++)
+        {
+            const Eigen::Vector3i& face = ibo_[i];
+            Eigen::Vector3i ibo;
+            for (int j = 0; j < 3; j++)
+                ibo[j] = indexmap[face[j]];
+            mesh.ibo_[i] = ibo;
+        }
+    }
+    return mesh;
+}
+
+ModelMesh clash::ModelMesh::simpleMeshEdge() const 
+{
+    ModelMesh mesh;
+    mesh.vbo_ = vbo_;
+    const std::vector<std::vector<int>>& indexes = ibos_;
+    const std::vector<Eigen::Vector3d>& points = vbo_;
     mesh.ibos_.resize(indexes.size());
-    for (int i = 0; i < (int)meshO.ibo_.size(); i++)
+    for (size_t i = 0; i < indexes.size(); i++)
     {
         const std::vector<int>& face = indexes[i];
         if (face.size() == 3)
@@ -311,12 +371,12 @@ static ModelMesh simpleMeshEdge(const ModelMesh& meshO)
             continue;
         }
         std::vector<int> temp;
-        int n = face.size();
-        for (int j = 0; j < (int)face.size(); j++)
+        int n = (int)face.size();
+        for (size_t j = 0; j < face.size(); j++)
         {
-            int k = j + n;
+            int k = int(j) + n;
             Eigen::Vector3d normal = (points[face[k % n]] - points[face[(k - 1) % n]]).cross(points[face[(k + 1) % n]] - points[face[k % n]]);
-            if (normal.isZero())
+            if (normal.isZero()) // narrrow triangle
                 continue;
             temp.push_back(face[k % n]);
         }
@@ -327,7 +387,7 @@ static ModelMesh simpleMeshEdge(const ModelMesh& meshO)
 
 void clash::ModelMesh::removeColinearVertex()
 {
-    ModelMesh mesh = simpleMeshEdge(*this);
+    ModelMesh mesh = simpleMeshEdge();
     ibos_ = mesh.ibos_;
 }
 
@@ -365,3 +425,20 @@ void clash::ModelMesh::makeCoplanar()
         cout << accum << endl;
     }
 }
+
+ModelMesh clash::ModelMesh::getIntersectMesh(const Eigen::AlignedBox3d& box) const
+{
+    ModelMesh mesh;
+    mesh.vbo_ = vbo_;
+    for (int i = 0; i < (int)ibo_.size(); i++)
+    {
+        Eigen::AlignedBox3d temp;
+        for (int j = 0; j < 3; ++j)
+            temp.extend(vbo_[ibo_[i][j]]);
+        if (box.intersects(temp))
+            mesh.ibo_.push_back(ibo_[i]);
+    }
+    return mesh.simpleMesh(false);
+}
+
+
