@@ -244,9 +244,8 @@ namespace games
 	//ModelMesh meshQuadricErrorMetricsSimplification(const ModelMesh& mesh, size_t collapseEdgeCount = 0);
 	clash::ModelMesh meshQEMSimplification(const clash::ModelMesh& mesh, size_t collapseEdgeCount = 0);
 	HeMesh meshQEMSimplification(const HeMesh& mesh, size_t edgeCollapseTarget = 0);
+	DLLEXPORT_CAL clash::ModelMesh meshMergeTerrainFacesBaseonNormal(const clash::ModelMesh& mesh, double toleAngle = 1e-6);
 	DLLEXPORT_CAL clash::ModelMesh meshMergeFacesBaseonNormal(const clash::ModelMesh& mesh, double toleAngle = 1e-6);
-	DLLEXPORT_CAL clash::ModelMesh meshMergeFacesToQuadrangle(const clash::ModelMesh& mesh, double toleAngle = 1e-6);
-	DLLEXPORT_CAL clash::ModelMesh meshMergeFacesSideEdgeOnly(const clash::ModelMesh& mesh, double toleAngle = 1e-6);
 
 }
 #endif// CALCULATE_MESHTOPOLOGY_H
