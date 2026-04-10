@@ -288,20 +288,26 @@ static void test_vector_7()
 	//for (auto iter = vec.begin(); iter != vec.end();)
 	//	vec.erase(iter);
 	//vec.erase(std::remove(vec.begin(), vec.end(), 1), vec.end());
-
 	//auto iter = vec.begin();
 	//while (iter != vec.end())
 	//	vec.erase(iter);
 
-
 	for (int i = 0; i < vec.size();)
 	{
 		vec.erase(vec.begin());
-
 	}
 
-}
+	//std::vector<int> 
+	vec = { 1, 2, 3, 4, 5, 2, 6 };
+	int value_to_remove = 2;
 
+	// 使用 std::remove 将所有等于 value_to_remove 的元素移到末尾
+	auto new_end = std::remove(vec.begin(), vec.end(), value_to_remove);
+
+	// 使用 erase 删除这些元素
+	vec.erase(new_end, vec.end());
+
+}
 
 //<algorithm>函数
 static void test_vector_8()
@@ -331,9 +337,9 @@ static void test_vector_8()
 
 static int _enrol = []()->int 
 	{
-		test_vector_4();
+		//test_vector_4();
 		//test_vector_6();
-		//test_vector_7();
+		test_vector_7();
 		//test_vector_8();
 		cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
