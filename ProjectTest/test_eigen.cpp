@@ -194,6 +194,11 @@ static void test3()
 
 	Vector3d tst = {};
     cout << "Vector3d inital=" << tst;
+
+	Vector3d vA(1, 0, 0);
+	Vector3d vB(1, 1e-6, 0);
+	Vector3d vC = vA.cross(vB);
+    bool isz = vC.isZero();
 	return;
 }
 
@@ -456,7 +461,7 @@ static int enrol = []()->int
 	{
 		//test0();
 		//test2();
-		//test3();
+		test3();
 		cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();
