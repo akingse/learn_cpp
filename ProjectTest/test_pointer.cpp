@@ -179,12 +179,71 @@ static void test4()
 	return;
 }
 
+#include <iostream>
+#include <cstdint> // 用于uintptr_t
+
+class Base {
+private:
+protected:
+public:
+	int value;
+public:
+	Base() : value(0) {}
+};
+
+class Child :public Base
+{
+	int value2 = 0;
+public:
+	Child()
+	{
+		Base();
+	}
+	void set(int v)
+	{
+		value = v;
+	}
+	void set2(int v)
+	{
+		value2 = v;
+	}
+};
+
+static void test5()
+{
+	Child* child = new Child;
+	child->set(123);
+	//child->set2(567);
+	size_t off = offsetof(Base, value);
+
+	int offset = 0;
+	int* value = reinterpret_cast<int*>(reinterpret_cast<char*>(child) + offset);
+	
+	int offset2 = 4;
+	int* value2 = reinterpret_cast<int*>(reinterpret_cast<char*>(child) + offset2);
+	for (int i = 0; i < 32; i++)
+	{
+		//int* value2 = reinterpret_cast<int*>(reinterpret_cast<char*>(child) + i);
+  //      cout << "offset=" << i <<", "<< *value2 << endl;
+	}
+	return;
+}
+
+void accessPrivateMember(Base* base) 
+{
+	uintptr_t addr = reinterpret_cast<uintptr_t>(base); // 获取基地址
+	//int* ptr = reinterpret_cast<int*>(addr + offsetof(Base, value)); // 只能计算public
+	//std::cout << "Value: " << *ptr << std::endl; // 访问私有成员变量
+}
+
+
 static int enrol = []()->int
 	{
 		//test1();
 		//test2();
 		//test3();
-		test4();
+		//test4();
+		test5();
 		cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();
