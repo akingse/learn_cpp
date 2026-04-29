@@ -236,6 +236,27 @@ void accessPrivateMember(Base* base)
 	//std::cout << "Value: " << *ptr << std::endl; // 访问私有成员变量
 }
 
+class VuNode
+{
+public:
+	unsigned int mask = 0;
+	VuNode* vs = nullptr;
+};
+
+#define getmask(node, vumask) ((node)->mask & (vumask))
+#define setmask(node, vumask) ((node)->mask |= (vumask))
+
+static void test6()
+{
+	VuNode* firstnode = new VuNode;
+	VuNode* secondnode = new VuNode;
+	VuNode* primitive = new VuNode;
+	primitive->mask = 1;
+	int copy = 21743;
+	setmask(firstnode, getmask(primitive,copy));
+	secondnode->vs = firstnode;
+	return;
+}
 
 static int enrol = []()->int
 	{
@@ -244,6 +265,7 @@ static int enrol = []()->int
 		//test3();
 		//test4();
 		test5();
+		test6();
 		cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();
