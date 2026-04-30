@@ -241,6 +241,7 @@ class VuNode
 public:
 	unsigned int mask = 0;
 	VuNode* vs = nullptr;
+	VuNode* next = nullptr;
 };
 
 #define getmask(node, vumask) ((node)->mask & (vumask))
@@ -255,6 +256,39 @@ static void test6()
 	int copy = 21743;
 	setmask(firstnode, getmask(primitive,copy));
 	secondnode->vs = firstnode;
+
+
+	return;
+}
+
+VuNode* vu_allocate(VuNode* graph)
+{
+	VuNode* newnode = NULL;
+	newnode = graph;
+	memset(newnode, 0, sizeof(VuNode));
+	newnode->next = NULL;
+	return newnode;
+}
+
+static void test7()
+{
+	VuNode* innerface;
+	VuNode* outerface;
+
+	VuNode** firstnode = &innerface;
+	VuNode** secondnode = &outerface;
+
+	VuNode* graph = new VuNode;
+	graph->mask = 1;
+	*firstnode = vu_allocate(graph);
+	graph->mask = 2;
+	*secondnode = vu_allocate(graph);
+
+	(*firstnode)->mask = 0;
+	(*secondnode)->mask = 1;
+	(*firstnode)->vs = (*secondnode);
+	(*secondnode)->vs = (*firstnode);
+
 	return;
 }
 
@@ -266,6 +300,7 @@ static int enrol = []()->int
 		//test4();
 		test5();
 		test6();
+		test7();
 		cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();
