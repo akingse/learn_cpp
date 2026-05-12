@@ -276,6 +276,13 @@ static void test_vector_6()
 //测试erase
 static void test_vector_7()
 {
+	//变量重名
+	int aa = 1;
+	{
+		int aa = 10;
+		aa++;//修改的是局部变量
+	}
+
 	vector<int> vec = { 1,2,3 };
 	std::for_each(vec.begin(), vec.end(), [](int& iter) {iter *= 2; });
 

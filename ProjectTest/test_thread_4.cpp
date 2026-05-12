@@ -157,6 +157,18 @@ static int main6()
 	return 0;
 }
 
+static void test0()
+{
+	// \r：不换行，直接回到当前行开头，覆盖旧内容；
+	for (int i = 0; i <= 100; i += 10) 
+	{
+		std::cout << "\rProgress: " << i << "%" << std::flush;
+		std::this_thread::sleep_for(std::chrono::milliseconds(600));
+	}
+
+	std::cout << " Done!" << std::endl;
+}
+
 static int enrol = []()->int
 	{
 		//main1();
@@ -165,5 +177,6 @@ static int enrol = []()->int
 		//main4();
 		//main5();
 		//main6();
+		test0();
 		return 0;
 	}();
