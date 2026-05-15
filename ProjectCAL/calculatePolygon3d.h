@@ -155,6 +155,13 @@ namespace clash
         return mat4;
     }
 #endif
+    
+    //to find holes in mesh-face
+    inline void computeBoundaryContours(
+        const std::vector<Eigen::Vector3d>& mesh_vbo, const std::vector<Eigen::Vector3i>& mesh_ibo)
+    {
+
+    }
 
     //ordered contour points and vertex index
     inline std::pair<std::vector<Eigen::Vector3d>, std::unordered_set<int>> computeBoundaryContour(
