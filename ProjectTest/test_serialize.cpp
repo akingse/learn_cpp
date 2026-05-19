@@ -46,9 +46,9 @@ int main_ser()
 	BPGeometricPrimitiveSer de = _bp_deserialize(data);
 
 	// vector 整型构造
-	//std::vector<unsigned char> infor1(remark.size()); //byte 6
-	//std::vector<unsigned char> infor2(sizeof(bool));//byte 1
-	//std::vector<unsigned char> infor3(sizeof(size_t));//byte 8
+	//std::vector<unsigned char> infor1(remark.size()); //unsigned char 6
+	//std::vector<unsigned char> infor2(sizeof(bool));//unsigned char 1
+	//std::vector<unsigned char> infor3(sizeof(size_t));//unsigned char 8
 	std::vector<unsigned char> infor(15);
 
 	//注意容器的 sizeof() 和 .size()
@@ -131,11 +131,11 @@ TreeNode* generateRandomTree(int maxDepth, int currentDepth = 1)
 //重写序列化，修改序列化逻辑，返回智能指针
 namespace ppc
 {
-	std::vector<byte> serializition(const shared_ptr<TreeNodePtr>& root)
+	std::vector<unsigned char> serializition(const shared_ptr<TreeNodePtr>& root)
 	{
 		if (root == nullptr)
 			return {};
-		std::vector<byte> serialized(
+		std::vector<unsigned char> serialized(
 			sizeof(int) +
 			sizeof(int) * (1 + root->m_geomIndexes.size()));
 		unsigned char* ptr = serialized.data();
@@ -146,23 +146,23 @@ namespace ppc
 		//member
 		memcpy(ptr, &root->m_nodeIndex, sizeof(int)); ptr += sizeof(int);
 		//leftNode
-		std::vector<byte> bufferLeft = ppc::serializition(root->m_left);
+		std::vector<unsigned char> bufferLeft = ppc::serializition(root->m_left);
 		count = (int)bufferLeft.size();
-		std::vector<byte> sizeLeft(sizeof(int));
+		std::vector<unsigned char> sizeLeft(sizeof(int));
 		memcpy(sizeLeft.data(), &count, sizeof(int));
 		serialized.insert(serialized.end(), sizeLeft.begin(), sizeLeft.end());
 		serialized.insert(serialized.end(), bufferLeft.begin(), bufferLeft.end());
 		//rightNode
-		std::vector<byte> bufferRight = ppc::serializition(root->m_right);
+		std::vector<unsigned char> bufferRight = ppc::serializition(root->m_right);
 		count = (int)bufferRight.size();
-		std::vector<byte> sizeRight(sizeof(int));
+		std::vector<unsigned char> sizeRight(sizeof(int));
 		memcpy(sizeRight.data(), &count, sizeof(int));
 		serialized.insert(serialized.end(), sizeRight.begin(), sizeRight.end());
 		serialized.insert(serialized.end(), bufferRight.begin(), bufferRight.end());
 		return serialized;
 	}
 
-	shared_ptr<TreeNodePtr> deserializition(const std::vector<byte>& data)
+	shared_ptr<TreeNodePtr> deserializition(const std::vector<unsigned char>& data)
 	{
 		if (data.empty())
 			return nullptr;
@@ -181,12 +181,12 @@ namespace ppc
 		//	return shared_ptr<TreeNode>(root);
 		//leftNode
 		memcpy(&count, ptr, sizeof(int)); ptr += sizeof(int);
-		std::vector<byte> bufferLeft(count);
+		std::vector<unsigned char> bufferLeft(count);
 		memcpy(bufferLeft.data(), ptr, count); ptr += count;
 		root->m_left = deserializition(bufferLeft);
 		//rightNode
 		memcpy(&count, ptr, sizeof(int)); ptr += sizeof(int);
-		std::vector<byte> bufferRight(count);
+		std::vector<unsigned char> bufferRight(count);
 		memcpy(bufferRight.data(), ptr, count); ptr += count;
 		root->m_right = deserializition(bufferRight);
 		return root;
@@ -268,7 +268,7 @@ void testSerialization3()
 	//bin.push_back('h');
 	//bin.push_back('e');
 
-	//Byte
+	//unsigned char
 	std::vector<unsigned char> bin(str.size());
 	memcpy(bin.data(), str.data(), str.size());
 	string str_de(bin.size(), 0);
@@ -290,7 +290,7 @@ void testSerialization4()
 	int count = 0;
 	for (int i = 1; i < 1e6; i++)
 	{
-		vector<byte> tochar(4);
+		vector<unsigned char> tochar(4);
 		memcpy(tochar.data(), &i, sizeof(int));
         char ci = static_cast<char>(i);
 		
@@ -364,24 +364,24 @@ static void testSerialization6()
 	return;
 }
 
-//测试依赖反转，vector<byte>版本函数
+//测试依赖反转，vector<unsigned char>版本函数
 static void testSerialization7()
 {
 	std::shared_ptr<TreeNodePtr> node1 = Implementation::createNewPtr();
-	std::vector<byte> buffer1 = serializition(node1);
+	std::vector<unsigned char> buffer1 = serializition(node1);
 	std::shared_ptr<TreeNodePtr> nodeDe1 = deserializition(buffer1);
 	//depend
 	DependencyRegistry& reg = DependencyRegistry::getInstance();
-	auto serialize_fun = reg.get<std::vector<byte>(const shared_ptr<TreeNodePtr>&)>("serializition");
-	std::vector<byte> buffer2;
+	auto serialize_fun = reg.get<std::vector<unsigned char>(const shared_ptr<TreeNodePtr>&)>("serializition");
+	std::vector<unsigned char> buffer2;
 	if (serialize_fun!=nullptr)
 		buffer2 = (*serialize_fun)(node1);
-	auto deserialize_fun = reg.get<shared_ptr<TreeNodePtr>(const std::vector<byte>&)>("deserializition");
+	auto deserialize_fun = reg.get<shared_ptr<TreeNodePtr>(const std::vector<unsigned char>&)>("deserializition");
 	shared_ptr<TreeNodePtr> nodeDe2;
 	if (deserialize_fun != nullptr)
 		nodeDe2 = (*deserialize_fun)(buffer2);
 	//depinv
-	std::vector<byte> buffer3= ppc::serializition(node1);
+	std::vector<unsigned char> buffer3= ppc::serializition(node1);
 	std::shared_ptr<TreeNodePtr> nodeDe3 = ppc::deserializition(buffer3);
 
 	return;
@@ -397,11 +397,11 @@ static void testSerialization8()
 {
 	DependencyInversion& registry = DependencyInversion::getInstance();
 	//std::shared_ptr<TreeNodePtr> node1 = Implementation::createNewPtr();
-	//auto serialize_fun = reg.get<std::vector<byte>(const shared_ptr<TreeNodePtr>&)>("serializition");
-	//std::vector<byte> buffer2;
+	//auto serialize_fun = reg.get<std::vector<unsigned char>(const shared_ptr<TreeNodePtr>&)>("serializition");
+	//std::vector<unsigned char> buffer2;
 	//if (serialize_fun != nullptr)
 	//	buffer2 = (*serialize_fun)(node1);
-	//auto deserialize_fun = reg.get<shared_ptr<TreeNodePtr>(const std::vector<byte>&)>("deserializition");
+	//auto deserialize_fun = reg.get<shared_ptr<TreeNodePtr>(const std::vector<unsigned char>&)>("deserializition");
 	//shared_ptr<TreeNodePtr> nodeDe2;
 	//if (deserialize_fun != nullptr)
 	//	nodeDe2 = (*deserialize_fun)(buffer2);

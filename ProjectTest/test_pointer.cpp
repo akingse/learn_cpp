@@ -36,14 +36,14 @@ int main_ptwo()
 //}
 
 //指针传值
-static void test_pointer_(byte* const data)
+static void test_pointer_(char* const data)
 {
 	//data += 4;
 	*data = 'c';
 	cout << *data << endl;
 }
 
-static void test_pointer(byte* data)
+static void test_pointer(char* data)
 {
 	data += 4;
 	*data = 'c';
@@ -51,7 +51,7 @@ static void test_pointer(byte* data)
 }
 
 //函数接收到的是指针 data 的一个副本。在函数内部，对 data 的偏移操作只会修改函数内部的副本，不会影响原始指针的值。
-static void test_pointer_c(const byte* data)
+static void test_pointer_c(const char* data)
 {
 	data += 4;
 	//*data = 'c';
@@ -59,13 +59,13 @@ static void test_pointer_c(const byte* data)
 }
 
 //函数接收到的是指针 data 的引用。在函数内部，对 data 的偏移操作会直接修改原始指针的值，因为函数内部操作的是原始指针的引用。
-static void test_pointer_r(byte*& data)
+static void test_pointer_r(char*& data)
 {
 	data += 4;
 	cout << *data << endl;
 }
 
-static void test_pointer_pp(byte** data)
+static void test_pointer_pp(char** data)
 {
 	*data += 4;
 	cout << *data << endl;
@@ -75,7 +75,7 @@ static void test_pointer_pp(byte** data)
 static void test1()
 {
 	string str = "12345";
-	byte* data = new byte;
+	char* data = new char;
 	memcpy(data, str.data(), str.size());
 
 	//test_point_c(data);

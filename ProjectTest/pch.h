@@ -1,12 +1,14 @@
 #pragma once
 #define _CRT_SECURE_NO_WARNINGS
+#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 //stream
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
 #include <string>
-#include <sstream>
+#include <iostream>
+#include <filesystem>
 //time
 #include <chrono>   
 #include <time.h> //clock()

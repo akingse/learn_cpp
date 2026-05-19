@@ -204,9 +204,21 @@ int _test3()
     return 0;
 }
 
+//文件重命名
+static void _test4()
+{
+    string filename = R"("C:\Users\Aking\Downloads\0.jpg")";
+    string newname = R"("C:\Users\Aking\Downloads\123.jpg")";
+
+    int res = std::rename(filename.c_str(), newname.c_str());
+    std::filesystem::rename(filename.c_str(), newname.c_str());
+    return;
+}
+
 static int enrol = []()->int
 {
     //_test0();
-    _test3();
+    //_test3();
+    _test4();
     return 0;
 }();
