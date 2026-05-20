@@ -207,11 +207,14 @@ int _test3()
 //文件重命名
 static void _test4()
 {
-    string filename = R"("C:\Users\Aking\Downloads\0.jpg")";
-    string newname = R"("C:\Users\Aking\Downloads\123.jpg")";
+    string filename = R"(C:\Users\Aking\Downloads\0.jpg)";
+    string newname = R"(C:\Users\Aking\Downloads\123.jpg)";
 
-    int res = std::rename(filename.c_str(), newname.c_str());
-    std::filesystem::rename(filename.c_str(), newname.c_str());
+    int res = std::rename(filename.c_str(), newname.c_str());//C++14
+    if (std::filesystem::exists(filename))
+    {
+        std::filesystem::rename(filename, newname);//C++17
+    }
     return;
 }
 
