@@ -177,6 +177,6 @@ static int enrol = []()->int
 		//main4();
 		//main5();
 		//main6();
-		test0();
+		//test0();
 		return 0;
 	}();
