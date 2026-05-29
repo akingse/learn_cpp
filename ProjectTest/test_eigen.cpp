@@ -199,6 +199,16 @@ static void test3()
 	Vector3d vB(1, 1e-6, 0);
 	Vector3d vC = vA.cross(vB);
     bool isz = vC.isZero();
+
+
+	//cross
+    vA = Vector3d(1, 0, 0);
+    //vB = Vector3d(0.5, sqrt(3)/2, 0);
+    vB = Vector3d(0.5, 1, 0);
+    vC = vA.cross(vB);
+	// area*2<limArea
+	// area*area*4<limArea*limArea
+	double len = vC.norm();
 	return;
 }
 
@@ -461,7 +471,7 @@ static int enrol = []()->int
 	{
 		//test0();
 		//test2();
-		//test3();
+		test3();
 		cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();
