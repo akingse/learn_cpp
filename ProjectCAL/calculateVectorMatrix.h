@@ -513,6 +513,35 @@ namespace eigen
     //    return getMatrixFromTwoPoints(Eigen::Vector3d(0, 0, 0), vec);
     //}
 
+    //create orth matrix
+    inline Eigen::Matrix4d getMatrixFromTwoVectors(const Eigen::Vector3d& _axisx, const Eigen::Vector3d& _axisy)
+    {
+        Eigen::Vector3d axisx = _axisx.normalized();
+        Eigen::Vector3d axisy = _axisy.normalized();
+        Eigen::Vector3d axisz = axisx.cross(axisy).normalized();
+        if (axisz.isZero())
+            axisz = Eigen::Vector3d(0, 0, 1);
+        axisy = axisz.cross(axisx).normalized();
+        Eigen::Matrix4d matFor;//matInv
+        matFor << //forword matrix
+            axisx[0], axisy[0], axisz[0], 0.0,
+            axisx[1], axisy[1], axisz[1], 0.0,
+            axisx[2], axisy[2], axisz[2], 0.0,
+            0, 0, 0, 1;
+        return matFor;
+    }
+
+    inline Eigen::Matrix4d getMatrixFromColumnVectors(const Eigen::Vector3d& axisx, const Eigen::Vector3d& axisy, const Eigen::Vector3d& axisz, const Eigen::Vector3d& point)
+    {
+        Eigen::Matrix4d mat;
+        mat << 
+            axisx[0], axisy[0], axisz[0], point[0],
+            axisx[1], axisy[1], axisz[1], point[1],
+            axisx[2], axisy[2], axisz[2], point[2],
+            0, 0, 0, 1;
+        return mat;
+    }
+
     // generate matrix
     DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const Eigen::Vector3d& origin, const Eigen::Vector3d& normal);
     //DLLEXPORT_CAL Eigen::Matrix4d getProjectionMatrixByPlane(const clash::Plane3d& plane);
