@@ -209,6 +209,13 @@ static void test3()
 	// area*2<limArea
 	// area*area*4<limArea*limArea
 	double len = vC.norm();
+
+	//¾ØÕó³Ë
+	Vector3d position = Vector3d(10, 0, 0);
+
+	Eigen::Matrix4d mat4d0 = translate(Vector3d(-10, 0, 0))* rotate(Vector3d(1,1,1), 1.5) * translate(position);
+	Eigen::Matrix4d mat4d1 = rotate(Vector3d(10,0,0), Vector3d(1, 1, 1), 1.5);
+
 	return;
 }
 
