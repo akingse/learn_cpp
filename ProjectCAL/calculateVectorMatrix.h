@@ -310,7 +310,7 @@ namespace eigen
     inline Eigen::Matrix4d rotate(const Eigen::Vector3d& position, const Eigen::Vector3d& axis, double theta = 0.0)
     {
         Eigen::Matrix4d mat4d = rotate(axis, theta);
-		return eigen::translate(-position) * mat4d * translate(position);
+        return translate(position) * mat4d * translate(-1.0 * position);
     }
 
     inline Eigen::Matrix4d translate(const Eigen::Vector2d& vec)

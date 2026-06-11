@@ -216,6 +216,8 @@ static void test3()
 	Eigen::Matrix4d mat4d0 = translate(Vector3d(-10, 0, 0))* rotate(Vector3d(1,1,1), 1.5) * translate(position);
 	Eigen::Matrix4d mat4d1 = rotate(Vector3d(10,0,0), Vector3d(1, 1, 1), 1.5);
 
+	Eigen::Matrix4d mat4d2 = rotate(Vector3d(100,0,0), Vector3d(0, 0, 1), M_PI/4);
+	BPParaTransform mat4 = para::rotateArbitrary(BPParaVec(100, 0, 0), BPParaVec(0, 0, 1), M_PI / 4);
 	return;
 }
 
