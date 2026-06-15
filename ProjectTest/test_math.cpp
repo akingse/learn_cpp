@@ -634,14 +634,158 @@ static void test6()
     return;
 }
 
+namespace Eigen
+{
+    typedef Eigen::Matrix<double, 3, 4> MatrixGk;
+}
+
+namespace GK
+{
+    //区间
+    class GkMaInterval
+    {
+    public:
+        void* impl = 0;
+        GkMaInterval(double min, double max)
+        {
+            double* imp = new double(2);
+            imp[0] = min;
+            imp[1] = min;
+            impl = imp;
+        }
+    };
+
+    //uv参数区间
+    class GkMaParamVec
+    {
+    public:
+        void* impl = 0;
+        GkMaParamVec(double u, double v)
+        {
+            double* imp = new double(2);
+            imp[0] = u;
+            imp[1] = v;
+            impl = imp;
+        }
+    };
+
+    class GkMaPos
+    {
+    public:
+        void* impl = 0;
+        GkMaPos(double x, double y, double z)
+        {
+            double* imp = new double(3);
+            imp[0] = x;
+            imp[1] = y;
+            imp[2] = z;
+            impl = imp;
+        }
+    };
+    class GkMaVec
+    {
+    public:
+        void* impl = 0;
+        GkMaVec(double x, double y, double z)
+        {
+            double* imp = new double(3);
+            imp[0] = x;
+            imp[1] = y;
+            imp[2] = z;
+            impl = imp;
+        }
+    };
+    class GkMaBox
+    {
+    public:
+        void* impl = 0;
+        GkMaBox(double x0, double y0, double z0, double x1, double y1, double z1)
+        {
+            double* imp = new double(6);
+            imp[0] = x0;
+            imp[1] = y0;
+            imp[2] = z0;
+            imp[3] = x1;
+            imp[4] = y1;
+            imp[5] = z1;
+            impl = imp;
+        }
+    };
+
+    //矩阵
+    class GkMaMatrix //3*3
+    {
+    public:
+        void* impl = 0;
+        GkMaMatrix()
+        {
+            Eigen::Matrix3d* mat = new Eigen::Matrix3d();
+            mat->row(0) << 1, 2, 3;
+            mat->row(1) << 0, 1, 4;
+            mat->row(2) << 0, 0, 1;
+            impl = mat->data();
+        }
+    };
+    class GkMaTrans
+    {
+    public:
+        void* impl = 0;
+        GkMaTrans()
+        {
+            //para::BPParaTransform mat = para::trans(2, 3, 4);
+            //impl = mat.m_matrix;
+            Eigen::MatrixGk* mat = new Eigen::MatrixGk();
+            mat->row(0) << 1, 0, 0, 2;
+            mat->row(1) << 0, 1, 0, 3;
+            mat->row(2) << 0, 0, 1, 4;
+            impl = mat->data();
+        }
+    };
+    class GkMaMatrix4d
+    {
+    public:
+        void* impl = 0;
+        GkMaMatrix4d()
+        {
+            Eigen::Matrix4d* mat = new Eigen::Matrix4d();
+            mat->row(0) << 1, 0, 0, 2;
+            mat->row(1) << 0, 1, 0, 3;
+            mat->row(2) << 0, 0, 1, 4;
+            mat->row(3) << 0, 0, 0, 1;
+            impl = mat->data();
+        }
+    };
+}
+
+
+//内存监视
+using namespace GK;
+static void test7()
+{
+    //使用Native Visualizer（NatVis）文件可以帮助你更好地调试C++代码
+
+    GkMaPos pos = GkMaPos(1, 2, 3);
+    GkMaVec vec = GkMaVec(1, 2, 3);
+    shared_ptr<GkMaPos> pvec = make_shared<GkMaPos>(GkMaPos(2, 3, 4));
+    GkMaBox box = GkMaBox(1, 2, 3,4,5,6);
+
+    GkMaInterval inter = GkMaInterval(0, 1);
+    GkMaParamVec uv = GkMaParamVec(0, 3);
+    GkMaMatrix mat2 = GkMaMatrix();
+    GkMaTrans mat = GkMaTrans();
+    Eigen::Matrix4d mat0 = eigen::translate(2, 3, 4);
+    return;
+}
+
 static int enrol = []()->int
 {
     //test0();
     //test1();
     //test2(); //for funciton
     //test3();
-    test5();
+    //test5();
     //test6();
+    test7();
     cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
     return 0;
 }();
