@@ -681,6 +681,21 @@ namespace GK
             imp[2] = z;
             impl = imp;
         }
+        std::string to_str() const
+        {
+            string num;
+            ostringstream oss;
+            oss << std::setprecision(numeric_limits<double>::max_digits10) << *(double*)impl;
+            oss.clear();
+            num += oss.str() + ",";
+            oss << std::setprecision(numeric_limits<double>::max_digits10) << *((double*)impl + 1);
+            oss.clear();
+            num += oss.str() + ",";
+            oss << std::setprecision(numeric_limits<double>::max_digits10) << *((double*)impl + 2);
+            oss.clear();
+            num += oss.str();
+            return num;
+        }
     };
     class GkMaVec
     {
@@ -693,6 +708,19 @@ namespace GK
             imp[1] = y;
             imp[2] = z;
             impl = imp;
+        }
+        std::string to_str() const
+        {
+            string num;
+            for (int i = 0; i < 3; i++)
+            {
+                ostringstream oss;
+                oss << std::setprecision(numeric_limits<double>::max_digits10) << *((double*)impl + i);
+                oss.clear();
+                num += oss.str() + ",";
+            }
+            num.pop_back();
+            return num;
         }
     };
     class GkMaBox
@@ -765,7 +793,10 @@ static void test7()
     //使用Native Visualizer（NatVis）文件可以帮助你更好地调试C++代码
 
     GkMaPos pos = GkMaPos(1, 2, 3);
+    string nump1 = pos.to_str();
     GkMaVec vec = GkMaVec(1, 2, 3);
+    string numv1 = vec.to_str();
+
     shared_ptr<GkMaPos> pvec = make_shared<GkMaPos>(GkMaPos(2, 3, 4));
     GkMaBox box = GkMaBox(1, 2, 3,4,5,6);
 
@@ -774,6 +805,13 @@ static void test7()
     GkMaMatrix mat2 = GkMaMatrix();
     GkMaTrans mat = GkMaTrans();
     Eigen::Matrix4d mat0 = eigen::translate(2, 3, 4);
+
+    double pi = M_PI;
+    string num1 = to_string(pi);
+    ostringstream oss;
+    oss << std::setprecision(numeric_limits<double>::max_digits10) << pi;
+    string num2 = oss.str();
+
     return;
 }
 
