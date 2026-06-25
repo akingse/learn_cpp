@@ -681,27 +681,38 @@ namespace GK
             imp[2] = z;
             impl = imp;
         }
-        std::string to_str() const
-        {
-            string num;
-            ostringstream oss;
-            oss << std::setprecision(numeric_limits<double>::max_digits10) << *(double*)impl;
-            oss.clear();
-            num += oss.str() + ",";
-            oss << std::setprecision(numeric_limits<double>::max_digits10) << *((double*)impl + 1);
-            oss.clear();
-            num += oss.str() + ",";
-            oss << std::setprecision(numeric_limits<double>::max_digits10) << *((double*)impl + 2);
-            oss.clear();
-            num += oss.str();
-            return num;
-        }
     };
     class GkMaVec
     {
     public:
         void* impl = 0;
         GkMaVec(double x, double y, double z)
+        {
+            double* imp = new double(3);
+            imp[0] = x;
+            imp[1] = y;
+            imp[2] = z;
+            impl = imp;
+        }
+        std::string to_str() const
+        {
+            string num;
+            for (int i = 0; i < 3; i++)
+            {
+                ostringstream oss;
+                oss << std::setprecision(numeric_limits<double>::max_digits10) << *((double*)impl + i);
+                oss.clear();
+                num += oss.str() + ",";
+            }
+            num.pop_back();
+            return num;
+        }
+    };
+    class GkMaVec3d
+    {
+    public:
+        void* impl = 0;
+        GkMaVec3d(double x, double y, double z)
         {
             double* imp = new double(3);
             imp[0] = x;
@@ -786,16 +797,18 @@ namespace GK
 }
 
 
-//内存监视
+//内存监视 //GkMath.natvis
 using namespace GK;
 static void test7()
 {
     //使用Native Visualizer（NatVis）文件可以帮助你更好地调试C++代码
 
     GkMaPos pos = GkMaPos(1, 2, 3);
-    string nump1 = pos.to_str();
-    GkMaVec vec = GkMaVec(1, 2, 3);
+    //string nump1 = pos.to_str();
+    GkMaVec vec = GkMaVec(1, exp(1), M_PI);
     string numv1 = vec.to_str();
+    GkMaVec3d vec2 = GkMaVec3d(1, exp(1), M_PI);
+    string numv2 = vec.to_str();
 
     shared_ptr<GkMaPos> pvec = make_shared<GkMaPos>(GkMaPos(2, 3, 4));
     GkMaBox box = GkMaBox(1, 2, 3,4,5,6);
