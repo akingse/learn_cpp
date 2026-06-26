@@ -9,6 +9,30 @@
         <DisplayString>{debug()}</DisplayString>
     </Type>
 
+    <!--for GkVertex -->
+    <Type Name="GeomKernel::GkVertex">
+        <DisplayString>{debug()}</DisplayString>
+    </Type>
+
+    <!--for GkEdge -->
+    <Type Name="GeomKernel::GkEdge">
+        <DisplayString>{debug()}</DisplayString>
+        <Expand>
+            <Item Name="[Raw Impl]">m_impl</Item>
+            <Synthetic Name="[Debug String]">
+                <Expand>
+                    <Item Name="Value">child()</Item>
+                </Expand>
+            </Synthetic>
+
+            <ArrayItems>
+                <Size>size()</Size>
+                <ValuePointer>data()</ValuePointer>
+            </ArrayItems>
+            
+        </Expand>
+    </Type>
+
 
     <!--for GkMaParamVec -->
     <Type Name="GK::GkMaParamVec">
