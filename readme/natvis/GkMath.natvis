@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+    <Type Name="GK::GkMaVec3d">
+        <DisplayString>{debug()}</DisplayString>
+    </Type>
+    <Type Name="GK::GkMaPos3d">
+        <DisplayString>{debug()}</DisplayString>
+    </Type>
+
+
+    <!--for GkMaParamVec -->
+    <Type Name="GK::GkMaParamVec">
+        <DisplayString>double[2]</DisplayString>
+        <Expand>
+            <Item Name="[u]">(*(double*)impl)</Item>
+            <Item Name="[v]">(*((double*)impl+1))</Item>
+        </Expand>
+    </Type>
+    
+    <!--for GkMaInterval -->
+    <Type Name="GK::GkMaInterval">
+        <DisplayString>double[2]</DisplayString>
+        <Expand>
+            <ArrayItems>
+                <Size>2</Size>
+                <ValuePointer>(double*)impl</ValuePointer>
+            </ArrayItems>
+            <Item Name="[impl]">impl</Item>
+        </Expand>
+    </Type>
+    
+    <!--for GkMaPos -->
+    <Type Name="GK::GkMaPos">
+        <DisplayString>double[3]</DisplayString>
+        <Expand>
+            <ArrayItems>
+                <Size>3</Size>
+                <ValuePointer>(double*)impl</ValuePointer>
+            </ArrayItems>
+        <Item Name="[impl]">impl</Item>
+        </Expand>
+    </Type>
+    
+    <!--for GkMaVec -->
+    <Type Name="GK::GkMaVec">
+        <DisplayString>double[3]</DisplayString>
+        <Expand>
+            <ArrayItems>
+                <Size>3</Size>
+                <ValuePointer>(double*)impl</ValuePointer>
+            </ArrayItems>
+            <Item Name="[impl]">impl</Item>
+        </Expand>
+    </Type>
+    
+    <!--for GkMaBox -->
+    <Type Name="GK::GkMaBox0">
+        <DisplayString>double[6]</DisplayString>
+        <Expand>
+            <Item Name="[min]">""</Item>
+            <ArrayItems>
+                <Size>3</Size>
+                <ValuePointer>(double*)impl</ValuePointer>
+            </ArrayItems>
+            <Item Name="[max]">""</Item>
+            <ArrayItems>
+                <Size>3</Size>
+                <ValuePointer>(double*)impl+3</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+    <Type Name="GK::GkMaBox">
+        <DisplayString>double[6]</DisplayString>
+        <Expand>
+            <Item Name="[min]">""</Item>
+            <Item Name="[x]">(*((double*)impl+0))</Item>
+            <Item Name="[y]">(*((double*)impl+1))</Item>
+            <Item Name="[z]">(*((double*)impl+2))</Item>
+            <Item Name="[max]">""</Item>
+            <Item Name="[x]">(*((double*)impl+3))</Item>
+            <Item Name="[y]">(*((double*)impl+4))</Item>
+            <Item Name="[z]">(*((double*)impl+5))</Item>
+        </Expand>
+    </Type>
+    
+    <!--for GkMaMatrix -->
+    <Type Name="GK::GkMaMatrix">
+        <DisplayString>double[16]</DisplayString>
+        <Expand>
+            <Synthetic Name="[row 0]" Condition="Flags%2">
+                <DisplayString>({*((double*)impl+0)}, {*((double*)impl+1)}, {*((double*)impl+2)})</DisplayString>
+            </Synthetic>
+            <Synthetic Name="[row 0]" Condition="!(Flags%2)">
+                <DisplayString>({*((double*)impl+0)}, {*((double*)impl+3)}, {*((double*)impl+6)})</DisplayString>
+            </Synthetic>
+            <Synthetic Name="[row 1]" Condition="Flags%2">
+                <DisplayString>({*((double*)impl+3)}, {*((double*)impl+4)}, {*((double*)impl+5)})</DisplayString>
+            </Synthetic>
+            <Synthetic Name="[row 1]" Condition="!(Flags%2)">
+                <DisplayString>({*((double*)impl+1)}, {*((double*)impl+4)}, {*((double*)impl+7)})</DisplayString>
+            </Synthetic>
+            <Synthetic Name="[row 2]" Condition="Flags%2">
+                <DisplayString>({*((double*)impl+6)}, {*((double*)impl+7)}, {*((double*)impl+8)})</DisplayString>
+            </Synthetic>
+            <Synthetic Name="[row 2]" Condition="!(Flags%2)">
+                <DisplayString>({*((double*)impl+2)}, {*((double*)impl+5)}, {*((double*)impl+8)})</DisplayString>
+            </Synthetic>
+        </Expand>
+    </Type>
+
+    <!--for GkMaTrans 3*4-->
+    <Type Name="GK::GkMaTrans">
+        <DisplayString>double[12]</DisplayString>
+        <Expand>
+            <Synthetic Name="[row 0]" Condition="1">
+                <DisplayString>({*((double*)impl+0)}, {*((double*)impl+3)}, {*((double*)impl+6)}, {*((double*)impl+9)})</DisplayString>
+            </Synthetic>
+            <Synthetic Name="[row 1]" Condition="1">
+                <DisplayString>({*((double*)impl+1)}, {*((double*)impl+4)}, {*((double*)impl+7)}, {*((double*)impl+10)})</DisplayString>
+            </Synthetic>
+            <Synthetic Name="[row 2]" Condition="1">
+                <DisplayString>({*((double*)impl+2)}, {*((double*)impl+5)}, {*((double*)impl+8)}, {*((double*)impl+11)})</DisplayString>
+            </Synthetic>
+
+        </Expand>
+    </Type>
+
+    <!--for GkMaMatrix4d -->
+    <Type Name="GK::GkMaMatrix4d">
+        <DisplayString>double[16]</DisplayString>
+        <Expand>
+            <Synthetic Name="[row 0]" Condition="Flags%2">
+                <DisplayString>({*((double*)impl+0)}, {*((double*)impl+1)}, {*((double*)impl+2)}, {*((double*)impl+3)})</DisplayString>
+            </Synthetic>
+            <Synthetic Name="[row 0]" Condition="!(Flags%2)">
+                <DisplayString>({*((double*)impl+0)}, {*((double*)impl+4)}, {*((double*)impl+8)}, {*((double*)impl+12)})</DisplayString>
+            </Synthetic>
+            <Synthetic Name="[row 1]" Condition="Flags%2">
+                <DisplayString>({*((double*)impl+4)}, {*((double*)impl+5)}, {*((double*)impl+6)}, {*((double*)impl+7)})</DisplayString>
+            </Synthetic>
+            <Synthetic Name="[row 1]" Condition="!(Flags%2)">
+                <DisplayString>({*((double*)impl+1)}, {*((double*)impl+5)}, {*((double*)impl+9)}, {*((double*)impl+13)})</DisplayString>
+            </Synthetic>
+            <Synthetic Name="[row 2]" Condition="Flags%2">
+                <DisplayString>({*((double*)impl+8)}, {*((double*)impl+9)}, {*((double*)impl+10)}, {*((double*)impl+11)})</DisplayString>
+            </Synthetic>
+            <Synthetic Name="[row 2]" Condition="!(Flags%2)">
+                <DisplayString>({*((double*)impl+2)}, {*((double*)impl+6)}, {*((double*)impl+10)}, {*((double*)impl+14)})</DisplayString>
+            </Synthetic>
+            <Synthetic Name="[row 3]" Condition="Flags%2">
+                <DisplayString>({*((double*)impl+12)}, {*((double*)impl+13)}, {*((double*)impl+14)}, {*((double*)impl+15)})</DisplayString>
+            </Synthetic>
+            <Synthetic Name="[row 3]" Condition="!(Flags%2)">
+                <DisplayString>({*((double*)impl+3)}, {*((double*)impl+4)}, {*((double*)impl+11)}, {*((double*)impl+15)})</DisplayString>
+            </Synthetic>
+        </Expand>
+    </Type>
+    
+</AutoVisualizer>
