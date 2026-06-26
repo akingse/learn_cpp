@@ -733,6 +733,47 @@ namespace GK
             num.pop_back();
             return num;
         }
+        std::string debug() const
+        {
+            return to_str();
+        }
+    };
+    class GkMaPos3d
+    {
+    public:
+        void* impl = 0;
+        GkMaPos3d(double x, double y, double z)
+        {
+            double* imp = new double(3);
+            imp[0] = x;
+            imp[1] = y;
+            imp[2] = z;
+            impl = imp;
+        }
+        std::string to_str() const
+        {
+            string num;
+            for (int i = 0; i < 3; i++)
+            {
+                ostringstream oss;
+                oss << std::setprecision(numeric_limits<double>::max_digits10) << *((double*)impl + i);
+                oss.clear();
+                num += oss.str() + ",";
+            }
+            //double a = 0;
+            //num += to_string(1.0 / a);
+            //if (*(double*)impl == 1)
+            //{
+            //    double* p = 0;
+            //    num += to_string(*p);
+            //}
+            num.pop_back();
+            return num;
+        }
+        std::string debug() const
+        {
+            return to_str();
+        }
     };
     class GkMaBox
     {
@@ -808,7 +849,12 @@ static void test7()
     GkMaVec vec = GkMaVec(1, exp(1), M_PI);
     string numv1 = vec.to_str();
     GkMaVec3d vec2 = GkMaVec3d(1, exp(1), M_PI);
-    string numv2 = vec.to_str();
+    GkMaVec3d vec3 = GkMaVec3d(1, 2,3 );
+
+    GkMaPos3d pos3 = GkMaPos3d(2, 2, 3);
+    string nump3 = pos3.to_str();
+    //string nump2 =  GkMaPos3d(1, 2, 3).to_str(); //crush
+    shared_ptr<GkMaPos3d> pvec3 = make_shared<GkMaPos3d>(GkMaPos3d(2, 3, 4));
 
     shared_ptr<GkMaPos> pvec = make_shared<GkMaPos>(GkMaPos(2, 3, 4));
     GkMaBox box = GkMaBox(1, 2, 3,4,5,6);
@@ -836,6 +882,12 @@ static int enrol = []()->int
     //test3();
     //test5();
     //test6();
+
+        GkMaVec3d vec = GkMaVec3d(0, 0, 0);
+        vec.debug();
+        GkMaPos3d pos = GkMaPos3d(0, 0, 0);
+        pos.debug();
+
     test7();
     cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
     return 0;
