@@ -220,6 +220,9 @@
     <ClCompile Include="test_model_mesh.cpp">
       <Filter>test_geo</Filter>
     </ClCompile>
+    <ClCompile Include="test_GkTopo.cpp">
+      <Filter>test_math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
