@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
-    <Type Name="GK::GkMaVec3d">
+    <!--for debug -->
+    <Type Name="GeomKernel::GkMaVec">
         <DisplayString>{debug()}</DisplayString>
     </Type>
-    <Type Name="GK::GkMaPos3d">
+    <Type Name="GeomKernel::GkMaPos">
         <DisplayString>{debug()}</DisplayString>
     </Type>
 
