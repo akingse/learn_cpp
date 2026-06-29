@@ -3,29 +3,38 @@
 
     <!--for debug -->
     <Type Name="GeomKernel::GkMaVec">
-        <DisplayString>{debug()}</DisplayString>
+        <DisplayString>{debug_this()}</DisplayString>
     </Type>
     <Type Name="GeomKernel::GkMaPos">
-        <DisplayString>{debug()}</DisplayString>
+        <DisplayString>{debug_this()}</DisplayString>
     </Type>
 
     <!--for GkVertex -->
     <Type Name="GeomKernel::GkVertex">
-        <DisplayString>{debug()}</DisplayString>
+        <DisplayString>{debug_this()}</DisplayString>
+        <Expand>
+            <Item Name="[data_owner]">debug_owner()</Item>
+        </Expand>
     </Type>
 
     <!--for GkEdge -->
     <Type Name="GeomKernel::GkEdge">
-        <DisplayString>{debug()}</DisplayString>
+        <DisplayString>{{debug}}</DisplayString>
         <Expand>
-            <Item Name="[size]">size()</Item>
-            
-            <Synthetic Name="[Memory]">
-                <Expand>
-                    <Item Name="data">data()</Item>
-                </Expand>
-            </Synthetic>
-            
+            <Item Name="[data_this]">debug_this()</Item>
+            <Item Name="[data_curve]">debug_curve()</Item>
+            <Item Name="[data_owner]">debug_owner()</Item>
+            <Item Name="[data_owning]">debug_owning()</Item>
+        </Expand>
+    </Type>
+
+    <!--for GkLoop -->
+    <Type Name="GeomKernel::GkLoop">
+        <DisplayString>{{debug}}</DisplayString>
+        <Expand>
+            <Item Name="[data_this]">debug_this()</Item>
+            <Item Name="[data_owner]">debug_owner()</Item>
+            <Item Name="[data_owning]">debug_owning()</Item>
         </Expand>
     </Type>
 
@@ -34,8 +43,8 @@
     <Type Name="GK::GkMaParamVec">
         <DisplayString>double[2]</DisplayString>
         <Expand>
-            <Item Name="[u]">(*(double*)impl)</Item>
-            <Item Name="[v]">(*((double*)impl+1))</Item>
+            <Item Name="[u]">(*(double*)m_impl)</Item>
+            <Item Name="[v]">(*((double*)m_impl+1))</Item>
         </Expand>
     </Type>
     
@@ -45,9 +54,9 @@
         <Expand>
             <ArrayItems>
                 <Size>2</Size>
-                <ValuePointer>(double*)impl</ValuePointer>
+                <ValuePointer>(double*)m_impl</ValuePointer>
             </ArrayItems>
-            <Item Name="[impl]">impl</Item>
+            <Item Name="[m_impl]">m_impl</Item>
         </Expand>
     </Type>
     
@@ -57,9 +66,9 @@
         <Expand>
             <ArrayItems>
                 <Size>3</Size>
-                <ValuePointer>(double*)impl</ValuePointer>
+                <ValuePointer>(double*)m_impl</ValuePointer>
             </ArrayItems>
-        <Item Name="[impl]">impl</Item>
+        <Item Name="[m_impl]">m_impl</Item>
         </Expand>
     </Type>
     
@@ -69,9 +78,9 @@
         <Expand>
             <ArrayItems>
                 <Size>3</Size>
-                <ValuePointer>(double*)impl</ValuePointer>
+                <ValuePointer>(double*)m_impl</ValuePointer>
             </ArrayItems>
-            <Item Name="[impl]">impl</Item>
+            <Item Name="[m_impl]">m_impl</Item>
         </Expand>
     </Type>
     
@@ -82,12 +91,12 @@
             <Item Name="[min]">""</Item>
             <ArrayItems>
                 <Size>3</Size>
-                <ValuePointer>(double*)impl</ValuePointer>
+                <ValuePointer>(double*)m_impl</ValuePointer>
             </ArrayItems>
             <Item Name="[max]">""</Item>
             <ArrayItems>
                 <Size>3</Size>
-                <ValuePointer>(double*)impl+3</ValuePointer>
+                <ValuePointer>(double*)m_impl+3</ValuePointer>
             </ArrayItems>
         </Expand>
     </Type>
@@ -95,13 +104,13 @@
         <DisplayString>double[6]</DisplayString>
         <Expand>
             <Item Name="[min]">""</Item>
-            <Item Name="[x]">(*((double*)impl+0))</Item>
-            <Item Name="[y]">(*((double*)impl+1))</Item>
-            <Item Name="[z]">(*((double*)impl+2))</Item>
+            <Item Name="[x]">(*((double*)m_impl+0))</Item>
+            <Item Name="[y]">(*((double*)m_impl+1))</Item>
+            <Item Name="[z]">(*((double*)m_impl+2))</Item>
             <Item Name="[max]">""</Item>
-            <Item Name="[x]">(*((double*)impl+3))</Item>
-            <Item Name="[y]">(*((double*)impl+4))</Item>
-            <Item Name="[z]">(*((double*)impl+5))</Item>
+            <Item Name="[x]">(*((double*)m_impl+3))</Item>
+            <Item Name="[y]">(*((double*)m_impl+4))</Item>
+            <Item Name="[z]">(*((double*)m_impl+5))</Item>
         </Expand>
     </Type>
     
@@ -110,22 +119,22 @@
         <DisplayString>double[16]</DisplayString>
         <Expand>
             <Synthetic Name="[row 0]" Condition="Flags%2">
-                <DisplayString>({*((double*)impl+0)}, {*((double*)impl+1)}, {*((double*)impl+2)})</DisplayString>
+                <DisplayString>({*((double*)m_impl+0)}, {*((double*)m_impl+1)}, {*((double*)m_impl+2)})</DisplayString>
             </Synthetic>
             <Synthetic Name="[row 0]" Condition="!(Flags%2)">
-                <DisplayString>({*((double*)impl+0)}, {*((double*)impl+3)}, {*((double*)impl+6)})</DisplayString>
+                <DisplayString>({*((double*)m_impl+0)}, {*((double*)m_impl+3)}, {*((double*)m_impl+6)})</DisplayString>
             </Synthetic>
             <Synthetic Name="[row 1]" Condition="Flags%2">
-                <DisplayString>({*((double*)impl+3)}, {*((double*)impl+4)}, {*((double*)impl+5)})</DisplayString>
+                <DisplayString>({*((double*)m_impl+3)}, {*((double*)m_impl+4)}, {*((double*)m_impl+5)})</DisplayString>
             </Synthetic>
             <Synthetic Name="[row 1]" Condition="!(Flags%2)">
-                <DisplayString>({*((double*)impl+1)}, {*((double*)impl+4)}, {*((double*)impl+7)})</DisplayString>
+                <DisplayString>({*((double*)m_impl+1)}, {*((double*)m_impl+4)}, {*((double*)m_impl+7)})</DisplayString>
             </Synthetic>
             <Synthetic Name="[row 2]" Condition="Flags%2">
-                <DisplayString>({*((double*)impl+6)}, {*((double*)impl+7)}, {*((double*)impl+8)})</DisplayString>
+                <DisplayString>({*((double*)m_impl+6)}, {*((double*)m_impl+7)}, {*((double*)m_impl+8)})</DisplayString>
             </Synthetic>
             <Synthetic Name="[row 2]" Condition="!(Flags%2)">
-                <DisplayString>({*((double*)impl+2)}, {*((double*)impl+5)}, {*((double*)impl+8)})</DisplayString>
+                <DisplayString>({*((double*)m_impl+2)}, {*((double*)m_impl+5)}, {*((double*)m_impl+8)})</DisplayString>
             </Synthetic>
         </Expand>
     </Type>
@@ -135,13 +144,13 @@
         <DisplayString>double[12]</DisplayString>
         <Expand>
             <Synthetic Name="[row 0]" Condition="1">
-                <DisplayString>({*((double*)impl+0)}, {*((double*)impl+3)}, {*((double*)impl+6)}, {*((double*)impl+9)})</DisplayString>
+                <DisplayString>({*((double*)m_impl+0)}, {*((double*)m_impl+3)}, {*((double*)m_impl+6)}, {*((double*)m_impl+9)})</DisplayString>
             </Synthetic>
             <Synthetic Name="[row 1]" Condition="1">
-                <DisplayString>({*((double*)impl+1)}, {*((double*)impl+4)}, {*((double*)impl+7)}, {*((double*)impl+10)})</DisplayString>
+                <DisplayString>({*((double*)m_impl+1)}, {*((double*)m_impl+4)}, {*((double*)m_impl+7)}, {*((double*)m_impl+10)})</DisplayString>
             </Synthetic>
             <Synthetic Name="[row 2]" Condition="1">
-                <DisplayString>({*((double*)impl+2)}, {*((double*)impl+5)}, {*((double*)impl+8)}, {*((double*)impl+11)})</DisplayString>
+                <DisplayString>({*((double*)m_impl+2)}, {*((double*)m_impl+5)}, {*((double*)m_impl+8)}, {*((double*)m_impl+11)})</DisplayString>
             </Synthetic>
 
         </Expand>
@@ -152,28 +161,28 @@
         <DisplayString>double[16]</DisplayString>
         <Expand>
             <Synthetic Name="[row 0]" Condition="Flags%2">
-                <DisplayString>({*((double*)impl+0)}, {*((double*)impl+1)}, {*((double*)impl+2)}, {*((double*)impl+3)})</DisplayString>
+                <DisplayString>({*((double*)m_impl+0)}, {*((double*)m_impl+1)}, {*((double*)m_impl+2)}, {*((double*)m_impl+3)})</DisplayString>
             </Synthetic>
             <Synthetic Name="[row 0]" Condition="!(Flags%2)">
-                <DisplayString>({*((double*)impl+0)}, {*((double*)impl+4)}, {*((double*)impl+8)}, {*((double*)impl+12)})</DisplayString>
+                <DisplayString>({*((double*)m_impl+0)}, {*((double*)m_impl+4)}, {*((double*)m_impl+8)}, {*((double*)m_impl+12)})</DisplayString>
             </Synthetic>
             <Synthetic Name="[row 1]" Condition="Flags%2">
-                <DisplayString>({*((double*)impl+4)}, {*((double*)impl+5)}, {*((double*)impl+6)}, {*((double*)impl+7)})</DisplayString>
+                <DisplayString>({*((double*)m_impl+4)}, {*((double*)m_impl+5)}, {*((double*)m_impl+6)}, {*((double*)m_impl+7)})</DisplayString>
             </Synthetic>
             <Synthetic Name="[row 1]" Condition="!(Flags%2)">
-                <DisplayString>({*((double*)impl+1)}, {*((double*)impl+5)}, {*((double*)impl+9)}, {*((double*)impl+13)})</DisplayString>
+                <DisplayString>({*((double*)m_impl+1)}, {*((double*)m_impl+5)}, {*((double*)m_impl+9)}, {*((double*)m_impl+13)})</DisplayString>
             </Synthetic>
             <Synthetic Name="[row 2]" Condition="Flags%2">
-                <DisplayString>({*((double*)impl+8)}, {*((double*)impl+9)}, {*((double*)impl+10)}, {*((double*)impl+11)})</DisplayString>
+                <DisplayString>({*((double*)m_impl+8)}, {*((double*)m_impl+9)}, {*((double*)m_impl+10)}, {*((double*)m_impl+11)})</DisplayString>
             </Synthetic>
             <Synthetic Name="[row 2]" Condition="!(Flags%2)">
-                <DisplayString>({*((double*)impl+2)}, {*((double*)impl+6)}, {*((double*)impl+10)}, {*((double*)impl+14)})</DisplayString>
+                <DisplayString>({*((double*)m_impl+2)}, {*((double*)m_impl+6)}, {*((double*)m_impl+10)}, {*((double*)m_impl+14)})</DisplayString>
             </Synthetic>
             <Synthetic Name="[row 3]" Condition="Flags%2">
-                <DisplayString>({*((double*)impl+12)}, {*((double*)impl+13)}, {*((double*)impl+14)}, {*((double*)impl+15)})</DisplayString>
+                <DisplayString>({*((double*)m_impl+12)}, {*((double*)m_impl+13)}, {*((double*)m_impl+14)}, {*((double*)m_impl+15)})</DisplayString>
             </Synthetic>
             <Synthetic Name="[row 3]" Condition="!(Flags%2)">
-                <DisplayString>({*((double*)impl+3)}, {*((double*)impl+4)}, {*((double*)impl+11)}, {*((double*)impl+15)})</DisplayString>
+                <DisplayString>({*((double*)m_impl+3)}, {*((double*)m_impl+4)}, {*((double*)m_impl+11)}, {*((double*)m_impl+15)})</DisplayString>
             </Synthetic>
         </Expand>
     </Type>
