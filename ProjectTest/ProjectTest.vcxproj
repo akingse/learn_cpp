@@ -272,6 +272,7 @@
   <ItemGroup>
     <ClInclude Include="test_cpt_geo.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="test_GkTopo.h" />
     <ClInclude Include="test_serialize.h" />
     <ClInclude Include="test_singleton.h" />
   </ItemGroup>

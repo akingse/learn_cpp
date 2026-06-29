@@ -237,5 +237,8 @@
     <ClInclude Include="test_cpt_geo.h">
       <Filter>test_geo</Filter>
     </ClInclude>
+    <ClInclude Include="test_GkTopo.h">
+      <Filter>test_math</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
