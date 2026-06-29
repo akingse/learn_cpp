@@ -2,6 +2,40 @@
 #include "test_GkTopo.h"
 using namespace std;
 using namespace GeomKernel;
+static string s_empty;
+//__declspec(noinline)
+std::string& GkVertex::debug_this() //const
+{
+    if (!m_impl)
+        return s_empty;
+    /*std::string*/ info = "GeomKernel::GkVertex::debug_this";
+    info += "; ";
+    info += ((GkMaPos*)m_impl)->debug();
+    return info;
+}
+//#ifdef _DEBUG
+//void force_link_GkVertex_debug_this(const GkVertex& v)
+//{
+//    volatile auto s = v.debug_this();
+//}
+//#endif
+
+//implement
+GkEdge GkVertex::debug_owner() const
+{
+    return GkEdge();
+}
+
+
+
+GkLoop GkEdge::debug_owner() const
+{
+    return GkLoop();
+}
+GkFace GkLoop::debug_owner() const
+{
+    return GkFace();
+}
 
 static void test0()
 {
@@ -19,7 +53,7 @@ static void test0()
 static void test1()
 {
     GkVertex vertex(GkMaPos(1, 2, 3));
-    string name_v = vertex.debug_this();
+    //string name_v = vertex.debug_this();
 
     GkVertex v0(GkMaPos(0, 0, 0));
     GkVertex v1(GkMaPos(1, 0, 0));
@@ -39,6 +73,7 @@ static void test1()
     GkLoop loop(edges);
     std::vector<GkEdge> getedges = loop.debug_owning();
 
+    //–ß¬ ≤‚ ‘
     std::vector<GkMaPos> points;
     for (int i = 0; i < 100000; i++)
     {
@@ -57,8 +92,8 @@ static int enrol = []()->int
         pos.debug_this();
 
         GkVertex vertex;
-        vertex.debug_this();
-        vertex.debug_owner();
+        //vertex.debug_this();
+        //vertex.debug_owner();
         GkEdge edge;
         edge.debug_this();
         edge.debug_curve();

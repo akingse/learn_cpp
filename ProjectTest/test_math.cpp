@@ -1,5 +1,7 @@
 #include "pch.h"
 using namespace std;
+using namespace eigen;
+using namespace Eigen;
 //https://www.cnblogs.com/xiaoxi666/p/6421228.html
 //#define N 5
 static constexpr int N = 5;
@@ -344,7 +346,7 @@ static void test1()
         iter = 2 * iter;
     }
     //cout << numList[0] << endl;
-    cout << math_sign(-10) << endl;
+    //cout << math_sign(-10) << endl;
 
     return;
 }
@@ -806,6 +808,31 @@ static void test7()
     return;
 }
 
+static void test8()
+{
+    Vector3d point(2, 0, 0);
+    //Vector3d point(1, 1e-6, 0);
+    //Vector3d point(1, 0, 0);
+    Vector3d lineA(0, 0, 0);
+    Vector3d lineB(2, 2, 0);
+
+    double d1 = eigen::getDistanceOfPointAndLine(point, { lineA,lineB });
+
+    return;
+}
+static void test9()
+{
+    //Vector2d point(2, 0);
+    //Vector3d point(1, 1e-6, 0);
+    Vector2d point(1, 0);
+    Vector2d lineA(0, 0);
+    Vector2d lineB(2, 0);
+
+    double d1 = eigen::getDistanceOfPointAndLine(point, { lineA,lineB });
+
+    return;
+}
+
 static int enrol = []()->int
 {
     //test0();
@@ -815,7 +842,9 @@ static int enrol = []()->int
     //test5();
     //test6();
 
-    test7();
+    //test7();
+    test8();
+    test9();
     cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
     return 0;
 }();

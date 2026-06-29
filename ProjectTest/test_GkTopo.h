@@ -16,7 +16,7 @@ namespace GeomKernel
             imp[2] = z;
             m_impl = imp;
         }
-        std::string to_str() const
+        inline std::string to_str() const
         {
             std::string num;
             for (int i = 0; i < 3; i++)
@@ -36,7 +36,7 @@ namespace GeomKernel
             num.pop_back();
             return num;
         }
-        std::string debug() const
+        inline std::string debug() const
         {
             return to_str();
         }
@@ -53,12 +53,12 @@ namespace GeomKernel
             imp[2] = z;
             m_impl = imp;
         }
-        double operator[](int i) const
+        inline double operator[](int i) const
         {
             return *((double*)m_impl + i);
         }
 
-        std::string to_str() const
+        inline std::string to_str() const
         {
             std::string num = "(";
             for (int i = 0; i < 3; i++)
@@ -72,11 +72,11 @@ namespace GeomKernel
             num += ")";
             return num;
         }
-        std::string debug() const
+        inline std::string debug() const
         {
             return to_str();
         }
-        std::string debug_this() const
+        inline std::string debug_this() const
         {
             return to_str();
         }
@@ -89,31 +89,35 @@ namespace GeomKernel
 
     class GkVertex
     {
-    public:
         void* m_impl = 0;
+        std::string info;
+    public:
         GkVertex() = default;
         GkVertex(const GkMaPos& p)
         {
             GkMaPos* impl = new GkMaPos(p[0], p[1], p[2]);
             m_impl = impl;
         }
-        GkMaPos point() const
-        {
-            return *(GkMaPos*)m_impl;
-        }
+        //GkMaPos point() const
+        //{
+        //    return *(GkMaPos*)m_impl;
+        //}
         GkVertex(const GkVertex& p)
         {
             m_impl = p.m_impl;
         }
-        inline std::string debug_this() const
-        {
-            if (!m_impl)
-                return {};
-            //fullname
-            std::string info = __FUNCTION__;
-            info += "; " + ((GkMaPos*)m_impl)->debug();
-            return info;
-        }
+        //__declspec(noinline)
+        std::string& debug_this(); //const;
+
+        //inline std::string debug_this() const
+        //{
+        //    if (!m_impl)
+        //        return {};
+        //    //fullname
+        //    std::string info = __FUNCTION__;
+        //    info += "; " + ((GkMaPos*)m_impl)->debug();
+        //    return info;
+        //}
 
         GkEdge debug_owner() const;
 
@@ -122,6 +126,8 @@ namespace GeomKernel
     class GkEdge
     {
         void* m_impl = 0;
+        std::string m_info0;
+        std::string m_info1;
     public:
         GkEdge() = default;
         GkEdge(const GkEdge& edge)
@@ -144,7 +150,7 @@ namespace GeomKernel
             m_impl = imp;
         }
 
-        std::string child() const
+        inline std::string child() const
         {
             std::vector<GkVertex>* imp = (std::vector<GkVertex>*)m_impl;
             if (!imp)
@@ -154,7 +160,7 @@ namespace GeomKernel
                 info += imp->at(i).debug_this() + "\n";
             return info;
         }
-        int size() const
+        inline int size() const
         {
             std::vector<GkVertex>* imp = (std::vector<GkVertex>*)m_impl;
             if (!imp)
@@ -170,15 +176,19 @@ namespace GeomKernel
         //}
 
 
-        std::string debug_this() const
+        inline std::string& debug_this() //const
         {
-            return __FUNCTION__;
+            //return __FUNCTION__;
+            m_info0 = __FUNCTION__;
+            return m_info0;
         }
-        std::string debug_curve() const
+        inline std::string& debug_curve() //const
         {
-            return " getGeometry.";
+            //return " getGeometry.";
+            m_info1 = " getGeometry.";
+            return m_info1;
         }
-        std::vector<GkVertex> debug_owning() const
+        inline std::vector<GkVertex> debug_owning() const
         {
             std::vector<GkVertex>* imp = (std::vector<GkVertex>*)m_impl;
             if (!imp)
@@ -202,11 +212,11 @@ namespace GeomKernel
             }
             m_impl = imp;
         }
-        std::string debug_this() const
+        inline std::string debug_this() const
         {
             return __FUNCTION__ + std::string(" getGeometry.");
         }
-        std::vector<GkEdge> debug_owning() const
+        inline std::vector<GkEdge> debug_owning() const
         {
             std::vector<GkEdge>* imp = (std::vector<GkEdge>*)m_impl;
             if (!imp)
@@ -230,17 +240,5 @@ namespace GeomKernel
         }
     };
 
-    //implement
-    GkEdge GkVertex::debug_owner() const
-    {
-        return GkEdge();
-    }
-    GkLoop GkEdge::debug_owner() const
-    {
-        return GkLoop();
-    }
-    GkFace GkLoop::debug_owner() const
-    {
-        return GkFace();
-    }
+
 }
