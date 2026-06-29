@@ -127,7 +127,7 @@ namespace GeomKernel
         GkEdge() = default;
         GkEdge(const GkEdge& edge)
         {
-            std::vector<GkVertex>* imp = (std::vector<GkVertex>*)m_impl;
+            std::vector<GkVertex>* imp = (std::vector<GkVertex>*)edge.m_impl;
             if (!imp)
                 return;
             std::vector<GkVertex>* new_imp = new std::vector<GkVertex>;
@@ -173,7 +173,11 @@ namespace GeomKernel
 
         std::string debug_this() const
         {
-            return __FUNCTION__ + string(" getGeometry.");
+            return __FUNCTION__;
+        }
+        std::string debug_curve() const
+        {
+            return string(" getGeometry.");
         }
         std::vector<GkVertex> debug_owning() const
         {
@@ -300,8 +304,9 @@ static int enrol = []()->int
         vertex.debug_owner();
         GkEdge edge;
         edge.debug_this();
-        edge.child();
-        edge.size();
+        edge.debug_curve();
+        //edge.child();
+        //edge.size();
         edge.debug_owning();
         edge.debug_owner();
         GkLoop loop;

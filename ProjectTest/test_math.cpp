@@ -645,13 +645,13 @@ namespace GK
     class GkMaInterval
     {
     public:
-        void* impl = 0;
+        void* m_impl = 0;
         GkMaInterval(double min, double max)
         {
             double* imp = new double(2);
             imp[0] = min;
             imp[1] = min;
-            impl = imp;
+            m_impl = imp;
         }
     };
 
@@ -659,40 +659,40 @@ namespace GK
     class GkMaParamVec
     {
     public:
-        void* impl = 0;
+        void* m_impl = 0;
         GkMaParamVec(double u, double v)
         {
             double* imp = new double(2);
             imp[0] = u;
             imp[1] = v;
-            impl = imp;
+            m_impl = imp;
         }
     };
 
     class GkMaPos
     {
     public:
-        void* impl = 0;
+        void* m_impl = 0;
         GkMaPos(double x, double y, double z)
         {
             double* imp = new double(3);
             imp[0] = x;
             imp[1] = y;
             imp[2] = z;
-            impl = imp;
+            m_impl = imp;
         }
     };
     class GkMaVec
     {
     public:
-        void* impl = 0;
+        void* m_impl = 0;
         GkMaVec(double x, double y, double z)
         {
             double* imp = new double(3);
             imp[0] = x;
             imp[1] = y;
             imp[2] = z;
-            impl = imp;
+            m_impl = imp;
         }
         std::string to_str() const
         {
@@ -700,7 +700,7 @@ namespace GK
             for (int i = 0; i < 3; i++)
             {
                 ostringstream oss;
-                oss << std::setprecision(numeric_limits<double>::max_digits10) << *((double*)impl + i);
+                oss << std::setprecision(numeric_limits<double>::max_digits10) << *((double*)m_impl + i);
                 oss.clear();
                 num += oss.str() + ",";
             }
@@ -711,7 +711,7 @@ namespace GK
     class GkMaBox
     {
     public:
-        void* impl = 0;
+        void* m_impl = 0;
         GkMaBox(double x0, double y0, double z0, double x1, double y1, double z1)
         {
             double* imp = new double(6);
@@ -721,42 +721,42 @@ namespace GK
             imp[3] = x1;
             imp[4] = y1;
             imp[5] = z1;
-            impl = imp;
+            m_impl = imp;
         }
     };
     //¾ØÕó
     class GkMaMatrix //3*3
     {
     public:
-        void* impl = 0;
+        void* m_impl = 0;
         GkMaMatrix()
         {
             Eigen::Matrix3d* mat = new Eigen::Matrix3d();
             mat->row(0) << 1, 2, 3;
             mat->row(1) << 0, 1, 4;
             mat->row(2) << 0, 0, 1;
-            impl = mat->data();
+            m_impl = mat->data();
         }
     };
     class GkMaTrans
     {
     public:
-        void* impl = 0;
+        void* m_impl = 0;
         GkMaTrans()
         {
             //para::BPParaTransform mat = para::trans(2, 3, 4);
-            //impl = mat.m_matrix;
+            //m_impl = mat.m_matrix;
             Eigen::MatrixGk* mat = new Eigen::MatrixGk();
             mat->row(0) << 1, 0, 0, 2;
             mat->row(1) << 0, 1, 0, 3;
             mat->row(2) << 0, 0, 1, 4;
-            impl = mat->data();
+            m_impl = mat->data();
         }
     };
     class GkMaMatrix4d
     {
     public:
-        void* impl = 0;
+        void* m_impl = 0;
         GkMaMatrix4d()
         {
             Eigen::Matrix4d* mat = new Eigen::Matrix4d();
@@ -764,7 +764,7 @@ namespace GK
             mat->row(1) << 0, 1, 0, 3;
             mat->row(2) << 0, 0, 1, 4;
             mat->row(3) << 0, 0, 0, 1;
-            impl = mat->data();
+            m_impl = mat->data();
         }
     };
 }
@@ -796,6 +796,13 @@ static void test7()
     oss << std::setprecision(numeric_limits<double>::max_digits10) << pi;
     string num2 = oss.str();
 
+    //Ð§ÂÊ²âÊÔ
+    std::vector<GkMaPos> points;
+    for (int i = 0; i < 1000000; i++)
+    {
+        points.push_back(GkMaPos(i, i, i));
+    }
+
     return;
 }
 
@@ -808,7 +815,7 @@ static int enrol = []()->int
     //test5();
     //test6();
 
-    //test7();
+    test7();
     cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
     return 0;
 }();

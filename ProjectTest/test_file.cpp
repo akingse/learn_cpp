@@ -211,10 +211,10 @@ static void _test4()
     string newname = R"(C:\Users\Aking\Downloads\123.jpg)";
 
     int res = std::rename(filename.c_str(), newname.c_str());//C++14
-    if (std::filesystem::exists(filename))
-    {
-        std::filesystem::rename(filename, newname);//C++17
-    }
+    //if (std::filesystem::exists(filename))
+    //{
+    //    std::filesystem::rename(filename, newname);//C++17
+    //}
     return;
 }
 
