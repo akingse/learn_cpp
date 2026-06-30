@@ -8,11 +8,13 @@ std::string& GkVertex::debug_this() //const
 {
     if (!m_impl)
         return s_empty;
-    /*std::string*/ info = "GeomKernel::GkVertex::debug_this";
-    info += "; ";
-    info += ((GkMaPos*)m_impl)->debug();
-    return info;
+    static std::string infoVertex;
+    infoVertex.clear();
+    infoVertex = "GeomKernel::GkVertex::debug_this; ";
+    infoVertex += ((GkMaPos*)m_impl)->debug();
+    return infoVertex;
 }
+
 //#ifdef _DEBUG
 //void force_link_GkVertex_debug_this(const GkVertex& v)
 //{
@@ -23,18 +25,60 @@ std::string& GkVertex::debug_this() //const
 //implement
 GkEdge GkVertex::debug_owner() const
 {
-    return GkEdge();
+    GkVertex v0(GkMaPos(10, 0, 0));
+    GkVertex v1(GkMaPos(20, 0, 0));
+    GkEdge edge(v0, v1);
+    return edge;
 }
-
-
 
 GkLoop GkEdge::debug_owner() const
 {
     return GkLoop();
 }
+
+std::string& GkEdge::debug_this() //const
+{
+    static std::string infoEdge;
+    infoEdge.clear();
+    infoEdge = __FUNCTION__;
+    return infoEdge;
+}
+std::string& GkEdge::debug_curve() //const
+{
+    static std::string infoEdgeCur;
+    infoEdgeCur.clear();
+    infoEdgeCur = " getGeometry.curve";
+    return infoEdgeCur;
+}
+
 GkFace GkLoop::debug_owner() const
 {
     return GkFace();
+}
+std::string& GkLoop::debug_this() //const
+{
+    static std::string infoLoop;
+    infoLoop.clear();
+    infoLoop = __FUNCTION__;
+    return infoLoop;
+}
+std::string& GkFace::debug_this() //const
+{
+    static std::string infoFace;
+    infoFace.clear();
+    infoFace = __FUNCTION__;
+    return infoFace;
+}
+std::string& GkFace::debug_surface() //const
+{
+    static std::string infoFaceSur;
+    infoFaceSur.clear();
+    infoFaceSur = " getGeometry.surface";
+    return infoFaceSur;
+}
+GkShell GkFace::debug_owner() const
+{
+    return GkShell();
 }
 
 static void test0()
@@ -63,6 +107,24 @@ static void test1()
     //GkVertex* data = edge.data();
     std::vector<GkVertex> data = edge.debug_owning();
 
+    //std::vector<GkEdge> getedges = loop.debug_owning();
+
+    //效率测试
+    std::vector<GkMaPos> points;
+    for (int i = 0; i < 100000; i++)
+    {
+        points.push_back(GkMaPos(i, i, i));
+    }
+
+    return;
+}
+
+static void test2()
+{
+    GkVertex v0(GkMaPos(0, 0, 0));
+    GkVertex v1(GkMaPos(1, 0, 0));
+    GkEdge edge(v0, v1);
+
     std::vector<GkEdge> edges =
     {
         GkEdge(GkVertex(GkMaPos(0, 0, 0)), GkVertex(GkMaPos(1, 0, 0))),
@@ -71,14 +133,8 @@ static void test1()
         GkEdge(GkVertex(GkMaPos(0, 1, 0)), GkVertex(GkMaPos(0, 0, 0))),
     };
     GkLoop loop(edges);
-    std::vector<GkEdge> getedges = loop.debug_owning();
 
-    //效率测试
-    std::vector<GkMaPos> points;
-    for (int i = 0; i < 100000; i++)
-    {
-        points.push_back(GkMaPos(i, i, i));
-    }
+    GkFace face({ loop });
 
     return;
 }
@@ -106,8 +162,14 @@ static int enrol = []()->int
         loop.debug_owning();
         loop.debug_owner();
 
+        GkFace face;
+        face.debug_this();
+        face.debug_owning();
+        face.debug_owner();
+
         //test0();
-        test1();
+        //test1();
+        test2();
 
         cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
         return 0;
