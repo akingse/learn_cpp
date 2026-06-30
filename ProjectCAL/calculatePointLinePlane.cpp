@@ -12,8 +12,8 @@ double eigen::getDistanceOfPointAndLine(const Eigen::Vector2d& point, const std:
 	if (vecSeg.isZero())
 		return (line[0] - point).norm();
 	double k = vecSeg.dot(point - line[0]) / vecSeg.dot(vecSeg);
-	Vector2d local = point + k * vecSeg;
-	return (line[0] - local).norm();
+	Vector2d local = line[0] + k * vecSeg;
+	return (local - point).norm();
 }
 
 static bool isTwoSegmentsIntersect_DA(const std::array<Vector2d, 2>& segmA, const std::array<Vector2d, 2>& segmB, double toleDist)
@@ -168,8 +168,8 @@ double eigen::getDistanceOfPointAndLine(const Eigen::Vector3d& point, const std:
 	if (vecSeg.isZero())
 		return (line[0] - point).norm();
 	double k = vecSeg.dot(point - line[0]) / vecSeg.dot(vecSeg);
-	Vector3d local = point + k * vecSeg;
-	return (line[0] - local).norm();
+	Vector3d local = line[0] + k * vecSeg;
+    return (local - point).norm();
 }
 
 double eigen::getDistanceOfPointAndPlane(const Eigen::Vector3d& point, const Eigen::Vector3d& origin, const Eigen::Vector3d& normal)
