@@ -6,35 +6,56 @@
         <DisplayString>{debug_this()}</DisplayString>
     </Type>
     <Type Name="GeomKernel::GkMaPos">
-        <DisplayString>{debug_this()}</DisplayString>
+        <DisplayString>{debug_this()}</DisplayString>       
     </Type>
 
     <!--for GkVertex -->
     <Type Name="GeomKernel::GkVertex">
         <DisplayString>{debug_this()}</DisplayString>
         <Expand>
-            <Item Name="[data_owner]">debug_owner()</Item>
+            <Synthetic Name="[Synthetic]">
+                <Expand>
+                    <Item Name="[data_owner]">debug_owner()</Item>
+                </Expand>
+            </Synthetic>
         </Expand>
     </Type>
 
     <!--for GkEdge -->
     <Type Name="GeomKernel::GkEdge">
-        <DisplayString>{{debug}}</DisplayString>
+        <DisplayString>{debug_this()}</DisplayString>
         <Expand>
-            <Item Name="[data_this]">debug_this()</Item>
-            <Item Name="[data_curve]">debug_curve()</Item>
-            <Item Name="[data_owner]">debug_owner()</Item>
-            <Item Name="[data_owning]">debug_owning()</Item>
+            <Synthetic Name="[Synthetic]">
+                <Expand>
+                    <Item Name="[data_curve]">debug_curve()</Item>
+                    <Item Name="[data_ownings]">debug_owning()</Item>
+                    <Item Name="[data_owner]">debug_owner()</Item>
+                </Expand>
+            </Synthetic>
         </Expand>
     </Type>
 
     <!--for GkLoop -->
     <Type Name="GeomKernel::GkLoop">
-        <DisplayString>{{debug}}</DisplayString>
+        <DisplayString>{debug_this()}</DisplayString>
         <Expand>
-            <Item Name="[data_this]">debug_this()</Item>
+            <Synthetic Name="[Synthetic]">
+                <Expand>
+                    <Item Name="[data_ownings]">debug_owning()</Item>
+                    <Item Name="[data_owner]">debug_owner()</Item>
+                </Expand>
+            </Synthetic>
+
+        </Expand>
+    </Type>
+
+    <!--for GkFace -->
+    <Type Name="GeomKernel::GkFace">
+        <DisplayString>{debug_this()}</DisplayString>
+        <Expand>
+            <Item Name="[data_surface]">debug_surface()</Item>
+            <Item Name="[data_ownings]">debug_owning()</Item>
             <Item Name="[data_owner]">debug_owner()</Item>
-            <Item Name="[data_owning]">debug_owning()</Item>
         </Expand>
     </Type>
 
