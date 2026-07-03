@@ -8,11 +8,11 @@ std::string& GkVertex::debug_this() //const
 {
     if (!m_impl)
         return s_empty;
-    static std::string infoVertex;
-    infoVertex.clear();
-    infoVertex = "GeomKernel::GkVertex::debug_this; ";
-    infoVertex += ((GkMaPos*)m_impl)->debug();
-    return infoVertex;
+    //static std::string infoVertex;
+    //m_infothis.clear();
+    m_infothis = "GeomKernel::GkVertex::debug_this; ";
+    m_infothis += ((GkMaPos*)m_impl)->debug();
+    return m_infothis;
 }
 
 //#ifdef _DEBUG
@@ -38,10 +38,10 @@ GkLoop GkEdge::debug_owner() const
 
 std::string& GkEdge::debug_this() //const
 {
-    static std::string infoEdge;
-    infoEdge.clear();
-    infoEdge = __FUNCTION__;
-    return infoEdge;
+    //static std::string infoEdge;
+    //infoEdge.clear();
+    m_infothis = __FUNCTION__;
+    return m_infothis;
 }
 std::string& GkEdge::debug_curve() //const
 {
