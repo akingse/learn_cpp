@@ -10,7 +10,7 @@ std::string& GkVertex::debug_this() //const
         return s_empty;
     //static std::string infoVertex;
     //m_infothis.clear();
-    m_infothis = "GeomKernel::GkVertex::debug_this; ";
+    //m_infothis = "GeomKernel::GkVertex::debug_this; ";
     m_infothis += ((GkMaPos*)m_impl)->debug();
     return m_infothis;
 }
@@ -167,7 +167,7 @@ static int enrol = []()->int
         face.debug_owning();
         face.debug_owner();
 
-        //test0();
+        test0();
         //test1();
         test2();
 

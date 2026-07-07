@@ -2,6 +2,12 @@
 
 //≤‚ ‘natvisµ˜ ‘º‡ ”
 
+#define GET_CLASS_NAME(className) \
+    template <typename T> \
+    struct className { \
+        static const char* name() { return #className; } \
+    }
+
 namespace GeomKernel
 {
     class GkMaVec
@@ -18,7 +24,9 @@ namespace GeomKernel
         }
         inline std::string to_str() const
         {
-            std::string num;
+            std::string num = typeid(*this).name();
+            num = num.substr(6);
+            num += "(";
             for (int i = 0; i < 3; i++)
             {
                 std::ostringstream oss;
@@ -60,7 +68,9 @@ namespace GeomKernel
 
         inline std::string to_str() const
         {
-            std::string num = "(";
+            std::string num = typeid(*this).name();
+            num = num.substr(6);
+            num += "(";
             for (int i = 0; i < 3; i++)
             {
                 std::ostringstream oss;
