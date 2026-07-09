@@ -48,6 +48,11 @@ namespace GeomKernel
         {
             return to_str();
         }
+        inline double operator[](int i) const
+        {
+            return *((double*)m_impl + i);
+        }
+
     };
 
     class GkMaPos
@@ -61,10 +66,6 @@ namespace GeomKernel
             imp[1] = y;
             imp[2] = z;
             m_impl = imp;
-        }
-        inline double operator[](int i) const
-        {
-            return *((double*)m_impl + i);
         }
 
         inline std::string to_str() const
@@ -87,7 +88,8 @@ namespace GeomKernel
         {
             return to_str();
         }
-        inline std::string debug_this() const
+
+        inline const std::string& debug_this()
         {
             return to_str();
         }
