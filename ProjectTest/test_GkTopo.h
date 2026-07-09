@@ -49,6 +49,7 @@ namespace GeomKernel
             return to_str();
         }
     };
+
     class GkMaPos
     {
     public:
@@ -119,7 +120,7 @@ namespace GeomKernel
             m_impl = p.m_impl;
         }
         //__declspec(noinline)
-        std::string& debug_this(); //const;
+        const std::string& debug_this(); //const;
 
         //inline std::string debug_this() const
         //{
@@ -131,7 +132,7 @@ namespace GeomKernel
         //    return info;
         //}
 
-        GkEdge debug_owner() const;
+        const GkEdge& debug_owner() const;
 
     };
 
@@ -179,18 +180,19 @@ namespace GeomKernel
                 return 0;
             return imp->size();
         }
-        inline std::vector<GkVertex> debug_owning() const
+
+        inline const std::vector<GkVertex>& debug_owning() const
         {
             std::vector<GkVertex>* imp = (std::vector<GkVertex>*)m_impl;
             if (!imp)
                 return {};
             return *imp;
         }
-        GkLoop debug_owner() const;
+        const GkLoop& debug_owner() const;
 
         //debug
-        std::string& debug_this();
-        std::string& debug_curve();
+        const std::string& debug_this();
+        const std::string& debug_curve();
 
     };
 
@@ -209,16 +211,16 @@ namespace GeomKernel
             }
             m_impl = imp;
         }
-        GkFace debug_owner() const;
-        inline std::vector<GkEdge>& debug_owning() const
+
+        inline const std::vector<GkEdge>& debug_owning() const
         {
             std::vector<GkEdge>* imp = (std::vector<GkEdge>*)m_impl;
             //if (!imp)
             //    return {};
             return *imp;
         }
-
-        std::string& debug_this(); //const
+        const GkFace& debug_owner() const;
+        const std::string& debug_this(); //const
 
     };
 
@@ -236,16 +238,17 @@ namespace GeomKernel
                 imp->push_back(loops[i]);
             m_impl = imp;
         }
-        GkShell debug_owner() const;
-        inline std::vector<GkLoop> debug_owning() const
+
+        const GkShell& debug_owner() const;
+        inline const std::vector<GkLoop>& debug_owning() const
         {
             std::vector<GkLoop>* imp = (std::vector<GkLoop>*)m_impl;
             if (!imp)
                 return {};
             return *imp;
         }
-        std::string& debug_this(); //const
-        std::string& debug_surface();
+        const std::string& debug_this(); //const
+        const std::string& debug_surface();
     };
 
     class GkShell

@@ -4,7 +4,7 @@ using namespace std;
 using namespace GeomKernel;
 static string s_empty;
 //__declspec(noinline)
-std::string& GkVertex::debug_this() //const
+const std::string& GkVertex::debug_this() //const
 {
     if (!m_impl)
         return s_empty;
@@ -23,7 +23,7 @@ std::string& GkVertex::debug_this() //const
 //#endif
 
 //implement
-GkEdge GkVertex::debug_owner() const
+const GkEdge& GkVertex::debug_owner() const
 {
     GkVertex v0(GkMaPos(10, 0, 0));
     GkVertex v1(GkMaPos(20, 0, 0));
@@ -31,19 +31,19 @@ GkEdge GkVertex::debug_owner() const
     return edge;
 }
 
-GkLoop GkEdge::debug_owner() const
+const GkLoop& GkEdge::debug_owner() const
 {
     return GkLoop();
 }
 
-std::string& GkEdge::debug_this() //const
+const std::string& GkEdge::debug_this() //const
 {
     //static std::string infoEdge;
     //infoEdge.clear();
     m_infothis = __FUNCTION__;
     return m_infothis;
 }
-std::string& GkEdge::debug_curve() //const
+const std::string& GkEdge::debug_curve() //const
 {
     static std::string infoEdgeCur;
     infoEdgeCur.clear();
@@ -51,32 +51,32 @@ std::string& GkEdge::debug_curve() //const
     return infoEdgeCur;
 }
 
-GkFace GkLoop::debug_owner() const
+const GkFace& GkLoop::debug_owner() const
 {
     return GkFace();
 }
-std::string& GkLoop::debug_this() //const
+const std::string& GkLoop::debug_this() //const
 {
     static std::string infoLoop;
     infoLoop.clear();
     infoLoop = __FUNCTION__;
     return infoLoop;
 }
-std::string& GkFace::debug_this() //const
+const std::string& GkFace::debug_this() //const
 {
     static std::string infoFace;
     infoFace.clear();
     infoFace = __FUNCTION__;
     return infoFace;
 }
-std::string& GkFace::debug_surface() //const
+const std::string& GkFace::debug_surface() //const
 {
     static std::string infoFaceSur;
     infoFaceSur.clear();
     infoFaceSur = " getGeometry.surface";
     return infoFaceSur;
 }
-GkShell GkFace::debug_owner() const
+const GkShell& GkFace::debug_owner() const
 {
     return GkShell();
 }
@@ -96,6 +96,17 @@ static void test0()
 
 static void test1()
 {
+    string info;
+    std::ostringstream oss;
+    oss << std::setprecision(std::numeric_limits<double>::max_digits10) << 1;
+    info = oss.str();
+    oss.str("");  // 清空内部字符串缓冲区
+    oss.clear();  // 重置错误状态标志（防止之前的错误影响后续操作）
+    oss << std::setprecision(std::numeric_limits<double>::max_digits10) << 2;
+    info = oss.str();
+    oss.str("");
+    oss.clear();
+
     GkVertex vertex(GkMaPos(1, 2, 3));
     //string name_v = vertex.debug_this();
 
@@ -167,8 +178,8 @@ static int enrol = []()->int
         face.debug_owning();
         face.debug_owner();
 
-        test0();
-        //test1();
+        //test0();
+        test1();
         test2();
 
         cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
