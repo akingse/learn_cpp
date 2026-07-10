@@ -11,7 +11,7 @@ const std::string& GkVertex::debug_this() //const
     //static std::string infoVertex;
     //m_infothis.clear();
     //m_infothis = "GeomKernel::GkVertex::debug_this; ";
-    m_infothis += ((GkMaPos*)m_impl)->debug();
+    m_infothis = ((GkMaPos*)m_impl)->debug();
     return m_infothis;
 }
 
@@ -114,10 +114,10 @@ static void test1()
     GkVertex v1(GkMaPos(1, 0, 0));
     GkEdge edge(v0, v1);
     string name_e = edge.debug_this();
-    int size = edge.size();
-    //GkVertex* data = edge.data();
-    std::vector<GkVertex> data = edge.debug_owning();
 
+
+    int size = edge.size();
+    std::vector<GkVertex> data = edge.debug_owning();
     //std::vector<GkEdge> getedges = loop.debug_owning();
 
     //–ß¬ ≤‚ ‘

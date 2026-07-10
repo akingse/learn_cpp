@@ -110,17 +110,18 @@ namespace GeomKernel
         GkVertex() = default;
         GkVertex(const GkMaPos& p)
         {
-            GkMaPos* impl = new GkMaPos(p[0], p[1], p[2]);
+            GkMaPos* impl = new GkMaPos(
+                *((double*)p.m_impl + 0), *((double*)p.m_impl + 1), *((double*)p.m_impl + 2));
             m_impl = impl;
         }
         //GkMaPos point() const
         //{
         //    return *(GkMaPos*)m_impl;
         //}
-        GkVertex(const GkVertex& p)
-        {
-            m_impl = p.m_impl;
-        }
+        //GkVertex(const GkVertex& p)
+        //{
+        //    m_impl = p.m_impl;
+        //}
         //__declspec(noinline)
         const std::string& debug_this(); //const;
 
