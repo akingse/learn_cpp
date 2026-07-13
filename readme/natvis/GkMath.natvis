@@ -59,6 +59,16 @@
         </Expand>
     </Type>
 
+    <!--for GkLoop -->
+    <Type Name="GeomKernel::GkLoop">
+        <DisplayString>{debug_this()}</DisplayString>
+        <Expand>
+            <Item Name="[data_ownings]">debug_owning()</Item>
+            <Item Name="[data_owner]">debug_owner()</Item>
+        </Expand>
+    </Type>
+
+
 
     <!--for GkMaParamVec -->
     <Type Name="GK::GkMaParamVec">

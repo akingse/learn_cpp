@@ -161,6 +161,7 @@ static int enrol = []()->int
         GkVertex vertex;
         //vertex.debug_this();
         //vertex.debug_owner();
+
         GkEdge edge;
         edge.debug_this();
         edge.debug_curve();
@@ -168,6 +169,7 @@ static int enrol = []()->int
         //edge.size();
         edge.debug_owning();
         edge.debug_owner();
+
         GkLoop loop;
         loop.debug_this();
         loop.debug_owning();
