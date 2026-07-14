@@ -191,6 +191,138 @@ namespace Local
     };
 }
 
+//æ≤Ã¨±‰¡ø∞Ê±æ
+namespace Static
+{
+    //Topo
+    class GkVertex;
+    class GkEdge;
+    class GkLoop;
+    class GkFace;
+    class GkShell;
+
+    class GkVertex
+    {
+        void* m_impl = 0;
+    public:
+        GkVertex() = default;
+        GkVertex(const Eigen::Vector3d& p)
+        {
+            double* impl = new double(3);
+            impl[0] = p[0];
+            impl[1] = p[1];
+            impl[2] = p[2];
+            m_impl = impl;
+        }
+
+        const std::string& debug_this(); //const;
+        GkEdge debug_owner() const;
+
+    };
+
+    class GkEdge
+    {
+        void* m_impl = 0;
+    public:
+        GkEdge() = default;
+        GkEdge(const GkEdge& edge)
+        {
+            std::vector<GkVertex>* imp = (std::vector<GkVertex>*)edge.m_impl;
+            if (!imp)
+                return;
+            std::vector<GkVertex>* new_imp = new std::vector<GkVertex>;
+            for (int i = 0; i < imp->size(); i++)
+            {
+                new_imp->push_back((*imp)[i]);
+            }
+            m_impl = new_imp;
+        }
+        GkEdge(const GkVertex& v0, const GkVertex& v1)
+        {
+            std::vector<GkVertex>* imp = new std::vector<GkVertex>;// { v0, v1 };
+            imp->push_back(v0);
+            imp->push_back(v1);
+            m_impl = imp;
+        }
+
+        inline std::vector<GkVertex> debug_owning() const
+        {
+            std::vector<GkVertex>* imp = (std::vector<GkVertex>*)m_impl;
+            if (!imp)
+                return {};
+            return *imp;
+        }
+        GkLoop debug_owner() const;
+
+        //debug
+        const std::string& debug_this();
+        const std::string& debug_geom();
+
+    };
+
+    class GkLoop
+    {
+        void* m_impl = 0;
+    public:
+        GkLoop() = default;
+        GkLoop(const std::vector<GkEdge>& edges)
+        {
+            std::vector<GkEdge>* imp = new std::vector<GkEdge>;
+            for (int i = 0; i < edges.size(); i++)
+            {
+                imp->push_back(edges[i]);
+            }
+            m_impl = imp;
+        }
+
+        inline std::vector<GkEdge> debug_owning() const
+        {
+            std::vector<GkEdge>* imp = (std::vector<GkEdge>*)m_impl;
+            if (!imp)
+                return {};
+            return *imp;
+        }
+        GkFace debug_owner() const;
+        const std::string& debug_this();//const
+
+    };
+
+    class GkFace
+    {
+        void* m_impl = 0;
+    public:
+        GkFace() = default;
+        GkFace(const std::vector<GkLoop>& loops)
+        {
+            std::vector<GkLoop>* imp = new std::vector<GkLoop>;
+            for (int i = 0; i < loops.size(); i++)
+                imp->push_back(loops[i]);
+            m_impl = imp;
+        }
+
+        GkShell debug_owner() const;
+        inline std::vector<GkLoop> debug_owning() const
+        {
+            std::vector<GkLoop>* imp = (std::vector<GkLoop>*)m_impl;
+            if (!imp)
+                return {};
+            return *imp;
+        }
+
+        const std::string& debug_this(); //const
+        const std::string& debug_geom();
+
+    };
+
+    class GkShell
+    {
+        void* m_impl = 0;
+    public:
+        const std::string& debug_this(); //const
+
+    };
+}
+
 namespace GeomKernel
 {
     class GkMaVec

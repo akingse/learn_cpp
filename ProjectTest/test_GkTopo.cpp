@@ -15,8 +15,88 @@ namespace Local
         GkEdge edge(v0, v1);
         return edge;
     }
+    GkLoop GkEdge::debug_owner() const
+    {
+        return GkLoop();
+    }
+}
+
+namespace Static
+{
+    const std::string& GkVertex::debug_this() //const;
+    {
+        if (!m_impl)
+            return {};
+        std::string num = "coord";
+        num += "(";
+        for (int i = 0; i < 3; i++)
+        {
+            std::ostringstream oss;
+            oss << std::setprecision(std::numeric_limits<double>::max_digits10) << *((double*)m_impl + i);
+            oss.clear();
+            num += oss.str() + ",";
+        }
+        num.pop_back();
+        num += ")";
+        //return num;
+        static std::string infoGkVertex;
+        infoGkVertex.clear();
+        infoGkVertex = num;
+        return infoGkVertex;
+    }
+
+    const std::string& GkEdge::debug_this()
+    {
+        std::string m_infothis = __FUNCTION__;
+        static std::string infoGkEdge;
+        infoGkEdge.clear();
+        infoGkEdge = m_infothis;
+        return infoGkEdge;
+    }
+    const std::string& GkEdge::debug_geom()
+    {
+        static std::string infoEdgeCur;
+        infoEdgeCur.clear();
+        infoEdgeCur = " getGeometry.curve";
+        return infoEdgeCur;
+    }
+
+    const std::string& GkLoop::debug_this()//const
+    {
+        std::string m_infothis = __FUNCTION__;
+        static std::string infoGkLoop;
+        infoGkLoop.clear();
+        infoGkLoop = m_infothis;
+        return infoGkLoop;
+    }
+
+    const std::string& GkFace::debug_this() //const
+    {
+        std::string m_infothis = __FUNCTION__;
+        static std::string infoGkFace;
+        infoGkFace.clear();
+        infoGkFace = m_infothis;
+        return infoGkFace;
+    }
+    const std::string& GkFace::debug_geom()
+    {
+        static std::string infoFaceSur;
+        infoFaceSur.clear();
+        infoFaceSur = " getGeometry.surface";
+        return infoFaceSur;
+    }
+
+    const std::string& GkShell::debug_this() //const
+    {
+        std::string m_infothis = __FUNCTION__;
+        static std::string infoGkShell;
+        infoGkShell.clear();
+        infoGkShell = m_infothis;
+        return infoGkShell;
+    }
 
 }
+
 
 namespace GeomKernel
 {
@@ -61,10 +141,10 @@ namespace GeomKernel
     }
     const std::string& GkEdge::debug_curve() //const
     {
-        static std::string infoEdgeCur;
-        infoEdgeCur.clear();
-        infoEdgeCur = " getGeometry.curve";
-        return infoEdgeCur;
+        //static std::string infoEdgeCur;
+        //infoEdgeCur.clear();
+        m_infocurve = " getGeometry.curve";
+        return m_infocurve;
     }
 
     const GkFace& GkLoop::debug_owner() const
@@ -87,10 +167,10 @@ namespace GeomKernel
     }
     const std::string& GkFace::debug_surface() //const
     {
-        static std::string infoFaceSur;
-        infoFaceSur.clear();
-        infoFaceSur = " getGeometry.surface";
-        return infoFaceSur;
+        //static std::string infoFaceSur;
+        //infoFaceSur.clear();
+        m_infosurf = " getGeometry.surface";
+        return m_infosurf;
     }
     const GkShell& GkFace::debug_owner() const
     {
@@ -223,10 +303,8 @@ namespace Local
         Local::GkEdge edge;
         edge.debug_this();
         edge.debug_geom();
-        //edge.child();
-        //edge.size();
         edge.debug_owning();
-        //edge.debug_owner();
+        edge.debug_owner();
 
         Local::GkLoop loop;
         loop.debug_this();
@@ -243,6 +321,7 @@ namespace Local
 
 namespace Local
 {
+    //局部变量版本
     static void test3()
     {
         GkVertex v0(Vector3d(0, 0, 0));
