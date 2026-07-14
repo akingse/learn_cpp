@@ -1,9 +1,22 @@
 #include "pch.h"
 #include "test_GkTopo.h"
 using namespace std;
+using namespace Eigen;
 //using namespace GeomKernel;
 static string s_empty;
 //__declspec(noinline)
+
+namespace Local
+{
+    GkEdge GkVertex::debug_owner() const
+    {
+        GkVertex v0(Vector3d(10, 0, 0));
+        GkVertex v1(Vector3d(20, 0, 0));
+        GkEdge edge(v0, v1);
+        return edge;
+    }
+
+}
 
 namespace GeomKernel
 {
@@ -83,6 +96,14 @@ namespace GeomKernel
     {
         return GkShell();
     }
+
+    const std::string& GkShell::debug_this() //const
+    {
+        static std::string infoShell;
+        infoShell.clear();
+        infoShell = __FUNCTION__;
+        return infoShell;
+    }
 }
 
 namespace GeomKernel
@@ -157,7 +178,9 @@ namespace GeomKernel
     }
 }
 
-static int enrol = []()->int
+namespace GeomKernel
+{
+    static void enrol_0()
     {
         GeomKernel::GkMaVec vec = GeomKernel::GkMaVec(0, 0, 0);
         vec.debug();
@@ -186,10 +209,74 @@ static int enrol = []()->int
         face.debug_this();
         face.debug_owning();
         face.debug_owner();
+    }
+}
+
+namespace Local
+{
+    static void enrol_1()
+    {
+        Local::GkVertex vertex;
+        vertex.debug_this();
+        vertex.debug_owner();
+
+        Local::GkEdge edge;
+        edge.debug_this();
+        edge.debug_geom();
+        //edge.child();
+        //edge.size();
+        edge.debug_owning();
+        //edge.debug_owner();
+
+        Local::GkLoop loop;
+        loop.debug_this();
+        loop.debug_owning();
+        //loop.debug_owner();
+
+        Local::GkFace face;
+        face.debug_this();
+        face.debug_geom();
+        face.debug_owning();
+        //face.debug_owner();
+    }
+}
+
+namespace Local
+{
+    static void test3()
+    {
+        GkVertex v0(Vector3d(0, 0, 0));
+        GkVertex v1(Vector3d(1, 0, 0));
+        std::string info_v0 = v0.debug_this();
+
+        GkEdge edge(v0, v1);
+
+        std::vector<GkEdge> edges =
+        {
+            GkEdge(GkVertex(Vector3d(0, 0, 0)), GkVertex(Vector3d(1, 0, 0))),
+            GkEdge(GkVertex(Vector3d(1, 0, 0)), GkVertex(Vector3d(1, 1, 0))),
+            GkEdge(GkVertex(Vector3d(1, 1, 0)), GkVertex(Vector3d(0, 1, 0))),
+            GkEdge(GkVertex(Vector3d(0, 1, 0)), GkVertex(Vector3d(0, 0, 0))),
+        };
+        GkLoop loop(edges);
+
+        GkFace face({ loop });
+
+        return;
+    }
+}
+
+static int enrol = []()->int
+    {
+        GeomKernel::enrol_0();
+        Local::enrol_1();
 
         //GeomKernel::test0();
         GeomKernel::test1();
         GeomKernel::test2();
+
+        //Local
+        Local::test3();
 
         cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
         return 0;

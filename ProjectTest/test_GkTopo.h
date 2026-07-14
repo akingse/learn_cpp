@@ -33,7 +33,23 @@ namespace Local
             m_impl = impl;
         }
 
-        const std::string& debug_this(); //const;
+        const std::string& debug_this() //const;
+        {
+            if (!m_impl)
+                return {};
+            std::string num = "coord";
+            num += "(";
+            for (int i = 0; i < 3; i++)
+            {
+                std::ostringstream oss;
+                oss << std::setprecision(std::numeric_limits<double>::max_digits10) << *((double*)m_impl + i);
+                oss.clear();
+                num += oss.str() + ",";
+            }
+            num.pop_back();
+            num += ")";
+            return num;
+        }
 
         GkEdge debug_owner() const;
 
@@ -66,17 +82,6 @@ namespace Local
             m_impl = imp;
         }
 
-        inline std::string child() const
-        {
-            std::vector<GkVertex>* imp = (std::vector<GkVertex>*)m_impl;
-            if (!imp)
-                return {};
-            std::string info;
-            for (int i = 0; i < imp->size(); i++)
-                info += imp->at(i).debug_this() + "\n";
-            return info;
-        }
-
         inline std::vector<GkVertex> debug_owning() const
         {
             std::vector<GkVertex>* imp = (std::vector<GkVertex>*)m_impl;
@@ -87,8 +92,18 @@ namespace Local
         GkLoop debug_owner() const;
 
         //debug
-        const std::string& debug_this();
-        const std::string& debug_geom();
+        const std::string& debug_this()
+        {
+            std::string m_infothis = __FUNCTION__;
+            return m_infothis;
+        }
+        const std::string& debug_geom()
+        {
+            std::string infoEdgeCur;
+            infoEdgeCur.clear();
+            infoEdgeCur = " getGeometry.curve";
+            return infoEdgeCur;
+        }
 
     };
 
@@ -111,12 +126,16 @@ namespace Local
         inline std::vector<GkEdge> debug_owning() const
         {
             std::vector<GkEdge>* imp = (std::vector<GkEdge>*)m_impl;
-            //if (!imp)
-            //    return {};
+            if (!imp)
+                return {};
             return *imp;
         }
         GkFace debug_owner() const;
-        const std::string& debug_this(); //const
+        const std::string& debug_this()//const
+        {
+            std::string m_infothis = __FUNCTION__;
+            return m_infothis;
+        }
 
     };
 
@@ -144,8 +163,19 @@ namespace Local
             return *imp;
         }
 
-        const std::string& debug_this(); //const
-        const std::string& debug_surface();
+        const std::string& debug_this() //const
+        {
+            std::string m_infothis = __FUNCTION__;
+            return m_infothis;
+        }
+        const std::string& debug_geom()
+        {
+            std::string infoFaceSur;
+            infoFaceSur.clear();
+            infoFaceSur = " getGeometry.surface";
+            return infoFaceSur;
+        }
+
     };
 
     class GkShell
@@ -153,6 +183,11 @@ namespace Local
         void* m_impl = 0;
         //std::string info;
     public:
+        const std::string& debug_this() //const
+        {
+            std::string m_infothis = __FUNCTION__;
+            return m_infothis;
+        }
     };
 }
 
@@ -366,8 +401,8 @@ namespace GeomKernel
         inline const std::vector<GkEdge>& debug_owning() const
         {
             std::vector<GkEdge>* imp = (std::vector<GkEdge>*)m_impl;
-            //if (!imp)
-            //    return {};
+            if (!imp) //null not crush
+                return {};
             return *imp;
         }
         const GkFace& debug_owner() const;
@@ -407,5 +442,6 @@ namespace GeomKernel
         void* m_impl = 0;
         std::string info;
     public:
+        const std::string& debug_this(); //const
     };
 }
