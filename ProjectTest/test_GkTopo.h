@@ -11,6 +11,71 @@
 //局部变量版本
 namespace Local
 {
+    class GkMaPos
+    {
+    public:
+        void* m_impl = 0;
+        GkMaPos(double x, double y, double z)
+        {
+            double* imp = new double(3);
+            imp[0] = x;
+            imp[1] = y;
+            imp[2] = z;
+            m_impl = imp;
+        }
+
+        inline const char* debug_this()
+        {
+            std::string num = typeid(*this).name();
+            num = num.substr(6);
+            num += "(";
+            for (int i = 0; i < 3; i++)
+            {
+                std::ostringstream oss;
+                oss << std::setprecision(std::numeric_limits<double>::max_digits10) << *((double*)m_impl + i);
+                oss.clear();
+                num += oss.str() + ",";
+            }
+            num.pop_back();
+            num += ")";
+            std::string* info = new std::string(num);
+            return info->c_str();
+        }
+    };
+
+    class GkMaVec
+    {
+    public:
+        std::shared_ptr<std::string> m_info;
+        void* m_impl = 0;
+        GkMaVec(double x, double y, double z)
+        {
+            double* imp = new double(3);
+            imp[0] = x;
+            imp[1] = y;
+            imp[2] = z;
+            m_impl = imp;
+        }
+        inline std::shared_ptr<std::string> debug_this()
+        {
+            std::string num = typeid(*this).name();
+            num = num.substr(6);
+            num += "(";
+            for (int i = 0; i < 3; i++)
+            {
+                std::ostringstream oss;
+                oss << std::setprecision(std::numeric_limits<double>::max_digits10) << *((double*)m_impl + i);
+                oss.clear();
+                num += oss.str() + ",";
+            }
+            num.pop_back();
+            num += ")";
+            return std::make_shared<std::string>(num);
+        }
+
+    };
+
+
     //Topo
     class GkVertex;
     class GkEdge;
@@ -33,7 +98,7 @@ namespace Local
             m_impl = impl;
         }
 
-        const std::string& debug_this() //const;
+        std::string debug_this() //const;
         {
             if (!m_impl)
                 return {};
@@ -92,12 +157,12 @@ namespace Local
         GkLoop debug_owner() const;
 
         //debug
-        const std::string& debug_this()
+        std::string debug_this()
         {
             std::string m_infothis = __FUNCTION__;
             return m_infothis;
         }
-        const std::string& debug_geom()
+        std::string debug_geom()
         {
             std::string infoEdgeCur;
             infoEdgeCur.clear();
@@ -131,7 +196,7 @@ namespace Local
             return *imp;
         }
         GkFace debug_owner() const;
-        const std::string& debug_this()//const
+        std::string debug_this()//const
         {
             std::string m_infothis = __FUNCTION__;
             return m_infothis;
@@ -163,12 +228,12 @@ namespace Local
             return *imp;
         }
 
-        const std::string& debug_this() //const
+        std::string debug_this() //const
         {
             std::string m_infothis = __FUNCTION__;
             return m_infothis;
         }
-        const std::string& debug_geom()
+        std::string debug_geom()
         {
             std::string infoFaceSur;
             infoFaceSur.clear();
@@ -183,7 +248,7 @@ namespace Local
         void* m_impl = 0;
         //std::string info;
     public:
-        const std::string& debug_this() //const
+        std::string debug_this() //const
         {
             std::string m_infothis = __FUNCTION__;
             return m_infothis;

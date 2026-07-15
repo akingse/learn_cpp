@@ -19,10 +19,39 @@ namespace Local
     {
         return GkLoop();
     }
+    GkFace GkLoop::debug_owner() const
+    {
+        return GkFace();
+    }
+    GkShell GkFace::debug_owner() const
+    {
+        return GkShell();
+    }
+
 }
 
 namespace Static
 {
+    GkEdge GkVertex::debug_owner() const
+    {
+        GkVertex v0(Vector3d(10, 0, 0));
+        GkVertex v1(Vector3d(20, 0, 0));
+        GkEdge edge(v0, v1);
+        return edge;
+    }
+    GkLoop GkEdge::debug_owner() const
+    {
+        return GkLoop();
+    }
+    GkFace GkLoop::debug_owner() const
+    {
+        return GkFace();
+    }
+    GkShell GkFace::debug_owner() const
+    {
+        return GkShell();
+    }
+
     const std::string& GkVertex::debug_this() //const;
     {
         if (!m_impl)
@@ -131,7 +160,6 @@ namespace GeomKernel
     {
         return GkLoop();
     }
-
     const std::string& GkEdge::debug_this() //const
     {
         //static std::string infoEdge;
@@ -158,6 +186,7 @@ namespace GeomKernel
         infoLoop = __FUNCTION__;
         return infoLoop;
     }
+
     const std::string& GkFace::debug_this() //const
     {
         static std::string infoFace;
@@ -186,78 +215,7 @@ namespace GeomKernel
     }
 }
 
-namespace GeomKernel
-{
-    static void test0()
-    {
-        GkMaVec vec2 = GkMaVec(1, exp(1), M_PI);
-        GkMaVec vec3 = GkMaVec(1, 2, 3);
-
-        GkMaPos pos3 = GkMaPos(2, 2, 3);
-        string nump3 = pos3.to_str();
-        //string nump2 =  GkMaPos(1, 2, 3).to_str(); //crush
-        shared_ptr<GkMaPos> pvec3 = make_shared<GkMaPos>(GkMaPos(2, 3, 4));
-
-        return;
-    }
-
-    static void test1()
-    {
-        string info;
-        std::ostringstream oss;
-        oss << std::setprecision(std::numeric_limits<double>::max_digits10) << 1;
-        info = oss.str();
-        oss.str("");  // 清空内部字符串缓冲区
-        oss.clear();  // 重置错误状态标志（防止之前的错误影响后续操作）
-        oss << std::setprecision(std::numeric_limits<double>::max_digits10) << 2;
-        info = oss.str();
-        oss.str("");
-        oss.clear();
-
-        GkVertex vertex(GkMaPos(1, 2, 3));
-        //string name_v = vertex.debug_this();
-
-        GkVertex v0(GkMaPos(0, 0, 0));
-        GkVertex v1(GkMaPos(1, 0, 0));
-        GkEdge edge(v0, v1);
-        string name_e = edge.debug_this();
-
-
-        int size = edge.size();
-        std::vector<GkVertex> data = edge.debug_owning();
-        //std::vector<GkEdge> getedges = loop.debug_owning();
-
-        //效率测试
-        std::vector<GkMaPos> points;
-        for (int i = 0; i < 100000; i++)
-        {
-            points.push_back(GkMaPos(i, i, i));
-        }
-
-        return;
-    }
-
-    static void test2()
-    {
-        GkVertex v0(GkMaPos(0, 0, 0));
-        GkVertex v1(GkMaPos(1, 0, 0));
-        GkEdge edge(v0, v1);
-
-        std::vector<GkEdge> edges =
-        {
-            GkEdge(GkVertex(GkMaPos(0, 0, 0)), GkVertex(GkMaPos(1, 0, 0))),
-            GkEdge(GkVertex(GkMaPos(1, 0, 0)), GkVertex(GkMaPos(1, 1, 0))),
-            GkEdge(GkVertex(GkMaPos(1, 1, 0)), GkVertex(GkMaPos(0, 1, 0))),
-            GkEdge(GkVertex(GkMaPos(0, 1, 0)), GkVertex(GkMaPos(0, 0, 0))),
-        };
-        GkLoop loop(edges);
-
-        GkFace face({ loop });
-
-        return;
-    }
-}
-
+//enrol
 namespace GeomKernel
 {
     static void enrol_0()
@@ -296,26 +254,131 @@ namespace Local
 {
     static void enrol_1()
     {
-        Local::GkVertex vertex;
+        GkVertex vertex;
         vertex.debug_this();
         vertex.debug_owner();
 
-        Local::GkEdge edge;
+        GkEdge edge;
         edge.debug_this();
         edge.debug_geom();
         edge.debug_owning();
         edge.debug_owner();
 
-        Local::GkLoop loop;
+        GkLoop loop;
         loop.debug_this();
         loop.debug_owning();
-        //loop.debug_owner();
+        loop.debug_owner();
 
-        Local::GkFace face;
+        GkFace face;
         face.debug_this();
         face.debug_geom();
         face.debug_owning();
-        //face.debug_owner();
+        face.debug_owner();
+    }
+}
+
+namespace Static
+{
+    static void enrol_2()
+    {
+        GkVertex vertex;
+        vertex.debug_this();
+        vertex.debug_owner();
+
+        GkEdge edge;
+        edge.debug_this();
+        edge.debug_geom();
+        edge.debug_owning();
+        edge.debug_owner();
+
+        GkLoop loop;
+        loop.debug_this();
+        loop.debug_owning();
+        loop.debug_owner();
+
+        GkFace face;
+        face.debug_this();
+        face.debug_geom();
+        face.debug_owning();
+        face.debug_owner();
+    }
+}
+
+
+namespace GeomKernel
+{
+    //向量
+    static void test0()
+    {
+        GkMaVec vec2 = GkMaVec(1, exp(1), M_PI);
+        GkMaVec vec3 = GkMaVec(1, 2, 3);
+
+        GkMaPos pos3 = GkMaPos(2, 2, 3);
+        string nump3 = pos3.to_str();
+        //string nump2 =  GkMaPos(1, 2, 3).to_str(); //crush
+        shared_ptr<GkMaPos> pvec3 = make_shared<GkMaPos>(GkMaPos(2, 3, 4));
+
+        return;
+    }
+
+    //效率测试
+    static void test1()
+    {
+        string info;
+        std::ostringstream oss;
+        oss << std::setprecision(std::numeric_limits<double>::max_digits10) << 1;
+        info = oss.str();
+        oss.str("");  // 清空内部字符串缓冲区
+        oss.clear();  // 重置错误状态标志（防止之前的错误影响后续操作）
+        oss << std::setprecision(std::numeric_limits<double>::max_digits10) << 2;
+        info = oss.str();
+        oss.str("");
+        oss.clear();
+
+        GkVertex vertex(GkMaPos(1, 2, 3));
+        //string name_v = vertex.debug_this();
+
+        GkVertex v0(GkMaPos(0, 0, 0));
+        GkVertex v1(GkMaPos(1, 0, 0));
+        GkEdge edge(v0, v1);
+        string name_e = edge.debug_this();
+
+
+        int size = edge.size();
+        std::vector<GkVertex> data = edge.debug_owning();
+        //std::vector<GkEdge> getedges = loop.debug_owning();
+
+        //效率测试
+        std::vector<GkMaPos> points;
+        for (int i = 0; i < 100000; i++)
+        {
+            points.push_back(GkMaPos(i, i, i));
+        }
+
+        return;
+    }
+}
+
+namespace GeomKernel
+{
+    static void test2()
+    {
+        GkVertex v0(GkMaPos(0, 0, 0));
+        GkVertex v1(GkMaPos(1, 0, 0));
+        GkEdge edge(v0, v1);
+
+        std::vector<GkEdge> edges =
+        {
+            GkEdge(GkVertex(GkMaPos(0, 0, 0)), GkVertex(GkMaPos(1, 0, 0))),
+            GkEdge(GkVertex(GkMaPos(1, 0, 0)), GkVertex(GkMaPos(1, 1, 0))),
+            GkEdge(GkVertex(GkMaPos(1, 1, 0)), GkVertex(GkMaPos(0, 1, 0))),
+            GkEdge(GkVertex(GkMaPos(0, 1, 0)), GkVertex(GkMaPos(0, 0, 0))),
+        };
+        GkLoop loop(edges);
+
+        GkFace face({ loop });
+
+        return;
     }
 }
 
@@ -323,6 +386,40 @@ namespace Local
 {
     //局部变量版本
     static void test3()
+    {
+        GkMaPos pos = GkMaPos(2, 2, 3);
+        string info = pos.debug_this();
+
+        GkMaVec vec = GkMaVec(2, 2, 3);
+        std::shared_ptr<std::string> info2 = vec.debug_this();
+
+        GkVertex v0(Vector3d(0, 0, 0));
+        GkVertex v1(Vector3d(1, 0, 0));
+        std::string info_v0 = v0.debug_this();
+
+        GkEdge edge(v0, v1);
+
+        std::vector<GkEdge> edges =
+        {
+            GkEdge(GkVertex(Vector3d(0, 0, 0)), GkVertex(Vector3d(1, 0, 0))),
+            GkEdge(GkVertex(Vector3d(1, 0, 0)), GkVertex(Vector3d(1, 1, 0))),
+            GkEdge(GkVertex(Vector3d(1, 1, 0)), GkVertex(Vector3d(0, 1, 0))),
+            GkEdge(GkVertex(Vector3d(0, 1, 0)), GkVertex(Vector3d(0, 0, 0))),
+        };
+        GkLoop loop(edges);
+        GkEdge edge0 = loop.debug_owning()[0];
+        GkLoop lp_ow = edge0.debug_owner();
+
+        GkFace face({ loop });
+
+        return;
+    }
+}
+
+namespace Static
+{
+    //静态变量版本
+    static void test4()
     {
         GkVertex v0(Vector3d(0, 0, 0));
         GkVertex v1(Vector3d(1, 0, 0));
@@ -338,6 +435,8 @@ namespace Local
             GkEdge(GkVertex(Vector3d(0, 1, 0)), GkVertex(Vector3d(0, 0, 0))),
         };
         GkLoop loop(edges);
+        GkEdge edge0 = loop.debug_owning()[0];
+        GkLoop lp_ow = edge0.debug_owner();
 
         GkFace face({ loop });
 
@@ -349,6 +448,7 @@ static int enrol = []()->int
     {
         GeomKernel::enrol_0();
         Local::enrol_1();
+        Static::enrol_2();
 
         //GeomKernel::test0();
         GeomKernel::test1();
@@ -356,6 +456,7 @@ static int enrol = []()->int
 
         //Local
         Local::test3();
+        Static::test4();
 
         cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
         return 0;
