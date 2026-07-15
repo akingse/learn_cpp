@@ -642,3 +642,143 @@ namespace GeomKernel
         const std::string& debug_this(); //const
     };
 }
+
+//const char* 
+#define USING_CONST_REFER
+namespace CharP
+{
+    //Topo
+    class GkVertex;
+    class GkEdge;
+    class GkLoop;
+    class GkFace;
+    class GkShell;
+
+    class GkVertex
+    {
+        void* m_impl = 0;
+        char* m_infothis = 0;
+    public:
+        GkVertex() = default;
+        GkVertex(const Eigen::Vector3d& p)
+        {
+            double* impl = new double(3);
+            impl[0] = p[0];
+            impl[1] = p[1];
+            impl[2] = p[2];
+            m_impl = impl;
+        }
+#ifdef USING_CONST_REFER
+        const GkEdge& debug_owner() const;
+#else
+        GkEdge debug_owner() const;
+#endif
+        const char* debug_this();
+
+    };
+
+    class GkEdge
+    {
+        void* m_impl = 0;
+        char* m_infothis = 0;
+        char* m_infocurve = 0;
+    public:
+        GkEdge() = default;
+        GkEdge(const GkVertex& v0, const GkVertex& v1)
+        {
+            std::vector<GkVertex>* imp = new std::vector<GkVertex>;// { v0, v1 };
+            imp->push_back(v0);
+            imp->push_back(v1);
+            m_impl = imp;
+        }
+#ifdef USING_CONST_REFER
+        const GkLoop& debug_owner() const;
+        inline const std::vector<GkVertex>& debug_owning() const
+#else
+        GkLoop debug_owner() const;
+        inline std::vector<GkVertex> debug_owning() const
+#endif
+        {
+            std::vector<GkVertex>* imp = (std::vector<GkVertex>*)m_impl;
+            if (!imp)
+                return {};
+            return *imp;
+        }
+
+        //debug
+        const char* debug_this();
+        const char* debug_geom();
+
+    };
+
+    class GkLoop
+    {
+        void* m_impl = 0;
+        char* m_infothis = 0;
+    public:
+        GkLoop() = default;
+        GkLoop(const std::vector<GkEdge>& edges)
+        {
+            std::vector<GkEdge>* imp = new std::vector<GkEdge>;
+            for (int i = 0; i < edges.size(); i++)
+            {
+                imp->push_back(edges[i]);
+            }
+            m_impl = imp;
+        }
+#ifdef USING_CONST_REFER
+        const GkFace& debug_owner() const;
+        inline const std::vector<GkEdge>& debug_owning() const
+#else
+        GkFace debug_owner() const;
+        inline std::vector<GkEdge> debug_owning() const
+#endif
+        {
+            std::vector<GkEdge>* imp = (std::vector<GkEdge>*)m_impl;
+            if (!imp) //null not crush
+                return {};
+            return *imp;
+        }
+        const char* debug_this(); //const
+
+    };
+
+    class GkFace
+    {
+        void* m_impl = 0;
+        char* m_infothis = 0;
+        char* m_infosurf = 0;
+    public:
+        GkFace() = default;
+        GkFace(const std::vector<GkLoop>& loops)
+        {
+            std::vector<GkLoop>* imp = new std::vector<GkLoop>;
+            for (int i = 0; i < loops.size(); i++)
+                imp->push_back(loops[i]);
+            m_impl = imp;
+        }
+#ifdef USING_CONST_REFER
+        const GkShell& debug_owner() const;
+        inline const std::vector<GkLoop>& debug_owning() const
+#else
+        GkShell debug_owner() const;
+        inline std::vector<GkLoop> debug_owning() const
+#endif
+        {
+            std::vector<GkLoop>* imp = (std::vector<GkLoop>*)m_impl;
+            if (!imp)
+                return {};
+            return *imp;
+        }
+        const char* debug_this(); //const
+        const char* debug_geom();
+    };
+
+    class GkShell
+    {
+        void* m_impl = 0;
+        char* info = 0;
+    public:
+        const char* debug_this(); //const
+    };
+}

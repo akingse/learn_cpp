@@ -126,6 +126,111 @@ namespace Static
 
 }
 
+namespace CharP
+{
+#ifdef USING_CONST_REFER
+    const GkEdge& GkVertex::debug_owner() const
+    {
+        GkVertex v0(Vector3d(10, 0, 0));
+        GkVertex v1(Vector3d(20, 0, 0));
+        GkEdge edge(v0, v1);
+        return edge;
+    }
+    const GkLoop& GkEdge::debug_owner() const
+    {
+        return GkLoop();
+    }
+    const GkFace& GkLoop::debug_owner() const
+    {
+        return GkFace();
+    }
+    const GkShell& GkFace::debug_owner() const
+    {
+        return GkShell();
+    }
+#else
+    GkEdge GkVertex::debug_owner() const
+    {
+        GkVertex v0(Vector3d(10, 0, 0));
+        GkVertex v1(Vector3d(20, 0, 0));
+        GkEdge edge(v0, v1);
+        return edge;
+    }
+    GkLoop GkEdge::debug_owner() const
+    {
+        return GkLoop();
+    }
+    GkFace GkLoop::debug_owner() const
+    {
+        return GkFace();
+    }
+    GkShell GkFace::debug_owner() const
+    {
+        return GkShell();
+    }
+#endif
+
+    const char* GkVertex::debug_this() //const;
+    {
+        if (!m_impl)
+            return {};
+        std::string num = "coord";
+        num += "(";
+        for (int i = 0; i < 3; i++)
+        {
+            std::ostringstream oss;
+            oss << std::setprecision(std::numeric_limits<double>::max_digits10) << *((double*)m_impl + i);
+            oss.clear();
+            num += oss.str() + ",";
+        }
+        num.pop_back();
+        num += ")";
+        //return num;
+        std::string* info = new std::string(num);
+        return info->c_str();
+    }
+
+    const char* GkEdge::debug_this()
+    {
+        std::string m_infothis = __FUNCTION__;
+        std::string* info = new std::string(m_infothis);
+        return info->c_str();
+    }
+    const char* GkEdge::debug_geom()
+    {
+        std::string infoEdgeCur = " getGeometry.curve";
+        std::string* info = new std::string(infoEdgeCur);
+        return info->c_str();
+    }
+
+    const char* GkLoop::debug_this()//const
+    {
+        std::string m_infothis = __FUNCTION__;
+        std::string* info = new std::string(m_infothis);
+        return info->c_str();
+    }
+
+    const char* GkFace::debug_this() //const
+    {
+        std::string m_infothis = __FUNCTION__;
+        std::string* info = new std::string(m_infothis);
+        return info->c_str();
+    }
+    const char* GkFace::debug_geom()
+    {
+        std::string infoFaceSur = " getGeometry.surface";
+        std::string* info = new std::string(infoFaceSur);
+        return info->c_str();
+    }
+
+    const char* GkShell::debug_this() //const
+    {
+        std::string m_infothis = __FUNCTION__;
+        std::string* info = new std::string(m_infothis);
+        return info->c_str();
+    }
+
+}
 
 namespace GeomKernel
 {
@@ -304,6 +409,33 @@ namespace Static
     }
 }
 
+namespace CharP
+{
+    static void enrol_3()
+    {
+        GkVertex vertex;
+        vertex.debug_this();
+        vertex.debug_owner();
+
+        GkEdge edge;
+        edge.debug_this();
+        edge.debug_geom();
+        edge.debug_owning();
+        edge.debug_owner();
+
+        GkLoop loop;
+        loop.debug_this();
+        loop.debug_owning();
+        loop.debug_owner();
+
+        GkFace face;
+        face.debug_this();
+        face.debug_geom();
+        face.debug_owning();
+        face.debug_owner();
+    }
+}
+
 
 namespace GeomKernel
 {
@@ -444,11 +576,40 @@ namespace Static
     }
 }
 
+namespace CharP
+{
+    //CharP≥…‘±∞Ê±æ
+    static void test5()
+    {
+        GkVertex v0(Vector3d(0, 0, 0));
+        GkVertex v1(Vector3d(1, 0, 0));
+        std::string info_v0 = v0.debug_this();
+
+        GkEdge edge(v0, v1);
+
+        std::vector<GkEdge> edges =
+        {
+            GkEdge(GkVertex(Vector3d(0, 0, 0)), GkVertex(Vector3d(1, 0, 0))),
+            GkEdge(GkVertex(Vector3d(1, 0, 0)), GkVertex(Vector3d(1, 1, 0))),
+            GkEdge(GkVertex(Vector3d(1, 1, 0)), GkVertex(Vector3d(0, 1, 0))),
+            GkEdge(GkVertex(Vector3d(0, 1, 0)), GkVertex(Vector3d(0, 0, 0))),
+        };
+        GkLoop loop(edges);
+        GkEdge edge0 = loop.debug_owning()[0];
+        GkLoop lp_ow = edge0.debug_owner();
+
+        GkFace face({ loop });
+
+        return;
+    }
+}
+
 static int enrol = []()->int
     {
         GeomKernel::enrol_0();
         Local::enrol_1();
         Static::enrol_2();
+        CharP::enrol_3();
 
         //GeomKernel::test0();
         GeomKernel::test1();
@@ -457,6 +618,7 @@ static int enrol = []()->int
         //Local
         Local::test3();
         Static::test4();
+        CharP::test5();
 
         cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
         return 0;
