@@ -59,17 +59,135 @@
         </Expand>
     </Type>
 
-    <!--for GkLoop -->
-    <Type Name="GeomKernel::GkLoop">
+    <!--for GkShell -->
+    <Type Name="GeomKernel::GkShell">
         <DisplayString>{debug_this()}</DisplayString>
         <Expand>
+        </Expand>
+    </Type>
+
+    <!--for Local version -->
+
+    <!--for GkVertex -->
+    <Type Name="Local::GkVertex">
+        <DisplayString>{debug_this()}</DisplayString>
+        <Expand>
+            <Synthetic Name="[Synthetic]">
+                <Expand>
+                    <Item Name="[data_owner]">debug_owner()</Item>
+                </Expand>
+            </Synthetic>
+        </Expand>
+    </Type>
+
+    <!--for GkEdge -->
+    <Type Name="Local::GkEdge">
+        <DisplayString>{debug_this()}</DisplayString>
+        <Expand>
+            <Synthetic Name="[Synthetic]">
+                <Expand>
+                    <Item Name="[data_curve]">debug_geom()</Item>
+                    <Item Name="[data_ownings]">debug_owning()</Item>
+                    <Item Name="[data_owner]">debug_owner()</Item>
+                </Expand>
+            </Synthetic>
+        </Expand>
+    </Type>
+
+    <!--for GkLoop -->
+    <Type Name="Local::GkLoop">
+        <DisplayString>{debug_this()}</DisplayString>
+        <Expand>
+            <Synthetic Name="[Synthetic]">
+                <Expand>
+                    <Item Name="[data_ownings]">debug_owning()</Item>
+                    <Item Name="[data_owner]">debug_owner()</Item>
+                </Expand>
+            </Synthetic>
+
+        </Expand>
+    </Type>
+
+    <!--for GkFace -->
+    <Type Name="Local::GkFace">
+        <DisplayString>{debug_this()}</DisplayString>
+        <Expand>
+            <Item Name="[data_surface]">debug_geom()</Item>
             <Item Name="[data_ownings]">debug_owning()</Item>
             <Item Name="[data_owner]">debug_owner()</Item>
         </Expand>
     </Type>
 
+    <!--for GkShell -->
+    <Type Name="Local::GkShell">
+        <DisplayString>{debug_this()}</DisplayString>
+        <Expand>
+        </Expand>
+    </Type>
 
 
+    <!--for Static version -->
+
+    <!--for GkVertex -->
+    <Type Name="Static::GkVertex">
+        <DisplayString>{debug_this()}</DisplayString>
+        <Expand>
+            <Synthetic Name="[Synthetic]">
+                <Expand>
+                    <Item Name="[data_owner]">debug_owner()</Item>
+                </Expand>
+            </Synthetic>
+        </Expand>
+    </Type>
+
+    <!--for GkEdge -->
+    <Type Name="Static::GkEdge">
+        <DisplayString>{debug_this()}</DisplayString>
+        <Expand>
+            <Synthetic Name="[Synthetic]">
+                <Expand>
+                    <Item Name="[data_curve]">debug_geom()</Item>
+                    <Item Name="[data_ownings]">debug_owning()</Item>
+                    <Item Name="[data_owner]">debug_owner()</Item>
+                </Expand>
+            </Synthetic>
+        </Expand>
+    </Type>
+
+    <!--for GkLoop -->
+    <Type Name="Static::GkLoop">
+        <DisplayString>{debug_this()}</DisplayString>
+        <Expand>
+            <Synthetic Name="[Synthetic]">
+                <Expand>
+                    <Item Name="[data_ownings]">debug_owning()</Item>
+                    <Item Name="[data_owner]">debug_owner()</Item>
+                </Expand>
+            </Synthetic>
+
+        </Expand>
+    </Type>
+
+    <!--for GkFace -->
+    <Type Name="Static::GkFace">
+        <DisplayString>{debug_this()}</DisplayString>
+        <Expand>
+            <Item Name="[data_surface]">debug_geom()</Item>
+            <Item Name="[data_ownings]">debug_owning()</Item>
+            <Item Name="[data_owner]">debug_owner()</Item>
+        </Expand>
+    </Type>
+
+    <!--for GkShell -->
+    <Type Name="Static::GkShell">
+        <DisplayString>{debug_this()}</DisplayString>
+        <Expand>
+        </Expand>
+    </Type>
+
+
+    <!--for Gk Math origin -->
+    
     <!--for GkMaParamVec -->
     <Type Name="GK::GkMaParamVec">
         <DisplayString>double[2]</DisplayString>
