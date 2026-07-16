@@ -68,6 +68,16 @@
 
     <!--for Local version -->
 
+    <Type Name="Local::GkMaVec">
+        <DisplayString>{debug_this()}</DisplayString>
+    </Type>
+    <Type Name="Local::GkMaPos">
+        <Expand>
+            <!-- 强制展开所有内部字段，支持长文本完整显示 -->
+            <Item Name="[Expand]">debug_this()</Item>
+        </Expand>
+    </Type>
+    
     <!--for GkVertex -->
     <Type Name="Local::GkVertex">
         <DisplayString>{debug_this()}</DisplayString>
