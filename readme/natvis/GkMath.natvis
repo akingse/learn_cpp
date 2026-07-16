@@ -125,6 +125,65 @@
         </Expand>
     </Type>
 
+    <!--for CharP version -->
+
+    <!--for GkVertex -->
+    <Type Name="CharP::GkVertex">
+        <DisplayString>{debug_this()}</DisplayString>
+        <Expand>
+            <Synthetic Name="[Synthetic]">
+                <Expand>
+                    <Item Name="[data_owner]">debug_owner()</Item>
+                </Expand>
+            </Synthetic>
+        </Expand>
+    </Type>
+
+    <!--for GkEdge -->
+    <Type Name="CharP::GkEdge">
+        <DisplayString>{debug_this()}</DisplayString>
+        <Expand>
+            <Synthetic Name="[Synthetic]">
+                <Expand>
+                    <Item Name="[data_curve]">debug_geom()</Item>
+                    <Item Name="[data_ownings]">debug_owning()</Item>
+                    <Item Name="[data_owner]">debug_owner()</Item>
+                </Expand>
+            </Synthetic>
+        </Expand>
+    </Type>
+
+    <!--for GkLoop -->
+    <Type Name="CharP::GkLoop">
+        <DisplayString>{debug_this()}</DisplayString>
+        <Expand>
+            <Synthetic Name="[Synthetic]">
+                <Expand>
+                    <Item Name="[data_ownings]">debug_owning()</Item>
+                    <Item Name="[data_owner]">debug_owner()</Item>
+                </Expand>
+            </Synthetic>
+
+        </Expand>
+    </Type>
+
+    <!--for GkFace -->
+    <Type Name="CharP::GkFace">
+        <DisplayString>{debug_this()}</DisplayString>
+        <Expand>
+            <Item Name="[data_surface]">debug_geom()</Item>
+            <Item Name="[data_ownings]">debug_owning()</Item>
+            <Item Name="[data_owner]">debug_owner()</Item>
+        </Expand>
+    </Type>
+
+    <!--for GkShell -->
+    <Type Name="CharP::GkShell">
+        <DisplayString>{debug_this()}</DisplayString>
+        <Expand>
+        </Expand>
+    </Type>
+
 
     <!--for Static version -->
 
