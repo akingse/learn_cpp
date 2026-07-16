@@ -534,7 +534,7 @@ static void test9()
 	Sleep(1.5);
 	timeend = std::chrono::high_resolution_clock::now();
 
-	std::vector<BVHTree2d> treeVct;
+	//std::vector<BVHTree2d> treeVct;
 	std::vector<Gene> geneVct;
 	geneVct.reserve(2);
 	//geneVct.resize(2);
