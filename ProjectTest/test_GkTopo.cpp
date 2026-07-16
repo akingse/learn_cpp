@@ -30,6 +30,7 @@ namespace Local
 
 }
 
+#if 0
 namespace Static
 {
     GkEdge GkVertex::debug_owner() const
@@ -123,7 +124,6 @@ namespace Static
         infoGkShell = m_infothis;
         return infoGkShell;
     }
-
 }
 
 namespace CharP
@@ -231,6 +231,7 @@ namespace CharP
     }
 
 }
+#endif
 
 namespace GeomKernel
 {
@@ -382,6 +383,7 @@ namespace Local
     }
 }
 
+#if 0
 namespace Static
 {
     static void enrol_2()
@@ -435,7 +437,7 @@ namespace CharP
         face.debug_owner();
     }
 }
-
+#endif
 
 namespace GeomKernel
 {
@@ -450,6 +452,23 @@ namespace GeomKernel
         //string nump2 =  GkMaPos(1, 2, 3).to_str(); //crush
         shared_ptr<GkMaPos> pvec3 = make_shared<GkMaPos>(GkMaPos(2, 3, 4));
 
+        Eigen::Matrix4d mat = eigen::rotz(1)* eigen::rotx(1);
+        string num = "GkMaTrans";
+        num += "(\n";
+        for (int i = 0; i < 4; i++)
+        {
+            num += "[";
+            for (int j = 0; j < 4; j++)
+            {
+                std::ostringstream oss;
+                oss << std::setprecision(std::numeric_limits<double>::max_digits10) << mat(i,j);
+                oss.clear();
+                num += oss.str() + ",";
+            }
+            num.pop_back();
+            num += "],\n";
+        }
+        num += ")";
         return;
     }
 
@@ -548,6 +567,7 @@ namespace Local
     }
 }
 
+#if 0
 namespace Static
 {
     //静态变量版本
@@ -601,24 +621,26 @@ namespace CharP
         GkFace face({ loop });
 
         return;
+        //嵌套和返回值拷贝和引用有关，引用可以，拷贝不行；
     }
 }
+#endif
 
 static int enrol = []()->int
     {
         GeomKernel::enrol_0();
         Local::enrol_1();
-        Static::enrol_2();
-        CharP::enrol_3();
+        //Static::enrol_2();
+        //CharP::enrol_3();
 
-        //GeomKernel::test0();
+        GeomKernel::test0();
         GeomKernel::test1();
         GeomKernel::test2();
 
         //Local
         Local::test3();
-        Static::test4();
-        CharP::test5();
+        //Static::test4();
+        //CharP::test5();
 
         cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
         return 0;
