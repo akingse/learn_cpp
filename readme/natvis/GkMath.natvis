@@ -114,7 +114,6 @@
                     <Item Name="[data_owner]">debug_owner()</Item>
                 </Expand>
             </Synthetic>
-
         </Expand>
     </Type>
 

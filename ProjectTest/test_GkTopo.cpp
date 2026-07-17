@@ -444,6 +444,8 @@ namespace GeomKernel
     //向量
     static void test0()
     {
+        bool is = false;
+        string flag = to_string(is); //"0"
         GkMaVec vec2 = GkMaVec(1, exp(1), M_PI);
         GkMaVec vec3 = GkMaVec(1, 2, 3);
 
@@ -538,7 +540,7 @@ namespace Local
     //局部变量版本
     static void test3()
     {
-        GkMaPos pos = GkMaPos(2, 2, 3);
+        GkMaPos pos = GkMaPos(sqrt(2), exp(1), M_PI);
         string info = pos.debug_this();
 
         GkMaVec vec = GkMaVec(2, 2, 3);

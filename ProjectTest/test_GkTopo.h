@@ -276,16 +276,17 @@ namespace Local
         {
             std::string num = typeid(*this).name();
             num = num.substr(6);
-            num += "(";
+            num += "(\n";
             for (int i = 0; i < 3; i++)
             {
                 std::ostringstream oss;
                 oss << std::setprecision(std::numeric_limits<double>::max_digits10) << *((double*)m_impl + i);
                 oss.clear();
-                num += oss.str() + ",";
+                num += oss.str() + ",\n";
             }
-            num.pop_back();
+            //num.pop_back();
             num += ")";
+            //num += "\n(oss << std::setprecision(std::numeric_limits<double>::max_digits10) << *((double*)m_impl + i);)";
             std::string* info = new std::string(num);
             return info->c_str();
         }
@@ -330,21 +331,18 @@ namespace Local
     class GkFace;
     class GkShell;
 
-
-    class DebugInfo
-    {
-    public:
-        std::string m_infothis;
-        std::string m_infogeom;
-        friend class GkVertex;
-        friend class GkEdge;
-    };
-
+    //class DebugInfo
+    //{
+    //public:
+    //    std::string m_infothis;
+    //    std::string m_infogeom;
+    //    friend class GkVertex;
+    //    friend class GkEdge;
+    //};
 
     class GkVertex
     {
         void* m_impl = 0;
-        //std::string m_infothis;
     public:
         GkVertex() = default;
         GkVertex(const Eigen::Vector3d& p)
@@ -381,8 +379,6 @@ namespace Local
     class GkEdge
     {
         void* m_impl = 0;
-        //std::string m_infothis;
-        //std::string m_infocurve;
     public:
         GkEdge() = default;
         GkEdge(const GkEdge& edge)
@@ -433,7 +429,6 @@ namespace Local
     class GkLoop
     {
         void* m_impl = 0;
-        //std::string m_infothis;
     public:
         GkLoop() = default;
         GkLoop(const std::vector<GkEdge>& edges)
@@ -465,8 +460,6 @@ namespace Local
     class GkFace
     {
         void* m_impl = 0;
-        //std::string m_infothis;
-        //std::string m_infosurf;
     public:
         GkFace() = default;
         GkFace(const std::vector<GkLoop>& loops)
@@ -504,7 +497,6 @@ namespace Local
     class GkShell
     {
         void* m_impl = 0;
-        //std::string info;
     public:
         std::string debug_this() //const
         {
