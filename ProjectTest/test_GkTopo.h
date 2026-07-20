@@ -305,7 +305,7 @@ namespace Local
             imp[2] = z;
             m_impl = imp;
         }
-        inline std::shared_ptr<std::string> debug_this()
+        inline const std::shared_ptr<std::string>& debug_this()
         {
             std::string num = typeid(*this).name();
             num = num.substr(6);
@@ -319,7 +319,9 @@ namespace Local
             }
             num.pop_back();
             num += ")";
-            return std::make_shared<std::string>(num);
+            //不能返回指向局部变量的引用（会悬空）
+            std::shared_ptr<std::string> ptr = std::make_shared<std::string>(num);
+            return ptr;
         }
 
     };

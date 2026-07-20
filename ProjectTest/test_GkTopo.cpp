@@ -544,6 +544,7 @@ namespace Local
         string info = pos.debug_this();
 
         GkMaVec vec = GkMaVec(2, 2, 3);
+        const std::shared_ptr<std::string>& info3 = vec.debug_this();
         std::shared_ptr<std::string> info2 = vec.debug_this();
 
         GkVertex v0(Vector3d(0, 0, 0));
