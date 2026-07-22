@@ -541,11 +541,11 @@ namespace Local
     static void test3()
     {
         GkMaPos pos = GkMaPos(sqrt(2), exp(1), M_PI);
-        string info = pos.debug_this();
+        GkMaVec vec = GkMaVec(1, 2, 3);
 
-        GkMaVec vec = GkMaVec(2, 2, 3);
-        const std::shared_ptr<std::string>& info3 = vec.debug_this();
-        std::shared_ptr<std::string> info2 = vec.debug_this();
+        string info = pos.debug_this();
+        //const std::shared_ptr<std::string>& info3 = vec.debug_this();
+        //std::shared_ptr<std::string> info2 = vec.debug_this();
 
         GkVertex v0(Vector3d(0, 0, 0));
         GkVertex v1(Vector3d(1, 0, 0));
