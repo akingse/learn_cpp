@@ -92,10 +92,11 @@
 
     <!--for GkEdge -->
     <Type Name="Local::GkEdge">
-        <DisplayString>{debug_this()}</DisplayString>
+        <DisplayString>[GkEdge]</DisplayString>
         <Expand>
             <Synthetic Name="[Synthetic]">
                 <Expand>
+                    <Item Name="[data_this]">debug_this()</Item>
                     <Item Name="[data_curve]">debug_geom()</Item>
                     <Item Name="[data_ownings]">debug_owning()</Item>
                     <Item Name="[data_owner]">debug_owner()</Item>
@@ -106,10 +107,11 @@
 
     <!--for GkLoop -->
     <Type Name="Local::GkLoop">
-        <DisplayString>{debug_this()}</DisplayString>
+        <DisplayString>[GkLoop]</DisplayString>
         <Expand>
             <Synthetic Name="[Synthetic]">
                 <Expand>
+                    <Item Name="[data_this]">debug_this()</Item>
                     <Item Name="[data_ownings]">debug_owning()</Item>
                     <Item Name="[data_owner]">debug_owner()</Item>
                 </Expand>
@@ -119,8 +121,9 @@
 
     <!--for GkFace -->
     <Type Name="Local::GkFace">
-        <DisplayString>{debug_this()}</DisplayString>
+        <DisplayString>[GkFace]</DisplayString>
         <Expand>
+            <Item Name="[data_this]">debug_this()</Item>
             <Item Name="[data_surface]">debug_geom()</Item>
             <Item Name="[data_ownings]">debug_owning()</Item>
             <Item Name="[data_owner]">debug_owner()</Item>
