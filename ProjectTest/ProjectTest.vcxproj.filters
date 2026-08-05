@@ -226,6 +226,9 @@
     <ClCompile Include="test_regular .cpp">
       <Filter>test_text</Filter>
     </ClCompile>
+    <ClCompile Include="test_txt_process.cpp">
+      <Filter>test_text</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
