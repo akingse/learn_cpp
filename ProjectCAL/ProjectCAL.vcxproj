@@ -165,6 +165,10 @@
     <ClInclude Include="DataRecordSingleton.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\readme\readme.md" />
+    <None Include="..\readme\readme_oda.md" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

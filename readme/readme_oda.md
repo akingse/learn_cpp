@@ -1,5 +1,5 @@
   # codex
-  
+
   cd D:\Alluser\ODA\Step_vc17_amd64mtdbg_26.12\exe\vc17_amd64mtdbg
 
   .\ExStepReadFile.exe "-inFile=D:\path\to\model.stp" -noWait -noProgress
@@ -49,7 +49,7 @@
   OdGiContextForStepDatabase + OdStepGsManager，把 ExGsSimpleDevice 换成窗口/DirectX/OpenGL GS device。另一个实用路径是用
   STEP_vc17_amd64mtdbg_ext.sln 里的 ExStep2Dwg 先转 DWG，再用 DWG viewer 显示。
 
-  ---
+---
   Kernel
 
 
@@ -58,7 +58,7 @@
   - Components：附加组件，如 Dwfdb、HlrAlgoBrep、OBJToolkit、导入/材质相关组件。
   - FacetModeler：面片建模库头文件和示例。
 
-  
+
    这个包覆盖 ODA Kernel 的几类典型能力：
 
   - 几何/建模：TD_Ge.lib、OdBrepModeler.lib、FacetModeler.lib、TD_AcisBuilder.lib
@@ -67,3 +67,36 @@
   - DWF/DWFX：TDwfDb.lib、DwfToolkit.lib、签名处理示例
   - PDF：TD_PdfExport.lib、TD_Pdfium.lib、qpdf.lib
   - 示例开发：TD_ExamplesCommon.lib 提供公共示例辅助代码
+
+---
+
+
+SDAI 是 **Standard Data Access Interface**，可以理解为 **访问 STEP 文件语义数据的标准接口层**。
+
+
+---
+
+- Kernel：核心头文件、开发头文件、扩展、导出模块和示例。约 1625 个文件。
+- KernelBase：基础 include 和少量扩展入口。
+ODA 的 Br API：核心类型在 Kernel\\Include\\Br，主要入口是 OdBrBrep，构造/转换相关是 OdBrepBuilder。
+
+- OdBrBrep：BRep 顶层对象，头文件在 Kernel/Include/Br/BrBrep.h。它是访问 3D solid/body 的 BRep 结构入口。
+- OdBrEntity：所有 BRep 拓扑对象的基类，见 Kernel/Include/Br/BrEntity.h。
+- 常见拓扑子类型：
+  - OdBrComplex
+  - OdBrShell
+  - OdBrFace
+  - OdBrLoop
+  - OdBrEdge
+  - OdBrVertex
+
+    拓扑层级大致是：
+
+  OdBrBrep
+    -> Complex
+      -> Shell
+        -> Face
+          -> Loop
+            -> Edge / Vertex
+
+
