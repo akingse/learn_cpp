@@ -441,4 +441,51 @@ ModelMesh clash::ModelMesh::getIntersectMesh(const Eigen::AlignedBox3d& box) con
     return mesh.simpleMesh(false);
 }
 
+//isClosedMesh
+static uint64_t edgeKey(int a, int b)
+{
+    if (a > b) std::swap(a, b);
+    return (uint64_t(uint32_t(a)) << 32) | uint32_t(b);
+}
 
+bool ModelMesh::isClosedMesh(bool* hasNonManifoldEdge /* = nullptr*/) const
+{
+    if (hasNonManifoldEdge) 
+        *hasNonManifoldEdge = false;
+    ModelMesh mesh = *this;
+    std::unordered_map<uint64_t, int> edgeCount;
+    edgeCount.reserve(mesh.ibo_.size() * 3);
+
+    for (const auto& f : mesh.ibo_)
+    {
+        int a = f[0], b = f[1], c = f[2];
+
+        if (a < 0 || b < 0 || c < 0) return false;
+        if (a >= (int)mesh.vbo_.size() ||
+            b >= (int)mesh.vbo_.size() ||
+            c >= (int)mesh.vbo_.size())
+            return false;
+
+        // 退化三角形
+        if (a == b || b == c || c == a)
+            return false;
+
+        edgeCount[edgeKey(a, b)]++;
+        edgeCount[edgeKey(b, c)]++;
+        edgeCount[edgeKey(c, a)]++;
+    }
+
+    for (const auto& kv : edgeCount)
+    {
+        if (kv.second == 1)
+            return false; // 边界边，未封闭
+
+        if (kv.second > 2)
+        {
+            if (hasNonManifoldEdge) *hasNonManifoldEdge = true;
+            return false; // 非流形边
+        }
+    }
+
+    return true;
+}

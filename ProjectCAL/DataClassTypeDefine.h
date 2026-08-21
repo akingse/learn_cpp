@@ -280,6 +280,8 @@ namespace clash
             mesh.apply_pose();
             return mesh;
         }
+
+        bool isClosedMesh(bool* hasNonManifoldEdge = nullptr) const;
         
         bool operator==(const ModelMesh& rhs) const
         {
