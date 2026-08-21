@@ -117,6 +117,47 @@ static void _test5()
 
 }
 
+static void _test6()
+{
+	constexpr double SPAresabs = 1e-6;
+	std::array<Eigen::Vector3d, 3> points =
+	{
+		Vector3d(0,0,0),
+		Vector3d(1e-6,1,0),
+		Vector3d(0,2,0),
+	};
+	Vector3d v10 = points[0] - points[1];
+	Vector3d v12 = points[1] - points[2];
+
+	Vector3d u10 = v10.normalized();
+	Vector3d u12 = v12.normalized();
+	Vector3d normal = u10.cross(u12);
+	double length = normal.norm();
+
+	double cosangle = v10.dot(v12) / (v10.norm() * v12.norm());
+	cosangle = 1 - fabs(cosangle);
+	bool isDegen = false;
+	if (cosangle < SPAresabs && !isDegen) //
+	{
+		double angle = get_angle_of_two_vectors(v10, v12); //原因找到了，角度和dot计算cos不是一个数量级；
+		isDegen = true;
+	}
+	double d = std::acos(1-SPAresabs) * max(v10.norm(), v12.norm());
+	Vector3d v_cro = (v10.cross(v12).cross(v12)).normalized();
+	Vector3d v_new = points[1] + d * v_cro;
+	points[1] = v_new;
+	//again
+	{
+		Vector3d v10 = points[0] - points[1];
+		Vector3d v12 = points[1] - points[2];
+		double cosangle = v10.dot(v12) / (v10.norm() * v12.norm());
+		cosangle = 1 - fabs(cosangle);
+		isDegen = true;
+	}
+
+	return;
+}
+
 static int enrol = []()->int
 	{
 		//_test1();
@@ -124,6 +165,7 @@ static int enrol = []()->int
 		//_test3();
 		//_test4();
 		//_test5();
+		_test6();
 		cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
 		return 0;
 	}();

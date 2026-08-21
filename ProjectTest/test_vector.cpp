@@ -282,8 +282,14 @@ static void test_vector_7()
 		int aa = 10;
 		aa++;//修改的是局部变量
 	}
+	double a1 = cos(0);
+	double a2 = cos(M_PI);
 
 	vector<int> vec = { 1,2,3 };
+	vector<int> vec1 = { 1,2,2 };
+	vector<int> vec2 = { 1,2,3 };
+	bool eq = vec == vec2;
+
 	std::for_each(vec.begin(), vec.end(), [](int& iter) {iter *= 2; });
 
 	while (!vec.empty())

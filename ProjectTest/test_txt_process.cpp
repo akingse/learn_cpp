@@ -69,7 +69,7 @@ static void test0()
 
 static int enrol = []()->int
     {
-        test0();
+        //test0();
         cout << clash::get_filepath_filename(__FILE__) << " finished.\n" << endl;
         return 0;
     }();
