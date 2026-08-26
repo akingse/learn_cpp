@@ -108,7 +108,7 @@ namespace eigen
         return std::acos(cosres); // 0->PI
     }
 
-    inline double get_angle_of_two_unit(const Eigen::Vector3d& v0, const Eigen::Vector3d& v1)
+    inline double get_angle_of_two_units(const Eigen::Vector3d& v0, const Eigen::Vector3d& v1)
     {
         double cosres = v0.dot(v1);// / (v0.norm() * v1.norm());
         if (1.0 < cosres) //avoid nan
