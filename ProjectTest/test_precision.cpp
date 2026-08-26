@@ -22,7 +22,7 @@ static void _test1()
 	double du = croPro - croProU; //always equal
 
 	double angle1 = eigen::get_angle_of_two_vectors(vecA, vecB);
-	double angle2 = eigen::get_angle_of_two_unit(vecA, vecB);
+	double angle2 = eigen::get_angle_of_two_units(vecA, vecB);
 	double d = angle1 - angle2;	// =1e-10 //单位化仅对acos有影响
 	return;
 }
@@ -34,7 +34,7 @@ static void _test2()
 	Eigen::Vector3d vecB(2, 1, 0);
 	bool pall = Precision::isParallel(vecA, vecB);
 	double angle1 = eigen::get_angle_of_two_vectors(vecA, vecB);
-	double angle2 = eigen::get_angle_of_two_unit(vecA, vecB);
+	double angle2 = eigen::get_angle_of_two_units(vecA, vecB);
 	double d = angle1 - angle2;
 
 	// large-short
@@ -42,7 +42,7 @@ static void _test2()
 	Eigen::Vector3d vecD(2, 1+1e-6, 0);
 	bool pall2 = Precision::isParallel(vecC, vecD);
 	angle1 = eigen::get_angle_of_two_vectors(vecA, vecB);
-	angle2 = eigen::get_angle_of_two_unit(vecA, vecB);
+	angle2 = eigen::get_angle_of_two_units(vecA, vecB);
 	d = angle1 - angle2;
 
 	return;
@@ -55,7 +55,7 @@ static void _test3()
 	Eigen::Vector3d vecB(10, 11 + 1e-5, 0);
 	bool pall = Precision::isParallel(vecA, vecB);
 	double angle1 = eigen::get_angle_of_two_vectors(vecA, vecB);
-	double angle2 = eigen::get_angle_of_two_unit(vecA, vecB);
+	double angle2 = eigen::get_angle_of_two_units(vecA, vecB);
 	double d = angle1 - angle2;	// =1e-10
 	return;
 }
@@ -77,7 +77,7 @@ static void _test4()
 		Eigen::Vector3d vecA(rand(), rand(), 0);
 		Eigen::Vector3d vecB(rand(), rand(), 0);
 		double angle1 = eigen::get_angle_of_two_vectors(vecA, vecB);
-		double angle2 = eigen::get_angle_of_two_unit(vecA, vecB);
+		double angle2 = eigen::get_angle_of_two_units(vecA, vecB);
 		d = angle1 - angle2;
 	}
 

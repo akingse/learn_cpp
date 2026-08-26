@@ -284,6 +284,11 @@ static void test_vector_7()
 	}
 	double a1 = cos(0);
 	double a2 = cos(M_PI);
+	double a3 = 1-cos(1e-6); //5e-13
+	double a4 = 1-cos(1e-4); //5e-9
+
+	double SPAres_angle = 1e-6;
+	double d = std::acos(1 - SPAres_angle);
 
 	vector<int> vec = { 1,2,3 };
 	vector<int> vec1 = { 1,2,2 };
