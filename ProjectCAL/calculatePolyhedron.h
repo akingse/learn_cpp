@@ -55,6 +55,9 @@ namespace clash
 	std::tuple<clash::RelationOfTwoMesh, Eigen::Vector3d> getTwoMeshsIntersectRelation(const ModelMesh& meshA, const ModelMesh& meshB);
 	std::tuple<double, std::array<int, 2>> getTwoMeshsSeparationDistanceSAT(const ModelMesh& meshA, const ModelMesh& meshB, double tolerance);
 
+	//optimize
+	ModelMesh removeNarrowTriangle(const ModelMesh& mesh);
+
 }
 
 // collision detection

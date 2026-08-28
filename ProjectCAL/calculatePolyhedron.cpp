@@ -1561,6 +1561,22 @@ std::tuple<double, std::array<int, 2>> clash::getTwoMeshsSeparationDistanceSAT(c
 	return { d, index };
 }
 
+ModelMesh clash::removeNarrowTriangle(const ModelMesh& mesh)
+{
+	//先试翻边
+	//↓
+	//翻边不行，再折叠最短边
+	//↓
+	//折叠也不行，保留或交给局部重三角化
+
+	//buildEdgeAdjacency(mesh);
+	//tryFlipEdge(mesh, edge);
+	//tryCollapseShortestEdge(mesh, badFace);
+
+
+	return ModelMesh();
+}
+
 //---------------------------------------------------------------------------
 //  penetration depth
 //---------------------------------------------------------------------------
