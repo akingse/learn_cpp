@@ -23,14 +23,15 @@ using namespace clash;
 //#ifdef STATISTIC_DATA_TESTFOR
 //#endif
 
-double clash::computeTriangleArea(const std::array<Vector2d, 3>& triangle)
+//computeTriangleArea
+double clash::getAreaOfTriangle(const std::array<Vector2d, 3>& triangle)
 {
 	Vector2d a = triangle[1] - triangle[0];
 	Vector2d b = triangle[2] - triangle[0];
 	return 0.5 * fabs(a[0] * b[1] - a[1] * b[0]); //cross value
 }
 
-double clash::computeTriangleArea(const std::array<Vector3d, 3>& triangle, bool is2D /*= true*/) //is2D means OnXoY
+double clash::getAreaOfTriangle(const std::array<Vector3d, 3>& triangle, bool is2D /*= false*/) //is2D means OnXoY
 {
 	Vector3d AB = triangle[1] - triangle[0];
 	Vector3d AC = triangle[2] - triangle[0];
