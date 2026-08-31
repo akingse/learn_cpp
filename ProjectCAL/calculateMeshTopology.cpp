@@ -1242,7 +1242,7 @@ clash::ModelMesh games::meshMergeTerrainFacesBaseonNormal(const clash::ModelMesh
 			do {
 				if (max < count++) //avoid endlessloop
 					break;
-				polygon2d.push_back(mesh.vbo2_[iter->m_oriVertex->m_index]);
+				//polygon2d.push_back(eigen::to_vec2(mesh.vbo_[iter->m_oriVertex->m_index]));
 				iter->m_isClose = true;//isUsed
 				iter = iter->m_nextEdge;
 			} while (front != iter);
@@ -1306,7 +1306,7 @@ clash::ModelMesh games::meshMergeTerrainFacesBaseonNormal(const clash::ModelMesh
 		do {
 			if (max < count++)
 				break;
-			polygon2d.push_back(mesh.vbo2_[edge->m_oriVertex->m_index]);
+			//polygon2d.push_back(eigen::to_vec2(mesh.vbo_[edge->m_oriVertex->m_index]));
 			edge = edge->m_nextEdge;
 		} while (first != edge);
 		if (polygon2d.size() < 3) //BackWardLine

@@ -393,9 +393,9 @@ namespace clash
         for (const int& i : inters)//(int i = 0; i < mesh.ibo_.size(); ++i)
         {
             Triangle2d trigon2d = { //2D
-                mesh.vbo2_[mesh.ibo_[i][0]],
-                mesh.vbo2_[mesh.ibo_[i][1]],
-                mesh.vbo2_[mesh.ibo_[i][2]] };
+                eigen::to_vec2(mesh.vbo_[mesh.ibo_[i][0]]),
+                eigen::to_vec2(mesh.vbo_[mesh.ibo_[i][1]]),
+                eigen::to_vec2(mesh.vbo_[mesh.ibo_[i][2]]) };
             if (!isPointInTriangle(p, trigon2d))
                 continue;
             double deno = mesh.fno_[i][2];// Vector3d(0, 0, 1).dot(mesh.fno_[i]);
@@ -425,9 +425,9 @@ namespace clash
         for (const int& i : inters)
         {
             Triangle2d trigon2d = { //2D
-                mesh.vbo2_[mesh.ibo_[i][0]],
-                mesh.vbo2_[mesh.ibo_[i][1]],
-                mesh.vbo2_[mesh.ibo_[i][2]] };
+                eigen::to_vec2(mesh.vbo_[mesh.ibo_[i][0]]),
+                eigen::to_vec2(mesh.vbo_[mesh.ibo_[i][1]]),
+                eigen::to_vec2(mesh.vbo_[mesh.ibo_[i][2]]) };
             if (!isPointInTriangle(eigen::to_vec2(p), trigon2d))
                 continue;
             double deno = mesh.fno_[i][2];// Vector3d(0, 0, 1).dot(mesh.fno_[i]);
