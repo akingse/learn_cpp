@@ -136,6 +136,58 @@ static void _test2()
     return;
 }
 
+//#include <windows.h>
+//#include <iostream>
+//#include <string>
+//#include <cwchar>
+
+std::vector<string> listFolders(const std::wstring& folderPath)
+{
+    std::wstring searchPath = folderPath;
+
+    // ²¹ÆëÂ·¾¶·Ö¸ô·û
+    if (!searchPath.empty() &&
+        searchPath.back() != L'\\' &&
+        searchPath.back() != L'/') {
+        searchPath += L'\\';
+    }
+    searchPath += L"*";
+
+    std::vector<string> res;
+    WIN32_FIND_DATAW findData{};
+    HANDLE findHandle = FindFirstFileW(searchPath.c_str(), &findData);
+
+    if (findHandle == INVALID_HANDLE_VALUE) {
+        std::cerr << "¶ÁÈ¡ÎÄ¼þ¼ÐÊ§°Ü£¬´íÎóÂë£º" << GetLastError() << '\n';
+        return {};
+    }
+
+    do {
+        if (!(findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+            continue;
+        }
+
+        // ÅÅ³ýµ±Ç°Ä¿Â¼ºÍÉÏ¼¶Ä¿Â¼
+        if (std::wcscmp(findData.cFileName, L".") == 0 ||
+            std::wcscmp(findData.cFileName, L"..") == 0) {
+            continue;
+        }
+
+        std::wcout << findData.cFileName << L'\n';
+        res.push_back(wstring2string(findData.cFileName));
+
+    } while (FindNextFileW(findHandle, &findData));
+
+    const DWORD error = GetLastError();
+    FindClose(findHandle);
+
+    if (error != ERROR_NO_MORE_FILES) {
+        std::cerr << "±éÀúÊ§°Ü£¬´íÎóÂë£º" << error << '\n';
+    }
+}
+
+
+
 std::vector<std::string> getListFiles(const std::string& directory) 
 {
     std::vector<std::string> filenameRes;
