@@ -276,6 +276,9 @@ static void test_vector_6()
 //测试erase
 static void test_vector_7()
 {
+	int a[3] = { 0,1,2 };//调试全显示
+	array<int,3> b = { 0,1,2 };//不支持调试全显示
+
 	//变量重名
 	int aa = 1;
 	{
